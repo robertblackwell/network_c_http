@@ -1,0 +1,206 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "inputs":[{
+        "id":"selectTest",
+        "type":"pickString",
+        "description": "Select the test to debug",
+        "options": [
+            "test_doctest/test_doctest",
+            "test_streambuf/test_streambuf",
+            "test_subcommands/test_subcommands",
+            "test_pipe/test_pipe",
+            "test_pipe/test_pipe_writer",
+            "test_buffers/test_buffers",
+            "test_marvin_errors/test_marvin_errors",
+            "test_ssl/test_ssl",
+            "test_headers/test_headers",
+            "test_certificates/test_env_utils/test_env_utils",
+            "test_certificates/test_certificates/test_certificates",
+            "test_message/test_message",
+            "test_message/test_new_parser",
+            "test_message_reader/test_message_reader",
+            "test_message_roundtrip/test_message_roundtrip",
+            "test_server_v3/demo1/test_server_v3_demo_1",
+            "test_server_v3/demo2/test_server_v3_demo_2",
+            "test_server_v3/manual/test_server_v3_manual",
+            "test_proxy_manual/test_proxy_manual",
+            "test_uri/test_uri",
+            "test_ssl_server/boost_ssl_server_v1/boost_ssl_server_v1",
+            "test_ssl_server/boost_ssl_server_v2/boost_ssl_server_v2",
+            "test_ssl_server/marvin_ssl_server/marvin_ssl_server"
+        ],
+        "default": "test_client_request"
+    }],
+    "configurations": [
+        {
+            "name": "(gdb) simple-proxy",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/cmake-build-debug/apps/simple_proxy/simple_proxy",
+            "args": ["--marvin-home", "${workspaceFolder}", "--proxy-port", "9992"],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {
+                    "name": "MARVIN_HOME",
+                    "value": "${workspaceFolder}"
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true,
+                }
+            ]
+        },
+        {
+            "name": "(gdb) simple proxy cli",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/cmake-build-debug/apps/simple_proxy/simple_proxy_cli",
+            "args": ["stop", "-c"],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {
+                    "name": "MARVIN_HOME",
+                    "value": "${workspaceFolder}"
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true,
+                }
+            ]
+        },
+        {
+            "name": "(gdb) subcommand",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/cmake-build-debug/tests/test_subcommands/test_subcommands",
+            "args": ["stop", "-c"],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {
+                    "name": "MARVIN_HOME",
+                    "value": "${workspaceFolder}"
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true,
+                }
+            ]
+        },
+        {
+            "name": "(gdb) Config Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/cmake-build-debug/apps/config/config",
+            "args": ["4", "5"],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {
+                    "name": "MARVIN_HOME",
+                    "value": "${workspaceFolder}"
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true,
+                }
+            ]
+        },
+        {
+            "name": "(gdb) handshake Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/cmake-build-debug/apps/handshake/handshake",
+            "args": ["--file", "data/list_top_500.data"],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {
+                    "name": "MARVIN_HOME",
+                    "value": "${workspaceFolder}"
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true,
+                }
+            ]
+        },
+        {
+            "name": "Test Debug Launch",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/cmake-build-debug/tests/${input:selectTest}/${input:selectTest}",
+            "args": [],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}/cmake-build-debug/tests/${input:selectTest}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        },
+        {
+            "name": "Debug full path",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/cmake-build-debug/tests/${input:selectTest}",
+            "args": [],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {
+                    "name": "MARVIN_HOME",
+                    "value": "${workspaceFolder}"
+                },
+                {
+                    "name":"MARVIN_CERT_STORE_PATH", 
+                    "value":"${workspaceFolder}/config/cert_store"
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
+    ]
+}
