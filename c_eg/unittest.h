@@ -3,6 +3,8 @@
 #define _GNU_SOURCE
 #include <assert.h>
 #include <stdio.h>
+#include <libgen.h>
+
 #include <c_eg/buffer/contig_buffer.h>
 #include <c_eg/logger.h>
 
@@ -25,34 +27,35 @@
 #define    BRIGHT_CYAN(string)       "\x1b[36;1m" string  "\x1b[0m"
 #define    BRIGHT_WHITE(string)      "\x1b[37;1m" string  "\x1b[0m"
 
-
 typedef int(UTFunction)();
+#define UT_MAX_MSG_SIZE 256
 
 typedef struct {
-    char* fn_name;
-    char* file_name;
+    const char* fn_name;
+    const char* file_name;
     int line;
-    char* msg;
+    char msg[UT_MAX_MSG_SIZE];
 } UTAssertResult, *UTAssertResultRef;
 
 typedef struct  UTObject_s {
 	char* name;
 	UTFunction* fn;
 	bool passed;
-	char* msg;
+	char msg[UT_MAX_MSG_SIZE];
 } UTObject, *UTObjectRef;
 
 
 // make a testcase from a test function
 void UTRegister(UTObjectRef uto);
-void UTRun();
-void UTRecordAssertResult(char* fn, char* file, int line, char* msg);
+int UTRun();
+void UTRecordAssertResult(const char* fn, const char* file, int line, const char* msg);
 
 #define UT_EQUAL_INT(a,b) do{\
 	if(a != b) {\
 	    char* msg; \
-		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") RED("normal red") BRIGHT_BLUE("func: %s file: %s line: %d not equal a = %d b = %d\n"), __FILE__, __FUNCTION__, __LINE__,a , b);\
+		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %d b = %d\n"), __FUNCTION__, __FILE__, __LINE__,a , b);\
         UTRecordAssertResult(__FUNCTION__, __FILE__, __LINE__, msg);   \
+        free(msg); \
 		return 1; \
 	}	\
 } while(0);

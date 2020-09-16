@@ -55,5 +55,6 @@ int main()
     UT_ADD(test_something_3);
     UT_ADD(test_something_2);
     UT_ADD(test_something_4);
-	UT_RUN();
+	int rc = UT_RUN();
+	return rc;
 }

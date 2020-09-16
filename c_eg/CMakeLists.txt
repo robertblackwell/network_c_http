@@ -7,17 +7,28 @@
 ##
 set(EXTSRC ${C_EG_VENDOR_SRCDIR})
 
-set(C_EG_LIBRARY_HEADER_FILES 
+add_custom_command(
+	# generate socket list code
+	COMMAND echo "Makeing socket_list  class"
+	DEPENDS __list_template.h list_template.c sock_list_in.h sock_list_in.c
+	OUTPUT sock_list.h sock_list.c
+	COMMENT "Generatiing socket_list.h socket_list.c "
+)
+#add_custom_target(libfoo_untar DEPENDS ${LIBFOO_TAR_HEADERS})
+
+set(C_EG_LIBRARY_HEADER_FILES
+	sock_list.h
 	unittest.h
 	buffer/contig_buffer.h
 	logger.h
 	server.h
 	queue.h
 	worker.h
+	list.h
 	)
 
 set(C_EG_LIBRARY_SOURCE_FILES 
-
+	sock_list.c
 	unittest.c
 	# buffer/buffer_chain.cpp			
 	buffer/contig_buffer.c
@@ -25,6 +36,7 @@ set(C_EG_LIBRARY_SOURCE_FILES
 	server.c
 	queue.c
 	worker.c
+	list.c
 	)
 
 set_source_files_properties(${C_EG_LIBRARY_SOURCE_FILES} PROPERTIES LANGUAGE C)
