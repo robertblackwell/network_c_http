@@ -1,46 +1,58 @@
 #
 # This script generates mytype_list.h and mytype_list.c
 #
+base_type=List
+base_type_dir="$(tr [A-Z] [a-z] <<< "$base_type")"
+base_type_lc="$(tr [A-Z] [a-z] <<< "$base_type")"
+
+# derived type
+type=MyType
+file_prefix="$(tr [A-Z] [a-z] <<< "$type")"
+prefix=MT
+
 tmp=$(dirname $(readlink -f ${0}))
 project_dir=$(dirname ${tmp})
 src_dir=${project_dir}/c_eg
-#echo $tmp
-#echo project_dir ${project_dir}
-#echo src dir ${src_dir}
 
-type=MyType
 #file prefix is lower cased version of type name
-file_prefix="$(tr [A-Z] [a-z] <<< "$type")"
-prefix=MT
-input_file_h=${src_dir}/__list_template.h
-output_file_h=${src_dir}/${file_prefix}_list_inc.h
-input_file_c=${src_dir}/__list_template.c
-output_file_c=${src_dir}/${file_prefix}_list_inc.c
+template_h=${src_dir}/${base_type_dir}/template.h
+generated_h=${src_dir}/${file_prefix}/generated.h
+template_c=${src_dir}/${base_type_dir}/template.c
+generated_c=${src_dir}/${file_prefix}/generated.c
 
-infile_h=${src_dir}/${file_prefix}_list_in.h
-outfile_h=${src_dir}/${file_prefix}_list.h
-infile_c=${src_dir}/${file_prefix}_list_in.c
-outfile_c=${src_dir}/${file_prefix}_list.c
+hand_coded_h=${src_dir}/${file_prefix}/hand_coded.h
+outfile_h=${src_dir}/${file_prefix}/${file_prefix}_${base_type_lc}.h
+hand_coded_c=${src_dir}/${file_prefix}/hand_coded.c
+outfile_c=${src_dir}/${file_prefix}/${file_prefix}_${base_type_lc}.c
+
+if [[ $1 == "clean" ]]; then
+  rm -v generated_h generated_c outfile_h outfile_c
+  exit
+fi
 
 echo "Generating Typed list for Type: ${type} with prefix ${prefix} "
-echo "\tgenerating ${input_file_h} to ${output_file_h}"
-echo "\tgenerating ${input_file_c} to ${output_file_c}"
+echo "\tgenerating ${template_h} to ${generated_h}"
+echo "\tgenerating ${template_c} to ${generated_c}"
 
-cmd="cat ${input_file} | sed 's/__TYPE__/${type}/g' | sed 's/__PREFIX__/${prefix}/g' > ${output_file}"
+cmd="cat ${template_file} | sed 's/__TYPE__/${type}/g' | sed 's/__PREFIX__/${prefix}/g' > ${generated_h}"
 
-cat ${input_file_h} | sed "s/__TYPE__/${type}/g" | sed "s/__PREFIX__/${prefix}/g" > ${output_file_h}
-cat ${input_file_c} | sed "s/__TYPE__/${type}/g" | sed "s/__PREFIX__/${prefix}/g" > ${output_file_c}
+cat ${template_h} | sed "s/__TYPE__/${type}/g" | sed "s/__PREFIX__/${prefix}/g" > ${generated_h}
+cat ${template_c} | sed "s/__TYPE__/${type}/g" | sed "s/__PREFIX__/${prefix}/g" > ${generated_c}
 
+# merges together the generated file and hand coded part of the final file
+function replace_include() {
+  while read  line || [ -n "$line" ]
+  do
+    if [[ $line == *"__LIST_INCLUDE_H__"* ]]; then
+      echo ///
+      echo /// The remainder of this file is generated code and will be over written at the next build
+      echo ///
+      cat ${2}
+    else
+      echo $line
+    fi
+  done < "${1}"
+}
 
-while read  line || [ -n "$line" ]
-do
-  if [[ $line == *"__LIST_INCLUDE_H__"* ]]; then
-    echo "Found it"
-    echo /// >> ${outfile_h}
-    echo /// The remainder of this file is generated code and will be over written at the next build >> ${outfile_h}
-    echo /// >> ${outfile_h}
-    cat ${output_file_h} >> ${outfile_h}
-  else
-    echo $line >> ${outfile_h}
-  fi
-done < "${infile_h}"
+replace_include ${hand_coded_h} ${generated_h}  > ${outfile_h}
+replace_include ${hand_coded_c} ${generated_c}  > ${outfile_c}

@@ -7,6 +7,7 @@ typedef MyType, *MyTypeRef;
 
 __LIST_INCLUDE_H__
 
+MyTypeRef MyType_new();
 
 //this is after the include
 #endif
