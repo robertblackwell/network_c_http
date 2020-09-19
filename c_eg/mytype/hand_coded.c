@@ -1,7 +1,4 @@
 #include <c_eg/mytype.h>
-
-MyTypeRef MyType_new()
-{
-}
+#include <c_eg/mytype_list.h>
 
 __LIST_INCLUDE_H__

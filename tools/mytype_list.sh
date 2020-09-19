@@ -1,18 +1,24 @@
 #
-# This script generates mytype_list.h and mytype_list.c
+# This script generates a typed list based on input parameters
 #
+
+echo This is mytype_list.sh $(pwd)
+
 base_type=List
-base_type_dir="$(tr [A-Z] [a-z] <<< "$base_type")"
-base_type_lc="$(tr [A-Z] [a-z] <<< "$base_type")"
+base_type_dir=list #"$(tr [A-Z] [a-z] <<< "$base_type")"
+base_type_lc=list #"$(tr [A-Z] [a-z] <<< "$base_type")"
 
 # derived type
 type=MyType
-file_prefix="$(tr [A-Z] [a-z] <<< "$type")"
+file_prefix=mytype #"$(tr [A-Z] [a-z] <<< "$type")"
 prefix=MT
 
 tmp=$(dirname $(readlink -f ${0}))
 project_dir=$(dirname ${tmp})
 src_dir=${project_dir}/c_eg
+
+echo This is mytype_list.sh ${project_dir}
+
 
 #file prefix is lower cased version of type name
 template_h=${src_dir}/${base_type_dir}/template.h
@@ -25,8 +31,11 @@ outfile_h=${src_dir}/${file_prefix}/${file_prefix}_${base_type_lc}.h
 hand_coded_c=${src_dir}/${file_prefix}/hand_coded.c
 outfile_c=${src_dir}/${file_prefix}/${file_prefix}_${base_type_lc}.c
 
+final_h=${src_dir}/${file_prefix}_${base_type_lc}.h
+final_c=${src_dir}/${file_prefix}_${base_type_lc}.c
+
 if [[ $1 == "clean" ]]; then
-  rm -v generated_h generated_c outfile_h outfile_c
+  rm -v $generated_h $generated_c $outfile_h $outfile_c
   exit
 fi
 
@@ -44,10 +53,21 @@ function replace_include() {
   while read  line || [ -n "$line" ]
   do
     if [[ $line == *"__LIST_INCLUDE_H__"* ]]; then
+      echo ////////////////////////////////////////////////////////////////////////////////////////////////////////
       echo ///
-      echo /// The remainder of this file is generated code and will be over written at the next build
       echo ///
+      echo ///  WARNING The content between these block comments is generated code and will be over written at the next build
+      echo ///
+      echo ///
+      echo ////////////////////////////////////////////////////////////////////////////////////////////////////////
       cat ${2}
+      echo ////////////////////////////////////////////////////////////////////////////////////////////////////////
+      echo ///
+      echo ///
+      echo ///  WARNING after this the code is not generated - it comes from the relevant hand_code.h/.c file
+      echo ///
+      echo ///
+      echo ////////////////////////////////////////////////////////////////////////////////////////////////////////
     else
       echo $line
     fi
@@ -55,4 +75,6 @@ function replace_include() {
 }
 
 replace_include ${hand_coded_h} ${generated_h}  > ${outfile_h}
+cp ${outfile_h} ${final_h}
 replace_include ${hand_coded_c} ${generated_c}  > ${outfile_c}
+cp ${outfile_c} ${final_c}

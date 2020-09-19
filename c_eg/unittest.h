@@ -59,21 +59,88 @@ void UTRecordAssertResult(const char* fn, const char* file, int line, const char
 		return 1; \
 	}	\
 } while(0);
+#define UT_NOT_EQUAL_INT(a,b) do{\
+	if(a == b) {\
+	    char* msg; \
+		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %d b = %d\n"), __FUNCTION__, __FILE__, __LINE__,a , b);\
+        UTRecordAssertResult(__FUNCTION__, __FILE__, __LINE__, msg);   \
+        free(msg); \
+		return 1; \
+	}	\
+} while(0);
 
+#define UT_NOT_EQUAL_LONG(a,b) do{\
+	if(a == b) {\
+	    char* msg; \
+		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %ld b = %ld\n"), __FUNCTION__, __FILE__, __LINE__,a , b);\
+        UTRecordAssertResult(__FUNCTION__, __FILE__, __LINE__, msg);   \
+        free(msg); \
+		return 1; \
+	}	\
+} while(0);
 #define UT_EQUAL_LONG(a,b) do{\
 	if(a != b) {\
-		printf(RED("FAILED report ") BLUE("%s %s %d not equal a = %d b = %d\n"), __FILE__, __FUNCTION__, __LINE__,a , b);\
+	    char* msg; \
+		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %ld b = %ld\n"), __FUNCTION__, __FILE__, __LINE__,a , b);\
+        UTRecordAssertResult(__FUNCTION__, __FILE__, __LINE__, msg);   \
+        free(msg); \
 		return 1; \
 	}	\
 } while(0);
 
 #define UT_EQUAL_PTR(a,b) do{\
 	if(a != b) {\
-		printf(RED("FAILED report ") BLUE("%s %s %d not equal a = %d b = %d\n"), __FILE__, __FUNCTION__, __LINE__,a , b);\
+	    char* msg; \
+		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %lx b = %lx\n"), __FUNCTION__, __FILE__, __LINE__,a , b);\
+        UTRecordAssertResult(__FUNCTION__, __FILE__, __LINE__, msg);   \
+        free(msg); \
 		return 1; \
 	}	\
 } while(0);
 
+#define UT_NOT_EQUAL_PTR(a,b) do{\
+	if(a == b) {\
+	    char* msg; \
+		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %lx b = %lx\n"), __FUNCTION__, __FILE__, __LINE__,a , b);\
+        UTRecordAssertResult(__FUNCTION__, __FILE__, __LINE__, msg);   \
+        free(msg); \
+		return 1; \
+	}	\
+} while(0);
+
+#define UT_EQUAL_CSTR(a,b) do{\
+	if(strcmp(a,b) != 0) {\
+	    char* msg; \
+		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %s b = %s\n"), __FUNCTION__, __FILE__, __LINE__,a , b);\
+        UTRecordAssertResult(__FUNCTION__, __FILE__, __LINE__, msg);   \
+        free(msg); \
+		return 1; \
+	}	\
+} while(0);
+
+#define UT_NOT_EQUAL_CSTR(a,b) do{\
+	if(strcmp(a,b) == 0) {\
+	    char* msg; \
+		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %s b = %s\n"), __FUNCTION__, __FILE__, __LINE__,a , b);\
+        UTRecordAssertResult(__FUNCTION__, __FILE__, __LINE__, msg);   \
+        free(msg); \
+		return 1; \
+	}	\
+} while(0);
+
+
+#define UT_TRUE(a) do{\
+	if(a)  {\
+	    char* msg; \
+		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") BRIGHT_CYAN("line:") BLUE("%d") "\n"), __FUNCTION__, __FILE__, __LINE__,a , b);\
+        UTRecordAssertResult(__FUNCTION__, __FILE__, __LINE__, msg);   \
+        free(msg); \
+		return 1; \
+	}	\
+} while(0);
+
+#define REQUIRE(expression) UT_TRUE((expression))
+#define CHECK(expression) UT_TRUE((expression))
 #define UT_ADD(name) UTObject uobj_ ## name = {#name, name}; UTRegister(&uobj_ ## name);
 #define UT_RUN(tests) UTRun();
 

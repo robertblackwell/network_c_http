@@ -1,77 +1,76 @@
 #ifndef buffer_chain_template_hpp
 #define buffer_chain_template_hpp
 #include <stddef.h>
-#include <memory>
-#include <iostream>
-#include <vector>
-#include <boost/asio/buffer.hpp>
-#include <marvin/buffer/contig_buffer.hpp>
-#include <marvin/buffer/contig_buffer_factory.hpp>
+#include <assert.h>
+#include <string.h>
+#include <c_eg/list.h>
+#include <c_eg/buffer/contig_buffer.h>
 
 typedef struct BufferChain_s {
 
-        std::vector<ContigBufferRef>          m_chain;
-        std::size_t                           m_size;
-        ContigBufferRef (*m_config_factory)();
-} BufferChain, *BufferChainRef;
+        ListRef   m_chain;
+        int       m_size;
 
-BufferChainRef BufferChain_new(ConfigBufferRef(*factory)())
+} BufferChain, *BufferChainRef;
+static void dealloc(void* p)
 {
-    m_chain = (BufferChainRef)malloc(sizeof(BufferChain_s));
-    m_chain = std::vector<ContigBuffer::SPtr>();
-    m_size = 0;
-    m_contig_factory = factory;
+    CBuffer_free((CBufferRef)p);
 }
-void BufferChain_free(BufferChainRef bchain)
+BufferChainRef BufferChain_new()
 {
-    for(int i = 0; i < bchain->m_chain.size(); i++) {
-        ContigBuffer_free(bchain->m_chain.at(i))
+    BufferChainRef tmp = malloc(sizeof(BufferChain));
+    tmp->m_chain = List_new(dealloc);
+    tmp->m_size = 0;
+}
+void BufferChain_free(BufferChainRef this)
+{
+    ListNodeRef iter = List_iterator(this->m_chain);
+    for(;;) {
+        if(iter == NULL) {
+            break;
+        }
+        ListNodeRef next = List_itr_next(this->m_chain, iter);
+        List_itr_remove(this->m_chain, &iter);
+        iter = next;
     }
-    free((void*)bchain);
+    free((void*)this);
 }
-void BufferChain_append(BufferChainRef bchain, void* buf, std::size_t len)
+void BufferChain_append(BufferChainRef this, void* buf, int len)
 {
-    if (bchain->m_chain.size() > 0) {
-        ContigBufferRef last_cb = m_chain.at(m_chain.size()-1);
-        if ((ContigBuffer_capacity(last_mb) - ContigBuffer_size(last_mb)) >= len) {
-            ContigBuffer_append(last_mb, buf, len);
-            bchain->m_size += len;
+    if (this->m_size > 0) {
+        CBufferRef last_cb = List_last(this->m_chain);
+        if ((CBuffer_capacity(last_cb) - CBuffer_size(last_cb)) >= len) {
+            CBuffer_append(last_cb, buf, len);
+            this->m_size += len;
             return;
         }
     }
-    std::size_t required_len = (len > 256*4*8) ? len+100 : 256*4*8;
-    ContigBufferRef new_cb = bchain->m_contig_factory();
-    ContigBuffer_append(new_cb, buf, len);
-    BufferChain_push_back(bchain, new_mb);
+    int required_len = (len > 256*4*8) ? len+100 : 256*4*8;
+    CBufferRef new_cb = CBuffer_new();
+    CBuffer_append(new_cb, buf, len);
+    List_add_back(this->m_chain, (void*)new_cb);
+    this->m_size += len;
 }
-void BufferChain_append(BufferChainRef bchain, std::string str)
+void BufferChain_append_cstr(BufferChainRef this, char* cstr)
 {
-    append((void*)str.c_str(), str.size());
-}
-void BufferChain_append(BufferChainRef bchain, std::string& str)
-{
-    append((void*)str.c_str(), str.size());
+    BufferChain_append(this, (void*)cstr, strlen(cstr));
 }
 
-void BufferChain_push_back(BufferChainRef bchain, ContigBufferRef cb)
-{
-    bchain->m_size += ContigBuffer_size(cb);
-    bchain->m_chain.push_back(mb);
-}
 void BufferChain_clear(BufferChainRef bchain)
 {
-    for(int i = 0; i < bchain->m_chain.size(); i++) {
-        ContifBuffer_free(bchain->mchain.at(i));
-    }
-    bchain->m_chain.clear();
-    bchain->m_size = 0;
+    assert(false);
+//    for(int i = 0; i < bchain->m_chain.size(); i++) {
+//        ContifBuffer_free(bchain->mchain.at(i));
+//    }
+//    bchain->m_chain.clear();
+//    bchain->m_size = 0;
 }
-std::size_t BufferChain_size(BufferChainRef bchain)
+int BufferChain_size(BufferChainRef this)
 {
-    return m_size;
+    return this->m_size;
 }
-        
-std::size_t BufferChain_blocks(BufferChainRef bchain, )
+#ifdef BVBVB
+int BufferChain_blocks(BufferChainRef this)
 {
     return m_chain.size();
 }
@@ -98,6 +97,6 @@ CBuf::SPtr BufferChain_amalgamate(BufferChainRef bchain)
     }
     return mb_final;
 }
-
+#endif
 
 #endif

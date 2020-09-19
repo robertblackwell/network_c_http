@@ -28,10 +28,10 @@ void List_init(ListRef lref, ListItemDeallocator dealloc);
 void List_destroy(ListRef lref);
 
 //free the entire list including invalidating the lref
-void List_free(ListRef lref);
+void List_free(ListRef* lref_ptr);
 
 //returns number of nodes on LIst
-size_t List_size(ListRef lref);
+int List_size(ListRef lref);
 
 // add to the end of the list
 void List_add_back(ListRef lref, void*);
@@ -57,8 +57,9 @@ ListNodeRef List_iterator(ListRef lref);
 // moves the iterator on to the next Node on the list, returns NULL if goes off the end of the list
 ListNodeRef List_itr_next(ListRef lref, ListNodeRef itr);
 
-// removes a list item pointed at by an iterator
-void List_itr_remove(ListRef lref, ListNodeRef itr);
+// removes a list item pointed at by an iterator, frees that item and invalidates the iterator
+// and sets to NULL the variable pointing to it
+void List_itr_remove(ListRef lref, ListNodeRef* itr);
 
 // gets the value of the item held in the Node pointed at by this iterator
 void* List_itr_unpack(ListRef lref, ListNodeRef itr);

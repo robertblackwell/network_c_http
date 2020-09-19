@@ -15,9 +15,11 @@ DummyObjRef DummyObj_new(long val)
     DummyObjRef dref = malloc(sizeof(DummyObj));
     dref->value = val;
 }
-void DummyObj_free(DummyObjRef dref)
+void DummyObj_free(DummyObjRef* dref)
 {
-    free((void*)dref);
+
+    free((void*)*dref);
+    *dref = NULL;
 }
 
 #define DOList_new() List_new(dealloc)
@@ -34,7 +36,7 @@ typedef ListRef DObjListRef;
 typedef ListNodeRef DObjListIter, ListIter;
 
 DObjListRef  DObj_List_new();
-void         DObj_List_free(DObjListRef lref) ;
+void         DObj_List_free(DObjListRef* lref) ;
 DummyObjRef  DObj_List_first(DObjListRef lref);
 DummyObjRef  DObj_List_last(DObjListRef lref) ;
 DummyObjRef  DObj_List_remove_first(DObjListRef lref);
@@ -43,10 +45,10 @@ DummyObjRef  DObj_List_itr_unpack(DObjListRef lref, DObjListIter iter);
 DObjListIter DObj_List_iterator(DObjListRef lref);
 DObjListIter DObj_List_itr_next(DObjListRef lref, DObjListIter iter);
 
-static void dealloc(void* ptr) {DummyObj_free((DummyObjRef) ptr);}
+static void dealloc(void* ptr) {DummyObj_free((DummyObjRef*) ptr);}
 
 DObjListRef  DObj_List_new() {return (DObjListRef)List_new(dealloc);}
-void         DObj_List_free(DObjListRef lref) {List_free(lref);}
+void         DObj_List_free(DObjListRef* lref) {List_free(*((ListRef**)lref)); *lref = NULL;}
 DummyObjRef  DObj_List_first(DObjListRef lref) { return (DummyObjRef)List_first(lref);}
 DummyObjRef  DObj_List_last(DObjListRef lref)  { return (DummyObjRef)List_last(lref);}
 DummyObjRef  DObj_List_remove_first(DObjListRef lref) { return (DummyObjRef)List_remove_first(lref);}

@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <assert.h>
 #include <string.h>
+#include <c_eg/utils.h>
 #include <c_eg/buffer/contig_buffer.h>
 
 
@@ -76,16 +77,6 @@ void* BufferStrategy_reallocate(BufferStrategyRef bsref, void* current_memptr, s
 
 BufferStrategy common_strategy = {.m_min_size=256, .m_max_size=1024*1024};
 
-
-// struct CBuffer_s
-// {
-//     void*       m_memPtr;     /// points to the start of the memory slab managed by the instance
-//     char*       m_cPtr;       /// same as memPtr but makes it easier in debugger to see whats in the buffer
-//     size_t      m_length;    ///
-//     size_t      m_capacity;  /// the capacity of the buffer, the value used for the malloc call
-//     size_t      m_size;      /// size of the currently filled portion of the memory slab
-// };
-
 CBufferRef CBuffer_new()
 {
     CBufferRef cb_ptr = (CBufferRef)malloc(sizeof(CBuffer));
@@ -99,7 +90,7 @@ CBufferRef CBuffer_new()
     return cb_ptr;
 }
 
-CBufferRef CBuffer_from_string(char* c_str)
+CBufferRef CBuffer_from_cstring(char* c_str)
 {
     CBufferRef cbuf = CBuffer_new();
     CBuffer_append(cbuf, (void*)c_str, strlen(c_str));
@@ -147,7 +138,8 @@ void* CBuffer_next_available(CBufferRef cbuf)
  */
 void CBuffer_clear(CBufferRef cbuf)
 {
-    cbuf->m_length = 0; cbuf->m_cPtr[0] = (char)0;
+
+    cbuf->m_length = 0; cbuf->m_length = 0; cbuf->m_cPtr[0] = (char)0;
 }
 
 void CBuffer_append(CBufferRef cbuf, void* data, size_t len)
@@ -186,7 +178,18 @@ char* CBuffer_toString(CBufferRef cbuf)
     char* p = cbuf->m_cPtr;
     return p;
 }
-
+// c++ move semantics - saves a copy
+void CBuffer_move(CBufferRef dest, CBufferRef src)
+{
+    ASSERT_NOT_NULL(src);
+    ASSERT_NOT_NULL(dest);
+    CBuffer_clear(dest);
+//    CBuffer_append(dest, src->m_memPtr, src->m_length );
+    CBuffer tmp = *dest;
+    *dest = *src;
+    *src = tmp;
+    CBuffer_clear(src);
+}
 /**
  * Detremines if an address value (pointer) is within the address range of the
  * the buffer ie

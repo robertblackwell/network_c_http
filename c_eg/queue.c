@@ -35,12 +35,14 @@ QueueRef Queue_new()
     pthread_cond_init(&(q->not_full_cv), NULL);
     return q;
 }    
-void Queue_free(QueueRef qref)
+void Queue_free(QueueRef* qref_ptr)
 {
+    QueueRef qref = * qref_ptr;
     pthread_cond_destroy(&(qref->not_full_cv));
     pthread_cond_destroy(&(qref->not_empty_cv));
     pthread_mutex_destroy(&(qref->queue_mutex));
     free((void*)qref);
+    *qref_ptr = NULL;
 }
     
 int Queue_remove(QueueRef qref)

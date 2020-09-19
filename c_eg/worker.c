@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <c_eg/worker.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,7 +9,7 @@
 #include <pthread.h>
 
 #include <c_eg/constants.h>
-
+#include <c_eg/utils.h>
 #include <c_eg/socket_functions.h>
 #include <c_eg/queue.h>
 
@@ -79,6 +80,8 @@ struct Worker_s {
 WorkerRef Worker_new(QueueRef qref, int _id)
 {
     WorkerRef wref = (WorkerRef)malloc(sizeof(Worker));
+    if(wref == NULL)
+        return NULL;
     wref->active_socket = 0;
     wref->active  = false;
     wref->id = _id;
@@ -91,6 +94,7 @@ void Worker_free(WorkerRef wref)
 }
 static void* Worker_main(void* data)
 {
+    ASSERT_NOT_NULL(data);
     WorkerRef wref = (WorkerRef)data;
     while(true)
     {
@@ -110,6 +114,8 @@ static void* Worker_main(void* data)
 // start a pthread - returns 0 on success errno on fila
 void Worker_start(WorkerRef wref)
 {
+    ASSERT_NOT_NULL(wref);
+
     printf("Worker start - enter\n");
     int rc = pthread_create(&(wref->pthread), NULL, &(Worker_main), (void*) wref);
     printf("Worker start exit\n");
@@ -120,6 +126,7 @@ void Worker_start(WorkerRef wref)
 // }
 pthread_t* Worker_pthread(WorkerRef wref)
 {
+    ASSERT_NOT_NULL(wref);
     return &(wref->pthread);
 }
 

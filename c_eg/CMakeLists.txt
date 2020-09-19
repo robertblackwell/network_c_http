@@ -8,35 +8,60 @@
 set(EXTSRC ${C_EG_VENDOR_SRCDIR})
 
 add_custom_command(
-	# generate socket list code
-	COMMAND echo "Makeing socket_list  class"
-	DEPENDS __list_template.h list_template.c sock_list_in.h sock_list_in.c
-	OUTPUT sock_list.h sock_list.c
-	COMMENT "Generatiing socket_list.h socket_list.c "
+	# generate mytypet list code
+	COMMAND bash ${C_EG_TOOLS_DIR}/gen_typed_list.sh generate MyType MT
+	DEPENDS list/template.h list/template.c mytype/hand_coded.h mytype/hand_coded.c
+	OUTPUT ${C_EG_SOURCE_DIR}/mytype_list.h ${C_EG_SOURCE_DIR}/mytype_list.c
+	COMMENT "Generating mytype_list.h mytype_list.c"
+	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 )
-#add_custom_target(libfoo_untar DEPENDS ${LIBFOO_TAR_HEADERS})
+add_custom_command(
+	# generate header_line list code
+	COMMAND bash ${C_EG_TOOLS_DIR}/gen_typed_list.sh generate HeaderLine HDR
+	DEPENDS list/template.h list/template.c headerline/hand_coded.h headerline/hand_coded.c
+	OUTPUT ${C_EG_SOURCE_DIR}/headerline_list.h ${C_EG_SOURCE_DIR}/headerline_list.c
+	COMMENT "Generating header_line_list.h header_line_list.c"
+	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+)
 
 set(C_EG_LIBRARY_HEADER_FILES
-	sock_list.h
+#	mytype_list.h
+#	mytype.h
 	unittest.h
+	test_helper_types.h
 	buffer/contig_buffer.h
+	buffer/buffer_chain.h
 	logger.h
 	server.h
 	queue.h
 	worker.h
 	list.h
+	header_line.h
+	headerline_list.h
+	utils.h
+	${EXTSRC}/http-parser/http_parser.h
+	message.h
+	parser.h
 	)
 
-set(C_EG_LIBRARY_SOURCE_FILES 
-	sock_list.c
+set(C_EG_LIBRARY_SOURCE_FILES
+#	mytype_list.c
+#	mytype.c
+	test_helper_types.c
 	unittest.c
-	# buffer/buffer_chain.cpp			
+	buffer/buffer_chain.c
 	buffer/contig_buffer.c
 	logger.c		
 	server.c
 	queue.c
 	worker.c
 	list.c
+	header_line.c
+	headerline_list.c
+	utils.c
+	${EXTSRC}/http-parser/http_parser.c
+	message.c
+	parser.c
 	)
 
 set_source_files_properties(${C_EG_LIBRARY_SOURCE_FILES} PROPERTIES LANGUAGE C)

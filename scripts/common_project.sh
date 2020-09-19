@@ -4,7 +4,7 @@
 
 # the basename of the project root directory and rel paths to the incude and src dirs that hold
 #  project .cpp and .hpp files
-project_dir_name=c_eg
+project_dir_name=c
 project_src_dir_rel_path=c_eg
 project_include_dir_rel_path=c_eg
 

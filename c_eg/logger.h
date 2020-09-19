@@ -1,5 +1,6 @@
 #ifndef c_c_eg_logger_h
 #define c_c_eg_logger_h
+#define GNU_SOURCE
 #include <stdio.h>
 
 extern void log_function(char* level, const char* funcname, const char* filename, int line, char* message);

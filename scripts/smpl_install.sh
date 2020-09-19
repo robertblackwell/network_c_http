@@ -68,14 +68,14 @@ function smpl_install() {
 			exit 1
 		fi
 	}
-	smpl_run_one ${script_dir}/doctest_2.3.7.sh $@
-	smpl_run_one ${script_dir}/catch2_v2.11.1.sh $@
+#	smpl_run_one ${script_dir}/doctest_2.3.7.sh $@
+#	smpl_run_one ${script_dir}/catch2_v2.11.1.sh $@
 	# smpl_run_one ${script_dir}/cli11_v1.9.0.sh $@
 	# smpl_run_one ${script_dir}/nlohmann_json_3.7.3.sh $@
 	# smpl_run_one ${script_dir}/boost_1.71.0.sh $@
 	# smpl_run_one ${script_dir}/openssl_1.1.1.sh $@
 
-	# smpl_run_one ${script_dir}/nodejs_http_parser.sh $@
+	 smpl_run_one ${script_dir}/nodejs_http_parser.sh $@
 
 	# smpl_run_one ${script_dir}/urlparser.sh $@
 	# smpl_run_one ${script_dir}/cxxurl.sh $@
@@ -84,5 +84,6 @@ function smpl_install() {
 
 	if [ "$1" == "install"  ] || [ "$1" == "install_only" ] ; then
 		# ${script_dir}/install_openssl_default_cert_file.sh
+		echo " "
 	fi
 }

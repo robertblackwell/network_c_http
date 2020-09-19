@@ -1,13 +1,18 @@
 #ifndef buffer_chain_template_hpp
 #define buffer_chain_template_hpp
 #include <stddef.h>
-#include <memory>
-#include <iostream>
-#include <vector>
-#include <boost/asio/buffer.hpp>
-#include <marvin/buffer/contig_buffer.hpp>
-#include <marvin/buffer/contig_buffer_factory.hpp>
 
+struct BufferChain_s;
+
+typedef struct BufferChain_s BUfferChain, *BufferChainRef;
+
+BufferChainRef BufferChain_new();
+void BufferChain_free(BufferChainRef* this);
+void BufferChain_append(BufferChainRef this, void* buf, int len);
+void BufferChain_clear(BufferChainRef this);
+int BufferChain_size(BufferChainRef this);
+
+#ifdef nada
 class BufferChain
 {
     public:
@@ -200,6 +205,5 @@ inline std::string buffersequence_to_string(BufferChain::AsioConstBufferSeq& mut
     }
     return s;
 }
-
-} // namespave Marvin
+#endif
 #endif

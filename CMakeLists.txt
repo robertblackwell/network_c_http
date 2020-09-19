@@ -58,7 +58,7 @@ option(C_EG_BuildDocs "Build doxygen documentation" ON)
 # this is a fix for a problem with boost libraries see https://github.com/Microsoft/vcpkg/issues/4497
 # also a hack and breaks "best practices" as per Damiel Pfeiffer's presentation https://www.youtube.com/watch?v=rLopVhns4Zs&feature=youtu.be
 set(other_flags "${other_flags} -frtti -fvisibility-inlines-hidden")
-set(other_flags "${other_flags} -fvisibility=hidden")
+set(other_flags "${other_flags} -fvisibility=hidden -D_GNU_SOURCE")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${other_flags} -pthread")
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 set(CTEST_CUSTOM_PRE_TEST "echo THIS IS PRE TEST")
@@ -93,9 +93,11 @@ set(C_EG_PROJECT_DIR       ${C_EG_SOURCE_DIR})
 ## location of project header and source files
 set(C_EG_SOURCE_NAME       c_eg)
 set(C_EG_INCLUDE_NAME      c_eg)
+set(C_EG_TOOLS_NAME        tools)
 set(C_EG_LIB_NAME          c_eg_library)
 set(C_EG_SOURCE_DIR        ${C_EG_PROJECT_DIR}/${C_EG_SOURCE_NAME})
 set(C_EG_INCLUDE_DIR       ${C_EG_PROJECT_DIR}/${C_EG_INCLUDE_NAME})
+set(C_EG_TOOLS_DIR         ${C_EG_PROJECT_DIR}/${C_EG_TOOLS_NAME})
 ## location of other/3rd party headers, src and libs
 set(C_EG_VENDOR_NAME		 vendor)
 set(C_EG_VENDOR_DIR        ${C_EG_PROJECT_DIR}/${C_EG_VENDOR_NAME})

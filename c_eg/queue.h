@@ -9,7 +9,7 @@ struct Queue_s;
 typedef struct Queue_s Queue, *QueueRef;
 
 QueueRef Queue_new();
-void Queue_free(QueueRef q);
+void Queue_free(QueueRef* q_p);
 int Queue_remove(QueueRef q);
 void Queue_add(QueueRef q, int port);
 

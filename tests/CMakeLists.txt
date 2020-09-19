@@ -17,11 +17,14 @@ set(TEST_LINK_LIBS
 	${DL_LIB_SO}
 	)
 set(TEST_SERVER_BASEURL "http://whiteacorn.com/utests/echo/test.php")
-# add_subdirectory(test_buffers)
+ add_subdirectory(test_buffers)
 #add_subdirectory(test_logger)
 # add_subdirectory(test_server)
 # add_subdirectory(test_queue)
 add_subdirectory(test_list)
+add_subdirectory(test_header_line)
+add_subdirectory(test_hdrlist)
+add_subdirectory(test_parser)
 
 if (OFF)
 endif()

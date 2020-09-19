@@ -1,13 +1,16 @@
 
-static void dealloc(void* ptr) {MyType_free((MyTypeRef) ptr);}
+static void dealloc(void* ptr) {MyType_free((MTRef) ptr);}
 
-MyTypeListRef  MTList_new() {return (MyTypeListRef)List_new(dealloc);}
-void         MTList_free(MyTypeListRef lref) {List_free(lref);}
-MyTypeRef  MTList_first(MyTypeListRef lref) { return (MyTypeRef)List_first(lref);}
-MyTypeRef  MTList_last(DObjListRef lref)  { return (MyTypeRef)List_last(lref);}
-MyTypeRef  MTList_remove_first(DObjListRef lref) { return (MyTypeRef)List_remove_first(lref);}
-MyTypeRef  MTList_remove_last(DObjListRef lref) { return (MyTypeRef)List_remove_last(lref);}
-MyTypeRef  MTList_itr_unpack(DObjListRef lref, DObjListIter iter) { return (MyTypeRef)List_itr_unpack(lref, iter);}
-MyTypeListIter MTList_iterator(DObjListRef lref) { return List_iterator(lref);}
-MyTypeListIter MTList_itr_next(DObjListRef lref, DObjListIter iter) { return List_itr_next(lref, iter);}
+MTListRef  MTList_new() {return (MTListRef)List_new(dealloc);}
+void         MTList_free(MTListRef lref) {List_free(lref);}
+int          MTList_size(MTListRef lref) {return List_size(lref);}
+MTRef  MTList_first(MTListRef lref) { return (MyTypeRef)List_first(lref);}
+MTRef  MTList_last(MTListRef lref)  { return (MyTypeRef)List_last(lref);}
+MTRef  MTList_remove_first(MTListRef lref) { return (MyTypeRef)List_remove_first(lref);}
+MTRef  MTList_remove_last(MTListRef lref) { return (MyTypeRef)List_remove_last(lref);}
+MTRef  MTList_itr_unpack(MTListRef lref, MTListIter iter) { return (MyTypeRef)List_itr_unpack(lref, iter);}
+MTListIter MTList_iterator(MTListRef lref) { return List_iterator(lref);}
+MTListIter MTList_itr_next(MTListRef lref, MTListIter iter) { return List_itr_next(lref, iter);}
 
+void MTList_add_back(MTListRef lref, MTRef item) {List_add_back(lref, (void*)item);}
+void MTList_add_front(MTListRef lref, MTRef item) {List_add_front(lref, (void*)item);}

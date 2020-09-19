@@ -4,25 +4,6 @@
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <stdbool.h>
-/*
-* \ingroup buffers
-*
-* \brief ContigBuffer provides a template class representing a contiguous expanding block of memory.r
-*
-* ContigBuffer class wraps a contigous buffer and provides manipulation methods.
-* Once constructed the ContigBuffer instance "own" the raw memory.
-* ContigBuffer destructor releases the raw memory.
-* The template parameter is a strategy for how much to allocate initially and realloc
-* when expansion is required.
-* S should be 
-*   -   default constructable
-*   -   void* allocate(std::size_t size)
-*   -   std::size_t reallocate_size(std::size_t original_size, std::size_t new_size)
-*       like standard realloc should copy the content from the original address to the new address
-*   -   void* reallocate(void* p, std::size_t)
-*   -   void* free(void* p)
-*/
-//template<typename S=BufferStrategyInterface>
 
 #define CBUFFER_MAX_CAPACITY 10000
 #define CBUFFER_MIN_CAPACITY 1000
@@ -30,34 +11,9 @@
 struct CBuffers;
 typedef struct CBuffer_s CBuffer, *CBufferRef;
 
-// #ifdef XYZ
-// /**
-// * This struct implements a strategy for growing contiguous buffers
-// */
-// typedef struct BufferStrategy_s {
-//     size_t m_min_size;
-//     size_t m_max_size;
-// } BufferStrategy, *BufferStrategyRef;
-
-
-// typedef struct CBuffer_s
-// {
-//     void*       m_memPtr;     /// points to the start of the memory slab managed by the instance
-//     char*       m_cPtr;       /// same as memPtr but makes it easier in debugger to see whats in the buffer
-//     size_t      m_length;    ///
-//     size_t      m_capacity;  /// the capacity of the buffer, the value used for the malloc call
-//     size_t      m_size;      /// size of the currently filled portion of the memory slab
-//     BufferStrategy_s* m_strategy;
-// } CBuffer, * CBufferRef; 
-
-// #endif
-// CBufferRef BodyCBuffer_new();
-// CBufferRef HeaderCBuffer_new();
-// CBufferRef CBuffer_new_with_strategy();
-
 CBufferRef CBuffer_new();
 
-CBufferRef CBuffer_from_string(char* cstr);
+CBufferRef CBuffer_from_cstring(char* cstr);
 
 void CBuffer_free(CBufferRef cbuf);
 /**
@@ -79,7 +35,7 @@ void* CBuffer_next_available(CBufferRef cbuf);
 /**
  * Resets the buffer so that it is again an empty buffer
  */
-void CBuffer_clear();
+void CBuffer_clear(CBufferRef this);
 
 /**
 *append a block of data pointed at by a void* and of given length
@@ -100,6 +56,8 @@ void CBuffer_set_size(CBufferRef cbuf, size_t n);
  * This is a reference to an internal string so dont free or change it
  */
 char* CBuffer_to_string(CBufferRef cbuf);
+
+void CBuffer_move(CBufferRef dest, CBufferRef src);
 
 /**
  * Detremines if an address value (pointer) is within the address range of the

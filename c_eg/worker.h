@@ -1,6 +1,6 @@
 #ifndef c_ceg_worker_h
 #define c_ceg_worker_h
-
+//#define _GNU_SOURCE
 #include <c_eg/queue.h>
 #include <pthread.h>
 

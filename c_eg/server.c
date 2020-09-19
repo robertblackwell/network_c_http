@@ -9,6 +9,8 @@
 #include <errno.h>
 
 #include <c_eg/constants.h>
+#include <c_eg/utils.h>
+
 #include <c_eg/logger.h>
 #include <c_eg/socket_functions.h>
 #include <c_eg/queue.h>
@@ -75,13 +77,16 @@ ServerRef Server_new(int port)
     return sref;
 }
 
-void Server_free(ServerRef sref)
+void Server_free(ServerRef* sref)
 {
-
+    ASSERT_NOT_NULL(*sref);
+    free(*sref);
+    *sref = NULL;
 }
 
 void Server_listen(ServerRef sref)
 {
+    ASSERT_NOT_NULL(sref)
     printf("Server_listen\n");
     //
     // Start the worker threads
