@@ -381,7 +381,7 @@ int run_list (ListRef tests)
         ParserRef parser = Parser_new ();
         printf ("Running %s\n", x->description);
         WPT_init (&wpt, parser, &source, x->verify_function);
-        result = result || WPT_run2 (&wpt);
+        result = result || WPT_run (&wpt);
         iter = next;
     }
     return result;}
@@ -392,57 +392,6 @@ int test_A()
 int test_B()
 {
     return run_list(make_test_B());
-}
-///////////////////////////////////////////////////
-int test_01 ()
-{
-    ListRef tests = make_test_A ();
-    // note all labels are upper case
-    ListNodeRef iter = List_iterator (tests);
-    for (;;) {
-        if (iter == NULL) {
-            break;
-        }
-        ListNodeRef next = List_itr_next (tests, iter);
-        ParserTestRef x = (ParserTestRef) List_itr_unpack (tests, iter);
-        DataSource source;
-        DataSource_init (&source, x->lines);
-        for (;;) {
-            char buffer[1000];
-            char *b = &buffer[0];
-            int buffer_length = 1000;
-            int bytes_read = DataSource_read (&source, buffer, buffer_length);
-            if (bytes_read == 0) {
-                break;
-            }
-        }
-        iter = next;
-    }
-    return 0;
-}
-
-int test_02 ()
-{
-    int result = 0;
-    ListRef tests = make_test_B ();
-    // note all labels are upper case
-    ListNodeRef iter = List_iterator (tests);
-    for (;;) {
-        if (iter == NULL) {
-            break;
-        }
-        ListNodeRef next = List_itr_next (tests, iter);
-        ParserTestRef x = (ParserTestRef) List_itr_unpack (tests, iter);
-        DataSource source;
-        DataSource_init (&source, x->lines);
-        WrappedParserTest wpt;
-        ParserRef parser = Parser_new ();
-        printf ("Running %s", x->description);
-        WPT_init (&wpt, parser, &source, x->verify_function);
-        result = result || WPT_run2 (&wpt);
-        iter = next;
-    }
-    return result;
 }
 
 int main ()

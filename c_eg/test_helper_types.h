@@ -70,22 +70,20 @@ int DataSource_read(DataSourceRef this, void* buffer, int length);
  */
 typedef struct WrappedParserTest_s
 {
-    // using MsgList = std::vector<Marvin::MessageBase*>;
-    // using VerifyFunctionType = std::function<void(MsgList msg_list)>;
-    
     ParserRef           m_parser;
     DataSourceRef       m_data_source;
     VerifyFunctionType  m_verify_func;
     ListRef             m_messages;
+    char                m_read_buffer[1000];
+    char*               m_readbuffer_ptr;
+    int                 m_buffer_length;
+    int                 m_buffer_remaining;
 
 } WrappedParserTest, *WrappedParserTestRef;
     
 void WPT_init(WrappedParserTestRef this, ParserRef parser, DataSourceRef data_source, VerifyFunctionType verify_func);
-WrappedParserTestRef WPT_new(WrappedParserTestRef this, ParserRef parser, DataSourceRef data_source, VerifyFunctionType verify_func);
-void WPT_destroy(WrappedParserTestRef this);
-void WPT_free(WrappedParserTestRef* this_ptr);
+//void WPT_destroy(WrappedParserTestRef this);
 
 int WPT_run(WrappedParserTestRef this);
-int WPT_run2(WrappedParserTestRef this);
 
 #endif

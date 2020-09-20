@@ -1,6 +1,7 @@
 //opaque type representing list
 #include <stdlib.h>
 #include <assert.h>
+#include <stdio.h>
 #include <c_eg/alloc.h>
 #include <c_eg/list.h>
 #include <c_eg/utils.h>
@@ -66,7 +67,7 @@ void List_destroy(ListRef lref)
             break;
         }
         if(lref->dealloc != NULL) {
-            lref->dealloc(t->item);
+            lref->dealloc(&(t->item));
         }
         ListNodeRef tnext = t->forward;
         ListNode_free(&t);
@@ -87,11 +88,21 @@ int List_size(ListRef lref)
 {
     return lref->count;
 }
+void List_display(ListRef this)
+{
+    printf("List[%p] count: %d head %p talk %p\n", (void*)this, this->count, (void*)this->head, (void*)this->tail);
+    ListNodeRef iter = this->head;
+    while(iter != NULL) {
+        printf("Node[%p] forward:%p backwards:%p\n", (void*)iter, (void*)iter->forward, (void*)iter->backward);
+        ListNodeRef next = iter->forward;
+        iter = next;
+    }
+}
 // add to the front of the list
 void List_add_front(ListRef lref, void* content)
 {
     ASSERT_NOT_NULL(lref);
-    ListNodeRef lnref = ListNode_new(content, lref->tail, NULL);
+    ListNodeRef lnref = ListNode_new(content, NULL, NULL);
     if(lref->count == 0) {
         lref->head = lnref;
         lref->tail = lnref;
@@ -100,7 +111,7 @@ void List_add_front(ListRef lref, void* content)
         lnref->forward = lref->head;
         lnref->backward = NULL;
         lref->head->backward = lnref;
-        lref->tail = lnref;
+        lref->head = lnref;
         lref->count++;
     }
 }

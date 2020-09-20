@@ -15,7 +15,7 @@ CBufferRef CBuffer_new();
 
 CBufferRef CBuffer_from_cstring(char* cstr);
 
-void CBuffer_free(CBufferRef cbuf);
+void CBuffer_free(CBufferRef* cbuf);
 /**
  * gets a pointer to the start of the memory slab being managed by the instance
  */

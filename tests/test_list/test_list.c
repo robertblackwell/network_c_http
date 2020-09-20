@@ -45,7 +45,10 @@ DummyObjRef  DObj_List_itr_unpack(DObjListRef lref, DObjListIter iter);
 DObjListIter DObj_List_iterator(DObjListRef lref);
 DObjListIter DObj_List_itr_next(DObjListRef lref, DObjListIter iter);
 
-static void dealloc(void* ptr) {DummyObj_free((DummyObjRef*) ptr);}
+static void dealloc(void** ptr)
+{
+    DummyObj_free((DummyObjRef*) ptr);
+}
 
 DObjListRef  DObj_List_new() {return (DObjListRef)List_new(dealloc);}
 void         DObj_List_free(DObjListRef* lref) {List_free(*((ListRef**)lref)); *lref = NULL;}
@@ -85,7 +88,8 @@ int test_list_add_back()
     UT_EQUAL_INT((List_size(lref)), 2);
     UT_EQUAL_INT(v11, 333);
     UT_EQUAL_INT(v12, 444);
-
+    List_free(&lref);
+    UT_EQUAL_PTR(lref, NULL);
     return 0;
 }
 int test_list_add_front()
@@ -106,6 +110,9 @@ int test_list_add_front()
     UT_EQUAL_INT((List_size(lref)), 2);
     UT_EQUAL_INT(v11, 444);
     UT_EQUAL_INT(v12, 333);
+    List_free(&lref);
+    UT_EQUAL_PTR(lref, NULL);
+    return 0;
 
     return 0;
 }
@@ -119,9 +126,13 @@ int test_list_remove_front()
     DummyObjRef dref1 = DummyObj_new(111);
     DummyObjRef dref2 = DummyObj_new(222);
     DummyObjRef dref3= DummyObj_new(333);
+    List_display(lref);
     List_add_front(lref, (void*) dref1);
+    List_display(lref);
     List_add_front(lref, (void*) dref2);
+    List_display(lref);
     List_add_front(lref, (void*) dref3);
+    List_display(lref);
     UT_EQUAL_INT((List_size(lref)), 3);
     int v1 = (int)((DummyObjRef)List_remove_first(lref))->value;
     int v2 = (int)((DummyObjRef)List_remove_first(lref))->value;
@@ -130,9 +141,46 @@ int test_list_remove_front()
     UT_EQUAL_INT(v1, 333);
     UT_EQUAL_INT(v2, 222);
     UT_EQUAL_INT(v3, 111);
+    List_free(&lref);
+    UT_EQUAL_PTR(lref, NULL);
+    return 0;
 
     return 0;
 }
+
+int test_list_remove_back()
+{
+    ListRef lref = List_new(dealloc);
+    DummyObjRef dref = DummyObj_new(333);
+    List_add_front(lref, (void*) dref);
+    List_remove_first(lref);
+    UT_EQUAL_INT((List_size(lref)), 0);
+    DummyObjRef dref1 = DummyObj_new(111);
+    DummyObjRef dref2 = DummyObj_new(222);
+    DummyObjRef dref3= DummyObj_new(333);
+    List_display(lref);
+    List_add_back(lref, (void*) dref1);
+    List_display(lref);
+    List_add_back(lref, (void*) dref2);
+    List_display(lref);
+    List_add_back(lref, (void*) dref3);
+    List_display(lref);
+    UT_EQUAL_INT((List_size(lref)), 3);
+    int v1 = (int)((DummyObjRef)List_remove_last(lref))->value;
+    int v2 = (int)((DummyObjRef)List_remove_last(lref))->value;
+    int v3 = (int)((DummyObjRef)List_remove_last(lref))->value;
+    UT_EQUAL_INT((List_size(lref)), 0);
+    UT_EQUAL_INT(v1, 333);
+    UT_EQUAL_INT(v2, 222);
+    UT_EQUAL_INT(v3, 111);
+    List_free(&lref);
+    UT_EQUAL_PTR(lref, NULL);
+    return 0;
+
+    return 0;
+}
+
+
 int test_iter()
 {
     ListRef lref = List_new(dealloc);
@@ -155,9 +203,13 @@ int test_iter()
         UT_EQUAL_INT(v1, v2);
         iter = List_itr_next(lref, iter);
     }
+    List_free(&lref);
+    UT_EQUAL_PTR(lref, NULL);
+    return 0;
+
     return 0;
 }
-int test_list_remove_back()
+int test_list_remove_backx()
 {
     ListRef lref = List_new(dealloc);
     DummyObjRef dref = DummyObj_new(333);
@@ -178,6 +230,9 @@ int test_list_remove_back()
     UT_EQUAL_INT((oref1->value), 333);
     UT_EQUAL_INT((oref2->value), 222);
     UT_EQUAL_INT((oref3->value), 111);
+    List_free(&lref);
+    UT_EQUAL_PTR(lref, NULL);
+    return 0;
 
     return 0;
 }
@@ -190,6 +245,9 @@ int test_list_remove_back_one()
     List_add_front(lref, (void*) dref);
     List_remove_last(lref);
     UT_EQUAL_INT((List_size(lref)), 0);
+    List_free(&lref);
+    UT_EQUAL_PTR(lref, NULL);
+    return 0;
 
     return 0;
 }

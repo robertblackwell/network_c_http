@@ -57,39 +57,6 @@ void Parser_begin(ParserRef this, MessageRef message_ptr)
     this->m_current_message_ptr = message_ptr;
 }
 
-#ifdef NOIMPLEMENTED
-ParserReturnValue Parser_consume_old(ParserRef this, const void* buf, int length)
-{
-    bool only_header = false;
-    this->m_started = true;
-    ParserReturnValue rv = {.return_code = ParserRC_end_of_data, .bytes_remaining = length};
-    char* b = (char*) buf;
-    size_t total_parsed = 0;
-    while (total_parsed < length) {
-        char* b_start_ptr = &(b[total_parsed]);
-        int nparsed = Parser_appendBytes(this, (void*) b_start_ptr, length - total_parsed);
-        total_parsed = total_parsed + nparsed;
-        // std::cout << "nparsed: " << nparsed  << "len: " << length - total_parsed << " content: " << buf <<  std::endl;
-        rv.bytes_remaining = length - nparsed;
-        if (Parser_is_error(this)) {
-            rv.return_code = ParserRC_error;
-            ParserError x = Parser_get_error(this);
-            return rv;
-        } else if (this->m_message_done) {
-            rv.return_code = ParserRC_end_of_message;
-            return rv;
-        } else if (this->m_header_done) {
-            rv.return_code = ParserRC_end_of_header;
-            if (only_header) {
-                return rv;
-            }
-        } else if (nparsed == length) {
-
-        }
-    }
-    return rv;
-}
-#endif
 ParserReturnValue Parser_consume(ParserRef this, const void* buf, int length)
 {
     bool only_header = false;

@@ -24,8 +24,10 @@ size_t min_of_two(size_t a, size_t b)
 * CBuffer instances can be parameterized with different strategies
 */
 typedef struct BufferStrategy_s {
+
     size_t m_min_size;
     size_t m_max_size;
+
 } BufferStrategy, *BufferStrategyRef;
 
 
@@ -98,11 +100,13 @@ CBufferRef CBuffer_from_cstring(char* c_str)
     return cbuf;
 }
 
-void CBuffer_free(CBufferRef cbuf)
+void CBuffer_free(CBufferRef* cbuf)
 {
-    if (cbuf != NULL) {
-        if( (cbuf->m_memPtr != NULL) && (cbuf->m_capacity > 0) ){
-            BufferStrategy_deallocate(cbuf->m_strategy, cbuf->m_memPtr);
+    CBufferRef this = *cbuf;
+    if (this != NULL) {
+        if( (this->m_memPtr != NULL) && (this->m_capacity > 0) ){
+            BufferStrategy_deallocate(this->m_strategy, this->m_memPtr);
+            *cbuf = NULL;
         }
     }
 }
@@ -132,7 +136,8 @@ size_t CBuffer_capacity(CBufferRef cbuf)
 */
 void* CBuffer_next_available(CBufferRef cbuf)
 {
-    return (void*) (cbuf->m_cPtr + cbuf->m_length);
+    void* x = (void*) (cbuf->m_cPtr + cbuf->m_length);
+    return x;
 }
 /**
  * Resets the buffer so that it is again an empty buffer
@@ -145,6 +150,8 @@ void CBuffer_clear(CBufferRef cbuf)
 
 void CBuffer_append(CBufferRef cbuf, void* data, size_t len)
 {
+    if(len == 0)
+        return;
     if ( ( (cbuf->m_length + len) >= cbuf->m_capacity )  ) {
         size_t new_capacity = BufferStrategy_reallocate_size(cbuf->m_strategy, cbuf->m_capacity, cbuf->m_length + len);
         void* tmp = BufferStrategy_reallocate(cbuf->m_strategy, cbuf->m_memPtr, new_capacity);

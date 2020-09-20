@@ -7,6 +7,9 @@
 
 char* cstr_concat(char* s1, char* s2)
 {
+    int n1 = strlen(s1);
+    int n2 = strlen(s2);
+    int sz = strlen(s1) + strlen(s2);
     char* result;
     asprintf(&result, "%s%s", s1, s2);
     return result;
@@ -27,27 +30,25 @@ int test_make_buffer()
     UT_NOT_EQUAL_PTR(b, NULL);
     UT_EQUAL_INT(CBuffer_size(b), 0);
     UT_NOT_EQUAL_PTR((void*)CBuffer_data(b), NULL);
-//    CBuffer_free(&b);
-//    UT_EQUAL_PTR(b, NULL);
+    CBuffer_free(&b);
+    UT_EQUAL_PTR(b, NULL);
     return 0;
 }
 int test_expansion()
 {
     char* s1 = cstr_concat("","");
     char* extra = "abcedfghijklmnopqrstuvwxyz01923456789";
+    CBufferRef b2 = CBuffer_new();
     for(int i = 0; i < 5; i++) {
-        char* s2 = cstr_concat(s1, extra);
-        free(s1);
-        s1 = s2;
+        CBuffer_append(b2, (void*)extra, strlen(extra));
     }
 
-    CBufferRef b2 = CBuffer_from_cstring(s1);
     printf("b2 m_size %ld \n", CBuffer_size(b2));
     printf("b2 m_capacity %ld \n", CBuffer_capacity(b2));
     printf("b2 m_cptr %lx \n", (long)CBuffer_data(b2));
     UT_EQUAL_INT(5*strlen(extra), CBuffer_size(b2));
-//    CBuffer_free(&b2);
-//    UT_EQUAL_PTR(b2, NULL);
+    CBuffer_free(&b2);
+    UT_EQUAL_PTR(b2, NULL);
     return 0;
 }
 int test_big_expansion()
@@ -65,8 +66,8 @@ int test_big_expansion()
     printf("b2 m_capacity %ld \n", CBuffer_capacity(b2));
     printf("b2 m_cptr %lx \n", (long)CBuffer_data(b2));
     UT_EQUAL_INT(2800*strlen(extra), CBuffer_size(b2));
-//    CBuffer_free(&b2);
-//    UT_EQUAL_PTR(b2, NULL);
+    CBuffer_free(&b2);
+    UT_EQUAL_PTR(b2, NULL);
     return 0;
 }
 // demonstrate clear makes empty without additional allocation or deallocation
@@ -87,8 +88,8 @@ int test_cbuffer_clear()
     int sz2 = CBuffer_size(b2);
     UT_EQUAL_PTR(data1, data2);
     UT_NOT_EQUAL_INT(sz1, sz2);
-//    CBuffer_free(&b2);
-//    UT_EQUAL_PTR(b2, NULL);
+    CBuffer_free(&b2);
+    UT_EQUAL_PTR(b2, NULL);
     return 0;
 }
 // C++ style move sematics
@@ -115,10 +116,10 @@ int test_cbuffer_move()
     int sz21 = CBuffer_size(b1);
 
     UT_EQUAL_PTR(d21, d12);
-//    CBuffer_free(&b1);
-//    CBuffer_free(&b2);
-//    UT_EQUAL_PTR(b1, NULL);
-//    UT_EQUAL_PTR(b2, NULL);
+    CBuffer_free(&b1);
+    CBuffer_free(&b2);
+    UT_EQUAL_PTR(b1, NULL);
+    UT_EQUAL_PTR(b2, NULL);
 
     return 0;
 }
@@ -130,6 +131,7 @@ int test_chain_make()
     for(int i = 0; i < 2800; i++) {
         BufferChain_append(bcr, (void*)extra, strlen(extra));
     }
+    int x = BufferChain_size(bcr);
     UT_EQUAL_INT(BufferChain_size(bcr), 2800*strlen(extra))
     BufferChain_free(&bcr);
     UT_EQUAL_PTR(bcr, NULL);
@@ -159,8 +161,8 @@ int test_chain_compact() // and eq_cstr
     UT_EQUAL_INT(ok2, 0);
     BufferChain_free(&bcr);
     UT_EQUAL_PTR(bcr, NULL);
-//    CBuffer_free(c);
-//    UT_EQUAL_PTR(c, NULL);
+    CBuffer_free(&c);
+    UT_EQUAL_PTR(c, NULL);
     return 0;
 }
 

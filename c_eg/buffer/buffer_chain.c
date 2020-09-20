@@ -15,7 +15,7 @@ typedef struct BufferChain_s {
 } BufferChain, *BufferChainRef;
 static void dealloc(void* p)
 {
-    CBuffer_free((CBufferRef)p);
+    CBuffer_free((CBufferRef*)p);
 }
 BufferChainRef BufferChain_new()
 {
@@ -23,8 +23,9 @@ BufferChainRef BufferChain_new()
     tmp->m_chain = List_new(dealloc);
     tmp->m_size = 0;
 }
-void BufferChain_free(BufferChainRef this)
+void BufferChain_free(BufferChainRef* thisptr)
 {
+    BufferChainRef this = *thisptr;
     ListNodeRef iter = List_iterator(this->m_chain);
     for(;;) {
         if(iter == NULL) {
@@ -34,6 +35,7 @@ void BufferChain_free(BufferChainRef this)
         List_itr_remove(this->m_chain, &iter);
         iter = next;
     }
+    *thisptr = NULL;
     free((void*)this);
 }
 void BufferChain_append(BufferChainRef this, void* buf, int len)

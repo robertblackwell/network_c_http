@@ -45,6 +45,7 @@ struct Parser_s {
     http_parser*             m_http_parser_ptr;
     http_parser_settings*    m_http_parser_settings_ptr;
     MessageRef               m_current_message_ptr;
+
 //    BodyBufferStrategy       m_buffer_strategy;
 //    ContigBufferFactoryT     m_factory;
 
@@ -61,7 +62,6 @@ struct Parser_s {
 ParserRef Parser_new();
 void Parser_free(ParserRef* parser_p);
 
-//int  Parser_append_bytes(ParserRef parser, void* buffer,  unsigned length);
 void Parser_begin(ParserRef parser, MessageRef msg_ref);
 ParserReturnValue Parser_consume(ParserRef parser, const void* buffer, int length);
 #ifdef NOIMPLEMENTED

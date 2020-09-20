@@ -15,7 +15,7 @@ typedef struct ListNode_s ListNode, *ListNodeRef;
 
 
 // a function that knows how to free whatever the void* content of node is pointing at
-typedef void(*ListItemDeallocator)(void*);
+typedef void(*ListItemDeallocator)(void**);
 
 
 // create and initialize
@@ -29,6 +29,8 @@ void List_destroy(ListRef lref);
 
 //free the entire list including invalidating the lref
 void List_free(ListRef* lref_ptr);
+
+void List_diplay(ListRef this);
 
 //returns number of nodes on LIst
 int List_size(ListRef lref);
