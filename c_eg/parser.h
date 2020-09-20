@@ -61,12 +61,14 @@ struct Parser_s {
 ParserRef Parser_new();
 void Parser_free(ParserRef* parser_p);
 
-int  Parser_appendBytes(ParserRef parser, void* buffer,  unsigned length);
+//int  Parser_append_bytes(ParserRef parser, void* buffer,  unsigned length);
 void Parser_begin(ParserRef parser, MessageRef msg_ref);
 ParserReturnValue Parser_consume(ParserRef parser, const void* buffer, int length);
-ParserReturnValue Parser_end(ParserRef parser);
-void Parser_append_eof(ParserRef parser);
+#ifdef NOIMPLEMENTED
 
+//ParserReturnValue Parser_end(ParserRef parser);
+//void Parser_append_eof(ParserRef parser);
+#endif
 
 bool            Parser_is_error(ParserRef parser);
 enum http_errno Parser_get_errno(ParserRef parser);

@@ -343,7 +343,7 @@ ListRef make_test_A ()
     List_add_back (tl, test_A004);
     List_add_back (tl, test_A005);
     List_add_back (tl, test_A006);
-//    List_add_back (tl, test_A008); // still a problem with this one
+    List_add_back (tl, test_A008); // still a problem with this one
     List_add_back(tl, test_A007);
     return tl;
 }
@@ -447,7 +447,8 @@ int test_02 ()
 
 int main ()
 {
-    UT_ADD(test_B);
+    UT_ADD(test_A);
+//    UT_ADD(test_B);
     int rc = UT_RUN();
     return rc;
 }

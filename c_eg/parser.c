@@ -46,7 +46,7 @@ MessageRef Parser_current_message(ParserRef this)
 {
     return this->m_current_message_ptr;
 }
-int Parser_appendBytes(ParserRef this, void *buffer, unsigned length)
+int Parser_append_bytes(ParserRef this, void *buffer, unsigned length)
 {
     size_t nparsed = http_parser_execute(this->m_http_parser_ptr, this->m_http_parser_settings_ptr, (char*)buffer, (int)length);
     return (int)nparsed;
@@ -57,8 +57,8 @@ void Parser_begin(ParserRef this, MessageRef message_ptr)
     this->m_current_message_ptr = message_ptr;
 }
 
-
-ParserReturnValue Parser_consume(ParserRef this, const void* buf, int length)
+#ifdef NOIMPLEMENTED
+ParserReturnValue Parser_consume_old(ParserRef this, const void* buf, int length)
 {
     bool only_header = false;
     this->m_started = true;
@@ -89,6 +89,39 @@ ParserReturnValue Parser_consume(ParserRef this, const void* buf, int length)
     }
     return rv;
 }
+#endif
+ParserReturnValue Parser_consume(ParserRef this, const void* buf, int length)
+{
+    bool only_header = false;
+    this->m_started = true;
+    ParserReturnValue rv = {.return_code = ParserRC_end_of_data, .bytes_remaining = length};
+    char* b = (char*) buf;
+    size_t total_parsed = 0;
+    char* b_start_ptr = &(b[total_parsed]);
+//    int nparsed = Parser_append_bytes(this, (void*) b_start_ptr, length - total_parsed);
+    int nparsed = http_parser_execute(this->m_http_parser_ptr, this->m_http_parser_settings_ptr, b_start_ptr, length - total_parsed);
+    total_parsed = total_parsed + nparsed;
+    // std::cout << "nparsed: " << nparsed  << "len: " << length - total_parsed << " content: " << buf <<  std::endl;
+    rv.bytes_remaining = length - nparsed;
+    if (Parser_is_error(this)) {
+        rv.return_code = ParserRC_error;
+        ParserError x = Parser_get_error(this);
+        return rv;
+    } else if (this->m_message_done) {
+        rv.return_code = ParserRC_end_of_message;
+        return rv;
+    } else if (this->m_header_done) {
+        rv.return_code = ParserRC_end_of_header;
+        if (only_header) {
+            return rv;
+        }
+    } else if (nparsed == length) {
+
+    }
+    return rv;
+}
+#ifdef NOIMPLEMENTED
+
 ParserReturnValue Parser_end(ParserRef this)
 {
     ParserReturnValue rv = {.return_code = ParserRC_end_of_data, .bytes_remaining = 0};
@@ -127,6 +160,7 @@ void Parser_append_eof(ParserRef this)
     }
     printf("back from parser nparsed: %ld\n ", nparsed);
 }
+#endif
 enum http_errno Parser_get_errno(ParserRef this)
 {
     return (enum http_errno) this->m_http_parser_ptr->http_errno;
@@ -140,8 +174,8 @@ ParserError Parser_get_error(ParserRef this)
     erst.m_err_number = x;
     erst.m_name = n;
     erst.m_description = d;
-    if (this->m_http_parser_ptr->http_errno != 0)
-        printf(" errno: %d name: %s description: %s\n", this->m_http_parser_ptr->http_errno, n, d);
+//    if (this->m_http_parser_ptr->http_errno != 0)
+//        printf(" errno: %d name: %s description: %s\n", this->m_http_parser_ptr->http_errno, n, d);
     return erst;
 
 }
@@ -153,8 +187,8 @@ bool Parser_is_error(ParserRef this)
     char* n = (char*)http_errno_name(x);
     char* d = (char*)http_errno_description(x);
 #pragma clang diagnostic pops
-    if (this->m_http_parser_ptr->http_errno != 0)
-        printf(" errno: %d name: %s description %s\n", this->m_http_parser_ptr->http_errno, n, d);
+//    if (this->m_http_parser_ptr->http_errno != 0)
+//        printf(" errno: %d name: %s description %s\n", this->m_http_parser_ptr->http_errno, n, d);
     // FTROG_DEBUG(" errno: %d name: %s, description: %s", this->parser->http_errno, n,d);
     return (this->m_http_parser_ptr->http_errno != 0) && (this->m_http_parser_ptr->http_errno != HPE_PAUSED);
 };
