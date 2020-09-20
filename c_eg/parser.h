@@ -40,14 +40,11 @@ struct Parser_s {
     bool m_header_done;
     bool m_message_done;
     /*
-     * These are required to run the parser
+     * These are required to run the http-parser
      */
     http_parser*             m_http_parser_ptr;
     http_parser_settings*    m_http_parser_settings_ptr;
     MessageRef               m_current_message_ptr;
-
-//    BodyBufferStrategy       m_buffer_strategy;
-//    ContigBufferFactoryT     m_factory;
 
     int                      m_header_state;
     ///////////////////////////////////////////////////////////////////////////////////
@@ -64,11 +61,6 @@ void Parser_free(ParserRef* parser_p);
 
 void Parser_begin(ParserRef parser, MessageRef msg_ref);
 ParserReturnValue Parser_consume(ParserRef parser, const void* buffer, int length);
-#ifdef NOIMPLEMENTED
-
-//ParserReturnValue Parser_end(ParserRef parser);
-//void Parser_append_eof(ParserRef parser);
-#endif
 
 bool            Parser_is_error(ParserRef parser);
 enum http_errno Parser_get_errno(ParserRef parser);

@@ -32,6 +32,7 @@ set(C_EG_LIBRARY_HEADER_FILES
 	test_helper_types.h
 	buffer/contig_buffer.h
 	buffer/buffer_chain.h
+	buffer/iobuffer.h
 	logger.h
 	server.h
 	queue.h
@@ -54,6 +55,7 @@ set(C_EG_LIBRARY_SOURCE_FILES
 	unittest.c
 	buffer/buffer_chain.c
 	buffer/contig_buffer.c
+	buffer/iobuffer.c
 	logger.c		
 	server.c
 	queue.c

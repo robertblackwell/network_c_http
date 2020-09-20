@@ -98,7 +98,8 @@ TypeRef Type_new();
 int Type_count_something(TypeRef this);
 void Type_free(TypeRef* p);
 ```
-
+ - The `TypeRef` argument is __always__ called `this` to remind me that the function is a `method` and which object 
+ it is working on. 
  - a few points to note. 
     - TypeRef is deliberately not Type* as I want to obscure the fact that its a point to Type_s 
     - all "methods" functions have a name that starts with the type name or an abbreviation for that type name.

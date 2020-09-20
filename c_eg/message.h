@@ -33,7 +33,6 @@ typedef void* HeaderIter;
 
 typedef int HttpMinorVersion;
 
-
 MessageRef Message_new();
 MessageRef Message_new_request();
 MessageRef Message_new_response();
