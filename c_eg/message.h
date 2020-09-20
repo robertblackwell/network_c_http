@@ -25,6 +25,7 @@ enum HttpMinorVersion {minor_verson0=0, minor_version1=1};
 #define HEADER_CONNECTION "CONNECTION"
 #define HEADER_PROXYCONNECTION "PROXY-CONNECTION"
 #define HEADER_CONTENT_LENGTH "CONTENT-LENGTH"
+#define HEADER_TRANSFERENCODING "TRANSFER-ENCODING"
 
 
 // an iterator for pointing at a header line. NULL means does not reference a header line

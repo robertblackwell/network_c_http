@@ -48,7 +48,7 @@ void WPT_init(WrappedParserTestRef this, ParserRef parser, DataSourceRef data_so
 WrappedParserRef WPT_new(WrappedParserTestRef this, ParserRef parser, DataSourceRef data_source, VerifyFunctionType verify_func)
 {
     ASSERT_NOT_NULL(this);
-    WrappedParserRef wptref = malloc(sizeof(WrappedParser));
+    WrappedParserRef wptref = eg_alloc(sizeof(WrappedParser));
     if(wptref == NULL)
         return NULL;
     WPT_init(wptref, parser, data_source, verify_func);

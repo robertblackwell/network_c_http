@@ -1,10 +1,13 @@
 #include <c_eg/alloc.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <malloc.h>
 
 void* eg__alloc(size_t n)
 {
-    return malloc(n);
+    void* p = malloc(n);
+    int x = malloc_usable_size(p);
+    return p;
 }
 void eg__free(void* p)
 {

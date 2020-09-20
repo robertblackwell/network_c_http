@@ -3,6 +3,7 @@
 #include <stddef.h>
 #include <assert.h>
 #include <string.h>
+#include <c_eg/alloc.h>
 #include <c_eg/list.h>
 #include <c_eg/buffer/contig_buffer.h>
 
@@ -18,7 +19,7 @@ static void dealloc(void* p)
 }
 BufferChainRef BufferChain_new()
 {
-    BufferChainRef tmp = malloc(sizeof(BufferChain));
+    BufferChainRef tmp = eg_alloc(sizeof(BufferChain));
     tmp->m_chain = List_new(dealloc);
     tmp->m_size = 0;
 }
@@ -68,6 +69,46 @@ void BufferChain_clear(BufferChainRef bchain)
 int BufferChain_size(BufferChainRef this)
 {
     return this->m_size;
+}
+
+CBufferRef BufferChain_compact(BufferChainRef this)
+{
+    CBufferRef cb_final = CBuffer_new();
+    if(cb_final == NULL)
+        goto memerror_01;
+    ListNodeRef iter = List_iterator(this->m_chain);
+    while(iter != NULL) {
+        CBufferRef tmp = (CBufferRef)List_itr_unpack(this->m_chain, iter);
+        void* data = CBuffer_data(tmp);
+        int sz = CBuffer_size(tmp);
+        CBuffer_append(cb_final, data, sz); /* MEM CHECK REQUIRED*/
+        ListNodeRef next = List_itr_next(this->m_chain, iter);
+        iter = next;
+    }
+    return cb_final;
+    memerror_01:
+        return NULL;
+}
+bool BufferChain_eq_cstr(BufferChainRef this, char* cstr)
+{
+    ListNodeRef iter = List_iterator(this->m_chain);
+    int cstr_index = 0;
+    while(iter != NULL) {
+        CBufferRef tmp = (CBufferRef)List_itr_unpack(this->m_chain, iter);
+        char* data = CBuffer_data(tmp);
+        int sz = CBuffer_size(tmp);
+        int l = strlen(cstr);
+        for(int cb_index = 0; cb_index < sz; cb_index++) {
+            if(cstr[cstr_index] != data[cb_index]) {
+                return false;
+            } else {
+                cstr_index++;
+            }
+        }
+        ListNodeRef next = List_itr_next(this->m_chain, iter);
+        iter = next;
+    }
+    return true;
 }
 #ifdef BVBVB
 int BufferChain_blocks(BufferChainRef this)

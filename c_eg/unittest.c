@@ -5,6 +5,8 @@
 #include <pthread.h>
 
 #include <string.h>
+#include <c_eg/alloc.h>
+
 #include <c_eg/logger.h>
 
 #define UT_MAX_TESTS 100
@@ -72,7 +74,7 @@ void UTRecordAssertResult(const char* fn, const char* file, int line, const char
 {
     // only asserts are to be running from multiple threads
     pthread_mutex_lock(&ut_lock);
-    UTAssertResultRef arref = malloc(sizeof(UTAssertResult));
+    UTAssertResultRef arref = eg_alloc(sizeof(UTAssertResult));
     strcpy(arref->msg, msg);
     arref->fn_name = fn;
     arref->file_name = file;

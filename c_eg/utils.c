@@ -2,11 +2,12 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#include <c_eg/alloc.h>
 #include <c_eg/utils.h>
 char* make_upper(char* src)
 {
     int srclen = strlen(src);
-    char* dest = malloc(srclen+1);
+    char* dest = eg_alloc(srclen+1);
     char* s = src;
     char* p = dest;
     for(int i = 0; i < srclen; i++) {

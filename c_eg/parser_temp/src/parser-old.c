@@ -139,7 +139,7 @@ void HTTPParser::setUpNextMessage()
 
 void HTTPParser::setUpParserCallbacks()
 {
-    parser = (http_parser*)malloc(sizeof(http_parser));
+    parser = (http_parser*)eg_alloc(sizeof(http_parser));
     
     http_parser_init( parser, HTTP_BOTH );
     
@@ -154,7 +154,7 @@ void HTTPParser::setUpParserCallbacks()
     
     setHTTPParser(parser, this);
     
-    http_parser_settings* settings = (http_parser_settings*)malloc(sizeof(http_parser_settings));
+    http_parser_settings* settings = (http_parser_settings*)eg_alloc(sizeof(http_parser_settings));
     parserSettings = settings;
     
     /* Now set up the call back functions */

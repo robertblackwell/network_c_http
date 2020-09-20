@@ -1,5 +1,6 @@
 #include <c_eg/mytype.h>
 #include <stdlib.h>
+#include <c_eg/alloc.h>
 
 #include <c_eg/utils.h>
 struct MyType_s {
@@ -9,7 +10,7 @@ struct MyType_s {
 
 MyTypeRef MyType_new()
 {
-    MyTypeRef mref = malloc(sizeof(MyType));
+    MyTypeRef mref = eg_alloc(sizeof(MyType));
     mref->value_1 = 0;
     mref->value_2 = 0;
     return  mref;

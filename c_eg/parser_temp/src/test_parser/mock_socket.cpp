@@ -22,7 +22,7 @@ MockReadSocket::MockReadSocket(boost::asio::io_service& io, DataSource& data_sou
     m_ssl_context(boost::asio::ssl::context::method::sslv23),
     m_data_source(data_source)
 {
-    m_rdBuf = (char*)malloc(100000);
+    m_rdBuf = (char*)eg_alloc(100000);
     m_single_timer = new SingleTimer(m_io, TIMER_INTERVAL_MS);
 }
 // MockReadSocket::~MockReadSocket()

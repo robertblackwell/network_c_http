@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <assert.h>
 #include <string.h>
+#include <c_eg/alloc.h>
 #include <c_eg/utils.h>
 #include <c_eg/buffer/contig_buffer.h>
 
@@ -33,7 +34,7 @@ typedef struct CBuffer_s
     void*       m_memPtr;     /// points to the start of the memory slab managed by the instance
     char*       m_cPtr;       /// same as memPtr but makes it easier in debugger to see whats in the buffer
     size_t      m_length;    ///
-    size_t      m_capacity;  /// the capacity of the buffer, the value used for the malloc call
+    size_t      m_capacity;  /// the capacity of the buffer, the value used for the eg_alloc call
     size_t      m_size;      /// size of the currently filled portion of the memory slab
     BufferStrategyRef m_strategy;
 } CBuffer, * CBufferRef; 
@@ -45,7 +46,7 @@ typedef struct CBuffer_s
 void* BufferStrategy_allocate(BufferStrategyRef bsref, size_t required_size)
 {
     if (required_size > bsref->m_max_size) assert(0);
-    return malloc(max_of_two(required_size, bsref->m_min_size));
+    return eg_alloc(max_of_two(required_size, bsref->m_min_size));
 
 }
 /**
@@ -79,7 +80,7 @@ BufferStrategy common_strategy = {.m_min_size=256, .m_max_size=1024*1024};
 
 CBufferRef CBuffer_new()
 {
-    CBufferRef cb_ptr = (CBufferRef)malloc(sizeof(CBuffer));
+    CBufferRef cb_ptr = (CBufferRef)eg_alloc(sizeof(CBuffer));
     cb_ptr->m_strategy=&common_strategy;
     size_t tmp_cap = cb_ptr->m_strategy->m_min_size;
     cb_ptr->m_memPtr = BufferStrategy_allocate(cb_ptr->m_strategy, tmp_cap);

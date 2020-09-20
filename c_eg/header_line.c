@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <c_eg/alloc.h>
 #include <c_eg/utils.h>
 
 struct HeaderLine_s {
@@ -16,7 +17,7 @@ struct HeaderLine_s {
 //char* make_upper(char* src)
 //{
 //    int srclen = strlen(src);
-//    char* dest = malloc(srclen+1);
+//    char* dest = eg_alloc(srclen+1);
 //    char* s = src;
 //    char* p = dest;
 //    for(int i = 0; i < srclen; i++) {
@@ -29,11 +30,11 @@ struct HeaderLine_s {
 HeaderLineRef HeaderLine_new(char* labptr, int lablen, char* valptr, int vallen)
 {
     // store {label}: {value}\r\n\0
-    HeaderLineRef hlref = malloc(sizeof(HeaderLine));
+    HeaderLineRef hlref = eg_alloc(sizeof(HeaderLine));
     if(hlref  == NULL) goto mem_error_1;
     hlref->label_len = lablen;
     hlref->value_len = vallen;
-    hlref->label_ptr = malloc(lablen+1);
+    hlref->label_ptr = eg_alloc(lablen+1);
     if(hlref->label_ptr == NULL) goto mem_error_2;
     memcpy(hlref->label_ptr, labptr, lablen);
     {
@@ -45,7 +46,7 @@ HeaderLineRef HeaderLine_new(char* labptr, int lablen, char* valptr, int vallen)
         }
         p[lablen+1] = '\0';
     }
-    hlref->value_ptr = malloc(vallen+1);
+    hlref->value_ptr = eg_alloc(vallen+1);
     if(hlref->value_ptr == NULL) goto mem_error_2;
     memcpy(hlref->value_ptr, valptr, vallen);
     return  hlref;
@@ -81,7 +82,7 @@ char* HeaderLine_value(HeaderLineRef hlref)
 void HeaderLine_set_value(HeaderLineRef hlref, char* valptr, int vallen)
 {
     char* oldvalptr = hlref->value_ptr;
-    hlref->value_ptr = malloc(vallen+1);
+    hlref->value_ptr = eg_alloc(vallen+1);
     memcpy(hlref->value_ptr, valptr, vallen);
     free(oldvalptr);
 }

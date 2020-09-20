@@ -9,6 +9,7 @@
 #include <pthread.h>
 
 #include <c_eg/constants.h>
+#include <c_eg/alloc.h>
 #include <c_eg/utils.h>
 #include <c_eg/socket_functions.h>
 #include <c_eg/queue.h>
@@ -79,7 +80,7 @@ struct Worker_s {
 
 WorkerRef Worker_new(QueueRef qref, int _id)
 {
-    WorkerRef wref = (WorkerRef)malloc(sizeof(Worker));
+    WorkerRef wref = (WorkerRef)eg_alloc(sizeof(Worker));
     if(wref == NULL)
         return NULL;
     wref->active_socket = 0;

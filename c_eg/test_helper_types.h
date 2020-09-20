@@ -86,5 +86,6 @@ void WPT_destroy(WrappedParserTestRef this);
 void WPT_free(WrappedParserTestRef* this_ptr);
 
 int WPT_run(WrappedParserTestRef this);
+int WPT_run2(WrappedParserTestRef this);
 
 #endif

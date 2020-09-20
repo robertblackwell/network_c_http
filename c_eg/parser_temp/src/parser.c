@@ -16,7 +16,7 @@ int message_complete_cb(http_parser* parser);
 
 ParserRef Parser_new()
 {
-    ParserRef this = malloc(sizeof(Parser));
+    ParserRef this = eg_alloc(sizeof(Parser));
     if(this == NULL)
         return NULL;
     this->message_done = false;
@@ -166,7 +166,7 @@ void Parser_initialize(ParserRef this)
     if (this->m_http_parser_ptr != NULL) {
         free(this->m_http_parser_ptr);
     }
-    this->m_http_parser_ptr = (http_parser*)malloc(sizeof(http_parser));
+    this->m_http_parser_ptr = (http_parser*)eg_alloc(sizeof(http_parser));
     http_parser_init( this->m_http_parser_ptr, HTTP_BOTH );
     /** a link back from the C parser to this class*/
     this->m_http_parser_ptr->data = (void*) this;
@@ -174,7 +174,7 @@ void Parser_initialize(ParserRef this)
     if (this->m_http_parser_settings_ptr != NULL) {
         free(this->m_http_parser_settings_ptr);
     }
-    http_parser_settings* settings = (http_parser_settings*)malloc(sizeof(http_parser_settings));
+    http_parser_settings* settings = (http_parser_settings*)eg_alloc(sizeof(http_parser_settings));
     this->m_http_parser_settings_ptr = settings;
     ContigBuffer_clear(this->m_status_buf);
     ContigBuffer_clear(this->m_url_buf);

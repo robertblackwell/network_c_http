@@ -96,7 +96,7 @@ private:
     DataSource m_data_source;
     // the test case - vector of strings
     std::vector<std::string> rawData;
-    // a read buffer malloc'd by the constructor
+    // a read buffer eg_alloc'd by the constructor
     char *m_rdBuf;
 };
 } // namespace Message

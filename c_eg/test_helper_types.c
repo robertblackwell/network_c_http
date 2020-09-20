@@ -5,12 +5,14 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <c_eg/alloc.h>
+
 #include <c_eg/unittest.h>
 #include <c_eg/utils.h>
 
 ParserTestRef ParserTest_new(char* description, char** lines, VerifyFunctionType vf)
 {
-    ParserTestRef this = malloc(sizeof(ParserTest));
+    ParserTestRef this = eg_alloc(sizeof(ParserTest));
     this->description = description;
     this->lines = lines;
     this->verify_function = vf;
@@ -62,7 +64,7 @@ int DataSource_read(DataSourceRef this, void* buffer, int length)
 static void msg_dealloc(void* p)
 {
     void** pp = &p;
-    Message_free((MessageRef)pp);
+    Message_free((MessageRef*)pp);
 }
 void WPT_init(WrappedParserTestRef this, ParserRef parser, DataSourceRef data_source, VerifyFunctionType verify_func)
 {
@@ -75,7 +77,7 @@ void WPT_init(WrappedParserTestRef this, ParserRef parser, DataSourceRef data_so
 WrappedParserTestRef WPT_new(WrappedParserTestRef this, ParserRef parser, DataSourceRef data_source, VerifyFunctionType verify_func)
 {
     ASSERT_NOT_NULL(this);
-    WrappedParserTestRef wptref = malloc(sizeof(WrappedParserTest));
+    WrappedParserTestRef wptref = eg_alloc(sizeof(WrappedParserTest));
     if(wptref == NULL)
         return NULL;
     WPT_init(wptref, parser, data_source, verify_func);
@@ -150,4 +152,57 @@ int WPT_run(WrappedParserTestRef this)
     }
     return this->m_verify_func(this->m_messages);
 }
-
+char buffer[1000];
+char* buffer_ptr = buffer;
+int buffer_length = 1000;
+int buffer_remaining = 0;
+MessageRef WPT_read_msg(WrappedParserTestRef this)
+{
+    MessageRef message_ptr = Message_new();
+    Parser_begin(this->m_parser, message_ptr);
+    int bytes_read;
+    for(;;) {
+        if(buffer_remaining == 0 ) {
+            bytes_read = DataSource_read(this->m_data_source, buffer, buffer_length);
+            if(bytes_read == 0) {
+                if(this->m_parser->m_started && (!this->m_parser->m_message_done)) {
+                    bytes_read = 0;
+                } else {
+                    return NULL;
+                }
+            }
+            buffer_ptr = buffer;
+            buffer_remaining = bytes_read;
+        } else {
+            bytes_read = buffer_remaining;
+        }
+        char* tmp = buffer_ptr;
+        char* tmp2 = buffer;
+        ParserReturnValue ret = Parser_consume(this->m_parser, (void*) buffer_ptr, bytes_read);
+        int consumed = bytes_read - ret.bytes_remaining;
+        buffer_ptr = buffer_ptr + consumed;
+        buffer_remaining = buffer_remaining - consumed;
+        int tmp_remaining = buffer_remaining;
+        switch(ret.return_code) {
+            case ParserRC_error:
+                assert(false);
+                break;
+            case ParserRC_end_of_data:
+                break;
+            case ParserRC_end_of_header:
+                break;
+            case ParserRC_end_of_message:
+                return message_ptr;
+        }
+    }
+}
+int WPT_run2(WrappedParserTestRef this)
+{
+    MessageRef msgref;
+    while((msgref = WPT_read_msg(this)) != NULL) {
+        List_add_back(this->m_messages, (void*)msgref);
+    }
+    int r =this->m_verify_func(this->m_messages);
+    printf("Return from verify %d\n", r);
+    return r;
+}

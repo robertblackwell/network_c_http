@@ -1,4 +1,4 @@
-
+#include <c_eg/alloc.h>
 #include <c_eg/parser.h>
 #include <c_eg/utils.h>
 
@@ -18,7 +18,7 @@ void Parser_initialize(ParserRef this);
 
 ParserRef Parser_new()
 {
-    ParserRef this = malloc(sizeof(Parser));
+    ParserRef this = eg_alloc(sizeof(Parser));
     if(this == NULL)
         return NULL;
     this->m_message_done = false;
@@ -140,7 +140,8 @@ ParserError Parser_get_error(ParserRef this)
     erst.m_err_number = x;
     erst.m_name = n;
     erst.m_description = d;
-    printf(" errno: %d name: %s description: %s\n", this->m_http_parser_ptr->http_errno, n, d);
+    if (this->m_http_parser_ptr->http_errno != 0)
+        printf(" errno: %d name: %s description: %s\n", this->m_http_parser_ptr->http_errno, n, d);
     return erst;
 
 }
@@ -152,7 +153,8 @@ bool Parser_is_error(ParserRef this)
     char* n = (char*)http_errno_name(x);
     char* d = (char*)http_errno_description(x);
 #pragma clang diagnostic pops
-    printf(" errno: %d name: %s description %s\n", this->m_http_parser_ptr->http_errno, n, d);
+    if (this->m_http_parser_ptr->http_errno != 0)
+        printf(" errno: %d name: %s description %s\n", this->m_http_parser_ptr->http_errno, n, d);
     // FTROG_DEBUG(" errno: %d name: %s, description: %s", this->parser->http_errno, n,d);
     return (this->m_http_parser_ptr->http_errno != 0) && (this->m_http_parser_ptr->http_errno != HPE_PAUSED);
 };
@@ -168,7 +170,7 @@ void Parser_initialize(ParserRef this)
     if (this->m_http_parser_ptr != NULL) {
         free(this->m_http_parser_ptr);
     }
-    this->m_http_parser_ptr = (http_parser*)malloc(sizeof(http_parser));
+    this->m_http_parser_ptr = (http_parser*)eg_alloc(sizeof(http_parser));
     http_parser_init( this->m_http_parser_ptr, HTTP_BOTH );
     /** a link back from the C parser to this class*/
     this->m_http_parser_ptr->data = (void*) this;
@@ -176,7 +178,7 @@ void Parser_initialize(ParserRef this)
     if (this->m_http_parser_settings_ptr != NULL) {
         free(this->m_http_parser_settings_ptr);
     }
-    http_parser_settings* settings = (http_parser_settings*)malloc(sizeof(http_parser_settings));
+    http_parser_settings* settings = (http_parser_settings*)eg_alloc(sizeof(http_parser_settings));
     this->m_http_parser_settings_ptr = settings;
     if(this->m_status_buf != NULL) CBuffer_clear(this->m_status_buf);
     if(this->m_url_buf != NULL) CBuffer_clear(this->m_url_buf);

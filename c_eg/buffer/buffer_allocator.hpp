@@ -36,7 +36,7 @@ public:
     void* allocate(std::size_t size) override
     {
         if (size > m_max_size) MARVIN_THROW("requested allocation too big");
-        return malloc(std::max(size, m_min_size));
+        return eg_alloc(std::max(size, m_min_size));
     }
     std::size_t max_size() override
     {

@@ -9,6 +9,7 @@
 #include <errno.h>
 
 #include <c_eg/constants.h>
+#include <c_eg/alloc.h>
 #include <c_eg/utils.h>
 
 #include <c_eg/logger.h>
@@ -70,7 +71,7 @@ struct Server_s {
 
 ServerRef Server_new(int port)
 {
-    ServerRef sref = (ServerRef)malloc(sizeof(Server));
+    ServerRef sref = (ServerRef)eg_alloc(sizeof(Server));
     sref->nbr_workers = NBR_WORKERS;
     sref->port = port;
     sref->qref = Queue_new();

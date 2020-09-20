@@ -1,16 +1,19 @@
 #ifndef buffer_chain_template_hpp
 #define buffer_chain_template_hpp
 #include <stddef.h>
+#include <c_eg/buffer/contig_buffer.h>
 
 struct BufferChain_s;
 
-typedef struct BufferChain_s BUfferChain, *BufferChainRef;
+typedef struct BufferChain_s BufferChain, *BufferChainRef;
 
 BufferChainRef BufferChain_new();
 void BufferChain_free(BufferChainRef* this);
 void BufferChain_append(BufferChainRef this, void* buf, int len);
 void BufferChain_clear(BufferChainRef this);
 int BufferChain_size(BufferChainRef this);
+CBufferRef BufferChain_compact(BufferChainRef this);
+bool BufferChain_eq_cstr(BufferChainRef this, char* cstr);
 
 #ifdef nada
 class BufferChain

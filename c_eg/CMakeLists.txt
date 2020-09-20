@@ -27,6 +27,7 @@ add_custom_command(
 set(C_EG_LIBRARY_HEADER_FILES
 #	mytype_list.h
 #	mytype.h
+	alloc.h
 	unittest.h
 	test_helper_types.h
 	buffer/contig_buffer.h
@@ -39,6 +40,7 @@ set(C_EG_LIBRARY_HEADER_FILES
 	header_line.h
 	headerline_list.h
 	utils.h
+
 	${EXTSRC}/http-parser/http_parser.h
 	message.h
 	parser.h
@@ -47,6 +49,7 @@ set(C_EG_LIBRARY_HEADER_FILES
 set(C_EG_LIBRARY_SOURCE_FILES
 #	mytype_list.c
 #	mytype.c
+	alloc.c
 	test_helper_types.c
 	unittest.c
 	buffer/buffer_chain.c

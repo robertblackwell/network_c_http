@@ -13,7 +13,7 @@
 #include <string.h>
 
 #include <c_eg/constants.h>
-
+#include <c_eg/alloc.h>
 
 struct Queue_s {
     int              q[QUEUE_MAX_SIZE];
@@ -27,7 +27,7 @@ struct Queue_s {
 
 QueueRef Queue_new()
 {
-    QueueRef q = (QueueRef)malloc(sizeof(Queue));
+    QueueRef q = (QueueRef)eg_alloc(sizeof(Queue));
     q->max_size = QUEUE_MAX_SIZE;
     q->size = 0;
     pthread_mutex_init(&(q->queue_mutex), NULL);

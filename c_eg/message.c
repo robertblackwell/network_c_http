@@ -1,6 +1,7 @@
 #include <c_eg/message.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <c_eg/alloc.h>
 #include <c_eg/headerline_list.h>
 
 struct Message_s
@@ -25,7 +26,7 @@ struct Message_s
 
 MessageRef Message_new ()
 {
-    MessageRef mref = (MessageRef) malloc(sizeof(Message));
+    MessageRef mref = (MessageRef) eg_alloc(sizeof(Message));
     if(mref == NULL) goto error_label_1;
 
     mref->body = NULL;

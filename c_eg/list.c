@@ -1,6 +1,7 @@
 //opaque type representing list
 #include <stdlib.h>
 #include <assert.h>
+#include <c_eg/alloc.h>
 #include <c_eg/list.h>
 #include <c_eg/utils.h>
 //Internal - type used to build list
@@ -20,7 +21,7 @@ struct List_s {
 
 ListNodeRef ListNode_new(void* content, ListNodeRef prev, ListNodeRef next)
 {
-    ListNodeRef lnref = malloc(sizeof(ListNode));
+    ListNodeRef lnref = eg_alloc(sizeof(ListNode));
     lnref->item = content;
     lnref->forward = next;
     lnref->backward = prev;
@@ -36,7 +37,7 @@ void ListNode_free(ListNodeRef* lnref_ptr)
 // create and initialize
 ListRef List_new(ListItemDeallocator dealloc)
 {
-    ListRef lref = malloc(sizeof(List));
+    ListRef lref = eg_alloc(sizeof(List));
     if(lref != NULL) {
         List_init(lref, dealloc);
     }
