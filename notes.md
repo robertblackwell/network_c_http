@@ -80,3 +80,35 @@ easily integrate with my project.
 
 Hence I built my own, each as a single `.h` and `.c` file.
 
+## Some conventions
+
+###Opaque types
+
+This project has a number of `Opaque` types, such a __List__, __Queue__.
+
+-   The headers file declare such types as 
+```
+struct Type_s;
+typedef Type_s Type, *TypeRef;
+```
+ -  Only the 'c' file has a full definition of the struct members.
+ -  Functions that operate of such an opaque type are defined thus:
+ ```
+TypeRef Type_new();
+int Type_count_something(TypeRef this);
+void Type_free(TypeRef* p);
+```
+
+ - a few points to note. 
+    - TypeRef is deliberately not Type* as I want to obscure the fact that its a point to Type_s 
+    - all "methods" functions have a name that starts with the type name or an abbreviation for that type name.
+    - all `Type_free` functions take a pointer to a TypeRef and set that variable to NULL on return. This is a 
+    token effort ot ease the dangling pointer problem
+    - the `Type_free` function deallocates all memory pointed to from within the type.
+    - char* arguments to functions are references that only need to be valid for the duration of the function call. 
+    If a function needs to save the string pointed to by the char* argument, in a struct say, 
+    for use after the function returns then the string is copied. An example of this 
+    ```
+        HeaderLineRef HeaderLine_new(char* key, char* value);
+    ``` 
+     
