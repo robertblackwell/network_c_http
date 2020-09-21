@@ -1,5 +1,5 @@
 
-static void dealloc(void* ptr) {__TYPE___free((__TYPE__Ref*) ptr);}
+static void dealloc(void** ptr) {__TYPE___free((__TYPE__Ref*) ptr);}
 
 __PREFIX__ListRef  __PREFIX__List_new() {return (__PREFIX__ListRef)List_new(dealloc);}
 void         __PREFIX__List_free(__PREFIX__ListRef* lref_ptr) {List_free(lref_ptr);}

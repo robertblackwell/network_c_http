@@ -90,17 +90,22 @@ void Worker_free(WorkerRef wref)
 }
 char* simple_response_body(char* message)
 {
+    time_t t = time(NULL);
+    struct tm *tm = localtime(&t);
+    char dt_s[64];
+    assert(strftime(dt_s, sizeof(dt_s), "%c", tm));
 
     char* body = "<html>"
                  "<head>"
                  "</head>"
                  "<body>"
                  "%s"
+                 "<p>Date/Time is %s</p>"
                  "</body>"
                  "</html>";
 
     char* s1;
-    int len1 = asprintf(&s1, body, message);
+    int len1 = asprintf(&s1, body, message, dt_s);
 
     return s1;
 }
@@ -170,8 +175,7 @@ static void* Worker_main(void* data)
 {
     ASSERT_NOT_NULL(data);
     WorkerRef wref = (WorkerRef)data;
-    while(true)
-    {
+    while(true) {
         printf("Worker_main start of loop\n");
         wref->active = false;
 
@@ -179,23 +183,19 @@ static void* Worker_main(void* data)
         wref->active_socket = (int) mySocketHandle;
         int socket = mySocketHandle;
         wref->active = true;
-        // in here read and service a http request
-//        http_handler(wref->active_socket);
-//        Worker_handler(wref);
-        {
-            ParserRef parser_ref = Parser_new();
-            MessageReaderRef rdr = MessageReader_new(parser_ref, socket);
-            MessageWriterRef wrtr = MessageWriter_new(socket);
-            MessageRef request_msg_ref;
-            MessageRef response_msg_ref;
-            while((request_msg_ref = MessageReader_read(rdr)) != NULL) {
-                printf("Got a request\n");
-                handle_request(request_msg_ref, wrtr);
-                Message_free(&request_msg_ref);
-            }
-            MessageWriter_free(&wrtr);
-            MessageReader_free(&rdr);
+        ParserRef parser_ref = Parser_new();
+        MessageReaderRef rdr = MessageReader_new(parser_ref, socket);
+        MessageWriterRef wrtr = MessageWriter_new(socket);
+        MessageRef request_msg_ref;
+        MessageRef response_msg_ref;
+        while((request_msg_ref = MessageReader_read(rdr)) != NULL) {
+            printf("Got a request socket: %d pthread_self %ld\n", socket, pthread_self());
+            handle_request(request_msg_ref, wrtr);
+            Message_free(&request_msg_ref);
+            close(socket);
         }
+        MessageWriter_free(&wrtr);
+        MessageReader_free(&rdr);
         wref->active = false;
     }
     return NULL;

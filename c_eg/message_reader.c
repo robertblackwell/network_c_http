@@ -49,7 +49,10 @@ MessageRef MessageReader_read(MessageReaderRef this)
         if(IOBuffer_data_len(ctx) == 0 ) {
             IOBuffer_reset(ctx);
             bytes_read = read(this->m_socket, IOBuffer_space(ctx), IOBuffer_space_len(ctx));
-            if(bytes_read == 0) {
+            // bytes_read == 0 means other end closed the socket
+            // bytes_read < 0 means io error which includes I closed the socket on the last iteration of the read message loop
+            // in either case return NULL unless the other end is signalling end of message with a close (non HTTP spec compliant)
+            if(bytes_read <= 0) {
                 if(this->m_parser->m_started && (!this->m_parser->m_message_done)) {
                     bytes_read = 0;
                 } else {

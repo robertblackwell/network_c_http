@@ -9,5 +9,5 @@ __LIST_INCLUDE_H__
 void HDRList_add(HDRListRef this, CBufferRef key, CBufferRef value);
 HeaderLineRef HDRList_find(HDRListRef hlref, char* key);
 void HDRList_remove(HDRListRef hlref, char* key);
-CBUfferRef HDRList_serialize(HDRListRef this);
+CBufferRef HDRList_serialize(HDRListRef this);
 #endif

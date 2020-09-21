@@ -49,6 +49,7 @@ HeaderLineRef HeaderLine_new(char* labptr, int lablen, char* valptr, int vallen)
     hlref->value_ptr = eg_alloc(vallen+1);
     if(hlref->value_ptr == NULL) goto mem_error_2;
     memcpy(hlref->value_ptr, valptr, vallen);
+    hlref->value_ptr[vallen] = (char)0;
     return  hlref;
     mem_error_1:
         // nothing got allocated

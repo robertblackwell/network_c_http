@@ -30,7 +30,7 @@ void List_destroy(ListRef lref);
 //free the entire list including invalidating the lref
 void List_free(ListRef* lref_ptr);
 
-void List_diplay(ListRef this);
+void List_display(ListRef this);
 
 //returns number of nodes on LIst
 int List_size(ListRef lref);

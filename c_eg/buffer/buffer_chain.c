@@ -13,7 +13,7 @@ typedef struct BufferChain_s {
         int       m_size;
 
 } BufferChain, *BufferChainRef;
-static void dealloc(void* p)
+static void dealloc(void** p)
 {
     CBuffer_free((CBufferRef*)p);
 }

@@ -28,6 +28,10 @@ ParserRef Parser_new()
     this->m_header_state = kHEADER_STATE_NOTHING;
     this->m_http_parser_ptr = NULL;
     this->m_http_parser_settings_ptr = NULL;
+    this->m_status_buf = CBuffer_new();
+    this->m_url_buf    = CBuffer_new();
+    this->m_name_buf   = CBuffer_new();
+    this->m_value_buf  = CBuffer_new();
     return this;
 }
 

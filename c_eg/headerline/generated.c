@@ -1,5 +1,5 @@
 
-static void dealloc(void* ptr) {HeaderLine_free((HeaderLineRef*) ptr);}
+static void dealloc(void** ptr) {HeaderLine_free((HeaderLineRef*) ptr);}
 
 HDRListRef  HDRList_new() {return (HDRListRef)List_new(dealloc);}
 void         HDRList_free(HDRListRef* lref_ptr) {List_free(lref_ptr);}

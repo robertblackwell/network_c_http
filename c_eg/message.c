@@ -32,7 +32,8 @@ MessageRef Message_new ()
     if(mref->headers == NULL) goto error_label_2;
     mref->minor_vers = minor_version1;
     mref->major_vers = major_version1;
-
+    mref->target = CBuffer_new();
+    mref->reason = CBuffer_new();
     return mref;
     error_label_2:
         Message_free(&mref);
@@ -44,7 +45,7 @@ MessageRef Message_new_request()
     MessageRef mref = Message_new();
     if(mref != NULL) {
         mref->is_request = true;
-        mref->target = CBuffer_new();
+//        mref->target = CBuffer_new();
         return mref;
     }
     return NULL;
@@ -55,7 +56,7 @@ MessageRef Message_new_response()
     MessageRef mref = Message_new();
     if(mref != NULL) {
         mref->is_request = false;
-        mref->reason = CBuffer_new();
+//        mref->reason = CBuffer_new();
         return mref;
     }
     return NULL;

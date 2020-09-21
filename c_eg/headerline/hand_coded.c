@@ -57,7 +57,7 @@ CBufferRef HDRList_serialize(HDRListRef this)
     CBufferRef cb = CBuffer_new();
     ListNodeRef iter = HDRList_iterator(this);
     while(iter != NULL) {
-        HeaderLineRef line = M_HDRList_itr_unpack(this, iter);
+        HeaderLineRef line = HDRList_itr_unpack(this, iter);
         CBuffer_append_cstr(cb, HeaderLine_label(this));
         CBuffer_append_cstr(cb, ": ");
         CBuffer_append_cstr(cb, HeaderLine_value(this));

@@ -53,10 +53,10 @@ void MessageWriter_start(MessageWriterRef this, HttpStatus status, HDRListRef he
     int x = len+2;
     MessageWriter_write_chunk(this, CBuffer_data(cb_output_ref), CBuffer_size(cb_output_ref));
 
-    free(first_line);
-    CBuffer_free(&serialized_headers);
-    CBuffer_free(&cb_output_ref);
-
+//    free(first_line);
+//    CBuffer_free(&serialized_headers);
+//    CBuffer_free(&cb_output_ref);
+//    return;
     failed:
         if(first_line != NULL) free(first_line);
         if(serialized_headers != NULL) CBuffer_free(&serialized_headers);
@@ -65,6 +65,7 @@ void MessageWriter_start(MessageWriterRef this, HttpStatus status, HDRListRef he
 }
 void MessageWriter_write_chunk(MessageWriterRef this, void* buffer, int len)
 {
+char* c = (char*)buffer;
     printf("write_chunk this:%p, buffer: %p len: %d \n", this, buffer, len);
     int res = (int)write(this->socket, buffer, len);
     // handle error

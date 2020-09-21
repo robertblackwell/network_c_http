@@ -11,7 +11,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void dealloc (void *ptr)
+static void dealloc (void **ptr)
 { HeaderLine_free ((HeaderLineRef *) ptr); }
 
 HDRListRef HDRList_new ()
@@ -115,11 +115,9 @@ CBufferRef HDRList_serialize (HDRListRef this)
     CBufferRef cb = CBuffer_new ();
     ListNodeRef iter = HDRList_iterator (this);
     while (iter != NULL) {
-        HeaderLineRef line = HDRList_itr_unpack(this, iter);
-        char* label = HeaderLine_label (line);
+        HeaderLineRef line = HDRList_itr_unpack (this, iter);
         CBuffer_append_cstr (cb, HeaderLine_label (line));
         CBuffer_append_cstr (cb, ": ");
-        char* value = HeaderLine_value (line);
         CBuffer_append_cstr (cb, HeaderLine_value (line));
         CBuffer_append_cstr (cb, "\r\n");
         iter = M_HDRList_itr_next(this, iter);
