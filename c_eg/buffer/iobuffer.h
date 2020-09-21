@@ -1,5 +1,5 @@
 #ifndef c_c_eg_buffer_iobuffer_h
-#define c_c_eg_buffer_iobuffer__h
+#define c_c_eg_buffer_iobuffer_h
 
 #define _GNU_SOURCE
 
@@ -28,10 +28,10 @@
  *
   */
 typedef struct IOBuffer_s {
-    char buffer[1000];
-    char*  mem_p;             // always points to the start of buffer
+    void*  mem_p;             // always points to the start of buffer
+    char*  char_p;
     int    buffer_capacity;   // always holds the size of the buffer
-    char*  buffer_ptr;        // points to the start of unused data in buffer
+    void*  buffer_ptr;        // points to the start of unused data in buffer
     int    buffer_length;     // same as capacity
     int    buffer_remaining;  // length of daat no consumed
 
@@ -39,12 +39,12 @@ typedef struct IOBuffer_s {
 
 IOBufferRef IOBuffer_init(IOBufferRef this, int capacity);
 IOBufferRef IOBuffer_new_with_capacity(int capacity);
-IOBufferRef IOBuffer_new_with();
+IOBufferRef IOBuffer_new();
 void IOBuffer_set_used(IOBufferRef this, int bytes_used);
-void* IOBUffer_data(IOBufferRef this);
+void* IOBuffer_data(IOBufferRef this);
 int IOBuffer_data_len(IOBufferRef this);
 void* IOBuffer_space(IOBufferRef this);
-int IOBuffer_space_len(IOBuffer this);
+int IOBuffer_space_len(IOBufferRef this);
 void IOBuffer_commit(IOBufferRef this, int bytes_used);
 void IOBuffer_consume(IOBufferRef this, int byte_count);
 

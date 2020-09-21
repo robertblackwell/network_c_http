@@ -37,6 +37,8 @@ set(C_EG_LIBRARY_HEADER_FILES
 	server.h
 	queue.h
 	worker.h
+	message_reader.h
+	message_writer.h
 	list.h
 	header_line.h
 	headerline_list.h
@@ -60,6 +62,8 @@ set(C_EG_LIBRARY_SOURCE_FILES
 	server.c
 	queue.c
 	worker.c
+	message_reader.c
+	message_writer.c
 	list.c
 	header_line.c
 	headerline_list.c

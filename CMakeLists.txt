@@ -168,4 +168,5 @@ enable_testing()
 
 add_subdirectory(c_eg)
 add_subdirectory(tests)
+add_subdirectory(app)
 

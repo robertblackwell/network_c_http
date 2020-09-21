@@ -59,7 +59,7 @@ HeaderIter Message_get_header(MessageRef mref, const char* labptr);
 bool Message_get_is_request(MessageRef this);
 void Message_set_is_request(MessageRef this, bool yn);
 void Message_move_target(MessageRef this, CBufferRef target);
-char* Message_get_target(MessageRef this);
+CBufferRef Message_get_target(MessageRef this);
 
 void Message_move_reason(MessageRef this, CBufferRef reason);
 char* Message_get_reason(MessageRef this);
@@ -73,5 +73,7 @@ const char* Message_header_iter_deref(MessageRef mref, HeaderIter iter);
 
 BufferChainRef Message_get_body(MessageRef mref);
 void Message_set_body(MessageRef mref, BufferChainRef bodyp);
+
+CBufferRef Message_serialize(MessageRef this);
 
 #endif

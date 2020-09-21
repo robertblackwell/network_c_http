@@ -4,6 +4,7 @@
 #include <c_eg/unittest.h>
 #include <c_eg/buffer/contig_buffer.h>
 #include <c_eg/buffer/buffer_chain.h>
+#include <c_eg/buffer/iobuffer.h>
 
 char* cstr_concat(char* s1, char* s2)
 {
@@ -165,6 +166,49 @@ int test_chain_compact() // and eq_cstr
     UT_EQUAL_PTR(c, NULL);
     return 0;
 }
+int test_iobuffer_make()
+{
+    IOBufferRef ioref = IOBuffer_new();
+    void* x = IOBuffer_space(ioref);
+    int l = IOBuffer_space_len(ioref);
+    char* sconst = "A0123456789P";
+    size_t y = strlen(sconst);
+    memcpy(x, sconst, y+1);
+    IOBuffer_commit(ioref, y+1);
+    void* data = IOBuffer_data(ioref);
+    int data_length = IOBuffer_data_len(ioref);
+    IOBuffer_consume(ioref, 1);
+    void* data_1 = IOBuffer_data(ioref);
+    int data_length_1 = IOBuffer_data_len(ioref);
+    UT_EQUAL_PTR((data+1), IOBuffer_data(ioref));
+    UT_EQUAL_INT((data_length - 1), IOBuffer_data_len(ioref));
+    UT_EQUAL_INT(strcmp("0123456789P", (char*)IOBuffer_data(ioref)), 0);
+    return 0;
+}
+int test_iobuffer_make2()
+{
+    IOBufferRef ioref = IOBuffer_new();
+    void* x = IOBuffer_space(ioref);
+    int l = IOBuffer_space_len(ioref);
+    char* sconst = "A0123456789P";
+    size_t y = strlen(sconst);
+    memcpy(x, sconst, y); // this time dont copy the zero terminator
+    IOBuffer_commit(ioref, y);
+    void* data = IOBuffer_data(ioref);
+    int data_length = IOBuffer_data_len(ioref);
+    int i = 1;
+    while(IOBuffer_data_len(ioref) > 0) {
+        IOBuffer_consume(ioref, 1);
+        void* data2 = IOBuffer_data(ioref);
+        int data_length_2 = IOBuffer_data_len(ioref);
+        UT_EQUAL_PTR((data+i), IOBuffer_data(ioref));
+        UT_EQUAL_INT((data_length - i), IOBuffer_data_len(ioref));
+        UT_EQUAL_INT(strncmp(&(sconst[i]), (char*)IOBuffer_data(ioref), IOBuffer_data_len(ioref)), 0);
+        i++;
+    }
+    return 0;
+}
+
 
 int main()
 {
@@ -175,6 +219,8 @@ int main()
     UT_ADD(test_cbuffer_move);
     UT_ADD(test_chain_make);
     UT_ADD(test_chain_compact);
+    UT_ADD(test_iobuffer_make);
+    UT_ADD(test_iobuffer_make2);
     int rc = UT_RUN();
     return rc;
 }

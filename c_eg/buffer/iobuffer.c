@@ -7,22 +7,11 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#ifdef IOBUFFER_OPAQUE
-typedef struct IOBuffer_s {
-    char buffer[1000];
-    char*  mem_p;             // always points to the start of buffer
-    int    buffer_capacity;   // always holds the size of the buffer
-    char*  buffer_ptr;        // points to the start of unused data in buffer
-    int    buffer_length;     // same as capacity
-    int    buffer_remaining;  // length of datat no consumed
-
-} IOBuffer, *IOBufferRef;
-#endif
-
 IOBufferRef IOBuffer_init(IOBufferRef this, int capacity )
 {
     this->buffer_ptr = this->mem_p = eg_alloc(capacity);
     if(this->mem_p == NULL) goto memerror;
+    this->char_p = (char*)this->mem_p;
     this->buffer_capacity = capacity;
     this->buffer_length = this->buffer_capacity;
     this->buffer_remaining = 0;
@@ -43,22 +32,24 @@ IOBufferRef IOBuffer_new_with_capacity(int capacity)
 }
 IOBufferRef IOBuffer_new()
 {
-    return IOBuffer_new_with_capacity(IOBUFFER_DEFAULT_CAPACITY)
+    return IOBuffer_new_with_capacity(IOBUFFER_DEFAULT_CAPACITY);
 }
 
-void* IOBUffer_data(IOBufferRef this)
+void* IOBuffer_data(IOBufferRef this)
 {
     return this->buffer_ptr;
 }
 int IOBuffer_data_len(IOBufferRef this)
 {
-    assert(false);
+    return this->buffer_remaining;
 }
 void* IOBuffer_space(IOBufferRef this)
 {
+    return (this->buffer_ptr + this->buffer_remaining);
 }
-int IOBuffer_space_len(IOBuffer this)
+int IOBuffer_space_len(IOBufferRef this)
 {
+    return (this->mem_p + this->buffer_capacity) - (this->buffer_ptr + this->buffer_remaining);
 }
 void IOBuffer_commit(IOBufferRef this, int bytes_used)
 {
@@ -78,7 +69,8 @@ void IOBuffer_destroy(IOBufferRef this)
 }
 void IOBuffer_reset(IOBufferRef this)
 {
-    IOBuffer_init(this);
+    this->buffer_ptr = this->mem_p;
+    this->buffer_remaining = 0;
 }
 void IOBuffer_free(IOBufferRef* p)
 {

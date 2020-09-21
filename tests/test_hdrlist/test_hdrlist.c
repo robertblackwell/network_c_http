@@ -56,12 +56,15 @@ int test_hdrlist_find()
     UT_EQUAL_INT(sz, 0);
     UT_EQUAL_PTR(x, NULL);
 
+
     HDRList_add_back(hdr_listref, hdrln1);
     HDRList_add_back(hdr_listref, hdrln2);
     HDRList_add_back(hdr_listref, hdrln3);
     HDRList_add_back(hdr_listref, hdrln4);
     int sz2 = HDRList_size(hdr_listref);
     UT_EQUAL_INT(sz2, 4);
+    CBufferRef cbref = HDRList_serialize(hdr_listref);
+
     HeaderLineRef y = HDRList_find(hdr_listref, "onetwothree");
     UT_EQUAL_PTR(y, NULL);
     HeaderLineRef z = HDRList_find(hdr_listref, "HeaderLineKey1");
