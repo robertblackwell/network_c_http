@@ -101,9 +101,9 @@ CBufferRef cb = CBuffer_new();
 ListNodeRef iter = HDRList_iterator(this);
 while(iter != NULL) {
 HeaderLineRef line = HDRList_itr_unpack(this, iter);
-CBuffer_append_cstr(cb, HeaderLine_label(this));
+CBuffer_append_cstr(cb, HeaderLine_label(line));
 CBuffer_append_cstr(cb, ": ");
-CBuffer_append_cstr(cb, HeaderLine_value(this));
+CBuffer_append_cstr(cb, HeaderLine_value(line));
 CBuffer_append_cstr(cb, "rn");
 iter = M_HDRList_itr_next(this, iter);
 }
