@@ -56,20 +56,91 @@ void Message_set_version(MessageRef this, int maj, int minor);
 HDRListRef Message_headers(MessageRef this);
 
 void Message_add_header(MessageRef mref, char* labptr, int lablen, char* valptr, int vallen);
+
+///
+/// Returns the header list (of type HDRListRef) of a message.
+///
+/// NOTE: the memory for the returned value remains owned by the MessageRef
+///
+/// \param this MessageRef
+/// \return HDRListRef. The returned value is a reference ownership stays with the MessageRef.
+///
 HeaderIter Message_get_header(MessageRef mref, const char* labptr);
+
+///
+/// Returns true if the MessageRef points at a request false otherwise.
+///
+/// \param this
+/// \return bool
+///
 bool Message_get_is_request(MessageRef this);
+
+///
+/// Sets a Message internal is_request flag to the given value/
+///
+/// \param this MessageRef
+/// \param yn   bool
+///
 void Message_set_is_request(MessageRef this, bool yn);
+
+///
+/// Sets the content of MessageRef target property to the content of Cbuffer target
+/// argument.
+///
+/// NOTE: does this using move sematics so that the argument is reset to an empty buffer
+/// after the call.
+///
+/// NOTE: the caller retains ownership of the target argument
+///
+/// \param this   MessageRef
+/// \param target CBuffer
+///
 void Message_move_target(MessageRef this, CBufferRef target);
+
+///
+/// Returns a char*/c_string  pointer to the target string in a request message.
+///
+/// NOTE: the memory for the returned value remains owned by the MessageRef
+///
+/// \param this MessageRef
+/// \return c_string pointer. The returned value is a reference, ownership stays with the MessageRef.
+///
 CBufferRef Message_get_target(MessageRef this);
 
+///
+/// Sets the content of MessageRef reason property to the content of Cbuffer target
+/// argument.
+///
+/// NOTE: does this using move sematics so that the argument is reset to an empty buffer
+/// after the call.
+///
+/// NOTE: the caller retains ownership of the target argument
+///
+/// \param this   MessageRef
+/// \param reason CBuffer
+///
 void Message_move_reason(MessageRef this, CBufferRef reason);
+
+///
+/// Returns a char*/c_string  pointer to the reason string in a response message.
+///
+/// NOTE: the memory for the returned value remains owned by the MessageRef
+///
+/// \param this MessageRef
+/// \return c_string pointer. The returned value is a reference ownership stays with the MessageRef.
+///
 char* Message_get_reason(MessageRef this);
-/**
- *
- * @param mref MessageRef
- * @param iter HeaderListIter
- * @return a pointer to a c_string that is not owned by caller
- */
+
+///
+/// Returns the value property of a header line, pointed at by iter, from the headers of MessageRef.
+///
+/// This is basically a derefence operation
+///
+/// \param mref MessageRef
+/// \param iter HeaderListIter Must not be NULL
+/// \return a pointer to a c_string that is not owned by caller
+///
+///
 const char* Message_header_iter_deref(MessageRef mref, HeaderIter iter);
 
 BufferChainRef Message_get_body(MessageRef mref);

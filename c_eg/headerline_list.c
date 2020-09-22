@@ -133,7 +133,7 @@ CBufferRef HDRList_serialize (HDRListRef this)
         CBuffer_append_cstr (cb, HeaderLine_label (line));
         CBuffer_append_cstr (cb, ": ");
         CBuffer_append_cstr (cb, HeaderLine_value (line));
-        CBuffer_append_cstr (cb, "\r\n");
+        CBuffer_append_cstr (cb, "rn");
         iter = M_HDRList_itr_next(this, iter);
     }
     return cb;

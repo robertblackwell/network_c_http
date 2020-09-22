@@ -6,9 +6,44 @@
 
 __LIST_INCLUDE_H__
 
+///
+/// Create a new HeaderLine instance from key and value and add
+/// that HeaderLine to the HDRList.
+///
+/// The content of key and value are copied into the new HeaderLine instance
+/// and hence ownership of key and value remain with the caller
+///
+/// \param this HDRListRef
+/// \param key CBufferRef
+/// \param CBufferRef
+/// \return void
+///
 void HDRList_add(HDRListRef this, CBufferRef key, CBufferRef value);
+
+///
+/// Find a HeaderLine in a HDRList by key/label value
+///
+/// \param hlref HDRListRef
+/// \param key   char*
+/// \return    HeaderLineRef or NULL
+///            NULL on not found
+///            NOTE: If found the HeaderLineRef returns is still owned by the HDRList
+///            do not call HeaderLine_free() on the returned value
+///
 HeaderLineRef HDRList_find(HDRListRef hlref, char* key);
+
+///
+/// Remove a HeaderLine from the HDRList by key/label
+///
+/// \param hlref HDRListRef
+/// \param key   char*
+///
 void HDRList_remove(HDRListRef hlref, char* key);
+
+/// Serialize a header list into a CBufferRef
+/// \param this HDRListRef
+/// \return A serialized version of the header list as a CBuffer.
+///         NOTE: ownership of the CBuffer is transfered to the caller
 CBufferRef HDRList_serialize(HDRListRef this);
 
 ///
