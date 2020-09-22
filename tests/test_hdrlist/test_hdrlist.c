@@ -8,6 +8,7 @@
 #include <c_eg/list.h>
 #include <c_eg/header_line.h>
 #include <c_eg/headerline_list.h>
+#include <c_eg/message.h>
 
 
 
@@ -41,7 +42,8 @@ int test_hdrlist_add_back_get_content()
     UT_EQUAL_INT(strcmp(sv1, "333"), 0);
     UT_EQUAL_INT(strcmp(sh2, "HEADERLINEKEY2"), 0);
     UT_EQUAL_INT(strcmp(sv2, "4444"), 0);
-
+    List_display((ListRef)hdr_listref);
+    HDRList_free(&hdr_listref);
     return 0;
 }
 int test_hdrlist_find()
@@ -94,9 +96,52 @@ int test_hdrlist_find()
     HDRList_remove(hdr_listref, "HEADERLINEKEY2");
     UT_EQUAL_INT(HDRList_size(hdr_listref), 0);
 
+    HDRList_free(&hdr_listref);
+    CBuffer_free(&cbref);
 
     return 0;
 }
+void trial_HDRList_add_line(HDRListRef this, char* label, int lablen, char* value, int vallen)
+{
+    HeaderLineRef hl_content_type = HeaderLine_new(label, lablen, value, vallen);
+    HDRList_add_front(this, hl_content_type);
+}
+int test_serialize_headers()
+{
+    int body_len = 37;
+    char* body_len_str;
+    asprintf(&body_len_str, "%d", body_len);
+
+    HDRListRef hdrs = HDRList_new();
+    HeaderLineRef hl_content_length = HeaderLine_new(HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
+    HDRList_add_front(hdrs, hl_content_length);
+    char* content_type = "text/html; charset=UTF-8";
+    HeaderLineRef hl_content_type = HeaderLine_new(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
+    HDRList_add_front(hdrs, hl_content_type);
+    CBufferRef ser = HDRList_serialize(hdrs);
+    free(body_len_str);
+    HDRList_free(&hdrs);
+    CBuffer_free(&ser);
+    return 0;
+}
+int test_serialize_headers_2()
+{
+    int body_len = 37;
+    char* body_len_str;
+    asprintf(&body_len_str, "%d", body_len);
+
+    HDRListRef hdrs = HDRList_new();
+    trial_HDRList_add_line(hdrs, HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
+    char* content_type = "text/html; charset=UTF-8";
+    HDRList_add_line(hdrs, HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
+
+    CBufferRef ser = HDRList_serialize(hdrs);
+    free(body_len_str);
+    CBuffer_free(&ser);
+    HDRList_free(&hdrs);
+    return 0;
+}
+
 #ifdef HGHGH
 int test_list_add_front()
 {
@@ -213,6 +258,8 @@ int main()
 //    UT_ADD(test_list_remove_front);
 //    UT_ADD(test_list_remove_back);
 //    UT_ADD(test_iter);
+    UT_ADD(test_serialize_headers);
+    UT_ADD(test_serialize_headers_2);
 	int rc = UT_RUN();
 	return rc;
 }

@@ -27,6 +27,7 @@ void MessageWriter_free(MessageWriterRef* this_ptr)
 {
     MessageWriterRef this = *(this_ptr);
     MessageWriter_destroy(this);
+    eg_free(*this_ptr);
     *this_ptr = NULL;
 }
 
@@ -53,10 +54,10 @@ void MessageWriter_start(MessageWriterRef this, HttpStatus status, HDRListRef he
     int x = len+2;
     MessageWriter_write_chunk(this, CBuffer_data(cb_output_ref), CBuffer_size(cb_output_ref));
 
-//    free(first_line);
-//    CBuffer_free(&serialized_headers);
-//    CBuffer_free(&cb_output_ref);
-//    return;
+    free(first_line);
+    CBuffer_free(&serialized_headers);
+    CBuffer_free(&cb_output_ref);
+    return;
     failed:
         if(first_line != NULL) free(first_line);
         if(serialized_headers != NULL) CBuffer_free(&serialized_headers);

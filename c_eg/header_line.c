@@ -34,22 +34,23 @@ HeaderLineRef HeaderLine_new(char* labptr, int lablen, char* valptr, int vallen)
     if(hlref  == NULL) goto mem_error_1;
     hlref->label_len = lablen;
     hlref->value_len = vallen;
+
     hlref->label_ptr = eg_alloc(lablen+1);
     if(hlref->label_ptr == NULL) goto mem_error_2;
     memcpy(hlref->label_ptr, labptr, lablen);
-    {
         // Convert to upper case
         char* s = labptr;
         char* p = hlref->label_ptr;
         for(int i = 0; i < lablen; i++) {
             p[i] = toupper((unsigned char) labptr[i]);
         }
-        p[lablen+1] = '\0';
-    }
+        p[lablen] = '\0';
+
     hlref->value_ptr = eg_alloc(vallen+1);
     if(hlref->value_ptr == NULL) goto mem_error_2;
     memcpy(hlref->value_ptr, valptr, vallen);
-    hlref->value_ptr[vallen] = (char)0;
+    hlref->value_ptr[vallen] = (char)'\0';
+
     return  hlref;
     mem_error_1:
         // nothing got allocated
@@ -64,11 +65,13 @@ HeaderLineRef HeaderLine_new(char* labptr, int lablen, char* valptr, int vallen)
 void HeaderLine_free(HeaderLineRef* hlref_ptr)
 {
     HeaderLineRef hlref = *hlref_ptr;
-    free(hlref->label_ptr);
-    hlref->label_ptr = NULL;
-    free(hlref->value_ptr);
-    hlref->value_ptr = NULL;
-    free((void*) hlref);
+    eg_free(hlref->label_ptr);
+    hlref->label_len = 0;
+//    hlref->label_ptr = NULL;
+    eg_free(hlref->value_ptr);
+    hlref->value_len = 0;
+//    hlref->value_ptr = NULL;
+    eg_free((void*) hlref);
     *hlref_ptr = NULL;
 }
 void HeaderLine_dealloc(void* ptr) { HeaderLine_free((HeaderLineRef*)(ptr));}
@@ -85,5 +88,6 @@ void HeaderLine_set_value(HeaderLineRef hlref, char* valptr, int vallen)
     char* oldvalptr = hlref->value_ptr;
     hlref->value_ptr = eg_alloc(vallen+1);
     memcpy(hlref->value_ptr, valptr, vallen);
+    hlref->value_ptr[vallen] = '\0';
     free(oldvalptr);
 }

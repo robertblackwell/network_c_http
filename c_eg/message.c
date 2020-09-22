@@ -35,6 +35,7 @@ MessageRef Message_new ()
     mref->target = CBuffer_new();
     mref->reason = CBuffer_new();
     return mref;
+
     error_label_2:
         Message_free(&mref);
     error_label_1:
@@ -63,7 +64,12 @@ MessageRef Message_new_response()
 }
 void Message_free(MessageRef* this_p)
 {
-    free(*this_p);
+    MessageRef this = *this_p;
+    HDRList_free(&(this->headers));
+    CBuffer_free(&(this->target));
+    CBuffer_free(&(this->reason));
+
+    eg_free(*this_p);
     *this_p = NULL;
 }
 void Message_dispose(void* p)

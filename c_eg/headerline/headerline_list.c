@@ -73,7 +73,7 @@ HDRList_itr_remove(hlref, &iter);
 }
 
 }
-void HDRList_add(HDRListRef this, CBufferRef key, CBufferRef value)
+void HDRList_add_cbuf(HDRListRef this, CBufferRef key, CBufferRef value)
 {
 char* labptr = CBuffer_data(key);
 int lablen = CBuffer_size(key);
@@ -82,6 +82,19 @@ int vallen = CBuffer_size(value);
 HeaderLineRef hl = HeaderLine_new(labptr, lablen, valptr, vallen);
 M_HDRList_add_back(this, hl);
 }
+void HDRList_add_line(HDRListRef this, char* label, int lablen, char* value, int vallen)
+{
+HeaderLineRef hl_content_type = HeaderLine_new(label, lablen, value, vallen);
+HDRList_add_front(this, hl_content_type);
+}
+void HDRList_add_cstr(HDRListRef this, char* label, char* value)
+{
+int lablen = strlen(label);
+int vallen = strlen(value);
+HeaderLineRef hl_content_type = HeaderLine_new(label, lablen, value, vallen);
+HDRList_add_front(this, hl_content_type);
+}
+
 CBufferRef HDRList_serialize(HDRListRef this)
 {
 CBufferRef cb = CBuffer_new();

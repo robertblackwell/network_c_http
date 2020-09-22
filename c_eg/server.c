@@ -61,14 +61,6 @@ socket_handle_t create_listener_socket(int port, const char* host)
         assert(0);
 }
 
-struct Server_s {
-    int                     port;
-    int                     nbr_workers;
-    QueueRef                qref;
-    WorkerRef               worker_tab[NBR_WORKERS];
-};
-
-
 ServerRef Server_new(int port)
 {
     ServerRef sref = (ServerRef)eg_alloc(sizeof(Server));
@@ -110,10 +102,10 @@ void Server_listen(ServerRef sref)
         int port = sref->port;
         struct sockaddr_in peername;
         unsigned int addr_length = (unsigned int)sizeof(peername);
-        int socket_fd = create_listener_socket(port, "127.0.0.1");
+        sref->socket_fd = create_listener_socket(port, "127.0.0.1");
         for(;;)
         {
-            int sock2 = accept(socket_fd, (struct sockaddr*)&peername, &addr_length);
+            int sock2 = accept(sref->socket_fd, (struct sockaddr*)&peername, &addr_length);
             if( sock2 <= 0 )
             {
                 LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
@@ -129,9 +121,20 @@ void Server_listen(ServerRef sref)
     for(int i = 0; i < sref->nbr_workers; i++) {
         WorkerRef wref = sref->worker_tab[i];
         pthread_join( *Worker_pthread(wref), NULL);
+        Worker_free(wref);
+        printf("Server joining thread %d\n", i);
     }
+    Queue_free(&(sref->qref));
+    printf("Server_listen Queue_free() done \n");
     // also wait for the monitor  to complete
     
 }
-
+void Server_terminate(ServerRef this)
+{
+    for(int i = 0; i < this->nbr_workers; i++) {
+        Queue_add(this->qref, -1);
+        printf("Server_terminate adding %d \n", i);
+    }
+    close(this->socket_fd);
+}
 

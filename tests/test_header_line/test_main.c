@@ -27,6 +27,7 @@ int test_header_line_new()
     int v2b = strcmp(v2, val2);
     UT_EQUAL_INT(v2b, 0);
     // note all labels are upper case
+    HeaderLine_free(&hlref);
     return 0;
 }
 

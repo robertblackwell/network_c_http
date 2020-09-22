@@ -103,12 +103,10 @@ CBufferRef CBuffer_from_cstring(char* c_str)
 void CBuffer_free(CBufferRef* cbuf)
 {
     CBufferRef this = *cbuf;
-    if (this != NULL) {
-        if( (this->m_memPtr != NULL) && (this->m_capacity > 0) ){
-            BufferStrategy_deallocate(this->m_strategy, this->m_memPtr);
-            *cbuf = NULL;
-        }
-    }
+    assert(*cbuf != NULL);
+    eg_free(this->m_memPtr);
+    eg_free(*cbuf);
+    *cbuf = NULL;
 }
 /**
  * gets a pointer to the start of the memory slab being managed by the instance

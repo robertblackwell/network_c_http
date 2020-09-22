@@ -66,6 +66,7 @@ void IOBuffer_consume(IOBufferRef this, int byte_count)
 }
 void IOBuffer_destroy(IOBufferRef this)
 {
+    eg_free(this->mem_p);
 }
 void IOBuffer_reset(IOBufferRef this)
 {

@@ -56,6 +56,7 @@ MessageRef MessageReader_read(MessageReaderRef this)
                 if(this->m_parser->m_started && (!this->m_parser->m_message_done)) {
                     bytes_read = 0;
                 } else {
+                    Message_free(&(message_ptr));
                     return NULL;
                 }
             }

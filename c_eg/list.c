@@ -27,10 +27,16 @@ ListNodeRef ListNode_new(void* content, ListNodeRef prev, ListNodeRef next)
     lnref->forward = next;
     lnref->backward = prev;
 }
-void ListNode_free(ListNodeRef* lnref_ptr)
+void ListNode_free(ListRef lref, ListNodeRef* lnref_ptr)
 {
+    ASSERT_NOT_NULL(lref);
     ASSERT_NOT_NULL(lnref_ptr);
-    free((void*)*lnref_ptr);
+    ListNodeRef lnref = *lnref_ptr;
+    if(lref->dealloc != NULL) {
+        if(lnref->item != NULL)
+            lref->dealloc(&(lnref->item));
+    }
+    eg_free((void*)*lnref_ptr);
     *lnref_ptr = NULL;
 }
 
@@ -66,11 +72,11 @@ void List_destroy(ListRef lref)
         if(t == NULL) {
             break;
         }
-        if(lref->dealloc != NULL) {
-            lref->dealloc(&(t->item));
-        }
+//        if(lref->dealloc != NULL) {
+//            lref->dealloc(&(t->item));
+//        }
         ListNodeRef tnext = t->forward;
-        ListNode_free(&t);
+        ListNode_free(lref, &t);
         t = tnext;
     }
     List_init(lref, dealloc);
@@ -90,10 +96,10 @@ int List_size(ListRef lref)
 }
 void List_display(ListRef this)
 {
-    printf("List[%p] count: %d head %p talk %p\n", (void*)this, this->count, (void*)this->head, (void*)this->tail);
+    printf("List[%p] count: %d head %p tail %p\n", (void*)this, this->count, (void*)this->head, (void*)this->tail);
     ListNodeRef iter = this->head;
     while(iter != NULL) {
-        printf("Node[%p] forward:%p backwards:%p\n", (void*)iter, (void*)iter->forward, (void*)iter->backward);
+        printf("Node[%p] forward:%p backwards:%p  item:%p  %ld\n", (void*)iter, (void*)iter->forward, (void*)iter->backward, iter->item, (long)iter->item);
         ListNodeRef next = iter->forward;
         iter = next;
     }
@@ -150,7 +156,8 @@ void* List_remove_first(ListRef lref)
     if(lref->count == 1) {
         lref->count--;
         void* content = lref->head->item;
-        ListNode_free(&(lref->head));
+        lref->head->item = NULL;
+        ListNode_free(lref, &(lref->head));
         lref->head = NULL; lref->tail = NULL;
         return content;
     }
@@ -160,7 +167,8 @@ void* List_remove_first(ListRef lref)
     void* content = first->item;
     first->forward = NULL;
     first->backward = NULL;
-    ListNode_free(&first);
+    first->item = NULL;
+    ListNode_free(lref, &first);
     lref->count--;
     return content;
 }
@@ -183,7 +191,9 @@ void* List_remove_last(ListRef lref)
     if(lref->count == 1) {
         lref->count--;
         void* content = lref->head->item;
-        ListNode_free(&(lref->head));
+        lref->head->item = NULL;
+
+        ListNode_free(lref, &(lref->head));
         lref->head = NULL; lref->tail = NULL;
         return content;
     }
@@ -191,8 +201,11 @@ void* List_remove_last(ListRef lref)
     lref->tail = last->backward;
     lref->tail->forward = NULL;
     void* content = last->item;
-    last->forward = NULL; last->backward = NULL;
-    ListNode_free(&last);
+    last->forward = NULL;
+    last->backward = NULL;
+    last->item = NULL;
+
+    ListNode_free(lref, &last);
     lref->count--;
     return content;
 }
@@ -213,6 +226,7 @@ ListNodeRef List_itr_next(ListRef lref, ListNodeRef itr)
 }
 
 // removes a list item pointed at by an iterator - invalidates the itr
+// and if there is a dealloc function call it on the content of the list node
 void List_itr_remove(ListRef lref, ListNodeRef* itr_ptr)
 {
     ASSERT_NOT_NULL(lref);
@@ -225,7 +239,7 @@ void List_itr_remove(ListRef lref, ListNodeRef* itr_ptr)
         lref->count = 0;
         lref->head = NULL;
         lref->tail = NULL;
-        ListNode_free(itr_ptr);
+        ListNode_free(lref, itr_ptr);
         return;
     }
     if(lref->head == *itr_ptr) {
@@ -239,7 +253,8 @@ void List_itr_remove(ListRef lref, ListNodeRef* itr_ptr)
         (*itr_ptr)->backward->forward = (*itr_ptr)->forward;
     }
     lref->count--;
-    ListNode_free(itr_ptr);
+
+    ListNode_free(lref, itr_ptr);
 }
 
 // gets the value of the item held in the Node pointed at by this iterator

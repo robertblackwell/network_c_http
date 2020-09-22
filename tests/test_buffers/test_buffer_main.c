@@ -49,6 +49,7 @@ int test_expansion()
     printf("b2 m_cptr %lx \n", (long)CBuffer_data(b2));
     UT_EQUAL_INT(5*strlen(extra), CBuffer_size(b2));
     CBuffer_free(&b2);
+    free(s1);
     UT_EQUAL_PTR(b2, NULL);
     return 0;
 }
@@ -69,6 +70,7 @@ int test_big_expansion()
     UT_EQUAL_INT(2800*strlen(extra), CBuffer_size(b2));
     CBuffer_free(&b2);
     UT_EQUAL_PTR(b2, NULL);
+    free(s1);
     return 0;
 }
 // demonstrate clear makes empty without additional allocation or deallocation
@@ -91,6 +93,7 @@ int test_cbuffer_clear()
     UT_NOT_EQUAL_INT(sz1, sz2);
     CBuffer_free(&b2);
     UT_EQUAL_PTR(b2, NULL);
+    free(s1);
     return 0;
 }
 // C++ style move sematics
@@ -121,7 +124,7 @@ int test_cbuffer_move()
     CBuffer_free(&b2);
     UT_EQUAL_PTR(b1, NULL);
     UT_EQUAL_PTR(b2, NULL);
-
+    free(s1);
     return 0;
 }
 int test_chain_make()
@@ -183,6 +186,7 @@ int test_iobuffer_make()
     UT_EQUAL_PTR((data+1), IOBuffer_data(ioref));
     UT_EQUAL_INT((data_length - 1), IOBuffer_data_len(ioref));
     UT_EQUAL_INT(strcmp("0123456789P", (char*)IOBuffer_data(ioref)), 0);
+    IOBuffer_free(&ioref);
     return 0;
 }
 int test_iobuffer_make2()
@@ -206,6 +210,7 @@ int test_iobuffer_make2()
         UT_EQUAL_INT(strncmp(&(sconst[i]), (char*)IOBuffer_data(ioref), IOBuffer_data_len(ioref)), 0);
         i++;
     }
+    IOBuffer_free(&ioref);
     return 0;
 }
 

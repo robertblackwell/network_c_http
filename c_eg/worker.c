@@ -87,8 +87,9 @@ WorkerRef Worker_new(QueueRef qref, int _id)
 }
 void Worker_free(WorkerRef wref)
 {
+    free((void*)wref);
 }
-char* simple_response_body(char* message)
+char* simple_response_body(char* message, socket_handle_t socket, int pthread_self_value)
 {
     time_t t = time(NULL);
     struct tm *tm = localtime(&t);
@@ -101,11 +102,13 @@ char* simple_response_body(char* message)
                  "<body>"
                  "%s"
                  "<p>Date/Time is %s</p>"
+                 "<p>socket: %d</p>"
+                 "<p>p_thread_self %ld</p>"
                  "</body>"
                  "</html>";
 
     char* s1;
-    int len1 = asprintf(&s1, body, message, dt_s);
+    int len1 = asprintf(&s1, body, message, dt_s, socket, pthread_self_value);
 
     return s1;
 }
@@ -152,23 +155,27 @@ int handle_request(MessageRef request, MessageWriterRef wrtr)
         int urc = http_parser_parse_url(target_cstr, target_len, 0, &u);
     }
     char* msg = "<h2>this is a message</h2>";
-    char* body = simple_response_body(msg);
+    char* body = simple_response_body(msg, wrtr->socket, pthread_self());
     int body_len = strlen(body);
     char* body_len_str;
     asprintf(&body_len_str, "%d", body_len);
-    HeaderLineRef hl_content_length = HeaderLine_new(HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
     HDRListRef hdrs = HDRList_new();
+    HeaderLineRef hl_content_length = HeaderLine_new(HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
     HDRList_add_front(hdrs, hl_content_length);
+    char* content_type = "text/html; charset=UTF-8";
+    HeaderLineRef hl_content_type = HeaderLine_new(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
+    HDRList_add_front(hdrs, hl_content_type);
 
     MessageWriter_start(wrtr, HTTP_STATUS_OK, hdrs);
     MessageWriter_write_chunk(wrtr, (void*) body, body_len);
-//    CBufferRef first_line = CBuffer_from_cstring("Http/1.1 200 OK\r\n");
-//    CBufferRef serial = Message_serialize(request);
-//    int length = CBuffer_size(serial);
-//    char* s;
-//    int len = asprintf(&s,"Content-length: %d\r\n", length);
-//    CBuffer_append_cstr(first_line, s);
-//    Buffer
+
+    HDRList_free(&hdrs);
+    // this is definitely a trap as we passed off ownership of these header lines
+//    HeaderLine_free(&(hl_content_length));
+//    HeaderLine_free(&(hl_content_type));
+    free(body);
+    free(body_len_str);
+
     return 0;
 }
 static void* Worker_main(void* data)
@@ -180,6 +187,11 @@ static void* Worker_main(void* data)
         wref->active = false;
 
         int mySocketHandle = Queue_remove(wref->qref);
+        printf("Worker_main %p mySocketHandle: %d\n", wref, mySocketHandle);
+        if(mySocketHandle == -1) {
+            printf("Worker_main about to break %p mySocketHandle: %d\n", wref, mySocketHandle);
+            break;
+        }
         wref->active_socket = (int) mySocketHandle;
         int socket = mySocketHandle;
         wref->active = true;
@@ -187,17 +199,18 @@ static void* Worker_main(void* data)
         MessageReaderRef rdr = MessageReader_new(parser_ref, socket);
         MessageWriterRef wrtr = MessageWriter_new(socket);
         MessageRef request_msg_ref;
-        MessageRef response_msg_ref;
         while((request_msg_ref = MessageReader_read(rdr)) != NULL) {
             printf("Got a request socket: %d pthread_self %ld\n", socket, pthread_self());
             handle_request(request_msg_ref, wrtr);
             Message_free(&request_msg_ref);
             close(socket);
         }
+        Parser_free(&parser_ref);
         MessageWriter_free(&wrtr);
         MessageReader_free(&rdr);
         wref->active = false;
     }
+    printf("Worker_main exited main loop %p\n", wref);
     return NULL;
 }
 // start a pthread - returns 0 on success errno on fila

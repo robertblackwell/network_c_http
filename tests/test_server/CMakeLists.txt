@@ -5,7 +5,7 @@ message("test_link_libs        ${TEST_LINK_LIBS}")
 
 set(TARGET test_server)
 add_executable(${TARGET}
-	test_main.cpp
+	test_server.c
 )
 
 target_include_directories(${TARGET} 
