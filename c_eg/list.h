@@ -27,7 +27,9 @@ typedef struct ListNode_s ListNode, *ListNodeRef;
 ///
 typedef void(*ListItemDeallocator)(void**);
 
-
+///
+/// WARNING - THIS FUNCTION ALLOCATES MEMORY
+///
 ///
 /// Dynamically allocates a new List and return a ListRef, reference to the opaque List structure.
 ///
@@ -88,6 +90,9 @@ void List_display(ListRef this);
 int List_size(ListRef lref);
 
 ///
+/// WARNING - THIS FUNCTION ALLOCATES MEMORY
+///
+///
 // Add a new node to the back end of a list
 ///
 /// \param lref ListRef A list
@@ -95,6 +100,9 @@ int List_size(ListRef lref);
 ///
 void List_add_back(ListRef lref, void* item);
 
+///
+/// WARNING - THIS FUNCTION ALLOCATES MEMORY
+///
 ///
 // Add a new node to the front end of a list
 ///
@@ -111,7 +119,9 @@ void List_add_front(ListRef lref, void* item);
 ///
 void* List_first(ListRef lref);
 
-/// Gets the value of the void* item at the head of a list.
+/// Gets the value of the void* item in the node at the head of a list,
+/// Returns the item void* in the node at the head of the list and frees
+/// the node.
 ///
 /// NOTE: removes the first node from the list..
 ///
@@ -128,7 +138,8 @@ void* List_remove_first(ListRef lref);
 ///
 void* List_last(ListRef lref);
 
-/// Gets the value of the void* item at the tail of a list.
+/// Gets the value of the void* item in the node at the the tail of a list,
+/// returns the void* value and unlinks and frees the tail node
 ///
 /// NOTE: removes the last node from the list..
 ///
@@ -142,23 +153,24 @@ void* List_remove_last(ListRef lref);
 ///
 ///
 /// \param lref   ListRef a list Must not be NULL
-/// \return ListNodeRef iterator ointing at the first/head of the list.
+/// \return ListNodeRef iterator pointing at the first/head of the list.
 ///         returns NULL if List is empty
 ///
 ListNodeRef List_iterator(ListRef lref);
 
 ///
 /// Moves an iterator on to the next Node on the list.
-///returns NULL if goes off the end of the list
+/// returns NULL if goes off the end of the list
 ///
 /// \param lref ListRef a List
-/// \param itr  ListNodeRef a current not NULL iterator
+/// \param itr  ListNodeRef a current iterator pointing at a node on the list, cannot NULL iterator
 /// \return  THe next item on the list or NULL if there are no more nodes.
 ///
 ListNodeRef List_itr_next(ListRef lref, ListNodeRef itr);
 
 ///
-/// Removes a node pointed at by an iterator and sets to NULL the variable holding the iterator.
+/// Removes and frees the node pointed at by the itr, calls dealloc function on that nodes void* item field.
+/// and sets to NULL the variable/argument holding the iterator.
 ///
 /// \param lref ListRef
 /// \param itr  ListNodeRef a valid iterator for lref.

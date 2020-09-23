@@ -148,6 +148,7 @@ void CBuffer_clear(CBufferRef cbuf)
 
 void CBuffer_append(CBufferRef cbuf, void* data, size_t len)
 {
+    char* tmp = (char*)data;
     if(len == 0)
         return;
     if ( ( (cbuf->m_length + len) >= cbuf->m_capacity )  ) {
