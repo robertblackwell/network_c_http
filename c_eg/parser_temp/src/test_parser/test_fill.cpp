@@ -1,5 +1,5 @@
 ///
-/// This file tests fill in the fields in a MesasgeBase and/or MessageReader
+/// This file tests fill in the fields in a MesasgeBase and/or Rdr
 ///
 /// Coincidentally some testing of the Uri() class also takes place.
 /// 
@@ -23,7 +23,7 @@
 #include <marvin/connection/socket_factory.hpp>
 
 #endif
-#pragma mark - mock up a MessageReader
+#pragma mark - mock up a Rdr
 
 using namespace Marvin;
 namespace {

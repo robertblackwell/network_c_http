@@ -1,6 +1,6 @@
 
 #include <marvin/http/message_base.hpp>
-#include <marvin/message/message_reader_v2.hpp>
+#include <marvin/message/reader_v2.hpp>
 
 #include "runner.hpp"
 
@@ -15,8 +15,8 @@ std::string chain_to_string(Marvin::BufferChain chain)
 
 void Testrunner::makeReader()
 {
-    m_rdr = std::make_shared<Marvin::MessageReader>(m_conn);
-    auto rr = new Marvin::MessageReader(m_conn);
+    m_rdr = std::make_shared<Marvin::Rdr>(m_conn);
+    auto rr = new Marvin::Rdr(m_conn);
 }
 /**
 * Constructor - tcIndex is an index into the set of testcases
@@ -27,7 +27,7 @@ Testrunner::Testrunner(boost::asio::io_service& io, Marvin::ISocketSPtr rd_sock,
     m_tcObj(tcObj)
 {
     m_conn = rd_sock;
-    m_rdr = std::make_shared<Marvin::MessageReader>(m_conn);
+    m_rdr = std::make_shared<Marvin::Rdr>(m_conn);
     m_body = std::string("");
     m_bodyStream.str(m_body);
     m_body_accumulator = "";

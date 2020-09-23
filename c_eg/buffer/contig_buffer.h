@@ -1,12 +1,10 @@
 #ifndef lc_c_contig_buffer_t_hpp
 #define lc_c_contig_buffer_t_hpp
+#include <c_eg/alloc.h>
 #include <stddef.h>
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <stdbool.h>
-
-/// this macro marks all ContigBuffer fuunctions that allocate memory
-#define CB_MEMALLOC
 
 ///
 /// A CBuffer is a contiguous memory allocation that can expand as required.

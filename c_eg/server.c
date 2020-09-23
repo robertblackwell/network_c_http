@@ -87,8 +87,12 @@ void Server_listen(ServerRef sref)
     for(int i = 0; i < sref->nbr_workers; i++)
     {
         WorkerRef wref = Worker_new(sref->qref, i);
+        sref->worker_tab[i] = NULL;
+        if(Worker_start(wref) != 0) {
+            printf("Server failed starting thread - aborting\n");
+            return;
+        }
         sref->worker_tab[i] = wref;
-        Worker_start(wref);
     }
     printf("workers started\n");
     //
@@ -120,8 +124,10 @@ void Server_listen(ServerRef sref)
     //
     for(int i = 0; i < sref->nbr_workers; i++) {
         WorkerRef wref = sref->worker_tab[i];
-        pthread_join( *Worker_pthread(wref), NULL);
-        Worker_free(wref);
+        if(wref != NULL) {
+            pthread_join( *Worker_pthread(wref), NULL);
+            Worker_free(wref);
+        }
         printf("Server joining thread %d\n", i);
     }
     Queue_free(&(sref->qref));

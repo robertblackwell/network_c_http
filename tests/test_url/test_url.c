@@ -11,6 +11,8 @@
 #include <c_eg/headerline_list.h>
 #include <c_eg/message.h>
 
+//https://github.com/uriparser/uriparser
+
 typedef struct Url_s {
     CBufferRef scheme;
     CBufferRef host;
@@ -61,6 +63,21 @@ UrlRef Url_new(char* url)
 
 }
 
+
+void Url_free(UrlRef* this_ptr)
+{
+    UrlRef this = *this_ptr;
+    CBuffer_free(&(this->scheme));
+    CBuffer_free(&(this->host));
+    CBuffer_free(&(this->port));
+    CBuffer_free(&(this->fragement));
+    CBuffer_free(&(this->path));
+    CBuffer_free(&(this->query));
+    CBuffer_free(&(this->user_info));
+    eg_free(this);
+    this = NULL;
+}
+
 int xtest_url_01()
 {
     char* url = "http://www.somewhere.com/path1/path2?a=1111&b=2222";
@@ -91,7 +108,7 @@ int test_url_01()
     UT_EQUAL_INT(strcmp(CBuffer_data(uref->path), "/path1/path2"), 0);
     UT_EQUAL_INT(strcmp(CBuffer_data(uref->port), ""), 0);
     UT_EQUAL_INT(strcmp(CBuffer_data(uref->fragement), ""), 0);
-    UT_EQUAL_INT(strcmp(CBuffer_data(uref->query), "a-1111&b=2222"), 0);
+    UT_EQUAL_INT(strcmp(CBuffer_data(uref->query), "a=1111&b=2222"), 0);
     return 0;
 }
 

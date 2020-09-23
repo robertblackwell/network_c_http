@@ -88,9 +88,9 @@ function generate() {
 
 
   replace_include ${hand_coded_h} ${generated_h}  > ${outfile_h}
-  cp ${outfile_h} ${final_h}
+  cp -v ${outfile_h} ${final_h}
   replace_include ${hand_coded_c} ${generated_c}  > ${outfile_c}
-  cp ${outfile_c} ${final_c}
+  cp -v ${outfile_c} ${final_c}
 }
 
 function main() {

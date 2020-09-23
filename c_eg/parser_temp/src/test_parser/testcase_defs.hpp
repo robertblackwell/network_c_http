@@ -32,7 +32,7 @@ std::vector<std::string> make_header(std::string key, std::string value);
 
 /**
 * Create a set of testcases (a TestcaseDefinitions object) consiting of single messages with
-* various buffer arrangements to test that MessageReader paser works correctly
+* various buffer arrangements to test that Rdr paser works correctly
 * regardless of how the incoming data is buffered.
 */
 std::vector<Testcase> tc_make_buffering();

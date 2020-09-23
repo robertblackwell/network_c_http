@@ -1,6 +1,12 @@
 #ifndef c_eg_alloc_h
 #define c_eg_alloc_h
 #include <stddef.h>
+
+/// used to mark return type of functions that allocate memory
+#define MEMALLOC(type) type
+#define IFNULL(A, label) do { \
+    if((A) == NULL) goto label; \
+} while(0);
 /*
  * Use the macros not the functions
  */

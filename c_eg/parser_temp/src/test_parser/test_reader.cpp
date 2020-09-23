@@ -7,7 +7,7 @@
 
 #include <doctest/doctest.h>
 
-#include <marvin/message/message_reader_v2.hpp>
+#include <marvin/message/reader_v2.hpp>
 #include "mock_socket.hpp"
 #include "testcase.hpp"
 #include "helper_types.hpp"
@@ -19,9 +19,9 @@ using namespace Tests;
 using namespace Message;
 #if 0
 //-------------------------------------------------------------------------------------
-// Run a list of testcases (that exercise a MessageReader instance) using a mock socket 
+// Run a list of testcases (that exercise a Rdr instance) using a mock socket 
 // (that simulates asyn data arrival with a timer) reading an entire 
-// message -- using MessageReader::async_read_message() -- in a single call
+// message -- using Rdr::async_read_message() -- in a single call
 // to the messagereader
 //-------------------------------------------------------------------------------------
 void test_fullmessage(std::vector<Testcase> tcs)
@@ -41,10 +41,10 @@ void test_fullmessage(std::vector<Testcase> tcs)
     }
 }
 //-------------------------------------------------------------------------------------
-// Run a list of testcases (that exercise a MessageReader instance) using a mock socket
+// Run a list of testcases (that exercise a Rdr instance) using a mock socket
 // (as above simulating async io with a timer) reading a message in chunks, headers first
-// (using MessageReader::readHeader())
-// and then reads the message body in chunks (using MessageReader.readBodyData())
+// (using Rdr::readHeader())
+// and then reads the message body in chunks (using Rdr.readBodyData())
 // until EOM
 //-------------------------------------------------------------------------------------
 void test_streamingBody(std::vector<Testcase> tcs)

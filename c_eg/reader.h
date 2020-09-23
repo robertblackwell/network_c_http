@@ -1,5 +1,5 @@
-#ifndef c_c_eg_message_reader_h
-#define c_c_eg_message_reader_h
+#ifndef c_c_eg_reader_h
+#define c_c_eg_reader_h
 #include <c_eg/list.h>
 #include <c_eg/message.h>
 #include <c_eg/parser.h>

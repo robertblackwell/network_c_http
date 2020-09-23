@@ -37,7 +37,7 @@ typedef struct X_s {
 X wrtr_s = {42};
 XRef wrtr = &wrtr_s;
 
-void MessageWriter_start(HttpStatus status, HDRListRef headers)
+void Wrtr_start(HttpStatus status, HDRListRef headers)
 {
     const char* reason_str = http_status_str(status);
     char* first_line = NULL;
@@ -82,8 +82,8 @@ int test_handle_request()
     HeaderLineRef hl_content_type = HeaderLine_new(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
     HDRList_add_front(hdrs, hl_content_type);
 
-//    MessageWriter_start(wrtr, HTTP_STATUS_OK, hdrs);
-//    MessageWriter_write_chunk(wrtr, (void*) body, body_len);
+//    Wrtr_start(wrtr, HTTP_STATUS_OK, hdrs);
+//    Wrtr_write_chunk(wrtr, (void*) body, body_len);
 
     HDRList_free(&hdrs);
 //    HeaderLine_free(&(hl_content_length));

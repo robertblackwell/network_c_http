@@ -43,7 +43,7 @@ TestcaseDefinitions::TestcaseDefinitions(){}
 
 /**
 * Create a set of testcases (a TestcaseDefinitions object) consiting of single messages with
-* various buffer arrangements to test that MessageReader parser works correctly
+* various buffer arrangements to test that Rdr parser works correctly
 * regardless of how the incoming data is buffered. Does messages with a content-length
 * header and chunk-encoded messages
 */

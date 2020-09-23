@@ -9,7 +9,7 @@ typedef struct Worker_s Worker, *WorkerRef;
 
 WorkerRef Worker_new(QueueRef qref, int _id);
 void Worker_free(WorkerRef wref);
-void Worker_start(WorkerRef wref);
+int Worker_start(WorkerRef wref);
 
 pthread_t* Worker_pthread(WorkerRef);
 

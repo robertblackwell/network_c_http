@@ -1,4 +1,4 @@
-set(TARGET_RDR test_message_reader)
+set(TARGET_RDR test_reader)
 add_executable(${TARGET_RDR} 
 	main.cpp
 	test_reader.cpp

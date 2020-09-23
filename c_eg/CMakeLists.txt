@@ -7,22 +7,22 @@
 ##
 set(EXTSRC ${C_EG_VENDOR_SRCDIR})
 
-add_custom_command(
-	# generate mytypet list code
-	COMMAND bash ${C_EG_TOOLS_DIR}/gen_typed_list.sh generate MyType MT
-	DEPENDS list/template.h list/template.c mytype/hand_coded.h mytype/hand_coded.c
-	OUTPUT ${C_EG_SOURCE_DIR}/mytype_list.h ${C_EG_SOURCE_DIR}/mytype_list.c
-	COMMENT "Generating mytype_list.h mytype_list.c"
-	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-)
-add_custom_command(
-	# generate header_line list code
-	COMMAND bash ${C_EG_TOOLS_DIR}/gen_typed_list.sh generate HeaderLine HDR
-	DEPENDS list/template.h list/template.c headerline/hand_coded.h headerline/hand_coded.c
-	OUTPUT ${C_EG_SOURCE_DIR}/headerline_list.h ${C_EG_SOURCE_DIR}/headerline_list.c
-	COMMENT "Generating header_line_list.h header_line_list.c"
-	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-)
+#add_custom_command(
+#	# generate mytypet list code
+#	COMMAND bash ${C_EG_TOOLS_DIR}/gen_typed_list.sh generate MyType MT
+#	DEPENDS list/template.h list/template.c mytype/hand_coded.h mytype/hand_coded.c
+#	OUTPUT ${C_EG_SOURCE_DIR}/mytype_list.h ${C_EG_SOURCE_DIR}/mytype_list.c
+#	COMMENT "Generating mytype_list.h mytype_list.c"
+#	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+#)
+#add_custom_command(
+#	# generate header_line list code
+#	COMMAND bash ${C_EG_TOOLS_DIR}/gen_typed_list.sh generate HeaderLine HDR
+#	DEPENDS list/template.h list/template.c headerline/hand_coded.h headerline/hand_coded.c
+#	OUTPUT ${C_EG_SOURCE_DIR}/headerline_list.h ${C_EG_SOURCE_DIR}/headerline_list.c
+#	COMMENT "Generating header_line_list.h header_line_list.c"
+#	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+#)
 
 set(C_EG_LIBRARY_HEADER_FILES
 #	mytype_list.h
@@ -37,8 +37,8 @@ set(C_EG_LIBRARY_HEADER_FILES
 	server.h
 	queue.h
 	worker.h
-	message_reader.h
-	message_writer.h
+	reader.h
+	writer.h
 	list.h
 	header_line.h
 	headerline_list.h
@@ -62,8 +62,8 @@ set(C_EG_LIBRARY_SOURCE_FILES
 	server.c
 	queue.c
 	worker.c
-	message_reader.c
-	message_writer.c
+	reader.c
+	writer.c
 	list.c
 	header_line.c
 	headerline_list.c

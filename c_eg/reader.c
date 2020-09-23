@@ -1,6 +1,6 @@
 #define _GNU_SOURCE
 
-#include <c_eg/message_reader.h>
+#include <c_eg/reader.h>
 #include <c_eg/alloc.h>
 #include <c_eg/utils.h>
 #include <c_eg/buffer/iobuffer.h>
