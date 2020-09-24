@@ -1,13 +1,84 @@
 #define _GNU_SOURCE
 #include <assert.h>
 #include <stdio.h>
+#include <c_eg/alloc.h>
 #include <c_eg/unittest.h>
 #include <c_eg/buffer/contig_buffer.h>
 #include <c_eg/logger.h>
 #include <c_eg/list.h>
 #include <c_eg/server.h>
 #include <c_eg/headerline_list.h>
+#include <c_eg/client.h>
 #include <c_eg/message.h>
+#include <c_eg/reader.h>
+#include <c_eg/writer.h>
+
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+
+char* req1[] = {
+(char *) "GET /target HTTP/1.1\r\n",
+(char *) "Host: ahost\r\n",
+(char *) "Connection: close\r\n",
+(char *) "Content-length: 0\r\n\r\n",
+NULL
+};
+
+int test_client_01()
+{
+    ClientRef client = Client_new();
+    Client_connect(client, "localhost", 9001);
+    MessageRef response = Message_new();
+    Client_roundtrip(client, req1, &response);
+    CBufferRef cb = BufferChain_compact(Message_get_body(response));
+    return 0;
+}
+
+int client(int argc, char *argv[])
+{
+    int sockfd, portno, n;
+
+    struct sockaddr_in serv_addr;
+    struct hostent *server;
+
+    char buffer[256];
+    if (argc < 3) {
+        fprintf(stderr,"usage %s hostname port\n", argv[0]);
+        exit(0);
+    }
+    portno = atoi(argv[2]);
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if (sockfd < 0)
+        printf("ERROR opening socket");
+    server = gethostbyname(argv[1]);
+    if (server == NULL) {
+        fprintf(stderr,"ERROR, no such host\n");
+        exit(0);
+    }
+    bzero((char *) &serv_addr, sizeof(serv_addr));
+    serv_addr.sin_family = AF_INET;
+    bcopy((char *)server->h_addr,
+          (char *)&serv_addr.sin_addr.s_addr,
+          server->h_length);
+    serv_addr.sin_port = htons(portno);
+    if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0)
+        printf("ERROR connecting");
+    printf("Please enter the message: ");
+    bzero(buffer,256);
+    fgets(buffer,255,stdin);
+    n = write(sockfd,buffer,strlen(buffer));
+    if (n < 0)
+        printf("ERROR writing to socket");
+    bzero(buffer,256);
+    n = read(sockfd,buffer,255);
+    if (n < 0)
+        printf("ERROR reading from socket");
+    printf("%s\n",buffer);
+}
+
 char* simple_response_body(char* message, socket_handle_t socket, int pthread_self_value)
 {
     time_t t = time(NULL);
@@ -31,6 +102,7 @@ char* simple_response_body(char* message, socket_handle_t socket, int pthread_se
 
     return s1;
 }
+#ifdef lslsl
 typedef struct X_s {
     socket_handle_t socket;
 } X, *XRef;
@@ -93,9 +165,10 @@ int test_handle_request()
 
     return 0;
 }
+#endif
 int main()
 {
-    UT_ADD(test_handle_request);
+    UT_ADD(test_client_01);
     int rc = UT_RUN();
     return rc;
 }

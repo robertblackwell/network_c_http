@@ -46,7 +46,7 @@ bool Message_is_request(MessageRef mref);
 HttpStatus Message_get_status(MessageRef mref);
 void Message_set_status(MessageRef mref, HttpStatus status);
 
-HttpStatus Message_get_method(MessageRef mref);
+HttpMethod Message_get_method(MessageRef mref);
 void Message_set_method(MessageRef mref, HttpMethod method);
 
 HttpMinorVersion Message_get_minor_version(MessageRef mref);

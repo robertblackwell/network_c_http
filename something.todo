@@ -1,14 +1,14 @@
 TODO:
  ☐ change buffer tests to be pure C
  ☐ devise a test for XXXX_free() to ensure arg is set to NULL - all classes
- ☐ change name of HeaderLine to something like Hdr
+ ☐ change name of HeaderLine to something like Hdr or KVPair
  ☐ test queue add/remove
- ☐ convert queue to Typed List
+ ☐ convert queue to Typed List 
  ☐ replace all malloc/free pairs with Allocate/Deallocate
- ☐ test Allocate failure for all classes by stubbing Allocate
- 
+ ✔ test Allocate failure for all classes by stubbing Allocate - forget @done (20-09-23 17:42)
+ ☐ bug - parser does not return useful code from parser error
+ ☐ handler_example demo how to parse url/target, query string as tools for a meaningful handle function
+ ☐ make handler_example echo the request in a way that demonstrates if picked out all the relevant bits of the request
+ ☐ look at alternatives for making template classes 
+ ☐ documentation
 
-Tasks:
- ☐ code message and tests
- ☐ code parser and tests
- ☐ review parser read loop in test code

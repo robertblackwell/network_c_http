@@ -4,20 +4,21 @@
 // type of data to be held in the list
 typedef void* ListItem;
 
-//opaque type representing list
-struct List_s;
-typedef struct List_s List, *ListRef;
-
-//Internal - type used to build list
-struct ListNode_s;
-
 ///
 /// List is an opaque type. Can hold anonamous objects of type void*
 /// Typically used as the base for lists of specific types by casting
-/// MyType*/MyTypeRef to void*
+/// MyType*/MyTypeRef to void*.
+/// But can also hold int, long, char etc
 ///
-typedef struct ListNode_s ListNode, *ListNodeRef;
+struct List_s;
+typedef struct List_s List, *ListRef;
 
+//Internal - the type of nodes on the chain of nodes managed by
+// a List type.
+struct ListNode_s;
+
+typedef struct ListNode_s ListNode, *ListNodeRef;
+typedef ListNodeRef ListIterator;
 ///
 /// type definition for a function that knows how to deallocate
 /// the void* item field in a ListNode.

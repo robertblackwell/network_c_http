@@ -72,6 +72,9 @@ MessageRef Rdr_read(RdrRef this)
         int tmp_remaining = ctx->buffer_remaining;
         switch(ret.return_code) {
             case ParserRC_error:
+                printf("Got error from parser %d\n", ret.return_code);
+                ParserError pe = Parser_get_error(this->m_parser);
+                printf("Error details %s %s \n", pe.m_name, pe.m_description);
                 assert(false);
                 break;
             case ParserRC_end_of_data:

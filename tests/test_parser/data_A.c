@@ -1,5 +1,6 @@
 #include <c_eg/test_helper_types.h>
 #include <c_eg/unittest.h>
+#include <c_eg/message.h>
 
 #undef A_ON
 // A001
@@ -34,6 +35,39 @@ int test_A001_vfunc (ListRef messages)
     return 0;
 #endif
 }
+
+// A0011
+char* test_A0011_description = "response 200 with body and content length 10";
+char* test_A0011_lines[] = {
+(char *) "GET /target HTTP/1.1\r\n",
+(char *) "Host: ahost\r\n",
+(char *) "Connection: keep-alive\r\n",
+(char *) "Proxy-Connection: keep-alive\r\n",
+(char *) "Content-length: 0\r\n\r\n",
+NULL
+};
+
+int test_A0011_vfunc (ListRef messages)
+{
+    MessageRef m1 = (MessageRef) List_remove_first (messages);
+    HDRListRef h = Message_headers(m1);
+    int x = Message_get_status(m1);
+    UT_EQUAL_INT(Message_get_method(m1), HttpMethod);
+//    UT_EQUAL_CSTR(Message_get_reason(m1), "OK 11Reason Phrase");
+#ifdef A_ON
+    CHECK(h.at_key(HeaderFields::Host));
+    CHECK(h.at_key(HeaderFields::Connection));
+    CHECK(h.at_key(HeaderFields::ProxyConnection));
+    CHECK(h.at_key(HeaderFields::ContentLength));
+    CHECK(h.at_key(HeaderFields::Host).get() == "ahost");
+    CHECK(h.at_key(HeaderFields::Connection).get() == "keep-alive");
+    CHECK(h.at_key(HeaderFields::ProxyConnection).get() == "keep-alive");
+    CHECK(h.at_key(HeaderFields::ContentLength).get() == "11");
+    CHECK(m1->get_body_buffer_chain()->to_string() == "01234567890");
+    return 0;
+#endif
+}
+
 
 //A002
 char *test_A002_description = "response 201 body length 10 SOME body data in header buffer";
@@ -311,6 +345,7 @@ void test_A008_vfunc (ListRef messages)
 
 ListRef make_test_A()
 {
+    ParserTestRef test_A0011 = ParserTest_new(test_A0011_description, test_A0011_lines, test_A0011_vfunc);
     ParserTestRef test_A001 = ParserTest_new(test_A001_description, test_A001_lines, test_A001_vfunc);
     ParserTestRef test_A002 = ParserTest_new(test_A002_description, test_A002_lines, test_A002_vfunc);
     ParserTestRef test_A003 = ParserTest_new(test_A003_description, test_A003_lines, test_A003_vfunc);
@@ -320,6 +355,7 @@ ListRef make_test_A()
     ParserTestRef test_A007 = ParserTest_new(test_A007_description, test_A007_lines, test_A007_vfunc);
     ParserTestRef test_A008 = ParserTest_new(test_A008_description, test_A008_lines, test_A008_vfunc);
     ListRef tl = List_new(NULL);
+    List_add_back(tl, test_A0011);
     List_add_back(tl, test_A001);
     List_add_back(tl, test_A002);
     List_add_back(tl, test_A003);

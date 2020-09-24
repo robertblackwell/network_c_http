@@ -61,11 +61,12 @@ socket_handle_t create_listener_socket(int port, const char* host)
         assert(0);
 }
 
-ServerRef Server_new(int port)
+ServerRef Server_new(int port, HandlerFunction handler)
 {
     ServerRef sref = (ServerRef)eg_alloc(sizeof(Server));
     sref->nbr_workers = NBR_WORKERS;
     sref->port = port;
+    sref->handler = handler;
     sref->qref = Queue_new();
     return sref;
 }
@@ -86,7 +87,8 @@ void Server_listen(ServerRef sref)
     //
     for(int i = 0; i < sref->nbr_workers; i++)
     {
-        WorkerRef wref = Worker_new(sref->qref, i);
+        WorkerRef wref = Worker_new(sref->qref, i, sref->handler);
+//        sref->handler(NULL, NULL);
         sref->worker_tab[i] = NULL;
         if(Worker_start(wref) != 0) {
             printf("Server failed starting thread - aborting\n");
@@ -125,10 +127,10 @@ void Server_listen(ServerRef sref)
     for(int i = 0; i < sref->nbr_workers; i++) {
         WorkerRef wref = sref->worker_tab[i];
         if(wref != NULL) {
-            pthread_join( *Worker_pthread(wref), NULL);
+            Worker_join(wref);
             Worker_free(wref);
         }
-        printf("Server joining thread %d\n", i);
+        printf("Server joining thread %d  %p\n", i, wref);
     }
     Queue_free(&(sref->qref));
     printf("Server_listen Queue_free() done \n");

@@ -7,7 +7,7 @@
 #include <stdio.h>
 struct Message_s
 {
-    void *body;
+    BufferChainRef body;
     HDRListRef headers;
     int major_vers;
     HttpMinorVersion minor_vers;
@@ -161,6 +161,10 @@ void Message_set_version(MessageRef this, int major_vers, int minor_vers)
 void Message_set_method(MessageRef this, HttpMethod method)
 {
     this->method = method;
+}
+HttpMethod Message_get_method(MessageRef this)
+{
+    return this->method;
 }
 CBufferRef Message_get_target(MessageRef this)
 {

@@ -25,52 +25,52 @@ set(EXTSRC ${C_EG_VENDOR_SRCDIR})
 #)
 
 set(C_EG_LIBRARY_HEADER_FILES
-#	mytype_list.h
-#	mytype.h
 	alloc.h
-	unittest.h
-	test_helper_types.h
 	buffer/contig_buffer.h
 	buffer/buffer_chain.h
 	buffer/iobuffer.h
-	logger.h
-	server.h
-	queue.h
-	worker.h
-	reader.h
-	writer.h
-	list.h
+	client.h
+	handler.h
+	handler_example.h
 	header_line.h
 	headerline_list.h
-	utils.h
-
-	${EXTSRC}/http-parser/http_parser.h
+	list.h
+	logger.h
 	message.h
 	parser.h
+	queue.h
+	reader.h
+	server.h
+	test_helper_types.h
+	unittest.h
+	utils.h
+	worker.h
+	writer.h
+	${EXTSRC}/http-parser/http_parser.h
 	)
 
 set(C_EG_LIBRARY_SOURCE_FILES
-#	mytype_list.c
-#	mytype.c
 	alloc.c
-	test_helper_types.c
-	unittest.c
 	buffer/buffer_chain.c
 	buffer/contig_buffer.c
 	buffer/iobuffer.c
-	logger.c		
-	server.c
-	queue.c
-	worker.c
-	reader.c
-	writer.c
-	list.c
+	client.c
+	handler_example.c
 	header_line.c
 	headerline_list.c
-	utils.c
-	${EXTSRC}/http-parser/http_parser.c
+	list.c
+	logger.c
 	message.c
 	parser.c
+	queue.c
+	reader.c
+	server.c
+	test_helper_types.c
+	unittest.c
+	utils.c
+	worker.c
+	writer.c
+	${EXTSRC}/http-parser/http_parser.c
 	)
 
 set_source_files_properties(${C_EG_LIBRARY_SOURCE_FILES} PROPERTIES LANGUAGE C)

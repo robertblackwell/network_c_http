@@ -1,4 +1,5 @@
 #include <c_eg/server.h>
+#include <c_eg/handler_example.h>
 #include <stdio.h>
 #include <mcheck.h>
 #include<signal.h>
@@ -22,7 +23,7 @@ int main()
         printf("app.c main signal() failed");
     }
     printf("Hello this is main \n");
-    ServerRef sref = Server_new(9001);
+    ServerRef sref = Server_new(9001, handler_example);
     g_sref = sref;
     Server_listen(sref);
     Server_free(&sref);
