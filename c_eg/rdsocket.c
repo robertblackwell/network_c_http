@@ -10,38 +10,60 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <unistd.h>
+#include <errno.h>
 
 /**
  * These adapter functions are necessary since the read function that work on real sockets has a different calling signature than
  * the DataSource_read() function that work on DataSourceRef. These two wrappers uniformize the signature
  */
-static int socket_read(void* sock_ctx, void* buffer, int len)
+ /**
+  *
+  * \param sock_ctx An OS sock file descriptor(int) cast to a void*. Needs to be cast back before use
+  * \param buffer   void* pointer to buffer
+  * \param len      int   len of available space in the buffer
+  * \return         int number of bytes read on success,
+  *                 0 generally means the socket was closed at the other end,
+  *                 negative means io error
+  */
+static int socket_read(RdSocketRef rdsock_ref, void* buffer, int len)
 {
-    int bytes_read = (int)read((int)sock_ctx, buffer, len);
+
+    void* sock_ctx = rdsock_ref->ctx;
+
+    int sock_fd = (int)(long)sock_ctx;
+    int bytes_read = (int)read(sock_fd, buffer, len);
+    rdsock_ref->m_errno = errno;
     return bytes_read;
 }
 
-static int datasource_read(void* sock_ctx, void* buffer, int len)
+static int datasource_read(RdSocketRef rdsock_ref, void* buffer, int len)
 {
+    void* sock_ctx = rdsock_ref->ctx;
     DataSourceRef dsref = (DataSourceRef)(sock_ctx);
     int bytes_read = DataSource_read((DataSourceRef)sock_ctx, buffer, len);
+    rdsock_ref->m_errno = dsref->m_errno;
     return bytes_read;
 }
 
-RdSocket RealSocket(int socket)
+RdSocket RealSocket(int sock)
 {
     RdSocket rdsock;
-    rdsock.read_f = &socket_read;
-    rdsock.ctx = socket;
+    rdsock.read_f = (ReadFunc) &socket_read;
+    /**
+     * this next cast could conceivably be a problem is sizeof(int) > sizeof(void*) - so test
+     */
+    static_assert(sizeof(int) <= sizeof(void*));
+    rdsock.ctx = (void*)(long)sock;
     return rdsock;
 }
 RdSocket DataSourceSocket(DataSourceRef dsref)
 {
-    RdSocket rdsock = {.ctx=(void*)dsref, .read_f=&datasource_read};
+    RdSocket rdsock = {.ctx=(void*)dsref, .read_f=(ReadFunc) &datasource_read};
     return rdsock;
 }
 int RdSocket_read(RdSocketRef rdsock, void* buffer, int len)
 {
     DataSourceRef tmp = (DataSourceRef)rdsock->ctx;
-    return rdsock->read_f(rdsock->ctx, buffer, len);
+    int bytes_read = rdsock->read_f(rdsock, buffer, len);
+    return bytes_read;
 }

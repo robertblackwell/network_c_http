@@ -48,6 +48,7 @@ int DataSource_read(DataSourceRef this, void* buffer, int length)
     if (block == NULL) {
         return 0;
     } else if (strcmp(block, "error") == 0) {
+        this->m_errno = -99;
         return -1;
     } else {
         this->m_block_count++;

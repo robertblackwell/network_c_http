@@ -11,10 +11,20 @@
  * Generally a DataSource is created from the lines in a ParserTest
  */
 typedef struct DataSource_s {
-    // points as the current block being provided
-    int   m_block_count;
-    /** A array/list of data blocks null terminated*/
-    char** m_blocks;
+    /**
+     *  points as the current block being provided
+     */
+    int     m_block_count;
+
+    /**
+     *  A array/list of data blocks null terminated
+     */
+    char**  m_blocks;
+    /**
+     * errno from most recent simulated io error
+     */
+    int     m_errno;
+
 } DataSource, *DataSourceRef;
 
 void DataSource_init(DataSourceRef this, char* blocks[]);
