@@ -30,6 +30,7 @@ set(C_EG_LIBRARY_HEADER_FILES
 	buffer/buffer_chain.h
 	buffer/iobuffer.h
 	client.h
+	datasource.h
 	handler.h
 	handler_example.h
 	header_line.h
@@ -38,10 +39,12 @@ set(C_EG_LIBRARY_HEADER_FILES
 	logger.h
 	message.h
 	parser.h
+	parser_test.h
 	queue.h
 	reader.h
+	rdsocket.h
 	server.h
-	test_helper_types.h
+#	test_helper_types.h
 	unittest.h
 	utils.h
 	worker.h
@@ -55,6 +58,7 @@ set(C_EG_LIBRARY_SOURCE_FILES
 	buffer/contig_buffer.c
 	buffer/iobuffer.c
 	client.c
+	datasource.c
 	handler_example.c
 	header_line.c
 	headerline_list.c
@@ -62,10 +66,12 @@ set(C_EG_LIBRARY_SOURCE_FILES
 	logger.c
 	message.c
 	parser.c
+	parser_test.c
 	queue.c
 	reader.c
+	rdsocket.c
 	server.c
-	test_helper_types.c
+#	test_helper_types.c
 	unittest.c
 	utils.c
 	worker.c

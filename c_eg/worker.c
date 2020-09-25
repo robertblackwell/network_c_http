@@ -45,6 +45,12 @@ void Worker_free(WorkerRef wref)
     free((void*)wref);
 }
 
+void handle_parse_error(MessageRef requestref, WrtrRef wrtr)
+{
+    char* reply = "HTTP/1.1 400 BAD REQUEST \r\nContent-length: 0\r\n\r\n";
+    Wrtr_write_chunk(wrtr, (void*)reply, strlen(reply));
+}
+
 static void* Worker_main(void* data)
 {
     ASSERT_NOT_NULL(data);
@@ -65,22 +71,34 @@ static void* Worker_main(void* data)
             break;
         }
         wref->active_socket = (int) mySocketHandle;
-        int socket = mySocketHandle;
+        int sock = mySocketHandle;
         wref->active = true;
         if((parser_ref = Parser_new()) == NULL) goto finalize;
-        if((rdr = Rdr_new(parser_ref, socket)) == NULL) goto finalize;
-        if((wrtr = Wrtr_new(socket)) == NULL) goto finalize;
+        RdSocket rdsock = RealSocket(sock);
+        if((rdr = Rdr_new(parser_ref, rdsock)) == NULL) goto finalize;
+        if((wrtr = Wrtr_new(sock)) == NULL) goto finalize;
 
-        while((request_msg_ref = Rdr_read(rdr)) != NULL) {
-            printf("Got a request socket: %d pthread_self %ld\n", socket, pthread_self());
-            if(0 == wref->handler(request_msg_ref, wrtr)) goto finalize;
-            Message_free(&request_msg_ref);
-            close(socket);
-            socket = 0;
+        while(1) {
+            printf("Got a request socket: %d pthread_self %ld\n", sock, pthread_self());
+            int rc = Rdr_read(rdr, &request_msg_ref);
+            if((rc == RDR_OK) && (request_msg_ref != NULL)) {
+                if(0 == wref->handler(request_msg_ref, wrtr)) goto finalize;
+                Message_free(&request_msg_ref);
+                close(sock);
+                sock = 0;
+                break;
+            } else if(rc == RDR_PARSE_ERROR) {
+                // send a reply bad request
+                printf("Worker: parse error");
+                handle_parse_error(request_msg_ref, wrtr);
+                break;
+            } else {
+                break;
+            }
         }
 
         finalize:
-            if(socket != 0) close(socket);
+            if(sock != 0) close(sock);
             if(request_msg_ref != NULL) Message_free(&request_msg_ref);
             if(parser_ref != NULL) Parser_free(&parser_ref);
             if(wrtr != NULL) Wrtr_free(&wrtr);

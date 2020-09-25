@@ -7,8 +7,10 @@
 #include <c_eg/unittest.h>
 #include <c_eg/logger.h>
 #include <c_eg/header_line.h>
-#include <c_eg/test_helper_types.h>
+#include <c_eg/datasource.h>
+#include <c_eg/parser_test.h>
 #include <c_eg/message.h>
+#include <c_eg/reader.h>
 
 #undef A_ON
 #define CHECK_HEADER(h, K, V) do {\
@@ -25,7 +27,7 @@
 } while(0);
 
 // A0011
-char* test_A0011_description = "get with zero body";
+char* test_A0011_description = "A0011 parser error";
 char* test_A0011_lines[] = {
 (char *) "GET /target HTTP/1.\r\n",
 (char *) "Host: ahost\r\n",
@@ -35,12 +37,43 @@ char* test_A0011_lines[] = {
 NULL
 };
 
-int test_A0011_vfunc (ListRef messages)
+int test_A0011_vfunc (ListRef results)
 {
-    MessageRef m1 = (MessageRef) List_remove_first (messages);
-    HDRListRef h = Message_headers(m1);
-    HttpMethod x = Message_get_method(m1);
-    UT_EQUAL_INT(Message_get_method(m1), HTTP_GET);
+    ReadResultRef rref = (ReadResultRef) List_remove_first (results);
+    MessageRef m1 = rref->message;
+    UT_EQUAL_INT(rref->rc, RDR_PARSE_ERROR);
+    return 0;
+//    UT_EQUAL_CSTR(Message_get_reason(m1), "OK 11Reason Phrase");
+#ifdef A_ON
+    CHECK(h.at_key(HeaderFields::Host));
+    CHECK(h.at_key(HeaderFields::Connection));
+    CHECK(h.at_key(HeaderFields::ProxyConnection));
+    CHECK(h.at_key(HeaderFields::ContentLength));
+    CHECK(h.at_key(HeaderFields::Host).get() == "ahost");
+    CHECK(h.at_key(HeaderFields::Connection).get() == "keep-alive");
+    CHECK(h.at_key(HeaderFields::ProxyConnection).get() == "keep-alive");
+    CHECK(h.at_key(HeaderFields::ContentLength).get() == "11");
+    CHECK(m1->get_body_buffer_chain()->to_string() == "01234567890");
+    return 0;
+#endif
+}
+
+// A0012
+char* test_A0012_description = "A0012 simulated io error";
+char* test_A0012_lines[] = {
+(char *) "GET /target HTTP/1.1\r\n",
+(char *) "Host: ahost\r\n",
+(char *) "Connection: keep-alive\r\n",
+(char *) "Proxy-Connection: keep-alive\r\n",
+(char *) "error",
+NULL
+};
+
+int test_A0012_vfunc (ListRef results)
+{
+    ReadResultRef rref = (ReadResultRef) List_remove_first (results);
+    MessageRef m1 = rref->message;
+    UT_EQUAL_INT(rref->rc, RDR_IO_ERROR);
     return 0;
 //    UT_EQUAL_CSTR(Message_get_reason(m1), "OK 11Reason Phrase");
 #ifdef A_ON
@@ -70,9 +103,10 @@ char *test_A001_lines[] = {
 NULL
 };
 
-int test_A001_vfunc (ListRef messages)
+int test_A001_vfunc (ListRef results)
 {
-    MessageRef m1 = (MessageRef) List_remove_first (messages);
+    ReadResultRef rref = (ReadResultRef) List_remove_first (results);
+    MessageRef m1 = rref->message;
     HDRListRef h = Message_headers (m1);
     UT_EQUAL_INT(Message_get_status (m1), 200);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 11Reason Phrase");
@@ -99,9 +133,10 @@ char *test_A002_lines[] = {
 NULL
 };
 
-int test_A002_vfunc (ListRef messages)
+int test_A002_vfunc (ListRef results)
 {
-    MessageRef m1 = (MessageRef) List_remove_first (messages);
+    ReadResultRef rref = (ReadResultRef) List_remove_first (results);
+    MessageRef m1 = rref->message;
     HDRListRef h = Message_headers (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 22Reason Phrase");
@@ -127,9 +162,10 @@ char *test_A003_lines[] = {
 NULL
 };
 
-int test_A003_vfunc (ListRef messages)
+int test_A003_vfunc (ListRef results)
 {
-    MessageRef m1 = (MessageRef) List_remove_first (messages);
+    ReadResultRef rref = (ReadResultRef) List_remove_first (results);
+    MessageRef m1 = rref->message;
     HDRListRef h = Message_headers (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 22Reason Phrase");
@@ -179,9 +215,10 @@ char *test_A004_lines[] = {
 NULL
 };
 
-int test_A004_vfunc (ListRef messages)
+int test_A004_vfunc (ListRef results)
 {
-    MessageRef m1 = (MessageRef) List_remove_first (messages);
+    ReadResultRef rref = (ReadResultRef) List_remove_first (results);
+    MessageRef m1 = rref->message;
     HDRListRef h = Message_headers (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK Reason Phrase");
@@ -214,9 +251,10 @@ char *test_A005_lines[] = {
 NULL
 };
 
-int test_A005_vfunc (ListRef messages)
+int test_A005_vfunc (ListRef results)
 {
-    MessageRef m1 = (MessageRef) List_remove_first (messages);
+    ReadResultRef rref = (ReadResultRef) List_remove_first (results);
+    MessageRef m1 = rref->message;
     HDRListRef h = Message_headers (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK Reason Phrase");
@@ -250,9 +288,10 @@ char *test_A006_lines[] = {
 NULL
 };
 
-int test_A006_vfunc (ListRef messages)
+int test_A006_vfunc (ListRef results)
 {
-    MessageRef m1 = (MessageRef) List_remove_first (messages);
+    ReadResultRef rref = (ReadResultRef) List_remove_first (results);
+    MessageRef m1 = rref->message;
     HDRListRef h = Message_headers (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK Reason Phrase");
@@ -288,10 +327,12 @@ char *test_A007_lines[] = {
 NULL
 };
 
-int test_A007_vfunc (ListRef messages)
+int test_A007_vfunc (ListRef results)
 {
-    MessageRef m1 = (MessageRef) List_remove_first (messages);
-    MessageRef m2 = (MessageRef) List_remove_first (messages);
+    ReadResultRef rref = (ReadResultRef) List_remove_first (results);
+    MessageRef m1 = rref->message;
+    ReadResultRef rref2 = (ReadResultRef) List_remove_first (results);
+    MessageRef m2 = rref2->message;
     UT_NOT_EQUAL_PTR(m1, m2);
     UT_NOT_EQUAL_PTR(m1, NULL);
     UT_NOT_EQUAL_PTR(m2, NULL);
@@ -344,9 +385,10 @@ char *test_A008_lines[] = {
 (char *) NULL,
 };
 
-int test_A008_vfunc (ListRef messages)
+int test_A008_vfunc (ListRef results)
 {
-    MessageRef m1 = (MessageRef) List_remove_first (messages);
+    ReadResultRef rref = (ReadResultRef) List_remove_first (results);
+    MessageRef m1 = rref->message;
     HDRListRef h = Message_headers (m1);
     int n = HDRList_size (h);
     UT_EQUAL_INT(Message_get_status (m1), 200);
@@ -364,6 +406,7 @@ int test_A008_vfunc (ListRef messages)
 ListRef make_test_A ()
 {
     ParserTestRef test_A0011 = ParserTest_new (test_A0011_description, test_A0011_lines, test_A0011_vfunc);
+    ParserTestRef test_A0012 = ParserTest_new (test_A0012_description, test_A0012_lines, test_A0012_vfunc);
     ParserTestRef test_A001 = ParserTest_new (test_A001_description, test_A001_lines, test_A001_vfunc);
     ParserTestRef test_A002 = ParserTest_new (test_A002_description, test_A002_lines, test_A002_vfunc);
     ParserTestRef test_A003 = ParserTest_new (test_A003_description, test_A003_lines, test_A003_vfunc);
@@ -374,6 +417,7 @@ ListRef make_test_A ()
     ParserTestRef test_A008 = ParserTest_new (test_A008_description, test_A008_lines, test_A008_vfunc);
     ListRef tl = List_new (NULL);
     List_add_back (tl, test_A0011);
+    List_add_back (tl, test_A0012);
     List_add_back (tl, test_A001);
     List_add_back (tl, test_A002);
     List_add_back (tl, test_A003);

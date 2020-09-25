@@ -26,6 +26,7 @@ add_subdirectory(test_list)
 add_subdirectory(test_header_line)
 add_subdirectory(test_hdrlist)
 add_subdirectory(test_parser)
+add_subdirectory(test_funcptr)
 
 if (OFF)
 endif()

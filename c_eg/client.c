@@ -54,10 +54,11 @@ void Client_connect(ClientRef this, char* host, int portno)
     this->sock = sockfd;
     this->wrtr = Wrtr_new(sockfd);
     this->parser = Parser_new();
-    this->rdr = Rdr_new(this->parser, sockfd);
+    RdSocket rdsock = RealSocket(sockfd);
+    this->rdr = Rdr_new(this->parser, rdsock);
 
 }
-void Client_roundtrip(ClientRef this, char* req_buffers[], MessageRef* response)
+void Client_roundtrip(ClientRef this, char* req_buffers[], MessageRef* response_ptr)
 {
     int buf_index = 0;
     int buf_len;
@@ -69,7 +70,7 @@ void Client_roundtrip(ClientRef this, char* req_buffers[], MessageRef* response)
         int bytes_written = write(this->sock, buf, buf_len);
         buf_index++;
     }
-    *response = Rdr_read(this->rdr);
+    int rc = Rdr_read(this->rdr, response_ptr);
 
     close(this->sock);
 }
