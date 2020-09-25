@@ -18,7 +18,7 @@ NULL
 int test_A001_vfunc (ListRef messages)
 {
     MessageRef m1 = (MessageRef) List_remove_first (messages);
-    HDRListRef h = Message_headers(m1);
+    HdrListRef h = Message_headers(m1);
     int x = Message_get_status(m1);
     UT_EQUAL_INT(Message_get_status(m1), 200);
     UT_EQUAL_CSTR(Message_get_reason(m1), "OK 11Reason Phrase");
@@ -50,7 +50,7 @@ NULL
 int test_A0011_vfunc (ListRef messages)
 {
     MessageRef m1 = (MessageRef) List_remove_first (messages);
-    HDRListRef h = Message_headers(m1);
+    HdrListRef h = Message_headers(m1);
     int x = Message_get_status(m1);
     UT_EQUAL_INT(Message_get_method(m1), HttpMethod);
 //    UT_EQUAL_CSTR(Message_get_reason(m1), "OK 11Reason Phrase");

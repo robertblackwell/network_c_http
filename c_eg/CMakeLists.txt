@@ -16,11 +16,11 @@ set(EXTSRC ${C_EG_VENDOR_SRCDIR})
 #	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 #)
 #add_custom_command(
-#	# generate header_line list code
-#	COMMAND bash ${C_EG_TOOLS_DIR}/gen_typed_list.sh generate HeaderLine HDR
+#	# generate kvpair list code
+#	COMMAND bash ${C_EG_TOOLS_DIR}/gen_typed_list.sh generate KVPair HDR
 #	DEPENDS list/template.h list/template.c headerline/hand_coded.h headerline/hand_coded.c
-#	OUTPUT ${C_EG_SOURCE_DIR}/headerline_list.h ${C_EG_SOURCE_DIR}/headerline_list.c
-#	COMMENT "Generating header_line_list.h header_line_list.c"
+#	OUTPUT ${C_EG_SOURCE_DIR}/hdrlist.h ${C_EG_SOURCE_DIR}/hdrlist.c
+#	COMMENT "Generating kvpair_list.h kvpair_list.c"
 #	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
 #)
 
@@ -33,8 +33,8 @@ set(C_EG_LIBRARY_HEADER_FILES
 	datasource.h
 	handler.h
 	handler_example.h
-	header_line.h
-	headerline_list.h
+	kvpair.h
+	hdrlist.h
 	list.h
 	logger.h
 	message.h
@@ -60,8 +60,8 @@ set(C_EG_LIBRARY_SOURCE_FILES
 	client.c
 	datasource.c
 	handler_example.c
-	header_line.c
-	headerline_list.c
+	kvpair.c
+	hdrlist.c
 	list.c
 	logger.c
 	message.c

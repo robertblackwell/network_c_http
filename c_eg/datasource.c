@@ -1,17 +1,9 @@
 #define _GNU_SOURCE
 
 #include <c_eg/datasource.h>
-#include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
 #include <assert.h>
 #include <c_eg/alloc.h>
-
-#include <c_eg/unittest.h>
-#include <c_eg/utils.h>
-#include <c_eg/buffer/iobuffer.h>
-#include <c_eg/rdsocket.h>
-#include <c_eg/reader.h>
 
 /**
  *

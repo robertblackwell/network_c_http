@@ -9,7 +9,7 @@
 #include <c_eg/list.h>
 #include <c_eg/rdsocket.h>
 #include <c_eg/server.h>
-#include <c_eg/headerline_list.h>
+#include <c_eg/hdrlist.h>
 #include <c_eg/message.h>
 
 void testfunc()

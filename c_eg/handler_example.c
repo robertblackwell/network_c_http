@@ -49,9 +49,9 @@ int handler_example(MessageRef request, WrtrRef wrtr)
     char* msg = "<h2>this is a message</h2>";
     char* body = NULL;
     char* body_len_str = NULL;
-    HDRListRef hdrs = NULL;
-    HeaderLineRef hl_content_length = NULL;
-    HeaderLineRef hl_content_type = NULL;
+    HdrListRef hdrs = NULL;
+    KVPairRef hl_content_length = NULL;
+    KVPairRef hl_content_type = NULL;
     int return_value = 0;
 
     printf("Handle request\n");
@@ -60,16 +60,16 @@ int handler_example(MessageRef request, WrtrRef wrtr)
     int body_len = strlen(body);
     if(-1 == asprintf(&body_len_str, "%d", body_len)) goto finalize;
 
-    if((hdrs = HDRList_new()) == NULL) goto finalize;
+    if((hdrs = HdrList_new()) == NULL) goto finalize;
 
-    if((hl_content_length = HeaderLine_new(HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str))) == NULL) goto finalize;
+    if((hl_content_length = KVPair_new(HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str))) == NULL) goto finalize;
 
-    HDRList_add_front(hdrs, hl_content_length);
+    HdrList_add_front(hdrs, hl_content_length);
 
     char* content_type = "text/html; charset=UTF-8";
-    if((hl_content_type = HeaderLine_new(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type))) == NULL) goto finalize;
+    if((hl_content_type = KVPair_new(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type))) == NULL) goto finalize;
 
-    HDRList_add_front(hdrs, hl_content_type);
+    HdrList_add_front(hdrs, hl_content_type);
 
     Wrtr_start(wrtr, HTTP_STATUS_OK, hdrs);
     Wrtr_write_chunk(wrtr, (void*) body, body_len);
@@ -77,7 +77,7 @@ int handler_example(MessageRef request, WrtrRef wrtr)
     return_value = 1;
 
     finalize:
-    if(hdrs != NULL) HDRList_free(&hdrs);
+    if(hdrs != NULL) HdrList_free(&hdrs);
     if(body != NULL) free(body);
     if(body_len_str != NULL) free(body_len_str);
     return return_value;

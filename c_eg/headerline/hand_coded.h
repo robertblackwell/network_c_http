@@ -1,50 +1,50 @@
-#ifndef c_ceg_headerline_list_h
-#define c_ceg_headerline_list_h
-#include <c_eg/header_line.h>
+#ifndef c_ceg_hdrlist_h
+#define c_ceg_hdrlist_h
+#include <c_eg/kvpair.h>
 #include <c_eg/buffer/contig_buffer.h>
 
 
 __LIST_INCLUDE_H__
 
 ///
-/// Create a new HeaderLine instance from key and value and add
-/// that HeaderLine to the HDRList.
+/// Create a new KVPair instance from key and value and add
+/// that KVPair to the HdrList.
 ///
-/// The content of key and value are copied into the new HeaderLine instance
+/// The content of key and value are copied into the new KVPair instance
 /// and hence ownership of key and value remain with the caller
 ///
-/// \param this HDRListRef
+/// \param this HdrListRef
 /// \param key CBufferRef
 /// \param CBufferRef
 /// \return void
 ///
-void HDRList_add(HDRListRef this, CBufferRef key, CBufferRef value);
+void HdrList_add(HdrListRef this, CBufferRef key, CBufferRef value);
 
 ///
-/// Find a HeaderLine in a HDRList by key/label value
+/// Find a KVPair in a HdrList by key/label value
 ///
-/// \param hlref HDRListRef
+/// \param hlref HdrListRef
 /// \param key   char*
-/// \return    HeaderLineRef or NULL
+/// \return    KVPairRef or NULL
 ///            NULL on not found
-///            NOTE: If found the HeaderLineRef returns is still owned by the HDRList
-///            do not call HeaderLine_free() on the returned value
+///            NOTE: If found the KVPairRef returns is still owned by the HdrList
+///            do not call KVPair_free() on the returned value
 ///
-HeaderLineRef HDRList_find(HDRListRef hlref, char* key);
+KVPairRef HdrList_find(HdrListRef hlref, char* key);
 
 ///
-/// Remove a HeaderLine from the HDRList by key/label
+/// Remove a KVPair from the HdrList by key/label
 ///
-/// \param hlref HDRListRef
+/// \param hlref HdrListRef
 /// \param key   char*
 ///
-void HDRList_remove(HDRListRef hlref, char* key);
+void HdrList_remove(HdrListRef hlref, char* key);
 
 /// Serialize a header list into a CBufferRef
-/// \param this HDRListRef
+/// \param this HdrListRef
 /// \return A serialized version of the header list as a CBuffer.
 ///         NOTE: ownership of the CBuffer is transfered to the caller
-CBufferRef HDRList_serialize(HDRListRef this);
+CBufferRef HdrList_serialize(HdrListRef this);
 
 ///
 /// Adds a new header line to the list
@@ -57,7 +57,7 @@ CBufferRef HDRList_serialize(HDRListRef this);
 /// to deal with the two CBufferRef as they wish.
 ///
 ///
-void HDRList_add_cbuf(HDRListRef this, CBufferRef key, CBufferRef value);
+void HdrList_add_cbuf(HdrListRef this, CBufferRef key, CBufferRef value);
 
 ///
 /// Adds a new header line to the list
@@ -72,7 +72,7 @@ void HDRList_add_cbuf(HDRListRef this, CBufferRef key, CBufferRef value);
 /// to deal with the two char* buffers as they wish.
 ///
 ////
-void HDRList_add_line(HDRListRef this, char* label, int lablen, char* value, int vallen);
+void HdrList_add_line(HdrListRef this, char* label, int lablen, char* value, int vallen);
 
 ///
 /// Adds a new header line to the list
@@ -85,6 +85,6 @@ void HDRList_add_line(HDRListRef this, char* label, int lablen, char* value, int
 /// to deal with the two char* buffers as they wish.
 ///
 ///
-void HDRList_add_cstr(HDRListRef this, char* label, char* value);
+void HdrList_add_cstr(HdrListRef this, char* label, char* value);
 
 #endif

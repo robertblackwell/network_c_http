@@ -211,14 +211,14 @@ void* List_remove_last(ListRef lref)
 }
 
 //gets an iterator for the list which initially will be pointing at the first Node in the list
-ListNodeRef List_iterator(ListRef lref)
+ListIterator List_iterator(ListRef lref)
 {
     ASSERT_NOT_NULL(lref);
     return lref->head;
 }
 
 // moves the iterator on to the next Node on the list, returns NULL if goes off the end of the list
-ListNodeRef List_itr_next(ListRef lref, ListNodeRef itr)
+ListIterator List_itr_next(ListRef lref, ListIterator itr)
 {
     ASSERT_NOT_NULL(lref);
     ASSERT_NOT_NULL(itr);
@@ -227,7 +227,7 @@ ListNodeRef List_itr_next(ListRef lref, ListNodeRef itr)
 
 // removes a list item pointed at by an iterator - invalidates the itr
 // and if there is a dealloc function call it on the content of the list node
-void List_itr_remove(ListRef lref, ListNodeRef* itr_ptr)
+void List_itr_remove(ListRef lref, ListIterator* itr_ptr)
 {
     ASSERT_NOT_NULL(lref);
     ListNodeRef itr = *itr_ptr;
@@ -258,7 +258,7 @@ void List_itr_remove(ListRef lref, ListNodeRef* itr_ptr)
 }
 
 // gets the value of the item held in the Node pointed at by this iterator
-void* List_itr_unpack(ListRef lref, ListNodeRef itr)
+void* List_itr_unpack(ListRef lref, ListIterator itr)
 {
     ASSERT_NOT_NULL(lref);
     ASSERT_NOT_NULL(itr);

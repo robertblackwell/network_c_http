@@ -3,9 +3,9 @@
 message("test_include_dirs     ${TEST_INCLUDE_DIRS}")
 message("test_link_libs        ${TEST_LINK_LIBS}")
 
-set(TARGET test_header_line)
+set(TARGET test_client)
 add_executable(${TARGET}
-	test_main.c
+	test_client.c
 )
 
 target_include_directories(${TARGET} 

@@ -7,7 +7,7 @@
 #include <c_eg/logger.h>
 #include <c_eg/list.h>
 #include <c_eg/server.h>
-#include <c_eg/headerline_list.h>
+#include <c_eg/hdrlist.h>
 #include <c_eg/client.h>
 #include <c_eg/message.h>
 #include <c_eg/reader.h>
@@ -109,7 +109,7 @@ typedef struct X_s {
 X wrtr_s = {42};
 XRef wrtr = &wrtr_s;
 
-void Wrtr_start(HttpStatus status, HDRListRef headers)
+void Wrtr_start(HttpStatus status, HdrListRef headers)
 {
     const char* reason_str = http_status_str(status);
     char* first_line = NULL;
@@ -119,10 +119,10 @@ void Wrtr_start(HttpStatus status, HDRListRef headers)
     CBufferRef cb_output_ref = NULL;
     if((cb_output_ref = CBuffer_new()) == NULL) goto failed;
     CBufferRef serialized_headers = NULL;
-    serialized_headers = HDRList_serialize(headers);
+    serialized_headers = HdrList_serialize(headers);
 
     CBuffer_append(cb_output_ref, (void*)first_line, len);
-    /// this is clumsy - change HDRList_serialize() to deposit into an existing ContigBuffer
+    /// this is clumsy - change HdrList_serialize() to deposit into an existing ContigBuffer
     CBuffer_append(cb_output_ref, CBuffer_data(serialized_headers), CBuffer_size(serialized_headers));
     CBuffer_append_cstr(cb_output_ref, "\r\n");
     int x = len+2;
@@ -147,19 +147,19 @@ int test_handle_request()
     int body_len = strlen(body);
     char* body_len_str;
     asprintf(&body_len_str, "%d", body_len);
-    HDRListRef hdrs = HDRList_new();
-    HeaderLineRef hl_content_length = HeaderLine_new(HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
-    HDRList_add_front(hdrs, hl_content_length);
+    HdrListRef hdrs = HdrList_new();
+    KVPairRef hl_content_length = KVPair_new(HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
+    HdrList_add_front(hdrs, hl_content_length);
     char* content_type = "text/html; charset=UTF-8";
-    HeaderLineRef hl_content_type = HeaderLine_new(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
-    HDRList_add_front(hdrs, hl_content_type);
+    KVPairRef hl_content_type = KVPair_new(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
+    HdrList_add_front(hdrs, hl_content_type);
 
 //    Wrtr_start(wrtr, HTTP_STATUS_OK, hdrs);
 //    Wrtr_write_chunk(wrtr, (void*) body, body_len);
 
-    HDRList_free(&hdrs);
-//    HeaderLine_free(&(hl_content_length));
-//    HeaderLine_free(&(hl_content_type));
+    HdrList_free(&hdrs);
+//    KVPair_free(&(hl_content_length));
+//    KVPair_free(&(hl_content_type));
     free(body);
     free(body_len_str);
 

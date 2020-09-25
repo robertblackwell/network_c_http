@@ -154,29 +154,29 @@ void* List_remove_last(ListRef lref);
 ///
 ///
 /// \param lref   ListRef a list Must not be NULL
-/// \return ListNodeRef iterator pointing at the first/head of the list.
+/// \return ListIterator iterator pointing at the first/head of the list.
 ///         returns NULL if List is empty
 ///
-ListNodeRef List_iterator(ListRef lref);
+ListIterator List_iterator(ListRef lref);
 
 ///
 /// Moves an iterator on to the next Node on the list.
 /// returns NULL if goes off the end of the list
 ///
 /// \param lref ListRef a List
-/// \param itr  ListNodeRef a current iterator pointing at a node on the list, cannot NULL iterator
+/// \param itr  ListIterator a current iterator pointing at a node on the list, cannot NULL iterator
 /// \return  THe next item on the list or NULL if there are no more nodes.
 ///
-ListNodeRef List_itr_next(ListRef lref, ListNodeRef itr);
+ListIterator List_itr_next(ListRef lref, ListIterator itr);
 
 ///
 /// Removes and frees the node pointed at by the itr, calls dealloc function on that nodes void* item field.
 /// and sets to NULL the variable/argument holding the iterator.
 ///
 /// \param lref ListRef
-/// \param itr  ListNodeRef a valid iterator for lref.
+/// \param itr  ListIterator a valid iterator for lref.
 ///
-void List_itr_remove(ListRef lref, ListNodeRef* itr);
+void List_itr_remove(ListRef lref, ListIterator* itr);
 
 ///
 /// Gets the void* value of the item held in the Node pointed at by this iterator.
@@ -187,6 +187,6 @@ void List_itr_remove(ListRef lref, ListNodeRef* itr);
 /// \param itr  A valid iterator, cannot be NULL
 /// \return     void* value held by node pointed at by itr
 ///
-void* List_itr_unpack(ListRef lref, ListNodeRef itr);
+void* List_itr_unpack(ListRef lref, ListIterator itr);
 
 #endif

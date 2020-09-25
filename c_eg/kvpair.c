@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-#include <c_eg/header_line.h>
+#include <c_eg/kvpair.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -7,7 +7,7 @@
 #include <c_eg/alloc.h>
 #include <c_eg/utils.h>
 
-struct HeaderLine_s {
+struct KVPair_s {
     char* label_ptr;
     int   label_len;
     char* value_ptr;
@@ -26,11 +26,11 @@ struct HeaderLine_s {
 //    p[srclen+1] = (unsigned char)'\0';
 //    return dest;
 //}
-// creates and initializes a new HeaderLine obj. Returns NULL on allocation failure
-HeaderLineRef HeaderLine_new(char* labptr, int lablen, char* valptr, int vallen)
+// creates and initializes a new KVPair obj. Returns NULL on allocation failure
+KVPairRef KVPair_new(char* labptr, int lablen, char* valptr, int vallen)
 {
     // store {label}: {value}\r\n\0
-    HeaderLineRef hlref = eg_alloc(sizeof(HeaderLine));
+    KVPairRef hlref = eg_alloc(sizeof(KVPair));
     if(hlref  == NULL) goto mem_error_1;
     hlref->label_len = lablen;
     hlref->value_len = vallen;
@@ -62,9 +62,9 @@ HeaderLineRef HeaderLine_new(char* labptr, int lablen, char* valptr, int vallen)
         free((void*)hlref);
         return NULL;
 }
-void HeaderLine_free(HeaderLineRef* hlref_ptr)
+void KVPair_free(KVPairRef* hlref_ptr)
 {
-    HeaderLineRef hlref = *hlref_ptr;
+    KVPairRef hlref = *hlref_ptr;
     eg_free(hlref->label_ptr);
     hlref->label_len = 0;
 //    hlref->label_ptr = NULL;
@@ -74,16 +74,16 @@ void HeaderLine_free(HeaderLineRef* hlref_ptr)
     eg_free((void*) hlref);
     *hlref_ptr = NULL;
 }
-void HeaderLine_dealloc(void* ptr) { HeaderLine_free((HeaderLineRef*)(ptr));}
-char* HeaderLine_label(HeaderLineRef hlref)
+void KVPair_dealloc(void* ptr) { KVPair_free((KVPairRef*)(ptr));}
+char* KVPair_label(KVPairRef hlref)
 {
     return hlref->label_ptr;
 }
-char* HeaderLine_value(HeaderLineRef hlref)
+char* KVPair_value(KVPairRef hlref)
 {
     return hlref->value_ptr;
 }
-void HeaderLine_set_value(HeaderLineRef hlref, char* valptr, int vallen)
+void KVPair_set_value(KVPairRef hlref, char* valptr, int vallen)
 {
     char* oldvalptr = hlref->value_ptr;
     hlref->value_ptr = eg_alloc(vallen+1);

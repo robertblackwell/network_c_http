@@ -16,7 +16,7 @@ void Wrtr_destroy(WrtrRef this);
 void Wrtr_free(WrtrRef* this_ptr);
 
 void Wrtr_write(WrtrRef wrtr, MessageRef msg_ref);
-void Wrtr_start(WrtrRef this, HttpStatus status, HDRListRef headers);
+void Wrtr_start(WrtrRef this, HttpStatus status, HdrListRef headers);
 void Wrtr_write_chunk(WrtrRef this, void* buffer, int len);
 
 #endif

@@ -4,7 +4,7 @@
 #include <http-parser/http_parser.h>
 #include <c_eg/buffer/buffer_chain.h>
 
-#include <c_eg/headerline_list.h>
+#include <c_eg/hdrlist.h>
 
 struct Message_s;
 typedef struct Message_s Message, *MessageRef;
@@ -53,17 +53,17 @@ HttpMinorVersion Message_get_minor_version(MessageRef mref);
 void Message_set_minor_version(MessageRef this, HttpMinorVersion mv);
 void Message_set_version(MessageRef this, int maj, int minor);
 
-HDRListRef Message_headers(MessageRef this);
+HdrListRef Message_headers(MessageRef this);
 
 void Message_add_header(MessageRef mref, char* labptr, int lablen, char* valptr, int vallen);
 
 ///
-/// Returns the header list (of type HDRListRef) of a message.
+/// Returns the header list (of type HdrListRef) of a message.
 ///
 /// NOTE: the memory for the returned value remains owned by the MessageRef
 ///
 /// \param this MessageRef
-/// \return HDRListRef. The returned value is a reference ownership stays with the MessageRef.
+/// \return HdrListRef. The returned value is a reference ownership stays with the MessageRef.
 ///
 HeaderIter Message_get_header(MessageRef mref, const char* labptr);
 

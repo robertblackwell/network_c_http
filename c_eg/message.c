@@ -1,14 +1,14 @@
 #define _GNU_SOURCE
 #include <c_eg/message.h>
 #include <c_eg/alloc.h>
-#include <c_eg/headerline_list.h>
+#include <c_eg/hdrlist.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 struct Message_s
 {
     BufferChainRef body;
-    HDRListRef headers;
+    HdrListRef headers;
     int major_vers;
     HttpMinorVersion minor_vers;
     bool is_request;
@@ -28,7 +28,7 @@ MessageRef Message_new ()
     if(mref == NULL) goto error_label_1;
 
     mref->body = NULL;
-    mref->headers = HDRList_new();
+    mref->headers = HdrList_new();
     if(mref->headers == NULL) goto error_label_2;
     mref->minor_vers = minor_version1;
     mref->major_vers = major_version1;
@@ -65,7 +65,7 @@ MessageRef Message_new_response()
 void Message_free(MessageRef* this_p)
 {
     MessageRef this = *this_p;
-    HDRList_free(&(this->headers));
+    HdrList_free(&(this->headers));
     CBuffer_free(&(this->target));
     CBuffer_free(&(this->reason));
 
@@ -97,14 +97,14 @@ CBufferRef Message_serialize_request(MessageRef mref)
     int l1= asprintf(&first_line,"%s %s HTTP/%d.%d\r\n", meth, (char*)CBuffer_data(mref->target), mref->major_vers, mref->minor_vers);
     CBuffer_append(result, (void*)first_line, l1);
     free(first_line);
-    HDRListRef hdrs = mref->headers;
-    ListNodeRef iter = HDRList_iterator(hdrs);
+    HdrListRef hdrs = mref->headers;
+    ListIterator iter = HdrList_iterator(hdrs);
     while(iter != NULL) {
-        HeaderLineRef item = HDRList_itr_unpack(hdrs, iter);
+        KVPairRef item = HdrList_itr_unpack(hdrs, iter);
         char* s;
-        int len = asprintf(&s,"%s: %s\r\n", HeaderLine_label(item), HeaderLine_value(item));
+        int len = asprintf(&s,"%s: %s\r\n", KVPair_label(item), KVPair_value(item));
         CBuffer_append(result, (void*)s, len);
-        ListNodeRef next = HDRList_itr_next(hdrs, iter);
+        ListIterator next = HdrList_itr_next(hdrs, iter);
         iter = next;
         free(s);
     }
@@ -187,7 +187,7 @@ char* Message_get_reason(MessageRef this)
 {
     (char*)CBuffer_data(this->reason);
 }
-HDRListRef Message_headers(MessageRef this)
+HdrListRef Message_headers(MessageRef this)
 {
     return this->headers;
 }

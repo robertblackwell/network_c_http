@@ -195,7 +195,7 @@ int test_iter()
     List_add_front(lref, (void*) dref2);
     List_add_front(lref, (void*) dref3);
     UT_EQUAL_INT((List_size(lref)), 3);
-    ListNodeRef iter = List_iterator(lref);
+    ListIterator iter = List_iterator(lref);
     for(int i = 3; i != 0;i--) {
         DummyObjRef dref = (DummyObjRef)List_itr_unpack(lref, iter);
         int v1 = i*100 + i*10 + i;

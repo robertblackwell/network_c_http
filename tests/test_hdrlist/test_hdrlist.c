@@ -6,8 +6,8 @@
 #include <c_eg/buffer/contig_buffer.h>
 #include <c_eg/logger.h>
 #include <c_eg/list.h>
-#include <c_eg/header_line.h>
-#include <c_eg/headerline_list.h>
+#include <c_eg/kvpair.h>
+#include <c_eg/hdrlist.h>
 #include <c_eg/message.h>
 
 
@@ -15,96 +15,96 @@
 ///////////////////////////////////////////////////
 int test_hdrlist_new()
 {
-    HDRListRef hdrlistref = HDRList_new();
-    int sz = HDRList_size(hdrlistref);
+    HdrListRef hdrlistref = HdrList_new();
+    int sz = HdrList_size(hdrlistref);
     UT_NOT_EQUAL_PTR(hdrlistref, NULL);
     UT_EQUAL_INT(sz, 0);
-    HDRList_free(&hdrlistref);
+    HdrList_free(&hdrlistref);
     UT_EQUAL_PTR(hdrlistref, NULL);
 	return 0;
 }
 int test_hdrlist_add_back_get_content()
 {
-    HDRListRef hdr_listref = HDRList_new();
-    HeaderLineRef hdrln1 = HeaderLine_new("HeaderLineKey1", strlen("HeaderLineKey1"), "333", strlen("333"));
-    HeaderLineRef hdrln2 = HeaderLine_new("HeaderLineKey2", strlen("HeaderLineKey2"), "4444", strlen("4444"));
-    HDRList_add_back(hdr_listref, hdrln1);
-    HDRList_add_back(hdr_listref, hdrln2);
-    int sz = HDRList_size(hdr_listref);
+    HdrListRef hdrlistref = HdrList_new();
+    KVPairRef hdrln1 = KVPair_new("KVPairKey1", strlen("KVPairKey1"), "333", strlen("333"));
+    KVPairRef hdrln2 = KVPair_new("KVPairKey2", strlen("KVPairKey2"), "4444", strlen("4444"));
+    HdrList_add_back(hdrlistref, hdrln1);
+    HdrList_add_back(hdrlistref, hdrln2);
+    int sz = HdrList_size(hdrlistref);
     UT_EQUAL_INT(sz, 2);
-    HeaderLineRef hdrref1 = HDRList_first(hdr_listref);
-    char* sh1 = HeaderLine_label(hdrref1);
-    char* sv1 = HeaderLine_value(hdrref1);
-    HeaderLineRef hdrref2 = HDRList_last(hdr_listref);
-    char* sh2 = HeaderLine_label(hdrref2);
-    char* sv2 = HeaderLine_value(hdrref2);
-    UT_EQUAL_INT(strcmp(sh1, "HEADERLINEKEY1"), 0);
+    KVPairRef hdrref1 = HdrList_first(hdrlistref);
+    char* sh1 = KVPair_label(hdrref1);
+    char* sv1 = KVPair_value(hdrref1);
+    KVPairRef hdrref2 = HdrList_last(hdrlistref);
+    char* sh2 = KVPair_label(hdrref2);
+    char* sv2 = KVPair_value(hdrref2);
+    UT_EQUAL_INT(strcmp(sh1, "KVPAIRKEY1"), 0);
     UT_EQUAL_INT(strcmp(sv1, "333"), 0);
-    UT_EQUAL_INT(strcmp(sh2, "HEADERLINEKEY2"), 0);
+    UT_EQUAL_INT(strcmp(sh2, "KVPAIRKEY2"), 0);
     UT_EQUAL_INT(strcmp(sv2, "4444"), 0);
-    List_display((ListRef)hdr_listref);
-    HDRList_free(&hdr_listref);
+    List_display((ListRef)hdrlistref);
+    HdrList_free(&hdrlistref);
     return 0;
 }
 int test_hdrlist_find()
 {
-    HDRListRef hdr_listref = HDRList_new();
-    HeaderLineRef hdrln1 = HeaderLine_new("HeaderLineKey1", strlen("HeaderLineKey1"), "333", strlen("333"));
-    HeaderLineRef hdrln2 = HeaderLine_new("HeaderLineKey2", strlen("HeaderLineKey2"), "4444", strlen("4444"));
-    HeaderLineRef hdrln3 = HeaderLine_new("HeaderLineKey3", strlen("HeaderLineKey2"), "55555", strlen("55555"));
-    HeaderLineRef hdrln4 = HeaderLine_new("HeaderLineKey4", strlen("HeaderLineKey2"), "666666", strlen("666666"));
-    HeaderLineRef x = HDRList_find(hdr_listref, "onetwothree");
-    int sz = HDRList_size(hdr_listref);
+    HdrListRef hdrlistref = HdrList_new();
+    KVPairRef hdrln1 = KVPair_new("KVPairKey1", strlen("KVPairKey1"), "333", strlen("333"));
+    KVPairRef hdrln2 = KVPair_new("KVPairKey2", strlen("KVPairKey2"), "4444", strlen("4444"));
+    KVPairRef hdrln3 = KVPair_new("KVPairKey3", strlen("KVPairKey2"), "55555", strlen("55555"));
+    KVPairRef hdrln4 = KVPair_new("KVPairKey4", strlen("KVPairKey2"), "666666", strlen("666666"));
+    KVPairRef x = HdrList_find(hdrlistref, "onetwothree");
+    int sz = HdrList_size(hdrlistref);
     UT_EQUAL_INT(sz, 0);
     UT_EQUAL_PTR(x, NULL);
 
 
-    HDRList_add_back(hdr_listref, hdrln1);
-    HDRList_add_back(hdr_listref, hdrln2);
-    HDRList_add_back(hdr_listref, hdrln3);
-    HDRList_add_back(hdr_listref, hdrln4);
-    int sz2 = HDRList_size(hdr_listref);
+    HdrList_add_back(hdrlistref, hdrln1);
+    HdrList_add_back(hdrlistref, hdrln2);
+    HdrList_add_back(hdrlistref, hdrln3);
+    HdrList_add_back(hdrlistref, hdrln4);
+    int sz2 = HdrList_size(hdrlistref);
     UT_EQUAL_INT(sz2, 4);
-    CBufferRef cbref = HDRList_serialize(hdr_listref);
+    CBufferRef cbref = HdrList_serialize(hdrlistref);
 
-    HeaderLineRef y = HDRList_find(hdr_listref, "onetwothree");
+    KVPairRef y = HdrList_find(hdrlistref, "onetwothree");
     UT_EQUAL_PTR(y, NULL);
-    HeaderLineRef z = HDRList_find(hdr_listref, "HeaderLineKey1");
+    KVPairRef z = HdrList_find(hdrlistref, "KVPAIRkey1");
     UT_NOT_EQUAL_PTR(z, NULL);
     UT_EQUAL_PTR(((void*)hdrln1),((void*) z) );
-    HeaderLineRef w = HDRList_find(hdr_listref, "HEADERLINEKEY2");
+    KVPairRef w = HdrList_find(hdrlistref, "KVPAIRKEY2");
     UT_NOT_EQUAL_PTR(w, NULL);
     UT_EQUAL_PTR(((void*)hdrln2),((void*) w) );
 
-    UT_EQUAL_INT(HDRList_size(hdr_listref), 4);
-    HDRList_remove(hdr_listref, "onetwothree");
-    UT_EQUAL_INT(HDRList_size(hdr_listref), 4);
+    UT_EQUAL_INT(HdrList_size(hdrlistref), 4);
+    HdrList_remove(hdrlistref, "onetwothree");
+    UT_EQUAL_INT(HdrList_size(hdrlistref), 4);
 
     // delete one in the middle of the chain
-    HDRList_remove(hdr_listref, "HeaderLineKey3");
-    int xx = HDRList_size(hdr_listref);
-    UT_EQUAL_INT(HDRList_size(hdr_listref), 3);
+    HdrList_remove(hdrlistref, "KVPairKey3");
+    int xx = HdrList_size(hdrlistref);
+    UT_EQUAL_INT(HdrList_size(hdrlistref), 3);
     // front of chain
-    HDRList_remove(hdr_listref, "HEADERLINEKEY1");
-    UT_EQUAL_INT(HDRList_size(hdr_listref), 2);
+    HdrList_remove(hdrlistref, "KVPairKey1");
+    UT_EQUAL_INT(HdrList_size(hdrlistref), 2);
 
     // back of chain
-    HDRList_remove(hdr_listref, "HEADERLINEKEY4");
-    UT_EQUAL_INT(HDRList_size(hdr_listref), 1);
+    HdrList_remove(hdrlistref, "KVPAIRKEY4");
+    UT_EQUAL_INT(HdrList_size(hdrlistref), 1);
 
     // last one
-    HDRList_remove(hdr_listref, "HEADERLINEKEY2");
-    UT_EQUAL_INT(HDRList_size(hdr_listref), 0);
+    HdrList_remove(hdrlistref, "KVPAIRKEY2");
+    UT_EQUAL_INT(HdrList_size(hdrlistref), 0);
 
-    HDRList_free(&hdr_listref);
+    HdrList_free(&hdrlistref);
     CBuffer_free(&cbref);
 
     return 0;
 }
-void trial_HDRList_add_line(HDRListRef this, char* label, int lablen, char* value, int vallen)
+void trial_HdrList_add_line(HdrListRef this, char* label, int lablen, char* value, int vallen)
 {
-    HeaderLineRef hl_content_type = HeaderLine_new(label, lablen, value, vallen);
-    HDRList_add_front(this, hl_content_type);
+    KVPairRef hl_content_type = KVPair_new(label, lablen, value, vallen);
+    HdrList_add_front(this, hl_content_type);
 }
 int test_serialize_headers()
 {
@@ -112,15 +112,15 @@ int test_serialize_headers()
     char* body_len_str;
     asprintf(&body_len_str, "%d", body_len);
 
-    HDRListRef hdrs = HDRList_new();
-    HeaderLineRef hl_content_length = HeaderLine_new(HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
-    HDRList_add_front(hdrs, hl_content_length);
+    HdrListRef hdrs = HdrList_new();
+    KVPairRef hl_content_length = KVPair_new(HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
+    HdrList_add_front(hdrs, hl_content_length);
     char* content_type = "text/html; charset=UTF-8";
-    HeaderLineRef hl_content_type = HeaderLine_new(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
-    HDRList_add_front(hdrs, hl_content_type);
-    CBufferRef ser = HDRList_serialize(hdrs);
+    KVPairRef hl_content_type = KVPair_new(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
+    HdrList_add_front(hdrs, hl_content_type);
+    CBufferRef ser = HdrList_serialize(hdrs);
     free(body_len_str);
-    HDRList_free(&hdrs);
+    HdrList_free(&hdrs);
     CBuffer_free(&ser);
     return 0;
 }
@@ -130,15 +130,15 @@ int test_serialize_headers_2()
     char* body_len_str;
     asprintf(&body_len_str, "%d", body_len);
 
-    HDRListRef hdrs = HDRList_new();
-    trial_HDRList_add_line(hdrs, HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
+    HdrListRef hdrs = HdrList_new();
+    trial_HdrList_add_line(hdrs, HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
     char* content_type = "text/html; charset=UTF-8";
-    HDRList_add_line(hdrs, HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
+    HdrList_add_line(hdrs, HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
 
-    CBufferRef ser = HDRList_serialize(hdrs);
+    CBufferRef ser = HdrList_serialize(hdrs);
     free(body_len_str);
     CBuffer_free(&ser);
-    HDRList_free(&hdrs);
+    HdrList_free(&hdrs);
     return 0;
 }
 
@@ -202,7 +202,7 @@ int test_iter()
     List_add_front(lref, (void*) dref2);
     List_add_front(lref, (void*) dref3);
     UT_EQUAL_INT((List_size(lref)), 3);
-    ListNodeRef iter = List_iterator(lref);
+    ListIterator iter = List_iterator(lref);
     for(int i = 3; i != 0;i--) {
         DummyObjRef dref = (DummyObjRef)List_itr_unpack(lref, iter);
         int v1 = i*100 + i*10 + i;

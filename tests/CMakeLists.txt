@@ -18,15 +18,18 @@ set(TEST_LINK_LIBS
 	)
 set(TEST_SERVER_BASEURL "http://whiteacorn.com/utests/echo/test.php")
 add_subdirectory(test_buffers)
-add_subdirectory(test_check_macro)
-add_subdirectory(test_server)
+#add_subdirectory(test_check_macro)
+
+# dont run this one without a server up and running
+# add_subdirectory(test_client)
+
 add_subdirectory(test_url)
 add_subdirectory(test_query)
 add_subdirectory(test_list)
-add_subdirectory(test_header_line)
+add_subdirectory(test_kvpair)
 add_subdirectory(test_hdrlist)
 add_subdirectory(test_parser)
-add_subdirectory(test_funcptr)
+# add_subdirectory(test_funcptr)
 
 if (OFF)
 endif()

@@ -263,11 +263,11 @@ int header_field_data_cb(http_parser* parser, const char* at, size_t length)
 {
     ParserRef this =  (ParserRef)(parser->data);
     MessageRef message = Parser_current_message(this);
-    HDRListRef hdrs = Message_headers(message);
+    HdrListRef hdrs = Message_headers(message);
     int state = this->m_header_state;
     if( (state == 0) || (state == kHEADER_STATE_NOTHING) || (state == kHEADER_STATE_VALUE)) {
         if(CBuffer_size(this->m_name_buf) != 0) {
-            HDRList_add_cbuf(hdrs, this->m_name_buf, this->m_value_buf);  /*NEEDS ALLO TEST*/
+            HdrList_add_cbuf(hdrs, this->m_name_buf, this->m_value_buf);  /*NEEDS ALLO TEST*/
             CBuffer_clear(this->m_name_buf);
             CBuffer_clear(this->m_value_buf);
         }
@@ -301,7 +301,7 @@ int headers_complete_cb(http_parser* parser) //, const char* aptr, size_t remain
     ParserRef this =  (ParserRef)(parser->data);
     MessageRef message = Parser_current_message(this);
     if( CBuffer_size(this->m_name_buf) != 0 ) {
-        HDRList_add_cbuf(Message_headers(message), this->m_name_buf, this->m_value_buf);  /*NEEDS ALLO TEST*/
+        HdrList_add_cbuf(Message_headers(message), this->m_name_buf, this->m_value_buf);  /*NEEDS ALLO TEST*/
         CBuffer_clear(this->m_name_buf);
         CBuffer_clear(this->m_value_buf);
     }

@@ -1,13 +1,10 @@
 #ifndef c_c_eg_datasource_h
 #define c_c_eg_datasource_h
-//#include <c_eg/list.h>
-//#include <c_eg/rdsocket.h>
-//#include <c_eg/message.h>
-//#include <c_eg/parser.h>
 #include <stdbool.h>
 /**
- * Purpose of this class is to demo use of the parser in a situation
- * that simulates synchronously reading from some source of bytes
+ * Purpose of this class is to demo and test  use of the parser in a situation
+ * that simulates synchronously reading from some source of bytes other than a real socket
+ *
  * Generally a DataSource is created from the lines in a ParserTest
  */
 typedef struct DataSource_s {

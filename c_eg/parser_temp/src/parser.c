@@ -262,7 +262,7 @@ int headers_complete_cb(http_parser* parser) //, const char* aptr, size_t remain
     ParserRef this =  (ParserRef)(parser->data);
     MessageRef message = Parser_current_message(this);
     if( ContigBuffer_size(this->m_name_buf) != 0 ) {
-        HDRList_add(Message_headers(message), this->m_name_buf, this->m_value_buf);
+        HdrList_add(Message_headers(message), this->m_name_buf, this->m_value_buf);
         ContigBuffer_clear(this->m_name_buf);
         ContigBuffer_clear(this->m_value_buf);
     }

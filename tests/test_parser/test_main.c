@@ -6,7 +6,7 @@
 #include <http-parser/http_parser.h>
 #include <c_eg/unittest.h>
 #include <c_eg/logger.h>
-#include <c_eg/header_line.h>
+#include <c_eg/kvpair.h>
 #include <c_eg/datasource.h>
 #include <c_eg/parser_test.h>
 #include <c_eg/message.h>
@@ -14,10 +14,10 @@
 
 #undef A_ON
 #define CHECK_HEADER(h, K, V) do {\
-    HeaderLineRef hlref = HDRList_find(h, HEADER_HOST); \
+    KVPairRef hlref = HdrList_find(h, HEADER_HOST); \
     UT_NOT_EQUAL_PTR(hlref, NULL); \
-    UT_EQUAL_CSTR(HeaderLine_label(hlref), HEADER_HOST); \
-    UT_EQUAL_CSTR(HeaderLine_value(hlref), "ahost"); \
+    UT_EQUAL_CSTR(KVPair_label(hlref), HEADER_HOST); \
+    UT_EQUAL_CSTR(KVPair_value(hlref), "ahost"); \
 } while(0);
 
 #define CHECK_BODY(M, S) do {\
@@ -107,7 +107,7 @@ int test_A001_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
     MessageRef m1 = rref->message;
-    HDRListRef h = Message_headers (m1);
+    HdrListRef h = Message_headers (m1);
     UT_EQUAL_INT(Message_get_status (m1), 200);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 11Reason Phrase");
 
@@ -137,7 +137,7 @@ int test_A002_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
     MessageRef m1 = rref->message;
-    HDRListRef h = Message_headers (m1);
+    HdrListRef h = Message_headers (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 22Reason Phrase");
 
@@ -166,7 +166,7 @@ int test_A003_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
     MessageRef m1 = rref->message;
-    HDRListRef h = Message_headers (m1);
+    HdrListRef h = Message_headers (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 22Reason Phrase");
 
@@ -176,21 +176,21 @@ int test_A003_vfunc (ListRef results)
     CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "10");
     CHECK_BODY(m1, "ABCDEFGHIJ");
 
-    HeaderLineRef hlref_host = HDRList_find (h, HEADER_HOST);
-    UT_EQUAL_CSTR(HeaderLine_label (hlref_host), HEADER_HOST);
-    UT_EQUAL_CSTR(HeaderLine_value (hlref_host), "ahost");
+    KVPairRef hlref_host = HdrList_find (h, HEADER_HOST);
+    UT_EQUAL_CSTR(KVPair_label (hlref_host), HEADER_HOST);
+    UT_EQUAL_CSTR(KVPair_value (hlref_host), "ahost");
 
-    HeaderLineRef hlref_connection = HDRList_find (h, HEADER_CONNECTION);
-    UT_EQUAL_CSTR(HeaderLine_label (hlref_connection), HEADER_CONNECTION);
-    UT_EQUAL_CSTR(HeaderLine_value (hlref_connection), "keep-alive");
+    KVPairRef hlref_connection = HdrList_find (h, HEADER_CONNECTION);
+    UT_EQUAL_CSTR(KVPair_label (hlref_connection), HEADER_CONNECTION);
+    UT_EQUAL_CSTR(KVPair_value (hlref_connection), "keep-alive");
 
-    HeaderLineRef hlref_proxy_connection = HDRList_find (h, HEADER_PROXYCONNECTION);
-    UT_EQUAL_CSTR(HeaderLine_label (hlref_proxy_connection), HEADER_PROXYCONNECTION);
-    UT_EQUAL_CSTR(HeaderLine_value (hlref_proxy_connection), "keep-alive");
+    KVPairRef hlref_proxy_connection = HdrList_find (h, HEADER_PROXYCONNECTION);
+    UT_EQUAL_CSTR(KVPair_label (hlref_proxy_connection), HEADER_PROXYCONNECTION);
+    UT_EQUAL_CSTR(KVPair_value (hlref_proxy_connection), "keep-alive");
 
-    HeaderLineRef hlref_content_length = HDRList_find (h, HEADER_CONTENT_LENGTH);
-    UT_EQUAL_CSTR(HeaderLine_label (hlref_content_length), HEADER_CONTENT_LENGTH);
-    UT_EQUAL_CSTR(HeaderLine_value (hlref_content_length), "10");
+    KVPairRef hlref_content_length = HdrList_find (h, HEADER_CONTENT_LENGTH);
+    UT_EQUAL_CSTR(KVPair_label (hlref_content_length), HEADER_CONTENT_LENGTH);
+    UT_EQUAL_CSTR(KVPair_value (hlref_content_length), "10");
 
     return 0;
 
@@ -219,7 +219,7 @@ int test_A004_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
     MessageRef m1 = rref->message;
-    HDRListRef h = Message_headers (m1);
+    HdrListRef h = Message_headers (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK Reason Phrase");
 
@@ -255,7 +255,7 @@ int test_A005_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
     MessageRef m1 = rref->message;
-    HDRListRef h = Message_headers (m1);
+    HdrListRef h = Message_headers (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK Reason Phrase");
 
@@ -292,7 +292,7 @@ int test_A006_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
     MessageRef m1 = rref->message;
-    HDRListRef h = Message_headers (m1);
+    HdrListRef h = Message_headers (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK Reason Phrase");
 
@@ -336,13 +336,13 @@ int test_A007_vfunc (ListRef results)
     UT_NOT_EQUAL_PTR(m1, m2);
     UT_NOT_EQUAL_PTR(m1, NULL);
     UT_NOT_EQUAL_PTR(m2, NULL);
-    HDRListRef h1 = Message_headers (m1);
-    HDRListRef h2 = Message_headers (m2);
+    HdrListRef h1 = Message_headers (m1);
+    HdrListRef h2 = Message_headers (m2);
     UT_NOT_EQUAL_PTR(h1, h2);
     UT_NOT_EQUAL_PTR(h1, NULL);
     UT_NOT_EQUAL_PTR(h2, NULL);
     {
-        HDRListRef h = Message_headers (m1);
+        HdrListRef h = Message_headers (m1);
         UT_EQUAL_INT(Message_get_status (m1), 200);
         UT_EQUAL_CSTR(Message_get_reason (m1), "OK 11Reason Phrase");
 
@@ -354,7 +354,7 @@ int test_A007_vfunc (ListRef results)
         CHECK_BODY(m1, "1234567890");
     }
     {
-        HDRListRef h = Message_headers (m2);
+        HdrListRef h = Message_headers (m2);
         UT_EQUAL_INT(Message_get_status (m2), 201);
         UT_EQUAL_CSTR(Message_get_reason (m2), "OK 22Reason Phrase");
 
@@ -389,12 +389,12 @@ int test_A008_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
     MessageRef m1 = rref->message;
-    HDRListRef h = Message_headers (m1);
-    int n = HDRList_size (h);
+    HdrListRef h = Message_headers (m1);
+    int n = HdrList_size (h);
     UT_EQUAL_INT(Message_get_status (m1), 200);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 11Reason Phrase");
 
-    HeaderLineRef hlr = HDRList_find (h, HEADER_HOST);
+    KVPairRef hlr = HdrList_find (h, HEADER_HOST);
     CHECK_HEADER(h, HEADER_HOST, "ahost");
     CHECK_HEADER(h, HEADER_CONNECTION, "keep-alive");
     CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
@@ -449,12 +449,12 @@ int run_list (ListRef tests)
 {
     int result = 0;
     // note all labels are upper case
-    ListNodeRef iter = List_iterator (tests);
+    ListIterator iter = List_iterator (tests);
     for (;;) {
         if (iter == NULL) {
             break;
         }
-        ListNodeRef next = List_itr_next (tests, iter);
+        ListIterator next = List_itr_next (tests, iter);
         ParserTestRef x = (ParserTestRef) List_itr_unpack (tests, iter);
         DataSource source;
         DataSource_init (&source, x->lines);

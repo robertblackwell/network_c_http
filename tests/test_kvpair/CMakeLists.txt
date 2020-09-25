@@ -3,9 +3,9 @@
 message("test_include_dirs     ${TEST_INCLUDE_DIRS}")
 message("test_link_libs        ${TEST_LINK_LIBS}")
 
-set(TARGET test_server)
+set(TARGET test_kvpair)
 add_executable(${TARGET}
-	test_server.c
+	test_main.c
 )
 
 target_include_directories(${TARGET} 

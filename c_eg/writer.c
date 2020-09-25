@@ -40,10 +40,10 @@ void Wrtr_write(WrtrRef wrtr, MessageRef msg_ref)
  *
  * \param this    WrtrRef contains the socket/fd for writing
  * \param status  HttpStatus enum value
- * \param headers HDRListRef - the deaders to be written
+ * \param headers HdrListRef - the deaders to be written
  * \result (TODO) success, EOF-closed by other end, IO error
  */
-void Wrtr_start(WrtrRef this, HttpStatus status, HDRListRef headers)
+void Wrtr_start(WrtrRef this, HttpStatus status, HdrListRef headers)
 {
     char* first_line = NULL;
     CBufferRef cb_output_ref = NULL;
@@ -56,7 +56,7 @@ void Wrtr_start(WrtrRef this, HttpStatus status, HDRListRef headers)
 
     if((cb_output_ref = CBuffer_new()) == NULL) goto failed;
 
-    serialized_headers = HDRList_serialize(headers);
+    serialized_headers = HdrList_serialize(headers);
     if(serialized_headers == NULL) goto failed;
 
     CBuffer_append(cb_output_ref, (void*)first_line, len);

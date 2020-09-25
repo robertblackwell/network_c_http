@@ -26,12 +26,12 @@ BufferChainRef BufferChain_new()
 void BufferChain_free(BufferChainRef* thisptr)
 {
     BufferChainRef this = *thisptr;
-    ListNodeRef iter = List_iterator(this->m_chain);
+    ListIterator iter = List_iterator(this->m_chain);
     for(;;) {
         if(iter == NULL) {
             break;
         }
-        ListNodeRef next = List_itr_next(this->m_chain, iter);
+        ListIterator next = List_itr_next(this->m_chain, iter);
         List_itr_remove(this->m_chain, &iter);
         iter = next;
     }
@@ -78,13 +78,13 @@ CBufferRef BufferChain_compact(BufferChainRef this)
     CBufferRef cb_final = CBuffer_new();
     if(cb_final == NULL)
         goto memerror_01;
-    ListNodeRef iter = List_iterator(this->m_chain);
+    ListIterator iter = List_iterator(this->m_chain);
     while(iter != NULL) {
         CBufferRef tmp = (CBufferRef)List_itr_unpack(this->m_chain, iter);
         void* data = CBuffer_data(tmp);
         int sz = CBuffer_size(tmp);
         CBuffer_append(cb_final, data, sz); /* MEM CHECK REQUIRED*/
-        ListNodeRef next = List_itr_next(this->m_chain, iter);
+        ListIterator next = List_itr_next(this->m_chain, iter);
         iter = next;
     }
     return cb_final;
@@ -93,7 +93,7 @@ CBufferRef BufferChain_compact(BufferChainRef this)
 }
 bool BufferChain_eq_cstr(BufferChainRef this, char* cstr)
 {
-    ListNodeRef iter = List_iterator(this->m_chain);
+    ListIterator iter = List_iterator(this->m_chain);
     int cstr_index = 0;
     while(iter != NULL) {
         CBufferRef tmp = (CBufferRef)List_itr_unpack(this->m_chain, iter);
@@ -107,7 +107,7 @@ bool BufferChain_eq_cstr(BufferChainRef this, char* cstr)
                 cstr_index++;
             }
         }
-        ListNodeRef next = List_itr_next(this->m_chain, iter);
+        ListIterator next = List_itr_next(this->m_chain, iter);
         iter = next;
     }
     return true;
