@@ -121,17 +121,23 @@ void Server_listen(ServerRef sref)
             Queue_add(sref->qref, sock2);
         }
     }
+    sleep(15);
+    printf("About to join all threads\n");
     //
     // wait for the workers to complete
     //
     for(int i = 0; i < sref->nbr_workers; i++) {
         WorkerRef wref = sref->worker_tab[i];
         if(wref != NULL) {
+            printf("About to joined worker %d\n", i);
             Worker_join(wref);
+            printf("Joined thread %d\n", i);
             Worker_free(wref);
+            printf("Freed worker %d\n", i);
         }
         printf("Server joining thread %d  %p\n", i, wref);
     }
+    printf("All threads joined\n");
     Queue_free(&(sref->qref));
     printf("Server_listen Queue_free() done \n");
     // also wait for the monitor  to complete
@@ -141,6 +147,7 @@ void Server_terminate(ServerRef this)
 {
     for(int i = 0; i < this->nbr_workers; i++) {
         Queue_add(this->qref, -1);
+        sleep(5);
         printf("Server_terminate adding %d \n", i);
     }
     close(this->socket_fd);

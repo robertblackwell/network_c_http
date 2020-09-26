@@ -55,7 +55,8 @@ static void* Worker_main(void* data)
 {
     ASSERT_NOT_NULL(data);
     WorkerRef wref = (WorkerRef)data;
-    while(true) {
+    bool terminate = false;
+    while(!terminate) {
         printf("Worker_main start of loop\n");
         wref->active = false;
         ParserRef parser_ref = NULL;;
@@ -64,38 +65,41 @@ static void* Worker_main(void* data)
         MessageRef request_msg_ref = NULL;
 
         int mySocketHandle = Queue_remove(wref->qref);
-        printf("Worker_main %p mySocketHandle: %d\n", wref, mySocketHandle);
+        printf("Worker_main %p mySocketHandle: %d worker %d\n", wref, mySocketHandle, wref->id);
+        int sock = mySocketHandle;
         if(mySocketHandle == -1) {
             /// this is the terminate signal
             printf("Worker_main about to break %p mySocketHandle: %d\n", wref, mySocketHandle);
-            break;
-        }
-        wref->active_socket = (int) mySocketHandle;
-        int sock = mySocketHandle;
-        wref->active = true;
-        if((parser_ref = Parser_new()) == NULL) goto finalize;
-        RdSocket rdsock = RealSocket(sock);
-        if((rdr = Rdr_new(parser_ref, rdsock)) == NULL) goto finalize;
-        if((wrtr = Wrtr_new(sock)) == NULL) goto finalize;
+            terminate = true;
+            sock = 0;
+        } else {
+            wref->active_socket = (int) mySocketHandle;
+            wref->active = true;
+            if((parser_ref = Parser_new()) == NULL) goto finalize;
+            RdSocket rdsock = RealSocket(sock);
+            if((rdr = Rdr_new(parser_ref, rdsock)) == NULL) goto finalize;
+            if((wrtr = Wrtr_new(sock)) == NULL) goto finalize;
 
-        while(1) {
-            printf("Got a request socket: %d pthread_self %ld\n", sock, pthread_self());
-            int rc = Rdr_read(rdr, &request_msg_ref);
-            if((rc == RDR_OK) && (request_msg_ref != NULL)) {
-                if(0 == wref->handler(request_msg_ref, wrtr)) goto finalize;
-                Message_free(&request_msg_ref);
-                close(sock);
-                sock = 0;
-                break;
-            } else if(rc == RDR_PARSE_ERROR) {
-                // send a reply bad request
-                printf("Worker: parse error");
-                handle_parse_error(request_msg_ref, wrtr);
-                break;
-            } else {
-                break;
+            while(1) {
+                printf("Got a request socket: %d pthread_self %ld\n", sock, pthread_self());
+                int rc = Rdr_read(rdr, &request_msg_ref);
+                if((rc == RDR_OK) && (request_msg_ref != NULL)) {
+                    if(0 == wref->handler(request_msg_ref, wrtr)) goto finalize;
+                    Message_free(&request_msg_ref);
+                    close(sock);
+                    sock = 0;
+                    break;
+                } else if(rc == RDR_PARSE_ERROR) {
+                    // send a reply bad request
+                    printf("Worker: parse error");
+                    handle_parse_error(request_msg_ref, wrtr);
+                    break;
+                } else {
+                    break;
+                }
             }
         }
+        printf("Worker_main exited main loop %p, %d\n", wref, wref->id);
 
         finalize:
             if(sock != 0) close(sock);
@@ -105,7 +109,7 @@ static void* Worker_main(void* data)
             if(rdr != NULL) Rdr_free(&rdr);
             wref->active = false;
     }
-    printf("Worker_main exited main loop %p\n", wref);
+    printf("Worker_main exited main loop %p, %d\n", wref, wref->id);
     return NULL;
 }
 // start a pthread - returns 0 on success errno on fila
