@@ -46,29 +46,29 @@ void Writer_write(Writer* wrtr, Message* msg_ref)
 void Writer_start(Writer* this, HttpStatus status, HdrList* headers)
 {
     char* first_line = NULL;
-    CBufferRef cb_output_ref = NULL;
-    CBufferRef serialized_headers = NULL;
+    Cbuffer* cb_output_ref = NULL;
+    Cbuffer* serialized_headers = NULL;
     void* return_value = NULL;
 
     const char* reason_str = http_status_str(status);
     int len = asprintf(&first_line, "HTTP/1.1 %d %s\r\n", status, reason_str);
     if(first_line == NULL) goto failed;
 
-    if((cb_output_ref = CBuffer_new()) == NULL) goto failed;
+    if((cb_output_ref = Cbuffer_new()) == NULL) goto failed;
 
     serialized_headers = HdrList_serialize(headers);
     if(serialized_headers == NULL) goto failed;
 
-    CBuffer_append(cb_output_ref, (void*)first_line, len);
-    CBuffer_append(cb_output_ref, CBuffer_data(serialized_headers), CBuffer_size(serialized_headers));
-    CBuffer_append_cstr(cb_output_ref, "\r\n");
-    Writer_write_chunk(this, CBuffer_data(cb_output_ref), CBuffer_size(cb_output_ref));
+    Cbuffer_append(cb_output_ref, (void*)first_line, len);
+    Cbuffer_append(cb_output_ref, Cbuffer_data(serialized_headers), Cbuffer_size(serialized_headers));
+    Cbuffer_append_cstr(cb_output_ref, "\r\n");
+    Writer_write_chunk(this, Cbuffer_data(cb_output_ref), Cbuffer_size(cb_output_ref));
 
     return_value = (void*)1;
     failed:
         if(first_line != NULL) free(first_line);
-        if(serialized_headers != NULL) CBuffer_free(&serialized_headers);
-        if(cb_output_ref != NULL) CBuffer_free(&cb_output_ref);
+        if(serialized_headers != NULL) Cbuffer_free(&serialized_headers);
+        if(cb_output_ref != NULL) Cbuffer_free(&cb_output_ref);
     return;
 }
 /**

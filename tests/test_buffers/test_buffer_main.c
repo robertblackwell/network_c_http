@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <c_eg/unittest.h>
-#include <c_eg/buffer/contig_buffer.h>
+#include <c_eg/buffer/cbuffer.h>
 #include <c_eg/buffer/buffer_chain.h>
 #include <c_eg/buffer/iobuffer.h>
 
@@ -24,14 +24,14 @@ int test_simple()
 }
 int test_make_buffer()
 {
-    CBufferRef b = CBuffer_new();
-    printf("m_size %ld \n", CBuffer_size(b));
-    printf("m_capacity %ld \n", CBuffer_capacity(b));
-    printf("m_cptr %lx \n", (long)CBuffer_data(b));
+    Cbuffer* b = Cbuffer_new();
+    printf("m_size %ld \n", Cbuffer_size(b));
+    printf("m_capacity %ld \n", Cbuffer_capacity(b));
+    printf("m_cptr %lx \n", (long)Cbuffer_data(b));
     UT_NOT_EQUAL_PTR(b, NULL);
-    UT_EQUAL_INT(CBuffer_size(b), 0);
-    UT_NOT_EQUAL_PTR((void*)CBuffer_data(b), NULL);
-    CBuffer_free(&b);
+    UT_EQUAL_INT(Cbuffer_size(b), 0);
+    UT_NOT_EQUAL_PTR((void*)Cbuffer_data(b), NULL);
+    Cbuffer_free(&b);
     UT_EQUAL_PTR(b, NULL);
     return 0;
 }
@@ -39,16 +39,16 @@ int test_expansion()
 {
     char* s1 = cstr_concat("","");
     char* extra = "abcedfghijklmnopqrstuvwxyz01923456789";
-    CBufferRef b2 = CBuffer_new();
+    Cbuffer* b2 = Cbuffer_new();
     for(int i = 0; i < 5; i++) {
-        CBuffer_append(b2, (void*)extra, strlen(extra));
+        Cbuffer_append(b2, (void*)extra, strlen(extra));
     }
 
-    printf("b2 m_size %ld \n", CBuffer_size(b2));
-    printf("b2 m_capacity %ld \n", CBuffer_capacity(b2));
-    printf("b2 m_cptr %lx \n", (long)CBuffer_data(b2));
-    UT_EQUAL_INT(5*strlen(extra), CBuffer_size(b2));
-    CBuffer_free(&b2);
+    printf("b2 m_size %ld \n", Cbuffer_size(b2));
+    printf("b2 m_capacity %ld \n", Cbuffer_capacity(b2));
+    printf("b2 m_cptr %lx \n", (long)Cbuffer_data(b2));
+    UT_EQUAL_INT(5*strlen(extra), Cbuffer_size(b2));
+    Cbuffer_free(&b2);
     free(s1);
     UT_EQUAL_PTR(b2, NULL);
     return 0;
@@ -62,13 +62,13 @@ int test_big_expansion()
         free(s1);
         s1 = s2;
     }
-    CBufferRef b2 = CBuffer_from_cstring(s1);
-    printf("b2 length %ld \n", CBuffer_size(b2));
-    printf("b2 m_size %ld \n", CBuffer_size(b2));
-    printf("b2 m_capacity %ld \n", CBuffer_capacity(b2));
-    printf("b2 m_cptr %lx \n", (long)CBuffer_data(b2));
-    UT_EQUAL_INT(2800*strlen(extra), CBuffer_size(b2));
-    CBuffer_free(&b2);
+    Cbuffer* b2 = Cbuffer_from_cstring(s1);
+    printf("b2 length %ld \n", Cbuffer_size(b2));
+    printf("b2 m_size %ld \n", Cbuffer_size(b2));
+    printf("b2 m_capacity %ld \n", Cbuffer_capacity(b2));
+    printf("b2 m_cptr %lx \n", (long)Cbuffer_data(b2));
+    UT_EQUAL_INT(2800*strlen(extra), Cbuffer_size(b2));
+    Cbuffer_free(&b2);
     UT_EQUAL_PTR(b2, NULL);
     free(s1);
     return 0;
@@ -83,15 +83,15 @@ int test_cbuffer_clear()
         free(s1);
         s1 = s2;
     }
-    CBufferRef b2 = CBuffer_from_cstring(s1);
-    void* data1 = CBuffer_data(b2);
-    int sz1 = CBuffer_size(b2);
-    CBuffer_clear(b2);
-    void* data2 = CBuffer_data(b2);
-    int sz2 = CBuffer_size(b2);
+    Cbuffer* b2 = Cbuffer_from_cstring(s1);
+    void* data1 = Cbuffer_data(b2);
+    int sz1 = Cbuffer_size(b2);
+    Cbuffer_clear(b2);
+    void* data2 = Cbuffer_data(b2);
+    int sz2 = Cbuffer_size(b2);
     UT_EQUAL_PTR(data1, data2);
     UT_NOT_EQUAL_INT(sz1, sz2);
-    CBuffer_free(&b2);
+    Cbuffer_free(&b2);
     UT_EQUAL_PTR(b2, NULL);
     free(s1);
     return 0;
@@ -107,21 +107,21 @@ int test_cbuffer_move()
         free(s1);
         s1 = s2;
     }
-    CBufferRef b2 = CBuffer_from_cstring(s1);
-    void* d12 = CBuffer_data(b2);
-    int sz12 = CBuffer_size(b2);
-    CBufferRef b1 = CBuffer_from_cstring(extra2);
-    void* d11 = CBuffer_data(b1);
-    int sz11 = CBuffer_size(b1);
-    CBuffer_move(b1, b2);
-    void* d22 = CBuffer_data(b2);
-    int sz22 = CBuffer_size(b2);
-    void* d21 = CBuffer_data(b1);
-    int sz21 = CBuffer_size(b1);
+    Cbuffer* b2 = Cbuffer_from_cstring(s1);
+    void* d12 = Cbuffer_data(b2);
+    int sz12 = Cbuffer_size(b2);
+    Cbuffer* b1 = Cbuffer_from_cstring(extra2);
+    void* d11 = Cbuffer_data(b1);
+    int sz11 = Cbuffer_size(b1);
+    Cbuffer_move(b1, b2);
+    void* d22 = Cbuffer_data(b2);
+    int sz22 = Cbuffer_size(b2);
+    void* d21 = Cbuffer_data(b1);
+    int sz21 = Cbuffer_size(b1);
 
     UT_EQUAL_PTR(d21, d12);
-    CBuffer_free(&b1);
-    CBuffer_free(&b2);
+    Cbuffer_free(&b1);
+    Cbuffer_free(&b2);
     UT_EQUAL_PTR(b1, NULL);
     UT_EQUAL_PTR(b2, NULL);
     free(s1);
@@ -129,7 +129,7 @@ int test_cbuffer_move()
 }
 int test_chain_make()
 {
-    BufferChainRef bcr = BufferChain_new();
+    BufferChain* bcr = BufferChain_new();
     char* s1 = cstr_concat("","");
     char* extra = "abcedfghijklmnopqrstuvwxyz01923456789";
     for(int i = 0; i < 2800; i++) {
@@ -144,7 +144,7 @@ int test_chain_make()
 }
 int test_chain_compact() // and eq_cstr
 {
-    BufferChainRef bcr = BufferChain_new();
+    BufferChain* bcr = BufferChain_new();
     char* s1 = cstr_concat("","");
     char* s2;
     char* extra = "abcedfghijklmnopqrstuvwxyz01923456789";
@@ -154,10 +154,10 @@ int test_chain_compact() // and eq_cstr
         s1 = s2;
     }
     UT_EQUAL_INT(BufferChain_size(bcr), 2800*strlen(extra))
-    CBufferRef c = BufferChain_compact(bcr);
-    int x = strlen((char*)CBuffer_data(c));
-    UT_EQUAL_INT(x, CBuffer_size(c));
-    int y = strcmp(s1, (char*)CBuffer_data(c));
+    Cbuffer* c = BufferChain_compact(bcr);
+    int x = strlen((char*)Cbuffer_data(c));
+    UT_EQUAL_INT(x, Cbuffer_size(c));
+    int y = strcmp(s1, (char*)Cbuffer_data(c));
     bool ok = BufferChain_eq_cstr(bcr, s1);
     UT_EQUAL_INT(ok, 1);
     s1[3] = 'X';
@@ -165,7 +165,7 @@ int test_chain_compact() // and eq_cstr
     UT_EQUAL_INT(ok2, 0);
     BufferChain_free(&bcr);
     UT_EQUAL_PTR(bcr, NULL);
-    CBuffer_free(&c);
+    Cbuffer_free(&c);
     UT_EQUAL_PTR(c, NULL);
     return 0;
 }

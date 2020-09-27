@@ -7,80 +7,80 @@
 #include <stdbool.h>
 
 ///
-/// A CBuffer is a contiguous memory allocation that can expand as required.
+/// A Cbuffer is a contiguous memory allocation that can expand as required.
 /// It maintains:
 /// - the length of the total memory allocation,
 /// - the length of the used part of the memory allocation
 /// - always terminates the used portion with a '\0' which is not counted as part of the used portion
 ///   so that the used portion is always a valid cstr
 ///
-struct CBuffers;
-typedef struct CBuffer_s CBuffer, *CBufferRef;
+struct Cbuffers;
+typedef struct Cbuffer_s Cbuffer;
 
 ///
 /// WARNING - THIS FUNCTION ALLOCATES MEMORY
 ///
-CBufferRef CBuffer_new();
+Cbuffer* Cbuffer_new();
 
 ///
 /// WARNING - THIS FUNCTION ALLOCATES MEMORY
 ///
-CBufferRef CBuffer_from_cstring(char* cstr);
+Cbuffer* Cbuffer_from_cstring(char* cstr);
 
-void CBuffer_free(CBufferRef* cbuf);
+void Cbuffer_free(Cbuffer** cbuf);
 
 ///
 /// Gets a void* pointer to the start of the used portion of memory area
 ///
-/// \param this CBufferRef The buffer, cannot be NULL
+/// \param this Cbuffer* The buffer, cannot be NULL
 /// \return void* POinter to start of used portion of the managed memory area
 ///
-void* CBuffer_data(CBufferRef this);
+void* Cbuffer_data(Cbuffer* this);
 
 ///
 /// Gets a char* pointer to the start of the used portion of memory area,
 /// the first byte after the used portion is always '\0' so that the pointer
 /// returned by this function is a valid c strin.
 ///
-/// \param this CBufferRef The buffer, cannot be NULL
+/// \param this Cbuffer* The buffer, cannot be NULL
 /// \return void* POinter to start of used portion of the managed memory area
 ///
-char* CBuffer_cstr(CBufferRef this);
+char* Cbuffer_cstr(Cbuffer* this);
 
 ///
 /// Gets the size of used portion of the buffer
 ///
 /// \param cbuf
 /// \return
-size_t CBuffer_size(CBufferRef cbuf);
+size_t Cbuffer_size(Cbuffer* cbuf);
 
 ///
 /// Gets the current capacity of the buffer - max value of size, but
-/// Note: CBuffer can be extended via realloc so the returned value of
+/// Note: Cbuffer can be extended via realloc so the returned value of
 /// this function is not a constant
 ///
 /// \param cbuf
 /// \return
-size_t CBuffer_capacity(CBufferRef cbuf);
+size_t Cbuffer_capacity(Cbuffer* cbuf);
 
 ///
 /// Returns a pointer to the next available unused position in the buffer,
 /// which is always the '\0' terminator.
 ///
-/// Should not be used other than by CBuffer functions.
+/// Should not be used other than by Cbuffer functions.
 ///
 /// \param cbuf
 /// \return
 ///
-void* CBuffer_next_available(CBufferRef cbuf);
+void* Cbuffer_next_available(Cbuffer* cbuf);
 
 ///
 /// Resets the buffer so that it is again an empty buffer.
 /// Does not release the manage memory area. If it has been expanded by previous
 /// usage pattern the larger memory area will be retained.
 ///
-/// \param this CBuffer
-void CBuffer_clear(CBufferRef this);
+/// \param this Cbuffer
+void Cbuffer_clear(Cbuffer* this);
 
 ///
 /// WARNING - THIS FUNCTION ALLOCATES MEMORY
@@ -96,7 +96,7 @@ void CBuffer_clear(CBufferRef this);
 /// \param data
 /// \param len
 ///
-void CBuffer_append(CBufferRef cbuf, void* data, size_t len);
+void Cbuffer_append(Cbuffer* cbuf, void* data, size_t len);
 
 ///
 /// WARNING - THIS FUNCTION ALLOCATES MEMORY
@@ -111,24 +111,24 @@ void CBuffer_append(CBufferRef cbuf, void* data, size_t len);
 /// \param data
 /// \param len
 ///
-void CBuffer_append_cstr(CBufferRef cbuf, char* cstr);
+void Cbuffer_append_cstr(Cbuffer* cbuf, char* cstr);
 
 ///
 /// Force the used size of the buffer to the given value.
 ///
-/// Reserved for CBuffer internal use.
+/// Reserved for Cbuffer internal use.
 ///
-void CBuffer_set_size(CBufferRef cbuf, size_t n);
+void Cbuffer_set_size(Cbuffer* cbuf, size_t n);
 
 ///
-/// Moves the content of one CBuffer instance to another by using move semantics.
+/// Moves the content of one Cbuffer instance to another by using move semantics.
 /// The internal pointers and counters of src are moved to dest.
 ///
 /// src argument is reset to an empty buffer
 /// \param dest
 /// \param src
 ///
-void CBuffer_move(CBufferRef dest, CBufferRef src);
+void Cbuffer_move(Cbuffer* dest, Cbuffer* src);
 
 ///
 /// Detremines if an address value (pointer) is within the address range of the
@@ -138,8 +138,8 @@ void CBuffer_move(CBufferRef dest, CBufferRef src);
 ///      buffer.dada() < = ptr < buffer.data() + buffer.size();
 ///
 ///
-bool CBuffer_contains_voidptr(CBufferRef cbuf, void* ptr);
-bool CBuffer_contains_charptr(CBufferRef cbuf, char* ptr);
+bool Cbuffer_contains_voidptr(Cbuffer* cbuf, void* ptr);
+bool Cbuffer_contains_charptr(Cbuffer* cbuf, char* ptr);
 
 
 #endif

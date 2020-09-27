@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <c_eg/alloc.h>
 #include <c_eg/unittest.h>
-#include <c_eg/buffer/contig_buffer.h>
+#include <c_eg/buffer/cbuffer.h>
 #include <c_eg/logger.h>
 #include <c_eg/list.h>
 #include <c_eg/server.h>
@@ -33,7 +33,7 @@ int test_client_01()
     Client_connect(client, "localhost", 9001);
     Message* response = Message_new();
     Client_roundtrip(client, req1, &response);
-    CBufferRef cb = BufferChain_compact(Message_get_body(response));
+    Cbuffer* cb = BufferChain_compact(Message_get_body(response));
     return 0;
 }
 
@@ -116,25 +116,25 @@ void Writer_start(HttpStatus status, HdrList* headers)
     int len = asprintf(&first_line, "HTTP/1.1 %d %s\r\n", status, reason_str);
     if(first_line == NULL) goto failed;
 
-    CBufferRef cb_output_ref = NULL;
-    if((cb_output_ref = CBuffer_new()) == NULL) goto failed;
-    CBufferRef serialized_headers = NULL;
+    Cbuffer* cb_output_ref = NULL;
+    if((cb_output_ref = Cbuffer_new()) == NULL) goto failed;
+    Cbuffer* serialized_headers = NULL;
     serialized_headers = HdrList_serialize(headers);
 
-    CBuffer_append(cb_output_ref, (void*)first_line, len);
+    Cbuffer_append(cb_output_ref, (void*)first_line, len);
     /// this is clumsy - change HdrList_serialize() to deposit into an existing ContigBuffer
-    CBuffer_append(cb_output_ref, CBuffer_data(serialized_headers), CBuffer_size(serialized_headers));
-    CBuffer_append_cstr(cb_output_ref, "\r\n");
+    Cbuffer_append(cb_output_ref, Cbuffer_data(serialized_headers), Cbuffer_size(serialized_headers));
+    Cbuffer_append_cstr(cb_output_ref, "\r\n");
     int x = len+2;
 
     free(first_line);
-    CBuffer_free(&serialized_headers);
-    CBuffer_free(&cb_output_ref);
+    Cbuffer_free(&serialized_headers);
+    Cbuffer_free(&cb_output_ref);
     return;
     failed:
     if(first_line != NULL) free(first_line);
-    if(serialized_headers != NULL) CBuffer_free(&serialized_headers);
-    if(cb_output_ref != NULL) CBuffer_free(&cb_output_ref);
+    if(serialized_headers != NULL) Cbuffer_free(&serialized_headers);
+    if(cb_output_ref != NULL) Cbuffer_free(&cb_output_ref);
 
 }
 

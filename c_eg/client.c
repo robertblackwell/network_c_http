@@ -1,6 +1,6 @@
 #include <c_eg/client.h>
 #include <c_eg/alloc.h>
-#include <c_eg/buffer/contig_buffer.h>
+#include <c_eg/buffer/cbuffer.h>
 #include <c_eg/message.h>
 #include <c_eg/reader.h>
 #include <c_eg/writer.h>

@@ -1,7 +1,7 @@
 
 #include <pthread.h>
 #include <unistd.h>
-#include <c_eg/buffer/contig_buffer.h>
+#include <c_eg/buffer/cbuffer.h>
 #include <c_eg/logger.h>
 #include <c_eg/queue.h>
 

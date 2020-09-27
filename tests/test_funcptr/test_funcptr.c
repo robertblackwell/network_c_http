@@ -4,7 +4,7 @@
 #include <http-parser/http_parser.h>
 #include <c_eg/alloc.h>
 #include <c_eg/unittest.h>
-#include <c_eg/buffer/contig_buffer.h>
+#include <c_eg/buffer/cbuffer.h>
 #include <c_eg/logger.h>
 #include <c_eg/list.h>
 #include <c_eg/rdsocket.h>

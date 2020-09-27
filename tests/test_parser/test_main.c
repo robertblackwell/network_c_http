@@ -21,7 +21,7 @@
 } while(0);
 
 #define CHECK_BODY(M, S) do {\
-    BufferChainRef body = Message_get_body(M); \
+    BufferChain* body = Message_get_body(M); \
     bool x##M = BufferChain_eq_cstr(body, S); \
     UT_EQUAL_INT(x##M, 1); \
 } while(0);
@@ -115,7 +115,7 @@ int test_A001_vfunc (List* results)
     CHECK_HEADER(h, HEADER_CONNECTION, "keep-alive");
     CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
     CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "11");
-    BufferChainRef body = Message_get_body (m1);
+    BufferChain* body = Message_get_body (m1);
     bool x = BufferChain_eq_cstr (body, "01234567890");
     CHECK_BODY(m1, "01234567890");
     return 0;
@@ -350,7 +350,7 @@ int test_A007_vfunc (List* results)
         CHECK_HEADER(h, HEADER_CONNECTION, "keep-alive");
         CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
         CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "10");
-        BufferChainRef bcref = Message_get_body (m1);
+        BufferChain* bcref = Message_get_body (m1);
         CHECK_BODY(m1, "1234567890");
     }
     {
@@ -363,8 +363,8 @@ int test_A007_vfunc (List* results)
         CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
         CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "11");
 
-        BufferChainRef bcref = Message_get_body(m2);
-        CBufferRef cbref = BufferChain_compact(bcref);
+        BufferChain* bcref = Message_get_body(m2);
+        Cbuffer* cbref = BufferChain_compact(bcref);
         bool x01 = BufferChain_eq_cstr(bcref, "ABCDEFGHIJK");
         int y = x01;
         CHECK_BODY(m2, "ABCDEFGHIJK");

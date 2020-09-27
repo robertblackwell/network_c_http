@@ -3,7 +3,7 @@
 #include <string.h>
 #include <c_eg/alloc.h>
 #include <c_eg/utils.h>
-#include <c_eg/buffer/contig_buffer.h>
+#include <c_eg/buffer/cbuffer.h>
 
 
 #define CBUFFER_MAX_CAPACITY 10000
@@ -21,7 +21,7 @@ size_t min_of_two(size_t a, size_t b)
 
 /**
 * This struct implements a strategy for growing contiguous buffers
-* CBuffer instances can be parameterized with different strategies
+* Cbuffer instances can be parameterized with different strategies
 */
 typedef struct BufferStrategy_s {
 
@@ -31,7 +31,7 @@ typedef struct BufferStrategy_s {
 } BufferStrategy, *BufferStrategyRef;
 
 
-typedef struct CBuffer_s
+typedef struct Cbuffer_s
 {
     void*       m_memPtr;     /// points to the start of the memory slab managed by the instance
     char*       m_cPtr;       /// same as memPtr but makes it easier in debugger to see whats in the buffer
@@ -39,7 +39,7 @@ typedef struct CBuffer_s
     size_t      m_capacity;  /// the capacity of the buffer, the value used for the eg_alloc call
     size_t      m_size;      /// size of the currently filled portion of the memory slab
     BufferStrategyRef m_strategy;
-} CBuffer, * CBufferRef; 
+} Cbuffer;
 
 /**
 * Allocates memory - BufferStrategyRef determines how big the memory block
@@ -80,9 +80,9 @@ void* BufferStrategy_reallocate(BufferStrategyRef bsref, void* current_memptr, s
 
 BufferStrategy common_strategy = {.m_min_size=256, .m_max_size=1024*1024};
 
-CBufferRef CBuffer_new()
+Cbuffer* Cbuffer_new()
 {
-    CBufferRef cb_ptr = (CBufferRef)eg_alloc(sizeof(CBuffer));
+    Cbuffer* cb_ptr = (Cbuffer*)eg_alloc(sizeof(Cbuffer));
     cb_ptr->m_strategy=&common_strategy;
     size_t tmp_cap = cb_ptr->m_strategy->m_min_size;
     cb_ptr->m_memPtr = BufferStrategy_allocate(cb_ptr->m_strategy, tmp_cap);
@@ -93,16 +93,16 @@ CBufferRef CBuffer_new()
     return cb_ptr;
 }
 
-CBufferRef CBuffer_from_cstring(char* c_str)
+Cbuffer* Cbuffer_from_cstring(char* c_str)
 {
-    CBufferRef cbuf = CBuffer_new();
-    CBuffer_append(cbuf, (void*)c_str, strlen(c_str));
+    Cbuffer* cbuf = Cbuffer_new();
+    Cbuffer_append(cbuf, (void*)c_str, strlen(c_str));
     return cbuf;
 }
 
-void CBuffer_free(CBufferRef* cbuf)
+void Cbuffer_free(Cbuffer** cbuf)
 {
-    CBufferRef this = *cbuf;
+    Cbuffer* this = *cbuf;
     assert(*cbuf != NULL);
     eg_free(this->m_memPtr);
     eg_free(*cbuf);
@@ -111,28 +111,28 @@ void CBuffer_free(CBufferRef* cbuf)
 /**
  * gets a pointer to the start of the memory slab being managed by the instance
  */
-void* CBuffer_data(CBufferRef cbuf)
+void* Cbuffer_data(Cbuffer* cbuf)
 {
     return cbuf->m_memPtr;
 }
 /**
  * gets the size of used portion of the buffer
 */
-size_t CBuffer_size(CBufferRef cbuf)
+size_t Cbuffer_size(Cbuffer* cbuf)
 {
     return cbuf->m_length;
 }
 /**
  * capacity of the buffer - max value of size
 */
-size_t CBuffer_capacity(CBufferRef cbuf)
+size_t Cbuffer_capacity(Cbuffer* cbuf)
 {
     return cbuf->m_capacity;
 }
 /**
  * returns a pointer to the next available unused position in the buffer
 */
-void* CBuffer_next_available(CBufferRef cbuf)
+void* Cbuffer_next_available(Cbuffer* cbuf)
 {
     void* x = (void*) (cbuf->m_cPtr + cbuf->m_length);
     return x;
@@ -140,13 +140,13 @@ void* CBuffer_next_available(CBufferRef cbuf)
 /**
  * Resets the buffer so that it is again an empty buffer
  */
-void CBuffer_clear(CBufferRef cbuf)
+void Cbuffer_clear(Cbuffer* cbuf)
 {
 
     cbuf->m_length = 0; cbuf->m_length = 0; cbuf->m_cPtr[0] = (char)0;
 }
 
-void CBuffer_append(CBufferRef cbuf, void* data, size_t len)
+void Cbuffer_append(Cbuffer* cbuf, void* data, size_t len)
 {
     char* tmp = (char*)data;
     if(len == 0)
@@ -158,18 +158,18 @@ void CBuffer_append(CBufferRef cbuf, void* data, size_t len)
         cbuf->m_cPtr = (char*) cbuf->m_memPtr;
         cbuf->m_capacity = new_capacity;
     }
-    void* na = CBuffer_next_available(cbuf);
+    void* na = Cbuffer_next_available(cbuf);
     memcpy(na, data, len);
     cbuf->m_length = cbuf->m_length + len;
     cbuf->m_size = cbuf->m_length;
     
     cbuf->m_cPtr = (char*) cbuf->m_memPtr;
 }
-void CBuffer_append_cstr(CBufferRef cbuf, char* cstr)
+void Cbuffer_append_cstr(Cbuffer* cbuf, char* cstr)
 {
-    CBuffer_append(cbuf, (void*)cstr, strlen(cstr));
+    Cbuffer_append(cbuf, (void*)cstr, strlen(cstr));
 }
-void CBuffer_setSize(CBufferRef cbuf, size_t n)
+void Cbuffer_setSize(Cbuffer* cbuf, size_t n)
 {
     cbuf->m_length = n;
     cbuf->m_size = n;
@@ -180,22 +180,22 @@ void CBuffer_setSize(CBufferRef cbuf, size_t n)
  * This is a reference to an internal string so dont free or change it
  * there is a bug here as no zero on the end
  */
-char* CBuffer_toString(CBufferRef cbuf)
+char* Cbuffer_toString(Cbuffer* cbuf)
 {
     char* p = cbuf->m_cPtr;
     return p;
 }
 // c++ move semantics - saves a copy
-void CBuffer_move(CBufferRef dest, CBufferRef src)
+void Cbuffer_move(Cbuffer* dest, Cbuffer* src)
 {
     ASSERT_NOT_NULL(src);
     ASSERT_NOT_NULL(dest);
-    CBuffer_clear(dest);
-//    CBuffer_append(dest, src->m_memPtr, src->m_length );
-    CBuffer tmp = *dest;
+    Cbuffer_clear(dest);
+//    Cbuffer_append(dest, src->m_memPtr, src->m_length );
+    Cbuffer tmp = *dest;
     *dest = *src;
     *src = tmp;
-    CBuffer_clear(src);
+    Cbuffer_clear(src);
 }
 /**
  * Detremines if an address value (pointer) is within the address range of the
@@ -205,12 +205,12 @@ void CBuffer_move(CBufferRef dest, CBufferRef src)
  *      buffer.dada() < = ptr < buffer.data() + buffer.size();
  *
  */
-bool CBuffer_contains_voidptr(CBufferRef cbuf, void* ptr)
+bool Cbuffer_contains_voidptr(Cbuffer* cbuf, void* ptr)
 {
     char* p = (char*) ptr;
-    return CBuffer_contains_charptr(cbuf, p);
+    return Cbuffer_contains_charptr(cbuf, p);
 }
-bool CBuffer_contains_charptr(CBufferRef cbuf, char* ptr)
+bool Cbuffer_contains_charptr(Cbuffer* cbuf, char* ptr)
 {
     char* endPtr = cbuf->m_cPtr + (long)cbuf->m_capacity;
     char* sPtr = cbuf->m_cPtr;

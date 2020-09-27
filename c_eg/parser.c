@@ -28,10 +28,10 @@ Parser* Parser_new()
     this->m_header_state = kHEADER_STATE_NOTHING;
     this->m_http_parser_ptr = NULL;
     this->m_http_parser_settings_ptr = NULL;
-    this->m_status_buf = CBuffer_new();
-    this->m_url_buf    = CBuffer_new();
-    this->m_name_buf   = CBuffer_new();
-    this->m_value_buf  = CBuffer_new();
+    this->m_status_buf = Cbuffer_new();
+    this->m_url_buf    = Cbuffer_new();
+    this->m_name_buf   = Cbuffer_new();
+    this->m_value_buf  = Cbuffer_new();
     return this;
 }
 
@@ -48,11 +48,11 @@ void Parser_free(Parser** this_p)
         this->m_http_parser_settings_ptr = NULL;
     }
 
-    if(this->m_name_buf != NULL) CBuffer_free(&(this->m_name_buf));
-    if(this->m_url_buf != NULL) CBuffer_free(&(this->m_url_buf));
-    if(this->m_status_buf != NULL) CBuffer_free(&(this->m_status_buf));
-    if(this->m_value_buf != NULL) CBuffer_free(&(this->m_value_buf));
-    if(this->m_name_buf != NULL) CBuffer_free(&(this->m_name_buf));
+    if(this->m_name_buf != NULL) Cbuffer_free(&(this->m_name_buf));
+    if(this->m_url_buf != NULL) Cbuffer_free(&(this->m_url_buf));
+    if(this->m_status_buf != NULL) Cbuffer_free(&(this->m_status_buf));
+    if(this->m_value_buf != NULL) Cbuffer_free(&(this->m_value_buf));
+    if(this->m_name_buf != NULL) Cbuffer_free(&(this->m_name_buf));
     free(this);
     *this_p = NULL;
 
@@ -196,10 +196,10 @@ void Parser_initialize(Parser* this)
     }
     http_parser_settings* settings = (http_parser_settings*)eg_alloc(sizeof(http_parser_settings));
     this->m_http_parser_settings_ptr = settings;
-    if(this->m_status_buf != NULL) CBuffer_clear(this->m_status_buf);
-    if(this->m_url_buf != NULL) CBuffer_clear(this->m_url_buf);
-    if(this->m_name_buf != NULL) CBuffer_clear(this->m_name_buf);
-    if(this->m_value_buf != NULL) CBuffer_clear(this->m_value_buf);
+    if(this->m_status_buf != NULL) Cbuffer_clear(this->m_status_buf);
+    if(this->m_url_buf != NULL) Cbuffer_clear(this->m_url_buf);
+    if(this->m_name_buf != NULL) Cbuffer_clear(this->m_name_buf);
+    if(this->m_value_buf != NULL) Cbuffer_clear(this->m_value_buf);
     this->m_http_parser_settings_ptr->on_message_begin = message_begin_cb;
     this->m_http_parser_settings_ptr->on_url = url_data_cb;
     this->m_http_parser_settings_ptr->on_status = status_data_cb;
@@ -217,24 +217,24 @@ int message_begin_cb(http_parser* parser)
 {
     Parser* this =  (Parser*)(parser->data);
     if(this->m_status_buf != NULL) {
-        CBuffer_clear(this->m_status_buf);
+        Cbuffer_clear(this->m_status_buf);
     } else {
-        if((this->m_status_buf = CBuffer_new())==NULL)  return -1; // this will stop parsing and the error can be handled higher up
+        if((this->m_status_buf = Cbuffer_new())==NULL)  return -1; // this will stop parsing and the error can be handled higher up
     }
     if(this->m_url_buf != NULL) {
-        CBuffer_clear(this->m_url_buf);
+        Cbuffer_clear(this->m_url_buf);
     } else {
-        if((this->m_url_buf = CBuffer_new()) == NULL) return -1; // this will stop parsing and the error can be handled higher up
+        if((this->m_url_buf = Cbuffer_new()) == NULL) return -1; // this will stop parsing and the error can be handled higher up
     }
     if(this->m_name_buf != NULL) {
-        CBuffer_clear(this->m_name_buf);
+        Cbuffer_clear(this->m_name_buf);
     } else {
-        if((this->m_name_buf = CBuffer_new()) == NULL) return -1; // this will stop parsing and the error can be handled higher up
+        if((this->m_name_buf = Cbuffer_new()) == NULL) return -1; // this will stop parsing and the error can be handled higher up
     }
     if(this->m_value_buf != NULL) {
-        CBuffer_clear(this->m_value_buf);
+        Cbuffer_clear(this->m_value_buf);
     } else {
-        if((this->m_value_buf = CBuffer_new()) == NULL)  return -1; // this will stop parsing and the error can be handled higher up
+        if((this->m_value_buf = Cbuffer_new()) == NULL)  return -1; // this will stop parsing and the error can be handled higher up
     }
     return 0;
 }
@@ -244,7 +244,7 @@ int url_data_cb(http_parser* parser, const char* at, size_t length)
     Parser* this =  (Parser*)(parser->data);
     Message* message = Parser_current_message(this);
     Message_set_is_request(message, true);
-    CBuffer_append(this->m_url_buf, (char*)at, length); /*NEEDS ALLO TEST*/
+    Cbuffer_append(this->m_url_buf, (char*)at, length); /*NEEDS ALLO TEST*/
     return 0;
 }
 
@@ -255,7 +255,7 @@ int status_data_cb(http_parser* parser, const char* at, size_t length)
     Message_set_is_request(message, false);
     Message_set_status(message, this->m_http_parser_ptr->status_code);
 
-    CBuffer_append(this->m_status_buf, (char*)at, length);  /*NEEDS ALLO TEST*/
+    Cbuffer_append(this->m_status_buf, (char*)at, length);  /*NEEDS ALLO TEST*/
     Message_move_reason(message, this->m_status_buf);  /*NEEDS ALLO TEST*/
     return 0;
 }
@@ -266,14 +266,14 @@ int header_field_data_cb(http_parser* parser, const char* at, size_t length)
     HdrList* hdrs = Message_headers(message);
     int state = this->m_header_state;
     if( (state == 0) || (state == kHEADER_STATE_NOTHING) || (state == kHEADER_STATE_VALUE)) {
-        if(CBuffer_size(this->m_name_buf) != 0) {
+        if(Cbuffer_size(this->m_name_buf) != 0) {
             HdrList_add_cbuf(hdrs, this->m_name_buf, this->m_value_buf);  /*NEEDS ALLO TEST*/
-            CBuffer_clear(this->m_name_buf);
-            CBuffer_clear(this->m_value_buf);
+            Cbuffer_clear(this->m_name_buf);
+            Cbuffer_clear(this->m_value_buf);
         }
-        CBuffer_append(this->m_name_buf, (char*)at, length);  /*NEEDS ALLO TEST*/
+        Cbuffer_append(this->m_name_buf, (char*)at, length);  /*NEEDS ALLO TEST*/
     } else if( state == kHEADER_STATE_FIELD ) {
-        CBuffer_append(this->m_name_buf, (char*)at, length);  /*NEEDS ALLO TEST*/
+        Cbuffer_append(this->m_name_buf, (char*)at, length);  /*NEEDS ALLO TEST*/
     } else {
         assert(false);
     }
@@ -286,10 +286,10 @@ int header_value_data_cb(http_parser* parser, const char* at, size_t length)
     Message* message = Parser_current_message(this);
     int state = this->m_header_state;
     if( state == kHEADER_STATE_FIELD ) {
-        CBuffer_clear(this->m_value_buf);
-        CBuffer_append(this->m_value_buf, (char*)at, length);  /*NEEDS ALLO TEST*/
+        Cbuffer_clear(this->m_value_buf);
+        Cbuffer_append(this->m_value_buf, (char*)at, length);  /*NEEDS ALLO TEST*/
     } else if( state == kHEADER_STATE_VALUE) {
-        CBuffer_append(this->m_value_buf, (char*)at, length);  /*NEEDS ALLO TEST*/
+        Cbuffer_append(this->m_value_buf, (char*)at, length);  /*NEEDS ALLO TEST*/
     } else {
         assert(false);
     }
@@ -300,18 +300,18 @@ int headers_complete_cb(http_parser* parser) //, const char* aptr, size_t remain
 {
     Parser* this =  (Parser*)(parser->data);
     Message* message = Parser_current_message(this);
-    if( CBuffer_size(this->m_name_buf) != 0 ) {
+    if( Cbuffer_size(this->m_name_buf) != 0 ) {
         HdrList_add_cbuf(Message_headers(message), this->m_name_buf, this->m_value_buf);  /*NEEDS ALLO TEST*/
-        CBuffer_clear(this->m_name_buf);
-        CBuffer_clear(this->m_value_buf);
+        Cbuffer_clear(this->m_name_buf);
+        Cbuffer_clear(this->m_value_buf);
     }
     Message_set_version(message, parser->http_major, parser->http_minor );
-    if( CBuffer_size(this->m_url_buf)  == 0 ) {
+    if( Cbuffer_size(this->m_url_buf)  == 0 ) {
     } else {
         Message_set_method(message, (enum http_method)parser->method);
         Message_move_target(message, this->m_url_buf);  /*NEEDS ALLO TEST*/
     }
-//    if( CBuffer_size(this->m_status_buf) == 0 ) {
+//    if( Cbuffer_size(this->m_status_buf) == 0 ) {
 //    } else {
 //        Message_move_reason(message, this->m_status_buf);
 //    }
@@ -322,7 +322,7 @@ int body_data_cb(http_parser* parser, const char* at, size_t length)
 {
     Parser* this =  (Parser*)(parser->data);
     Message* message = Parser_current_message(this);
-    BufferChainRef chain_ptr = Message_get_body(message);
+    BufferChain* chain_ptr = Message_get_body(message);
     if (chain_ptr == NULL) {
         chain_ptr = BufferChain_new();  /*NEEDS ALLO TEST*/
         Message_set_body(message, chain_ptr);

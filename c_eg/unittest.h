@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <libgen.h>
 
-#include <c_eg/buffer/contig_buffer.h>
+#include <c_eg/buffer/cbuffer.h>
 #include <c_eg/logger.h>
 
 #define GREEN(string)   "\x1b[32m" string "\x1b[0m"

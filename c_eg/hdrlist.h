@@ -1,7 +1,7 @@
 #ifndef c_ceg_hdrlist_h
 #define c_ceg_hdrlist_h
 #include <c_eg/kvpair.h>
-#include <c_eg/buffer/contig_buffer.h>
+#include <c_eg/buffer/cbuffer.h>
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -64,11 +64,11 @@ void HdrList_add_front(HdrList* lref, KVPair* item);
 /// and hence ownership of key and value remain with the caller
 ///
 /// param this HdrList*
-/// param key CBufferRef
-/// param CBufferRef
+/// param key Cbuffer*
+/// param Cbuffer*
 /// return void
 ///
-void HdrList_add(HdrList* this, CBufferRef key, CBufferRef value);
+void HdrList_add(HdrList* this, Cbuffer* key, Cbuffer* value);
 
 ///
 /// Find a KVPair in a HdrList by key/label value
@@ -90,24 +90,24 @@ KVPair* HdrList_find(HdrList* hlref, char* key);
 ///
 void HdrList_remove(HdrList* hlref, char* key);
 
-/// Serialize a header list into a CBufferRef
+/// Serialize a header list into a Cbuffer*
 /// param this HdrList*
-/// return A serialized version of the header list as a CBuffer.
-/// NOTE: ownership of the CBuffer is transfered to the caller
-CBufferRef HdrList_serialize(HdrList* this);
+/// return A serialized version of the header list as a Cbuffer.
+/// NOTE: ownership of the Cbuffer is transfered to the caller
+Cbuffer* HdrList_serialize(HdrList* this);
 
 ///
 /// Adds a new header line to the list
 ///
 /// param this HDRLineRef A ref for the list being added to
-/// param key CBufferRef holding the key or label for the header line.
-/// param value CBufferRef holding the value for the header line
+/// param key Cbuffer* holding the key or label for the header line.
+/// param value Cbuffer* holding the value for the header line
 ///
-/// The content of the CBufferRef are copied into the header line so the caller is free
-/// to deal with the two CBufferRef as they wish.
+/// The content of the Cbuffer* are copied into the header line so the caller is free
+/// to deal with the two Cbuffer* as they wish.
 ///
 ///
-void HdrList_add_cbuf(HdrList* this, CBufferRef key, CBufferRef value);
+void HdrList_add_cbuf(HdrList* this, Cbuffer* key, Cbuffer* value);
 
 ///
 /// Adds a new header line to the list

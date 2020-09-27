@@ -7,7 +7,7 @@
  */
 #include <http-parser/http_parser.h>
 #include <c_eg/message.h>
-#include <c_eg/buffer/contig_buffer.h>
+#include <c_eg/buffer/cbuffer.h>
 
 /**
  * state values used in parsing http header lines
@@ -68,10 +68,10 @@ struct Parser_s {
     ///////////////////////////////////////////////////////////////////////////////////
     // String buffers used to accumulate values from http-parser
     ///////////////////////////////////////////////////////////////////////////////////
-    CBufferRef             m_url_buf;
-    CBufferRef             m_status_buf;
-    CBufferRef             m_name_buf;
-    CBufferRef             m_value_buf;
+    Cbuffer*             m_url_buf;
+    Cbuffer*             m_status_buf;
+    Cbuffer*             m_name_buf;
+    Cbuffer*             m_value_buf;
 };
 
 Parser* Parser_new();

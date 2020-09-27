@@ -93,9 +93,9 @@ void Message_set_is_request(Message* this, bool yn);
 /// NOTE: the caller retains ownership of the target argument
 ///
 /// \param this   Message*
-/// \param target CBuffer
+/// \param target Cbuffer
 ///
-void Message_move_target(Message* this, CBufferRef target);
+void Message_move_target(Message* this, Cbuffer* target);
 
 ///
 /// Returns a char*/c_string  pointer to the target string in a request message.
@@ -105,7 +105,7 @@ void Message_move_target(Message* this, CBufferRef target);
 /// \param this Message*
 /// \return c_string pointer. The returned value is a reference, ownership stays with the Message*.
 ///
-CBufferRef Message_get_target(Message* this);
+Cbuffer* Message_get_target(Message* this);
 
 ///
 /// Sets the content of Message* reason property to the content of Cbuffer target
@@ -117,9 +117,9 @@ CBufferRef Message_get_target(Message* this);
 /// NOTE: the caller retains ownership of the target argument
 ///
 /// \param this   Message*
-/// \param reason CBuffer
+/// \param reason Cbuffer
 ///
-void Message_move_reason(Message* this, CBufferRef reason);
+void Message_move_reason(Message* this, Cbuffer* reason);
 
 ///
 /// Returns a char*/c_string  pointer to the reason string in a response message.
@@ -143,9 +143,9 @@ char* Message_get_reason(Message* this);
 ///
 const char* Message_header_iter_deref(Message* mref, HeaderIter iter);
 
-BufferChainRef Message_get_body(Message* mref);
-void Message_set_body(Message* mref, BufferChainRef bodyp);
+BufferChain* Message_get_body(Message* mref);
+void Message_set_body(Message* mref, BufferChain* bodyp);
 
-CBufferRef Message_serialize(Message* this);
+Cbuffer* Message_serialize(Message* this);
 
 #endif

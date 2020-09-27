@@ -7,7 +7,7 @@
 #include <boost/asio/buffer.hpp>
 #include <marvin/error_handler/error_handler.hpp>
 #include <marvin/buffer/buffer_allocator.hpp>
-#include <marvin/buffer/contig_buffer.hpp>
+#include <marvin/buffer/cbuffer.hpp>
 namespace Marvin {
 /**
 * \ingroup buffers

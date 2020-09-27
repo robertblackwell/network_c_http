@@ -26,7 +26,7 @@ set(EXTSRC ${C_EG_VENDOR_SRCDIR})
 
 set(C_EG_LIBRARY_HEADER_FILES
 	alloc.h
-	buffer/contig_buffer.h
+	buffer/cbuffer.h
 	buffer/buffer_chain.h
 	buffer/iobuffer.h
 	client.h
@@ -55,7 +55,7 @@ set(C_EG_LIBRARY_HEADER_FILES
 set(C_EG_LIBRARY_SOURCE_FILES
 	alloc.c
 	buffer/buffer_chain.c
-	buffer/contig_buffer.c
+	buffer/cbuffer.c
 	buffer/iobuffer.c
 	client.c
 	datasource.c

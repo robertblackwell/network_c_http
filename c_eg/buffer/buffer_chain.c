@@ -5,27 +5,27 @@
 #include <string.h>
 #include <c_eg/alloc.h>
 #include <c_eg/list.h>
-#include <c_eg/buffer/contig_buffer.h>
+#include <c_eg/buffer/cbuffer.h>
 
 typedef struct BufferChain_s {
 
         List*   m_chain;
         int       m_size;
 
-} BufferChain, *BufferChainRef;
+} BufferChain;
 static void dealloc(void** p)
 {
-    CBuffer_free((CBufferRef*)p);
+    Cbuffer_free((Cbuffer**)p);
 }
-BufferChainRef BufferChain_new()
+BufferChain* BufferChain_new()
 {
-    BufferChainRef tmp = eg_alloc(sizeof(BufferChain));
+    BufferChain* tmp = eg_alloc(sizeof(BufferChain));
     tmp->m_chain = List_new(dealloc);
     tmp->m_size = 0;
 }
-void BufferChain_free(BufferChainRef* thisptr)
+void BufferChain_free(BufferChain** thisptr)
 {
-    BufferChainRef this = *thisptr;
+    BufferChain* this = *thisptr;
     ListIterator iter = List_iterator(this->m_chain);
     for(;;) {
         if(iter == NULL) {
@@ -38,28 +38,28 @@ void BufferChain_free(BufferChainRef* thisptr)
     *thisptr = NULL;
     free((void*)this);
 }
-void BufferChain_append(BufferChainRef this, void* buf, int len)
+void BufferChain_append(BufferChain* this, void* buf, int len)
 {
     if (this->m_size > 0) {
-        CBufferRef last_cb = List_last(this->m_chain);
-        if ((CBuffer_capacity(last_cb) - CBuffer_size(last_cb)) >= len) {
-            CBuffer_append(last_cb, buf, len);
+        Cbuffer* last_cb = List_last(this->m_chain);
+        if ((Cbuffer_capacity(last_cb) - Cbuffer_size(last_cb)) >= len) {
+            Cbuffer_append(last_cb, buf, len);
             this->m_size += len;
             return;
         }
     }
     int required_len = (len > 256*4*8) ? len+100 : 256*4*8;
-    CBufferRef new_cb = CBuffer_new();
-    CBuffer_append(new_cb, buf, len);
+    Cbuffer* new_cb = Cbuffer_new();
+    Cbuffer_append(new_cb, buf, len);
     List_add_back(this->m_chain, (void*)new_cb);
     this->m_size += len;
 }
-void BufferChain_append_cstr(BufferChainRef this, char* cstr)
+void BufferChain_append_cstr(BufferChain* this, char* cstr)
 {
     BufferChain_append(this, (void*)cstr, strlen(cstr));
 }
 
-void BufferChain_clear(BufferChainRef bchain)
+void BufferChain_clear(BufferChain* bchain)
 {
     assert(false);
 //    for(int i = 0; i < bchain->m_chain.size(); i++) {
@@ -68,22 +68,22 @@ void BufferChain_clear(BufferChainRef bchain)
 //    bchain->m_chain.clear();
 //    bchain->m_size = 0;
 }
-int BufferChain_size(BufferChainRef this)
+int BufferChain_size(BufferChain* this)
 {
     return this->m_size;
 }
 
-CBufferRef BufferChain_compact(BufferChainRef this)
+Cbuffer* BufferChain_compact(BufferChain* this)
 {
-    CBufferRef cb_final = CBuffer_new();
+    Cbuffer* cb_final = Cbuffer_new();
     if(cb_final == NULL)
         goto memerror_01;
     ListIterator iter = List_iterator(this->m_chain);
     while(iter != NULL) {
-        CBufferRef tmp = (CBufferRef)List_itr_unpack(this->m_chain, iter);
-        void* data = CBuffer_data(tmp);
-        int sz = CBuffer_size(tmp);
-        CBuffer_append(cb_final, data, sz); /* MEM CHECK REQUIRED*/
+        Cbuffer* tmp = (Cbuffer*)List_itr_unpack(this->m_chain, iter);
+        void* data = Cbuffer_data(tmp);
+        int sz = Cbuffer_size(tmp);
+        Cbuffer_append(cb_final, data, sz); /* MEM CHECK REQUIRED*/
         ListIterator next = List_itr_next(this->m_chain, iter);
         iter = next;
     }
@@ -91,14 +91,14 @@ CBufferRef BufferChain_compact(BufferChainRef this)
     memerror_01:
         return NULL;
 }
-bool BufferChain_eq_cstr(BufferChainRef this, char* cstr)
+bool BufferChain_eq_cstr(BufferChain* this, char* cstr)
 {
     ListIterator iter = List_iterator(this->m_chain);
     int cstr_index = 0;
     while(iter != NULL) {
-        CBufferRef tmp = (CBufferRef)List_itr_unpack(this->m_chain, iter);
-        char* data = CBuffer_data(tmp);
-        int sz = CBuffer_size(tmp);
+        Cbuffer* tmp = (Cbuffer*)List_itr_unpack(this->m_chain, iter);
+        char* data = Cbuffer_data(tmp);
+        int sz = Cbuffer_size(tmp);
         int l = strlen(cstr);
         for(int cb_index = 0; cb_index < sz; cb_index++) {
             if(cstr[cstr_index] != data[cb_index]) {
@@ -113,18 +113,18 @@ bool BufferChain_eq_cstr(BufferChainRef this, char* cstr)
     return true;
 }
 #ifdef BVBVB
-int BufferChain_blocks(BufferChainRef this)
+int BufferChain_blocks(BufferChain* this)
 {
     return m_chain.size();
 }
-ContigBuffer& BufferChain_block_at(BufferChainRef bchain, std::size_t index)
+ContigBuffer& BufferChain_block_at(BufferChain* bchain, std::size_t index)
 {
     if (index >= m_chain.size()) {
             MARVIN_THROW("index out of range");
     }
     return *(m_chain.at(index));
 }
-std::string BufferChain_to_string(BufferChainRef bchain)
+std::string BufferChain_to_string(BufferChain* bchain)
 {
     std::string s = "";
     for(CBuf::SPtr& mb : m_chain) {
@@ -132,7 +132,7 @@ std::string BufferChain_to_string(BufferChainRef bchain)
     }
     return s;
 }
-CBuf::SPtr BufferChain_amalgamate(BufferChainRef bchain)
+CBuf::SPtr BufferChain_amalgamate(BufferChain* bchain)
 {
     CBuf::SPtr mb_final = m_buf_factory.makeSPtr(this->size());
     for(CBuf::SPtr& mb : m_chain) {

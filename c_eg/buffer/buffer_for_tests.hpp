@@ -2,7 +2,7 @@
 #define marvin_buffer_for_tests_hpp
 
 #include <marvin/buffer/buffer_allocator.hpp>
-#include <marvin/buffer/contig_buffer.hpp>
+#include <marvin/buffer/cbuffer.hpp>
 #include <marvin/buffer/contig_buffer_factory.hpp>
 #include <marvin/buffer/buffer_chain.hpp>
 namespace Marvin {

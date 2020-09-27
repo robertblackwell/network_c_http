@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <c_eg/unittest.h>
-#include <c_eg/buffer/contig_buffer.h>
+#include <c_eg/buffer/cbuffer.h>
 #include <c_eg/logger.h>
 #include <c_eg/list.h>
 #include <c_eg/kvpair.h>
@@ -65,7 +65,7 @@ int test_hdrlist_find()
     HdrList_add_back(hdrlistref, hdrln4);
     int sz2 = HdrList_size(hdrlistref);
     UT_EQUAL_INT(sz2, 4);
-    CBufferRef cbref = HdrList_serialize(hdrlistref);
+    Cbuffer* cbref = HdrList_serialize(hdrlistref);
 
     KVPair* y = HdrList_find(hdrlistref, "onetwothree");
     UT_EQUAL_PTR(y, NULL);
@@ -97,7 +97,7 @@ int test_hdrlist_find()
     UT_EQUAL_INT(HdrList_size(hdrlistref), 0);
 
     HdrList_free(&hdrlistref);
-    CBuffer_free(&cbref);
+    Cbuffer_free(&cbref);
 
     return 0;
 }
@@ -118,10 +118,10 @@ int test_serialize_headers()
     char* content_type = "text/html; charset=UTF-8";
     KVPair* hl_content_type = KVPair_new(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
     HdrList_add_front(hdrs, hl_content_type);
-    CBufferRef ser = HdrList_serialize(hdrs);
+    Cbuffer* ser = HdrList_serialize(hdrs);
     free(body_len_str);
     HdrList_free(&hdrs);
-    CBuffer_free(&ser);
+    Cbuffer_free(&ser);
     return 0;
 }
 int test_serialize_headers_2()
@@ -135,9 +135,9 @@ int test_serialize_headers_2()
     char* content_type = "text/html; charset=UTF-8";
     HdrList_add_line(hdrs, HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
 
-    CBufferRef ser = HdrList_serialize(hdrs);
+    Cbuffer* ser = HdrList_serialize(hdrs);
     free(body_len_str);
-    CBuffer_free(&ser);
+    Cbuffer_free(&ser);
     HdrList_free(&hdrs);
     return 0;
 }
