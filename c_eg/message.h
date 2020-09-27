@@ -7,7 +7,7 @@
 #include <c_eg/hdrlist.h>
 
 struct Message_s;
-typedef struct Message_s Message, *MessageRef;
+typedef struct Message_s Message;
 
 // from http-parser
 typedef enum http_status HttpStatus;
@@ -34,57 +34,57 @@ typedef void* HeaderIter;
 
 typedef int HttpMinorVersion;
 
-MessageRef Message_new();
-MessageRef Message_new_request();
-MessageRef Message_new_response();
+Message* Message_new();
+Message* Message_new_request();
+Message* Message_new_response();
 
-void Message_free(MessageRef* p);
+void Message_free(Message** p);
 void Message_dealloc(void* m);
 
-bool Message_is_request(MessageRef mref);
+bool Message_is_request(Message* mref);
 
-HttpStatus Message_get_status(MessageRef mref);
-void Message_set_status(MessageRef mref, HttpStatus status);
+HttpStatus Message_get_status(Message* mref);
+void Message_set_status(Message* mref, HttpStatus status);
 
-HttpMethod Message_get_method(MessageRef mref);
-void Message_set_method(MessageRef mref, HttpMethod method);
+HttpMethod Message_get_method(Message* mref);
+void Message_set_method(Message* mref, HttpMethod method);
 
-HttpMinorVersion Message_get_minor_version(MessageRef mref);
-void Message_set_minor_version(MessageRef this, HttpMinorVersion mv);
-void Message_set_version(MessageRef this, int maj, int minor);
+HttpMinorVersion Message_get_minor_version(Message* mref);
+void Message_set_minor_version(Message* this, HttpMinorVersion mv);
+void Message_set_version(Message* this, int maj, int minor);
 
-HdrListRef Message_headers(MessageRef this);
+HdrList* Message_headers(Message* this);
 
-void Message_add_header(MessageRef mref, char* labptr, int lablen, char* valptr, int vallen);
-
-///
-/// Returns the header list (of type HdrListRef) of a message.
-///
-/// NOTE: the memory for the returned value remains owned by the MessageRef
-///
-/// \param this MessageRef
-/// \return HdrListRef. The returned value is a reference ownership stays with the MessageRef.
-///
-HeaderIter Message_get_header(MessageRef mref, const char* labptr);
+void Message_add_header(Message* mref, char* labptr, int lablen, char* valptr, int vallen);
 
 ///
-/// Returns true if the MessageRef points at a request false otherwise.
+/// Returns the header list (of type HdrList*) of a message.
+///
+/// NOTE: the memory for the returned value remains owned by the Message*
+///
+/// \param this Message*
+/// \return HdrList*. The returned value is a reference ownership stays with the Message*.
+///
+HeaderIter Message_get_header(Message* mref, const char* labptr);
+
+///
+/// Returns true if the Message* points at a request false otherwise.
 ///
 /// \param this
 /// \return bool
 ///
-bool Message_get_is_request(MessageRef this);
+bool Message_get_is_request(Message* this);
 
 ///
 /// Sets a Message internal is_request flag to the given value/
 ///
-/// \param this MessageRef
+/// \param this Message*
 /// \param yn   bool
 ///
-void Message_set_is_request(MessageRef this, bool yn);
+void Message_set_is_request(Message* this, bool yn);
 
 ///
-/// Sets the content of MessageRef target property to the content of Cbuffer target
+/// Sets the content of Message* target property to the content of Cbuffer target
 /// argument.
 ///
 /// NOTE: does this using move sematics so that the argument is reset to an empty buffer
@@ -92,23 +92,23 @@ void Message_set_is_request(MessageRef this, bool yn);
 ///
 /// NOTE: the caller retains ownership of the target argument
 ///
-/// \param this   MessageRef
+/// \param this   Message*
 /// \param target CBuffer
 ///
-void Message_move_target(MessageRef this, CBufferRef target);
+void Message_move_target(Message* this, CBufferRef target);
 
 ///
 /// Returns a char*/c_string  pointer to the target string in a request message.
 ///
-/// NOTE: the memory for the returned value remains owned by the MessageRef
+/// NOTE: the memory for the returned value remains owned by the Message*
 ///
-/// \param this MessageRef
-/// \return c_string pointer. The returned value is a reference, ownership stays with the MessageRef.
+/// \param this Message*
+/// \return c_string pointer. The returned value is a reference, ownership stays with the Message*.
 ///
-CBufferRef Message_get_target(MessageRef this);
+CBufferRef Message_get_target(Message* this);
 
 ///
-/// Sets the content of MessageRef reason property to the content of Cbuffer target
+/// Sets the content of Message* reason property to the content of Cbuffer target
 /// argument.
 ///
 /// NOTE: does this using move sematics so that the argument is reset to an empty buffer
@@ -116,36 +116,36 @@ CBufferRef Message_get_target(MessageRef this);
 ///
 /// NOTE: the caller retains ownership of the target argument
 ///
-/// \param this   MessageRef
+/// \param this   Message*
 /// \param reason CBuffer
 ///
-void Message_move_reason(MessageRef this, CBufferRef reason);
+void Message_move_reason(Message* this, CBufferRef reason);
 
 ///
 /// Returns a char*/c_string  pointer to the reason string in a response message.
 ///
-/// NOTE: the memory for the returned value remains owned by the MessageRef
+/// NOTE: the memory for the returned value remains owned by the Message*
 ///
-/// \param this MessageRef
-/// \return c_string pointer. The returned value is a reference ownership stays with the MessageRef.
+/// \param this Message*
+/// \return c_string pointer. The returned value is a reference ownership stays with the Message*.
 ///
-char* Message_get_reason(MessageRef this);
+char* Message_get_reason(Message* this);
 
 ///
-/// Returns the value property of a header line, pointed at by iter, from the headers of MessageRef.
+/// Returns the value property of a header line, pointed at by iter, from the headers of Message*.
 ///
 /// This is basically a derefence operation
 ///
-/// \param mref MessageRef
+/// \param mref Message*
 /// \param iter HeaderListIter Must not be NULL
 /// \return a pointer to a c_string that is not owned by caller
 ///
 ///
-const char* Message_header_iter_deref(MessageRef mref, HeaderIter iter);
+const char* Message_header_iter_deref(Message* mref, HeaderIter iter);
 
-BufferChainRef Message_get_body(MessageRef mref);
-void Message_set_body(MessageRef mref, BufferChainRef bodyp);
+BufferChainRef Message_get_body(Message* mref);
+void Message_set_body(Message* mref, BufferChainRef bodyp);
 
-CBufferRef Message_serialize(MessageRef this);
+CBufferRef Message_serialize(Message* this);
 
 #endif

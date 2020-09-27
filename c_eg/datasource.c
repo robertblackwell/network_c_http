@@ -7,10 +7,10 @@
 
 /**
  *
- * @param this DataSourceRef
+ * @param this DataSource*
  * @param blocks a pointer to an array of char* (an array of const cstring pointers)
  */
-void DataSource_init(DataSourceRef this, char** blocks)
+void DataSource_init(DataSource* this, char** blocks)
 {
     this->m_block_count = 0;
     this->m_blocks = blocks;
@@ -20,7 +20,7 @@ void DataSource_init(DataSourceRef this, char** blocks)
  * Returns the next block of utf-8 null terminated data, NULL when done
  * @return char*, NULL when done
  */
-char* DataSource_next(DataSourceRef this)
+char* DataSource_next(DataSource* this)
 {
     char* block = this->m_blocks[this->m_block_count];
     this->m_block_count++;
@@ -29,12 +29,12 @@ char* DataSource_next(DataSourceRef this)
 /**
  * @return bool true when no more data
  */
-bool DataSource_finished(DataSourceRef this)
+bool DataSource_finished(DataSource* this)
 {
     return (this->m_blocks[this->m_block_count] == NULL);
 }
 
-int DataSource_read(DataSourceRef this, void* buffer, int length)
+int DataSource_read(DataSource* this, void* buffer, int length)
 {
     char* block = this->m_blocks[this->m_block_count];
     if (block == NULL) {

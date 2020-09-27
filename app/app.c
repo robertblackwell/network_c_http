@@ -4,7 +4,7 @@
 #include <mcheck.h>
 #include<signal.h>
 
-ServerRef g_sref;
+Server* g_sref;
 
 void sig_handler(int signo)
 {
@@ -21,7 +21,7 @@ int main()
         printf("app.c main signal() failed");
     }
     printf("Hello this is main \n");
-    ServerRef sref = Server_new(9001, handler_example);
+    Server* sref = Server_new(9001, handler_example);
     g_sref = sref;
     Server_listen(sref);
     Server_free(&sref);

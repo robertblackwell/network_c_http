@@ -12,15 +12,15 @@
 #include <unistd.h>
 #include <errno.h>
 
-RdrRef Rdr_new(ParserRef parser, RdSocket rdsock)
+Rdr* Rdr_new(Parser* parser, RdSocket rdsock)
 {
-    RdrRef rdr = eg_alloc(sizeof(Rdr));
+    Rdr* rdr = eg_alloc(sizeof(Rdr));
     if(rdr == NULL)
         return NULL;
     Rdr_init(rdr, parser, rdsock);
     return rdr;
 }
-void Rdr_init(RdrRef  this, ParserRef parser, RdSocket rdsock)
+void Rdr_init(Rdr*  this, Parser* parser, RdSocket rdsock)
 {
     ASSERT_NOT_NULL(this);
     this->m_parser = parser;
@@ -29,22 +29,22 @@ void Rdr_init(RdrRef  this, ParserRef parser, RdSocket rdsock)
     this->m_iobuffer = IOBuffer_new();
 }
 
-void Rdr_destroy(RdrRef this)
+void Rdr_destroy(Rdr* this)
 {
     IOBuffer_free(&(this->m_iobuffer));
 
 }
-void Rdr_free(RdrRef* this_ptr)
+void Rdr_free(Rdr** this_ptr)
 {
-    RdrRef this = *this_ptr;
+    Rdr* this = *this_ptr;
     Rdr_destroy(this);
     eg_free((void*)this);
     *this_ptr = NULL;
 }
-int Rdr_read(RdrRef this, MessageRef* msgref_ptr)
+int Rdr_read(Rdr* this, Message** msgref_ptr)
 {
     IOBufferRef iobuf = this->m_iobuffer;
-    MessageRef message_ptr = Message_new();
+    Message* message_ptr = Message_new();
     Parser_begin(this->m_parser, message_ptr);
     int bytes_read;
     for(;;) {

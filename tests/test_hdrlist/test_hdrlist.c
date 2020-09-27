@@ -15,7 +15,7 @@
 ///////////////////////////////////////////////////
 int test_hdrlist_new()
 {
-    HdrListRef hdrlistref = HdrList_new();
+    HdrList* hdrlistref = HdrList_new();
     int sz = HdrList_size(hdrlistref);
     UT_NOT_EQUAL_PTR(hdrlistref, NULL);
     UT_EQUAL_INT(sz, 0);
@@ -25,35 +25,35 @@ int test_hdrlist_new()
 }
 int test_hdrlist_add_back_get_content()
 {
-    HdrListRef hdrlistref = HdrList_new();
-    KVPairRef hdrln1 = KVPair_new("KVPairKey1", strlen("KVPairKey1"), "333", strlen("333"));
-    KVPairRef hdrln2 = KVPair_new("KVPairKey2", strlen("KVPairKey2"), "4444", strlen("4444"));
+    HdrList* hdrlistref = HdrList_new();
+    KVPair* hdrln1 = KVPair_new("KVPairKey1", strlen("KVPairKey1"), "333", strlen("333"));
+    KVPair* hdrln2 = KVPair_new("KVPairKey2", strlen("KVPairKey2"), "4444", strlen("4444"));
     HdrList_add_back(hdrlistref, hdrln1);
     HdrList_add_back(hdrlistref, hdrln2);
     int sz = HdrList_size(hdrlistref);
     UT_EQUAL_INT(sz, 2);
-    KVPairRef hdrref1 = HdrList_first(hdrlistref);
+    KVPair* hdrref1 = HdrList_first(hdrlistref);
     char* sh1 = KVPair_label(hdrref1);
     char* sv1 = KVPair_value(hdrref1);
-    KVPairRef hdrref2 = HdrList_last(hdrlistref);
+    KVPair* hdrref2 = HdrList_last(hdrlistref);
     char* sh2 = KVPair_label(hdrref2);
     char* sv2 = KVPair_value(hdrref2);
     UT_EQUAL_INT(strcmp(sh1, "KVPAIRKEY1"), 0);
     UT_EQUAL_INT(strcmp(sv1, "333"), 0);
     UT_EQUAL_INT(strcmp(sh2, "KVPAIRKEY2"), 0);
     UT_EQUAL_INT(strcmp(sv2, "4444"), 0);
-    List_display((ListRef)hdrlistref);
+    List_display((List*)hdrlistref);
     HdrList_free(&hdrlistref);
     return 0;
 }
 int test_hdrlist_find()
 {
-    HdrListRef hdrlistref = HdrList_new();
-    KVPairRef hdrln1 = KVPair_new("KVPairKey1", strlen("KVPairKey1"), "333", strlen("333"));
-    KVPairRef hdrln2 = KVPair_new("KVPairKey2", strlen("KVPairKey2"), "4444", strlen("4444"));
-    KVPairRef hdrln3 = KVPair_new("KVPairKey3", strlen("KVPairKey2"), "55555", strlen("55555"));
-    KVPairRef hdrln4 = KVPair_new("KVPairKey4", strlen("KVPairKey2"), "666666", strlen("666666"));
-    KVPairRef x = HdrList_find(hdrlistref, "onetwothree");
+    HdrList* hdrlistref = HdrList_new();
+    KVPair* hdrln1 = KVPair_new("KVPairKey1", strlen("KVPairKey1"), "333", strlen("333"));
+    KVPair* hdrln2 = KVPair_new("KVPairKey2", strlen("KVPairKey2"), "4444", strlen("4444"));
+    KVPair* hdrln3 = KVPair_new("KVPairKey3", strlen("KVPairKey2"), "55555", strlen("55555"));
+    KVPair* hdrln4 = KVPair_new("KVPairKey4", strlen("KVPairKey2"), "666666", strlen("666666"));
+    KVPair* x = HdrList_find(hdrlistref, "onetwothree");
     int sz = HdrList_size(hdrlistref);
     UT_EQUAL_INT(sz, 0);
     UT_EQUAL_PTR(x, NULL);
@@ -67,12 +67,12 @@ int test_hdrlist_find()
     UT_EQUAL_INT(sz2, 4);
     CBufferRef cbref = HdrList_serialize(hdrlistref);
 
-    KVPairRef y = HdrList_find(hdrlistref, "onetwothree");
+    KVPair* y = HdrList_find(hdrlistref, "onetwothree");
     UT_EQUAL_PTR(y, NULL);
-    KVPairRef z = HdrList_find(hdrlistref, "KVPAIRkey1");
+    KVPair* z = HdrList_find(hdrlistref, "KVPAIRkey1");
     UT_NOT_EQUAL_PTR(z, NULL);
     UT_EQUAL_PTR(((void*)hdrln1),((void*) z) );
-    KVPairRef w = HdrList_find(hdrlistref, "KVPAIRKEY2");
+    KVPair* w = HdrList_find(hdrlistref, "KVPAIRKEY2");
     UT_NOT_EQUAL_PTR(w, NULL);
     UT_EQUAL_PTR(((void*)hdrln2),((void*) w) );
 
@@ -101,9 +101,9 @@ int test_hdrlist_find()
 
     return 0;
 }
-void trial_HdrList_add_line(HdrListRef this, char* label, int lablen, char* value, int vallen)
+void trial_HdrList_add_line(HdrList* this, char* label, int lablen, char* value, int vallen)
 {
-    KVPairRef hl_content_type = KVPair_new(label, lablen, value, vallen);
+    KVPair* hl_content_type = KVPair_new(label, lablen, value, vallen);
     HdrList_add_front(this, hl_content_type);
 }
 int test_serialize_headers()
@@ -112,11 +112,11 @@ int test_serialize_headers()
     char* body_len_str;
     asprintf(&body_len_str, "%d", body_len);
 
-    HdrListRef hdrs = HdrList_new();
-    KVPairRef hl_content_length = KVPair_new(HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
+    HdrList* hdrs = HdrList_new();
+    KVPair* hl_content_length = KVPair_new(HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
     HdrList_add_front(hdrs, hl_content_length);
     char* content_type = "text/html; charset=UTF-8";
-    KVPairRef hl_content_type = KVPair_new(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
+    KVPair* hl_content_type = KVPair_new(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
     HdrList_add_front(hdrs, hl_content_type);
     CBufferRef ser = HdrList_serialize(hdrs);
     free(body_len_str);
@@ -130,7 +130,7 @@ int test_serialize_headers_2()
     char* body_len_str;
     asprintf(&body_len_str, "%d", body_len);
 
-    HdrListRef hdrs = HdrList_new();
+    HdrList* hdrs = HdrList_new();
     trial_HdrList_add_line(hdrs, HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
     char* content_type = "text/html; charset=UTF-8";
     HdrList_add_line(hdrs, HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
@@ -145,19 +145,19 @@ int test_serialize_headers_2()
 #ifdef HGHGH
 int test_list_add_front()
 {
-    ListRef lref = List_new(dealloc);
-    DummyObjRef dref = DummyObj_new(333);
+    List* lref = List_new(dealloc);
+    DummyObj* dref = DummyObj_new(333);
     List_add_front(lref, (void*) dref);
     int sz = List_size(lref);
-    int v1 = ((DummyObjRef)List_first(lref))->value;
-    int v2 = ((DummyObjRef)List_last(lref))->value;
+    int v1 = ((DummyObj*)List_first(lref))->value;
+    int v2 = ((DummyObj*)List_last(lref))->value;
     UT_EQUAL_INT(sz, 1);
     UT_EQUAL_INT(v1, 333);
     UT_EQUAL_INT(v2, 333);
-    DummyObjRef dref2 = DummyObj_new(444);
+    DummyObj* dref2 = DummyObj_new(444);
     List_add_front(lref, (void*) dref2);
-    int v11 = ((DummyObjRef)List_first(lref))->value;
-    int v12 = ((DummyObjRef)List_last(lref))->value;
+    int v11 = ((DummyObj*)List_first(lref))->value;
+    int v12 = ((DummyObj*)List_last(lref))->value;
     UT_EQUAL_INT((List_size(lref)), 2);
     UT_EQUAL_INT(v11, 444);
     UT_EQUAL_INT(v12, 333);
@@ -166,21 +166,21 @@ int test_list_add_front()
 }
 int test_list_remove_front()
 {
-    ListRef lref = List_new(dealloc);
-    DummyObjRef dref = DummyObj_new(333);
+    List* lref = List_new(dealloc);
+    DummyObj* dref = DummyObj_new(333);
     List_add_front(lref, (void*) dref);
     List_remove_first(lref);
     UT_EQUAL_INT((List_size(lref)), 0);
-    DummyObjRef dref1 = DummyObj_new(111);
-    DummyObjRef dref2 = DummyObj_new(222);
-    DummyObjRef dref3= DummyObj_new(333);
+    DummyObj* dref1 = DummyObj_new(111);
+    DummyObj* dref2 = DummyObj_new(222);
+    DummyObj* dref3= DummyObj_new(333);
     List_add_front(lref, (void*) dref1);
     List_add_front(lref, (void*) dref2);
     List_add_front(lref, (void*) dref3);
     UT_EQUAL_INT((List_size(lref)), 3);
-    int v1 = (int)((DummyObjRef)List_remove_first(lref))->value;
-    int v2 = (int)((DummyObjRef)List_remove_first(lref))->value;
-    int v3 = (int)((DummyObjRef)List_remove_first(lref))->value;
+    int v1 = (int)((DummyObj*)List_remove_first(lref))->value;
+    int v2 = (int)((DummyObj*)List_remove_first(lref))->value;
+    int v3 = (int)((DummyObj*)List_remove_first(lref))->value;
     UT_EQUAL_INT((List_size(lref)), 0);
     UT_EQUAL_INT(v1, 333);
     UT_EQUAL_INT(v2, 222);
@@ -190,21 +190,21 @@ int test_list_remove_front()
 }
 int test_iter()
 {
-    ListRef lref = List_new(dealloc);
-    DummyObjRef dref = DummyObj_new(333);
+    List* lref = List_new(dealloc);
+    DummyObj* dref = DummyObj_new(333);
     List_add_front(lref, (void*) dref);
     List_remove_first(lref);
     UT_EQUAL_INT((List_size(lref)), 0);
-    DummyObjRef dref1 = DummyObj_new(111);
-    DummyObjRef dref2 = DummyObj_new(222);
-    DummyObjRef dref3= DummyObj_new(333);
+    DummyObj* dref1 = DummyObj_new(111);
+    DummyObj* dref2 = DummyObj_new(222);
+    DummyObj* dref3= DummyObj_new(333);
     List_add_front(lref, (void*) dref1);
     List_add_front(lref, (void*) dref2);
     List_add_front(lref, (void*) dref3);
     UT_EQUAL_INT((List_size(lref)), 3);
     ListIterator iter = List_iterator(lref);
     for(int i = 3; i != 0;i--) {
-        DummyObjRef dref = (DummyObjRef)List_itr_unpack(lref, iter);
+        DummyObj* dref = (DummyObj*)List_itr_unpack(lref, iter);
         int v1 = i*100 + i*10 + i;
         int v2 = dref->value;
         UT_EQUAL_INT(v1, v2);
@@ -214,21 +214,21 @@ int test_iter()
 }
 int test_list_remove_back()
 {
-    ListRef lref = List_new(dealloc);
-    DummyObjRef dref = DummyObj_new(333);
+    List* lref = List_new(dealloc);
+    DummyObj* dref = DummyObj_new(333);
     List_add_back(lref, (void*) dref);
     List_remove_last(lref);
     UT_EQUAL_INT((List_size(lref)), 0);
-    DummyObjRef dref1 = DummyObj_new(111);
-    DummyObjRef dref2 = DummyObj_new(222);
-    DummyObjRef dref3= DummyObj_new(333);
+    DummyObj* dref1 = DummyObj_new(111);
+    DummyObj* dref2 = DummyObj_new(222);
+    DummyObj* dref3= DummyObj_new(333);
     List_add_back(lref, (void*) dref1);
     List_add_back(lref, (void*) dref2);
     List_add_back(lref, (void*) dref3);
     UT_EQUAL_INT((List_size(lref)), 3);
-    DummyObjRef oref1 = (DummyObjRef)List_remove_last(lref);
-    DummyObjRef oref2 = (DummyObjRef)List_remove_last(lref);
-    DummyObjRef oref3 = (DummyObjRef)List_remove_last(lref);
+    DummyObj* oref1 = (DummyObj*)List_remove_last(lref);
+    DummyObj* oref2 = (DummyObj*)List_remove_last(lref);
+    DummyObj* oref3 = (DummyObj*)List_remove_last(lref);
     UT_EQUAL_INT((List_size(lref)), 0);
     UT_EQUAL_INT((oref1->value), 333);
     UT_EQUAL_INT((oref2->value), 222);
@@ -240,8 +240,8 @@ int test_list_remove_back()
 
 int test_list_remove_back_one()
 {
-    ListRef lref = List_new(dealloc);
-    DummyObjRef dref = DummyObj_new(333);
+    List* lref = List_new(dealloc);
+    DummyObj* dref = DummyObj_new(333);
     List_add_front(lref, (void*) dref);
     List_remove_last(lref);
     UT_EQUAL_INT((List_size(lref)), 0);

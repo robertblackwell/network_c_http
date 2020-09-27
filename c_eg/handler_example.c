@@ -44,18 +44,18 @@ char* simple_response_body(char* message, socket_handle_t socket, int pthread_se
     return s1;
 }
 
-int handler_example(MessageRef request, WrtrRef wrtr)
+int handler_example(Message* request, Wrtr* wrtr)
 {
     char* msg = "<h2>this is a message</h2>";
     char* body = NULL;
     char* body_len_str = NULL;
-    HdrListRef hdrs = NULL;
-    KVPairRef hl_content_length = NULL;
-    KVPairRef hl_content_type = NULL;
+    HdrList* hdrs = NULL;
+    KVPair* hl_content_length = NULL;
+    KVPair* hl_content_type = NULL;
     int return_value = 0;
 
     printf("Handle request\n");
-    if((body = simple_response_body(msg, wrtr->socket, pthread_self())) == NULL) goto finalize;
+    if((body = simple_response_body(msg, wrtr->m_sock, pthread_self())) == NULL) goto finalize;
 
     int body_len = strlen(body);
     if(-1 == asprintf(&body_len_str, "%d", body_len)) goto finalize;

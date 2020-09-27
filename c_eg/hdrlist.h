@@ -12,18 +12,18 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include <c_eg/list.h>
-typedef ListRef HdrListRef;
-typedef ListNodeRef HdrListIter, ListIter;
+typedef List HdrList;
+typedef ListNode* HdrListIter, ListIter;
 
 
 #define M_HdrList_new() List_new(dealloc)
 #define M_HdrList_free(lref) List_free(lref)
-#define M_HdrList_first(lref) (KVPairListRef)List_first(lref)
-#define M_HdrList_size(lref) (KVPairListRef)List_size(lref)
-#define M_HdrList_last(lref) (KVPairListRef)List_last(lref)
-#define M_HdrList_remove_first(lref) (KVPairListRef)List_remove_first(lref)
-#define M_HdrList_remove_last(lref) (KVPairListRef)List_remove_last(lref)
-#define M_HdrList_itr_unpack(lref, iter) (KVPairListRef)List_itr_unpack(lref, iter)
+#define M_HdrList_first(lref) (KVPairList*)List_first(lref)
+#define M_HdrList_size(lref) (KVPairList*)List_size(lref)
+#define M_HdrList_last(lref) (KVPairList*)List_last(lref)
+#define M_HdrList_remove_first(lref) (KVPairList*)List_remove_first(lref)
+#define M_HdrList_remove_last(lref) (KVPairList*)List_remove_last(lref)
+#define M_HdrList_itr_unpack(lref, iter) (KVPairList*)List_itr_unpack(lref, iter)
 #define M_HdrList_iterator(lref) List_iterator(lref)
 #define M_HdrList_itr_next(lref, iter) List_itr_next(lref, iter)
 #define M_HdrList_itr_remove(lref, itr)
@@ -32,21 +32,21 @@ typedef ListNodeRef HdrListIter, ListIter;
 #define M_HdrList_add_front(lref, item) List_add_back(lref, (void*)item);
 
 
-HdrListRef  HdrList_new();
-void HdrList_free(HdrListRef* lref_ptr) ;
-int  HdrList_size(HdrListRef lref);
+HdrList*  HdrList_new();
+void HdrList_free(HdrList** lref_ptr) ;
+int  HdrList_size(HdrList* lref);
 
-KVPairRef  HdrList_first(HdrListRef lref);
-KVPairRef  HdrList_last(HdrListRef lref) ;
-KVPairRef  HdrList_remove_first(HdrListRef lref);
-KVPairRef  HdrList_remove_last(HdrListRef lref);
-KVPairRef  HdrList_itr_unpack(HdrListRef lref, HdrListIter iter);
-HdrListIter HdrList_iterator(HdrListRef lref);
-HdrListIter HdrList_itr_next  (HdrListRef lref, HdrListIter iter);
-void               HdrList_itr_remove(HdrListRef lref, HdrListIter* iter);
+KVPair*  HdrList_first(HdrList* lref);
+KVPair*  HdrList_last(HdrList* lref) ;
+KVPair*  HdrList_remove_first(HdrList* lref);
+KVPair*  HdrList_remove_last(HdrList* lref);
+KVPair*  HdrList_itr_unpack(HdrList* lref, HdrListIter iter);
+HdrListIter HdrList_iterator(HdrList* lref);
+HdrListIter HdrList_itr_next  (HdrList* lref, HdrListIter iter);
+void               HdrList_itr_remove(HdrList* lref, HdrListIter* iter);
 
-void HdrList_add_back(HdrListRef lref, KVPairRef item);
-void HdrList_add_front(HdrListRef lref, KVPairRef item);
+void HdrList_add_back(HdrList* lref, KVPair* item);
+void HdrList_add_front(HdrList* lref, KVPair* item);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
@@ -63,38 +63,38 @@ void HdrList_add_front(HdrListRef lref, KVPairRef item);
 /// The content of key and value are copied into the new KVPair instance
 /// and hence ownership of key and value remain with the caller
 ///
-/// param this HdrListRef
+/// param this HdrList*
 /// param key CBufferRef
 /// param CBufferRef
 /// return void
 ///
-void HdrList_add(HdrListRef this, CBufferRef key, CBufferRef value);
+void HdrList_add(HdrList* this, CBufferRef key, CBufferRef value);
 
 ///
 /// Find a KVPair in a HdrList by key/label value
 ///
-/// param hlref HdrListRef
+/// param hlref HdrList*
 /// param key char*
-/// return KVPairRef or NULL
+/// return KVPair* or NULL
 /// NULL on not found
-/// NOTE: If found the KVPairRef returns is still owned by the HdrList
+/// NOTE: If found the KVPair* returns is still owned by the HdrList
 /// do not call KVPair_free() on the returned value
 ///
-KVPairRef HdrList_find(HdrListRef hlref, char* key);
+KVPair* HdrList_find(HdrList* hlref, char* key);
 
 ///
 /// Remove a KVPair from the HdrList by key/label
 ///
-/// param hlref HdrListRef
+/// param hlref HdrList*
 /// param key char*
 ///
-void HdrList_remove(HdrListRef hlref, char* key);
+void HdrList_remove(HdrList* hlref, char* key);
 
 /// Serialize a header list into a CBufferRef
-/// param this HdrListRef
+/// param this HdrList*
 /// return A serialized version of the header list as a CBuffer.
 /// NOTE: ownership of the CBuffer is transfered to the caller
-CBufferRef HdrList_serialize(HdrListRef this);
+CBufferRef HdrList_serialize(HdrList* this);
 
 ///
 /// Adds a new header line to the list
@@ -107,7 +107,7 @@ CBufferRef HdrList_serialize(HdrListRef this);
 /// to deal with the two CBufferRef as they wish.
 ///
 ///
-void HdrList_add_cbuf(HdrListRef this, CBufferRef key, CBufferRef value);
+void HdrList_add_cbuf(HdrList* this, CBufferRef key, CBufferRef value);
 
 ///
 /// Adds a new header line to the list
@@ -122,7 +122,7 @@ void HdrList_add_cbuf(HdrListRef this, CBufferRef key, CBufferRef value);
 /// to deal with the two char* buffers as they wish.
 ///
 ////
-void HdrList_add_line(HdrListRef this, char* label, int lablen, char* value, int vallen);
+void HdrList_add_line(HdrList* this, char* label, int lablen, char* value, int vallen);
 
 ///
 /// Adds a new header line to the list
@@ -135,6 +135,6 @@ void HdrList_add_line(HdrListRef this, char* label, int lablen, char* value, int
 /// to deal with the two char* buffers as they wish.
 ///
 ///
-void HdrList_add_cstr(HdrListRef this, char* label, char* value);
+void HdrList_add_cstr(HdrList* this, char* label, char* value);
 
 #endif

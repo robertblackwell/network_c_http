@@ -11,7 +11,7 @@ int test_kvpair_new()
 {
     char* lab = "Content-length"; int lablen = strlen(lab);
     char* val = "123456"; int vallen = strlen(val);
-    KVPairRef hlref = KVPair_new(lab, lablen, val, vallen);
+    KVPair* hlref = KVPair_new(lab, lablen, val, vallen);
     char* l = KVPair_label(hlref);
     int ll = strlen(l);
     char* v = KVPair_value(hlref);

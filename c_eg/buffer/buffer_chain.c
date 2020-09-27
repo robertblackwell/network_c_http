@@ -9,7 +9,7 @@
 
 typedef struct BufferChain_s {
 
-        ListRef   m_chain;
+        List*   m_chain;
         int       m_size;
 
 } BufferChain, *BufferChainRef;

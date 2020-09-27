@@ -22,14 +22,14 @@ typedef struct Url_s {
     CBufferRef query;
     CBufferRef user_info;
 
-} Url_t,  *UrlRef;
+} Url_t,  Url;
 
-UrlRef Url_new(char* url)
+Url* Url_new(char* url)
 {
     struct http_parser_url u;
     http_parser_url_init(&u);
     http_parser_parse_url(url, strlen(url),0, &u);
-    UrlRef this = eg_alloc(sizeof(Url_t));
+    Url* this = eg_alloc(sizeof(Url_t));
 
     this->scheme = CBuffer_new();
     if(u.field_data[UF_SCHEMA].len != 0)
@@ -64,9 +64,9 @@ UrlRef Url_new(char* url)
 }
 
 
-void Url_free(UrlRef* this_ptr)
+void Url_free(Url** this_ptr)
 {
-    UrlRef this = *this_ptr;
+    Url* this = *this_ptr;
     CBuffer_free(&(this->scheme));
     CBuffer_free(&(this->host));
     CBuffer_free(&(this->port));
@@ -93,13 +93,13 @@ int xtest_url_01()
     char* query = url + u.field_data[UF_QUERY].off;
     char* user_info = url + u.field_data[UF_USERINFO].off;
 
-    UrlRef uref = Url_new(url);
+    Url* uref = Url_new(url);
     return 0;
 }
 int test_url_01()
 {
     char* url = "http://www.somewhere.com/path1/path2?a=1111&b=2222";
-    UrlRef uref = Url_new(url);
+    Url* uref = Url_new(url);
     char* scheme = (char*)CBuffer_data(uref->scheme);
     char* host = (char*)CBuffer_data(uref->host);
 

@@ -29,9 +29,9 @@ NULL
 
 int test_client_01()
 {
-    ClientRef client = Client_new();
+    Client* client = Client_new();
     Client_connect(client, "localhost", 9001);
-    MessageRef response = Message_new();
+    Message* response = Message_new();
     Client_roundtrip(client, req1, &response);
     CBufferRef cb = BufferChain_compact(Message_get_body(response));
     return 0;
@@ -109,7 +109,7 @@ typedef struct X_s {
 X wrtr_s = {42};
 XRef wrtr = &wrtr_s;
 
-void Wrtr_start(HttpStatus status, HdrListRef headers)
+void Wrtr_start(HttpStatus status, HdrList* headers)
 {
     const char* reason_str = http_status_str(status);
     char* first_line = NULL;
@@ -147,11 +147,11 @@ int test_handle_request()
     int body_len = strlen(body);
     char* body_len_str;
     asprintf(&body_len_str, "%d", body_len);
-    HdrListRef hdrs = HdrList_new();
-    KVPairRef hl_content_length = KVPair_new(HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
+    HdrList* hdrs = HdrList_new();
+    KVPair* hl_content_length = KVPair_new(HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
     HdrList_add_front(hdrs, hl_content_length);
     char* content_type = "text/html; charset=UTF-8";
-    KVPairRef hl_content_type = KVPair_new(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
+    KVPair* hl_content_type = KVPair_new(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
     HdrList_add_front(hdrs, hl_content_type);
 
 //    Wrtr_start(wrtr, HTTP_STATUS_OK, hdrs);

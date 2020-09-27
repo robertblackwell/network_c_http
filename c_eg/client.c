@@ -14,20 +14,20 @@
 #include <netdb.h>
 
 
-ClientRef Client_new()
+Client* Client_new()
 {
-    ClientRef this = eg_alloc(sizeof(Client));
+    Client* this = eg_alloc(sizeof(Client));
 }
-void Client_free(ClientRef* this_ptr)
+void Client_free(Client** this_ptr)
 {
-    ClientRef this = *this_ptr;
+    Client* this = *this_ptr;
     Parser_free(&(this->parser));
     Rdr_free(&(this->rdr));
     Wrtr_free(&(this->wrtr));
     eg_free(*this_ptr);
     *this_ptr = NULL;
 }
-void Client_connect(ClientRef this, char* host, int portno)
+void Client_connect(Client* this, char* host, int portno)
 {
     int sockfd, n;
 
@@ -58,7 +58,7 @@ void Client_connect(ClientRef this, char* host, int portno)
     this->rdr = Rdr_new(this->parser, rdsock);
 
 }
-void Client_roundtrip(ClientRef this, char* req_buffers[], MessageRef* response_ptr)
+void Client_roundtrip(Client* this, char* req_buffers[], Message** response_ptr)
 {
     int buf_index = 0;
     int buf_len;

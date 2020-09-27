@@ -6,16 +6,16 @@
  */
 struct KVPair_s;
 
-typedef struct KVPair_s KVPair, *KVPairRef;
+typedef struct KVPair_s KVPair;
 
-KVPairRef KVPair_new(char* labptr, int lablen, char* valptr, int valsize);
-void KVPair_free(KVPairRef* hlref_ptr);
+KVPair* KVPair_new(char* labptr, int lablen, char* valptr, int valsize);
+void KVPair_free(KVPair** hlref_ptr);
 void KVPair_dealloc(void* ptr);
 
-void KVPair_set_value(KVPairRef hlref, char* valptr, int vallen);
+void KVPair_set_value(KVPair* hlref, char* valptr, int vallen);
 
 
-char* KVPair_label(KVPairRef hlref);
-char* KVPair_value(KVPairRef hlref);
+char* KVPair_label(KVPair* hlref);
+char* KVPair_value(KVPair* hlref);
 
 #endif

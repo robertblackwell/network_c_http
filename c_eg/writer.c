@@ -8,42 +8,42 @@
 #include <errno.h>
 #include <http-parser/http_parser.h>
 
-void Wrtr_init(WrtrRef this, socket_handle_t socket)
+void Wrtr_init(Wrtr* this, int sock)
 {
-    this->socket = socket;
+    this->m_sock = sock;
 }
-WrtrRef Wrtr_new(socket_handle_t socket)
+Wrtr* Wrtr_new(int socket)
 {
-    WrtrRef mwref = eg_alloc(sizeof(Wrtr));
+    Wrtr* mwref = eg_alloc(sizeof(Wrtr));
     if(mwref == NULL)
         return NULL;
     Wrtr_init(mwref, socket);
     return mwref;
 }
-void Wrtr_destroy(WrtrRef this)
+void Wrtr_destroy(Wrtr* this)
 {
 }
-void Wrtr_free(WrtrRef* this_ptr)
+void Wrtr_free(Wrtr** this_ptr)
 {
-    WrtrRef this = *(this_ptr);
+    Wrtr* this = *(this_ptr);
     Wrtr_destroy(this);
     eg_free(*this_ptr);
     *this_ptr = NULL;
 }
 
-void Wrtr_write(WrtrRef wrtr, MessageRef msg_ref)
+void Wrtr_write(Wrtr* wrtr, Message* msg_ref)
 {
 }
 /**
  *
  * Initiates the writing of a http response by sending status and headers.
  *
- * \param this    WrtrRef contains the socket/fd for writing
+ * \param this    Wrtr* contains the socket/fd for writing
  * \param status  HttpStatus enum value
- * \param headers HdrListRef - the deaders to be written
+ * \param headers HdrList* - the deaders to be written
  * \result (TODO) success, EOF-closed by other end, IO error
  */
-void Wrtr_start(WrtrRef this, HttpStatus status, HdrListRef headers)
+void Wrtr_start(Wrtr* this, HttpStatus status, HdrList* headers)
 {
     char* first_line = NULL;
     CBufferRef cb_output_ref = NULL;
@@ -78,9 +78,9 @@ void Wrtr_start(WrtrRef this, HttpStatus status, HdrListRef headers)
  * \param this    WrtRef (holds the socket/fd to which the write should be made
  * \param buffer  void* Address of start of buffer
  * \param len     int length of data in buffer
- * \return        (TODO) return success, EOF-scket closed by other end, IO error
+ * \return        (TODO) return success, EOF-socket closed by other end, IO error
  */
-void Wrtr_write_chunk(WrtrRef this, void* buffer, int len)
+void Wrtr_write_chunk(Wrtr* this, void* buffer, int len)
 {
     char* c = (char*)buffer;
     void* tmp_buffer = buffer;
@@ -90,7 +90,7 @@ void Wrtr_write_chunk(WrtrRef this, void* buffer, int len)
 //    return;
     int my_errno;
     while(1) {
-        int res = (int)write(this->socket, tmp_buffer, tmp_len);
+        int res = (int)write(this->m_sock, tmp_buffer, tmp_len);
         if(res == tmp_len) {
             return; // success
         } else if(res > 0) {
@@ -111,6 +111,6 @@ void Wrtr_write_chunk(WrtrRef this, void* buffer, int len)
  *
  * \param this
  */
-void Wrtr_end(WrtrRef this)
+void Wrtr_end(Wrtr* this)
 {
 }

@@ -21,15 +21,15 @@
 struct Worker_s {
     bool            active;
     int             active_socket;
-    QueueRef        qref;
+    Queue*        qref;
     pthread_t       pthread;
     int             id;
     HandlerFunction handler;
 };
 
-WorkerRef Worker_new(QueueRef qref, int _id, HandlerFunction handler)
+Worker* Worker_new(Queue* qref, int _id, HandlerFunction handler)
 {
-    WorkerRef wref = (WorkerRef)eg_alloc(sizeof(Worker));
+    Worker* wref = (Worker*)eg_alloc(sizeof(Worker));
     if(wref == NULL)
         return NULL;
     wref->active_socket = 0;
@@ -40,12 +40,12 @@ WorkerRef Worker_new(QueueRef qref, int _id, HandlerFunction handler)
     printf("returning from Worker_new\n");
     return wref;
 }
-void Worker_free(WorkerRef wref)
+void Worker_free(Worker* wref)
 {
     free((void*)wref);
 }
 
-void handle_parse_error(MessageRef requestref, WrtrRef wrtr)
+void handle_parse_error(Message* requestref, Wrtr* wrtr)
 {
     char* reply = "HTTP/1.1 400 BAD REQUEST \r\nContent-length: 0\r\n\r\n";
     Wrtr_write_chunk(wrtr, (void*)reply, strlen(reply));
@@ -54,22 +54,22 @@ void handle_parse_error(MessageRef requestref, WrtrRef wrtr)
 static void* Worker_main(void* data)
 {
     ASSERT_NOT_NULL(data);
-    WorkerRef wref = (WorkerRef)data;
+    Worker* wref = (Worker*)data;
     bool terminate = false;
     while(!terminate) {
         printf("Worker_main start of loop\n");
         wref->active = false;
-        ParserRef parser_ref = NULL;;
-        RdrRef rdr = NULL;
-        WrtrRef wrtr = NULL;
-        MessageRef request_msg_ref = NULL;
+        Parser* parser_ref = NULL;;
+        Rdr* rdr = NULL;
+        Wrtr* wrtr = NULL;
+        Message* request_msg_ref = NULL;
 
         int my_socket_handle = Queue_remove(wref->qref);
-        printf("Worker_main %p mySocketHandle: %d worker %d\n", wref, mySocketHandle, wref->id);
+        printf("Worker_main %p mySocketHandle: %d worker %d\n", wref, my_socket_handle, wref->id);
         int sock = my_socket_handle;
         if(my_socket_handle == -1) {
             /// this is the terminate signal
-            printf("Worker_main about to break %p mySocketHandle: %d\n", wref, mySocketHandle);
+            printf("Worker_main about to break %p mySocketHandle: %d\n", wref, my_socket_handle);
             terminate = true;
             sock = 0;
         } else {
@@ -113,7 +113,7 @@ static void* Worker_main(void* data)
     return NULL;
 }
 // start a pthread - returns 0 on success errno on fila
-int Worker_start(WorkerRef wref)
+int Worker_start(Worker* wref)
 {
     ASSERT_NOT_NULL(wref);
 
@@ -131,12 +131,12 @@ int Worker_start(WorkerRef wref)
 // {
 //     wref->pthread = pthread;
 // }
-pthread_t* Worker_pthread(WorkerRef wref)
+pthread_t* Worker_pthread(Worker* wref)
 {
     ASSERT_NOT_NULL(wref);
     return &(wref->pthread);
 }
-void Worker_join(WorkerRef wref)
+void Worker_join(Worker* wref)
 {
     int retvalue;
     pthread_join(wref->pthread, NULL);

@@ -22,25 +22,25 @@ typedef struct DataSource_s {
      */
     int     m_errno;
 
-} DataSource, *DataSourceRef;
+} DataSource;
 
-void DataSource_init(DataSourceRef this, char* blocks[]);
+void DataSource_init(DataSource* this, char* blocks[]);
 
 /**
  * Returns the next block of utf-8 null terminated data, NULL when done
  * @return char*, NULL when done
  */
-char* DataSource_next(DataSourceRef this);
+char* DataSource_next(DataSource* this);
 
 /**
  * @return bool true when no more data
  */
-bool DataSource_finished(DataSourceRef this);
+bool DataSource_finished(DataSource* this);
 
 /*
 * 'Reads' up to length data into buffer and returns the actually number 'read'
 */
-int DataSource_read(DataSourceRef this, void* buffer, int length);
+int DataSource_read(DataSource* this, void* buffer, int length);
 
 
 #endif

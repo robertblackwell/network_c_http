@@ -25,9 +25,9 @@ struct Queue_s {
 };
 
 
-QueueRef Queue_new()
+Queue* Queue_new()
 {
-    QueueRef q = (QueueRef)eg_alloc(sizeof(Queue));
+    Queue* q = (Queue*)eg_alloc(sizeof(Queue));
     q->max_size = QUEUE_MAX_SIZE;
     q->size = 0;
     pthread_mutex_init(&(q->queue_mutex), NULL);
@@ -35,9 +35,9 @@ QueueRef Queue_new()
     pthread_cond_init(&(q->not_full_cv), NULL);
     return q;
 }    
-void Queue_free(QueueRef* qref_ptr)
+void Queue_free(Queue** qref_ptr)
 {
-    QueueRef qref = * qref_ptr;
+    Queue* qref = * qref_ptr;
     pthread_cond_destroy(&(qref->not_full_cv));
     pthread_cond_destroy(&(qref->not_empty_cv));
     pthread_mutex_destroy(&(qref->queue_mutex));
@@ -45,7 +45,7 @@ void Queue_free(QueueRef* qref_ptr)
     *qref_ptr = NULL;
 }
     
-int Queue_remove(QueueRef qref)
+int Queue_remove(Queue* qref)
 {
     pthread_mutex_lock(&(qref->queue_mutex));
     while( qref->size == 0 ){
@@ -68,7 +68,7 @@ int Queue_remove(QueueRef qref)
     return r;
 }
     
-void Queue_add(QueueRef qref, int a)
+void Queue_add(Queue* qref, int a)
 {
     pthread_mutex_lock(&(qref->queue_mutex));
     // in here put a wait for space on the queue

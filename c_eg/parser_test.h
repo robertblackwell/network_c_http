@@ -9,7 +9,7 @@
  * A VerifyFunction is a callable that examines a MsgList to
  * check that is gives the expected result;
  */
-typedef int(*VerifyFunctionType)(ListRef msg_list)  ;
+typedef int(*VerifyFunctionType)(List* msg_list)  ;
 
 /** 
  * A parser test set consists of a descriptions, array of input lines or buffers,
@@ -36,11 +36,11 @@ ParserTestRef ParserTest_new(char* description, char** lines, VerifyFunctionType
 
 
 typedef struct ReadResult_s {
-    MessageRef  message;
+    Message*  message;
     int         rc;
 } ReadResult, *ReadResultRef;
 
-ReadResultRef ReadResult_new(MessageRef msg, int rc);
+ReadResultRef ReadResult_new(Message* msg, int rc);
 void ReadResult_free(ReadResultRef* this_ptr);
 
 
@@ -53,12 +53,12 @@ void ReadResult_free(ReadResultRef* this_ptr);
  */
 typedef struct WrappedParserTest_s
 {
-    ParserRef           m_parser;
-    DataSourceRef       m_data_source;
+    Parser*           m_parser;
+    DataSource*       m_data_source;
     VerifyFunctionType  m_verify_func;
-    ListRef             m_results;
+    List*             m_results;
     RdSocket            m_rdsock;
-    RdrRef              m_rdr;
+    Rdr*              m_rdr;
 
     char                m_read_buffer[1000];
     char*               m_readbuffer_ptr;
@@ -67,7 +67,7 @@ typedef struct WrappedParserTest_s
 
 } WrappedParserTest, *WrappedParserTestRef;
     
-void WPT_init(WrappedParserTestRef this, ParserRef parser, DataSourceRef data_source, VerifyFunctionType verify_func);
+void WPT_init(WrappedParserTestRef this, Parser* parser, DataSource* data_source, VerifyFunctionType verify_func);
 //void WPT_destroy(WrappedParserTestRef this);
 
 int WPT_run(WrappedParserTestRef this);

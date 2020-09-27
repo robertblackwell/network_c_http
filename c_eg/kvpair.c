@@ -27,10 +27,10 @@ struct KVPair_s {
 //    return dest;
 //}
 // creates and initializes a new KVPair obj. Returns NULL on allocation failure
-KVPairRef KVPair_new(char* labptr, int lablen, char* valptr, int vallen)
+KVPair* KVPair_new(char* labptr, int lablen, char* valptr, int vallen)
 {
     // store {label}: {value}\r\n\0
-    KVPairRef hlref = eg_alloc(sizeof(KVPair));
+    KVPair* hlref = eg_alloc(sizeof(KVPair));
     if(hlref  == NULL) goto mem_error_1;
     hlref->label_len = lablen;
     hlref->value_len = vallen;
@@ -62,9 +62,9 @@ KVPairRef KVPair_new(char* labptr, int lablen, char* valptr, int vallen)
         free((void*)hlref);
         return NULL;
 }
-void KVPair_free(KVPairRef* hlref_ptr)
+void KVPair_free(KVPair** hlref_ptr)
 {
-    KVPairRef hlref = *hlref_ptr;
+    KVPair* hlref = *hlref_ptr;
     eg_free(hlref->label_ptr);
     hlref->label_len = 0;
 //    hlref->label_ptr = NULL;
@@ -74,16 +74,16 @@ void KVPair_free(KVPairRef* hlref_ptr)
     eg_free((void*) hlref);
     *hlref_ptr = NULL;
 }
-void KVPair_dealloc(void* ptr) { KVPair_free((KVPairRef*)(ptr));}
-char* KVPair_label(KVPairRef hlref)
+void KVPair_dealloc(void* ptr) { KVPair_free((KVPair**)(ptr));}
+char* KVPair_label(KVPair* hlref)
 {
     return hlref->label_ptr;
 }
-char* KVPair_value(KVPairRef hlref)
+char* KVPair_value(KVPair* hlref)
 {
     return hlref->value_ptr;
 }
-void KVPair_set_value(KVPairRef hlref, char* valptr, int vallen)
+void KVPair_set_value(KVPair* hlref, char* valptr, int vallen)
 {
     char* oldvalptr = hlref->value_ptr;
     hlref->value_ptr = eg_alloc(vallen+1);

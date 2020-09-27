@@ -6,12 +6,12 @@
 // producers wait on full
 //
 struct Queue_s;
-typedef struct Queue_s Queue, *QueueRef;
+typedef struct Queue_s Queue;
 
-QueueRef Queue_new();
-void Queue_free(QueueRef* q_p);
-int Queue_remove(QueueRef q);
-void Queue_add(QueueRef q, int port);
+Queue* Queue_new();
+void Queue_free(Queue** q_p);
+int Queue_remove(Queue* q);
+void Queue_add(Queue* q, int port);
 
 
 #endif

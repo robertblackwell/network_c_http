@@ -17,7 +17,7 @@
  *      ctx is int(socket_handle_t) socket
  *  Testing DataSource
  *      function is DataSource_read()
- *      ctx is DataSourceRef
+ *      ctx is DataSource*
  *
  *  RdSocket is a type that generalizes both cases and provides a uniform interface
  *  for reading data from these two sources.
@@ -30,7 +30,7 @@ typedef struct RdSocket_s {
     void* ctx;
     int   m_errno;
 
-} RdSocket, *RdSocketRef;
+} RdSocket;
 
 /**
  * create a RdSocket from a real tcp socket
@@ -39,15 +39,15 @@ typedef struct RdSocket_s {
 RdSocket RealSocket(int socket);
 
 /**
- * Creates a RdSocket from as DataSourceRef - which is a pointer -
- * the instance holds the DataSourceRef without ownership and does not free it.
+ * Creates a RdSocket from as DataSource* - which is a pointer -
+ * the instance holds the DataSource* without ownership and does not free it.
  *
- * WARNING: ensure the DataSourceRef remains valid for the duration of use of the RdSocket. Oh for a shared_ptr
+ * WARNING: ensure the DataSource* remains valid for the duration of use of the RdSocket. Oh for a shared_ptr
  *
- * \param datasource DataSourceRef
+ * \param datasource DataSource*
  * \return RdSocket By value
  */
-RdSocket DataSourceSocket(DataSourceRef datasource);
+RdSocket DataSourceSocket(DataSource* datasource);
 
 /**
  * This function is the uniform interface for reading data from a RdSocket regardless of its underlying data source.
@@ -67,12 +67,12 @@ RdSocket DataSourceSocket(DataSourceRef datasource);
  *              captured and stored in rdsock_ref->m_errno
  *              For DataSource based RdSocket a simulated errno will be derived from the DataSource instance
  */
-int RdSocket_read(RdSocketRef rdsock_ref, void* buffer, int buffer_len);
+int RdSocket_read(RdSocket* rdsock_ref, void* buffer, int buffer_len);
 
 /**
- * Gets the errno from a RdSocketRef
+ * Gets the errno from a RdSocket*
  * \param rdsock_ref RdSocketRef
  * \return           int errno from the most recent read if that read experienced an io error
  */
-int RdSocket_errno(RdSocketRef rdsock_ref);
+int RdSocket_errno(RdSocket* rdsock_ref);
 #endif

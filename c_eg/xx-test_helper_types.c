@@ -24,10 +24,10 @@ ParserTestRef ParserTest_new(char* description, char** lines, VerifyFunctionType
 
 /**
  *
- * @param this DataSourceRef
+ * @param this DataSource*
  * @param blocks a pointer to an array of char* (an array of const cstring pointers)
  */
-void DataSource_init(DataSourceRef this, char** blocks)
+void DataSource_init(DataSource* this, char** blocks)
 {
     this->m_block_count = 0;
     this->m_blocks = blocks;
@@ -37,7 +37,7 @@ void DataSource_init(DataSourceRef this, char** blocks)
  * Returns the next block of utf-8 null terminated data, NULL when done
  * @return char*, NULL when done
  */
-char* DataSource_next(DataSourceRef this)
+char* DataSource_next(DataSource* this)
 {
     char* block = this->m_blocks[this->m_block_count];
     this->m_block_count++;
@@ -46,12 +46,12 @@ char* DataSource_next(DataSourceRef this)
 /**
  * @return bool true when no more data
  */
-bool DataSource_finished(DataSourceRef this)
+bool DataSource_finished(DataSource* this)
 {
     return (this->m_blocks[this->m_block_count] == NULL);
 }
 
-int DataSource_read(DataSourceRef this, void* buffer, int length)
+int DataSource_read(DataSource* this, void* buffer, int length)
 {
     char* block = this->m_blocks[this->m_block_count];
     if (block == NULL) {
@@ -68,7 +68,7 @@ int DataSource_read(DataSourceRef this, void* buffer, int length)
 }
 
 
-ReadResultRef ReadResult_new(MessageRef msg, int rc)
+ReadResultRef ReadResult_new(Message* msg, int rc)
 {
     ReadResultRef rdref = eg_alloc(sizeof(ReadResult));
     rdref->message = msg;
@@ -88,7 +88,7 @@ static void read_result_dealloc(void** p)
 }
 
 
-void WPT_init(WrappedParserTestRef this, ParserRef parser, DataSourceRef data_source, VerifyFunctionType verify_func)
+void WPT_init(WrappedParserTestRef this, Parser* parser, DataSource* data_source, VerifyFunctionType verify_func)
 {
     ASSERT_NOT_NULL(this);
     this->m_parser = parser;
@@ -104,9 +104,9 @@ void WPT_destroy(WrappedParserTestRef this)
     ASSERT_NOT_NULL(this);
 }
 
-int WPT_read_msg(WrappedParserTestRef this, IOBufferRef ctx, MessageRef* msgref_ptr )
+int WPT_read_msg(WrappedParserTestRef this, IOBufferRef ctx, Message** msgref_ptr )
 {
-    MessageRef message_ptr = Message_new();
+    Message* message_ptr = Message_new();
     Parser_begin(this->m_parser, message_ptr);
     int bytes_read;
     for(;;) {
@@ -170,7 +170,7 @@ int WPT_read_msg(WrappedParserTestRef this, IOBufferRef ctx, MessageRef* msgref_
 }
 int WPT_run(WrappedParserTestRef this)
 {
-    MessageRef msgref;
+    Message* msgref;
     IOBuffer context;
     IOBuffer_init(&context, 256);
     int rc = 0;

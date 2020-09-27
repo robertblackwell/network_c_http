@@ -61,9 +61,9 @@ socket_handle_t create_listener_socket(int port, const char* host)
         assert(0);
 }
 
-ServerRef Server_new(int port, HandlerFunction handler)
+Server* Server_new(int port, HandlerFunction handler)
 {
-    ServerRef sref = (ServerRef)eg_alloc(sizeof(Server));
+    Server* sref = (Server*)eg_alloc(sizeof(Server));
     sref->nbr_workers = NBR_WORKERS;
     sref->port = port;
     sref->handler = handler;
@@ -71,14 +71,14 @@ ServerRef Server_new(int port, HandlerFunction handler)
     return sref;
 }
 
-void Server_free(ServerRef* sref)
+void Server_free(Server** sref)
 {
     ASSERT_NOT_NULL(*sref);
     free(*sref);
     *sref = NULL;
 }
 
-void Server_listen(ServerRef sref)
+void Server_listen(Server* sref)
 {
     ASSERT_NOT_NULL(sref)
     printf("Server_listen\n");
@@ -87,7 +87,7 @@ void Server_listen(ServerRef sref)
     //
     for(int i = 0; i < sref->nbr_workers; i++)
     {
-        WorkerRef wref = Worker_new(sref->qref, i, sref->handler);
+        Worker* wref = Worker_new(sref->qref, i, sref->handler);
 //        sref->handler(NULL, NULL);
         sref->worker_tab[i] = NULL;
         if(Worker_start(wref) != 0) {
@@ -126,7 +126,7 @@ void Server_listen(ServerRef sref)
     // wait for the workers to complete
     //
     for(int i = 0; i < sref->nbr_workers; i++) {
-        WorkerRef wref = sref->worker_tab[i];
+        Worker* wref = sref->worker_tab[i];
         if(wref != NULL) {
             printf("About to joined worker %d\n", i);
             Worker_join(wref);
@@ -142,7 +142,7 @@ void Server_listen(ServerRef sref)
     // also wait for the monitor  to complete
     
 }
-void Server_terminate(ServerRef this)
+void Server_terminate(Server* this)
 {
     for(int i = 0; i < this->nbr_workers; i++) {
         Queue_add(this->qref, -1);

@@ -22,7 +22,7 @@ typedef struct Url_s {
     CBufferRef query;
     CBufferRef user_info;
 
-} Url_t,  *UrlRef;
+} Url_t, Url;
 
-UrlRef Url_new(char* url);
-void Url_free(UrlRef* this_ptr);
+Url* Url_new(char* url);
+void Url_free(Url** this_ptr);

@@ -14,7 +14,7 @@
 
 /**
  * These adapter functions are necessary since the read function that work on real sockets has a different calling signature than
- * the DataSource_read() function that work on DataSourceRef. These two wrappers uniformize the signature
+ * the DataSource_read() function that work on DataSource*. These two wrappers uniformize the signature
  */
  /**
   *
@@ -25,7 +25,7 @@
   *                 0 generally means the socket was closed at the other end,
   *                 negative means io error
   */
-static int socket_read(RdSocketRef rdsock_ref, void* buffer, int len)
+static int socket_read(RdSocket* rdsock_ref, void* buffer, int len)
 {
 
     void* sock_ctx = rdsock_ref->ctx;
@@ -36,11 +36,11 @@ static int socket_read(RdSocketRef rdsock_ref, void* buffer, int len)
     return bytes_read;
 }
 
-static int datasource_read(RdSocketRef rdsock_ref, void* buffer, int len)
+static int datasource_read(RdSocket* rdsock_ref, void* buffer, int len)
 {
     void* sock_ctx = rdsock_ref->ctx;
-    DataSourceRef dsref = (DataSourceRef)(sock_ctx);
-    int bytes_read = DataSource_read((DataSourceRef)sock_ctx, buffer, len);
+    DataSource* dsref = (DataSource*)(sock_ctx);
+    int bytes_read = DataSource_read((DataSource*)sock_ctx, buffer, len);
     rdsock_ref->m_errno = dsref->m_errno;
     return bytes_read;
 }
@@ -56,14 +56,14 @@ RdSocket RealSocket(int sock)
     rdsock.ctx = (void*)(long)sock;
     return rdsock;
 }
-RdSocket DataSourceSocket(DataSourceRef dsref)
+RdSocket DataSourceSocket(DataSource* dsref)
 {
     RdSocket rdsock = {.ctx=(void*)dsref, .read_f=(ReadFunc) &datasource_read};
     return rdsock;
 }
-int RdSocket_read(RdSocketRef rdsock, void* buffer, int len)
+int RdSocket_read(RdSocket* rdsock, void* buffer, int len)
 {
-    DataSourceRef tmp = (DataSourceRef)rdsock->ctx;
+    DataSource* tmp = (DataSource*)rdsock->ctx;
     int bytes_read = rdsock->read_f(rdsock, buffer, len);
     return bytes_read;
 }
