@@ -44,7 +44,7 @@ char* simple_response_body(char* message, socket_handle_t socket, int pthread_se
     return s1;
 }
 
-int handler_example(Message* request, Wrtr* wrtr)
+int handler_example(Message* request, Writer* wrtr)
 {
     char* msg = "<h2>this is a message</h2>";
     char* body = NULL;
@@ -71,8 +71,8 @@ int handler_example(Message* request, Wrtr* wrtr)
 
     HdrList_add_front(hdrs, hl_content_type);
 
-    Wrtr_start(wrtr, HTTP_STATUS_OK, hdrs);
-    Wrtr_write_chunk(wrtr, (void*) body, body_len);
+    Writer_start(wrtr, HTTP_STATUS_OK, hdrs);
+    Writer_write_chunk(wrtr, (void*) body, body_len);
 
     return_value = 1;
 

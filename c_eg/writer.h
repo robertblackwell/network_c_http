@@ -3,20 +3,20 @@
 #include <c_eg/message.h>
 #include <c_eg/socket_functions.h>
 
-struct Wrtr_s {
+struct Writer_s {
     int m_sock;
 };
 
-typedef struct Wrtr_s Wrtr;
+typedef struct Writer_s Writer;
 
-void Wrtr_init(Wrtr* this, int sock);
-Wrtr* Wrtr_new(int sock);
-Wrtr* Wrtr_new(int sock);
-void Wrtr_destroy(Wrtr* this);
-void Wrtr_free(Wrtr** this_ptr);
+void Writer_init(Writer* this, int sock);
+Writer* Writer_new(int sock);
+Writer* Writer_new(int sock);
+void Writer_destroy(Writer* this);
+void Writer_free(Writer** this_ptr);
 
-void Wrtr_write(Wrtr* wrtr, Message* msg_ref);
-void Wrtr_start(Wrtr* this, HttpStatus status, HdrList* headers);
-void Wrtr_write_chunk(Wrtr* this, void* buffer, int len);
+void Writer_write(Writer* wrtr, Message* msg_ref);
+void Writer_start(Writer* this, HttpStatus status, HdrList* headers);
+void Writer_write_chunk(Writer* this, void* buffer, int len);
 
 #endif

@@ -15,10 +15,10 @@
  * can call on this function to handle requests.
  *
  * The handler function is called once for each request and is passed the request message in its
- * entirety together with a Wrtr instance that provides functions to write the response.
+ * entirety together with a Writer instance that provides functions to write the response.
  *
  * The handler function is solely responsible for constructing and sending the response.
  */
-typedef int(*HandlerFunction)(Message* request, Wrtr* wrttr);
+typedef int(*HandlerFunction)(Message* request, Writer* wrttr);
 
 #endif

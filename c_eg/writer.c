@@ -8,42 +8,42 @@
 #include <errno.h>
 #include <http-parser/http_parser.h>
 
-void Wrtr_init(Wrtr* this, int sock)
+void Writer_init(Writer* this, int sock)
 {
     this->m_sock = sock;
 }
-Wrtr* Wrtr_new(int socket)
+Writer* Writer_new(int socket)
 {
-    Wrtr* mwref = eg_alloc(sizeof(Wrtr));
+    Writer* mwref = eg_alloc(sizeof(Writer));
     if(mwref == NULL)
         return NULL;
-    Wrtr_init(mwref, socket);
+    Writer_init(mwref, socket);
     return mwref;
 }
-void Wrtr_destroy(Wrtr* this)
+void Writer_destroy(Writer* this)
 {
 }
-void Wrtr_free(Wrtr** this_ptr)
+void Writer_free(Writer** this_ptr)
 {
-    Wrtr* this = *(this_ptr);
-    Wrtr_destroy(this);
+    Writer* this = *(this_ptr);
+    Writer_destroy(this);
     eg_free(*this_ptr);
     *this_ptr = NULL;
 }
 
-void Wrtr_write(Wrtr* wrtr, Message* msg_ref)
+void Writer_write(Writer* wrtr, Message* msg_ref)
 {
 }
 /**
  *
  * Initiates the writing of a http response by sending status and headers.
  *
- * \param this    Wrtr* contains the socket/fd for writing
+ * \param this    Writer* contains the socket/fd for writing
  * \param status  HttpStatus enum value
  * \param headers HdrList* - the deaders to be written
  * \result (TODO) success, EOF-closed by other end, IO error
  */
-void Wrtr_start(Wrtr* this, HttpStatus status, HdrList* headers)
+void Writer_start(Writer* this, HttpStatus status, HdrList* headers)
 {
     char* first_line = NULL;
     CBufferRef cb_output_ref = NULL;
@@ -62,7 +62,7 @@ void Wrtr_start(Wrtr* this, HttpStatus status, HdrList* headers)
     CBuffer_append(cb_output_ref, (void*)first_line, len);
     CBuffer_append(cb_output_ref, CBuffer_data(serialized_headers), CBuffer_size(serialized_headers));
     CBuffer_append_cstr(cb_output_ref, "\r\n");
-    Wrtr_write_chunk(this, CBuffer_data(cb_output_ref), CBuffer_size(cb_output_ref));
+    Writer_write_chunk(this, CBuffer_data(cb_output_ref), CBuffer_size(cb_output_ref));
 
     return_value = (void*)1;
     failed:
@@ -80,7 +80,7 @@ void Wrtr_start(Wrtr* this, HttpStatus status, HdrList* headers)
  * \param len     int length of data in buffer
  * \return        (TODO) return success, EOF-socket closed by other end, IO error
  */
-void Wrtr_write_chunk(Wrtr* this, void* buffer, int len)
+void Writer_write_chunk(Writer* this, void* buffer, int len)
 {
     char* c = (char*)buffer;
     void* tmp_buffer = buffer;
@@ -111,6 +111,6 @@ void Wrtr_write_chunk(Wrtr* this, void* buffer, int len)
  *
  * \param this
  */
-void Wrtr_end(Wrtr* this)
+void Writer_end(Writer* this)
 {
 }

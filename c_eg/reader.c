@@ -12,15 +12,15 @@
 #include <unistd.h>
 #include <errno.h>
 
-Rdr* Rdr_new(Parser* parser, RdSocket rdsock)
+Reader* Reader_new(Parser* parser, RdSocket rdsock)
 {
-    Rdr* rdr = eg_alloc(sizeof(Rdr));
+    Reader* rdr = eg_alloc(sizeof(Reader));
     if(rdr == NULL)
         return NULL;
-    Rdr_init(rdr, parser, rdsock);
+    Reader_init(rdr, parser, rdsock);
     return rdr;
 }
-void Rdr_init(Rdr*  this, Parser* parser, RdSocket rdsock)
+void Reader_init(Reader*  this, Parser* parser, RdSocket rdsock)
 {
     ASSERT_NOT_NULL(this);
     this->m_parser = parser;
@@ -29,19 +29,19 @@ void Rdr_init(Rdr*  this, Parser* parser, RdSocket rdsock)
     this->m_iobuffer = IOBuffer_new();
 }
 
-void Rdr_destroy(Rdr* this)
+void Reader_destroy(Reader* this)
 {
     IOBuffer_free(&(this->m_iobuffer));
 
 }
-void Rdr_free(Rdr** this_ptr)
+void Reader_free(Reader** this_ptr)
 {
-    Rdr* this = *this_ptr;
-    Rdr_destroy(this);
+    Reader* this = *this_ptr;
+    Reader_destroy(this);
     eg_free((void*)this);
     *this_ptr = NULL;
 }
-int Rdr_read(Rdr* this, Message** msgref_ptr)
+int Reader_read(Reader* this, Message** msgref_ptr)
 {
     IOBufferRef iobuf = this->m_iobuffer;
     Message* message_ptr = Message_new();
@@ -73,7 +73,7 @@ int Rdr_read(Rdr* this, Message** msgref_ptr)
                 Message_free(&(message_ptr));
                 *msgref_ptr = NULL;
                 // collect errno for more details
-                return RDR_IO_ERROR;
+                return READER_IO_ERROR;
             }
             IOBuffer_commit(iobuf, bytes_read);
         } else {
@@ -96,7 +96,7 @@ int Rdr_read(Rdr* this, Message** msgref_ptr)
 //                assert(false);
                 Message_free(&message_ptr);
                 *msgref_ptr = NULL;
-                return RDR_PARSE_ERROR;
+                return READER_PARSE_ERROR;
                 break;
             case ParserRC_end_of_data:
                 break;
@@ -105,7 +105,7 @@ int Rdr_read(Rdr* this, Message** msgref_ptr)
             case ParserRC_end_of_message:
                 *msgref_ptr = message_ptr;
                 // return ok
-                return RDR_OK;
+                return READER_OK;
         }
     }
 }

@@ -22,8 +22,8 @@ void Client_free(Client** this_ptr)
 {
     Client* this = *this_ptr;
     Parser_free(&(this->parser));
-    Rdr_free(&(this->rdr));
-    Wrtr_free(&(this->wrtr));
+    Reader_free(&(this->rdr));
+    Writer_free(&(this->wrtr));
     eg_free(*this_ptr);
     *this_ptr = NULL;
 }
@@ -52,10 +52,10 @@ void Client_connect(Client* this, char* host, int portno)
         printf("ERROR connecting");
     printf("Please enter the message: ");
     this->sock = sockfd;
-    this->wrtr = Wrtr_new(sockfd);
+    this->wrtr = Writer_new(sockfd);
     this->parser = Parser_new();
     RdSocket rdsock = RealSocket(sockfd);
-    this->rdr = Rdr_new(this->parser, rdsock);
+    this->rdr = Reader_new(this->parser, rdsock);
 
 }
 void Client_roundtrip(Client* this, char* req_buffers[], Message** response_ptr)
@@ -70,7 +70,7 @@ void Client_roundtrip(Client* this, char* req_buffers[], Message** response_ptr)
         int bytes_written = write(this->sock, buf, buf_len);
         buf_index++;
     }
-    int rc = Rdr_read(this->rdr, response_ptr);
+    int rc = Reader_read(this->rdr, response_ptr);
 
     close(this->sock);
 }

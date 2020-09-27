@@ -45,10 +45,10 @@ void Worker_free(Worker* wref)
     free((void*)wref);
 }
 
-void handle_parse_error(Message* requestref, Wrtr* wrtr)
+void handle_parse_error(Message* requestref, Writer* wrtr)
 {
     char* reply = "HTTP/1.1 400 BAD REQUEST \r\nContent-length: 0\r\n\r\n";
-    Wrtr_write_chunk(wrtr, (void*)reply, strlen(reply));
+    Writer_write_chunk(wrtr, (void*)reply, strlen(reply));
 }
 
 static void* Worker_main(void* data)
@@ -60,8 +60,8 @@ static void* Worker_main(void* data)
         printf("Worker_main start of loop\n");
         wref->active = false;
         Parser* parser_ref = NULL;;
-        Rdr* rdr = NULL;
-        Wrtr* wrtr = NULL;
+        Reader* rdr = NULL;
+        Writer* wrtr = NULL;
         Message* request_msg_ref = NULL;
 
         int my_socket_handle = Queue_remove(wref->qref);
@@ -77,19 +77,19 @@ static void* Worker_main(void* data)
             wref->active = true;
             if((parser_ref = Parser_new()) == NULL) goto finalize;
             RdSocket rdsock = RealSocket(sock);
-            if((rdr = Rdr_new(parser_ref, rdsock)) == NULL) goto finalize;
-            if((wrtr = Wrtr_new(sock)) == NULL) goto finalize;
+            if((rdr = Reader_new(parser_ref, rdsock)) == NULL) goto finalize;
+            if((wrtr = Writer_new(sock)) == NULL) goto finalize;
 
             while(1) {
                 printf("Got a request socket: %d pthread_self %ld\n", sock, pthread_self());
-                int rc = Rdr_read(rdr, &request_msg_ref);
-                if((rc == RDR_OK) && (request_msg_ref != NULL)) {
+                int rc = Reader_read(rdr, &request_msg_ref);
+                if((rc == READER_OK) && (request_msg_ref != NULL)) {
                     if(0 == wref->handler(request_msg_ref, wrtr)) goto finalize;
                     Message_free(&request_msg_ref);
                     close(sock);
                     sock = 0;
                     break;
-                } else if(rc == RDR_PARSE_ERROR) {
+                } else if(rc == READER_PARSE_ERROR) {
                     // send a reply bad request
                     printf("Worker: parse error");
                     handle_parse_error(request_msg_ref, wrtr);
@@ -105,8 +105,8 @@ static void* Worker_main(void* data)
             if(sock != 0) close(sock);
             if(request_msg_ref != NULL) Message_free(&request_msg_ref);
             if(parser_ref != NULL) Parser_free(&parser_ref);
-            if(wrtr != NULL) Wrtr_free(&wrtr);
-            if(rdr != NULL) Rdr_free(&rdr);
+            if(wrtr != NULL) Writer_free(&wrtr);
+            if(rdr != NULL) Reader_free(&rdr);
             wref->active = false;
     }
     printf("Worker_main exited main loop %p, %d\n", wref, wref->id);

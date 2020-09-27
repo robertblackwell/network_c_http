@@ -13,8 +13,8 @@
 
 struct Client_s {
     socket_handle_t sock;
-    Wrtr* wrtr;
-    Rdr*  rdr;
+    Writer* wrtr;
+    Reader*  rdr;
     Parser* parser;
 };
 typedef struct Client_s Client;

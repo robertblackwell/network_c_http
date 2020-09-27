@@ -41,7 +41,7 @@ int test_A0011_vfunc (List* results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
     Message* m1 = rref->message;
-    UT_EQUAL_INT(rref->rc, RDR_PARSE_ERROR);
+    UT_EQUAL_INT(rref->rc, READER_PARSE_ERROR);
     return 0;
 //    UT_EQUAL_CSTR(Message_get_reason(m1), "OK 11Reason Phrase");
 #ifdef A_ON
@@ -73,7 +73,7 @@ int test_A0012_vfunc (List* results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
     Message* m1 = rref->message;
-    UT_EQUAL_INT(rref->rc, RDR_IO_ERROR);
+    UT_EQUAL_INT(rref->rc, READER_IO_ERROR);
     return 0;
 //    UT_EQUAL_CSTR(Message_get_reason(m1), "OK 11Reason Phrase");
 #ifdef A_ON

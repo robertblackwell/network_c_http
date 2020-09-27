@@ -58,7 +58,7 @@ typedef struct WrappedParserTest_s
     VerifyFunctionType  m_verify_func;
     List*             m_results;
     RdSocket            m_rdsock;
-    Rdr*              m_rdr;
+    Reader*              m_rdr;
 
     char                m_read_buffer[1000];
     char*               m_readbuffer_ptr;

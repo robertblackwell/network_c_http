@@ -51,7 +51,7 @@ void WPT_init(WrappedParserTestRef this, Parser* parser, DataSource* data_source
     this->m_verify_func = verify_func;
     this->m_results = List_new(read_result_dealloc);
     this->m_rdsock = DataSourceSocket(this->m_data_source);
-    this->m_rdr = Rdr_new(this->m_parser, this->m_rdsock);
+    this->m_rdr = Reader_new(this->m_parser, this->m_rdsock);
 }
 
 void WPT_destroy(WrappedParserTestRef this)
@@ -68,7 +68,7 @@ int WPT_read_msg(WrappedParserTestRef this, IOBufferRef ctx, Message** msgref_pt
     for(;;) {
         if(IOBuffer_data_len(ctx) == 0 ) {
             IOBuffer_reset(ctx);
-            message_ptr = Rdr_read(this->m_rdr);
+            message_ptr = Reader_read(this->m_rdr);
 //            bytes_read = rdsocket.read_f(this->m_rdsocket.ctx, IOBuffer_space(ctx), IOBuffer_space_len(ctx));
 
             bytes_read = DataSource_read(this->m_data_source, IOBuffer_space(ctx), IOBuffer_space_len(ctx));
@@ -133,7 +133,7 @@ int WPT_run(WrappedParserTestRef this)
     int rc = 0;
     while(1) {
 //        rc = WPT_read_msg(this, &iobuf, &msgref);
-        rc = Rdr_read(this->m_rdr, &msgref);
+        rc = Reader_read(this->m_rdr, &msgref);
         ReadResultRef rr = ReadResult_new(msgref, rc);
         List_add_back(this->m_results, (void*)rr);
         if((rc != 0) || (msgref == NULL))

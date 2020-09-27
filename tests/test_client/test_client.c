@@ -109,7 +109,7 @@ typedef struct X_s {
 X wrtr_s = {42};
 XRef wrtr = &wrtr_s;
 
-void Wrtr_start(HttpStatus status, HdrList* headers)
+void Writer_start(HttpStatus status, HdrList* headers)
 {
     const char* reason_str = http_status_str(status);
     char* first_line = NULL;
@@ -154,8 +154,8 @@ int test_handle_request()
     KVPair* hl_content_type = KVPair_new(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
     HdrList_add_front(hdrs, hl_content_type);
 
-//    Wrtr_start(wrtr, HTTP_STATUS_OK, hdrs);
-//    Wrtr_write_chunk(wrtr, (void*) body, body_len);
+//    Writer_start(wrtr, HTTP_STATUS_OK, hdrs);
+//    Writer_write_chunk(wrtr, (void*) body, body_len);
 
     HdrList_free(&hdrs);
 //    KVPair_free(&(hl_content_length));
