@@ -121,7 +121,6 @@ void Server_listen(ServerRef sref)
             Queue_add(sref->qref, sock2);
         }
     }
-    sleep(15);
     printf("About to join all threads\n");
     //
     // wait for the workers to complete
@@ -147,7 +146,6 @@ void Server_terminate(ServerRef this)
 {
     for(int i = 0; i < this->nbr_workers; i++) {
         Queue_add(this->qref, -1);
-        sleep(5);
         printf("Server_terminate adding %d \n", i);
     }
     close(this->socket_fd);

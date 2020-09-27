@@ -64,16 +64,16 @@ static void* Worker_main(void* data)
         WrtrRef wrtr = NULL;
         MessageRef request_msg_ref = NULL;
 
-        int mySocketHandle = Queue_remove(wref->qref);
+        int my_socket_handle = Queue_remove(wref->qref);
         printf("Worker_main %p mySocketHandle: %d worker %d\n", wref, mySocketHandle, wref->id);
-        int sock = mySocketHandle;
-        if(mySocketHandle == -1) {
+        int sock = my_socket_handle;
+        if(my_socket_handle == -1) {
             /// this is the terminate signal
             printf("Worker_main about to break %p mySocketHandle: %d\n", wref, mySocketHandle);
             terminate = true;
             sock = 0;
         } else {
-            wref->active_socket = (int) mySocketHandle;
+            wref->active_socket = (int) my_socket_handle;
             wref->active = true;
             if((parser_ref = Parser_new()) == NULL) goto finalize;
             RdSocket rdsock = RealSocket(sock);

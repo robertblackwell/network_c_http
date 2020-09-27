@@ -17,8 +17,6 @@ void sig_handler(int signo)
 
 int main()
 {
-    mcheck(NULL);
-//    mcheck_check_all();
     if (signal(SIGINT, sig_handler) == SIG_ERR) {
         printf("app.c main signal() failed");
     }
