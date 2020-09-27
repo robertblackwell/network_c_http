@@ -30,17 +30,25 @@ void Rdr_destroy(RdrRef this);
 void Rdr_free(RdrRef* this_ptr);
 
 typedef enum Rdr_ReturnCode {
-        RDR_OK = 0,
-        RDR_PARSE_ERROR = -1,
-        RDR_IO_ERROR = -2,
+        RDR_OK = 0,             // A message was returned
+        RDR_PARSE_ERROR = -1,   // An error in the format of the message was detected.
+        RDR_IO_ERROR = -2,      // An IO error occurred.
 } Rdr_ReturnCode;
 
 /**
- * Read a http message from the m_readsocket data source/socket
+ * Read a stream of http message from the m_readsocket data source/socket.
  *
- * \param this        RdrRef - the reader object
- * \param msgref_ptr  Variable into which a MessageRef value will be placed if a message is successfully read.
- * \return Rdr_ReturnCode - indicates whether successfull and if not nature if error/
+ * This Rdr object handles the processing of
+ * -    taking data from a data source (soch as a socket) in buffers
+ * -    pushing the buffer it into a Parser
+ * -    handling the action on the various parser output states,
+ *      which includes handling the situation where two messages overlap in a single buffer.
+ *
+ *
+ *
+ * \param this              RdrRef - the reader object
+ * \param msgref_ptr        Variable into which a MessageRef value will be placed if a message is successfully read.
+ * \return Rdr_ReturnCode - Indicates whether successfull and if not nature if error.
  *                          TODO - on error the Rdr struct will contain details of the error
  *                          for IO error it will hold the errno value related to the error
  *                          and for a parse error will hold the relevant http_errno value

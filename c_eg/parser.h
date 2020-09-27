@@ -78,9 +78,24 @@ ParserRef Parser_new();
 void Parser_free(ParserRef* parser_p);
 
 void Parser_begin(ParserRef parser, MessageRef msg_ref);
+
 /**
- * The guts of the parsing process. Call this function repeatedly with successive buffers of data.
- * The returned value will indicate error, message complete, need more data or error paring latest buffer
+ * The guts of the http message parsing process.
+ *
+ * Call this function repeatedly with successive buffers of data.
+ * THese successive buffers may represent one or more messages and a single buffer is permitted to hold
+ * the end of one message and the start of the successive message.
+ *
+ * The returned value indicates the state the parser is in after processing a buffer, and under some circumstances
+ * how much of the provided buffer was consumed.
+ *
+ * Except under error conditions, the only time a buffer will be only partially consumed is when
+ * a messages ends part way through a buffer. This is indicated by message complete being returned
+ * along with number of bytes consumed being less that the size of the buffer provided.
+ *
+ * Under such situation the completed message should be retreived from the parser, the parser begin()
+ * method called again and the remainder of the incomplete buffer presented to the parser to start
+ * the next message.
  *
  * \param parser ParserRef
  * \param buffer A buffer of data presumable read from a tcp connectin
