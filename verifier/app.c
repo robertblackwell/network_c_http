@@ -5,7 +5,7 @@
 #include <sys/time.h>
 #include <math.h>
 
-#define NBR_CONCURRENT 10
+#define NBR_CONCURRENT 30
 #define NBR_PER_THREAD 100
 
 typedef struct ThreadContext {
@@ -192,6 +192,13 @@ void analyse_response_times(double all[NBR_PER_THREAD*NBR_CONCURRENT], double bu
 
 int main()
 {
+    int x1 = sizeof(char);
+    int x2 = sizeof(char*);
+    int x3 = sizeof(void*);
+    int x4 = sizeof(int);
+    int x5 = sizeof(long);
+    int x6 = sizeof(long long);
+
     double all[NBR_CONCURRENT*NBR_PER_THREAD];
     struct timeval main_time_start = get_time();
     pthread_t workers[NBR_CONCURRENT];
