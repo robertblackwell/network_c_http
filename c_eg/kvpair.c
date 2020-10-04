@@ -39,12 +39,12 @@ KVPair* KVPair_new(char* labptr, int lablen, char* valptr, int vallen)
     if(hlref->label_ptr == NULL) goto mem_error_2;
     memcpy(hlref->label_ptr, labptr, lablen);
         // Convert to upper case
-        char* s = labptr;
-        char* p = hlref->label_ptr;
-        for(int i = 0; i < lablen; i++) {
-            p[i] = toupper((unsigned char) labptr[i]);
-        }
-        p[lablen] = '\0';
+    char* s = labptr;
+    char* p = hlref->label_ptr;
+    for(int i = 0; i < lablen; i++) {
+        p[i] = toupper((unsigned char) labptr[i]);
+    }
+    p[lablen] = '\0';
 
     hlref->value_ptr = eg_alloc(vallen+1);
     if(hlref->value_ptr == NULL) goto mem_error_2;
@@ -62,6 +62,15 @@ KVPair* KVPair_new(char* labptr, int lablen, char* valptr, int vallen)
         free((void*)hlref);
         return NULL;
 }
+KVPair* KVPair_from_cstrs(char* key, char* value)
+{
+    return KVPair_new(key, strlen(key), value, strlen(value));
+}
+KVPair* KVPair_from_cstrpair(CStrPair cstrp)
+{
+    return KVPair_from_cstrs(cstrp.key, cstrp.value);
+}
+
 void KVPair_free(KVPair** hlref_ptr)
 {
     KVPair* hlref = *hlref_ptr;

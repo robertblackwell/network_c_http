@@ -50,7 +50,6 @@ void Client_connect(Client* this, char* host, int portno)
     serv_addr.sin_port = htons(portno);
     if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0)
         printf("ERROR connecting");
-    printf("Please enter the message: ");
     this->sock = sockfd;
     this->wrtr = Writer_new(sockfd);
     this->parser = Parser_new();
@@ -66,11 +65,12 @@ void Client_roundtrip(Client* this, char* req_buffers[], Message** response_ptr)
     while(req_buffers[buf_index] != NULL) {
         buf = req_buffers[buf_index];
         buf_len = strlen(buf);
-        printf("Write %d %s\n", buf_len, buf);
         int bytes_written = write(this->sock, buf, buf_len);
         buf_index++;
     }
     int rc = Reader_read(this->rdr, response_ptr);
+    BufferChain* bc = Message_get_body(*response_ptr);
+    Cbuffer* cb = BufferChain_compact(Message_get_body(*response_ptr));
 
     close(this->sock);
 }

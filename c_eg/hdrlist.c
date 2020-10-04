@@ -123,6 +123,12 @@ void HdrList_add_cstr (HdrList* this, char *label, char *value)
     KVPair* hl_content_type = KVPair_new (label, lablen, value, vallen);
     HdrList_add_front (this, hl_content_type);
 }
+void HdrList_add_many(HdrList* this, CStrPair* pairs[])
+{
+    for(int i = 0; pairs[i] != NULL; i++) {
+
+    }
+}
 
 // just to see it update
 Cbuffer* HdrList_serialize (HdrList* this)

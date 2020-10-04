@@ -29,7 +29,7 @@ add_subdirectory(test_list)
 add_subdirectory(test_kvpair)
 add_subdirectory(test_hdrlist)
 add_subdirectory(test_parser)
-# add_subdirectory(test_funcptr)
+add_subdirectory(test_rw)
 
 if (OFF)
 endif()

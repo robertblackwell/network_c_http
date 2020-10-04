@@ -70,6 +70,13 @@ void HdrList_add_front(HdrList* lref, KVPair* item);
 ///
 void HdrList_add(HdrList* this, Cbuffer* key, Cbuffer* value);
 
+/**
+ * Add multiple headers lines to a header list in one call.
+ * \param this  The HdrList to add the header lines
+ * \param pairs CStrPair[] An array of CStrPair terminated by null
+ */
+void HdrList_add_many(HdrList* this, CStrPair* pairs[]);
+
 ///
 /// Find a KVPair in a HdrList by key/label value
 ///

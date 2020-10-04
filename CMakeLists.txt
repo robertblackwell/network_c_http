@@ -121,7 +121,8 @@ set(C_EG_INCLUDE_PATHS
 )
 set(C_EG_LINK_LIBRARIES 
 	${C_EG_LIB_NAME} 
-	Threads::Threads 
+	Threads::Threads
+	m
 	${CMAKE_DL_LIBS}
 	# ${C_EG_VENDOR_LIBDIR}/libcert_library.a
 	# ${C_EG_VENDOR_LIBDIR}/libboost_filesystem.a 
@@ -169,4 +170,5 @@ enable_testing()
 add_subdirectory(c_eg)
 add_subdirectory(tests)
 add_subdirectory(app)
+add_subdirectory(verifier)
 

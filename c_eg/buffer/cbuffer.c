@@ -122,6 +122,11 @@ size_t Cbuffer_size(Cbuffer* cbuf)
 {
     return cbuf->m_length;
 }
+char* Cbuffer_cstr(Cbuffer* this)
+{
+    assert(this->m_cPtr[this->m_size] == '\0');
+    return this->m_cPtr;
+}
 /**
  * capacity of the buffer - max value of size
 */
@@ -164,6 +169,7 @@ void Cbuffer_append(Cbuffer* cbuf, void* data, size_t len)
     cbuf->m_size = cbuf->m_length;
     
     cbuf->m_cPtr = (char*) cbuf->m_memPtr;
+    cbuf->m_cPtr[cbuf->m_size] = '\0';
 }
 void Cbuffer_append_cstr(Cbuffer* cbuf, char* cstr)
 {

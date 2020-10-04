@@ -27,6 +27,7 @@ enum HttpMinorVersion {minor_verson0=0, minor_version1=1};
 #define HEADER_CONTENT_LENGTH "CONTENT-LENGTH"
 #define HEADER_TRANSFERENCODING "TRANSFER-ENCODING"
 #define HEADER_CONTENT_TYPE "CONTENT-TYPE"
+#define HEADER_ECHO_ID "C-EG-ECHO-ID"
 
 
 // an iterator for pointing at a header line. NULL means does not reference a header line
@@ -106,6 +107,8 @@ void Message_move_target(Message* this, Cbuffer* target);
 /// \return c_string pointer. The returned value is a reference, ownership stays with the Message*.
 ///
 Cbuffer* Message_get_target(Message* this);
+/// set target
+void Message_set_target(Message* this, char* targ);
 
 ///
 /// Sets the content of Message* reason property to the content of Cbuffer target

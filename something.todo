@@ -1,8 +1,7 @@
 TODO:
- ☐ devise a test for XXXX_free() to ensure arg is set to NULL - all classes
- ☐ change name of HeaderLine to something like Hdr or KVPair
+ ✔ change name of HeaderLine to something like Hdr or KVPair @done (20-10-02 07:17)
  ☐ test queue add/remove
- ☐ convert queue to Typed List 
+ ☐ convert queue to Typed List or circular style so that dont need to shuffle down
  ☐ bug - parser does not return useful code from parser error
  ☐ handler_example demo how to parse url/target, query string as tools for a meaningful handle function
  ☐ make handler_example echo the request in a way that demonstrates if picked out all the relevant bits of the request
@@ -10,11 +9,15 @@ TODO:
  ☐ documentation
  ☐ replace printf() with logger statements
  ☐ what to do about List and HDRList - preprocessor or hand coded ?
-
+ ☐ Apache ab program to test throughput of server
+ ☐ use memory sanitizer
+ ☐ clean up logging - too much output
+ ☐ build verify app to thoroughly test the server under load + keep-alive
 
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ devise a test for XXXX_free() to ensure arg is set to NULL - all classes @done (20-10-02 07:16) @project(TODO)
  ✔ replace all malloc/free pairs with Allocate/Deallocate @done (20-09-23 18:12) @project(TODO)
  ✔ change buffer tests to be pure C @done (20-09-23 18:12) @project(TODO)
  ✔ test Allocate failure for all classes by stubbing Allocate - forget @done (20-09-23 17:42) @project(TODO)

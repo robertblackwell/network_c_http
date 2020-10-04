@@ -52,9 +52,7 @@ int Queue_remove(Queue* qref)
         pthread_cond_wait(&(qref->not_empty_cv), &(qref->queue_mutex));
     }
     int r = qref->q[0];
-    // shuffle down
     for(int i = 0; i < qref->size - 1; i++) {
-        // printf("In remove i : %d q[i] %d  q[i-1] %d\n", i, qref->q[i], qref->q[i-1]);
         qref->q[i] = qref->q[i+1];
     }
     // clear the entry above data
@@ -71,16 +69,15 @@ int Queue_remove(Queue* qref)
 void Queue_add(Queue* qref, int a)
 {
     pthread_mutex_lock(&(qref->queue_mutex));
-    // in here put a wait for space on the queue
     while(qref->size == qref->max_size) {
         pthread_cond_wait(&(qref->not_full_cv), &(qref->queue_mutex));
     }
     qref->q[qref->size] = a;
     qref->size++;
     if( qref->size == 1 ){
-        // then it was empty before this add
         pthread_cond_broadcast(&(qref->not_empty_cv));
     }
+    printf("Queue_add: %d\n", qref->size);
     pthread_mutex_unlock(&(qref->queue_mutex));
 }
 

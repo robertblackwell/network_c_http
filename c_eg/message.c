@@ -5,6 +5,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
+
 struct Message_s
 {
     BufferChain* body;
@@ -93,7 +95,8 @@ Cbuffer* Message_serialize_request(Message* mref)
 {
     Cbuffer* result = Cbuffer_new();
     char* first_line;
-    char* meth = "METH";
+    char* meth = http_method_str(mref->method);
+
     int l1= asprintf(&first_line,"%s %s HTTP/%d.%d\r\n", meth, (char*)Cbuffer_data(mref->target), mref->major_vers, mref->minor_vers);
     Cbuffer_append(result, (void*)first_line, l1);
     free(first_line);
@@ -113,10 +116,26 @@ Cbuffer* Message_serialize_request(Message* mref)
 }
 Cbuffer* Message_serialize_response(Message* mref)
 {
+    Cbuffer* result = Cbuffer_new();
     char* first_line;
-    char* meth = "METH";
-    asprintf(&first_line, "%s %s HTTP/%d.%d\r\n", meth, (char*)Cbuffer_data(mref->target), mref->major_vers, mref->minor_vers);
-    return NULL;
+    int ll = asprintf(&first_line, "HTTP/%d.%d  %d %s\r\n",mref->major_vers, mref->minor_vers, mref->status_code, (char*)Cbuffer_data(mref->reason));
+    Cbuffer_append(result, (void*)first_line, ll);
+    free(first_line);
+    HdrList* hdrs = mref->headers;
+    ListIterator iter = HdrList_iterator(hdrs);
+    while(iter != NULL) {
+        KVPair* item = HdrList_itr_unpack(hdrs, iter);
+        char* s;
+        int len = asprintf(&s,"%s: %s\r\n", KVPair_label(item), KVPair_value(item));
+        Cbuffer_append(result, (void*)s, len);
+        ListIterator next = HdrList_itr_next(hdrs, iter);
+        iter = next;
+        free(s);
+    }
+    Cbuffer_append_cstr(result, "\r\n");
+    Cbuffer* body = BufferChain_compact(Message_get_body(mref));
+    Cbuffer_append(result, Cbuffer_data(body), Cbuffer_size(body));
+    return result;
 }
 Cbuffer* Message_serialize(Message* mref)
 {
@@ -176,6 +195,11 @@ void Message_move_target(Message* this, Cbuffer* target)
         this->target = Cbuffer_new();
     }
     Cbuffer_move(this->target, target);
+}
+void Message_set_target(Message* this, char* targ)
+{
+    assert((this->target != NULL) && (Cbuffer_size(this->target) == 0));
+    Cbuffer_append_cstr(this->target, targ);
 }
 void Message_move_reason(Message* this, Cbuffer* reason)
 {

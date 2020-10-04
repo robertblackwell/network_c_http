@@ -90,10 +90,6 @@ int Reader_read(Reader* this, Message** msgref_ptr)
                 ///
                 /// got a parse error - need some way to signal the caller so can send reply of bad message
                 ///
-                printf("Got error from parser %d\n", ret.return_code);
-                ParserError pe = Parser_get_error(this->m_parser);
-                printf("Error details %s %s \n", pe.m_name, pe.m_description);
-//                assert(false);
                 Message_free(&message_ptr);
                 *msgref_ptr = NULL;
                 return READER_PARSE_ERROR;

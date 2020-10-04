@@ -141,7 +141,17 @@ int test_serialize_headers_2()
     HdrList_free(&hdrs);
     return 0;
 }
+int test_hdr_add_many()
+{
+    HdrList* hdrs = HdrList_new();
+    HdrList_add_cstr(hdrs, "Key1", "value1");
+    HdrList_add_cstr(hdrs, "Key2", "value2");
+    HdrList_add_cstr(hdrs, "Key3", "value3");
+    HdrList_add_cstr(hdrs, "Key4", "value4");
+    Cbuffer* cb = HdrList_serialize(hdrs);
 
+    printf("This is it\n");
+}
 #ifdef HGHGH
 int test_list_add_front()
 {
@@ -254,7 +264,7 @@ int main()
 	UT_ADD(test_hdrlist_new);
     UT_ADD(test_hdrlist_add_back_get_content);
     UT_ADD(test_hdrlist_find);
-//    UT_ADD(test_list_add_front);
+    UT_ADD(test_hdr_add_many);
 //    UT_ADD(test_list_remove_front);
 //    UT_ADD(test_list_remove_back);
 //    UT_ADD(test_iter);

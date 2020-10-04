@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <c_eg/server.h>
 
 #include <stdlib.h>
@@ -96,7 +97,7 @@ void Server_listen(Server* sref)
         }
         sref->worker_tab[i] = wref;
     }
-    printf("workers started\n");
+    LOG_FMT("workers started\n");
     //
     // Start a Monitor thread that will check the workers are not zombies
     //
@@ -117,28 +118,23 @@ void Server_listen(Server* sref)
                 LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
                 break;
             }
-            printf("Server_listener adding socket to qref %d \n", sock2);
+            LOG_FMT("Server_listener adding socket to qref %d \n", sock2);
             Queue_add(sref->qref, sock2);
         }
     }
-    printf("About to join all threads\n");
+    LOG_FMT("About to join all threads\n");
     //
     // wait for the workers to complete
     //
     for(int i = 0; i < sref->nbr_workers; i++) {
         Worker* wref = sref->worker_tab[i];
         if(wref != NULL) {
-            printf("About to joined worker %d\n", i);
+            LOG_FMT("About to joined worker %d\n", i);
             Worker_join(wref);
-            printf("Joined thread %d\n", i);
             Worker_free(wref);
-            printf("Freed worker %d\n", i);
         }
-        printf("Server joining thread %d  %p\n", i, wref);
     }
-    printf("All threads joined\n");
     Queue_free(&(sref->qref));
-    printf("Server_listen Queue_free() done \n");
     // also wait for the monitor  to complete
     
 }
@@ -146,7 +142,6 @@ void Server_terminate(Server* this)
 {
     for(int i = 0; i < this->nbr_workers; i++) {
         Queue_add(this->qref, -1);
-        printf("Server_terminate adding %d \n", i);
     }
     close(this->socket_fd);
 }

@@ -85,9 +85,6 @@ void Writer_write_chunk(Writer* this, void* buffer, int len)
     char* c = (char*)buffer;
     void* tmp_buffer = buffer;
     int tmp_len = len;
-    printf("write_chunk this:%p, buffer: %p len: %d \n", this, buffer, len);
-//    int res = (int)write(this->socket, buffer, len);
-//    return;
     int my_errno;
     while(1) {
         int res = (int)write(this->m_sock, tmp_buffer, tmp_len);
