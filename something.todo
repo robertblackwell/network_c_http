@@ -13,6 +13,7 @@ TODO:
  ☐ use memory sanitizer
  ☐ clean up logging - too much output
  ☐ build verify app to thoroughly test the server under load + keep-alive
+ ☐ turn the client into an app that can send out any request - this will really test  the parser
 
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿

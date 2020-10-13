@@ -477,6 +477,7 @@ int test_B()
 
 int main ()
 {
+    printf("sizeof http_parser: %ld,  sizeof http_parser_settings: %ld\n", sizeof(struct http_parser), sizeof(struct http_parser_settings));
     UT_ADD(test_A);
 //    UT_ADD(test_B);
     int rc = UT_RUN();
