@@ -149,8 +149,9 @@ int test_hdr_add_many()
     HdrList_add_cstr(hdrs, "Key3", "value3");
     HdrList_add_cstr(hdrs, "Key4", "value4");
     Cbuffer* cb = HdrList_serialize(hdrs);
-
+    UT_EQUAL_CSTR(Cbuffer_cstr(cb), "KEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\n");
     printf("This is it\n");
+    return 0;
 }
 #ifdef HGHGH
 int test_list_add_front()
