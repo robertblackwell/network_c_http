@@ -4,13 +4,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <http-parser/http_parser.h>
-#include <c_eg/unittest.h>
-#include <c_eg/logger.h>
-#include <c_eg/kvpair.h>
-#include <c_eg/datasource.h>
-#include <c_eg/parser_test.h>
-#include <c_eg/message.h>
-#include <c_eg/reader.h>
+#include <c_http/unittest.h>
+#include <c_http/logger.h>
+#include <c_http/kvpair.h>
+#include <c_http/datasource.h>
+#include <c_http/parser_test.h>
+#include <c_http/message.h>
+#include <c_http/reader.h>
 
 #undef A_ON
 #define CHECK_HEADER(h, K, V) do {\

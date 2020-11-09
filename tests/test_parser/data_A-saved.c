@@ -1,4 +1,4 @@
-#include <c_eg/test_helper_types.h>
+#include <c_http/test_helper_types.h>
 
 #undef A_ON
 struct ParserTest_s tests_A[] = {

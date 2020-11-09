@@ -1,6 +1,6 @@
 #define _GNU_SOURCE
-#include <c_eg/alloc.h>
-#include <c_eg/unittest.h>
+#include <c_http/alloc.h>
+#include <c_http/unittest.h>
 
 #include <assert.h>
 #include <stdio.h>

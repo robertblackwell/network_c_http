@@ -1,9 +1,9 @@
 #define _GNU_SOURCE
 #include <assert.h>
 #include <stdio.h>
-#include <c_eg/unittest.h>
-#include <c_eg/buffer/cbuffer.h>
-#include <c_eg/logger.h>
+#include <c_http/unittest.h>
+#include <c_http/buffer/cbuffer.h>
+#include <c_http/logger.h>
 
 int test_something_1()
 {

@@ -167,7 +167,7 @@ endif()
 include(CTest) 
 enable_testing()
 
-add_subdirectory(c_eg)
+add_subdirectory(c_http)
 add_subdirectory(tests)
 add_subdirectory(app)
 add_subdirectory(verifier)

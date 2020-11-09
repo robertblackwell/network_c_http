@@ -1,10 +1,10 @@
 #define _GNU_SOURCE
 #include <assert.h>
 #include <stdio.h>
-#include <c_eg/unittest.h>
-#include <c_eg/buffer/cbuffer.h>
-#include <c_eg/logger.h>
-#include <c_eg/list.h>
+#include <c_http/unittest.h>
+#include <c_http/buffer/cbuffer.h>
+#include <c_http/logger.h>
+#include <c_http/list.h>
 
 typedef struct DummyObj_s {
     long value;

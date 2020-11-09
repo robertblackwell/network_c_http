@@ -2,14 +2,14 @@
 #include <assert.h>
 #include <stdio.h>
 #include <http-parser/http_parser.h>
-#include <c_eg/alloc.h>
-#include <c_eg/unittest.h>
-#include <c_eg/buffer/cbuffer.h>
-#include <c_eg/logger.h>
-#include <c_eg/list.h>
-#include <c_eg/server.h>
-#include <c_eg/hdrlist.h>
-#include <c_eg/message.h>
+#include <c_http/alloc.h>
+#include <c_http/unittest.h>
+#include <c_http/buffer/cbuffer.h>
+#include <c_http/logger.h>
+#include <c_http/list.h>
+#include <c_http/server.h>
+#include <c_http/hdrlist.h>
+#include <c_http/message.h>
 
 //https://github.com/uriparser/uriparser
 

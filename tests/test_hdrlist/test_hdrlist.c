@@ -2,13 +2,13 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <c_eg/unittest.h>
-#include <c_eg/buffer/cbuffer.h>
-#include <c_eg/logger.h>
-#include <c_eg/list.h>
-#include <c_eg/kvpair.h>
-#include <c_eg/hdrlist.h>
-#include <c_eg/message.h>
+#include <c_http/unittest.h>
+#include <c_http/buffer/cbuffer.h>
+#include <c_http/logger.h>
+#include <c_http/list.h>
+#include <c_http/kvpair.h>
+#include <c_http/hdrlist.h>
+#include <c_http/message.h>
 
 
 

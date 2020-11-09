@@ -1,10 +1,10 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <string.h>
-#include <c_eg/unittest.h>
-#include <c_eg/buffer/cbuffer.h>
-#include <c_eg/buffer/buffer_chain.h>
-#include <c_eg/buffer/iobuffer.h>
+#include <c_http/unittest.h>
+#include <c_http/buffer/cbuffer.h>
+#include <c_http/buffer/buffer_chain.h>
+#include <c_http/buffer/iobuffer.h>
 
 char* cstr_concat(char* s1, char* s2)
 {

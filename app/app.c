@@ -1,5 +1,5 @@
-#include <c_eg/server.h>
-#include <c_eg/handler_example.h>
+#include <c_http/server.h>
+#include <c_http/handler_example.h>
 #include <stdio.h>
 #include <mcheck.h>
 #include<signal.h>

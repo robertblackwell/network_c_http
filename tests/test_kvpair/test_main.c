@@ -2,9 +2,9 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <c_eg/unittest.h>
-#include <c_eg/logger.h>
-#include <c_eg/kvpair.h>
+#include <c_http/unittest.h>
+#include <c_http/logger.h>
+#include <c_http/kvpair.h>
 
 ///////////////////////////////////////////////////
 int test_kvpair_new()
