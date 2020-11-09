@@ -59,28 +59,31 @@ int Reader_read(ReaderRef this, MessageRef* msgref_ptr)
             void* c = this->m_rdsocket.ctx;
             ReadFunc rf = (this->m_rdsocket.read_f);
             bytes_read = RdSocket_read(&(this->m_rdsocket), buf, len);
-            // bytes_read == 0 means other end closed the socket, if have already started but not finished a message
-            // send 0 bytes to parser to signal EOF
-            //
-            // bytes_read < 0 means io error which includes I closed the socket on the last iteration of the read message loop
-            // in either case return NULL unless the other end is signalling end of message with a close (non HTTP spec compliant)
             if(bytes_read == 0) {
-                if((bytes_read == 0) && this->m_parser->m_started && (!this->m_parser->m_message_done)) {
-                    bytes_read = 0;
-                } else {
+                if (! this->m_parser->m_started) {
+                    // eof no message started - there will not be any more bytes to parse so cleanup and exit
+                    // return no error 
                     Message_free(&(message_ptr));
                     *msgref_ptr = NULL;
-                    int er = errno;
                     return 0;
                 }
-            } else if (bytes_read < 0) {
+                if (this->m_parser->m_started && this->m_parser->m_message_done) {
+                    // shld not get here
+                    assert(false);
+                }
+                if (this->m_parser->m_started && !this->m_parser->m_message_done) {
+                    // get here if otherend is signlaling eom with eof
+                    assert(true);
+                }
+            } else if (bytes_read > 0) {
+                IOBuffer_commit(iobuf, bytes_read);
+            } else {
+                // have an io error
                 int x = errno;
                 Message_free(&(message_ptr));
                 *msgref_ptr = NULL;
-                // collect errno for more details
                 return READER_IO_ERROR;
             }
-            IOBuffer_commit(iobuf, bytes_read);
         } else {
             bytes_read = iobuf->buffer_remaining;
         }
