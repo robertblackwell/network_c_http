@@ -8,46 +8,46 @@
 #include <errno.h>
 #include <http-parser/http_parser.h>
 
-void Writer_init(Writer* this, int sock)
+void Writer_init(WriterRef this, int sock)
 {
     this->m_sock = sock;
 }
-Writer* Writer_new(int socket)
+WriterRef Writer_new(int socket)
 {
-    Writer* mwref = eg_alloc(sizeof(Writer));
+    WriterRef mwref = eg_alloc(sizeof(Writer));
     if(mwref == NULL)
         return NULL;
     Writer_init(mwref, socket);
     return mwref;
 }
-void Writer_destroy(Writer* this)
+void Writer_destroy(WriterRef this)
 {
 }
-void Writer_free(Writer** this_ptr)
+void Writer_free(WriterRef* this_ptr)
 {
-    Writer* this = *(this_ptr);
+    WriterRef this = *(this_ptr);
     Writer_destroy(this);
     eg_free(*this_ptr);
     *this_ptr = NULL;
 }
 
-void Writer_write(Writer* wrtr, Message* msg_ref)
+void Writer_write(WriterRef wrtr, MessageRef msg_ref)
 {
 }
 /**
  *
  * Initiates the writing of a http response by sending status and headers.
  *
- * \param this    Writer* contains the socket/fd for writing
+ * \param this    WriterRef contains the socket/fd for writing
  * \param status  HttpStatus enum value
- * \param headers HdrList* - the deaders to be written
+ * \param headers HdrListRef - the deaders to be written
  * \result (TODO) success, EOF-closed by other end, IO error
  */
-void Writer_start(Writer* this, HttpStatus status, HdrList* headers)
+void Writer_start(WriterRef this, HttpStatus status, HdrListRef headers)
 {
     char* first_line = NULL;
-    Cbuffer* cb_output_ref = NULL;
-    Cbuffer* serialized_headers = NULL;
+    CbufferRef cb_output_ref = NULL;
+    CbufferRef serialized_headers = NULL;
     void* return_value = NULL;
 
     const char* reason_str = http_status_str(status);
@@ -80,7 +80,7 @@ void Writer_start(Writer* this, HttpStatus status, HdrList* headers)
  * \param len     int length of data in buffer
  * \return        (TODO) return success, EOF-socket closed by other end, IO error
  */
-void Writer_write_chunk(Writer* this, void* buffer, int len)
+void Writer_write_chunk(WriterRef this, void* buffer, int len)
 {
     char* c = (char*)buffer;
     void* tmp_buffer = buffer;
@@ -108,6 +108,6 @@ void Writer_write_chunk(Writer* this, void* buffer, int len)
  *
  * \param this
  */
-void Writer_end(Writer* this)
+void Writer_end(WriterRef this)
 {
 }

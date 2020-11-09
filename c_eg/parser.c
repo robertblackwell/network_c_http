@@ -14,11 +14,11 @@ int headers_complete_cb(http_parser* parser);//, const char* aptr, size_t remain
 int body_data_cb(http_parser* parser, const char* at, size_t length);
 int message_complete_cb(http_parser* parser);
 
-void Parser_initialize(Parser* this);
+void Parser_initialize(ParserRef this);
 
-Parser* Parser_new()
+ParserRef Parser_new()
 {
-    Parser* this = eg_alloc(sizeof(Parser));
+    ParserRef this = eg_alloc(sizeof(Parser));
     if(this == NULL)
         return NULL;
     this->m_message_done = false;
@@ -35,10 +35,10 @@ Parser* Parser_new()
     return this;
 }
 
-void Parser_free(Parser** this_p)
+void Parser_free(ParserRef* this_p)
 {
     ASSERT_NOT_NULL(*this_p);
-    Parser* this= *this_p;
+    ParserRef this= *this_p;
     if (this->m_http_parser_ptr != NULL) {
         free(this->m_http_parser_ptr);
         this->m_http_parser_ptr = NULL;
@@ -57,22 +57,22 @@ void Parser_free(Parser** this_p)
     *this_p = NULL;
 
 }
-Message* Parser_current_message(Parser* this)
+MessageRef Parser_current_message(ParserRef this)
 {
     return this->m_current_message_ptr;
 }
-int Parser_append_bytes(Parser* this, void *buffer, unsigned length)
+int Parser_append_bytes(ParserRef this, void *buffer, unsigned length)
 {
     size_t nparsed = http_parser_execute(this->m_http_parser_ptr, this->m_http_parser_settings_ptr, (char*)buffer, (int)length);
     return (int)nparsed;
 }
-void Parser_begin(Parser* this, Message* message_ptr)
+void Parser_begin(ParserRef this, MessageRef message_ptr)
 {
     Parser_initialize(this);
     this->m_current_message_ptr = message_ptr;
 }
 
-ParserReturnValue Parser_consume(Parser* this, const void* buf, int length)
+ParserReturnValue Parser_consume(ParserRef this, const void* buf, int length)
 {
     bool only_header = false;
     this->m_started = true;
@@ -102,7 +102,7 @@ ParserReturnValue Parser_consume(Parser* this, const void* buf, int length)
 }
 #ifdef NOIMPLEMENTED
 
-ParserReturnValue Parser_end(Parser* this)
+ParserReturnValue Parser_end(ParserRef this)
 {
     ParserReturnValue rv = {.return_code = ParserRC_end_of_data, .bytes_remaining = 0};
     char* buffer = NULL;
@@ -129,7 +129,7 @@ ParserReturnValue Parser_end(Parser* this)
     }
     return rv;
 }
-void Parser_append_eof(Parser* this)
+void Parser_append_eof(ParserRef this)
 {
     char* buffer = NULL;
     size_t nparsed;
@@ -141,11 +141,11 @@ void Parser_append_eof(Parser* this)
     printf("back from parser nparsed: %ld\n ", nparsed);
 }
 #endif
-enum http_errno Parser_get_errno(Parser* this)
+enum http_errno Parser_get_errno(ParserRef this)
 {
     return (enum http_errno) this->m_http_parser_ptr->http_errno;
 }
-ParserError Parser_get_error(Parser* this)
+ParserError Parser_get_error(ParserRef this)
 {
     enum http_errno x = (enum http_errno)this->m_http_parser_ptr->http_errno;
     char* n = (char*)http_errno_name(x);
@@ -157,7 +157,7 @@ ParserError Parser_get_error(Parser* this)
     return erst;
 
 }
-bool Parser_is_error(Parser* this)
+bool Parser_is_error(ParserRef this)
 {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wall"
@@ -168,7 +168,7 @@ bool Parser_is_error(Parser* this)
     return (this->m_http_parser_ptr->http_errno != 0) && (this->m_http_parser_ptr->http_errno != HPE_PAUSED);
 };
 
-void Parser_initialize(Parser* this)
+void Parser_initialize(ParserRef this)
 {
     this->m_header_state = kHEADER_STATE_NOTHING;
     this->m_started = false;
@@ -207,7 +207,7 @@ void Parser_initialize(Parser* this)
 
 int message_begin_cb(http_parser* parser)
 {
-    Parser* this =  (Parser*)(parser->data);
+    ParserRef this =  (ParserRef)(parser->data);
     if(this->m_status_buf != NULL) {
         Cbuffer_clear(this->m_status_buf);
     } else {
@@ -233,8 +233,8 @@ int message_begin_cb(http_parser* parser)
 
 int url_data_cb(http_parser* parser, const char* at, size_t length)
 {
-    Parser* this =  (Parser*)(parser->data);
-    Message* message = Parser_current_message(this);
+    ParserRef this =  (ParserRef)(parser->data);
+    MessageRef message = Parser_current_message(this);
     Message_set_is_request(message, true);
     Cbuffer_append(this->m_url_buf, (char*)at, length); /*NEEDS ALLO TEST*/
     return 0;
@@ -242,8 +242,8 @@ int url_data_cb(http_parser* parser, const char* at, size_t length)
 
 int status_data_cb(http_parser* parser, const char* at, size_t length)
 {
-    Parser* this =  (Parser*)(parser->data);
-    Message* message = Parser_current_message(this);
+    ParserRef this =  (ParserRef)(parser->data);
+    MessageRef message = Parser_current_message(this);
     Message_set_is_request(message, false);
     Message_set_status(message, this->m_http_parser_ptr->status_code);
 
@@ -253,9 +253,9 @@ int status_data_cb(http_parser* parser, const char* at, size_t length)
 }
 int header_field_data_cb(http_parser* parser, const char* at, size_t length)
 {
-    Parser* this =  (Parser*)(parser->data);
-    Message* message = Parser_current_message(this);
-    HdrList* hdrs = Message_headers(message);
+    ParserRef this =  (ParserRef)(parser->data);
+    MessageRef message = Parser_current_message(this);
+    HdrListRef hdrs = Message_headers(message);
     int state = this->m_header_state;
     if( (state == 0) || (state == kHEADER_STATE_NOTHING) || (state == kHEADER_STATE_VALUE)) {
         if(Cbuffer_size(this->m_name_buf) != 0) {
@@ -274,8 +274,8 @@ int header_field_data_cb(http_parser* parser, const char* at, size_t length)
 }
 int header_value_data_cb(http_parser* parser, const char* at, size_t length)
 {
-    Parser* this =  (Parser*)(parser->data);
-    Message* message = Parser_current_message(this);
+    ParserRef this =  (ParserRef)(parser->data);
+    MessageRef message = Parser_current_message(this);
     int state = this->m_header_state;
     if( state == kHEADER_STATE_FIELD ) {
         Cbuffer_clear(this->m_value_buf);
@@ -290,8 +290,8 @@ int header_value_data_cb(http_parser* parser, const char* at, size_t length)
 }
 int headers_complete_cb(http_parser* parser) //, const char* aptr, size_t remainder)
 {
-    Parser* this =  (Parser*)(parser->data);
-    Message* message = Parser_current_message(this);
+    ParserRef this =  (ParserRef)(parser->data);
+    MessageRef message = Parser_current_message(this);
     if( Cbuffer_size(this->m_name_buf) != 0 ) {
         HdrList_add_cbuf(Message_headers(message), this->m_name_buf, this->m_value_buf);  /*NEEDS ALLO TEST*/
         Cbuffer_clear(this->m_name_buf);
@@ -312,9 +312,9 @@ int headers_complete_cb(http_parser* parser) //, const char* aptr, size_t remain
 }
 int body_data_cb(http_parser* parser, const char* at, size_t length)
 {
-    Parser* this =  (Parser*)(parser->data);
-    Message* message = Parser_current_message(this);
-    BufferChain* chain_ptr = Message_get_body(message);
+    ParserRef this =  (ParserRef)(parser->data);
+    MessageRef message = Parser_current_message(this);
+    BufferChainRef chain_ptr = Message_get_body(message);
     if (chain_ptr == NULL) {
         chain_ptr = BufferChain_new();  /*NEEDS ALLO TEST*/
         Message_set_body(message, chain_ptr);
@@ -324,17 +324,17 @@ int body_data_cb(http_parser* parser, const char* at, size_t length)
 }
 int chunk_header_cb(http_parser* parser)
 {
-    Parser* p =  (Parser*)(parser->data);
+    ParserRef p =  (ParserRef)(parser->data);
     return 0;
 }
 int chunk_complete_cb(http_parser* parser)
 {
-    Parser* p =  (Parser*)(parser->data);
+    ParserRef p =  (ParserRef)(parser->data);
     return 0;
 }
 int message_complete_cb(http_parser* parser)
 {
-    Parser* this =  (Parser*)(parser->data);
+    ParserRef this =  (ParserRef)(parser->data);
     this->m_message_done = true;
     
     // MessageBase* message = p->current_message();

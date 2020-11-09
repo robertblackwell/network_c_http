@@ -14,15 +14,15 @@
 //https://github.com/uriparser/uriparser
 
 typedef struct Url_s {
-    Cbuffer* scheme;
-    Cbuffer* host;
-    Cbuffer* path;
-    Cbuffer* port;
-    Cbuffer* fragement;
-    Cbuffer* query;
-    Cbuffer* user_info;
+    CbufferRef scheme;
+    CbufferRef host;
+    CbufferRef path;
+    CbufferRef port;
+    CbufferRef fragement;
+    CbufferRef query;
+    CbufferRef user_info;
 
 } Url_t, Url;
 
-Url* Url_new(char* url);
-void Url_free(Url** this_ptr);
+UrlRef Url_new(char* url);
+void Url_free(UrlRef* this_ptr);

@@ -6,31 +6,31 @@
 #include <pthread.h>
 
 struct Worker_s;
-typedef struct Worker_s Worker;
+typedef struct Worker_s Worker, *WorkerRef;
 
 /**
  * Create a new Worker instance. Started by the server in a new thread.
- * Reads tcp socket_fd values from Queue and parses the read data into Message* which
+ * Reads tcp socket_fd values from Queue and parses the read data into MessageRef which
  * are passed to the HandlerFuunction to service the request. (see handler.h for signature of HandlerFunction).
  * \param qref
  * \param _id
  * \param handler
- * \return Worker* | NULL
+ * \return WorkerRef | NULL
  */
-Worker* Worker_new(Queue* qref, int _id, HandlerFunction handler);
-void Worker_free(Worker* wref);
+WorkerRef Worker_new(QueueRef qref, int _id, HandlerFunction handler);
+void Worker_free(WorkerRef wref);
 
 /**
  * Actually starts the new thread and calls the private Worker_main() function.
  * \param wref
  * \return
  */
-int Worker_start(Worker* wref);
+int Worker_start(WorkerRef wref);
 
-pthread_t* Worker_pthread(Worker* wref);
+pthread_t* Worker_pthread(WorkerRef wref);
 /**
  * Performs a pthread_wait() call on the thread associated with this instance of the Worker.
  * \param wref
  */
-void Worker_join(Worker* wref);
+void Worker_join(WorkerRef wref);
 #endif

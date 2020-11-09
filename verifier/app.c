@@ -39,15 +39,15 @@ ThreadContext* Ctx_new(int id)
 /**
  * Create a request message with target = /echo, an Echo_id header, empty body
  * \param ctx
- * \return Message* with ownership
+ * \return MessageRef with ownership
  */
-Message* mk_request(ThreadContext* ctx)
+MessageRef mk_request(ThreadContext* ctx)
 {
-    Message* request = Message_new();
+    MessageRef request = Message_new();
     Message_set_is_request(request, true);
     Message_set_method(request, HTTP_GET);
     Message_set_target(request, "/echo" );
-    HdrList* request_hdrs = Message_headers(request);
+    HdrListRef request_hdrs = Message_headers(request);
     char* content_length = "0";
     char* echo_id;
 
@@ -68,15 +68,15 @@ void Ctx_mk_uid(ThreadContext* ctx)
 /**
  * Verify that the response is correct based on the ctx->uid and request values
  * \param ctx       ThreadContext*
- * \param request   Message*
- * \param response  Message*
+ * \param request   MessageRef
+ * \param response  MessageRef
  * \return bool
  */
-bool verify_response(ThreadContext* ctx, Message* request, Message* response)
+bool verify_response(ThreadContext* ctx, MessageRef request, MessageRef response)
 {
-    BufferChain* body = Message_get_body(response);
-    Cbuffer* body_bc = BufferChain_compact(body);
-    Cbuffer* req_bc = Message_serialize(request);
+    BufferChainRef body = Message_get_body(response);
+    CbufferRef body_bc = BufferChain_compact(body);
+    CbufferRef req_bc = Message_serialize(request);
     int x = strcmp(Cbuffer_cstr(body_bc), Cbuffer_cstr(req_bc));
     if( x != 0) {
         printf("Verify failed \n");
@@ -104,12 +104,12 @@ void* threadfn(void* data)
     struct timeval start_time = get_time();
     for(int i = 0; i < ctx->howmany; i++) {
         struct timeval iter_start_time = get_time();
-        Message* response;
-        Client* client = Client_new();
+        MessageRef response;
+        ClientRef client = Client_new();
         Client_connect(client, "localhost", 9001);
         Ctx_mk_uid(ctx);
-        Message* request = mk_request(ctx);
-        Cbuffer* serialized = Message_serialize(request);
+        MessageRef request = mk_request(ctx);
+        CbufferRef serialized = Message_serialize(request);
         char* req_buffer[] = {
             Cbuffer_cstr(serialized), NULL
         };
@@ -118,7 +118,7 @@ void* threadfn(void* data)
         }
 
         Client_roundtrip(client, req_buffer,  &response);
-        Cbuffer* cb = Message_serialize(response);
+        CbufferRef cb = Message_serialize(response);
 
         if(! verify_response(ctx, request, response)) {
             printf("Verify response failed");

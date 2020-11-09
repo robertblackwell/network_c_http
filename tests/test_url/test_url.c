@@ -14,22 +14,22 @@
 //https://github.com/uriparser/uriparser
 
 typedef struct Url_s {
-    Cbuffer* scheme;
-    Cbuffer* host;
-    Cbuffer* path;
-    Cbuffer* port;
-    Cbuffer* fragement;
-    Cbuffer* query;
-    Cbuffer* user_info;
+    CbufferRef scheme;
+    CbufferRef host;
+    CbufferRef path;
+    CbufferRef port;
+    CbufferRef fragement;
+    CbufferRef query;
+    CbufferRef user_info;
 
-} Url_t,  Url;
+} Url_t,  Url, *UrlRef;
 
-Url* Url_new(char* url)
+UrlRef Url_new(char* url)
 {
     struct http_parser_url u;
     http_parser_url_init(&u);
     http_parser_parse_url(url, strlen(url),0, &u);
-    Url* this = eg_alloc(sizeof(Url_t));
+    UrlRef this = eg_alloc(sizeof(Url_t));
 
     this->scheme = Cbuffer_new();
     if(u.field_data[UF_SCHEMA].len != 0)
@@ -64,9 +64,9 @@ Url* Url_new(char* url)
 }
 
 
-void Url_free(Url** this_ptr)
+void Url_free(UrlRef* this_ptr)
 {
-    Url* this = *this_ptr;
+    UrlRef this = *this_ptr;
     Cbuffer_free(&(this->scheme));
     Cbuffer_free(&(this->host));
     Cbuffer_free(&(this->port));
@@ -93,13 +93,13 @@ int xtest_url_01()
     char* query = url + u.field_data[UF_QUERY].off;
     char* user_info = url + u.field_data[UF_USERINFO].off;
 
-    Url* uref = Url_new(url);
+    UrlRef uref = Url_new(url);
     return 0;
 }
 int test_url_01()
 {
     char* url = "http://www.somewhere.com/path1/path2?a=1111&b=2222";
-    Url* uref = Url_new(url);
+    UrlRef uref = Url_new(url);
     char* scheme = (char*)Cbuffer_data(uref->scheme);
     char* host = (char*)Cbuffer_data(uref->host);
 

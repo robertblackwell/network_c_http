@@ -23,7 +23,7 @@ ParserTestRef ParserTest_new(char* description, char** lines, VerifyFunctionType
 
 
 
-ReadResultRef ReadResult_new(Message* msg, int rc)
+ReadResultRef ReadResult_new(MessageRef msg, int rc)
 {
     ReadResultRef rdref = eg_alloc(sizeof(ReadResult));
     rdref->message = msg;
@@ -43,7 +43,7 @@ static void read_result_dealloc(void** p)
 }
 
 
-void WPT_init(WrappedParserTestRef this, Parser* parser, DataSource* data_source, VerifyFunctionType verify_func)
+void WPT_init(WrappedParserTestRef this, ParserRef parser, DataSource* data_source, VerifyFunctionType verify_func)
 {
     ASSERT_NOT_NULL(this);
     this->m_parser = parser;
@@ -59,9 +59,9 @@ void WPT_destroy(WrappedParserTestRef this)
     ASSERT_NOT_NULL(this);
 }
 #ifdef lslsl
-int WPT_read_msg(WrappedParserTestRef this, IOBufferRef ctx, Message** msgref_ptr )
+int WPT_read_msg(WrappedParserTestRef this, IOBufferRef ctx, MessageRef* msgref_ptr )
 {
-    Message* message_ptr = Message_new();
+    MessageRef message_ptr = Message_new();
 
     Parser_begin(this->m_parser, message_ptr);
     int bytes_read;
@@ -127,7 +127,7 @@ int WPT_read_msg(WrappedParserTestRef this, IOBufferRef ctx, Message** msgref_pt
 #endif
 int WPT_run(WrappedParserTestRef this)
 {
-    Message* msgref;
+    MessageRef msgref;
     IOBuffer iobuf;
     IOBuffer_init(&iobuf, 256);
     int rc = 0;

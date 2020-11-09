@@ -29,11 +29,11 @@ NULL
 
 int test_client_01()
 {
-    Client* client = Client_new();
+    ClientRef client = Client_new();
     Client_connect(client, "localhost", 9001);
-    Message* response = Message_new();
+    MessageRef response = Message_new();
     Client_roundtrip(client, req1, &response);
-    Cbuffer* cb = BufferChain_compact(Message_get_body(response));
+    CbufferRef cb = BufferChain_compact(Message_get_body(response));
     return 0;
 }
 
@@ -109,16 +109,16 @@ typedef struct X_s {
 X wrtr_s = {42};
 XRef wrtr = &wrtr_s;
 
-void Writer_start(HttpStatus status, HdrList* headers)
+void Writer_start(HttpStatus status, HdrListRef headers)
 {
     const char* reason_str = http_status_str(status);
     char* first_line = NULL;
     int len = asprintf(&first_line, "HTTP/1.1 %d %s\r\n", status, reason_str);
     if(first_line == NULL) goto failed;
 
-    Cbuffer* cb_output_ref = NULL;
+    CbufferRef cb_output_ref = NULL;
     if((cb_output_ref = Cbuffer_new()) == NULL) goto failed;
-    Cbuffer* serialized_headers = NULL;
+    CbufferRef serialized_headers = NULL;
     serialized_headers = HdrList_serialize(headers);
 
     Cbuffer_append(cb_output_ref, (void*)first_line, len);
@@ -147,11 +147,11 @@ int test_handle_request()
     int body_len = strlen(body);
     char* body_len_str;
     asprintf(&body_len_str, "%d", body_len);
-    HdrList* hdrs = HdrList_new();
-    KVPair* hl_content_length = KVPair_new(HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
+    HdrListRef hdrs = HdrList_new();
+    KVPairRef hl_content_length = KVPair_new(HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
     HdrList_add_front(hdrs, hl_content_length);
     char* content_type = "text/html; charset=UTF-8";
-    KVPair* hl_content_type = KVPair_new(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
+    KVPairRef hl_content_type = KVPair_new(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
     HdrList_add_front(hdrs, hl_content_type);
 
 //    Writer_start(wrtr, HTTP_STATUS_OK, hdrs);

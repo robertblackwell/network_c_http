@@ -6,7 +6,7 @@
 #include <c_eg/queue.h>
 
 typedef struct Params_s {
-	Queue* qref;
+	QueueRef qref;
 	int  id;
 } Params, *ParamsRef;
 
@@ -14,7 +14,7 @@ typedef struct Params_s {
 void* producer_01(void* data)
 {
 	int counter = 100;
-	Queue* qref = (Queue*)data;
+	QueueRef qref = (QueueRef)data;
 	while(1) {
 		for(int i = 0; i < 12; i++) {
 			printf("producer_01 adding %d\n", counter);
@@ -32,7 +32,7 @@ void* consumer_01(void* data)
 	ParamsRef p = (ParamsRef)data;
 	int id = p->id;
 
-	Queue* qref = p->qref;
+	QueueRef qref = p->qref;
 	while(1) {
 		printf("consumer_%d removing \n", id);
 		int value = Queue_remove(qref);
@@ -43,7 +43,7 @@ void* consumer_01(void* data)
 
 void test()
 {
-	Queue* qref = Queue_new();
+	QueueRef qref = Queue_new();
 	pthread_t t1, t2, t3;
 	pthread_create(&t1, NULL, &(producer_01), (void*)qref);
 	Params  p1={.qref=qref, .id=1000};

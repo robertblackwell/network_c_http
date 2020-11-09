@@ -24,7 +24,7 @@ int test_simple()
 }
 int test_make_buffer()
 {
-    Cbuffer* b = Cbuffer_new();
+    CbufferRef b = Cbuffer_new();
     printf("m_size %ld \n", Cbuffer_size(b));
     printf("m_capacity %ld \n", Cbuffer_capacity(b));
     printf("m_cptr %lx \n", (long)Cbuffer_data(b));
@@ -39,7 +39,7 @@ int test_expansion()
 {
     char* s1 = cstr_concat("","");
     char* extra = "abcedfghijklmnopqrstuvwxyz01923456789";
-    Cbuffer* b2 = Cbuffer_new();
+    CbufferRef b2 = Cbuffer_new();
     for(int i = 0; i < 5; i++) {
         Cbuffer_append(b2, (void*)extra, strlen(extra));
     }
@@ -62,7 +62,7 @@ int test_big_expansion()
         free(s1);
         s1 = s2;
     }
-    Cbuffer* b2 = Cbuffer_from_cstring(s1);
+    CbufferRef b2 = Cbuffer_from_cstring(s1);
     printf("b2 length %ld \n", Cbuffer_size(b2));
     printf("b2 m_size %ld \n", Cbuffer_size(b2));
     printf("b2 m_capacity %ld \n", Cbuffer_capacity(b2));
@@ -83,7 +83,7 @@ int test_cbuffer_clear()
         free(s1);
         s1 = s2;
     }
-    Cbuffer* b2 = Cbuffer_from_cstring(s1);
+    CbufferRef b2 = Cbuffer_from_cstring(s1);
     void* data1 = Cbuffer_data(b2);
     int sz1 = Cbuffer_size(b2);
     Cbuffer_clear(b2);
@@ -107,10 +107,10 @@ int test_cbuffer_move()
         free(s1);
         s1 = s2;
     }
-    Cbuffer* b2 = Cbuffer_from_cstring(s1);
+    CbufferRef b2 = Cbuffer_from_cstring(s1);
     void* d12 = Cbuffer_data(b2);
     int sz12 = Cbuffer_size(b2);
-    Cbuffer* b1 = Cbuffer_from_cstring(extra2);
+    CbufferRef b1 = Cbuffer_from_cstring(extra2);
     void* d11 = Cbuffer_data(b1);
     int sz11 = Cbuffer_size(b1);
     Cbuffer_move(b1, b2);
@@ -129,7 +129,7 @@ int test_cbuffer_move()
 }
 int test_chain_make()
 {
-    BufferChain* bcr = BufferChain_new();
+    BufferChainRef bcr = BufferChain_new();
     char* s1 = cstr_concat("","");
     char* extra = "abcedfghijklmnopqrstuvwxyz01923456789";
     for(int i = 0; i < 2800; i++) {
@@ -144,7 +144,7 @@ int test_chain_make()
 }
 int test_chain_compact() // and eq_cstr
 {
-    BufferChain* bcr = BufferChain_new();
+    BufferChainRef bcr = BufferChain_new();
     char* s1 = cstr_concat("","");
     char* s2;
     char* extra = "abcedfghijklmnopqrstuvwxyz01923456789";
@@ -154,7 +154,7 @@ int test_chain_compact() // and eq_cstr
         s1 = s2;
     }
     UT_EQUAL_INT(BufferChain_size(bcr), 2800*strlen(extra))
-    Cbuffer* c = BufferChain_compact(bcr);
+    CbufferRef c = BufferChain_compact(bcr);
     int x = strlen((char*)Cbuffer_data(c));
     UT_EQUAL_INT(x, Cbuffer_size(c));
     int y = strcmp(s1, (char*)Cbuffer_data(c));

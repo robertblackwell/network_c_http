@@ -14,7 +14,7 @@
 
 typedef struct Reader_s
 {
-    Parser*           m_parser;
+    ParserRef           m_parser;
     IOBufferRef         m_iobuffer;
     RdSocket            m_rdsocket;
     int                 m_io_errno;
@@ -22,12 +22,12 @@ typedef struct Reader_s
     char*               m_http_err_name;
     char*               m_http_err_description;
 
-} Reader;
+} Reader, *ReaderRef;
 
-Reader* Reader_new(Parser* parser, RdSocket rdsock);
-void Reader_init(Reader* this, Parser* parser, RdSocket rdsock);
-void Reader_destroy(Reader* this);
-void Reader_free(Reader** this_ptr);
+ReaderRef Reader_new(ParserRef parser, RdSocket rdsock);
+void Reader_init(ReaderRef this, ParserRef parser, RdSocket rdsock);
+void Reader_destroy(ReaderRef this);
+void Reader_free(ReaderRef* this_ptr);
 
 typedef enum Reader_ReturnCode {
         READER_OK = 0,             // A message was returned
@@ -46,14 +46,14 @@ typedef enum Reader_ReturnCode {
  *
  *
  *
- * \param this              Reader* - the reader object
- * \param msgref_ptr        Variable into which a Message* value will be placed if a message is successfully read.
+ * \param this              ReaderRef - the reader object
+ * \param msgref_ptr        Variable into which a MessageRef value will be placed if a message is successfully read.
  * \return Reader_ReturnCode - Indicates whether successfull and if not nature if error.
  *                          TODO - on error the Reader struct will contain details of the error
  *                          for IO error it will hold the errno value related to the error
  *                          and for a parse error will hold the relevant http_errno value
  *                          together with char* pointers to the error name and description
  */
-Reader_ReturnCode Reader_read(Reader* this, Message** msgref_ptr);
+Reader_ReturnCode Reader_read(ReaderRef this, MessageRef* msgref_ptr);
 
 #endif

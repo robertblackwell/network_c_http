@@ -5,6 +5,6 @@
 #include <c_eg/writer.h>
 
 
-int handler_example(Message* request, Writer* wrtr);
+int handler_example(MessageRef request, WriterRef wrtr);
 
 #endif

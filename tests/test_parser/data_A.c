@@ -15,10 +15,10 @@ char* test_A001_lines[] = {
 NULL
 };
 
-int test_A001_vfunc (List* messages)
+int test_A001_vfunc (ListRef messages)
 {
-    Message* m1 = (Message*) List_remove_first (messages);
-    HdrList* h = Message_headers(m1);
+    MessageRef m1 = (MessageRef) List_remove_first (messages);
+    HdrListRef h = Message_headers(m1);
     int x = Message_get_status(m1);
     UT_EQUAL_INT(Message_get_status(m1), 200);
     UT_EQUAL_CSTR(Message_get_reason(m1), "OK 11Reason Phrase");
@@ -47,10 +47,10 @@ char* test_A0011_lines[] = {
 NULL
 };
 
-int test_A0011_vfunc (List* messages)
+int test_A0011_vfunc (ListRef messages)
 {
-    Message* m1 = (Message*) List_remove_first (messages);
-    HdrList* h = Message_headers(m1);
+    MessageRef m1 = (MessageRef) List_remove_first (messages);
+    HdrListRef h = Message_headers(m1);
     int x = Message_get_status(m1);
     UT_EQUAL_INT(Message_get_method(m1), HttpMethod);
 //    UT_EQUAL_CSTR(Message_get_reason(m1), "OK 11Reason Phrase");
@@ -81,9 +81,9 @@ char *test_A002_lines[] = {
 NULL
 };
 
-int test_A002_vfunc (List* messages)
+int test_A002_vfunc (ListRef messages)
 {
-    Message* m1 = (Message*) List_remove_first (messages);
+    MessageRef m1 = (MessageRef) List_remove_first (messages);
 #ifdef A_ON
     auto x = m1->status_code();
     HeaderFields& h = m1->headers();
@@ -114,9 +114,9 @@ char *test_A003_lines[] = {
 NULL
 };
 
-int test_A003_vfunc (List* messages)
+int test_A003_vfunc (ListRef messages)
 {
-    Message* m1 = (Message*) List_remove_first (messages);
+    MessageRef m1 = (MessageRef) List_remove_first (messages);
 #ifdef A_ON
     HeaderFields& h = m1->headers();
     auto x = m1->status_code();
@@ -155,9 +155,9 @@ char *test_A004_lines[] = {
 NULL
 };
 
-int test_A004_vfunc (List* messages)
+int test_A004_vfunc (ListRef messages)
 {
-    Message* m1 = (Message*) List_remove_first (messages);
+    MessageRef m1 = (MessageRef) List_remove_first (messages);
 #ifdef A_ON
     HeaderFields& h = m1->headers();
     auto x = h.at_key(HeaderFields::TransferEncoding);
@@ -197,9 +197,9 @@ char *test_A005_lines[] = {
 NULL
 };
 
-int test_A005_vfunc (List* messages)
+int test_A005_vfunc (ListRef messages)
 {
-    Message* m1 = (Message*) List_remove_first (messages);
+    MessageRef m1 = (MessageRef) List_remove_first (messages);
 #ifdef A_ON
     HeaderFields& h = m1->headers();
     auto x = h.at_key(HeaderFields::TransferEncoding);
@@ -240,9 +240,9 @@ char *test_A006_lines[] = {
 NULL
 };
 
-int test_A006_vfunc (List* messages)
+int test_A006_vfunc (ListRef messages)
 {
-    Message* m1 = (Message*) List_remove_first (messages);
+    MessageRef m1 = (MessageRef) List_remove_first (messages);
 #ifdef A_ON
     HeaderFields& h = m1->headers();
     auto x = h.at_key(HeaderFields::TransferEncoding);
@@ -285,9 +285,9 @@ char *test_A007_lines[] = {
 NULL
 };
 
-int test_A007_vfunc (List* messages)
+int test_A007_vfunc (ListRef messages)
 {
-    Message* m1 = (Message*) List_remove_first (messages);
+    MessageRef m1 = (MessageRef) List_remove_first (messages);
 #ifdef A_ON
     HeaderFields& h = m0->headers();
     REQUIRE(m0 != nullptr);
@@ -299,7 +299,7 @@ int test_A007_vfunc (List* messages)
     CHECK(h.at_key("PROXY-CONNECTION").get() == "keep-alive");
     auto b0 = m0->get_body_buffer_chain()->to_string();
     CHECK(m0->get_body()->to_string() == "1234567890");
-    Message* m1 = messages[1];
+    MessageRef m1 = messages[1];
     HeaderFields& h2 = m1->headers();
     REQUIRE(m1 != nullptr);
     CHECK(m1->version_major() == 1);
@@ -327,9 +327,9 @@ char *test_A008_lines[] = {
 (char *) NULL,
 };
 
-void test_A008_vfunc (List* messages)
+void test_A008_vfunc (ListRef messages)
 {
-    Message* m1 = (Message*) List_remove_first (messages);
+    MessageRef m1 = (MessageRef) List_remove_first (messages);
 #ifdef A_ON
     HeaderFields& h = m0->headers();
     CHECK(m0->version_major() == 1);
@@ -343,7 +343,7 @@ void test_A008_vfunc (List* messages)
 
 }
 
-List* make_test_A()
+ListRef make_test_A()
 {
     ParserTestRef test_A0011 = ParserTest_new(test_A0011_description, test_A0011_lines, test_A0011_vfunc);
     ParserTestRef test_A001 = ParserTest_new(test_A001_description, test_A001_lines, test_A001_vfunc);
@@ -354,7 +354,7 @@ List* make_test_A()
     ParserTestRef test_A006 = ParserTest_new(test_A006_description, test_A006_lines, test_A006_vfunc);
     ParserTestRef test_A007 = ParserTest_new(test_A007_description, test_A007_lines, test_A007_vfunc);
     ParserTestRef test_A008 = ParserTest_new(test_A008_description, test_A008_lines, test_A008_vfunc);
-    List* tl = List_new(NULL);
+    ListRef tl = List_new(NULL);
     List_add_back(tl, test_A0011);
     List_add_back(tl, test_A001);
     List_add_back(tl, test_A002);

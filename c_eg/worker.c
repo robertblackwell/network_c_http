@@ -21,15 +21,15 @@
 struct Worker_s {
     bool            active;
     int             active_socket;
-    Queue*        qref;
+    QueueRef        qref;
     pthread_t       pthread;
     int             id;
     HandlerFunction handler;
 };
 
-Worker* Worker_new(Queue* qref, int _id, HandlerFunction handler)
+WorkerRef Worker_new(QueueRef qref, int _id, HandlerFunction handler)
 {
-    Worker* wref = (Worker*)eg_alloc(sizeof(Worker));
+    WorkerRef wref = (WorkerRef)eg_alloc(sizeof(Worker));
     if(wref == NULL)
         return NULL;
     wref->active_socket = 0;
@@ -39,12 +39,12 @@ Worker* Worker_new(Queue* qref, int _id, HandlerFunction handler)
     wref->handler = handler;
     return wref;
 }
-void Worker_free(Worker* wref)
+void Worker_free(WorkerRef wref)
 {
     free((void*)wref);
 }
 
-void handle_parse_error(Message* requestref, Writer* wrtr)
+void handle_parse_error(MessageRef requestref, WriterRef wrtr)
 {
     char* reply = "HTTP/1.1 400 BAD REQUEST \r\nContent-length: 0\r\n\r\n";
     Writer_write_chunk(wrtr, (void*)reply, strlen(reply));
@@ -53,14 +53,14 @@ void handle_parse_error(Message* requestref, Writer* wrtr)
 static void* Worker_main(void* data)
 {
     ASSERT_NOT_NULL(data);
-    Worker* wref = (Worker*)data;
+    WorkerRef wref = (WorkerRef)data;
     bool terminate = false;
     while(!terminate) {
         wref->active = false;
-        Parser* parser_ref = NULL;;
-        Reader* rdr = NULL;
-        Writer* wrtr = NULL;
-        Message* request_msg_ref = NULL;
+        ParserRef parser_ref = NULL;;
+        ReaderRef rdr = NULL;
+        WriterRef wrtr = NULL;
+        MessageRef request_msg_ref = NULL;
 
         int my_socket_handle = Queue_remove(wref->qref);
         printf("Worker_main %p mySocketHandle: %d worker %d\n", wref, my_socket_handle, wref->id);
@@ -107,7 +107,7 @@ static void* Worker_main(void* data)
     return NULL;
 }
 // start a pthread - returns 0 on success errno on fila
-int Worker_start(Worker* wref)
+int Worker_start(WorkerRef wref)
 {
     ASSERT_NOT_NULL(wref);
 
@@ -122,12 +122,12 @@ int Worker_start(Worker* wref)
 // {
 //     wref->pthread = pthread;
 // }
-pthread_t* Worker_pthread(Worker* wref)
+pthread_t* Worker_pthread(WorkerRef wref)
 {
     ASSERT_NOT_NULL(wref);
     return &(wref->pthread);
 }
-void Worker_join(Worker* wref)
+void Worker_join(WorkerRef wref)
 {
     int retvalue;
     pthread_join(wref->pthread, NULL);

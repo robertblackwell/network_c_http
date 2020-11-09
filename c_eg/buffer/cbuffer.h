@@ -15,45 +15,45 @@
 ///   so that the used portion is always a valid cstr
 ///
 struct Cbuffers;
-typedef struct Cbuffer_s Cbuffer;
-typedef Cbuffer* CbufferRef;
+typedef struct Cbuffer_s *CbufferRef;
+// typedef Cbuffer* CbufferRef;
 
 ///
 /// WARNING - THIS FUNCTION ALLOCATES MEMORY
 ///
-Cbuffer* Cbuffer_new();
+CbufferRef Cbuffer_new();
 
 ///
 /// WARNING - THIS FUNCTION ALLOCATES MEMORY
 ///
-Cbuffer* Cbuffer_from_cstring(char* cstr);
+CbufferRef Cbuffer_from_cstring(char* cstr);
 
-void Cbuffer_free(Cbuffer** cbuf);
+void Cbuffer_free(CbufferRef* cbuf);
 
 ///
 /// Gets a void* pointer to the start of the used portion of memory area
 ///
-/// \param this Cbuffer* The buffer, cannot be NULL
+/// \param this CbufferRef The buffer, cannot be NULL
 /// \return void* POinter to start of used portion of the managed memory area
 ///
-void* Cbuffer_data(const Cbuffer* this);
+void* Cbuffer_data(const CbufferRef this);
 
 ///
 /// Gets a char* pointer to the start of the used portion of memory area,
 /// the first byte after the used portion is always '\0' so that the pointer
 /// returned by this function is a valid c strin.
 ///
-/// \param this Cbuffer* The buffer, cannot be NULL
+/// \param this CbufferRef The buffer, cannot be NULL
 /// \return void* POinter to start of used portion of the managed memory area
 ///
-char* Cbuffer_cstr(const Cbuffer* this);
+char* Cbuffer_cstr(const CbufferRef this);
 
 ///
 /// Gets the size of used portion of the buffer
 ///
 /// \param cbuf
 /// \return
-size_t Cbuffer_size(const Cbuffer* cbuf);
+size_t Cbuffer_size(const CbufferRef cbuf);
 
 ///
 /// Gets the current capacity of the buffer - max value of size, but
@@ -62,7 +62,7 @@ size_t Cbuffer_size(const Cbuffer* cbuf);
 ///
 /// \param cbuf
 /// \return
-size_t Cbuffer_capacity(const Cbuffer* cbuf);
+size_t Cbuffer_capacity(const CbufferRef cbuf);
 
 ///
 /// Returns a pointer to the next available unused position in the buffer,
@@ -73,7 +73,7 @@ size_t Cbuffer_capacity(const Cbuffer* cbuf);
 /// \param cbuf
 /// \return
 ///
-void* Cbuffer_next_available(const Cbuffer* cbuf);
+void* Cbuffer_next_available(const CbufferRef cbuf);
 
 ///
 /// Resets the buffer so that it is again an empty buffer.
@@ -81,7 +81,7 @@ void* Cbuffer_next_available(const Cbuffer* cbuf);
 /// usage pattern the larger memory area will be retained.
 ///
 /// \param this Cbuffer
-void Cbuffer_clear(Cbuffer* this);
+void Cbuffer_clear(CbufferRef this);
 
 ///
 /// WARNING - THIS FUNCTION ALLOCATES MEMORY
@@ -97,7 +97,7 @@ void Cbuffer_clear(Cbuffer* this);
 /// \param data
 /// \param len
 ///
-void Cbuffer_append(Cbuffer* cbuf, void* data, size_t len);
+void Cbuffer_append(CbufferRef cbuf, void* data, size_t len);
 
 ///
 /// WARNING - THIS FUNCTION ALLOCATES MEMORY
@@ -112,14 +112,14 @@ void Cbuffer_append(Cbuffer* cbuf, void* data, size_t len);
 /// \param data
 /// \param len
 ///
-void Cbuffer_append_cstr(Cbuffer* cbuf, char* cstr);
+void Cbuffer_append_cstr(CbufferRef cbuf, char* cstr);
 
 ///
 /// Force the used size of the buffer to the given value.
 ///
 /// Reserved for Cbuffer internal use.
 ///
-void Cbuffer_set_size(Cbuffer* cbuf, size_t n);
+void Cbuffer_set_size(CbufferRef cbuf, size_t n);
 
 ///
 /// Moves the content of one Cbuffer instance to another by using move semantics.
@@ -129,7 +129,7 @@ void Cbuffer_set_size(Cbuffer* cbuf, size_t n);
 /// \param dest
 /// \param src
 ///
-void Cbuffer_move(Cbuffer* dest, Cbuffer* src);
+void Cbuffer_move(CbufferRef dest, CbufferRef src);
 
 ///
 /// Detremines if an address value (pointer) is within the address range of the
@@ -139,8 +139,8 @@ void Cbuffer_move(Cbuffer* dest, Cbuffer* src);
 ///      buffer.dada() < = ptr < buffer.data() + buffer.size();
 ///
 ///
-bool Cbuffer_contains_voidptr(const Cbuffer* cbuf, void* ptr);
-bool Cbuffer_contains_charptr(const Cbuffer* cbuf, char* ptr);
+bool Cbuffer_contains_voidptr(const CbufferRef cbuf, void* ptr);
+bool Cbuffer_contains_charptr(const CbufferRef cbuf, char* ptr);
 
 
 #endif

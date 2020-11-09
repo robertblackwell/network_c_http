@@ -32,47 +32,47 @@ void DummyObj_free(DummyObj** dref)
 #define DOList_iterator(lref) List_iterator(lref)
 #define DOList_itr_next(lref, iter) List_itr_next(lref, iter)
 
-typedef List DObjList;
+typedef List DObjList, *DObjListRef;
 typedef ListNode* DObjListIter, ListIter;
 
-DObjList*  DObj_List_new();
-void         DObj_List_free(DObjList** lref) ;
-DummyObj*  DObj_List_first(DObjList* lref);
-DummyObj*  DObj_List_last(DObjList* lref) ;
-DummyObj*  DObj_List_remove_first(DObjList* lref);
-DummyObj*  DObj_List_remove_last(DObjList* lref);
-DummyObj*  DObj_List_itr_unpack(DObjList* lref, DObjListIter iter);
-DObjListIter DObj_List_iterator(DObjList* lref);
-DObjListIter DObj_List_itr_next(DObjList* lref, DObjListIter iter);
+DObjListRef  DObj_List_new();
+void         DObj_List_free(DObjListRef* lref) ;
+DummyObj*  DObj_List_first(DObjListRef lref);
+DummyObj*  DObj_List_last(DObjListRef lref) ;
+DummyObj*  DObj_List_remove_first(DObjListRef lref);
+DummyObj*  DObj_List_remove_last(DObjListRef lref);
+DummyObj*  DObj_List_itr_unpack(DObjListRef lref, DObjListIter iter);
+DObjListIter DObj_List_iterator(DObjListRef lref);
+DObjListIter DObj_List_itr_next(DObjListRef lref, DObjListIter iter);
 
 static void dealloc(void** ptr)
 {
     DummyObj_free((DummyObj**) ptr);
 }
 
-DObjList*  DObj_List_new() {return (DObjList*)List_new(dealloc);}
-void         DObj_List_free(DObjList** lref) {List_free(*((List***)lref)); *lref = NULL;}
-DummyObj*  DObj_List_first(DObjList* lref) { return (DummyObj*)List_first(lref);}
-DummyObj*  DObj_List_last(DObjList* lref)  { return (DummyObj*)List_last(lref);}
-DummyObj*  DObj_List_remove_first(DObjList* lref) { return (DummyObj*)List_remove_first(lref);}
-DummyObj*  DObj_List_remove_last(DObjList* lref) { return (DummyObj*)List_remove_last(lref);}
-DummyObj*  DObj_List_itr_unpack(DObjList* lref, DObjListIter iter) { return (DummyObj*)List_itr_unpack(lref, iter);}
-DObjListIter DObj_List_iterator(DObjList* lref) { return List_iterator(lref);}
-DObjListIter DObj_List_itr_next(DObjList* lref, DObjListIter iter) { return List_itr_next(lref, iter);}
+DObjListRef  DObj_List_new() {return (DObjListRef)List_new(dealloc);}
+void         DObj_List_free(DObjListRef* lref) {List_free(*((ListRef**)lref)); *lref = NULL;}
+DummyObj*  DObj_List_first(DObjListRef lref) { return (DummyObj*)List_first(lref);}
+DummyObj*  DObj_List_last(DObjListRef lref)  { return (DummyObj*)List_last(lref);}
+DummyObj*  DObj_List_remove_first(DObjListRef lref) { return (DummyObj*)List_remove_first(lref);}
+DummyObj*  DObj_List_remove_last(DObjListRef lref) { return (DummyObj*)List_remove_last(lref);}
+DummyObj*  DObj_List_itr_unpack(DObjListRef lref, DObjListIter iter) { return (DummyObj*)List_itr_unpack(lref, iter);}
+DObjListIter DObj_List_iterator(DObjListRef lref) { return List_iterator(lref);}
+DObjListIter DObj_List_itr_next(DObjListRef lref, DObjListIter iter) { return List_itr_next(lref, iter);}
 
 
 
 ///////////////////////////////////////////////////
 int test_List_new()
 {
-    List* lref = List_new(dealloc);
+    ListRef lref = List_new(dealloc);
     int sz = List_size(lref);
     UT_EQUAL_INT(sz, 0);
 	return 0;
 }
 int test_list_add_back()
 {
-    List* lref = List_new(dealloc);
+    ListRef lref = List_new(dealloc);
     DummyObj* dref = DummyObj_new(333);
     List_add_back(lref, (void*) dref);
     int sz = List_size(lref);
@@ -94,7 +94,7 @@ int test_list_add_back()
 }
 int test_list_add_front()
 {
-    List* lref = List_new(dealloc);
+    ListRef lref = List_new(dealloc);
     DummyObj* dref = DummyObj_new(333);
     List_add_front(lref, (void*) dref);
     int sz = List_size(lref);
@@ -118,7 +118,7 @@ int test_list_add_front()
 }
 int test_list_remove_front()
 {
-    List* lref = List_new(dealloc);
+    ListRef lref = List_new(dealloc);
     DummyObj* dref = DummyObj_new(333);
     List_add_front(lref, (void*) dref);
     List_remove_first(lref);
@@ -150,7 +150,7 @@ int test_list_remove_front()
 
 int test_list_remove_back()
 {
-    List* lref = List_new(dealloc);
+    ListRef lref = List_new(dealloc);
     DummyObj* dref = DummyObj_new(333);
     List_add_front(lref, (void*) dref);
     List_remove_first(lref);
@@ -183,7 +183,7 @@ int test_list_remove_back()
 
 int test_iter()
 {
-    List* lref = List_new(dealloc);
+    ListRef lref = List_new(dealloc);
     DummyObj* dref = DummyObj_new(333);
     List_add_front(lref, (void*) dref);
     List_remove_first(lref);
@@ -211,7 +211,7 @@ int test_iter()
 }
 int test_list_remove_backx()
 {
-    List* lref = List_new(dealloc);
+    ListRef lref = List_new(dealloc);
     DummyObj* dref = DummyObj_new(333);
     List_add_back(lref, (void*) dref);
     List_remove_last(lref);
@@ -240,7 +240,7 @@ int test_list_remove_backx()
 
 int test_list_remove_back_one()
 {
-    List* lref = List_new(dealloc);
+    ListRef lref = List_new(dealloc);
     DummyObj* dref = DummyObj_new(333);
     List_add_front(lref, (void*) dref);
     List_remove_last(lref);

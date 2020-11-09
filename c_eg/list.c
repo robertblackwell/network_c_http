@@ -27,7 +27,7 @@ ListNode* ListNode_new(void* content, ListNode* prev, ListNode* next)
     lnref->forward = next;
     lnref->backward = prev;
 }
-void ListNode_free(List* lref, ListNode** lnref_ptr)
+void ListNode_free(ListRef lref, ListNode** lnref_ptr)
 {
     ASSERT_NOT_NULL(lref);
     ASSERT_NOT_NULL(lnref_ptr);
@@ -42,9 +42,9 @@ void ListNode_free(List* lref, ListNode** lnref_ptr)
 
 
 // create and initialize
-List* List_new(ListItemDeallocator dealloc)
+ListRef List_new(ListItemDeallocator dealloc)
 {
-    List* lref = eg_alloc(sizeof(List));
+    ListRef lref = eg_alloc(sizeof(List));
     if(lref != NULL) {
         List_init(lref, dealloc);
     }
@@ -52,7 +52,7 @@ List* List_new(ListItemDeallocator dealloc)
 }
 
 // initialize a given block of memory as empty list
-void List_init(List* lref, ListItemDeallocator dealloc)
+void List_init(ListRef lref, ListItemDeallocator dealloc)
 {
     ASSERT_NOT_NULL(lref);
     lref->count = 0;
@@ -62,7 +62,7 @@ void List_init(List* lref, ListItemDeallocator dealloc)
 }
 
 // destroy the content including freeing any dynamic memory leaving a functioning empty list
-void List_destroy(List* lref)
+void List_destroy(ListRef lref)
 {
     ASSERT_NOT_NULL(lref);
     ListItemDeallocator dealloc = lref->dealloc;
@@ -83,18 +83,18 @@ void List_destroy(List* lref)
 }
 
 //free the entire list including invalidating the lref
-void List_free(List** lref_ptr)
+void List_free(ListRef* lref_ptr)
 {
     ASSERT_NOT_NULL(*lref_ptr);
     List_destroy(*lref_ptr);
     free((void*)*lref_ptr);
     *lref_ptr = NULL;
 }
-int List_size(List* lref)
+int List_size(ListRef lref)
 {
     return lref->count;
 }
-void List_display(List* this)
+void List_display(ListRef this)
 {
     printf("List[%p] count: %d head %p tail %p\n", (void*)this, this->count, (void*)this->head, (void*)this->tail);
     ListNode* iter = this->head;
@@ -105,7 +105,7 @@ void List_display(List* this)
     }
 }
 // add to the front of the list
-void List_add_front(List* lref, void* content)
+void List_add_front(ListRef lref, void* content)
 {
     ASSERT_NOT_NULL(lref);
     ListNode* lnref = ListNode_new(content, NULL, NULL);
@@ -123,7 +123,7 @@ void List_add_front(List* lref, void* content)
 }
 
 // add to the back of the list
-void List_add_back(List* lref, void* content)
+void List_add_back(ListRef lref, void* content)
 {
     ASSERT_NOT_NULL(lref);
     ListNode* lnref = ListNode_new(content, NULL, lref->head);
@@ -141,14 +141,14 @@ void List_add_back(List* lref, void* content)
 }
 
 // gets the item contained in the first list item without removing from list
-void* List_first(List* lref)
+void* List_first(ListRef lref)
 {
     ASSERT_NOT_NULL(lref);
     return lref->head->item;
 }
 
 // gets the item contained in the first list item AND removes that item
-void* List_remove_first(List* lref)
+void* List_remove_first(ListRef lref)
 {
     ASSERT_NOT_NULL(lref);
     if(lref->count == 0)
@@ -174,7 +174,7 @@ void* List_remove_first(List* lref)
 }
 
 // gets the item contained in the last list item without removing from list
-void* List_last(List* lref)
+void* List_last(ListRef lref)
 {
     ASSERT_NOT_NULL(lref);
     if(lref->tail == NULL) return NULL;
@@ -182,7 +182,7 @@ void* List_last(List* lref)
 }
 
 // gets the item contained in the last list item AND removes that item
-void* List_remove_last(List* lref)
+void* List_remove_last(ListRef lref)
 {
     ASSERT_NOT_NULL(lref);
     if(lref->count == 0 ) {
@@ -211,14 +211,14 @@ void* List_remove_last(List* lref)
 }
 
 //gets an iterator for the list which initially will be pointing at the first Node in the list
-ListIterator List_iterator(List* lref)
+ListIterator List_iterator(ListRef lref)
 {
     ASSERT_NOT_NULL(lref);
     return lref->head;
 }
 
 // moves the iterator on to the next Node on the list, returns NULL if goes off the end of the list
-ListIterator List_itr_next(List* lref, ListIterator itr)
+ListIterator List_itr_next(ListRef lref, ListIterator itr)
 {
     ASSERT_NOT_NULL(lref);
     ASSERT_NOT_NULL(itr);
@@ -227,7 +227,7 @@ ListIterator List_itr_next(List* lref, ListIterator itr)
 
 // removes a list item pointed at by an iterator - invalidates the itr
 // and if there is a dealloc function call it on the content of the list node
-void List_itr_remove(List* lref, ListIterator* itr_ptr)
+void List_itr_remove(ListRef lref, ListIterator* itr_ptr)
 {
     ASSERT_NOT_NULL(lref);
     ListNode* itr = *itr_ptr;
@@ -258,7 +258,7 @@ void List_itr_remove(List* lref, ListIterator* itr_ptr)
 }
 
 // gets the value of the item held in the Node pointed at by this iterator
-void* List_itr_unpack(List* lref, ListIterator itr)
+void* List_itr_unpack(ListRef lref, ListIterator itr)
 {
     ASSERT_NOT_NULL(lref);
     ASSERT_NOT_NULL(itr);

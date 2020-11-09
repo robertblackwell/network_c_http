@@ -12,15 +12,15 @@
 #include <unistd.h>
 #include <errno.h>
 
-Reader* Reader_new(Parser* parser, RdSocket rdsock)
+ReaderRef Reader_new(ParserRef parser, RdSocket rdsock)
 {
-    Reader* rdr = eg_alloc(sizeof(Reader));
+    ReaderRef rdr = eg_alloc(sizeof(Reader));
     if(rdr == NULL)
         return NULL;
     Reader_init(rdr, parser, rdsock);
     return rdr;
 }
-void Reader_init(Reader*  this, Parser* parser, RdSocket rdsock)
+void Reader_init(ReaderRef  this, ParserRef parser, RdSocket rdsock)
 {
     ASSERT_NOT_NULL(this);
     this->m_parser = parser;
@@ -29,28 +29,33 @@ void Reader_init(Reader*  this, Parser* parser, RdSocket rdsock)
     this->m_iobuffer = IOBuffer_new();
 }
 
-void Reader_destroy(Reader* this)
+void Reader_destroy(ReaderRef this)
 {
     IOBuffer_free(&(this->m_iobuffer));
 
 }
-void Reader_free(Reader** this_ptr)
+void Reader_free(ReaderRef* this_ptr)
 {
-    Reader* this = *this_ptr;
+    ReaderRef this = *this_ptr;
     Reader_destroy(this);
     eg_free((void*)this);
     *this_ptr = NULL;
 }
-int Reader_read(Reader* this, Message** msgref_ptr)
+int Reader_read(ReaderRef this, MessageRef* msgref_ptr)
 {
     IOBufferRef iobuf = this->m_iobuffer;
-    Message* message_ptr = Message_new();
+    MessageRef message_ptr = Message_new();
     Parser_begin(this->m_parser, message_ptr);
     int bytes_read;
     for(;;) {
+        // 
+        // handle nothing left in iobuffer
+        // only read more if iobuffer is empty
+        // 
         if(IOBuffer_data_len(iobuf) == 0 ) {
             IOBuffer_reset(iobuf);
-            void* buf = IOBuffer_space(iobuf); int len = IOBuffer_space_len(iobuf);
+            void* buf = IOBuffer_space(iobuf); 
+            int len = IOBuffer_space_len(iobuf);
             void* c = this->m_rdsocket.ctx;
             ReadFunc rf = (this->m_rdsocket.read_f);
             bytes_read = RdSocket_read(&(this->m_rdsocket), buf, len);

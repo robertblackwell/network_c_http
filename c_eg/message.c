@@ -9,24 +9,24 @@
 
 struct Message_s
 {
-    BufferChain* body;
-    HdrList* headers;
+    BufferChainRef body;
+    HdrListRef headers;
     int major_vers;
     HttpMinorVersion minor_vers;
     bool is_request;
     struct {
         HttpStatus status_code;
-        Cbuffer* reason;
+        CbufferRef reason;
     };
     struct {
         HttpMethod method;
-        Cbuffer* target;
+        CbufferRef target;
     };
 };
 
-Message* Message_new ()
+MessageRef Message_new ()
 {
-    Message* mref = (Message*) eg_alloc(sizeof(Message));
+    MessageRef mref = (MessageRef) eg_alloc(sizeof(Message));
     if(mref == NULL) goto error_label_1;
 
     mref->body = NULL;
@@ -43,9 +43,9 @@ Message* Message_new ()
     error_label_1:
         return NULL;
 }
-Message* Message_new_request()
+MessageRef Message_new_request()
 {
-    Message* mref = Message_new();
+    MessageRef mref = Message_new();
     if(mref != NULL) {
         mref->is_request = true;
 //        mref->target = Cbuffer_new();
@@ -53,10 +53,10 @@ Message* Message_new_request()
     }
     return NULL;
 }
-Message* Message_new_response()
+MessageRef Message_new_response()
 {
 
-    Message* mref = Message_new();
+    MessageRef mref = Message_new();
     if(mref != NULL) {
         mref->is_request = false;
 //        mref->reason = Cbuffer_new();
@@ -64,9 +64,9 @@ Message* Message_new_response()
     }
     return NULL;
 }
-void Message_free(Message** this_p)
+void Message_free(MessageRef* this_p)
 {
-    Message* this = *this_p;
+    MessageRef this = *this_p;
     HdrList_free(&(this->headers));
     Cbuffer_free(&(this->target));
     Cbuffer_free(&(this->reason));
@@ -76,11 +76,11 @@ void Message_free(Message** this_p)
 }
 void Message_dispose(void* p)
 {
-    Message_free((Message**)&p);
+    Message_free((MessageRef*)&p);
 }
-Message* MessageResponse(HttpStatus status, void* body)
+MessageRef MessageResponse(HttpStatus status, void* body)
 {
-    Message* mref = Message_new(false);
+    MessageRef mref = Message_new(false);
     if(mref == NULL) goto error_1;
     mref->is_request = false;
     mref->status_code = status;
@@ -91,19 +91,19 @@ Message* MessageResponse(HttpStatus status, void* body)
     error_1:
         return NULL;
 }
-Cbuffer* Message_serialize_request(Message* mref)
+CbufferRef Message_serialize_request(MessageRef mref)
 {
-    Cbuffer* result = Cbuffer_new();
+    CbufferRef result = Cbuffer_new();
     char* first_line;
     const char* meth = http_method_str(mref->method);
 
     int l1= asprintf(&first_line,"%s %s HTTP/%d.%d\r\n", meth, (char*)Cbuffer_data(mref->target), mref->major_vers, mref->minor_vers);
     Cbuffer_append(result, (void*)first_line, l1);
     free(first_line);
-    HdrList* hdrs = mref->headers;
+    HdrListRef hdrs = mref->headers;
     ListIterator iter = HdrList_iterator(hdrs);
     while(iter != NULL) {
-        KVPair* item = HdrList_itr_unpack(hdrs, iter);
+        KVPairRef item = HdrList_itr_unpack(hdrs, iter);
         char* s;
         int len = asprintf(&s,"%s: %s\r\n", KVPair_label(item), KVPair_value(item));
         Cbuffer_append(result, (void*)s, len);
@@ -114,17 +114,17 @@ Cbuffer* Message_serialize_request(Message* mref)
     Cbuffer_append_cstr(result, "\r\n");
     return result;
 }
-Cbuffer* Message_serialize_response(Message* mref)
+CbufferRef Message_serialize_response(MessageRef mref)
 {
-    Cbuffer* result = Cbuffer_new();
+    CbufferRef result = Cbuffer_new();
     char* first_line;
     int ll = asprintf(&first_line, "HTTP/%d.%d  %d %s\r\n",mref->major_vers, mref->minor_vers, mref->status_code, (char*)Cbuffer_data(mref->reason));
     Cbuffer_append(result, (void*)first_line, ll);
     free(first_line);
-    HdrList* hdrs = mref->headers;
+    HdrListRef hdrs = mref->headers;
     ListIterator iter = HdrList_iterator(hdrs);
     while(iter != NULL) {
-        KVPair* item = HdrList_itr_unpack(hdrs, iter);
+        KVPairRef item = HdrList_itr_unpack(hdrs, iter);
         char* s;
         int len = asprintf(&s,"%s: %s\r\n", KVPair_label(item), KVPair_value(item));
         Cbuffer_append(result, (void*)s, len);
@@ -133,13 +133,13 @@ Cbuffer* Message_serialize_response(Message* mref)
         free(s);
     }
     Cbuffer_append_cstr(result, "\r\n");
-    Cbuffer* body = BufferChain_compact(Message_get_body(mref));
+    CbufferRef body = BufferChain_compact(Message_get_body(mref));
     Cbuffer_append(result, Cbuffer_data(body), Cbuffer_size(body));
     return result;
 }
-Cbuffer* Message_serialize(Message* mref)
+CbufferRef Message_serialize(MessageRef mref)
 {
-    Cbuffer* result;
+    CbufferRef result;
     if(mref->is_request) {
         result = Message_serialize_request(mref);
     } else {
@@ -148,78 +148,78 @@ Cbuffer* Message_serialize(Message* mref)
     return result;
 }
 
-HttpStatus Message_get_status(Message* this)
+HttpStatus Message_get_status(MessageRef this)
 {
     return this->status_code;
 }
-void Message_set_status(Message* this, HttpStatus status)
+void Message_set_status(MessageRef this, HttpStatus status)
 {
     this->status_code = status;
 }
-bool Message_get_is_request(Message* this)
+bool Message_get_is_request(MessageRef this)
 {
     return this->is_request;
 }
-void Message_set_is_request(Message* this, bool yn)
+void Message_set_is_request(MessageRef this, bool yn)
 {
     this->is_request = yn;
 }
-HttpMinorVersion Message_get_minor_version(Message* this)
+HttpMinorVersion Message_get_minor_version(MessageRef this)
 {
     return this->minor_vers;
 }
 
-void Message_set_minor_version(Message* this, HttpMinorVersion mv)
+void Message_set_minor_version(MessageRef this, HttpMinorVersion mv)
 {
     this->minor_vers = mv;
 }
-void Message_set_version(Message* this, int major_vers, int minor_vers)
+void Message_set_version(MessageRef this, int major_vers, int minor_vers)
 {
     this->minor_vers = minor_vers;
 }
-void Message_set_method(Message* this, HttpMethod method)
+void Message_set_method(MessageRef this, HttpMethod method)
 {
     this->method = method;
 }
-HttpMethod Message_get_method(Message* this)
+HttpMethod Message_get_method(MessageRef this)
 {
     return this->method;
 }
-Cbuffer* Message_get_target(Message* this)
+CbufferRef Message_get_target(MessageRef this)
 {
     return this->target;
 }
-void Message_move_target(Message* this, Cbuffer* target)
+void Message_move_target(MessageRef this, CbufferRef target)
 {
     if(this->target == NULL) {
         this->target = Cbuffer_new();
     }
     Cbuffer_move(this->target, target);
 }
-void Message_set_target(Message* this, char* targ)
+void Message_set_target(MessageRef this, char* targ)
 {
     assert((this->target != NULL) && (Cbuffer_size(this->target) == 0));
     Cbuffer_append_cstr(this->target, targ);
 }
-void Message_move_reason(Message* this, Cbuffer* reason)
+void Message_move_reason(MessageRef this, CbufferRef reason)
 {
     if(this->reason == NULL)
         this->reason = Cbuffer_new();
     Cbuffer_move(this->reason, reason);
 }
-char* Message_get_reason(Message* this)
+char* Message_get_reason(MessageRef this)
 {
     (char*)Cbuffer_data(this->reason);
 }
-HdrList* Message_headers(Message* this)
+HdrListRef Message_headers(MessageRef this)
 {
     return this->headers;
 }
-BufferChain* Message_get_body(Message* this)
+BufferChainRef Message_get_body(MessageRef this)
 {
     return this->body;
 }
-void Message_set_body(Message* this, BufferChain* bc)
+void Message_set_body(MessageRef this, BufferChainRef bc)
 {
     this->body = bc;
 }

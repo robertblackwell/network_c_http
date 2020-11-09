@@ -19,6 +19,6 @@
  *
  * The handler function is solely responsible for constructing and sending the response.
  */
-typedef int(*HandlerFunction)(Message* request, Writer* wrttr);
+typedef int(*HandlerFunction)(MessageRef request, WriterRef wrttr);
 
 #endif

@@ -8,12 +8,12 @@
 //
 typedef int32_t SocketFD;
 struct Queue_s;
-typedef struct Queue_s Queue;
+typedef struct Queue_s Queue, *QueueRef;
 
-Queue* Queue_new();
-void Queue_free(Queue** q_p);
-SocketFD Queue_remove(Queue* q);
-void Queue_add(Queue* q, SocketFD socket);
+QueueRef Queue_new();
+void Queue_free(QueueRef* q_p);
+SocketFD Queue_remove(QueueRef q);
+void Queue_add(QueueRef q, SocketFD socket);
 
 
 #endif

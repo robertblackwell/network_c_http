@@ -6,12 +6,12 @@
 #include <assert.h>
 #include <stdio.h>
 
-Url* Url_new(char* url)
+UrlRef Url_new(char* url)
 {
     struct http_parser_url u;
     http_parser_url_init(&u);
     http_parser_parse_url(url, strlen(url),0, &u);
-    Url* this = eg_alloc(sizeof(Url_t));
+    UrlRef this = eg_alloc(sizeof(Url_t));
 
     this->scheme = Cbuffer_new();
     if(u.field_data[UF_SCHEMA].len != 0)
@@ -46,9 +46,9 @@ Url* Url_new(char* url)
 }
 
 
-void Url_free(Url** this_ptr)
+void Url_free(UrlRef* this_ptr)
 {
-    Url* this = *this_ptr;
+    UrlRef this = *this_ptr;
     Cbuffer_free(&(this->scheme));
     Cbuffer_free(&(this->host));
     Cbuffer_free(&(this->port));

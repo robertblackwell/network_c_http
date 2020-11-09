@@ -14,20 +14,20 @@
 #include <netdb.h>
 
 
-Client* Client_new()
+ClientRef Client_new()
 {
-    Client* this = eg_alloc(sizeof(Client));
+    ClientRef this = eg_alloc(sizeof(Client));
 }
-void Client_free(Client** this_ptr)
+void Client_free(ClientRef* this_ptr)
 {
-    Client* this = *this_ptr;
+    ClientRef this = *this_ptr;
     Parser_free(&(this->parser));
     Reader_free(&(this->rdr));
     Writer_free(&(this->wrtr));
     eg_free(*this_ptr);
     *this_ptr = NULL;
 }
-void Client_connect(Client* this, char* host, int portno)
+void Client_connect(ClientRef this, char* host, int portno)
 {
     int sockfd, n;
 
@@ -57,7 +57,7 @@ void Client_connect(Client* this, char* host, int portno)
     this->rdr = Reader_new(this->parser, rdsock);
 
 }
-void Client_roundtrip(Client* this, char* req_buffers[], Message** response_ptr)
+void Client_roundtrip(ClientRef this, char* req_buffers[], MessageRef* response_ptr)
 {
     int buf_index = 0;
     int buf_len;
@@ -69,8 +69,8 @@ void Client_roundtrip(Client* this, char* req_buffers[], Message** response_ptr)
         buf_index++;
     }
     int rc = Reader_read(this->rdr, response_ptr);
-    BufferChain* bc = Message_get_body(*response_ptr);
-    Cbuffer* cb = BufferChain_compact(Message_get_body(*response_ptr));
+    BufferChainRef bc = Message_get_body(*response_ptr);
+    CbufferRef cb = BufferChain_compact(Message_get_body(*response_ptr));
 
     close(this->sock);
 }

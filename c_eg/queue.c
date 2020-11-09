@@ -35,7 +35,7 @@ struct Queue_s {
     pthread_cond_t  not_full_cv;
 };
 
-static uint32_t q_size(Queue* q)
+static uint32_t q_size(QueueRef q)
 {
     uint32_t sz;
     if(q->full) {
@@ -50,7 +50,7 @@ static uint32_t q_size(Queue* q)
     return sz;
 }
 
-static void advance_pointer(Queue* q)
+static void advance_pointer(QueueRef q)
 {
     if(q->full)
     {
@@ -60,28 +60,28 @@ static void advance_pointer(Queue* q)
     q->head = (q->head + 1) % q->max_size;
     q->full = (q->head == q->tail);
 }
-static void retreat_pointer(Queue* q)
+static void retreat_pointer(QueueRef q)
 {
     q->full = false;
     q->tail = (q->tail + 1) % q->max_size;
 }
-static bool q_full(Queue* qref)
+static bool q_full(QueueRef qref)
 {
     assert(qref);
 
     return qref->full;
 }
 
-static bool q_empty(Queue* qref)
+static bool q_empty(QueueRef qref)
 {
     assert(qref);
 
     return (!qref->full && (qref->head == qref->tail));
 }
 
-Queue* Queue_new()
+QueueRef Queue_new()
 {
-    Queue* q = (Queue*)eg_alloc(sizeof(Queue));
+    QueueRef q = (QueueRef)eg_alloc(sizeof(Queue));
     q->max_size = QUEUE_MAX_SIZE;
     q->size = 0;
     q->head = 0;
@@ -92,9 +92,9 @@ Queue* Queue_new()
     pthread_cond_init(&(q->not_full_cv), NULL);
     return q;
 }    
-void Queue_free(Queue** qref_ptr)
+void Queue_free(QueueRef* qref_ptr)
 {
-    Queue* qref = * qref_ptr;
+    QueueRef qref = * qref_ptr;
     pthread_cond_destroy(&(qref->not_full_cv));
     pthread_cond_destroy(&(qref->not_empty_cv));
     pthread_mutex_destroy(&(qref->queue_mutex));
@@ -102,7 +102,7 @@ void Queue_free(Queue** qref_ptr)
     *qref_ptr = NULL;
 }
     
-SocketFD Queue_remove(Queue* qref)
+SocketFD Queue_remove(QueueRef qref)
 {
     pthread_mutex_lock(&(qref->queue_mutex));
 
@@ -135,7 +135,7 @@ SocketFD Queue_remove(Queue* qref)
     return r;
 }
     
-void Queue_add(Queue* qref, SocketFD sock)
+void Queue_add(QueueRef qref, SocketFD sock)
 {
     pthread_mutex_lock(&(qref->queue_mutex));
 #ifdef QUEUE_CIRCULAR

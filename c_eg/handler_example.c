@@ -48,34 +48,34 @@ char* simple_response_body(char* message, socket_handle_t socket, int pthread_se
  * \param request
  * \return char* ownership, and responsibility to free, transfers to the caller
  */
-char* echo_body(Message* request)
+char* echo_body(MessageRef request)
 {
-    Cbuffer* cb_body = Message_serialize(request);
+    CbufferRef cb_body = Message_serialize(request);
     char* body = malloc(Cbuffer_size(cb_body) + 1);
     memcpy(body, Cbuffer_data(cb_body), Cbuffer_size(cb_body)+1);
     return body;
 }
-int handler_example(Message* request, Writer* wrtr)
+int handler_example(MessageRef request, WriterRef wrtr)
 {
     char* msg = "<h2>this is a message</h2>";
     char* body = NULL;
     char* body_len_str = NULL;
-    HdrList* resp_hdrs = NULL;
-    KVPair* hl_content_length = NULL;
-    KVPair* hl_content_type = NULL;
+    HdrListRef resp_hdrs = NULL;
+    KVPairRef hl_content_length = NULL;
+    KVPairRef hl_content_type = NULL;
     int return_value = 0;
 
     if((resp_hdrs = HdrList_new()) == NULL) goto finalize;
 
-    Cbuffer* target = Message_get_target(request);
+    CbufferRef target = Message_get_target(request);
     char* target_cstr = Cbuffer_cstr(target);
     if(strcmp(target_cstr, "/echo") == 0) {
-        HdrList* req_hdrs = Message_headers(request);
+        HdrListRef req_hdrs = Message_headers(request);
 
         /**
          * find the echo-id header in the request and put it in the response headers
          */
-        KVPair* kvp = HdrList_find(req_hdrs, HEADER_ECHO_ID);
+        KVPairRef kvp = HdrList_find(req_hdrs, HEADER_ECHO_ID);
         assert(kvp != NULL);
         HdrList_add_cstr(resp_hdrs, HEADER_ECHO_ID, KVPair_value(kvp));
 
@@ -113,6 +113,6 @@ int handler_example(Message* request, Writer* wrtr)
     if(body_len_str != NULL) free(body_len_str);
     return return_value;
 }
- int handler_dispatch(Message* request, Writer* wrtr)
+ int handler_dispatch(MessageRef request, WriterRef wrtr)
  {
  }

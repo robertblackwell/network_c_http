@@ -5,13 +5,13 @@
 
 __LIST_INCLUDE_H__
 
-HdrListIter HdrList_find_iter(HdrList* hlref, char* key)
+HdrListIter HdrList_find_iter(HdrListRef hlref, char* key)
 {
     HdrListIter result = NULL;
     char* fixed_key = make_upper(key);
     HdrListIter iter = HdrList_iterator(hlref);
     while(iter) {
-        KVPair* hlr = HdrList_itr_unpack(hlref, iter);
+        KVPairRef hlr = HdrList_itr_unpack(hlref, iter);
         char* k = KVPair_label(hlr);
         if(strcmp(k, fixed_key) == 0) {
             result = iter;
@@ -23,17 +23,17 @@ HdrListIter HdrList_find_iter(HdrList* hlref, char* key)
     return result;
 }
 
-KVPair* HdrList_find(HdrList* hlref, char* key)
+KVPairRef HdrList_find(HdrListRef hlref, char* key)
 {
     HdrListIter iter = HdrList_find_iter(hlref, key);
     if(iter == NULL) {
         return NULL;
     } else {
-        KVPair* hlr = HdrList_itr_unpack(hlref, iter);
+        KVPairRef hlr = HdrList_itr_unpack(hlref, iter);
         return hlr;
     }
 }
-void HdrList_remove(HdrList* hlref, char* key)
+void HdrList_remove(HdrListRef hlref, char* key)
 {
     HdrListIter iter = HdrList_find_iter(hlref, key);
     if(iter == NULL) {
@@ -43,34 +43,34 @@ void HdrList_remove(HdrList* hlref, char* key)
     }
 
 }
-void HdrList_add_cbuf(HdrList* this, Cbuffer* key, Cbuffer* value)
+void HdrList_add_cbuf(HdrListRef this, CbufferRef key, CbufferRef value)
 {
     char* labptr = Cbuffer_data(key);
     int lablen = Cbuffer_size(key);
     char* valptr = Cbuffer_data(value);
     int vallen = Cbuffer_size(value);
-    KVPair* hl = KVPair_new(labptr, lablen, valptr, vallen);
+    KVPairRef hl = KVPair_new(labptr, lablen, valptr, vallen);
     M_HdrList_add_back(this, hl);
 }
-void HdrList_add_line(HdrList* this, char* label, int lablen, char* value, int vallen)
+void HdrList_add_line(HdrListRef this, char* label, int lablen, char* value, int vallen)
 {
-    KVPair* hl_content_type = KVPair_new(label, lablen, value, vallen);
+    KVPairRef hl_content_type = KVPair_new(label, lablen, value, vallen);
     HdrList_add_front(this, hl_content_type);
 }
-void HdrList_add_cstr(HdrList* this, char* label, char* value)
+void HdrList_add_cstr(HdrListRef this, char* label, char* value)
 {
     int lablen = strlen(label);
     int vallen = strlen(value);
-    KVPair* hl_content_type = KVPair_new(label, lablen, value, vallen);
+    KVPairRef hl_content_type = KVPair_new(label, lablen, value, vallen);
     HdrList_add_front(this, hl_content_type);
 }
 // just to see it update
-Cbuffer* HdrList_serialize(HdrList* this)
+CbufferRef HdrList_serialize(HdrListRef this)
 {
-    Cbuffer* cb = Cbuffer_new();
+    CbufferRef cb = Cbuffer_new();
     ListIterator iter = HdrList_iterator(this);
     while(iter != NULL) {
-        KVPair* line = HdrList_itr_unpack(this, iter);
+        KVPairRef line = HdrList_itr_unpack(this, iter);
         Cbuffer_append_cstr(cb, KVPair_label(line));
         Cbuffer_append_cstr(cb, ": ");
         Cbuffer_append_cstr(cb, KVPair_value(line));

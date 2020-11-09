@@ -7,16 +7,16 @@ struct Writer_s {
     int m_sock;
 };
 
-typedef struct Writer_s Writer;
+typedef struct Writer_s Writer, *WriterRef;
 
-void Writer_init(Writer* this, int sock);
-Writer* Writer_new(int sock);
-Writer* Writer_new(int sock);
-void Writer_destroy(Writer* this);
-void Writer_free(Writer** this_ptr);
+void Writer_init(WriterRef this, int sock);
+WriterRef Writer_new(int sock);
+WriterRef Writer_new(int sock);
+void Writer_destroy(WriterRef this);
+void Writer_free(WriterRef* this_ptr);
 
-void Writer_write(Writer* wrtr, Message* msg_ref);
-void Writer_start(Writer* this, HttpStatus status, HdrList* headers);
-void Writer_write_chunk(Writer* this, void* buffer, int len);
+void Writer_write(WriterRef wrtr, MessageRef msg_ref);
+void Writer_start(WriterRef this, HttpStatus status, HdrListRef headers);
+void Writer_write_chunk(WriterRef this, void* buffer, int len);
 
 #endif

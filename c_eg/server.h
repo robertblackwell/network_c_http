@@ -15,10 +15,10 @@ struct Server_s {
     socket_handle_t         socket_fd;
     int                     nbr_workers;
     HandlerFunction         handler;
-    Queue*                  qref;
-    Worker*                 worker_tab[NBR_WORKERS];
+    QueueRef                  qref;
+    WorkerRef                 worker_tab[NBR_WORKERS];
 };
-typedef struct  Server_s Server;
+typedef struct  Server_s Server, *ServerRef;
 
 /**
  * Create a new server object.
@@ -26,8 +26,8 @@ typedef struct  Server_s Server;
  * \param handler  A function conforming to HandlerFunction (see handler.h) which will be called to handle all requests that are parsed successfully.
  * \return
  */
-Server* Server_new(int port, HandlerFunction handler);
-void Server_free(Server** srefptr);
-void Server_listen(Server* server);
-void Server_terminate(Server* this);
+ServerRef Server_new(int port, HandlerFunction handler);
+void Server_free(ServerRef* srefptr);
+void Server_listen(ServerRef server);
+void Server_terminate(ServerRef this);
 #endif

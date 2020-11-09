@@ -51,7 +51,7 @@ typedef struct ParserReturnValue ParserReturnValue;
  * over buffer and message boundaries
  */
 struct Parser_s;
-typedef struct Parser_s Parser;
+typedef struct Parser_s Parser, *ParserRef;
 
 struct Parser_s {
     bool m_started;
@@ -62,22 +62,22 @@ struct Parser_s {
      */
     http_parser*             m_http_parser_ptr;
     http_parser_settings*    m_http_parser_settings_ptr;
-    Message*               m_current_message_ptr;
+    MessageRef               m_current_message_ptr;
 
     int                      m_header_state;
     ///////////////////////////////////////////////////////////////////////////////////
     // String buffers used to accumulate values from http-parser
     ///////////////////////////////////////////////////////////////////////////////////
-    Cbuffer*             m_url_buf;
-    Cbuffer*             m_status_buf;
-    Cbuffer*             m_name_buf;
-    Cbuffer*             m_value_buf;
+    CbufferRef             m_url_buf;
+    CbufferRef             m_status_buf;
+    CbufferRef             m_name_buf;
+    CbufferRef             m_value_buf;
 };
 
-Parser* Parser_new();
-void Parser_free(Parser** parser_p);
+ParserRef Parser_new();
+void Parser_free(ParserRef* parser_p);
 
-void Parser_begin(Parser* parser, Message* msg_ref);
+void Parser_begin(ParserRef parser, MessageRef msg_ref);
 
 /**
  * The guts of the http message parsing process.
@@ -97,28 +97,28 @@ void Parser_begin(Parser* parser, Message* msg_ref);
  * method called again and the remainder of the incomplete buffer presented to the parser to start
  * the next message.
  *
- * \param parser Parser*
+ * \param parser ParserRef
  * \param buffer A buffer of data presumable read from a tcp connectin
  * \param length Length of the data ba=uffer
  * \return ParserReturnValue - a struct
  */
-ParserReturnValue Parser_consume(Parser* parser, const void* buffer, int length);
+ParserReturnValue Parser_consume(ParserRef parser, const void* buffer, int length);
 
 /**
  * Returns the message currently being worked on. Only valid after Parser_consume() returns ParserReturnValue.return_code == ReturnRC_end_of_message
- * \param parser Parser*
- * \return Message* or NULL
+ * \param parser ParserRef
+ * \return MessageRef or NULL
  */
-Message*      Parser_current_message(Parser* parser);
+MessageRef      Parser_current_message(ParserRef parser);
 
 /**
  * Gather details of latest error
  * \param parser
  * \return
  */
-bool            Parser_is_error(Parser* parser);
-enum http_errno Parser_get_errno(Parser* parser);
-ParserError     Parser_get_error(Parser* parser);
+bool            Parser_is_error(ParserRef parser);
+enum http_errno Parser_get_errno(ParserRef parser);
+ParserError     Parser_get_error(ParserRef parser);
 
 /**
  * C parser class callback functions that interface with the C language parser

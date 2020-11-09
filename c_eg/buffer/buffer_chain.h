@@ -4,15 +4,14 @@
 #include <c_eg/buffer/cbuffer.h>
 
 struct BufferChain_s;
+typedef struct BufferChain_s* BufferChainRef;
 
-typedef struct BufferChain_s BufferChain;
-
-BufferChain* BufferChain_new();
-void BufferChain_free(BufferChain** this);
-void BufferChain_append(BufferChain* this, void* buf, int len);
-void BufferChain_clear(BufferChain* this);
-int BufferChain_size(const BufferChain* this);
-Cbuffer* BufferChain_compact(const BufferChain* this);
-bool BufferChain_eq_cstr(const BufferChain* this, char* cstr);
+BufferChainRef BufferChain_new();
+void BufferChain_free(BufferChainRef* this);
+void BufferChain_append(BufferChainRef this, void* buf, int len);
+void BufferChain_clear(BufferChainRef this);
+int BufferChain_size(const BufferChainRef this);
+CbufferRef BufferChain_compact(const BufferChainRef this);
+bool BufferChain_eq_cstr(const BufferChainRef this, char* cstr);
 
 #endif

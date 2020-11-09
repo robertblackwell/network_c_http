@@ -14,14 +14,14 @@
 
 #undef A_ON
 #define CHECK_HEADER(h, K, V) do {\
-    KVPair* hlref = HdrList_find(h, HEADER_HOST); \
+    KVPairRef hlref = HdrList_find(h, HEADER_HOST); \
     UT_NOT_EQUAL_PTR(hlref, NULL); \
     UT_EQUAL_CSTR(KVPair_label(hlref), HEADER_HOST); \
     UT_EQUAL_CSTR(KVPair_value(hlref), "ahost"); \
 } while(0);
 
 #define CHECK_BODY(M, S) do {\
-    BufferChain* body = Message_get_body(M); \
+    BufferChainRef body = Message_get_body(M); \
     bool x##M = BufferChain_eq_cstr(body, S); \
     UT_EQUAL_INT(x##M, 1); \
 } while(0);
@@ -37,10 +37,10 @@ char* test_A0011_lines[] = {
 NULL
 };
 
-int test_A0011_vfunc (List* results)
+int test_A0011_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
-    Message* m1 = rref->message;
+    MessageRef m1 = rref->message;
     UT_EQUAL_INT(rref->rc, READER_PARSE_ERROR);
     return 0;
 //    UT_EQUAL_CSTR(Message_get_reason(m1), "OK 11Reason Phrase");
@@ -69,10 +69,10 @@ char* test_A0012_lines[] = {
 NULL
 };
 
-int test_A0012_vfunc (List* results)
+int test_A0012_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
-    Message* m1 = rref->message;
+    MessageRef m1 = rref->message;
     UT_EQUAL_INT(rref->rc, READER_IO_ERROR);
     return 0;
 //    UT_EQUAL_CSTR(Message_get_reason(m1), "OK 11Reason Phrase");
@@ -103,11 +103,11 @@ char *test_A001_lines[] = {
 NULL
 };
 
-int test_A001_vfunc (List* results)
+int test_A001_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
-    Message* m1 = rref->message;
-    HdrList* h = Message_headers (m1);
+    MessageRef m1 = rref->message;
+    HdrListRef h = Message_headers (m1);
     UT_EQUAL_INT(Message_get_status (m1), 200);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 11Reason Phrase");
 
@@ -115,7 +115,7 @@ int test_A001_vfunc (List* results)
     CHECK_HEADER(h, HEADER_CONNECTION, "keep-alive");
     CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
     CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "11");
-    BufferChain* body = Message_get_body (m1);
+    BufferChainRef body = Message_get_body (m1);
     bool x = BufferChain_eq_cstr (body, "01234567890");
     CHECK_BODY(m1, "01234567890");
     return 0;
@@ -133,11 +133,11 @@ char *test_A002_lines[] = {
 NULL
 };
 
-int test_A002_vfunc (List* results)
+int test_A002_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
-    Message* m1 = rref->message;
-    HdrList* h = Message_headers (m1);
+    MessageRef m1 = rref->message;
+    HdrListRef h = Message_headers (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 22Reason Phrase");
 
@@ -162,11 +162,11 @@ char *test_A003_lines[] = {
 NULL
 };
 
-int test_A003_vfunc (List* results)
+int test_A003_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
-    Message* m1 = rref->message;
-    HdrList* h = Message_headers (m1);
+    MessageRef m1 = rref->message;
+    HdrListRef h = Message_headers (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 22Reason Phrase");
 
@@ -176,19 +176,19 @@ int test_A003_vfunc (List* results)
     CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "10");
     CHECK_BODY(m1, "ABCDEFGHIJ");
 
-    KVPair* hlref_host = HdrList_find (h, HEADER_HOST);
+    KVPairRef hlref_host = HdrList_find (h, HEADER_HOST);
     UT_EQUAL_CSTR(KVPair_label (hlref_host), HEADER_HOST);
     UT_EQUAL_CSTR(KVPair_value (hlref_host), "ahost");
 
-    KVPair* hlref_connection = HdrList_find (h, HEADER_CONNECTION);
+    KVPairRef hlref_connection = HdrList_find (h, HEADER_CONNECTION);
     UT_EQUAL_CSTR(KVPair_label (hlref_connection), HEADER_CONNECTION);
     UT_EQUAL_CSTR(KVPair_value (hlref_connection), "keep-alive");
 
-    KVPair* hlref_proxy_connection = HdrList_find (h, HEADER_PROXYCONNECTION);
+    KVPairRef hlref_proxy_connection = HdrList_find (h, HEADER_PROXYCONNECTION);
     UT_EQUAL_CSTR(KVPair_label (hlref_proxy_connection), HEADER_PROXYCONNECTION);
     UT_EQUAL_CSTR(KVPair_value (hlref_proxy_connection), "keep-alive");
 
-    KVPair* hlref_content_length = HdrList_find (h, HEADER_CONTENT_LENGTH);
+    KVPairRef hlref_content_length = HdrList_find (h, HEADER_CONTENT_LENGTH);
     UT_EQUAL_CSTR(KVPair_label (hlref_content_length), HEADER_CONTENT_LENGTH);
     UT_EQUAL_CSTR(KVPair_value (hlref_content_length), "10");
 
@@ -215,11 +215,11 @@ char *test_A004_lines[] = {
 NULL
 };
 
-int test_A004_vfunc (List* results)
+int test_A004_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
-    Message* m1 = rref->message;
-    HdrList* h = Message_headers (m1);
+    MessageRef m1 = rref->message;
+    HdrListRef h = Message_headers (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK Reason Phrase");
 
@@ -251,11 +251,11 @@ char *test_A005_lines[] = {
 NULL
 };
 
-int test_A005_vfunc (List* results)
+int test_A005_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
-    Message* m1 = rref->message;
-    HdrList* h = Message_headers (m1);
+    MessageRef m1 = rref->message;
+    HdrListRef h = Message_headers (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK Reason Phrase");
 
@@ -288,11 +288,11 @@ char *test_A006_lines[] = {
 NULL
 };
 
-int test_A006_vfunc (List* results)
+int test_A006_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
-    Message* m1 = rref->message;
-    HdrList* h = Message_headers (m1);
+    MessageRef m1 = rref->message;
+    HdrListRef h = Message_headers (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK Reason Phrase");
 
@@ -327,22 +327,22 @@ char *test_A007_lines[] = {
 NULL
 };
 
-int test_A007_vfunc (List* results)
+int test_A007_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
-    Message* m1 = rref->message;
+    MessageRef m1 = rref->message;
     ReadResultRef rref2 = (ReadResultRef) List_remove_first (results);
-    Message* m2 = rref2->message;
+    MessageRef m2 = rref2->message;
     UT_NOT_EQUAL_PTR(m1, m2);
     UT_NOT_EQUAL_PTR(m1, NULL);
     UT_NOT_EQUAL_PTR(m2, NULL);
-    HdrList* h1 = Message_headers (m1);
-    HdrList* h2 = Message_headers (m2);
+    HdrListRef h1 = Message_headers (m1);
+    HdrListRef h2 = Message_headers (m2);
     UT_NOT_EQUAL_PTR(h1, h2);
     UT_NOT_EQUAL_PTR(h1, NULL);
     UT_NOT_EQUAL_PTR(h2, NULL);
     {
-        HdrList* h = Message_headers (m1);
+        HdrListRef h = Message_headers (m1);
         UT_EQUAL_INT(Message_get_status (m1), 200);
         UT_EQUAL_CSTR(Message_get_reason (m1), "OK 11Reason Phrase");
 
@@ -350,11 +350,11 @@ int test_A007_vfunc (List* results)
         CHECK_HEADER(h, HEADER_CONNECTION, "keep-alive");
         CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
         CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "10");
-        BufferChain* bcref = Message_get_body (m1);
+        BufferChainRef bcref = Message_get_body (m1);
         CHECK_BODY(m1, "1234567890");
     }
     {
-        HdrList* h = Message_headers (m2);
+        HdrListRef h = Message_headers (m2);
         UT_EQUAL_INT(Message_get_status (m2), 201);
         UT_EQUAL_CSTR(Message_get_reason (m2), "OK 22Reason Phrase");
 
@@ -363,8 +363,8 @@ int test_A007_vfunc (List* results)
         CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
         CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "11");
 
-        BufferChain* bcref = Message_get_body(m2);
-        Cbuffer* cbref = BufferChain_compact(bcref);
+        BufferChainRef bcref = Message_get_body(m2);
+        CbufferRef cbref = BufferChain_compact(bcref);
         bool x01 = BufferChain_eq_cstr(bcref, "ABCDEFGHIJK");
         int y = x01;
         CHECK_BODY(m2, "ABCDEFGHIJK");
@@ -385,16 +385,16 @@ char *test_A008_lines[] = {
 (char *) NULL,
 };
 
-int test_A008_vfunc (List* results)
+int test_A008_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
-    Message* m1 = rref->message;
-    HdrList* h = Message_headers (m1);
+    MessageRef m1 = rref->message;
+    HdrListRef h = Message_headers (m1);
     int n = HdrList_size (h);
     UT_EQUAL_INT(Message_get_status (m1), 200);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 11Reason Phrase");
 
-    KVPair* hlr = HdrList_find (h, HEADER_HOST);
+    KVPairRef hlr = HdrList_find (h, HEADER_HOST);
     CHECK_HEADER(h, HEADER_HOST, "ahost");
     CHECK_HEADER(h, HEADER_CONNECTION, "keep-alive");
     CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
@@ -403,7 +403,7 @@ int test_A008_vfunc (List* results)
     return 0;
 }
 
-List* make_test_A ()
+ListRef make_test_A ()
 {
     ParserTestRef test_A0011 = ParserTest_new (test_A0011_description, test_A0011_lines, test_A0011_vfunc);
     ParserTestRef test_A0012 = ParserTest_new (test_A0012_description, test_A0012_lines, test_A0012_vfunc);
@@ -415,7 +415,7 @@ List* make_test_A ()
     ParserTestRef test_A006 = ParserTest_new (test_A006_description, test_A006_lines, test_A006_vfunc);
     ParserTestRef test_A007 = ParserTest_new (test_A007_description, test_A007_lines, test_A007_vfunc);
     ParserTestRef test_A008 = ParserTest_new (test_A008_description, test_A008_lines, test_A008_vfunc);
-    List* tl = List_new (NULL);
+    ListRef tl = List_new (NULL);
     List_add_back (tl, test_A0011);
     List_add_back (tl, test_A0012);
     List_add_back (tl, test_A001);
@@ -429,11 +429,11 @@ List* make_test_A ()
     return tl;
 }
 
-List* make_test_B ()
+ListRef make_test_B ()
 {
     ParserTestRef test_A008 = ParserTest_new (test_A008_description, test_A008_lines, test_A008_vfunc);
     ParserTestRef test_A007 = ParserTest_new (test_A007_description, test_A007_lines, test_A007_vfunc);
-    List* tl = List_new (NULL);
+    ListRef tl = List_new (NULL);
     // there is a bug in this one
     List_add_back (tl, test_A008);
 //    List_add_back (tl, test_A007);
@@ -445,7 +445,7 @@ List* make_test_B ()
     return tl;
 }
 
-int run_list (List* tests)
+int run_list (ListRef tests)
 {
     int result = 0;
     // note all labels are upper case
@@ -459,7 +459,7 @@ int run_list (List* tests)
         DataSource source;
         DataSource_init (&source, x->lines);
         WrappedParserTest wpt;
-        Parser* parser = Parser_new ();
+        ParserRef parser = Parser_new ();
         printf ("Running %s\n", x->description);
         WPT_init (&wpt, parser, &source, x->verify_function);
         result = result || WPT_run (&wpt);
