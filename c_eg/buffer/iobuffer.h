@@ -20,7 +20,7 @@
  *      bytes_processed = process_bytes(..... IOBUffer_data(this). IOBuffer_datalen(this))
  *      IOBuffer_consume(this, bytes_processed)
  *
- *      bytes_generated = output_generator( .... IOBuffer_space(this), IOBUffer_spavelen(this))
+ *      bytes_generated = output_generator( .... IOBuffer_space(this), IOBUffer_spacelen(this))
  *      IOBUffer_commit(this, bytes_generated)
  *      bytes_written = write(fd, IOBuffer_data(this), IOBuffer_datalen(this))
  *      IOBuffer_consume(this, bytes_written)
@@ -40,13 +40,49 @@ IOBufferRef IOBuffer_init(IOBufferRef this, int capacity);
 IOBufferRef IOBuffer_new_with_capacity(int capacity);
 IOBufferRef IOBuffer_new();
 void IOBuffer_set_used(IOBufferRef this, int bytes_used);
-void* IOBuffer_data(IOBufferRef this);
-int IOBuffer_data_len(IOBufferRef this);
-void* IOBuffer_space(IOBufferRef this);
-int IOBuffer_space_len(IOBufferRef this);
-void IOBuffer_commit(IOBufferRef this, int bytes_used);
-void IOBuffer_consume(IOBufferRef this, int byte_count);
+/**
+ * Returns a reference pointer to the start of active data in the buffer.
+ * The memory pointed into is owned by the IoBuffer. Do not free
+ * \param this
+ * \return void*
+ */
+void* IOBuffer_data(const IOBufferRef this);
+/**
+ * Returns a the length of active data in the buffer.
+ * \param this
+ * \return int
+ */
+int IOBuffer_data_len(const IOBufferRef this);
+/**
+ * Returns a reference pointer to the start of unused memory space after the last
+ * active content in the buffer. This is the start of a memory where more data could be placed.
+ * The memory pointed into is owned by the IoBuffer. Do not free
+ * \param this
+ * \return void*
+ */
+void* IOBuffer_space(const IOBufferRef this);
+/**
+ * Returns a the length of available space in the buffer after
+ * the active data.
+ * \param this
+ * \return int
+ */
+int IOBuffer_space_len(const IOBufferRef this);
 
+/**
+ * Updates the IoBuffer so that the bytes_used bytes of memory area after the active content
+ * is also considered to be active data. The memory addded is not updated as it is expected
+ * that data has already been added to that area.
+ * \param this
+ * \param bytes_used
+ */
+void IOBuffer_commit(IOBufferRef this, int bytes_used);
+/**
+ * Updates the IoBuffer so that the first byte_count bytes of the active data are now
+ * considered not active data. IE Increments the start pointer
+ * \param this
+ * \param byte_count
+ */
 void IOBuffer_consume(IOBufferRef this, int byte_count);
 void IOBuffer_destroy(IOBufferRef this);
 void IOBuffer_reset(IOBufferRef this);

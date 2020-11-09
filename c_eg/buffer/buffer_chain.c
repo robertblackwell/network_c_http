@@ -68,12 +68,12 @@ void BufferChain_clear(BufferChain* bchain)
 //    bchain->m_chain.clear();
 //    bchain->m_size = 0;
 }
-int BufferChain_size(BufferChain* this)
+int BufferChain_size(const BufferChain* this)
 {
     return this->m_size;
 }
 
-Cbuffer* BufferChain_compact(BufferChain* this)
+Cbuffer* BufferChain_compact(const BufferChain* this)
 {
     Cbuffer* cb_final = Cbuffer_new();
     if(cb_final == NULL)
@@ -91,7 +91,7 @@ Cbuffer* BufferChain_compact(BufferChain* this)
     memerror_01:
         return NULL;
 }
-bool BufferChain_eq_cstr(BufferChain* this, char* cstr)
+bool BufferChain_eq_cstr(const BufferChain* this, char* cstr)
 {
     ListIterator iter = List_iterator(this->m_chain);
     int cstr_index = 0;

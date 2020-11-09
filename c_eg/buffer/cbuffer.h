@@ -16,6 +16,7 @@
 ///
 struct Cbuffers;
 typedef struct Cbuffer_s Cbuffer;
+typedef Cbuffer* CbufferRef;
 
 ///
 /// WARNING - THIS FUNCTION ALLOCATES MEMORY
@@ -35,7 +36,7 @@ void Cbuffer_free(Cbuffer** cbuf);
 /// \param this Cbuffer* The buffer, cannot be NULL
 /// \return void* POinter to start of used portion of the managed memory area
 ///
-void* Cbuffer_data(Cbuffer* this);
+void* Cbuffer_data(const Cbuffer* this);
 
 ///
 /// Gets a char* pointer to the start of the used portion of memory area,
@@ -45,14 +46,14 @@ void* Cbuffer_data(Cbuffer* this);
 /// \param this Cbuffer* The buffer, cannot be NULL
 /// \return void* POinter to start of used portion of the managed memory area
 ///
-char* Cbuffer_cstr(Cbuffer* this);
+char* Cbuffer_cstr(const Cbuffer* this);
 
 ///
 /// Gets the size of used portion of the buffer
 ///
 /// \param cbuf
 /// \return
-size_t Cbuffer_size(Cbuffer* cbuf);
+size_t Cbuffer_size(const Cbuffer* cbuf);
 
 ///
 /// Gets the current capacity of the buffer - max value of size, but
@@ -61,7 +62,7 @@ size_t Cbuffer_size(Cbuffer* cbuf);
 ///
 /// \param cbuf
 /// \return
-size_t Cbuffer_capacity(Cbuffer* cbuf);
+size_t Cbuffer_capacity(const Cbuffer* cbuf);
 
 ///
 /// Returns a pointer to the next available unused position in the buffer,
@@ -72,7 +73,7 @@ size_t Cbuffer_capacity(Cbuffer* cbuf);
 /// \param cbuf
 /// \return
 ///
-void* Cbuffer_next_available(Cbuffer* cbuf);
+void* Cbuffer_next_available(const Cbuffer* cbuf);
 
 ///
 /// Resets the buffer so that it is again an empty buffer.
@@ -138,8 +139,8 @@ void Cbuffer_move(Cbuffer* dest, Cbuffer* src);
 ///      buffer.dada() < = ptr < buffer.data() + buffer.size();
 ///
 ///
-bool Cbuffer_contains_voidptr(Cbuffer* cbuf, void* ptr);
-bool Cbuffer_contains_charptr(Cbuffer* cbuf, char* ptr);
+bool Cbuffer_contains_voidptr(const Cbuffer* cbuf, void* ptr);
+bool Cbuffer_contains_charptr(const Cbuffer* cbuf, char* ptr);
 
 
 #endif

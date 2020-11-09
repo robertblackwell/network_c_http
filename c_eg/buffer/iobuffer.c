@@ -35,19 +35,19 @@ IOBufferRef IOBuffer_new()
     return IOBuffer_new_with_capacity(IOBUFFER_DEFAULT_CAPACITY);
 }
 
-void* IOBuffer_data(IOBufferRef this)
+void* IOBuffer_data(const IOBufferRef this)
 {
     return this->buffer_ptr;
 }
-int IOBuffer_data_len(IOBufferRef this)
+int IOBuffer_data_len(const IOBufferRef this)
 {
     return this->buffer_remaining;
 }
-void* IOBuffer_space(IOBufferRef this)
+void* IOBuffer_space(const IOBufferRef this)
 {
     return (this->buffer_ptr + this->buffer_remaining);
 }
-int IOBuffer_space_len(IOBufferRef this)
+int IOBuffer_space_len(const IOBufferRef this)
 {
     return (this->mem_p + this->buffer_capacity) - (this->buffer_ptr + this->buffer_remaining);
 }

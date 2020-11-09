@@ -111,18 +111,18 @@ void Cbuffer_free(Cbuffer** cbuf)
 /**
  * gets a pointer to the start of the memory slab being managed by the instance
  */
-void* Cbuffer_data(Cbuffer* cbuf)
+void* Cbuffer_data(const Cbuffer* cbuf)
 {
     return cbuf->m_memPtr;
 }
 /**
  * gets the size of used portion of the buffer
 */
-size_t Cbuffer_size(Cbuffer* cbuf)
+size_t Cbuffer_size(const Cbuffer* cbuf)
 {
     return cbuf->m_length;
 }
-char* Cbuffer_cstr(Cbuffer* this)
+char* Cbuffer_cstr(const Cbuffer* this)
 {
     assert(this->m_cPtr[this->m_size] == '\0');
     return this->m_cPtr;
@@ -130,14 +130,14 @@ char* Cbuffer_cstr(Cbuffer* this)
 /**
  * capacity of the buffer - max value of size
 */
-size_t Cbuffer_capacity(Cbuffer* cbuf)
+size_t Cbuffer_capacity(const Cbuffer* cbuf)
 {
     return cbuf->m_capacity;
 }
 /**
  * returns a pointer to the next available unused position in the buffer
 */
-void* Cbuffer_next_available(Cbuffer* cbuf)
+void* Cbuffer_next_available(const Cbuffer* cbuf)
 {
     void* x = (void*) (cbuf->m_cPtr + cbuf->m_length);
     return x;
@@ -185,8 +185,9 @@ void Cbuffer_setSize(Cbuffer* cbuf, size_t n)
  * Returns a string that has the same value as the used portion of the buffer
  * This is a reference to an internal string so dont free or change it
  * there is a bug here as no zero on the end
+ * The return value is still owned by the buffer
  */
-char* Cbuffer_toString(Cbuffer* cbuf)
+char* Cbuffer_toString(const Cbuffer* cbuf)
 {
     char* p = cbuf->m_cPtr;
     return p;
@@ -211,12 +212,12 @@ void Cbuffer_move(Cbuffer* dest, Cbuffer* src)
  *      buffer.dada() < = ptr < buffer.data() + buffer.size();
  *
  */
-bool Cbuffer_contains_voidptr(Cbuffer* cbuf, void* ptr)
+bool Cbuffer_contains_voidptr(const Cbuffer* cbuf, void* ptr)
 {
     char* p = (char*) ptr;
     return Cbuffer_contains_charptr(cbuf, p);
 }
-bool Cbuffer_contains_charptr(Cbuffer* cbuf, char* ptr)
+bool Cbuffer_contains_charptr(const Cbuffer* cbuf, char* ptr)
 {
     char* endPtr = cbuf->m_cPtr + (long)cbuf->m_capacity;
     char* sPtr = cbuf->m_cPtr;

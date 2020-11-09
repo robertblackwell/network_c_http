@@ -11,8 +11,8 @@ BufferChain* BufferChain_new();
 void BufferChain_free(BufferChain** this);
 void BufferChain_append(BufferChain* this, void* buf, int len);
 void BufferChain_clear(BufferChain* this);
-int BufferChain_size(BufferChain* this);
-Cbuffer* BufferChain_compact(BufferChain* this);
-bool BufferChain_eq_cstr(BufferChain* this, char* cstr);
+int BufferChain_size(const BufferChain* this);
+Cbuffer* BufferChain_compact(const BufferChain* this);
+bool BufferChain_eq_cstr(const BufferChain* this, char* cstr);
 
 #endif
