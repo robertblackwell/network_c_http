@@ -5,7 +5,7 @@
 #include <c_http/utils.h>
 #include <c_http/socket_functions.h>
 #include <c_http/queue.h>
-#include <c_http/parser.h>
+#include <c_http/ll_parser_types.h>
 #include <c_http/reader.h>
 #include <c_http/writer.h>
 

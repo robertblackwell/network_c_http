@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <errno.h>
-#include <http-parser/http_parser.h>
+#include <c_http/ll_parser_types.h>
 
 void Writer_init(WriterRef this, int sock)
 {

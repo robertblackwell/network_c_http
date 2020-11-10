@@ -2,7 +2,6 @@
 #define c_http_rdsocket_h
 #include <c_http/list.h>
 #include <c_http/message.h>
-#include <c_http/parser.h>
 #include <c_http/buffer/iobuffer.h>
 #include <c_http/socket_functions.h>
 #include <c_http/datasource.h>

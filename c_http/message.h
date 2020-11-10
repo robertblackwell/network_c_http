@@ -1,18 +1,14 @@
 #ifndef c_http_message_h
 #define c_http_message_h
 #include <stdbool.h>
-#include <http-parser/http_parser.h>
+#include <stdint.h>
+#include <llhttp.h>
 #include <c_http/buffer/buffer_chain.h>
-
 #include <c_http/hdrlist.h>
-
+#include <c_http/ll_parser_types.h>
 struct Message_s;
 typedef struct Message_s Message, *MessageRef;
 
-// from http-parser
-typedef enum http_status HttpStatus;
-typedef enum http_method HttpMethod;
-typedef enum http_errno HttpErrno;
 enum HttpMajorVersion {major_version1=1};
 enum HttpMinorVersion {minor_verson0=0, minor_version1=1};
 

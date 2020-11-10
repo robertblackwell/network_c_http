@@ -3,22 +3,22 @@
 #include <c_http/utils.h>
 
 /// forward declares 
-int chunk_header_cb(llhttp_t* parser);
-int chunk_complete_cb(llhttp_t* parser);
-int message_begin_cb(llhttp_t* parser);
-int url_data_cb(llhttp_t* parser, const char* at, size_t length);
-int status_data_cb(llhttp_t* parser, const char* at, size_t length);
-int header_field_data_cb(llhttp_t* parser, const char* at, size_t length);
-int header_value_data_cb(llhttp_t* parser, const char* at, size_t length);
-int headers_complete_cb(llhttp_t* parser);//, const char* aptr, size_t remainder);
-int body_data_cb(llhttp_t* parser, const char* at, size_t length);
-int message_complete_cb(llhttp_t* parser);
+static int chunk_header_cb(llhttp_t* parser);
+static int chunk_complete_cb(llhttp_t* parser);
+static int message_begin_cb(llhttp_t* parser);
+static int url_data_cb(llhttp_t* parser, const char* at, size_t length);
+static int status_data_cb(llhttp_t* parser, const char* at, size_t length);
+static int header_field_data_cb(llhttp_t* parser, const char* at, size_t length);
+static int header_value_data_cb(llhttp_t* parser, const char* at, size_t length);
+static int headers_complete_cb(llhttp_t* parser);//, const char* aptr, size_t remainder);
+static int body_data_cb(llhttp_t* parser, const char* at, size_t length);
+static int message_complete_cb(llhttp_t* parser);
 
-void LL_Parser_initialize(ParserRef this);
+void Parser_initialize(ParserRef this);
 
-LL_ParserRef LL_Parser_new()
+ParserRef Parser_new()
 {
-    LL_ParserRef this = eg_alloc(sizeof(Parser));
+    ParserRef this = eg_alloc(sizeof(Parser));
     if(this == NULL)
         return NULL;
     this->m_message_done = false;
@@ -33,10 +33,10 @@ LL_ParserRef LL_Parser_new()
     return this;
 }
 
-void LL_Parser_free(LL_ParserRef* this_p)
+void Parser_free(ParserRef* this_p)
 {
     ASSERT_NOT_NULL(*this_p);
-    LL_ParserRef this= *this_p;
+    ParserRef this= *this_p;
     if (this->m_llhttp_ptr != NULL) {
         free(this->m_llhttp_ptr);
         this->m_llhttp_ptr = NULL;
@@ -55,44 +55,57 @@ void LL_Parser_free(LL_ParserRef* this_p)
     *this_p = NULL;
 
 }
-MessageRef LL_Parser_current_message(LL_ParserRef this)
+MessageRef Parser_current_message(ParserRef this)
 {
     return this->m_current_message_ptr;
 }
-int LL_Parser_append_bytes(LL_ParserRef this, void *buffer, unsigned length)
+int Parser_append_bytes(ParserRef this, void *buffer, unsigned length)
 {
     // @TODO - need to handle error
-    llhttp_errno errno  = llhttp_execute(this->m_llhttp_ptr, (const char*)buffer, (int)length);
-    size_t nparsed = llhttp_get_error_pos(this->m_llhttp_ptr) - buffer;
+    llhttp_errno_t errno  = llhttp_execute(this->m_llhttp_ptr, (const char*)buffer, (int)length);
+    size_t nparsed = (unsigned long)llhttp_get_error_pos(this->m_llhttp_ptr) - (unsigned long)buffer;
     return (int)nparsed;
 }
-void LL_Parser_begin(LL_ParserRef this, MessageRef message_ptr)
+void Parser_begin(ParserRef this, MessageRef message_ptr)
 {
-    LL_Parser_initialize(this);
+    Parser_initialize(this);
     this->m_current_message_ptr = message_ptr;
 }
 
-LL_ParserReturnValue LL_Parser_consume(LL_ParserRef this, const void* buf, int length)
+ParserReturnValue Parser_consume(ParserRef this, const void* buf, int length)
 {
     bool only_header = false;
     this->m_started = true;
-    LL_ParserReturnValue rv = {.return_code = ParserRC_end_of_data, .bytes_remaining = length};
+    ParserReturnValue rv = {.return_code = ParserRC_end_of_data, .bytes_remaining = length};
     char* b = (char*) buf;
     size_t total_parsed = 0;
     char* b_start_ptr = &(b[total_parsed]);
-    llhttp_errno errno = llhttp_execute(this->m_llhttp_ptr, b_start_ptr, length - total_parsed);
-    int nparsed = llhttp_get_error_pos(this->m_llhttp_ptr) - b_start_ptr;
+    llhttp_errno_t errno = HPE_OK;
+    if (length - total_parsed == 0) {
+        errno = llhttp_finish(this->m_llhttp_ptr);
+    } else {
+        errno = llhttp_execute(this->m_llhttp_ptr, b_start_ptr, length - total_parsed);
+    }
+    int need_eof = llhttp_message_needs_eof(this->m_llhttp_ptr);
+    int nparsed;
+    if (errno == HPE_OK) {
+        nparsed = length - total_parsed;
+    } else if ((errno == HPE_PAUSED) &&((length - total_parsed) == 0)) {
+        nparsed = 0;
+    } else {
+        nparsed = llhttp_get_error_pos(this->m_llhttp_ptr) - b_start_ptr;
+    }
     total_parsed = total_parsed + nparsed;
     rv.bytes_remaining = length - nparsed;
-    if (LL_Parser_is_error(this)) {
+    if (Parser_is_error(this)) {
         rv.return_code = ParserRC_error;
-        LL_ParserError x = LL_Parser_get_error(this);
+        ParserError x = Parser_get_error(this);
         return rv;
     } else if (this->m_message_done) {
-        rv.return_code = LL_ParserRC_end_of_message;
+        rv.return_code = ParserRC_end_of_message;
         return rv;
     } else if (this->m_header_done) {
-        rv.return_code = LL_ParserRC_end_of_header;
+        rv.return_code = ParserRC_end_of_header;
         if (only_header) {
             return rv;
         }
@@ -103,10 +116,10 @@ LL_ParserReturnValue LL_Parser_consume(LL_ParserRef this, const void* buf, int l
 }
 #ifdef NOIMPLEMENTED
 
-LL_ParserReturnValue LL_Parser_end(LL_ParserRef this)
+ParserReturnValue Parser_end(ParserRef this)
 {
     assert(false);
-    LL_ParserReturnValue rv = {.return_code = ParserRC_end_of_data, .bytes_remaining = 0};
+    ParserReturnValue rv = {.return_code = ParserRC_end_of_data, .bytes_remaining = 0};
     char* buffer = NULL;
     size_t nparsed;
     llhttp_errno p_error;
@@ -115,15 +128,15 @@ LL_ParserReturnValue LL_Parser_end(LL_ParserRef this)
         if (this->m_started) {
             p_error = llhttp_execute(this->m_llhttp_ptr, buffer, someLength);
         }
-        if (LL_Parser_is_error(this)) {
-            rv.return_code = LL_ParserRC_error;
-            ParserError x = LL_Parser_get_error(this);
+        if (Parser_is_error(this)) {
+            rv.return_code = ParserRC_error;
+            ParserError x = Parser_get_error(this);
             return rv;
         } else if (this->m_message_done) {
-            rv.return_code = LL_ParserRC_end_of_message;
+            rv.return_code = ParserRC_end_of_message;
             return rv;
         } else if (this->m_header_done) {
-            rv.return_code = LL_ParserRC_end_of_header;
+            rv.return_code = ParserRC_end_of_header;
         } else {
             printf("should not be here\n");
             return rv;
@@ -132,7 +145,7 @@ LL_ParserReturnValue LL_Parser_end(LL_ParserRef this)
     }
     return rv;
 }
-void LL_Parser_append_eof(LL_ParserRef this)
+void Parser_append_eof(ParserRef this)
 {
     char* buffer = NULL;
     size_t nparsed;
@@ -144,24 +157,24 @@ void LL_Parser_append_eof(LL_ParserRef this)
     printf("back from parser nparsed: %ld\n ", nparsed);
 }
 #endif
-enum http_errno LL_Parser_get_errno(LL_ParserRef this)
+llhttp_errno_t Parser_get_errno(ParserRef this)
 {
     llhttp_errno_t x = llhttp_get_errno(this->m_llhttp_ptr);
     return x;
 }
-LL_ParserError LL_Parser_get_error(LL_ParserRef this)
+ParserError Parser_get_error(ParserRef this)
 {
     llhttp_errno_t x = llhttp_get_errno(this->m_llhttp_ptr);
     char* n = (char*)llhttp_errno_name(x);
     char* d = (char*)llhttp_errno_name(x);
-    LL_ParserError erst;
+    ParserError erst;
     erst.m_err_number = x;
     erst.m_name = n;
     erst.m_description = d;
     return erst;
 
 }
-bool LL_Parser_is_error(LL_ParserRef this)
+bool Parser_is_error(ParserRef this)
 {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wall"
@@ -172,26 +185,19 @@ bool LL_Parser_is_error(LL_ParserRef this)
     return (x != HPE_OK) && (x != HPE_PAUSED);
 };
 
-void LL_Parser_initialize(LL_ParserRef this)
+void Parser_initialize(ParserRef this)
 {
     this->m_header_state = kHEADER_STATE_NOTHING;
     this->m_started = false;
     this->m_message_done = false;
     this->m_header_done = false;
     this->m_current_message_ptr = NULL;
-    if (this->m_http_parser_ptr != NULL) {
-        free(this->m_http_parser_ptr);
-    }
-    this->m_http_parser_ptr = (llhttp_t*)eg_alloc(sizeof(llhttp_t));
-    http_parser_init( this->m_http_parser_ptr, HTTP_BOTH );
-    /** a link back from the C parser to this class*/
-    this->m_http_parser_ptr->data = (void*) this;
 
-    if (this->m_http_parser_settings_ptr != NULL) {
-        free(this->m_http_parser_settings_ptr);
+    if (this->m_llhttp_settings_ptr != NULL) {
+        free(this->m_llhttp_settings_ptr);
     }
-    llhttp_settings* settings = (llhttp_settings*)eg_alloc(sizeof(llhttp_settings_s));
-    this->m_http_parser_settings_ptr = settings;
+    llhttp_settings_t* settings = (llhttp_settings_t*)eg_alloc(sizeof(llhttp_settings_t));
+    this->m_llhttp_settings_ptr = settings;
     if(this->m_status_buf != NULL) Cbuffer_clear(this->m_status_buf);
     if(this->m_url_buf != NULL) Cbuffer_clear(this->m_url_buf);
     if(this->m_name_buf != NULL) Cbuffer_clear(this->m_name_buf);
@@ -206,13 +212,23 @@ void LL_Parser_initialize(LL_ParserRef this)
     this->m_llhttp_settings_ptr->on_message_complete = message_complete_cb;
     this->m_llhttp_settings_ptr->on_chunk_header = chunk_header_cb;
     this->m_llhttp_settings_ptr->on_chunk_complete = chunk_complete_cb;
+
+    if (this->m_llhttp_ptr != NULL) {
+        free(this->m_llhttp_ptr);
+        this->m_llhttp_ptr = NULL;
+    }
+    this->m_llhttp_ptr = (llhttp_t*)eg_alloc(sizeof(llhttp_t));
+    llhttp_init( this->m_llhttp_ptr, HTTP_BOTH, settings);
+    /** a link back from the C parser to this class*/
+    this->m_llhttp_ptr->data = (void*) this;
+
 }
 
 static
 int message_begin_cb(llhttp_t* parser)
 {
-    LL_ParserRef this =  (LL_ParserRef)(parser->data);
-    MessageRef message = LL_Parser_current_message(this);
+    ParserRef this =  (ParserRef)(parser->data);
+    MessageRef message = Parser_current_message(this);
     if(this->m_status_buf != NULL) {
         Cbuffer_clear(this->m_status_buf);
     } else {
@@ -239,8 +255,8 @@ int message_begin_cb(llhttp_t* parser)
 static
 int url_data_cb(llhttp_t* parser, const char* at, size_t length)
 {
-    LL_ParserRef this =  (LL_ParserRef)(parser->data);
-    MessageRef message = LL_Parser_current_message(this);
+    ParserRef this =  (ParserRef)(parser->data);
+    MessageRef message = Parser_current_message(this);
     Message_set_is_request(message, true);
     Cbuffer_append(this->m_url_buf, (char*)at, length); /*NEEDS ALLO TEST*/
     return 0;
@@ -249,10 +265,10 @@ int url_data_cb(llhttp_t* parser, const char* at, size_t length)
 static
 int status_data_cb(llhttp_t* parser, const char* at, size_t length)
 {
-    LL_ParserRef this =  (LL_ParserRef)(parser->data);
-    MessageRef message = LL_Parser_current_message(this);
+    ParserRef this =  (ParserRef)(parser->data);
+    MessageRef message = Parser_current_message(this);
     Message_set_is_request(message, false);
-    Message_set_status(message, this->m_http_parser_ptr->status_code);
+    Message_set_status(message, this->m_llhttp_ptr->status_code);
 
     Cbuffer_append(this->m_status_buf, (char*)at, length);  /*NEEDS ALLO TEST*/
     Message_move_reason(message, this->m_status_buf);  /*NEEDS ALLO TEST*/
@@ -261,8 +277,8 @@ int status_data_cb(llhttp_t* parser, const char* at, size_t length)
 static
 int header_field_data_cb(llhttp_t* parser, const char* at, size_t length)
 {
-    LL_ParserRef this =  (LL_ParserRef)(parser->data);
-    MessageRef message = LL_Parser_current_message(this);
+    ParserRef this =  (ParserRef)(parser->data);
+    MessageRef message = Parser_current_message(this);
     HdrListRef hdrs = Message_headers(message);
     int state = this->m_header_state;
     if( (state == 0) || (state == kHEADER_STATE_NOTHING) || (state == kHEADER_STATE_VALUE)) {
@@ -283,8 +299,8 @@ int header_field_data_cb(llhttp_t* parser, const char* at, size_t length)
 static
 int header_value_data_cb(llhttp_t* parser, const char* at, size_t length)
 {
-    LL_ParserRef this =  (LL_ParserRef)(parser->data);
-    MessageRef message = LL_Parser_current_message(this);
+    ParserRef this =  (ParserRef)(parser->data);
+    MessageRef message = Parser_current_message(this);
     int state = this->m_header_state;
     if( state == kHEADER_STATE_FIELD ) {
         Cbuffer_clear(this->m_value_buf);
@@ -300,8 +316,8 @@ int header_value_data_cb(llhttp_t* parser, const char* at, size_t length)
 static
 int headers_complete_cb(llhttp_t* parser) //, const char* aptr, size_t remainder)
 {
-    LL_ParserRef this =  (LL_ParserRef)(parser->data);
-    MessageRef message = LL_Parser_current_message(this);
+    ParserRef this =  (ParserRef)(parser->data);
+    MessageRef message = Parser_current_message(this);
     if( Cbuffer_size(this->m_name_buf) != 0 ) {
         HdrList_add_cbuf(Message_headers(message), this->m_name_buf, this->m_value_buf);  /*NEEDS ALLO TEST*/
         Cbuffer_clear(this->m_name_buf);
@@ -310,7 +326,7 @@ int headers_complete_cb(llhttp_t* parser) //, const char* aptr, size_t remainder
     Message_set_version(message, parser->http_major, parser->http_minor );
     if( Cbuffer_size(this->m_url_buf)  == 0 ) {
     } else {
-        Message_set_method(message, (enum http_method)parser->method);
+        Message_set_method(message, (llhttp_method_t)parser->method);
         Message_move_target(message, this->m_url_buf);  /*NEEDS ALLO TEST*/
     }
 //    if( Cbuffer_size(this->m_status_buf) == 0 ) {
@@ -323,8 +339,8 @@ int headers_complete_cb(llhttp_t* parser) //, const char* aptr, size_t remainder
 static
 int body_data_cb(llhttp_t* parser, const char* at, size_t length)
 {
-    LL_ParserRef this =  (LL_ParserRef)(parser->data);
-    MessageRef message = LL_Parser_current_message(this);
+    ParserRef this =  (ParserRef)(parser->data);
+    MessageRef message = Parser_current_message(this);
     BufferChainRef chain_ptr = Message_get_body(message);
     if (chain_ptr == NULL) {
         chain_ptr = BufferChain_new();  /*NEEDS ALLO TEST*/
@@ -336,18 +352,18 @@ int body_data_cb(llhttp_t* parser, const char* at, size_t length)
 static
 int chunk_header_cb(llhttp_t* parser)
 {
-    LL_ParserRef this =  (LL_ParserRef)(parser->data);
-    MessageRef message = LL_Parser_current_message(this);
+    ParserRef this =  (ParserRef)(parser->data);
+    MessageRef message = Parser_current_message(this);
     return 0;
 }
 static
 int chunk_complete_cb(llhttp_t* parser)
 {
-    LL_ParserRef p =  (LL_ParserRef)(parser->data);
+    ParserRef p =  (ParserRef)(parser->data);
     return 0;
 }
 static
-int message_complete_cb(http_parser* parser)
+int message_complete_cb(llhttp_t* parser)
 {
     ParserRef this =  (ParserRef)(parser->data);
     this->m_message_done = true;
@@ -362,9 +378,9 @@ int message_complete_cb(http_parser* parser)
     // at a time - but multiple consecutive requests on the
     // same connection are possible. But a second request
     // wont be accepted until the first one is complete
-    http_parser_pause(parser, 1); // TODO fix me
+    // llhttp_parser_pause(parser, 1); // TODO fix me
     /*
      * Now get ready for the next message
      */
-    return 0;
+    return HPE_PAUSED;
 }

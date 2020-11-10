@@ -1,11 +1,13 @@
 
 #ifndef c_http_ll_parser_h
 #define c_http_ll_parser_h
+#include <stdint.h>
 /**
  * This modules wraps the c language http parser provided by github.com/joyent/http-parser
  * for use in this project.
  */
 #include <llhttp.h>
+#include <c_http/ll_parser_types.h>
 #include <c_http/message.h>
 #include <c_http/buffer/cbuffer.h>
 
@@ -18,42 +20,42 @@
 /**
  * Holds  details of a parse failure
  */
-struct LL_ParserError_s {
+struct ParserError_s {
     char*               m_name;
     char*               m_description;
-    enum http_errno     m_err_number;
+    llhttp_errno_t      m_err_number;
 };
-typedef struct LL_ParserError_s LL_ParserError;
+typedef struct ParserError_s ParserError;
 
 /**
  * \brief  Return code used as part of the value returned by Parser_consume() when processing data.
  */
-enum LL_ParserRC {
+enum ParserRC {
     ParserRC_error,          /// got a parse error
     ParserRC_end_of_header,  /// encountered enf of header
     ParserRC_end_of_message, /// encountered end of message
     ParserRC_end_of_data     /// processed all the data given
 };
-typedef enum LL_ParserRC LL_ParserRC;
+typedef enum ParserRC ParserRC;
 
 /**
  * Value object return by Parser_consume()
  */
-struct LL_ParserReturnValue {
-    LL_ParserRC   return_code;
+struct ParserReturnValue {
+    ParserRC   return_code;
     int           bytes_remaining;
 };
 
-typedef struct LL_ParserReturnValue LL_ParserReturnValue;
+typedef struct ParserReturnValue ParserReturnValue;
 
 /**
  * Type holding context data for Parser functions. Allows for parsing to continue
  * over buffer and message boundaries
  */
-struct LL_Parser_s;
-typedef struct LL_Parser_s LL_Parser, *LL_ParserRef;
+struct Parser_s;
+typedef struct Parser_s Parser, *ParserRef;
 
-struct LL_Parser_s {
+struct Parser_s {
     bool m_started;
     bool m_header_done;
     bool m_message_done;
@@ -61,7 +63,7 @@ struct LL_Parser_s {
      * These are required to run the http-parser
      */
     llhttp_t*                m_llhttp_ptr;
-    llhttp_settings*         m_llhttp_settings_ptr;
+    llhttp_settings_t*       m_llhttp_settings_ptr;
     MessageRef               m_current_message_ptr;
 
     int                      m_header_state;
@@ -74,10 +76,10 @@ struct LL_Parser_s {
     CbufferRef             m_value_buf;
 };
 
-LL_ParserRef LL_Parser_new();
-void LL_Parser_free(LL_ParserRef* parser_p);
+ParserRef Parser_new();
+void Parser_free(ParserRef* parser_p);
 
-void LL_Parser_begin(LL_ParserRef parser, MessageRef msg_ref);
+void Parser_begin(ParserRef parser, MessageRef msg_ref);
 
 /**
  * The guts of the http message parsing process.
@@ -102,23 +104,23 @@ void LL_Parser_begin(LL_ParserRef parser, MessageRef msg_ref);
  * @param length Length of the data ba=uffer
  * @return ParserReturnValue - a struct
  */
-LL_ParserReturnValue LL_Parser_consume(LL_ParserRef parser, const void* buffer, int length);
+ParserReturnValue Parser_consume(ParserRef parser, const void* buffer, int length);
 
 /**
  * Returns the message currently being worked on. Only valid after Parser_consume() returns ParserReturnValue.return_code == ReturnRC_end_of_message
  * \param parser ParserRef
  * \return MessageRef or NULL
  */
-MessageRef      LL_Parser_current_message(LL_ParserRef parser);
+MessageRef      Parser_current_message(ParserRef parser);
 
 /**
  * Gather details of latest error
  * \param parser
  * \return
  */
-bool            LL_Parser_is_error(LL_ParserRef parser);
-enum http_errno LL_Parser_get_errno(LL_ParserRef parser);
-ParserError     LL_Parser_get_error(LL_ParserRef parser);
+bool            Parser_is_error(ParserRef parser);
+llhttp_errno_t  Parser_get_errno(ParserRef parser);
+ParserError     Parser_get_error(ParserRef parser);
 
 /**
  * C parser class callback functions that interface with the C language parser

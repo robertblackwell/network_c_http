@@ -95,7 +95,7 @@ CbufferRef Message_serialize_request(MessageRef mref)
 {
     CbufferRef result = Cbuffer_new();
     char* first_line;
-    const char* meth = http_method_str(mref->method);
+    const char* meth = llhttp_method_name(mref->method);
 
     int l1= asprintf(&first_line,"%s %s HTTP/%d.%d\r\n", meth, (char*)Cbuffer_data(mref->target), mref->major_vers, mref->minor_vers);
     Cbuffer_append(result, (void*)first_line, l1);

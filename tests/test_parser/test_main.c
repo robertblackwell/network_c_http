@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <http-parser/http_parser.h>
+#include <c_http/ll_parser_types.h>
 #include <c_http/unittest.h>
 #include <c_http/logger.h>
 #include <c_http/kvpair.h>
@@ -27,7 +27,7 @@
 } while(0);
 
 // A0011
-char* test_A0011_description = "A0011 parser error";
+char* test_A0011_description = "A0011 parser error no minor version";
 char* test_A0011_lines[] = {
 (char *) "GET /target HTTP/1.\r\n",
 (char *) "Host: ahost\r\n",
@@ -373,7 +373,7 @@ int test_A007_vfunc (ListRef results)
 }
 
 // A008
-char *test_A008_description = "A008 No content-length";
+char *test_A008_description = "A008 No content-length parsing sould make content-length: 10";
 char *test_A008_lines[] = {
 (char *) "HTTP/1.1 200 OK 11Reason Phrase\r\n\0        ",
 (char *) "Host: ahost\r\n",
@@ -415,6 +415,7 @@ ListRef make_test_A ()
     ParserTestRef test_A006 = ParserTest_new (test_A006_description, test_A006_lines, test_A006_vfunc);
     ParserTestRef test_A007 = ParserTest_new (test_A007_description, test_A007_lines, test_A007_vfunc);
     ParserTestRef test_A008 = ParserTest_new (test_A008_description, test_A008_lines, test_A008_vfunc);
+
     ListRef tl = List_new (NULL);
     List_add_back (tl, test_A0011);
     List_add_back (tl, test_A0012);
@@ -477,7 +478,7 @@ int test_B()
 
 int main ()
 {
-    printf("sizeof http_parser: %ld,  sizeof http_parser_settings: %ld\n", sizeof(struct http_parser), sizeof(struct http_parser_settings));
+    printf("sizeof http_parser: %ld,  sizeof http_parser_settings: %ld\n", sizeof(llhttp_t), sizeof(llhttp_settings_t));
     UT_ADD(test_A);
 //    UT_ADD(test_B);
     int rc = UT_RUN();

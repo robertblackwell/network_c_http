@@ -38,8 +38,9 @@ set(C_EG_LIBRARY_HEADER_FILES
 	list.h
 	logger.h
 	message.h
-	parser.h
-	# ll_parser.h
+	# parser.h
+	ll_parser_types.h
+	ll_parser.h
 	parser_test.h
 	queue.h
 	reader.h
@@ -50,7 +51,8 @@ set(C_EG_LIBRARY_HEADER_FILES
 	utils.h
 	worker.h
 	writer.h
-	${EXTSRC}/http-parser/http_parser.h
+	# ${EXTSRC}/http-parser/http_parser.h
+	${C_EG_VENDOR_INCLUDEDIR}/llhttp.h
 	)
 
 set(C_EG_LIBRARY_SOURCE_FILES
@@ -66,8 +68,9 @@ set(C_EG_LIBRARY_SOURCE_FILES
 	list.c
 	logger.c
 	message.c
-	parser.c
-	# ll_parser.c
+	# parser.c
+	ll_parser_types.c
+	ll_parser.c
 	parser_test.c
 	queue.c
 	reader.c
@@ -78,7 +81,10 @@ set(C_EG_LIBRARY_SOURCE_FILES
 	utils.c
 	worker.c
 	writer.c
-	${EXTSRC}/http-parser/http_parser.c
+	# ${EXTSRC}/http-parser/http_parser.c
+	${EXTSRC}/llhttp/api.c
+	${EXTSRC}/llhttp/http.c
+	${EXTSRC}/llhttp/llhttp.c
 	)
 
 set_source_files_properties(${C_EG_LIBRARY_SOURCE_FILES} PROPERTIES LANGUAGE C)
@@ -94,6 +100,7 @@ target_include_directories(${C_EG_LIB_NAME}
 	${C_EG_INCLUDE_PATHS}
 )
 
+target_link_libraries(${C_EG_LIB_NAME} ${C_EG_VENDOR_LIBDIR}/libllhttp.a)
 # target_precompile_headers(marvin_library PUBLIC
 #   	<marvin/boost_stuff.hpp>
 # 	<memory>
