@@ -43,7 +43,7 @@ typedef enum ParserRC ParserRC;
  */
 struct ParserReturnValue {
     ParserRC   return_code;
-    int           bytes_remaining;
+    int        bytes_remaining;
 };
 
 typedef struct ParserReturnValue ParserReturnValue;
@@ -92,10 +92,10 @@ void Parser_begin(ParserRef parser, MessageRef msg_ref);
  * how much of the provided buffer was consumed.
  *
  * Except under error conditions, the only time a buffer will be only partially consumed is when
- * a messages ends part way through a buffer. This is indicated by message complete being returned
+ * a messages ends part way through a buffer. This is indicated by message complete true being returned
  * along with number of bytes consumed being less that the size of the buffer provided.
  *
- * Under such situation the completed message should be retreived from the parser, the parser begin()
+ * Under such situation the completed message should be retrieved from the parser, the parser begin()
  * method called again and the remainder of the incomplete buffer presented to the parser to start
  * the next message.
  *
@@ -113,32 +113,9 @@ ParserReturnValue Parser_consume(ParserRef parser, const void* buffer, int lengt
  */
 MessageRef      Parser_current_message(ParserRef parser);
 
-/**
- * Gather details of latest error
- * \param parser
- * \return
- */
-bool            Parser_is_error(ParserRef parser);
 llhttp_errno_t  Parser_get_errno(ParserRef parser);
 ParserError     Parser_get_error(ParserRef parser);
 
-/**
- * C parser class callback functions that interface with the C language parser
- * http-parser from github.com/joyent/http-parser.
- *
- * These could have been hidden in the parser.c file
-*
-int ll_message_begin_cb(llhttp_t* parser);
-int ll_url_data_cb(llhttp_t* parser, const char* at, size_t length);
-int ll_status_data_cb(llhttp_t parser, const char* at, size_t length);
-int ll_header_field_data_cb(llhttp_t parser, const char* at, size_t length);
-int ll_header_value_data_cb(llhttp_t parser, const char* at, size_t length);
-int ll_headers_complete_cb(llhttp_t parser);
-int ll_chunk_header_cb(llhttp_t parser);
-int ll_body_data_cb(llhttp_t parser, const char* at, size_t length);
-int ll_chunk_complete_cb(llhttp_t parser);
-int ll_message_complete_cb(llhttp_t parser);
-*/
 #endif
 
 

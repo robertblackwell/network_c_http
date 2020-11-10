@@ -43,7 +43,7 @@ set(C_EG_LIBRARY_HEADER_FILES
 	ll_parser.h
 	parser_test.h
 	queue.h
-	reader.h
+	ll_reader.h
 	rdsocket.h
 	server.h
 #	test_helper_types.h
@@ -73,7 +73,7 @@ set(C_EG_LIBRARY_SOURCE_FILES
 	ll_parser.c
 	parser_test.c
 	queue.c
-	reader.c
+	ll_reader.c
 	rdsocket.c
 	server.c
 #	test_helper_types.c

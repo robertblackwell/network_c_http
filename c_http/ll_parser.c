@@ -78,85 +78,40 @@ ParserReturnValue Parser_consume(ParserRef this, const void* buf, int length)
     this->m_started = true;
     ParserReturnValue rv = {.return_code = ParserRC_end_of_data, .bytes_remaining = length};
     char* b = (char*) buf;
-    size_t total_parsed = 0;
-    char* b_start_ptr = &(b[total_parsed]);
     llhttp_errno_t errno = HPE_OK;
-    if (length - total_parsed == 0) {
+    if (length == 0) {
         errno = llhttp_finish(this->m_llhttp_ptr);
     } else {
-        errno = llhttp_execute(this->m_llhttp_ptr, b_start_ptr, length - total_parsed);
+        errno = llhttp_execute(this->m_llhttp_ptr, b, length);
     }
     int need_eof = llhttp_message_needs_eof(this->m_llhttp_ptr);
     int nparsed;
     if (errno == HPE_OK) {
-        nparsed = length - total_parsed;
-    } else if ((errno == HPE_PAUSED) &&((length - total_parsed) == 0)) {
+        nparsed = length;
+    } else if ((errno == HPE_PAUSED) && (length == 0)) {
         nparsed = 0;
     } else {
-        nparsed = llhttp_get_error_pos(this->m_llhttp_ptr) - b_start_ptr;
+        nparsed = llhttp_get_error_pos(this->m_llhttp_ptr) - b;
     }
-    total_parsed = total_parsed + nparsed;
     rv.bytes_remaining = length - nparsed;
-    if (Parser_is_error(this)) {
+    if ((errno == HPE_OK) || (errno == HPE_PAUSED)) {
+        // only possibilities - processed entire buffer or on_message_complete paused parser before buffer fully consumed
+        if (this->m_message_done) {
+            rv.return_code = ParserRC_end_of_message;
+        } else if (this->m_header_done) {
+            assert(nparsed == length); // should only get here if buffer finished exactly at end of headers
+            rv.return_code = ParserRC_end_of_header;
+        } else if (nparsed == length) {
+            rv.return_code = ParserRC_end_of_data;
+        } else {
+            assert(false); // should never get here
+        }
+    } else {
         rv.return_code = ParserRC_error;
         ParserError x = Parser_get_error(this);
-        return rv;
-    } else if (this->m_message_done) {
-        rv.return_code = ParserRC_end_of_message;
-        return rv;
-    } else if (this->m_header_done) {
-        rv.return_code = ParserRC_end_of_header;
-        if (only_header) {
-            return rv;
-        }
-    } else if (nparsed == length) {
-
     }
     return rv;
 }
-#ifdef NOIMPLEMENTED
-
-ParserReturnValue Parser_end(ParserRef this)
-{
-    assert(false);
-    ParserReturnValue rv = {.return_code = ParserRC_end_of_data, .bytes_remaining = 0};
-    char* buffer = NULL;
-    size_t nparsed;
-    llhttp_errno p_error;
-    int someLength = 0;
-    if( ! this->m_message_done ) {
-        if (this->m_started) {
-            p_error = llhttp_execute(this->m_llhttp_ptr, buffer, someLength);
-        }
-        if (Parser_is_error(this)) {
-            rv.return_code = ParserRC_error;
-            ParserError x = Parser_get_error(this);
-            return rv;
-        } else if (this->m_message_done) {
-            rv.return_code = ParserRC_end_of_message;
-            return rv;
-        } else if (this->m_header_done) {
-            rv.return_code = ParserRC_end_of_header;
-        } else {
-            printf("should not be here\n");
-            return rv;
-        }
-        return rv;
-    }
-    return rv;
-}
-void Parser_append_eof(ParserRef this)
-{
-    char* buffer = NULL;
-    size_t nparsed;
-    int someLength = 0;
-    if( ! this->m_message_done )
-    {
-        nparsed = http_parser_execute(this->m_http_parser_ptr, this->m_http_parser_settings_ptr, buffer, someLength);
-    }
-    printf("back from parser nparsed: %ld\n ", nparsed);
-}
-#endif
 llhttp_errno_t Parser_get_errno(ParserRef this)
 {
     llhttp_errno_t x = llhttp_get_errno(this->m_llhttp_ptr);
@@ -174,16 +129,6 @@ ParserError Parser_get_error(ParserRef this)
     return erst;
 
 }
-bool Parser_is_error(ParserRef this)
-{
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wall"
-    llhttp_errno_t x = llhttp_get_errno(this->m_llhttp_ptr);
-    char* n = (char*)llhttp_errno_name(x);
-    char* d = (char*)llhttp_errno_name(x);
-#pragma clang diagnostic pops
-    return (x != HPE_OK) && (x != HPE_PAUSED);
-};
 
 void Parser_initialize(ParserRef this)
 {

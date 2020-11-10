@@ -10,7 +10,7 @@
 #include <c_http/datasource.h>
 #include <c_http/parser_test.h>
 #include <c_http/message.h>
-#include <c_http/reader.h>
+#include <c_http/ll_reader.h>
 
 #undef A_ON
 #define CHECK_HEADER(h, K, V) do {\
@@ -373,10 +373,11 @@ int test_A007_vfunc (ListRef results)
 }
 
 // A008
-char *test_A008_description = "A008 No content-length parsing sould make content-length: 10";
+char *test_A008_description = "A008 No content-length, has transfer encoding but not chunked. Parsing should make content-length: 10";
 char *test_A008_lines[] = {
 (char *) "HTTP/1.1 200 OK 11Reason Phrase\r\n\0        ",
 (char *) "Host: ahost\r\n",
+(char*) "Transfer-encoding: dummy\r\n",
 (char *) "Connection: keep-alive\r\n",
 (char *) "Proxy-Connection: keep\0    ",
 (char *) "-alive\r\n\0    ",
@@ -402,6 +403,38 @@ int test_A008_vfunc (ListRef results)
     CHECK_BODY(m1, "1234567890");
     return 0;
 }
+
+// A009
+char *test_A009_description = "A009 No content-length, no transfer encoding. Parses correctly";
+char *test_A009_lines[] = {
+(char *) "HTTP/1.1 200 OK 11Reason Phrase\r\n\0        ",
+(char *) "Host: ahost\r\n",
+(char *) "Connection: keep-alive\r\n",
+(char *) "Proxy-Connection: keep\0    ",
+(char *) "-alive\r\n\0    ",
+(char *) "\r\n",
+(char *) "1234567890",
+(char *) NULL,
+};
+
+int test_A009_vfunc (ListRef results)
+{
+    ReadResultRef rref = (ReadResultRef) List_remove_first (results);
+    MessageRef m1 = rref->message;
+    HdrListRef h = Message_headers (m1);
+    int n = HdrList_size (h);
+    UT_EQUAL_INT(Message_get_status (m1), 200);
+    UT_EQUAL_CSTR(Message_get_reason (m1), "OK 11Reason Phrase");
+
+    KVPairRef hlr = HdrList_find (h, HEADER_HOST);
+    CHECK_HEADER(h, HEADER_HOST, "ahost");
+    CHECK_HEADER(h, HEADER_CONNECTION, "keep-alive");
+    CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
+    CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "10");
+    CHECK_BODY(m1, "1234567890");
+    return 0;
+}
+
 
 ListRef make_test_A ()
 {
@@ -432,11 +465,11 @@ ListRef make_test_A ()
 
 ListRef make_test_B ()
 {
+    ParserTestRef test_A009 = ParserTest_new (test_A009_description, test_A009_lines, test_A009_vfunc);
     ParserTestRef test_A008 = ParserTest_new (test_A008_description, test_A008_lines, test_A008_vfunc);
-    ParserTestRef test_A007 = ParserTest_new (test_A007_description, test_A007_lines, test_A007_vfunc);
     ListRef tl = List_new (NULL);
     // there is a bug in this one
-    List_add_back (tl, test_A008);
+    List_add_back (tl, test_A009);
 //    List_add_back (tl, test_A007);
 //    List_add_back (tl, test_A007);
 //    List_add_back (tl, test_A007);
@@ -479,8 +512,8 @@ int test_B()
 int main ()
 {
     printf("sizeof http_parser: %ld,  sizeof http_parser_settings: %ld\n", sizeof(llhttp_t), sizeof(llhttp_settings_t));
-    UT_ADD(test_A);
-//    UT_ADD(test_B);
+//    UT_ADD(test_A);
+    UT_ADD(test_B);
     int rc = UT_RUN();
     return rc;
 }

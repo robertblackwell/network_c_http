@@ -5,16 +5,21 @@ c_http is an implementation of a basic  multi-threaded http server and client in
 I plan on using this as a model and re-implementating both the server and client in Rust, Swift and Zig 
 as a means of learning those languages.
 
-The most intricate part of the client and server is parsing http/1.X messages. In all cases I am using/planning to use
+The most intricate part of the client and server is parsing http/1.X messages. Until recently I was using/planning to use
 the http-parser at [https://github.com/nodejs/http-parser](https://github.com/nodejs/http-parser) 
-as a dependecny. For Rust, Swift and Zig that will require integrating those languages with
+as a dependency. For Rust, Swift and Zig that will require integrating those languages with
 a C dependency.
 
-The Rust version is already partially implemented at []()
 
-Since [https://github.com/nodejs/http-parser](https://github.com/nodejs/http-parser) is no longer maintained once 
-I have completed the 4 languages I will search for, and maybe adapt, another C parser maybe 
-[https://github.com/h2o/picohttpparser](https://github.com/h2o/picohttpparser) as the basis for these projects.
+However I recently (Nov 2020) noticed that [https://github.com/nodejs/http-parser](https://github.com/nodejs/http-parser) is 
+no longer being maintained and is being replaced by [https://github.com/nodejs/llhttp](https://github.com/nodejs/llhttp) 
+
+I have completed the conversion of this repo to use [https://github.com/nodejs/llhttp](https://github.com/nodejs/llhttp),
+currently in branch `llhttp`. 
+
+The Rust version is already partially implemented at [https://github.com/robertblackwell/rust_http](https://github.com/robertblackwell/rust_http) using 
+[https://github.com/nodejs/http-parser](https://github.com/nodejs/http-parser) and will be an early target for
+conversion to [https://github.com/nodejs/llhttp](https://github.com/nodejs/llhttp).
 
 ## Installation
 
