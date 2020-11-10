@@ -1,5 +1,5 @@
-#ifndef c_c_http_rdsocket_h
-#define c_c_http_rdsocket_h
+#ifndef c_http_rdsocket_h
+#define c_http_rdsocket_h
 #include <c_http/list.h>
 #include <c_http/message.h>
 #include <c_http/parser.h>

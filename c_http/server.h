@@ -1,5 +1,5 @@
-#ifndef c_ceg_server_h
-#define c_ceg_server_h
+#ifndef c_http_server_h
+#define c_http_server_h
 
 #include <c_http/constants.h>
 #include <c_http/queue.h>
@@ -15,8 +15,8 @@ struct Server_s {
     socket_handle_t         socket_fd;
     int                     nbr_workers;
     HandlerFunction         handler;
-    QueueRef                  qref;
-    WorkerRef                 worker_tab[NBR_WORKERS];
+    QueueRef                qref;
+    WorkerRef               worker_tab[NBR_WORKERS];
 };
 typedef struct  Server_s Server, *ServerRef;
 

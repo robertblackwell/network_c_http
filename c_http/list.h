@@ -80,7 +80,7 @@ void List_free(ListRef* lref_ptr);
 ///
 /// \param this ListRef Note the name
 ///
-void List_display(ListRef this);
+void List_display(const ListRef this);
 
 ///
 /// Returns number of nodes/items in a list
@@ -88,7 +88,7 @@ void List_display(ListRef this);
 /// \param lref ListRef The list
 /// \return int
 ///
-int List_size(ListRef lref);
+int List_size(const ListRef lref);
 
 ///
 /// WARNING - THIS FUNCTION ALLOCATES MEMORY
@@ -118,7 +118,7 @@ void List_add_front(ListRef lref, void* item);
 /// \param lref   ListRef a list Must not be NULL
 /// \return void* The content/item in the first node on the list. NULL if the list is empty
 ///
-void* List_first(ListRef lref);
+void* List_first(const ListRef lref);
 
 /// Gets the value of the void* item in the node at the head of a list,
 /// Returns the item void* in the node at the head of the list and frees
@@ -137,7 +137,7 @@ void* List_remove_first(ListRef lref);
 /// \param lref   ListRef a list Must not be NULL
 /// \return void* The content/item in the last node on the list. NULL if the list is empty
 ///
-void* List_last(ListRef lref);
+void* List_last(const ListRef lref);
 
 /// Gets the value of the void* item in the node at the the tail of a list,
 /// returns the void* value and unlinks and frees the tail node
@@ -157,7 +157,7 @@ void* List_remove_last(ListRef lref);
 /// \return ListIterator iterator pointing at the first/head of the list.
 ///         returns NULL if List is empty
 ///
-ListIterator List_iterator(ListRef lref);
+ListIterator List_iterator(const ListRef lref);
 
 ///
 /// Moves an iterator on to the next Node on the list.
@@ -167,7 +167,7 @@ ListIterator List_iterator(ListRef lref);
 /// \param itr  ListIterator a current iterator pointing at a node on the list, cannot NULL iterator
 /// \return  THe next item on the list or NULL if there are no more nodes.
 ///
-ListIterator List_itr_next(ListRef lref, ListIterator itr);
+ListIterator List_itr_next(const ListRef lref, const ListIterator itr);
 
 ///
 /// Removes and frees the node pointed at by the itr, calls dealloc function on that nodes void* item field.

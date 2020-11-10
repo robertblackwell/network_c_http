@@ -69,7 +69,7 @@ void HdrList_add_front(HdrListRef lref, KVPairRef item);
 /// param CbufferRef
 /// return void
 ///
-void HdrList_add(HdrListRef this, CbufferRef key, CbufferRef value);
+void HdrList_add(HdrListRef this, const CbufferRef key, const CbufferRef value);
 
 /**
  * Add multiple headers lines to a header list in one call.
@@ -88,7 +88,7 @@ void HdrList_add_many(HdrListRef this, CStrPair* pairs[]);
 /// NOTE: If found the KVPairRef returns is still owned by the HdrList
 /// do not call KVPair_free() on the returned value
 ///
-KVPairRef HdrList_find(HdrListRef hlref, char* key);
+KVPairRef HdrList_find(const HdrListRef hlref, const char* key);
 
 ///
 /// Remove a KVPair from the HdrList by key/label
@@ -96,13 +96,13 @@ KVPairRef HdrList_find(HdrListRef hlref, char* key);
 /// param hlref HdrListRef
 /// param key char*
 ///
-void HdrList_remove(HdrListRef hlref, char* key);
+void HdrList_remove(HdrListRef hlref, const char* key);
 
 /// Serialize a header list into a CbufferRef
 /// param this HdrListRef
 /// return A serialized version of the header list as a Cbuffer.
 /// NOTE: ownership of the Cbuffer is transfered to the caller
-CbufferRef HdrList_serialize(HdrListRef this);
+CbufferRef HdrList_serialize(const HdrListRef this);
 
 ///
 /// Adds a new header line to the list
@@ -115,7 +115,7 @@ CbufferRef HdrList_serialize(HdrListRef this);
 /// to deal with the two CbufferRef as they wish.
 ///
 ///
-void HdrList_add_cbuf(HdrListRef this, CbufferRef key, CbufferRef value);
+void HdrList_add_cbuf(HdrListRef this, const CbufferRef key, const CbufferRef value);
 
 ///
 /// Adds a new header line to the list
@@ -130,7 +130,7 @@ void HdrList_add_cbuf(HdrListRef this, CbufferRef key, CbufferRef value);
 /// to deal with the two char* buffers as they wish.
 ///
 ////
-void HdrList_add_line(HdrListRef this, char* label, int lablen, char* value, int vallen);
+void HdrList_add_line(HdrListRef this, const char* label, int lablen, const char* value, int vallen);
 
 ///
 /// Adds a new header line to the list
@@ -143,6 +143,6 @@ void HdrList_add_line(HdrListRef this, char* label, int lablen, char* value, int
 /// to deal with the two char* buffers as they wish.
 ///
 ///
-void HdrList_add_cstr(HdrListRef this, char* label, char* value);
+void HdrList_add_cstr(HdrListRef this, const char* label, const char* value);
 
 #endif

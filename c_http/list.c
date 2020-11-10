@@ -90,11 +90,11 @@ void List_free(ListRef* lref_ptr)
     free((void*)*lref_ptr);
     *lref_ptr = NULL;
 }
-int List_size(ListRef lref)
+int List_size(const ListRef lref)
 {
     return lref->count;
 }
-void List_display(ListRef this)
+void List_display(const ListRef this)
 {
     printf("List[%p] count: %d head %p tail %p\n", (void*)this, this->count, (void*)this->head, (void*)this->tail);
     ListNode* iter = this->head;
@@ -141,7 +141,7 @@ void List_add_back(ListRef lref, void* content)
 }
 
 // gets the item contained in the first list item without removing from list
-void* List_first(ListRef lref)
+void* List_first(const ListRef lref)
 {
     ASSERT_NOT_NULL(lref);
     return lref->head->item;
@@ -174,7 +174,7 @@ void* List_remove_first(ListRef lref)
 }
 
 // gets the item contained in the last list item without removing from list
-void* List_last(ListRef lref)
+void* List_last(const ListRef lref)
 {
     ASSERT_NOT_NULL(lref);
     if(lref->tail == NULL) return NULL;
@@ -211,14 +211,14 @@ void* List_remove_last(ListRef lref)
 }
 
 //gets an iterator for the list which initially will be pointing at the first Node in the list
-ListIterator List_iterator(ListRef lref)
+ListIterator List_iterator(const ListRef lref)
 {
     ASSERT_NOT_NULL(lref);
     return lref->head;
 }
 
 // moves the iterator on to the next Node on the list, returns NULL if goes off the end of the list
-ListIterator List_itr_next(ListRef lref, ListIterator itr)
+ListIterator List_itr_next(const ListRef lref, const ListIterator itr)
 {
     ASSERT_NOT_NULL(lref);
     ASSERT_NOT_NULL(itr);

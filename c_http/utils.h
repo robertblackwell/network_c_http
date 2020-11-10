@@ -5,6 +5,6 @@
 
 #define ASSERT_NOT_NULL(ptr) assert(ptr != NULL);
 
-char* make_upper(char* src);
+char* make_upper(const char* src);
 
 #endif

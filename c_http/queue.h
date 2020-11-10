@@ -1,5 +1,5 @@
-#ifndef c_ceg_queue_h
-#define c_ceg_queue_h
+#ifndef c_http_queue_h
+#define c_http_queue_h
 #include <stdint.h>
 //
 // This is a queue of integers (socket fd) with a fixed max size.

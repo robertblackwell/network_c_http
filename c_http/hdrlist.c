@@ -60,7 +60,7 @@ void HdrList_add_front (HdrListRef lref, KVPairRef item)
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HdrListIter HdrList_find_iter (HdrListRef hlref, char *key)
+HdrListIter HdrList_find_iter (const HdrListRef hlref, const char *key)
 {
     HdrListIter result = NULL;
     char *fixed_key = make_upper (key);
@@ -78,7 +78,7 @@ HdrListIter HdrList_find_iter (HdrListRef hlref, char *key)
     return result;
 }
 
-KVPairRef HdrList_find (HdrListRef hlref, char *key)
+KVPairRef HdrList_find (const HdrListRef hlref, const char *key)
 {
     HdrListIter iter = HdrList_find_iter (hlref, key);
     if (iter == NULL) {
@@ -89,7 +89,7 @@ KVPairRef HdrList_find (HdrListRef hlref, char *key)
     }
 }
 
-void HdrList_remove (HdrListRef hlref, char *key)
+void HdrList_remove (HdrListRef hlref, const char *key)
 {
     HdrListIter iter = HdrList_find_iter (hlref, key);
     if (iter == NULL) {
@@ -100,7 +100,7 @@ void HdrList_remove (HdrListRef hlref, char *key)
 
 }
 
-void HdrList_add_cbuf (HdrListRef this, CbufferRef key, CbufferRef value)
+void HdrList_add_cbuf (HdrListRef this, const CbufferRef key, const CbufferRef value)
 {
     char *labptr = Cbuffer_data (key);
     int lablen = Cbuffer_size (key);
@@ -110,13 +110,13 @@ void HdrList_add_cbuf (HdrListRef this, CbufferRef key, CbufferRef value)
     HdrList_add_back (this, hl);
 }
 
-void HdrList_add_line (HdrListRef this, char *label, int lablen, char *value, int vallen)
+void HdrList_add_line (HdrListRef this, const char *label, int lablen, const char *value, int vallen)
 {
     KVPairRef hl_content_type = KVPair_new (label, lablen, value, vallen);
     HdrList_add_front (this, hl_content_type);
 }
 
-void HdrList_add_cstr (HdrListRef this, char *label, char *value)
+void HdrList_add_cstr (HdrListRef this, const char *label, const char *value)
 {
     int lablen = strlen (label);
     int vallen = strlen (value);

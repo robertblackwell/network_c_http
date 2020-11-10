@@ -8,8 +8,10 @@
 #include <c_http/utils.h>
 
 struct KVPair_s {
+    // this string is always null terminated
     char* label_ptr;
     int   label_len;
+    // this string is always null terminated
     char* value_ptr;
     int   value_len;
 };
@@ -27,7 +29,7 @@ struct KVPair_s {
 //    return dest;
 //}
 // creates and initializes a new KVPair obj. Returns NULL on allocation failure
-KVPairRef KVPair_new(char* labptr, int lablen, char* valptr, int vallen)
+KVPairRef KVPair_new(const char* labptr, int lablen, const char* valptr, int vallen)
 {
     // store {label}: {value}\r\n\0
     KVPairRef hlref = eg_alloc(sizeof(KVPair));
@@ -39,16 +41,21 @@ KVPairRef KVPair_new(char* labptr, int lablen, char* valptr, int vallen)
     if(hlref->label_ptr == NULL) goto mem_error_2;
     memcpy(hlref->label_ptr, labptr, lablen);
         // Convert to upper case
-    char* s = labptr;
     char* p = hlref->label_ptr;
     for(int i = 0; i < lablen; i++) {
         p[i] = toupper((unsigned char) labptr[i]);
     }
+    /**
+     * Note NULL termination
+     */
     p[lablen] = '\0';
 
     hlref->value_ptr = eg_alloc(vallen+1);
     if(hlref->value_ptr == NULL) goto mem_error_2;
     memcpy(hlref->value_ptr, valptr, vallen);
+    /**
+     * Note NULL termination
+     */
     hlref->value_ptr[vallen] = (char)'\0';
 
     return  hlref;
@@ -62,7 +69,7 @@ KVPairRef KVPair_new(char* labptr, int lablen, char* valptr, int vallen)
         free((void*)hlref);
         return NULL;
 }
-KVPairRef KVPair_from_cstrs(char* key, char* value)
+KVPairRef KVPair_from_cstrs(const char* key, const char* value)
 {
     return KVPair_new(key, strlen(key), value, strlen(value));
 }
@@ -84,15 +91,15 @@ void KVPair_free(KVPairRef* hlref_ptr)
     *hlref_ptr = NULL;
 }
 void KVPair_dealloc(void* ptr) { KVPair_free((KVPairRef*)(ptr));}
-char* KVPair_label(KVPairRef hlref)
+char* KVPair_label(const KVPairRef hlref)
 {
     return hlref->label_ptr;
 }
-char* KVPair_value(KVPairRef hlref)
+char* KVPair_value(const KVPairRef hlref)
 {
     return hlref->value_ptr;
 }
-void KVPair_set_value(KVPairRef hlref, char* valptr, int vallen)
+void KVPair_set_value(KVPairRef hlref, const char* valptr, int vallen)
 {
     char* oldvalptr = hlref->value_ptr;
     hlref->value_ptr = eg_alloc(vallen+1);

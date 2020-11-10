@@ -39,6 +39,7 @@ set(C_EG_LIBRARY_HEADER_FILES
 	logger.h
 	message.h
 	parser.h
+	# ll_parser.h
 	parser_test.h
 	queue.h
 	reader.h
@@ -66,6 +67,7 @@ set(C_EG_LIBRARY_SOURCE_FILES
 	logger.c
 	message.c
 	parser.c
+	# ll_parser.c
 	parser_test.c
 	queue.c
 	reader.c
