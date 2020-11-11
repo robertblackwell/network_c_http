@@ -4,11 +4,11 @@
 set(TEST_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(TEST_INCLUDE_DIRS 
 	${TEST_DIR} 
-	${C_EG_INCLUDE_PATHS} 
+	${C_HTTP_INCLUDE_PATHS} 
 	SYSTEM ${VENDOR_DIR}/include)
 
 set(TEST_LINK_LIBS 
-	${C_EG_LIB_NAME} 
+	${C_HTTP_LIB_NAME} 
 	Threads::Threads 
 	${CMAKE_DL_LIBS}
 	m
@@ -34,7 +34,7 @@ add_subdirectory(test_parser)
 if (OFF)
 endif()
 
-if (C_EG_Verbose)
+if (C_HTTP_Verbose)
 	message("TEST_DIR                      ${TEST_DIR}")
 	message("HEADER_DIRS                   ${HEADER_DIRS}")
 	message("TEST_INLCUDE_DIRS             ${TEST_INCLUDE_DIRS}")

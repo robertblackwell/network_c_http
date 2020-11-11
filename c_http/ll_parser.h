@@ -6,7 +6,7 @@
  * This modules wraps the c language http parser provided by github.com/joyent/http-parser
  * for use in this project.
  */
-#include <llhttp.h>
+#include <llhttp/llhttp.h>
 #include <c_http/ll_parser_types.h>
 #include <c_http/message.h>
 #include <c_http/buffer/cbuffer.h>

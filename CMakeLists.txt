@@ -11,7 +11,7 @@ cmake_minimum_required(VERSION 3.16)
 ## Project 
 ## name  version
 ##
-project(C_EG VERSION 0.1.0 LANGUAGES C)
+project(C_HTTP VERSION 0.1.0 LANGUAGES C)
 
 ##
 ## Includes
@@ -42,12 +42,12 @@ endif()
 ##
 ## options
 ##
-option(C_EG_BuildTests "Build the tests when enabled" ON )
-option(C_EG_Install_Targets "Installs targets as well as files if set" OFF)
-option(C_EG_Package "Install as a CMake package - not implemented" OFF)
-option(C_EG_Verbose "Print a lot of diagnostic stuff" ON)
-option(C_EG_DebugBuild "Perform build as type Debug" ON)
-option(C_EG_BuildDocs "Build doxygen documentation" ON)
+option(C_HTTP_BuildTests "Build the tests when enabled" ON )
+option(C_HTTP_Install_Targets "Installs targets as well as files if set" OFF)
+option(C_HTTP_Package "Install as a CMake package - not implemented" OFF)
+option(C_HTTP_Verbose "Print a lot of diagnostic stuff" ON)
+option(C_HTTP_DebugBuild "Perform build as type Debug" ON)
+option(C_HTTP_BuildDocs "Build doxygen documentation" ON)
 
 
 
@@ -79,57 +79,57 @@ set(XCODE_GENERATE_SCHEME ON)
 ##
 include (GNUInstallDirs)
 
-if (C_EG_DebugBuild)
+if (C_HTTP_DebugBuild)
 	set(CMAKE_BUILD_TYPE Debug)
 endif()
 set(CMAKE_CXX_STANDARD 17)
 # set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # set(CMAKE_CXX_EXTENSIONS OFF)
 if(DEFINED CMAKE_DL_LIBS)
-    set(C_EG_DL_LIB_SO libdl.so)
+    set(C_HTTP_DL_LIB_SO libdl.so)
 endif()
 
-set(C_EG_PROJECT_DIR       ${C_EG_SOURCE_DIR})
+set(C_HTTP_PROJECT_DIR       ${C_HTTP_SOURCE_DIR})
 ## location of project header and source files
-set(C_EG_SOURCE_NAME       c_eg)
-set(C_EG_INCLUDE_NAME      c_eg)
-set(C_EG_TOOLS_NAME        tools)
-set(C_EG_LIB_NAME          c_eg_library)
-set(C_EG_SOURCE_DIR        ${C_EG_PROJECT_DIR}/${C_EG_SOURCE_NAME})
-set(C_EG_INCLUDE_DIR       ${C_EG_PROJECT_DIR}/${C_EG_INCLUDE_NAME})
-set(C_EG_TOOLS_DIR         ${C_EG_PROJECT_DIR}/${C_EG_TOOLS_NAME})
+set(C_HTTP_SOURCE_NAME       c_http)
+set(C_HTTP_INCLUDE_NAME      c_http)
+set(C_HTTP_TOOLS_NAME        tools)
+set(C_HTTP_LIB_NAME          c_http_library)
+set(C_HTTP_SOURCE_DIR        ${C_HTTP_PROJECT_DIR}/${C_HTTP_SOURCE_NAME})
+set(C_HTTP_INCLUDE_DIR       ${C_HTTP_PROJECT_DIR}/${C_HTTP_INCLUDE_NAME})
+set(C_HTTP_TOOLS_DIR         ${C_HTTP_PROJECT_DIR}/${C_HTTP_TOOLS_NAME})
 ## location of other/3rd party headers, src and libs
-set(C_EG_VENDOR_NAME		 vendor)
-set(C_EG_VENDOR_DIR        ${C_EG_PROJECT_DIR}/${C_EG_VENDOR_NAME})
-set(C_EG_VENDOR_INCLUDEDIR ${C_EG_VENDOR_DIR}/include)
-set(C_EG_VENDOR_LIBDIR     ${C_EG_VENDOR_DIR}/lib)
-set(C_EG_VENDOR_SRCDIR     ${C_EG_VENDOR_DIR}/src)
+set(C_HTTP_VENDOR_NAME		 vendor)
+set(C_HTTP_VENDOR_DIR        ${C_HTTP_PROJECT_DIR}/${C_HTTP_VENDOR_NAME})
+set(C_HTTP_VENDOR_INCLUDEDIR ${C_HTTP_VENDOR_DIR}/include)
+set(C_HTTP_VENDOR_LIBDIR     ${C_HTTP_VENDOR_DIR}/lib)
+set(C_HTTP_VENDOR_SRCDIR     ${C_HTTP_VENDOR_DIR}/src)
 
-if (${C_EG_BuildDocs} AND ${DOXYGEN_FOUND})
-	set(C_EG_BUILD_DOCS TRUE)
+if (${C_HTTP_BuildDocs} AND ${DOXYGEN_FOUND})
+	set(C_HTTP_BUILD_DOCS TRUE)
 else()
-	set(C_EG_BUILD_DOCS FALSE)
+	set(C_HTTP_BUILD_DOCS FALSE)
 endif()
 
 ## used by all compile steps to find headers
-set(C_EG_INCLUDE_PATHS 
-	${C_EG_PROJECT_DIR}
-	# ${C_EG_INCLUDE_DIR}
-	# ${C_EG_SOURCE_DIR}
-	${C_EG_VENDOR_INCLUDEDIR}
-	${C_EG_VENDOR_SRCDIR}
+set(C_HTTP_INCLUDE_PATHS 
+	${C_HTTP_PROJECT_DIR}
+	# ${C_HTTP_INCLUDE_DIR}
+	# ${C_HTTP_SOURCE_DIR}
+	${C_HTTP_VENDOR_INCLUDEDIR}
+	${C_HTTP_VENDOR_SRCDIR}
 )
-set(C_EG_LINK_LIBRARIES 
-	${C_EG_LIB_NAME} 
+set(C_HTTP_LINK_LIBRARIES 
+	${C_HTTP_LIB_NAME} 
 	Threads::Threads
 	m
 	${CMAKE_DL_LIBS}
-	# ${C_EG_VENDOR_LIBDIR}/libcert_library.a
-	# ${C_EG_VENDOR_LIBDIR}/libboost_filesystem.a 
-	# ${C_EG_VENDOR_LIBDIR}/libboost_system.a
-	# ${C_EG_VENDOR_LIBDIR}/libboost_program_options.a
-	# ${C_EG_VENDOR_LIBDIR}/libssl.a 
-	# ${C_EG_VENDOR_LIBDIR}/libcrypto.a 
+	# ${C_HTTP_VENDOR_LIBDIR}/libcert_library.a
+	# ${C_HTTP_VENDOR_LIBDIR}/libboost_filesystem.a 
+	# ${C_HTTP_VENDOR_LIBDIR}/libboost_system.a
+	# ${C_HTTP_VENDOR_LIBDIR}/libboost_program_options.a
+	# ${C_HTTP_VENDOR_LIBDIR}/libssl.a 
+	# ${C_HTTP_VENDOR_LIBDIR}/libcrypto.a 
 	${CMAKE_DL_LIBS}
 	${DL_LIB_SO}
 	)
@@ -138,30 +138,31 @@ set(C_EG_LINK_LIBRARIES
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY XCODE_GENERATE_SCHEME ON)
 
-if (C_EG_Verbose)
+if (C_HTTP_Verbose)
 	message("Project Name                      ${CMAKE_PROJECT_NAME}")
 	message("Build Type                        ${CMAKE_BUILD_TYPE}")
 	message("CMAKE_CXX_STANDARD                ${CMAKE_CXX_STANDARD}")
+	message("CMAKE_CXX_FLAGS                   ${CMAKE_CXX_FLAGS}")
 	message("CMAKE_DL_LIBS                     ${CMAKE_DL_LIBS}")
-	message("C_EG_PROJECT_DIR                  ${C_EG_PROJECT_DIR}")
-	message("C_EG_SOURCE_DIR                   ${C_EG_SOURCE_DIR}")
-	message("C_EG_INCLUDE_DIR                  ${C_EG_INCLUDE_DIR}")
-	message("C_EG_VENDOR_NAME                  ${C_EG_VENDOR_NAME}")
-	message("C_EG_VENOR_DIR                    ${C_EG_VENDOR_DIR}")
-	message("C_EG_VENDOR_INCLUDEDIR            ${C_EG_VENDOR_INCLUDEDIR}")
-	message("C_EG_VENDOR_LIBDIR                ${C_EG_VENDOR_LIBDIR}")
-	message("C_EG_VENDOR_SRCDIR                ${C_EG_VENDOR_SRCDIR}")
-	message("C_EG_VENDOR_SRCDIR                ${C_EG_VENDOR_SRCDIR}")
-	message("C_EG_DL_LIB_SO                    ${C_EG_DL_LIB_SO}")
-	message("C_EG_INCLUDE_PATHS                ${C_EG_INCLUDE_PATHS}")
-	message("C_EG_LINK_LIBRARIES               ${C_EG_LINK_LIBRARIES}")
-	message("C_EG_BuildDocsS                   ${C_EG_BuildDocs}")
+	message("C_HTTP_PROJECT_DIR                  ${C_HTTP_PROJECT_DIR}")
+	message("C_HTTP_SOURCE_DIR                   ${C_HTTP_SOURCE_DIR}")
+	message("C_HTTP_INCLUDE_DIR                  ${C_HTTP_INCLUDE_DIR}")
+	message("C_HTTP_VENDOR_NAME                  ${C_HTTP_VENDOR_NAME}")
+	message("C_HTTP_VENOR_DIR                    ${C_HTTP_VENDOR_DIR}")
+	message("C_HTTP_VENDOR_INCLUDEDIR            ${C_HTTP_VENDOR_INCLUDEDIR}")
+	message("C_HTTP_VENDOR_LIBDIR                ${C_HTTP_VENDOR_LIBDIR}")
+	message("C_HTTP_VENDOR_SRCDIR                ${C_HTTP_VENDOR_SRCDIR}")
+	message("C_HTTP_VENDOR_SRCDIR                ${C_HTTP_VENDOR_SRCDIR}")
+	message("C_HTTP_DL_LIB_SO                    ${C_HTTP_DL_LIB_SO}")
+	message("C_HTTP_INCLUDE_PATHS                ${C_HTTP_INCLUDE_PATHS}")
+	message("C_HTTP_LINK_LIBRARIES               ${C_HTTP_LINK_LIBRARIES}")
+	message("C_HTTP_BuildDocsS                   ${C_HTTP_BuildDocs}")
 	message("DOXYGEN_FOUND                     ${DOXYGEN_FOUND}")
-	message("C_EG_BUILD_DOCS                   ${C_EG_BUILD_DOCS}")
+	message("C_HTTP_BUILD_DOCS                   ${C_HTTP_BUILD_DOCS}")
 	message("CMAKE_INSTALL_PREFIX              ${CMAKE_INSTALL_PREFIX}")
 	message("CMAKE_INSTALL_FULL_INCLUDEDIR     ${CMAKE_INSTALL_FULL_INCLUDEDIR}")
 	message("CMAKE_INSTALL_INCLUDEDIR          ${CMAKE_INSTALL_INCLUDEDIR}")
-	message("C_EG_LIB_NAME                     ${C_EG_LIB_NAME}")
+	message("C_HTTP_LIB_NAME                     ${C_HTTP_LIB_NAME}")
 endif()
 
 include(CTest) 

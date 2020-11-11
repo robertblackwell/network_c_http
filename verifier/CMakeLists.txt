@@ -3,7 +3,7 @@ add_executable(verifier_client
 )
 
 target_include_directories(verifier_client
-	PUBLIC SYSTEM ${C_EG_INCLUDE_PATHS})
+	PUBLIC SYSTEM ${C_HTTP_INCLUDE_PATHS})
 
-target_link_libraries(verifier_client PUBLIC ${C_EG_LINK_LIBRARIES})
+target_link_libraries(verifier_client PUBLIC ${C_HTTP_LINK_LIBRARIES})
 
