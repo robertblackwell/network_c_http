@@ -14,6 +14,14 @@ TODO:
  ☐ clean up logging - too much output
  ☐ build verify app to thoroughly test the server under load + keep-alive
  ☐ turn the client into an app that can send out any request - this will really test  the parser
+ ☐ url psrase has been lost with conversion away from http-parser
+Next step:
+  ☐ need a good credible benchmark setup
+  ☐ pipe trick as altermative to condition variable
+  ☐ eventfd as alternative to condition variable
+  ☐ then recast worker code to use poll/epoll
+  ☐ make all these changes conditional compilations
+  ☐ experiment with poll or epoll for io completions
 
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿

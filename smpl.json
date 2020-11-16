@@ -5,6 +5,10 @@
   "dependencies": [
     {
       "name": "nodejs_llhttp", "version": "v2.2.0"
+    },
+    {
+      "name": "nodejs_http_parser", "version": "v2.9.4"
     }
+
   ]
 }

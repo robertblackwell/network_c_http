@@ -2,15 +2,14 @@
 #include <c_http/url.h>
 #include <c_http/buffer/cbuffer.h>
 
-#include <http-parser/http_parser.h>
 #include <assert.h>
 #include <stdio.h>
 
 UrlRef Url_new(char* url)
 {
-    struct http_parser_url u;
-    http_parser_url_init(&u);
-    http_parser_parse_url(url, strlen(url),0, &u);
+    struct c_http_parser_url u;
+    c_http_parser_url_init(&u);
+    c_http_parser_parse_url(url, strlen(url),0, &u);
     UrlRef this = eg_alloc(sizeof(Url_t));
 
     this->scheme = Cbuffer_new();

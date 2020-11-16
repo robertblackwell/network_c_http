@@ -40,6 +40,8 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 	message.h
 	ll_parser_types.h
 	ll_parser.h
+	operation.h
+	oprlist.h
 	parser_test.h
 	queue.h
 	ll_reader.h
@@ -47,8 +49,13 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 	server.h
 	unittest.h
 	utils.h
+	url_parser.h
+	url.h
 	worker.h
 	writer.h
+	reactor/cbtable.h
+	reactor/reactor.h
+	reactor/timers.h
 	${EXTSRC}/llhttp/llhttp.h
 	)
 
@@ -67,6 +74,8 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	message.c
 	ll_parser_types.c
 	ll_parser.c
+	operation.c
+	oprlist.c
 	parser_test.c
 	queue.c
 	ll_reader.c
@@ -75,8 +84,13 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 #	test_helper_types.c
 	unittest.c
 	utils.c
+	url_parser.c
+	url.c
 	worker.c
 	writer.c
+		reactor/cbtable.c
+		reactor/reactor.c
+		reactor/timers.c
 	${EXTSRC}/llhttp/api.c
 	${EXTSRC}/llhttp/http.c
 	${EXTSRC}/llhttp/llhttp.c

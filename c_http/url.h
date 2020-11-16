@@ -1,7 +1,7 @@
 #define _GNU_SOURCE
 #include <assert.h>
 #include <stdio.h>
-#include <http-parser/http_parser.h>
+#include <c_http/url_parser.h>
 #include <c_http/alloc.h>
 #include <c_http/unittest.h>
 #include <c_http/buffer/cbuffer.h>
@@ -22,7 +22,7 @@ typedef struct Url_s {
     CbufferRef query;
     CbufferRef user_info;
 
-} Url_t, Url;
+} Url_t, Url, *UrlRef;
 
 UrlRef Url_new(char* url);
 void Url_free(UrlRef* this_ptr);

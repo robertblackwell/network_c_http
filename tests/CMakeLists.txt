@@ -22,8 +22,9 @@ add_subdirectory(test_buffers)
 
 # dont run this one without a server up and running
 # add_subdirectory(test_client)
-
-# add_subdirectory(test_url)
+add_subdirectory(test_epoll)
+add_subdirectory(test_url)
+add_subdirectory(test_url_parser)
 add_subdirectory(test_query)
 add_subdirectory(test_list)
 add_subdirectory(test_kvpair)
