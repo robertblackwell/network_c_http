@@ -1,33 +1,25 @@
-#ifndef c_http_reactor_timers_h
-#define c_http_reactor_timers_h
-#include <c_http/list.h>
+#ifndef c_http_queue_watcher_h
+#define c_http_queue_watcher_h
 #include <time.h>
-#include <c_http/reactor/cbtable.h>
+#include <stdint.h>
+#include <c_http/xr/watcher.h>
+#include <c_http/xr/runloop.h>
 
-struct R_Timer_s;
-typedef struct R_Timer_s R_Timer, *R_TimerRef;
+struct XrQueueWatcher_s;
+typedef struct XrQueueWatcher_s XrQueueWatcher, *XrQueueWatcherRef;
+typedef uint64_t XrQueueEvent;
 
-typedef void(R_TimerCallback(R_TimerRef timer, void* arg, uint64_t event));
+typedef void(XrQueueWatcherCallback(XrQueueWatcherRef watcher, void* arg, XrQueueEvent event));
+typedef void(XrQueuetWatcherCaller(void* ctx));
 
-
-struct R_Timer_s {
-    int     fd;
-    time_t  expiry_time;
-    CallbackData cb_data;
+struct XrQueueWatcher_s {
+    struct XrWatcher_s;
+    void*                   queue;
+    XrQueueWatcherCallback* cb;
 };
 
-struct R_TimerList_s {
-    int     fd; // the fd being used for timers - hay get removed in future
-    int     earliest_expiry;
-    ListRef list;
-};
-typedef struct R_TimerList_s R_TimerList, *R_TimerListRef;
-
-R_TimerRef RTimer_new();
-void RTimer_free(R_TimerRef this);
-
-R_TimerListRef RTimerList_new();
-void RTimerList_free(R_TimerListRef this);
+XrQueueWatcherRef Xrqw_new(XrRunloopRef runloop);
+void Xrqw_free(XrQueueWatcherRef this);
 
 
 #endif

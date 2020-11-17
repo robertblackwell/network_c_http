@@ -1,23 +1,25 @@
-#ifndef REACTOR_H
-#define REACTOR_H
+#ifndef c_http_xr_runloop_h
+#define c_http_xr_runloop_h
 
 #include <stdint.h>
 #include <time.h>
 
 typedef void (*Callback)(void *arg, int fd, uint32_t events);
 
-typedef struct reactor Reactor, *ReactorRef;
+typedef struct XrRunloop_s XrRunloop, *XrRunloopRef;
+typedef struct XrWatcher_s XrWatcher, *XrWatcherRef;
 
-ReactorRef reactor_new(void);
 
-int reactor_destroy(ReactorRef reactor);
+XrRunloopRef XrRunloop_new(void);
 
-int reactor_register(ReactorRef reactor, int fd, uint32_t interest, Callback callback, void *callback_arg);
+int XrRunloop_destroy(XrRunloopRef rl);
 
-int reactor_deregister(ReactorRef reactor, int fd);
+int XrRunloop_register(XrRunloopRef rl, int fd, uint32_t interest, XrWatcherRef wref);
 
-int reactor_reregister(ReactorRef reactor, int fd, uint32_t interest, Callback callback, void *callback_arg);
+int XrRunloop_deregister(XrRunloopRef rl, int fd);
 
-int reactor_run(ReactorRef reactor, time_t timeout);
+int XrRunloop_reregister(XrRunloopRef rl, int fd, uint32_t interest, XrWatcherRef wref);
 
-#endif // REACTOR_H
+int XrRunloop_run(XrRunloopRef rl, time_t timeout);
+
+#endif

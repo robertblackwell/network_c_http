@@ -53,9 +53,13 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 	url.h
 	worker.h
 	writer.h
-	reactor/cbtable.h
-	reactor/reactor.h
-	reactor/timers.h
+	xr/cbtable.h
+	xr/runloop.h
+	xr/twatcher.h
+	xr/qwatcher.h
+	xr/swatcher.h
+		xr/watcher.h
+		xr/types.h
 	${EXTSRC}/llhttp/llhttp.h
 	)
 
@@ -88,9 +92,13 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	url.c
 	worker.c
 	writer.c
-		reactor/cbtable.c
-		reactor/reactor.c
-		reactor/timers.c
+
+		xr/cbtable.c
+		xr/runloop.c
+		xr/twatcher.c
+		xr/swatcher.c
+		xr/qwatcher.c
+		xr/watcher.c
 	${EXTSRC}/llhttp/api.c
 	${EXTSRC}/llhttp/http.c
 	${EXTSRC}/llhttp/llhttp.c
