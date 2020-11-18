@@ -12,7 +12,7 @@ typedef struct XrWatcher_s XrWatcher, *XrWatcherRef;
 
 XrRunloopRef XrRunloop_new(void);
 
-int XrRunloop_destroy(XrRunloopRef rl);
+void XrRunloop_free(XrRunloopRef rl);
 
 int XrRunloop_register(XrRunloopRef rl, int fd, uint32_t interest, XrWatcherRef wref);
 

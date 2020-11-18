@@ -7,6 +7,7 @@
 #define CBTABLE_MAX 4096
 
 struct CbTable_s {
+    uint64_t count;
 	XrWatcher* entries[CBTABLE_MAX];
 };
 
@@ -14,6 +15,7 @@ typedef struct CbTable_s CbTable, *CbTableRef;
 
 void CbTable_init(CbTableRef this)
 {
+    this->count = 0;
 	for(int i = 0; i < CBTABLE_MAX; i++) {
 		this->entries[i] = NULL;
 	}
@@ -37,6 +39,7 @@ void CbTable_insert(CbTableRef this, XrWatcherRef watcher, int fd)
 {
 	assert(this->entries[fd] == NULL);
 	this->entries[fd] = watcher;
+	this->count++;
 }
 void CbTable_remove(CbTableRef this, int fd)
 {
@@ -44,6 +47,7 @@ void CbTable_remove(CbTableRef this, int fd)
 	XrWatcherRef wr = (this->entries[fd]);
 	wr->free(wr);
 	this->entries[fd] = NULL;
+	this->count--;
 }
 XrWatcherRef CbTable_lookup(CbTableRef this, int fd)
 {
@@ -51,7 +55,7 @@ XrWatcherRef CbTable_lookup(CbTableRef this, int fd)
 	return 	(this->entries[fd]);
 
 }
-int iterator(CbTableRef this)
+int CbTable_iterator(CbTableRef this)
 {
     for(int i = 0; i < CBTABLE_MAX; i++) {
         if (this->entries[i] != NULL) {
@@ -60,7 +64,7 @@ int iterator(CbTableRef this)
     }
     return -1;
 }
-int next_iterator(CbTableRef this, int iter)
+int CbTable_next_iterator(CbTableRef this, int iter)
 {
     assert(iter+1 < CBTABLE_MAX);
     for(int i = iter+1; i < CBTABLE_MAX; i++) {
@@ -69,4 +73,8 @@ int next_iterator(CbTableRef this, int iter)
         }
     }
     return -1;
+}
+uint64_t CbTable_size(CbTableRef this)
+{
+    return this->count;
 }

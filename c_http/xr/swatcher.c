@@ -13,7 +13,7 @@ static void handler(void* ctx, int fd, uint64_t event)
     assert(fd == sw->fd);
     sw->cb(sw, event);
 }
-static void anaonymous_free(XrWatcherRef p)
+static void anonymous_free(XrWatcherRef p)
 {
     XrSocketWatcherRef twp = (XrSocketWatcherRef)p;
     Xrsw_free(twp);
@@ -21,7 +21,7 @@ static void anaonymous_free(XrWatcherRef p)
 void Xrtw_init(XrSocketWatcherRef this, XrRunloopRef runloop)
 {
     this->runloop = runloop;
-    this->free = &anaonymous_free;
+    this->free = &anonymous_free;
     this->handler = &handler;
 }
 XrSocketWatcherRef Xrtw_new(XrRunloopRef rl)

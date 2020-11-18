@@ -25,9 +25,6 @@ struct XrWatcher_s {
     void(*handler)(void* ctx, int fd, uint64_t event);
 };
 
-void XrWatcher_call_handler(XrWatcherRef this)
-{
-
-}
+void XrWatcher_call_handler(XrWatcherRef this);
 
 #endif

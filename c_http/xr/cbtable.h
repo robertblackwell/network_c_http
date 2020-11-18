@@ -13,5 +13,5 @@ void CbTable_remove(CbTableRef this, int fd);
 XrWatcherRef CbTable_lookup(CbTableRef this,int fd);
 int CbTable_iterator(CbTableRef this);
 int CbTable_next_iterator(CbTableRef this, int iter);
-
+uint64_t CbTable_size(CbTableRef this);
 #endif
