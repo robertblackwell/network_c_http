@@ -1,0 +1,8 @@
+XR Things to do :
+  Complete versions 1:
+    ☐ write and test qwatcher
+    ☐ combine new and register into a single call and use arm and disarm consistently
+  Version 2:
+   ☐ timers have their own chain and tiggered by epoll_wait return rather than use an FD
+   ☐ io watchers need to support multiple watchers per fd each watching different events and different callbacks. This is so each socket fd can have both a read watcher and a write watcher. This is necessary to handle duplex protocols such as http/1.1 tunnel.
+   ☐ will know the queue requirements when have experience with queues

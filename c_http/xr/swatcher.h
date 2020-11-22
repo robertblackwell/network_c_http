@@ -9,21 +9,23 @@
 
 typedef uint64_t XrSocketEvent;
 
-typedef void(XrSocketWatcherCallback(XrSocketWatcherRef watcher, XrSocketEvent event));
+typedef void(XrSocketWatcherCallback(XrSocketWatcherRef watch, void* arg, uint64_t event));
 typedef void(XrSocketWatcherCaller(void* ctx));
 
 struct XrSocketWatcher_s {
     struct XrWatcher_s;
 
     XrSocketWatcherCallback* cb;
+    void*                    cb_ctx;
 
 };
 
-XrSocketWatcherRef Xrsw_new(XrRunloopRef runloop);
+XrSocketWatcherRef Xrsw_new(XrRunloopRef runloop, int fd);
 void Xrsw_free(XrSocketWatcherRef this);
-void Xrtw_watch(XrSocketWatcherRef this, uint64_t watch_what);
-void Xrtw_change_watch(XrSocketWatcherRef this, uint64_t watch_what);
-void Xrtw_clear(XrSocketWatcherRef this);
+void Xrsw_register(XrSocketWatcherRef this, XrSocketWatcherCallback cb, void* arg,  uint64_t watch_what);
+void Xrsw_change_watch(XrSocketWatcherRef this, XrSocketWatcherCallback cb, void* arg, uint64_t watch_what);
+
+void Xrsw_deregister(XrSocketWatcherRef this);
 
 
 #endif

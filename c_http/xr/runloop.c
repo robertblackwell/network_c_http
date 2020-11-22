@@ -95,7 +95,9 @@ int XrRunloop_deregister(XrRunloopRef this, int fd)
 int XrRunloop_reregister(XrRunloopRef this, int fd, uint32_t interest, XrWatcherRef wref) {
     XR_ASSERT((CbTable_lookup(this->table, fd) != NULL),"fd not in CbTable");
     XR_RL_CTL(this, EPOLL_CTL_MOD, fd, interest)
-    CbTable_insert(this->table, wref, fd);
+    // entry must already be in table
+    XrWatcherRef wref_tmp = CbTable_lookup(this->table, fd);
+    assert(wref == wref_tmp);
     return 0;
 }
 
@@ -112,6 +114,7 @@ int XrRunloop_run(XrRunloopRef this, time_t timeout) {
         // test to see if watcher list is empty - in which case exit loop
         if(CbTable_size(this->table) == 0) {
 //            close(this->epoll_fd);
+            XR_PRINTF("XrRunloop_run() CbTable_size == 0");
             goto cleanup;
         }
         int nfds = epoll_wait(this->epoll_fd, events, MAX_EVENTS, -1);

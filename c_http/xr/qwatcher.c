@@ -1,30 +1,71 @@
 #include <c_http/xr/qwatcher.h>
+#include <assert.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/epoll.h>
+#include <unistd.h>
 
-XrQueueWatcherRef Xrqw_new(XrRunloopRef rl)
+
+static void handler(void* ctx, int fd, uint64_t event)
 {
-    return NULL;
+    XrQueueWatcherRef qw = (XrQueueWatcherRef)ctx;
+    assert(fd == qw->fd);
+    qw->cb(qw, qw->cb_ctx, event);
 }
-void Xrqw__free(XrQueueWatcherRef this)
+static void anonymous_free(XrWatcherRef p)
 {
+    XrQueueWatcherRef twp = (XrQueueWatcherRef)p;
+    Xrqw_free(twp);
 }
-static void dealloc(void** t)
+void Xrqw_init(XrQueueWatcherRef this, XrRunloopRef runloop, EvfdQueueRef qref)
 {
-    Xrqw__free((XrQueueWatcherRef )t);
+    this->type = XR_WATCHER_QUEUE;
+    sprintf(this->tag, "XRQW");
+    this->queue = qref;
+    this->fd = Evfdq_readfd(qref);
+    this->runloop = runloop;
+    this->free = &anonymous_free;
+    this->handler = &handler;
 }
-//void RTimerList_init(R_TimerListRef this)
-//{
-//    this->fd = timerfd_create(CLOCK_REALTIME, 0);
-//    this->list = List_new(&dealloc);
-//}
-//R_TimerListRef RTimerList_new()
-//{
-//    R_TimerListRef tmp = malloc(sizeof(R_TimerList));
-//    RTimerList_init(tmp);
-//    return tmp;
-//}
-//void RTimerList_free(R_TimerListRef this)
-//{
-//}
-//int RTimerList_earliest_expiry_time(R_TimerListRef this)
-//{
-//}
+XrQueueWatcherRef Xrqw_new(XrRunloopRef rl, EvfdQueueRef qref)
+{
+    XrQueueWatcherRef this = malloc(sizeof(XrQueueWatcher));
+    Xrqw_init(this, rl, qref);
+    return this;
+}
+void Xrqw_free(XrQueueWatcherRef this)
+{
+    XRQW_TYPE_CHECK(this)
+    close(this->fd);
+    free((void*)this);
+}
+void Xrqw_register(XrQueueWatcherRef this, XrQueueWatcherCallback cb, void* arg, uint64_t watch_what)
+{
+    XRQW_TYPE_CHECK(this)
+
+    uint32_t interest = watch_what;
+    this->cb = cb;
+    this->cb_ctx = arg;
+    int res = XrRunloop_register(this->runloop, this->fd, interest, (XrWatcherRef)(this));
+    assert(res ==0);
+}
+void Xrqw_change_watch(XrQueueWatcherRef this, XrQueueWatcherCallback cb, void* arg, uint64_t watch_what)
+{
+    uint32_t interest = watch_what;
+    if( cb != NULL) {
+        this->cb = cb;
+    }
+    if (arg != NULL) {
+        this->cb_ctx = arg;
+    }
+    int res = XrRunloop_reregister(this->runloop, this->fd, interest, (XrWatcherRef)this);
+    assert(res == 0);
+}
+void Xrqw_deregister(XrQueueWatcherRef this)
+{
+    XRQW_TYPE_CHECK(this)
+
+    int res =  XrRunloop_deregister(this->runloop, this->fd);
+    assert(res == 0);
+}

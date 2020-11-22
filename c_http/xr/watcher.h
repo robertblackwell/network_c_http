@@ -13,6 +13,7 @@
 // base struct for watchers
 struct XrWatcher_s {
     XrWatcherType           type;
+    char                    tag[10];
     XrRunloopRef            runloop;
     int                     fd;
     /**

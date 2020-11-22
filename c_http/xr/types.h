@@ -2,9 +2,9 @@
 #define c_http_xr_types_h
 
 typedef enum XrWatcherType {
-    XR_WATCHER_SOCKET,
-    XR_WATCHER_TIMER,
-    XR_WATCHER_QUEUE,
+    XR_WATCHER_SOCKET = 11,
+    XR_WATCHER_TIMER = 12,
+    XR_WATCHER_QUEUE = 13,
 } XrWatcherType;
 
 typedef struct XrWatcher_s XrWatcher, *XrWatcherRef;
@@ -27,10 +27,15 @@ do { \
     assert(false); \
 } while(0)
 
+#define XR_PRINTF_ENABLE
 #ifdef XR_PRINTF_ENABLE
 #define XR_PRINTF(...) printf(__VA_ARGS__)
 #else
 #define XR_PRINTF(...)
 #endif
+
+#define XRSW_TYPE_CHECK(w) assert(w->type == XR_WATCHER_SOCKET);
+#define XRTW_TYPE_CHECK(w) assert(w->type == XR_WATCHER_TIMER);
+#define XRQW_TYPE_CHECK(w) assert(w->type == XR_WATCHER_QUEUE);
 
 #endif

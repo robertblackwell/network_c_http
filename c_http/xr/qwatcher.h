@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <c_http/xr/watcher.h>
 #include <c_http/xr/runloop.h>
+#include <c_http/xr/evfd_queue.h>
 
 struct XrQueueWatcher_s;
 typedef struct XrQueueWatcher_s XrQueueWatcher, *XrQueueWatcherRef;
@@ -14,12 +15,18 @@ typedef void(XrQueuetWatcherCaller(void* ctx));
 
 struct XrQueueWatcher_s {
     struct XrWatcher_s;
-    void*                   queue;
+    EvfdQueueRef            queue;
     XrQueueWatcherCallback* cb;
+    void*                   cb_ctx;
 };
 
-XrQueueWatcherRef Xrqw_new(XrRunloopRef runloop);
+XrQueueWatcherRef Xrqw_new(XrRunloopRef runloop, EvfdQueueRef qref);
 void Xrqw_free(XrQueueWatcherRef this);
+void Xrqw_register(XrQueueWatcherRef this, XrQueueWatcherCallback cb, void* arg,  uint64_t watch_what);
+void Xrqw_change_watch(XrQueueWatcherRef this, XrQueueWatcherCallback cb, void* arg, uint64_t watch_what);
+
+void Xrqw_deregister(XrQueueWatcherRef this);
+
 
 
 #endif

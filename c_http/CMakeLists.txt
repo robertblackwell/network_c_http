@@ -58,8 +58,9 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 	xr/twatcher.h
 	xr/qwatcher.h
 	xr/swatcher.h
-		xr/watcher.h
-		xr/types.h
+	xr/watcher.h
+	xr/types.h
+	xr/evfd_queue.h
 	${EXTSRC}/llhttp/llhttp.h
 	)
 
@@ -93,12 +94,14 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	worker.c
 	writer.c
 
-		xr/cbtable.c
-		xr/runloop.c
-		xr/twatcher.c
-		xr/swatcher.c
-		xr/qwatcher.c
-		xr/watcher.c
+	xr/cbtable.c
+	xr/runloop.c
+	xr/twatcher.c
+	xr/swatcher.c
+	xr/qwatcher.c
+	xr/watcher.c
+	xr/evfd_queue.c
+
 	${EXTSRC}/llhttp/api.c
 	${EXTSRC}/llhttp/http.c
 	${EXTSRC}/llhttp/llhttp.c
