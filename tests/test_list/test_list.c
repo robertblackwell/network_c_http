@@ -33,7 +33,7 @@ void DummyObj_free(DummyObj** dref)
 #define DOList_itr_next(lref, iter) List_itr_next(lref, iter)
 
 typedef List DObjList, *DObjListRef;
-typedef ListNode* DObjListIter, ListIter;
+typedef ListIter DObjListIter;
 
 DObjListRef  DObj_List_new();
 void         DObj_List_free(DObjListRef* lref) ;

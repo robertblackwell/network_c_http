@@ -14,7 +14,7 @@
 struct XrWatcher_s {
     XrWatcherType           type;
     char                    tag[10];
-    XrRunloopRef            runloop;
+    XrReactorRef            runloop;
     int                     fd;
     /**
      * function that knows how to free the specific type of watcher from a general ref

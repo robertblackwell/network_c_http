@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-#include <c_http/writer.h>
+#include <c_http/sync/writer.h>
 #include <c_http/alloc.h>
 #include <stdio.h>
 #include <stdlib.h>

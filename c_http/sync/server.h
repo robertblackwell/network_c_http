@@ -3,12 +3,12 @@
 
 #include <c_http/constants.h>
 #include <c_http/queue.h>
-#include <c_http/worker.h>
+#include <c_http/sync/worker.h>
 #include <c_http/message.h>
-#include <c_http/writer.h>
+#include <c_http/sync/writer.h>
 #include <c_http/socket_functions.h>
-#include <c_http/handler.h>
-#include <c_http/handler_example.h>
+#include <c_http/sync/handler.h>
+#include <c_http/sync/handler_example.h>
 
 struct Server_s {
     int                     port;

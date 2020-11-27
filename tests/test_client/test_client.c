@@ -6,7 +6,7 @@
 #include <c_http/buffer/cbuffer.h>
 #include <c_http/logger.h>
 #include <c_http/list.h>
-#include <c_http/server.h>
+#include <c_http/sync/server.h>
 #include <c_http/hdrlist.h>
 #include <c_http/client.h>
 #include <c_http/message.h>

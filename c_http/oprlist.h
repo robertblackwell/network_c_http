@@ -14,7 +14,7 @@
 typedef List OprList;
 
 typedef OprList* OprListRef;
-typedef ListNode* OprListIter, ListIter;
+typedef ListIter OprListIter;
 
 
 #define M_OprList_new() List_new(dealloc)

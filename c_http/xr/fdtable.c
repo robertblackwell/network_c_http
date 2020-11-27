@@ -1,4 +1,4 @@
-#include <c_http/xr/cbtable.h>
+#include <c_http/xr/fdtable.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -6,42 +6,42 @@
 
 #define CBTABLE_MAX 4096
 
-struct CbTable_s {
+struct FdTable_s {
     uint64_t count;
 	XrWatcher* entries[CBTABLE_MAX];
 };
 
-typedef struct CbTable_s CbTable, *CbTableRef;
+typedef struct FdTable_s FdTable, *FdTableRef;
 
-void CbTable_init(CbTableRef this)
+void FdTable_init(FdTableRef this)
 {
     this->count = 0;
 	for(int i = 0; i < CBTABLE_MAX; i++) {
 		this->entries[i] = NULL;
 	}
 }
-CbTableRef CbTable_new()
+FdTableRef FdTable_new()
 {
-	CbTableRef tmp = malloc(sizeof(CbTable));
-	CbTable_init(tmp);
+	FdTableRef tmp = malloc(sizeof(FdTable));
+	FdTable_init(tmp);
 	return tmp;
 }
-void CbTable_free(CbTableRef this)
+void FdTable_free(FdTableRef this)
 {
 	for(int i = 0; i < CBTABLE_MAX; i++) {
 		if (this->entries[i] != NULL) {
-		    CbTable_remove(this, i);
+		    FdTable_remove(this, i);
 		}
 	}
 	free((void*)this);
 }
-void CbTable_insert(CbTableRef this, XrWatcherRef watcher, int fd)
+void FdTable_insert(FdTableRef this, XrWatcherRef watcher, int fd)
 {
 	assert(this->entries[fd] == NULL);
 	this->entries[fd] = watcher;
 	this->count++;
 }
-void CbTable_remove(CbTableRef this, int fd)
+void FdTable_remove(FdTableRef this, int fd)
 {
 	assert(this->entries[fd] != NULL);
 	XrWatcherRef wr = (this->entries[fd]);
@@ -49,13 +49,13 @@ void CbTable_remove(CbTableRef this, int fd)
 	this->entries[fd] = NULL;
 	this->count--;
 }
-XrWatcherRef CbTable_lookup(CbTableRef this, int fd)
+XrWatcherRef FdTable_lookup(FdTableRef this, int fd)
 {
 	assert(this->entries[fd] != NULL);
 	return 	(this->entries[fd]);
 
 }
-int CbTable_iterator(CbTableRef this)
+int FdTable_iterator(FdTableRef this)
 {
     for(int i = 0; i < CBTABLE_MAX; i++) {
         if (this->entries[i] != NULL) {
@@ -64,7 +64,7 @@ int CbTable_iterator(CbTableRef this)
     }
     return -1;
 }
-int CbTable_next_iterator(CbTableRef this, int iter)
+int FdTable_next_iterator(FdTableRef this, int iter)
 {
     assert(iter+1 < CBTABLE_MAX);
     for(int i = iter+1; i < CBTABLE_MAX; i++) {
@@ -74,7 +74,7 @@ int CbTable_next_iterator(CbTableRef this, int iter)
     }
     return -1;
 }
-uint64_t CbTable_size(CbTableRef this)
+uint64_t FdTable_size(FdTableRef this)
 {
     return this->count;
 }

@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <c_http/xr/types.h>
-#include <c_http/xr/runloop.h>
+#include <c_http/xr/reactor.h>
 #include <c_http/xr/watcher.h>
 
 typedef uint64_t XrSocketEvent;
@@ -20,7 +20,7 @@ struct XrSocketWatcher_s {
 
 };
 
-XrSocketWatcherRef Xrsw_new(XrRunloopRef runloop, int fd);
+XrSocketWatcherRef Xrsw_new(XrReactorRef runloop, int fd);
 void Xrsw_free(XrSocketWatcherRef this);
 void Xrsw_register(XrSocketWatcherRef this, XrSocketWatcherCallback cb, void* arg,  uint64_t watch_what);
 void Xrsw_change_watch(XrSocketWatcherRef this, XrSocketWatcherCallback cb, void* arg, uint64_t watch_what);

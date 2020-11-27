@@ -17,11 +17,11 @@
 #include <c_http/oprlist.h>
 #include <c_http/unittest.h>
 #include <c_http/utils.h>
-#include <c_http/xr/runloop.h>
+#include <c_http/xr/reactor.h>
 #include <c_http/xr/watcher.h>
-#include <c_http/xr/twatcher.h>
-#include <c_http/xr/swatcher.h>
-#include <c_http/xr/qwatcher.h>
+#include <c_http/xr/timer_watcher.h>
+#include <c_http/xr/socket_watcher.h>
+#include <c_http/xr/queue_watcher.h>
 #include <c_http/xr/evfd_queue.h>
 
 typedef struct QReader_s {
@@ -29,6 +29,7 @@ typedef struct QReader_s {
     int count;
     int expected_count;
 } QReader, *QReaderRef;
+
 
 QReaderRef QReader_new(EvfdQueueRef queue, int expected_count)
 {
@@ -64,10 +65,12 @@ void QReaderHandler(XrQueueWatcherRef qw, void* ctx, uint64_t event)
     QReaderRef rdr = (QReaderRef)ctx;
 
     EvfdQueueRef queue = rdr->queue;
-    void* data = Evfdq_remove(queue);
-    printf("Q Handler received %p count: %d\n", data, rdr->count);
-    bool x = (long)data == (long)rdr->count;
+    void* queue_data = Evfdq_remove(queue);
+
+    printf("Q Handler received %p count: %d\n", queue_data, rdr->count);
+    bool x = (long)queue_data == (long)rdr->count;
     assert(x);
+
     rdr->count++;
     if (rdr->count >= rdr->expected_count) {
         Xrqw_deregister(qw);
@@ -78,11 +81,11 @@ void QReaderHandler(XrQueueWatcherRef qw, void* ctx, uint64_t event)
 void* reader_thread_func(void* arg)
 {
     QReaderRef q_rdr_ctx = (QReaderRef)arg;
-    XrRunloopRef rloop = XrRunloop_new();
-    XrQueueWatcherRef qw = Xrqw_new(rloop, q_rdr_ctx->queue);
+    XrReactorRef rtor_ref = XrReactor_new();
+    XrQueueWatcherRef qw = Xrqw_new(rtor_ref, q_rdr_ctx->queue);
     uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
     Xrqw_register(qw, QReaderHandler, arg, interest);
-    XrRunloop_run(rloop, -1);
+    XrReactor_run(rtor_ref, -1);
 }
 void* writer_thread_func(void* arg)
 {

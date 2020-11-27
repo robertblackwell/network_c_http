@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-#include <c_http/server.h>
+#include <c_http/sync/server.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -16,7 +16,7 @@
 #include <c_http/logger.h>
 #include <c_http/socket_functions.h>
 #include <c_http/queue.h>
-#include <c_http/worker.h>
+#include <c_http/sync/worker.h>
 
 
 //

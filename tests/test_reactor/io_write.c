@@ -13,10 +13,10 @@
 #include <math.h>
 #include <c_http/utils.h>
 #include <c_http/xr/types.h>
-#include <c_http/xr/runloop.h>
+#include <c_http/xr/reactor.h>
 #include <c_http/xr/watcher.h>
-#include <c_http/xr/twatcher.h>
-#include <c_http/xr/swatcher.h>
+#include <c_http/xr/timer_watcher.h>
+#include <c_http/xr/socket_watcher.h>
 
 
 void WriteCtx_init(WriteCtx* this, int fd, XrSocketWatcherRef swatcher, XrTimerWatcherRef twatcher)
@@ -100,13 +100,13 @@ static void wrtr_wait(XrTimerWatcherRef watch, void* arg, uint64_t event)
 void* writer_thread_func(void* arg)
 {
     int wait_first = 1;
-    XrRunloopRef rl = XrRunloop_new();
+    XrReactorRef rtor_ref = XrReactor_new();
     Writer* wrtr = (Writer*)arg;
     for(int i = 0; i < wrtr->count; i++) {
         WriteCtx* ctx = &(wrtr->ctx_table[i]);
 
-        wrtr->ctx_table[i].swatcher = Xrsw_new(rl, ctx->writefd);
-        wrtr->ctx_table[i].twatcher = Xrtw_new(rl);
+        wrtr->ctx_table[i].swatcher = Xrsw_new(rtor_ref, ctx->writefd);
+        wrtr->ctx_table[i].twatcher = Xrtw_new(rtor_ref);
 
         WR_CTX_CHECK_TAG(ctx)
         XRTW_TYPE_CHECK(ctx->twatcher);
@@ -125,6 +125,6 @@ void* writer_thread_func(void* arg)
         }
     }
 
-    XrRunloop_run(rl, 10000000);
+    XrReactor_run(rtor_ref, 10000000);
     return NULL;
 }

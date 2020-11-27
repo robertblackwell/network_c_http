@@ -14,7 +14,7 @@
 #include <c_http/list.h>
 typedef List HdrList;
 typedef HdrList* HdrListRef;
-typedef ListNode* HdrListIter, ListIter;
+typedef ListIter HdrListIter;
 
 
 #define M_HdrList_new() List_new(dealloc)

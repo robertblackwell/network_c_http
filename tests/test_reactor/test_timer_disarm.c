@@ -14,9 +14,9 @@
 #include <c_http/oprlist.h>
 #include <c_http/unittest.h>
 #include <c_http/utils.h>
-#include <c_http/xr/runloop.h>
+#include <c_http/xr/reactor.h>
 #include <c_http/xr/watcher.h>
-#include <c_http/xr/twatcher.h>
+#include <c_http/xr/timer_watcher.h>
 
 static struct timespec current_time()
 {
@@ -86,14 +86,14 @@ int test_timer_disarm()
 {
 
     DisarmTestCtx* test_ctx_p_1 = DisarmTestCtx_new(0, 1);
-    XrRunloopRef rl = XrRunloop_new();
+    XrReactorRef rtor_ref = XrReactor_new();
 
-    XrTimerWatcherRef tw_1 = Xrtw_new(rl);
+    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref);
 
     Xrtw_set(tw_1, &callback_disarm_1, test_ctx_p_1, 1000, true);
 
-    XrRunloop_run(rl, 10000);
-    XrRunloop_free(rl);
+    XrReactor_run(rtor_ref, 10000);
+    XrReactor_free(rtor_ref);
     UT_EQUAL_INT(test_ctx_p_1->counter, 0);
     free(test_ctx_p_1);
     return 0;
@@ -106,10 +106,10 @@ int test_timer_disarm_rearm()
     DisarmTestCtx* test_ctx_p_1 = DisarmTestCtx_new(0, 7);
     DisarmTestCtx* test_ctx_p_2 = DisarmTestCtx_new(0, 6);
 
-    XrRunloopRef rl = XrRunloop_new();
+    XrReactorRef rtor_ref = XrReactor_new();
 
-    XrTimerWatcherRef tw_1 = Xrtw_new(rl);
-    XrTimerWatcherRef tw_2 = Xrtw_new(rl);
+    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref);
+    XrTimerWatcherRef tw_2 = Xrtw_new(rtor_ref);
     // time 2 callback will rearm tw_1 after count of 5
     test_ctx_p_2->rearm_tw = tw_1;
     test_ctx_p_2->rearm_ctx = test_ctx_p_1;
@@ -121,12 +121,12 @@ int test_timer_disarm_rearm()
     Xrtw_set(tw_1, &callback_disarm_1, test_ctx_p_1, 1000, true);
     Xrtw_set(tw_2, &callback_disarm_1, test_ctx_p_2, 2000, true);
 
-    XrRunloop_run(rl, 10000);
+    XrReactor_run(rtor_ref, 10000);
     UT_EQUAL_INT(test_ctx_p_1->counter, test_ctx_p_1->max_count);
     UT_EQUAL_INT(test_ctx_p_2->counter, test_ctx_p_2->max_count);
     free(test_ctx_p_1);
     free(test_ctx_p_2);
-    XrRunloop_free(rl);
+    XrReactor_free(rtor_ref);
     return 0;
 }
 

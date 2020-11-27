@@ -135,6 +135,7 @@ set(C_HTTP_LINK_LIBRARIES
 	# ${C_HTTP_VENDOR_LIBDIR}/libcrypto.a 
 	${CMAKE_DL_LIBS}
 	${DL_LIB_SO}
+	${C_HTTP_LIB_NAME}
 	)
 
 
@@ -175,4 +176,5 @@ add_subdirectory(c_http)
 add_subdirectory(tests)
 add_subdirectory(app)
 add_subdirectory(verifier)
+add_subdirectory(async_app)
 

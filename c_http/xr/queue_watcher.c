@@ -1,4 +1,4 @@
-#include <c_http/xr/qwatcher.h>
+#include <c_http/xr/queue_watcher.h>
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -18,7 +18,7 @@ static void anonymous_free(XrWatcherRef p)
     XrQueueWatcherRef twp = (XrQueueWatcherRef)p;
     Xrqw_free(twp);
 }
-void Xrqw_init(XrQueueWatcherRef this, XrRunloopRef runloop, EvfdQueueRef qref)
+void Xrqw_init(XrQueueWatcherRef this, XrReactorRef runloop, EvfdQueueRef qref)
 {
     this->type = XR_WATCHER_QUEUE;
     sprintf(this->tag, "XRQW");
@@ -28,10 +28,10 @@ void Xrqw_init(XrQueueWatcherRef this, XrRunloopRef runloop, EvfdQueueRef qref)
     this->free = &anonymous_free;
     this->handler = &handler;
 }
-XrQueueWatcherRef Xrqw_new(XrRunloopRef rl, EvfdQueueRef qref)
+XrQueueWatcherRef Xrqw_new(XrReactorRef rtor_ref, EvfdQueueRef qref)
 {
     XrQueueWatcherRef this = malloc(sizeof(XrQueueWatcher));
-    Xrqw_init(this, rl, qref);
+    Xrqw_init(this, rtor_ref, qref);
     return this;
 }
 void Xrqw_free(XrQueueWatcherRef this)
@@ -47,7 +47,7 @@ void Xrqw_register(XrQueueWatcherRef this, XrQueueWatcherCallback cb, void* arg,
     uint32_t interest = watch_what;
     this->cb = cb;
     this->cb_ctx = arg;
-    int res = XrRunloop_register(this->runloop, this->fd, interest, (XrWatcherRef)(this));
+    int res = XrReactor_register(this->runloop, this->fd, interest, (XrWatcherRef)(this));
     assert(res ==0);
 }
 void Xrqw_change_watch(XrQueueWatcherRef this, XrQueueWatcherCallback cb, void* arg, uint64_t watch_what)
@@ -59,13 +59,13 @@ void Xrqw_change_watch(XrQueueWatcherRef this, XrQueueWatcherCallback cb, void* 
     if (arg != NULL) {
         this->cb_ctx = arg;
     }
-    int res = XrRunloop_reregister(this->runloop, this->fd, interest, (XrWatcherRef)this);
+    int res = XrReactor_reregister(this->runloop, this->fd, interest, (XrWatcherRef)this);
     assert(res == 0);
 }
 void Xrqw_deregister(XrQueueWatcherRef this)
 {
     XRQW_TYPE_CHECK(this)
 
-    int res =  XrRunloop_deregister(this->runloop, this->fd);
+    int res =  XrReactor_deregister(this->runloop, this->fd);
     assert(res == 0);
 }

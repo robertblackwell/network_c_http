@@ -10,7 +10,7 @@
 #include <c_http/datasource.h>
 #include <c_http/parser_test.h>
 #include <c_http/message.h>
-#include <c_http/ll_reader.h>
+#include <c_http/sync/ll_reader.h>
 
 #undef A_ON
 #define CHECK_HEADER(h, K, V) do {\

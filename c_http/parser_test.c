@@ -11,7 +11,7 @@
 #include <c_http/utils.h>
 #include <c_http/buffer/iobuffer.h>
 #include <c_http/rdsocket.h>
-#include <c_http/ll_reader.h>
+#include <c_http/sync/ll_reader.h>
 
 ParserTestRef ParserTest_new(char* description, char** lines, VerifyFunctionType vf)
 {

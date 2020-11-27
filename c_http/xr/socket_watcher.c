@@ -1,4 +1,4 @@
-#include <c_http/xr/swatcher.h>
+#include <c_http/xr/socket_watcher.h>
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -18,7 +18,7 @@ static void anonymous_free(XrWatcherRef p)
     XrSocketWatcherRef twp = (XrSocketWatcherRef)p;
     Xrsw_free(twp);
 }
-void Xrsw_init(XrSocketWatcherRef this, XrRunloopRef runloop, int fd)
+void Xrsw_init(XrSocketWatcherRef this, XrReactorRef runloop, int fd)
 {
     this->type = XR_WATCHER_SOCKET;
     sprintf(this->tag, "XRSW");
@@ -28,10 +28,10 @@ void Xrsw_init(XrSocketWatcherRef this, XrRunloopRef runloop, int fd)
     this->free = &anonymous_free;
     this->handler = &handler;
 }
-XrSocketWatcherRef Xrsw_new(XrRunloopRef rl, int fd)
+XrSocketWatcherRef Xrsw_new(XrReactorRef rtor_ref, int fd)
 {
     XrSocketWatcherRef this = malloc(sizeof(XrSocketWatcher));
-    Xrsw_init(this, rl, fd);
+    Xrsw_init(this, rtor_ref, fd);
     return this;
 }
 void Xrsw_free(XrSocketWatcherRef this)
@@ -47,7 +47,7 @@ void Xrsw_register(XrSocketWatcherRef this, XrSocketWatcherCallback cb, void* ar
     uint32_t interest = watch_what;
     this->cb = cb;
     this->cb_ctx = arg;
-    int res = XrRunloop_register(this->runloop, this->fd, interest, (XrWatcherRef)(this));
+    int res = XrReactor_register(this->runloop, this->fd, interest, (XrWatcherRef)(this));
     assert(res ==0);
 }
 void Xrsw_change_watch(XrSocketWatcherRef this, XrSocketWatcherCallback cb, void* arg, uint64_t watch_what)
@@ -59,14 +59,14 @@ void Xrsw_change_watch(XrSocketWatcherRef this, XrSocketWatcherCallback cb, void
     if (arg != NULL) {
         this->cb_ctx = arg;
     }
-    int res = XrRunloop_reregister(this->runloop, this->fd, interest, (XrWatcherRef)this);
+    int res = XrReactor_reregister(this->runloop, this->fd, interest, (XrWatcherRef)this);
     assert(res == 0);
 }
 void Xrsw_deregister(XrSocketWatcherRef this)
 {
     XRSW_TYPE_CHECK(this)
 
-    int res =  XrRunloop_deregister(this->runloop, this->fd);
+    int res =  XrReactor_deregister(this->runloop, this->fd);
     assert(res == 0);
 }
 

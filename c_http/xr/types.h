@@ -1,17 +1,39 @@
 #ifndef c_http_xr_types_h
 #define c_http_xr_types_h
+#include <c_http/list.h>
+#include <c_http/message.h>
+/**
+ * This is the signature of a handler function. *The address) of such a function must
+ * be provided to Server_new() in order that the server and its worker threads
+ * can call on this function to handle requests.
+ *
+ * The handler function is called once for each request and is passed the request message in its
+ * entirety together with a Writer instance that provides functions to write the response.
+ *
+ * The handler function is solely responsible for constructing and sending the response.
+ */
+typedef int(*XrHandlerFunction)(MessageRef request, void* wrttr);
+
 
 typedef enum XrWatcherType {
     XR_WATCHER_SOCKET = 11,
     XR_WATCHER_TIMER = 12,
     XR_WATCHER_QUEUE = 13,
 } XrWatcherType;
-
+/**
+ * Forward declarations
+ */
 typedef struct XrWatcher_s XrWatcher, *XrWatcherRef;
 typedef struct XrTimerWatcher_s XrTimerWatcher, *XrTimerWatcherRef;
 typedef struct XrSocketWatcher_s XrSocketWatcher, *XrSocketWatcherRef;
 typedef struct XrQueueWatcher_s XrQueueWatcher, *XrQueueWatcherRef;
-typedef struct XrRunloop_s XrRunloop, *XrRunloopRef;
+typedef struct XrReactor_s XrReactor, *XrReactorRef;
+typedef struct XrWorker_s XrWorker, *XrWorkerRef;
+typedef struct XrServer_s XrServer, *XrServerRef;
+typedef struct XrConnection_s XrConnection, *XrConnectionRef;
+typedef ListRef XrConnListRef;
+typedef ListIter XrConnListIter;
+typedef void (*WatcherCallback)(XrWatcherRef wref, void* arg, uint64_t events);
 
 #define XR_ASSERT(test, msg) \
 do { \

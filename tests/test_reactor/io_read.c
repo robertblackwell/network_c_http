@@ -17,10 +17,10 @@
 #include <c_http/oprlist.h>
 #include <c_http/unittest.h>
 #include <c_http/utils.h>
-#include <c_http/xr/runloop.h>
+#include <c_http/xr/reactor.h>
 #include <c_http/xr/watcher.h>
-#include <c_http/xr/twatcher.h>
-#include <c_http/xr/swatcher.h>
+#include <c_http/xr/timer_watcher.h>
+#include <c_http/xr/socket_watcher.h>
 
 void Reader_init(Reader* this)
 {
@@ -62,17 +62,17 @@ void rd_callback(XrSocketWatcherRef watch, void* arg, uint64_t event)
 }
 void* reader_thread_func(void* arg)
 {
-    XrRunloopRef rl = XrRunloop_new();
+    XrReactorRef rtor_ref = XrReactor_new();
     Reader* rdr = (Reader*)arg;
     for(int i = 0; i < rdr->count; i++) {
         ReadCtx* ctx = &(rdr->ctx_table[i]);
-        rdr->ctx_table[i].swatcher = Xrsw_new(rl, ctx->readfd);
+        rdr->ctx_table[i].swatcher = Xrsw_new(rtor_ref, ctx->readfd);
         XrSocketWatcherRef sw = rdr->ctx_table[i].swatcher;
         uint64_t interest = EPOLLERR | EPOLLIN;
         Xrsw_register(sw, &rd_callback, (void*) ctx, 0);
         Xrsw_change_watch(sw, &rd_callback, (void*) ctx, interest);
     }
-    XrRunloop_run(rl, 1000000);
+    XrReactor_run(rtor_ref, 1000000);
     return NULL;
 
 }

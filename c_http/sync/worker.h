@@ -1,8 +1,8 @@
-#ifndef c_ceg_worker_h
-#define c_ceg_worker_h
+#ifndef c_http_worker_h
+#define c_http_worker_h
 //#define _GNU_SOURCE
 #include <c_http/queue.h>
-#include <c_http/handler.h>
+#include <c_http/sync/handler.h>
 #include <pthread.h>
 
 struct Worker_s;

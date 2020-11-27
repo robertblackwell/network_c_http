@@ -14,9 +14,9 @@
 #include <c_http/oprlist.h>
 #include <c_http/unittest.h>
 #include <c_http/utils.h>
-#include <c_http/xr/runloop.h>
+#include <c_http/xr/reactor.h>
 #include <c_http/xr/watcher.h>
-#include <c_http/xr/twatcher.h>
+#include <c_http/xr/timer_watcher.h>
 
 static struct timespec current_time()
 {
@@ -113,16 +113,16 @@ int test_timer_single_repeating()
 {
     TestCtx* test_ctx_p = TestCtx_new(0, 5);
 
-    XrRunloopRef rl = XrRunloop_new();
+    XrReactorRef rtor_ref = XrReactor_new();
 
-    XrTimerWatcherRef tw_1 = Xrtw_new(rl);
+    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref);
 
     Xrtw_set(tw_1, &callback_1, (void*)test_ctx_p, 1000, true);
 
-    XrRunloop_run(rl, 10000);
+    XrReactor_run(rtor_ref, 10000);
     UT_EQUAL_INT(test_ctx_p->counter, test_ctx_p->max_count);
     free(test_ctx_p);
-    XrRunloop_free(rl);
+    XrReactor_free(rtor_ref);
     return 0;
 }
 
@@ -132,34 +132,34 @@ int test_timer_multiple_repeating()
     TestCtx* test_ctx_p_1 = TestCtx_new(0, 5);
     TestCtx* test_ctx_p_2 = TestCtx_new(0, 6);
 
-    XrRunloopRef rl = XrRunloop_new();
+    XrReactorRef rtor_ref = XrReactor_new();
 
-    XrTimerWatcherRef tw_1 = Xrtw_new(rl);
-    XrTimerWatcherRef tw_2 = Xrtw_new(rl);
+    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref);
+    XrTimerWatcherRef tw_2 = Xrtw_new(rtor_ref);
 
     Xrtw_set(tw_1, &callback_1, test_ctx_p_1, 1000, true);
     Xrtw_set(tw_2, &callback_1, test_ctx_p_2, 1000, true);
 
-    XrRunloop_run(rl, 10000);
+    XrReactor_run(rtor_ref, 10000);
     UT_EQUAL_INT(test_ctx_p_1->counter, test_ctx_p_1->max_count);
     UT_EQUAL_INT(test_ctx_p_2->counter, test_ctx_p_2->max_count);
     free(test_ctx_p_1);
     free(test_ctx_p_2);
-    XrRunloop_free(rl);
+    XrReactor_free(rtor_ref);
     return 0;
 }
 int test_timer_non_repeating()
 {
 
     TestCtx* test_ctx_p_1 = TestCtx_new(0, 1);
-    XrRunloopRef rl = XrRunloop_new();
+    XrReactorRef rtor_ref = XrReactor_new();
 
-    XrTimerWatcherRef tw_1 = Xrtw_new(rl);
+    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref);
 
     Xrtw_set(tw_1, &callback_non_repeating, test_ctx_p_1, 1000, false);
 
-    XrRunloop_run(rl, 10000);
-    XrRunloop_free(rl);
+    XrReactor_run(rtor_ref, 10000);
+    XrReactor_free(rtor_ref);
     UT_EQUAL_INT(test_ctx_p_1->counter, 1);
     free(test_ctx_p_1);
     return 0;

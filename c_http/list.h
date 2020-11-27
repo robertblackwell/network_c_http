@@ -18,7 +18,7 @@ typedef struct List_s List, *ListRef;
 struct ListNode_s;
 
 typedef struct ListNode_s ListNode;
-typedef ListNode* ListIterator;
+typedef ListNode* ListIterator, *ListIter;
 ///
 /// type definition for a function that knows how to deallocate
 /// the void* item field in a ListNode.

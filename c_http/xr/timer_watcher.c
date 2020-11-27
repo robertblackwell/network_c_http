@@ -8,7 +8,7 @@
 #include <sys/epoll.h>
 #include <errno.h>
 
-#include <c_http/xr/twatcher.h>
+#include <c_http/xr/timer_watcher.h>
 
 
 
@@ -52,7 +52,7 @@ static void anonymous_free(XrWatcherRef p)
     XrTimerWatcherRef twp = (XrTimerWatcherRef)p;
     Xrtw_free(twp);
 }
-void Xrtw_init(XrTimerWatcherRef this, XrRunloopRef runloop)
+void Xrtw_init(XrTimerWatcherRef this, XrReactorRef runloop)
 {
     this->type = XR_WATCHER_TIMER;
     sprintf(this->tag, "XRTW");
@@ -63,10 +63,10 @@ void Xrtw_init(XrTimerWatcherRef this, XrRunloopRef runloop)
     this->fd = timerfd_create(CLOCK_REALTIME, TFD_CLOEXEC | TFD_NONBLOCK);
     XR_PRINTF("Xrtw_init fd: %d \n", this->fd);
 }
-XrTimerWatcherRef Xrtw_new(XrRunloopRef rl)
+XrTimerWatcherRef Xrtw_new(XrReactorRef rtor_ref)
 {
     XrTimerWatcherRef this = malloc(sizeof(XrTimerWatcher));
-    Xrtw_init(this, rl);
+    Xrtw_init(this, rtor_ref);
     return this;
 }
 void Xrtw_free(XrTimerWatcherRef this)
@@ -121,7 +121,7 @@ void Xrtw_set(XrTimerWatcherRef this, XrTimerWatcherCallback cb, void* ctx, uint
     print_current_tme("Xrtw_set");
     XR_PRINTF("Xrtw_set its.it_value secs %ld nsecs: %ld \n", its.it_value.tv_sec, its.it_value.tv_nsec);
     XR_PRINTF("Xrtw_set its.it_interval secs %ld nsecs: %ld\n", its.it_interval.tv_sec, its.it_interval.tv_nsec);
-    int res = XrRunloop_register(this->runloop, this->fd, interest, (XrWatcherRef)(this));
+    int res = XrReactor_register(this->runloop, this->fd, interest, (XrWatcherRef)(this));
     assert(res ==0);
 }
 void Xrtw_update(XrTimerWatcherRef this, uint64_t interval_ms, bool repeating)
@@ -132,7 +132,7 @@ void Xrtw_update(XrTimerWatcherRef this, uint64_t interval_ms, bool repeating)
     int flags = 0;
     int rc = timerfd_settime(this->fd, flags, &its, NULL);
     assert(rc == 0);
-    int res = XrRunloop_reregister(this->runloop, this->fd, interest, (XrWatcherRef)this);
+    int res = XrReactor_reregister(this->runloop, this->fd, interest, (XrWatcherRef)this);
     assert(res == 0);
 }
 void Xrtw_disarm(XrTimerWatcherRef this)
@@ -160,7 +160,7 @@ void Xrtw_clear(XrTimerWatcherRef this)
 {
     XRTW_TYPE_CHECK(this)
     XR_PRINTF("Xrtw_clear this->fd : %d\n", this->fd);
-    int res =  XrRunloop_deregister(this->runloop, this->fd);
+    int res =  XrReactor_deregister(this->runloop, this->fd);
     if(res != 0) {
         XR_PRINTF("Xrtw_clear res: %d errno: %d \n", res, errno);
     }

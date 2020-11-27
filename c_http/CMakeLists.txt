@@ -29,10 +29,7 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 	buffer/cbuffer.h
 	buffer/buffer_chain.h
 	buffer/iobuffer.h
-	client.h
 	datasource.h
-	handler.h
-	handler_example.h
 	kvpair.h
 	hdrlist.h
 	list.h
@@ -44,23 +41,33 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 	oprlist.h
 	parser_test.h
 	queue.h
-	ll_reader.h
 	rdsocket.h
-	server.h
 	unittest.h
 	utils.h
 	url_parser.h
 	url.h
-	worker.h
-	writer.h
-	xr/cbtable.h
-	xr/runloop.h
-	xr/twatcher.h
-	xr/qwatcher.h
-	xr/swatcher.h
+
+	sync/client.h
+	sync/handler.h
+	sync/handler_example.h
+	sync/server.h
+	sync/worker.h
+	sync/writer.h
+
+	xr/fdtable.h
+	xr/reactor.h
+	xr/timer_watcher.h
+	xr/queue_watcher.h
+	xr/socket_watcher.h
 	xr/watcher.h
 	xr/types.h
 	xr/evfd_queue.h
+	xr/xr_server.h
+	xr/xr_worker.h
+	xr/conn.h
+	xr/conn_list.h
+	xr/run_list.h
+
 	${EXTSRC}/llhttp/llhttp.h
 	)
 
@@ -69,9 +76,7 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	buffer/buffer_chain.c
 	buffer/cbuffer.c
 	buffer/iobuffer.c
-	client.c
 	datasource.c
-	handler_example.c
 	kvpair.c
 	hdrlist.c
 	list.c
@@ -83,24 +88,32 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	oprlist.c
 	parser_test.c
 	queue.c
-	ll_reader.c
 	rdsocket.c
-	server.c
 #	test_helper_types.c
 	unittest.c
 	utils.c
 	url_parser.c
 	url.c
-	worker.c
-	writer.c
 
-	xr/cbtable.c
-	xr/runloop.c
-	xr/twatcher.c
-	xr/swatcher.c
-	xr/qwatcher.c
+	sync/client.c
+	sync/writer.c
+	sync/ll_reader.c
+	sync/server.c
+	sync/worker.c
+	sync/handler_example.c
+
+	xr/xr_server.c
+	xr/xr_worker.c
+	xr/fdtable.c
+	xr/reactor.c
+	xr/timer_watcher.c
+	xr/socket_watcher.c
+	xr/queue_watcher.c
 	xr/watcher.c
 	xr/evfd_queue.c
+	xr/conn.c
+	xr/conn_list.c
+	xr/run_list.c
 
 	${EXTSRC}/llhttp/api.c
 	${EXTSRC}/llhttp/http.c

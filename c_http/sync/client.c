@@ -1,9 +1,9 @@
-#include <c_http/client.h>
+#include <c_http/sync/client.h>
 #include <c_http/alloc.h>
 #include <c_http/buffer/cbuffer.h>
 #include <c_http/message.h>
-#include <c_http/ll_reader.h>
-#include <c_http/writer.h>
+#include <c_http/sync/ll_reader.h>
+#include <c_http/sync/writer.h>
 
 #include <assert.h>
 #include <stdio.h>

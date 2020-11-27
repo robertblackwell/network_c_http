@@ -15,10 +15,10 @@
 #include <sys/epoll.h>
 #include <math.h>
 #include <c_http/utils.h>
-#include <c_http/xr/runloop.h>
+#include <c_http/xr/reactor.h>
 #include <c_http/xr/watcher.h>
-#include <c_http/xr/twatcher.h>
-#include <c_http/xr/swatcher.h>
+#include <c_http/xr/timer_watcher.h>
+#include <c_http/xr/socket_watcher.h>
 
 #define WRTR_TAG 123456789
 #define WCTX_TAG 918273645

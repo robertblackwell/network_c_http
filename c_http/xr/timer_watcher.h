@@ -1,6 +1,6 @@
 #ifndef c_http_twatcher_h
 #define c_http_twatcher_h
-#include <c_http/xr/runloop.h>
+#include <c_http/xr/reactor.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <c_http/xr/watcher.h>
@@ -24,7 +24,7 @@ struct XrTimerWatcher_s {
     void*                   cb_ctx;
 };
 
-XrTimerWatcherRef Xrtw_new(XrRunloopRef rl);
+XrTimerWatcherRef Xrtw_new(XrReactorRef rtor_ref);
 void Xrtw_free(XrTimerWatcherRef this);
 void Xrtw_set(XrTimerWatcherRef this, XrTimerWatcherCallback cb, void* ctx, uint64_t interval_ms, bool repeating);
 void Xrtw_update(XrTimerWatcherRef this, uint64_t interval_ms, bool repeating);
