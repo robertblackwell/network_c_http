@@ -56,18 +56,19 @@ void Writer_add_fd(Writer* this, int fd)
 }
 static void wrtr_wait(XrTimerWatcherRef watch, void* arg, uint64_t event);
 static int write_count = 0;
-static void wrtr_cb(XrSocketWatcherRef watch, void* arg, uint64_t event)
+static void wrtr_cb(XrWatcherRef watch, void* arg, uint64_t event)
 {
-    XRSW_TYPE_CHECK(watch)
+    XrSocketWatcherRef sock_watch = (XrSocketWatcherRef)watch;
+    XRSW_TYPE_CHECK(sock_watch)
     XR_PRINTF("test_io: Socket watcher wrtr_callback");
 
     char* wbuf = malloc(100);
     sprintf(wbuf, "this is a line from writer - %d\n", write_count);
-    int nwrite = write(watch->fd, wbuf, strlen(wbuf));
+    int nwrite = write(sock_watch->fd, wbuf, strlen(wbuf));
     free(wbuf);
 
     XR_PRINTF("test_io: Socket watcher wrtr_callback fd: %d event : %lx nread: %d errno: %d\n", watch->fd,  event, nwrite, errno);
-    Xrsw_change_watch(watch, NULL, NULL, 0);
+    Xrsw_change_watch(sock_watch, NULL, NULL, 0);
     WriteCtx* ctx = (WriteCtx*)(arg);
     WR_CTX_CHECK_TAG(ctx)
     XRSW_TYPE_CHECK(ctx->swatcher)

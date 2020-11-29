@@ -63,10 +63,11 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 	xr/types.h
 	xr/evfd_queue.h
 	xr/xr_server.h
-	xr/xr_worker.h
 	xr/conn.h
 	xr/conn_list.h
+	xr/xr_reader.h
 	xr/run_list.h
+	xr/handler_example.h
 
 	${EXTSRC}/llhttp/llhttp.h
 	)
@@ -103,7 +104,6 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	sync/handler_example.c
 
 	xr/xr_server.c
-	xr/xr_worker.c
 	xr/fdtable.c
 	xr/reactor.c
 	xr/timer_watcher.c
@@ -114,6 +114,8 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	xr/conn.c
 	xr/conn_list.c
 	xr/run_list.c
+	xr/xr_reader.c
+	xr/handler_example.c
 
 	${EXTSRC}/llhttp/api.c
 	${EXTSRC}/llhttp/http.c

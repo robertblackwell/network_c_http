@@ -9,7 +9,7 @@
 
 typedef uint64_t XrSocketEvent;
 
-typedef void(XrSocketWatcherCallback(XrSocketWatcherRef watch, void* arg, uint64_t event));
+typedef void(XrSocketWatcherCallback(XrWatcherRef watch, void* arg, uint64_t event));
 typedef void(XrSocketWatcherCaller(void* ctx));
 
 struct XrSocketWatcher_s {

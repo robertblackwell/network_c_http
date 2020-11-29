@@ -44,7 +44,7 @@ void Reader_add_fd(Reader* this, int fd)
 }
 
 static int read_count = 0;
-void rd_callback(XrSocketWatcherRef watch, void* arg, uint64_t event)
+void rd_callback(XrWatcherRef watch, void* arg, uint64_t event)
 {
     read_count++;
     ReadCtx* ctx = (ReadCtx*)arg;

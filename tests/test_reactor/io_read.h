@@ -38,6 +38,6 @@ Reader* Reader_new();
 void Reader_free(Reader* this);
 void Reader_add_fd(Reader* this, int fd);
 
-void rd_callback(XrSocketWatcherRef watch, void* arg, uint64_t event);
+void rd_callback(XrWatcherRef watch, void* arg, uint64_t event);
 void* reader_thread_func(void* arg);
 #endif

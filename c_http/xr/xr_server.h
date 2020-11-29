@@ -3,9 +3,10 @@
 
 #include <c_http/constants.h>
 #include <c_http/xr/evfd_queue.h>
-#include <c_http/xr/xr_worker.h>
 #include <c_http/message.h>
 #include <c_http/socket_functions.h>
+#include <c_http/xr/handler_example.h>
+
 #define XR_NBR_WORKERS 1
 struct XrServer_s {
     int                     port;
@@ -23,7 +24,7 @@ typedef struct  XrServer_s XrServer, *XrServerRef;
  * \param handler  A function conforming to HandlerFunction (see handler.h) which will be called to handle all requests that are parsed successfully.
  * \return
  */
-XrServerRef XrServer_new(int port, XrHandlerFunction handler);
+XrServerRef XrServer_new(int port);
 void XrServer_free(XrServerRef* srefptr);
 void XrServer_listen(XrServerRef server);
 void XrServer_terminate(XrServerRef this);

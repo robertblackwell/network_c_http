@@ -112,6 +112,42 @@ bool BufferChain_eq_cstr(const BufferChainRef this, char* cstr)
     }
     return true;
 }
+
+BufferChainIter BufferChain_iterator(BufferChainRef this)
+{
+    return List_iterator(this->m_chain);
+}
+BufferChainIter BufferChain_iter_next(BufferChainRef this, BufferChainIter iter)
+{
+    return List_itr_next(this->m_chain, iter);
+}
+CbufferRef BufferChain_unpack_iter(BufferChainRef this, BufferChainIter iter)
+{
+    return (CbufferRef)List_itr_unpack(this->m_chain, iter);
+}
+void BufferChain_remove_iter(BufferChainRef this, BufferChainIter iter)
+{
+    BufferChainIter tmp = iter;
+    List_itr_remove(this->m_chain, &tmp);
+}
+
+void BufferChain_add_front(BufferChainRef this, CbufferRef cbuf)
+{
+    List_add_front(this->m_chain, (void*) cbuf);
+}
+void BufferChain_add_back(BufferChainRef this, CbufferRef cbuf)
+{
+    List_add_back(this->m_chain, (void*) cbuf);
+}
+
+CbufferRef BufferChain_pop_front(BufferChainRef this)
+{
+    CbufferRef front = (CbufferRef) List_first(this->m_chain);
+    List_remove_first(this->m_chain);
+    return front;
+}
+
+
 #ifdef BVBVB
 int BufferChain_blocks(BufferChainRef this)
 {

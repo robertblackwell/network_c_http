@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <c_http/alloc.h>
+#include <c_http/buffer/cbuffer.h>
 #define IOBUFFER_DEFAULT_CAPACITY 4*1024
 /**
  * IOBuffer is intended for:
@@ -25,6 +26,12 @@
  *      bytes_written = write(fd, IOBuffer_data(this), IOBuffer_datalen(this))
  *      IOBuffer_consume(this, bytes_written)
  *
+ *  NOTE: IOBuffers never expand - they can be made to have any capacity needed at creation time, there after
+ *  they cannot expand. Consequence of this is that there re no "append" style methods.
+ *
+ *  It would be dangerous to allow a buffer to expand (and the address of the underlying memory possibly change)
+ *  while the same buffer was being used for IO
+ *
   */
 typedef struct IOBuffer_s {
     void*  mem_p;             // always points to the start of buffer
@@ -39,6 +46,37 @@ typedef struct IOBuffer_s {
 IOBufferRef IOBuffer_init(IOBufferRef this, int capacity);
 IOBufferRef IOBuffer_new_with_capacity(int capacity);
 IOBufferRef IOBuffer_new();
+
+/**
+ * Makes an IOBUffer from the content of a Cbuffer by COPY
+ * \param cbuf  CbufferRef
+ * \return IOBufferRef
+ *
+ * WARNING - AT SOME POINT THIS FUNCTION WILL ACQUIRE MOVE SEMANTICS
+ * AND THE SOURCE Cbuffer will be left
+ *  either
+ *      A) consistent but EMPTY
+ *      B) undefined - to do this we will need a new Cbuffer method called Cbuffer_steal_content
+ *          needs more thinking about
+ *
+ */
+IOBufferRef IOBuffer_from_cbuffer(CbufferRef cbuf);
+
+/**
+ * Makes an IOBUffer from the a pointer and length by COPY
+ * \param buf char* pointing to start of data to put in IOBUffer
+ * \param len int   length of data
+ * \return IOBufferRef
+ */
+IOBufferRef IOBuffer_from_buf(char* buf, int len);
+
+/**
+ * Makes an IOBUffer from a c-string by COPY
+ * \param cbuf  CbufferRef
+ * \return IOBufferRef
+ */
+IOBufferRef IOBuffer_from_cstring(char* cstr);
+
 void IOBuffer_set_used(IOBufferRef this, int bytes_used);
 /**
  * Returns a reference pointer to the start of active data in the buffer.

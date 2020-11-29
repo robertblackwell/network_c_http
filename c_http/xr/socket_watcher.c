@@ -11,7 +11,7 @@ static void handler(void* ctx, int fd, uint64_t event)
 {
     XrSocketWatcherRef sw = (XrSocketWatcherRef)ctx;
     assert(fd == sw->fd);
-    sw->cb(sw, sw->cb_ctx, event);
+    sw->cb((XrWatcherRef)sw, sw->cb_ctx, event);
 }
 static void anonymous_free(XrWatcherRef p)
 {

@@ -24,7 +24,7 @@ int main()
         printf("app.c main signal() failed");
     }
     printf("Hello this is xr main \n");
-    XrServerRef sref = XrServer_new(9001, handler_example);
+    XrServerRef sref = XrServer_new(9001);
     g_sref = sref;
     XrServer_listen(sref);
     XrServer_free(&sref);

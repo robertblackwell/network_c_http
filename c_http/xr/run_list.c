@@ -27,7 +27,7 @@ void Functor_call(FunctorRef this)
 
 
 static void dealloc (void **ptr)
-{ Functor_free ((FunctorRef) ptr); }
+{ Functor_free ((FunctorRef) *ptr); }
 
 RunListRef RunList_new ()
 { return (RunListRef) List_new (dealloc); }

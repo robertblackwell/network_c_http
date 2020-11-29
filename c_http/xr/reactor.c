@@ -82,7 +82,7 @@ void XrReactor_free(XrReactorRef this)
 
 int XrReactor_register(XrReactorRef this, int fd, uint32_t interest, XrWatcherRef wref)
 {
-    printf("XrReactor::register fd : %d  for events %ld\n", fd, interest);
+    printf("XrReactor::register fd : %d  for events %d\n", fd, interest);
     XrReactor_epoll_ctl (this, EPOLL_CTL_ADD, fd, interest);
     FdTable_insert(this->table, wref, fd);
     return 0;
@@ -154,7 +154,7 @@ int XrReactor_run(XrReactorRef this, time_t timeout) {
             FunctorRef fnc = RunList_itr_unpack(this->run_list, iter);
             Functor_call(fnc);
             RunListIter next_iter = RunList_itr_next(this->run_list, iter);
-            RunList_itr_remove(this->run_list, iter);
+            RunList_itr_remove(this->run_list, &iter);
             iter = next_iter;
         }
     }

@@ -30,10 +30,16 @@ typedef struct XrQueueWatcher_s XrQueueWatcher, *XrQueueWatcherRef;
 typedef struct XrReactor_s XrReactor, *XrReactorRef;
 typedef struct XrWorker_s XrWorker, *XrWorkerRef;
 typedef struct XrServer_s XrServer, *XrServerRef;
-typedef struct XrConnection_s XrConnection, *XrConnectionRef;
+typedef struct XrConn_s XrConn, *XrConnRef;
+typedef struct XrHandler_s XrHandler, *XrHandlerRef;
+
 typedef ListRef XrConnListRef;
 typedef ListIter XrConnListIter;
 typedef void (*WatcherCallback)(XrWatcherRef wref, void* arg, uint64_t events);
+
+typedef void (XrConnReadCallback)(XrConnRef conn, void* arg, int bytes_read, int status);
+typedef void (*XrConnReadMsgCallback)(XrConnRef conn, void* arg, int status);
+typedef void (*XrConnWriteCallback)(XrConnRef conn, void* arg, int status);
 
 #define XR_ASSERT(test, msg) \
 do { \

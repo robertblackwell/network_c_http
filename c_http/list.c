@@ -230,6 +230,7 @@ ListIterator List_itr_next(const ListRef lref, const ListIterator itr)
 void List_itr_remove(ListRef lref, ListIterator* itr_ptr)
 {
     ASSERT_NOT_NULL(lref);
+    ASSERT_NOT_NULL(itr_ptr);
     ListNode* itr = *itr_ptr;
     ASSERT_NOT_NULL(itr);
     if(lref->count == 0)

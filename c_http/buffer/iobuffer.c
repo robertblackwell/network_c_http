@@ -34,6 +34,26 @@ IOBufferRef IOBuffer_new()
 {
     return IOBuffer_new_with_capacity(IOBUFFER_DEFAULT_CAPACITY);
 }
+IOBufferRef IOBuffer_from_cbuffer(CbufferRef cbuf)
+{
+    int cap = Cbuffer_size(cbuf);
+    IOBufferRef this = IOBuffer_new_with_capacity(cap*2);
+    memcpy(IOBuffer_space(this), Cbuffer_data(cbuf), cap);
+    IOBuffer_commit(this, cap);
+    return this;
+}
+IOBufferRef IOBuffer_from_buf(char* buf, int len)
+{
+    int cap = len;
+    IOBufferRef this = IOBuffer_new_with_capacity(cap*2);
+    memcpy(IOBuffer_space(this), buf, len);
+    IOBuffer_commit(this, cap);
+    return this;
+}
+IOBufferRef IOBuffer_from_cstring(char* cstr)
+{
+    return IOBuffer_from_buf(cstr, strlen(cstr));
+}
 
 void* IOBuffer_data(const IOBufferRef this)
 {
@@ -59,10 +79,14 @@ void IOBuffer_consume(IOBufferRef this, int byte_count)
 {
     this->buffer_ptr += byte_count;
     // check no off end of buffer
-    assert(this->buffer_ptr < (this->mem_p + this->buffer_capacity));
+    void* x = this->mem_p + this->buffer_capacity;
+    assert(this->buffer_ptr <= (this->mem_p + this->buffer_capacity));
     this->buffer_remaining -= byte_count;
     // check consume did not remove too much
     assert(this->buffer_remaining >= 0);
+    if(this->buffer_remaining == 0) {
+        this->buffer_ptr = this->mem_p;
+    }
 }
 void IOBuffer_destroy(IOBufferRef this)
 {
