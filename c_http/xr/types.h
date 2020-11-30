@@ -55,6 +55,8 @@ do { \
     assert(false); \
 } while(0)
 
+#define XR_TRACE(fmt, ...) XR_PRINTF("%s" fmt " \n", __func__, __VA_ARGS__);
+
 #define XR_PRINTF_ENABLE
 #ifdef XR_PRINTF_ENABLE
 #define XR_PRINTF(...) printf(__VA_ARGS__)

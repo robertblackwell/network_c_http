@@ -212,7 +212,27 @@ static void state_machine(XrWatcherRef wp, void *arg, uint64_t event)
     }
 #undef NEXT_STATE
 }
-
+static void on_handler_write(XrConnRef conn_ref, void* arg, int status)
+{
+    XR_TRACE("conn: %p arg: %p status: %d", conn_ref, arg, status);
+    assert(conn_ref->handler_ref != NULL);
+    IOBufferRef iobuf = XrHandler_function(conn_ref->req_msg_ref, conn_ref);
+    if(iobuf != NULL) {
+        XrConn_write(conn_ref, iobuf, &on_handler_write, arg);
+    } else {
+        close(conn_ref->fd);
+        assert(false);
+    }
+}
+static void on_handle_message(XrConnRef conn_ref, void* arg, int status)
+{
+    XR_TRACE("conn: %p arg: %p status: %d", conn_ref, arg, status);
+    assert(conn_ref->handler_ref == NULL);
+    IOBufferRef iobuf = XrHandler_function(conn_ref->req_msg_ref, conn_ref);
+    assert(iobuf != NULL);
+    assert(conn_ref->handler_ref != NULL);
+    XrConn_write(conn_ref, iobuf, &on_handler_write, arg);
+}
 void listening_handler(XrWatcherRef wp, void *arg, uint64_t event)
 {
     XrSocketWatcherRef sw = (XrSocketWatcherRef)wp;
@@ -227,6 +247,9 @@ void listening_handler(XrWatcherRef wp, void *arg, uint64_t event)
     }
     XrSocketWatcherRef sw_ref = Xrsw_new(sref->reactor_ref, sock2);
     XrConnRef conn = XrConn_new(sock2, sw_ref, sref);
+    MessageRef inmsg = Message_new();
+    XrConn_read_msg(conn, inmsg, on_handle_message, (void*)conn);
+    return;
     conn->state = XRCONN_STATE_RDINIT;
     uint64_t interest = EPOLLERR | EPOLLIN;
     Xrsw_register(sw_ref, &state_machine, conn, interest);

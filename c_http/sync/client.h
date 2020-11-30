@@ -30,4 +30,4 @@ void Client_connect(ClientRef this, char* host, int port);
  * \param req_buffers The Request as a c-array of char* terminated by NULL
  * \param response    MessageRef
  */
-void Client_roundtrip(ClientRef this, char* req_buffers[], MessageRef* response);
+void Client_roundtrip(ClientRef this, const char* req_buffers[], MessageRef* response);

@@ -73,7 +73,7 @@ void List_destroy(ListRef lref);
 ///                       Note also after the return from List_free() mylist == NULL
 ///
 ///
-void List_free(ListRef* lref_ptr);
+void List_free(ListRef *lref_adr);
 
 ///
 /// Prints a dump of the list to stdout
@@ -174,9 +174,9 @@ ListIterator List_itr_next(const ListRef lref, const ListIterator itr);
 /// and sets to NULL the variable/argument holding the iterator.
 ///
 /// \param lref ListRef
-/// \param itr  ListIterator a valid iterator for lref.
+/// \param itr_adr  ListIterator* address of a list iterator variable holding a valid iterator.
 ///
-void List_itr_remove(ListRef lref, ListIterator* itr);
+void List_itr_remove(ListRef lref, ListIterator *itr_adr);
 
 ///
 /// Gets the void* value of the item held in the Node pointed at by this iterator.

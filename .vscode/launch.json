@@ -36,10 +36,10 @@
     }],
     "configurations": [
         {
-            "name": "(gdb) simple-proxy",
+            "name": "(gdb) xr_server",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/cmake-build-debug/apps/simple_proxy/simple_proxy",
+            "program": "${workspaceFolder}/cmake-build-debug/async_app/xr_server",
             "args": ["--marvin-home", "${workspaceFolder}", "--proxy-port", "9992"],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",

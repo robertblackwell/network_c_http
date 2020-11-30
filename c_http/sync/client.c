@@ -57,13 +57,13 @@ void Client_connect(ClientRef this, char* host, int portno)
     this->rdr = Reader_new(this->parser, rdsock);
 
 }
-void Client_roundtrip(ClientRef this, char* req_buffers[], MessageRef* response_ptr)
+void Client_roundtrip(ClientRef this, const char* req_buffers[], MessageRef* response_ptr)
 {
     int buf_index = 0;
     int buf_len;
     char* buf;
     while(req_buffers[buf_index] != NULL) {
-        buf = req_buffers[buf_index];
+        buf = (char*)req_buffers[buf_index];
         buf_len = strlen(buf);
         int bytes_written = write(this->sock, buf, buf_len);
         buf_index++;

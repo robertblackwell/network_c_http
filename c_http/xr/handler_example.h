@@ -4,17 +4,20 @@
 #include <c_http/message.h>
 #include <c_http/xr/conn.h>
 
-typedef struct XrHandler_s {
-    XrConnRef conn_ref;  // weak non owning reference
-    MessageRef      request;   // weak non owning reference
-    IOBufferRef     status_line;
-    HdrListRef      headers;
-    BufferChainRef  body;
+struct XrHandler_s;
+//struct XrHandler_s {
+//    XrConnRef conn_ref;  // weak non owning reference
+//    MessageRef      request;   // weak non owning reference
+//    IOBufferRef     status_line;
+//    HdrListRef      headers;
+//    BufferChainRef  body;
+//
+//    HdrListIter     hdr_iter;
+//    BufferChainIter body_iter;
+//
+//};
 
-    HdrListIter     hdr_iter;
-    BufferChainIter body_iter;
-
-};
+IOBufferRef XrHandler_function(MessageRef request, XrConnRef conn);
 
 /**
  * Makes an instance of XrHandler. This instance takes a non owning reference to
@@ -53,4 +56,7 @@ IOBufferRef XrHandler_body_piece(XrHandlerRef this);
  * \return BufferChainRef
  */
 BufferChainRef XrHandler_serialized_response(XrHandlerRef this);
+
+IOBufferRef XrHandler_execute(XrHandlerRef this);
+
 #endif

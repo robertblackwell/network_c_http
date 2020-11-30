@@ -107,7 +107,7 @@ int test_A001_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
     MessageRef m1 = rref->message;
-    HdrListRef h = Message_headers (m1);
+    HdrListRef h = Message_get_headerlist (m1);
     UT_EQUAL_INT(Message_get_status (m1), 200);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 11Reason Phrase");
 
@@ -137,7 +137,7 @@ int test_A002_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
     MessageRef m1 = rref->message;
-    HdrListRef h = Message_headers (m1);
+    HdrListRef h = Message_get_headerlist (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 22Reason Phrase");
 
@@ -166,7 +166,7 @@ int test_A003_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
     MessageRef m1 = rref->message;
-    HdrListRef h = Message_headers (m1);
+    HdrListRef h = Message_get_headerlist (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 22Reason Phrase");
 
@@ -219,7 +219,7 @@ int test_A004_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
     MessageRef m1 = rref->message;
-    HdrListRef h = Message_headers (m1);
+    HdrListRef h = Message_get_headerlist (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK Reason Phrase");
 
@@ -255,7 +255,7 @@ int test_A005_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
     MessageRef m1 = rref->message;
-    HdrListRef h = Message_headers (m1);
+    HdrListRef h = Message_get_headerlist (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK Reason Phrase");
 
@@ -292,7 +292,7 @@ int test_A006_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
     MessageRef m1 = rref->message;
-    HdrListRef h = Message_headers (m1);
+    HdrListRef h = Message_get_headerlist (m1);
     UT_EQUAL_INT(Message_get_status (m1), 201);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK Reason Phrase");
 
@@ -336,13 +336,13 @@ int test_A007_vfunc (ListRef results)
     UT_NOT_EQUAL_PTR(m1, m2);
     UT_NOT_EQUAL_PTR(m1, NULL);
     UT_NOT_EQUAL_PTR(m2, NULL);
-    HdrListRef h1 = Message_headers (m1);
-    HdrListRef h2 = Message_headers (m2);
+    HdrListRef h1 = Message_get_headerlist (m1);
+    HdrListRef h2 = Message_get_headerlist (m2);
     UT_NOT_EQUAL_PTR(h1, h2);
     UT_NOT_EQUAL_PTR(h1, NULL);
     UT_NOT_EQUAL_PTR(h2, NULL);
     {
-        HdrListRef h = Message_headers (m1);
+        HdrListRef h = Message_get_headerlist (m1);
         UT_EQUAL_INT(Message_get_status (m1), 200);
         UT_EQUAL_CSTR(Message_get_reason (m1), "OK 11Reason Phrase");
 
@@ -354,7 +354,7 @@ int test_A007_vfunc (ListRef results)
         CHECK_BODY(m1, "1234567890");
     }
     {
-        HdrListRef h = Message_headers (m2);
+        HdrListRef h = Message_get_headerlist (m2);
         UT_EQUAL_INT(Message_get_status (m2), 201);
         UT_EQUAL_CSTR(Message_get_reason (m2), "OK 22Reason Phrase");
 
@@ -390,7 +390,7 @@ int test_A008_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
     MessageRef m1 = rref->message;
-    HdrListRef h = Message_headers (m1);
+    HdrListRef h = Message_get_headerlist (m1);
     int n = HdrList_size (h);
     UT_EQUAL_INT(Message_get_status (m1), 200);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 11Reason Phrase");
@@ -421,7 +421,7 @@ int test_A009_vfunc (ListRef results)
 {
     ReadResultRef rref = (ReadResultRef) List_remove_first (results);
     MessageRef m1 = rref->message;
-    HdrListRef h = Message_headers (m1);
+    HdrListRef h = Message_get_headerlist (m1);
     int n = HdrList_size (h);
     UT_EQUAL_INT(Message_get_status (m1), 200);
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 11Reason Phrase");

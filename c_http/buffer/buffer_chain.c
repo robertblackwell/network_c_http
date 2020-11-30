@@ -7,10 +7,8 @@
 #include <c_http/buffer/cbuffer.h>
 
 typedef struct BufferChain_s {
-
         ListRef   m_chain;
         int       m_size;
-
 } BufferChain;
 
 static void dealloc(void** p)
@@ -54,6 +52,11 @@ void BufferChain_append(BufferChainRef this, void* buf, int len)
     List_add_back(this->m_chain, (void*)new_cb);
     this->m_size += len;
 }
+void BufferChain_append_cbuffer(BufferChainRef this, CbufferRef cbuf)
+{
+    BufferChain_append(this, Cbuffer_data(cbuf), Cbuffer_size(cbuf));
+}
+
 void BufferChain_append_cstr(BufferChainRef this, char* cstr)
 {
     BufferChain_append(this, (void*)cstr, strlen(cstr));
@@ -134,10 +137,12 @@ void BufferChain_remove_iter(BufferChainRef this, BufferChainIter iter)
 void BufferChain_add_front(BufferChainRef this, CbufferRef cbuf)
 {
     List_add_front(this->m_chain, (void*) cbuf);
+    this->m_size = Cbuffer_size(cbuf);
 }
 void BufferChain_add_back(BufferChainRef this, CbufferRef cbuf)
 {
     List_add_back(this->m_chain, (void*) cbuf);
+    this->m_size = Cbuffer_size(cbuf);
 }
 
 CbufferRef BufferChain_pop_front(BufferChainRef this)

@@ -47,7 +47,7 @@ MessageRef mk_request(ThreadContext* ctx)
     Message_set_is_request(request, true);
     Message_set_method(request, HTTP_GET);
     Message_set_target(request, "/echo" );
-    HdrListRef request_hdrs = Message_headers(request);
+    HdrListRef request_hdrs = Message_get_headerlist(request);
     char* content_length = "0";
     char* echo_id;
 
@@ -110,11 +110,11 @@ void* threadfn(void* data)
         Ctx_mk_uid(ctx);
         MessageRef request = mk_request(ctx);
         CbufferRef serialized = Message_serialize(request);
-        char* req_buffer[] = {
+        const char* req_buffer[] = {
             Cbuffer_cstr(serialized), NULL
         };
         for(int i = 0; req_buffer[i] != NULL; i++) {
-            char* x = req_buffer[i];
+            const char* x = req_buffer[i];
         }
 
         Client_roundtrip(client, req_buffer,  &response);

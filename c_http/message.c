@@ -112,6 +112,8 @@ CbufferRef Message_serialize_request(MessageRef mref)
         free(s);
     }
     Cbuffer_append_cstr(result, "\r\n");
+    CbufferRef body = BufferChain_compact(Message_get_body(mref));
+    Cbuffer_append(result, Cbuffer_data(body), Cbuffer_size(body));
     return result;
 }
 CbufferRef Message_serialize_response(MessageRef mref)
@@ -185,33 +187,62 @@ HttpMethod Message_get_method(MessageRef this)
 {
     return this->method;
 }
-CbufferRef Message_get_target(MessageRef this)
+
+// target
+const char* Message_get_target(MessageRef this)
 {
-    return this->target;
+    return (const char*)Cbuffer_cstr(this->target);
 }
-void Message_move_target(MessageRef this, CbufferRef target)
-{
-    if(this->target == NULL) {
-        this->target = Cbuffer_new();
-    }
-    Cbuffer_move(this->target, target);
-}
-void Message_set_target(MessageRef this, char* targ)
+//void Message_move_target(MessageRef this, CbufferRef target)
+//{
+//    if(this->target == NULL) {
+//        this->target = Cbuffer_new();
+//    }
+//    Cbuffer_move(this->target, target);
+//}
+void Message_set_target(MessageRef this, const char* targ)
 {
     assert((this->target != NULL) && (Cbuffer_size(this->target) == 0));
-    Cbuffer_append_cstr(this->target, targ);
+    Cbuffer_append_cstr(this->target, (const char*)targ);
 }
-void Message_move_reason(MessageRef this, CbufferRef reason)
+CbufferRef Message_get_target_cbuffer(MessageRef this)
 {
-    if(this->reason == NULL)
-        this->reason = Cbuffer_new();
-    Cbuffer_move(this->reason, reason);
+    return Cbuffer_from_cstring(Cbuffer_cstr(this->target));
 }
-char* Message_get_reason(MessageRef this)
+void Message_set_target_cbuffer(MessageRef this, CbufferRef target)
 {
-    (char*)Cbuffer_data(this->reason);
+    assert((this->target != NULL) && (Cbuffer_size(this->target) == 0));
+    Cbuffer_append_cstr(this->target, (const char*)Cbuffer_cstr(target));
+
 }
-HdrListRef Message_headers(MessageRef this)
+// reason
+void Message_set_reason(MessageRef this, const char* reason_cstr)
+{
+    assert((this->reason != NULL) && (Cbuffer_size(this->reason) == 0));
+    Cbuffer_append_cstr(this->reason, (const char*)reason_cstr);
+}
+//void Message_move_reason(MessageRef this, CbufferRef reason)
+//{
+//    if(this->reason == NULL)
+//        this->reason = Cbuffer_new();
+//    Cbuffer_move(this->reason, reason);
+//}
+const char* Message_get_reason(MessageRef this)
+{
+    (const char*)Cbuffer_cstr(this->reason);
+}
+CbufferRef Message_get_reason_cbuffer(MessageRef this)
+{
+    return Cbuffer_from_cstring(Cbuffer_cstr(this->reason));
+}
+void Message_set_reason_cbuffer(MessageRef this, CbufferRef target)
+{
+    assert((this->reason != NULL) && (Cbuffer_size(this->reason) == 0));
+    Cbuffer_append_cstr(this->reason, (const char*)Cbuffer_cstr(target));
+}
+
+// headers
+HdrListRef Message_get_headerlist(MessageRef this)
 {
     return this->headers;
 }

@@ -201,11 +201,25 @@ int test_iobuffer_make2()
     void* data = IOBuffer_data(ioref);
     int data_length = IOBuffer_data_len(ioref);
     int i = 1;
+    char* io_datap_before;
+    char* io_datap_after;
+    char* datap_after;
     while(IOBuffer_data_len(ioref) > 0) {
+        io_datap_before = IOBuffer_data(ioref);
         IOBuffer_consume(ioref, 1);
+        io_datap_after = IOBuffer_data(ioref);
+        /**
+         * this is important what does IOBuffer_data() return when there is no data -
+         * returns start of memory buffer NOT null
+         */
+        if(IOBuffer_data_len(ioref) == 0) {
+            datap_after = data;
+        } else {
+            datap_after = data + i;
+        }
         void* data2 = IOBuffer_data(ioref);
         int data_length_2 = IOBuffer_data_len(ioref);
-        UT_EQUAL_PTR((data+i), IOBuffer_data(ioref));
+        UT_EQUAL_PTR(io_datap_after, datap_after);
         UT_EQUAL_INT((data_length - i), IOBuffer_data_len(ioref));
         UT_EQUAL_INT(strncmp(&(sconst[i]), (char*)IOBuffer_data(ioref), IOBuffer_data_len(ioref)), 0);
         i++;

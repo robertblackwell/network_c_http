@@ -112,6 +112,8 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	xr/watcher.c
 	xr/evfd_queue.c
 	xr/conn.c
+	xr/conn_read.c
+	xr/conn_write.c
 	xr/conn_list.c
 	xr/run_list.c
 	xr/xr_reader.c

@@ -44,7 +44,7 @@ KVPairRef  HdrList_remove_last(HdrListRef lref);
 KVPairRef  HdrList_itr_unpack(HdrListRef lref, HdrListIter iter);
 HdrListIter HdrList_iterator(HdrListRef lref);
 HdrListIter HdrList_itr_next  (HdrListRef lref, HdrListIter iter);
-void               HdrList_itr_remove(HdrListRef lref, HdrListIter* iter);
+void        HdrList_itr_remove(HdrListRef lref, HdrListIter* iter_addr);
 
 void HdrList_add_back(HdrListRef lref, KVPairRef item);
 void HdrList_add_front(HdrListRef lref, KVPairRef item);
@@ -56,6 +56,24 @@ void HdrList_add_front(HdrListRef lref, KVPairRef item);
 ///
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Convenience function so that a list of headers can be filled in with code like:
+ *
+ * HdrListRef hdrlist = HdrList_from_array({
+ *  {"Content-type", "plain/html"},
+ *  {"Connection", "close"},
+ *  {"Content-length", "102"},
+ *  {NULL, NULL}
+ *  });
+ *  All the values in the array must be either sttring constants or local stack variables
+ *  as this function will not deallocate any of these strings
+ *
+ *
+ * @param raw
+ * @return
+ */
+HdrListRef HdrList_from_array(char* raw[][2]);
+
 
 ///
 /// Create a new KVPair instance from key and value and add
@@ -144,5 +162,4 @@ void HdrList_add_line(HdrListRef this, const char* label, int lablen, const char
 ///
 ///
 void HdrList_add_cstr(HdrListRef this, const char* label, const char* value);
-
 #endif

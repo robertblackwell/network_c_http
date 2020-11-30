@@ -1,1 +1,1 @@
-curl -X POST --data-binary "@big_file" http://localhost:9001
+curl -X POST -i -H "C-HTTP-ECHO-ID: 9012" --data-binary "@big_file" http://localhost:9001/echo

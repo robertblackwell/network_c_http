@@ -153,6 +153,21 @@ int test_hdr_add_many()
     printf("This is it\n");
     return 0;
 }
+int test_hdrlist_ar()
+{
+    char* ar[][2] = {
+        {"Key1", "value1"},
+        {"Key2", "value2"},
+        {"Key3", "value3"},
+        {"Key4", "value4"},
+        {NULL, NULL}
+    };
+    HdrListRef hdrs = HdrList_from_array(ar);
+
+    CbufferRef cb = HdrList_serialize(hdrs);
+    UT_EQUAL_CSTR(Cbuffer_cstr(cb), "KEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\n");
+    return 0;
+}
 #ifdef HGHGH
 int test_list_add_front()
 {
@@ -262,6 +277,7 @@ int test_list_remove_back_one()
 #endif
 int main()
 {
+    UT_ADD(test_hdrlist_ar);
 	UT_ADD(test_hdrlist_new);
     UT_ADD(test_hdrlist_add_back_get_content);
     UT_ADD(test_hdrlist_find);

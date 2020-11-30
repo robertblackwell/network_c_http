@@ -10,11 +10,13 @@
 #include <c_http/alloc.h>
 #include <c_http/buffer/cbuffer.h>
 #define IOBUFFER_DEFAULT_CAPACITY 4*1024
+
+
 /**
  * IOBuffer is intended for:
  * 1.   reading/writing data from/to say a socket and at the
  *      same time consuming some or all of the read data or producing more write data.
- *      the process would be something like:
+ *      The process would be something like:
  *
  *      bytes_read = read(fd, IOBUffer_readspace(this), IOBUffer_spacelen(this);
  *      IOBuffer_commit(this, bytes_read)
@@ -27,13 +29,14 @@
  *      IOBuffer_consume(this, bytes_written)
  *
  *  NOTE: IOBuffers never expand - they can be made to have any capacity needed at creation time, there after
- *  they cannot expand. Consequence of this is that there re no "append" style methods.
+ *  they cannot expand. A consequence of this is that there re no "append" style methods.
  *
  *  It would be dangerous to allow a buffer to expand (and the address of the underlying memory possibly change)
  *  while the same buffer was being used for IO
  *
   */
 typedef struct IOBuffer_s {
+    char   tag[5];
     void*  mem_p;             // always points to the start of buffer
     char*  char_p;
     int    buffer_capacity;   // always holds the size of the buffer

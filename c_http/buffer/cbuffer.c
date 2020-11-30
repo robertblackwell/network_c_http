@@ -9,6 +9,25 @@
 #define CBUFFER_MAX_CAPACITY 10000
 #define CBUFFER_MIN_CAPACITY 1000
 
+#define CB_SET_TAG(p) do { \
+    sprintf((p)->m_tag, "CBUF"); \
+} while(0);
+
+#define CB_CHECK_TAG_ONLY(p) do { \
+    if(strcmp((p)->m_tag, "CBUF") != 0) { \
+        assert(false); \
+    } \
+} while(0)
+
+#define CB_CHECK_TAG(p) do { \
+    if(strcmp((p)->m_tag, "CBUF") != 0) { \
+        assert(false); \
+    } \
+    if( (p)->m_memPtr == NULL) { \
+        assert(false);                          \
+    }   \
+} while(0);
+
 size_t max_of_two(size_t a, size_t b)
 {
     return (a >= b) ? a : b;
@@ -33,6 +52,7 @@ typedef struct BufferStrategy_s {
 
 typedef struct Cbuffer_s
 {
+    char        m_tag[8];
     void*       m_memPtr;     /// points to the start of the memory slab managed by the instance
     char*       m_cPtr;       /// same as memPtr but makes it easier in debugger to see whats in the buffer
     size_t      m_length;    ///
@@ -83,6 +103,7 @@ BufferStrategy common_strategy = {.m_min_size=256, .m_max_size=1024*1024};
 CbufferRef Cbuffer_new()
 {
     CbufferRef cb_ptr = (CbufferRef)eg_alloc(sizeof(Cbuffer));
+    CB_SET_TAG(cb_ptr);
     cb_ptr->m_strategy=&common_strategy;
     size_t tmp_cap = cb_ptr->m_strategy->m_min_size;
     cb_ptr->m_memPtr = BufferStrategy_allocate(cb_ptr->m_strategy, tmp_cap);
@@ -93,26 +114,35 @@ CbufferRef Cbuffer_new()
     return cb_ptr;
 }
 
-CbufferRef Cbuffer_from_cstring(char* c_str)
+CbufferRef Cbuffer_from_cstring(const char* c_str)
 {
     CbufferRef cbuf = Cbuffer_new();
     Cbuffer_append(cbuf, (void*)c_str, strlen(c_str));
     return cbuf;
 }
-
-void Cbuffer_free(CbufferRef* cbuf)
+/**
+ * This is the only method that can operate on an invalidated Cbuffer
+ * That is one who has had their memory stolen
+ * @param cbuf_ref_addr
+ */
+void Cbuffer_free(CbufferRef* cbuf_ref_addr)
 {
-    CbufferRef this = *cbuf;
-    assert(*cbuf != NULL);
-    eg_free(this->m_memPtr);
-    eg_free(*cbuf);
-    *cbuf = NULL;
+    CbufferRef this =  *cbuf_ref_addr;
+    CB_CHECK_TAG_ONLY(this);
+    assert(this != NULL);
+    // this will allow success free of invalidated cbuffer
+    if(this->m_memPtr != NULL) {
+        eg_free(this->m_memPtr);
+    }
+    eg_free(this);
+    *cbuf_ref_addr = NULL;
 }
 /**
  * gets a pointer to the start of the memory slab being managed by the instance
  */
 void* Cbuffer_data(const CbufferRef cbuf)
 {
+    CB_CHECK_TAG(cbuf);
     return cbuf->m_memPtr;
 }
 /**
@@ -120,10 +150,12 @@ void* Cbuffer_data(const CbufferRef cbuf)
 */
 size_t Cbuffer_size(const CbufferRef cbuf)
 {
+    CB_CHECK_TAG(cbuf);
     return cbuf->m_length;
 }
-char* Cbuffer_cstr(const CbufferRef this)
+const char* Cbuffer_cstr(const CbufferRef this)
 {
+    CB_CHECK_TAG(this);
     assert(this->m_cPtr[this->m_size] == '\0');
     return this->m_cPtr;
 }
@@ -132,6 +164,7 @@ char* Cbuffer_cstr(const CbufferRef this)
 */
 size_t Cbuffer_capacity(const CbufferRef cbuf)
 {
+    CB_CHECK_TAG(cbuf);
     return cbuf->m_capacity;
 }
 /**
@@ -139,6 +172,7 @@ size_t Cbuffer_capacity(const CbufferRef cbuf)
 */
 void* Cbuffer_next_available(const CbufferRef cbuf)
 {
+    CB_CHECK_TAG(cbuf);
     void* x = (void*) (cbuf->m_cPtr + cbuf->m_length);
     return x;
 }
@@ -147,12 +181,13 @@ void* Cbuffer_next_available(const CbufferRef cbuf)
  */
 void Cbuffer_clear(CbufferRef cbuf)
 {
-
+    CB_CHECK_TAG(cbuf);
     cbuf->m_length = 0; cbuf->m_length = 0; cbuf->m_cPtr[0] = (char)0;
 }
 
 void Cbuffer_append(CbufferRef cbuf, void* data, size_t len)
 {
+    CB_CHECK_TAG(cbuf);
     char* tmp = (char*)data;
     if(len == 0)
         return;
@@ -171,12 +206,14 @@ void Cbuffer_append(CbufferRef cbuf, void* data, size_t len)
     cbuf->m_cPtr = (char*) cbuf->m_memPtr;
     cbuf->m_cPtr[cbuf->m_size] = '\0';
 }
-void Cbuffer_append_cstr(CbufferRef cbuf, char* cstr)
+void Cbuffer_append_cstr(CbufferRef cbuf, const char* cstr)
 {
+    CB_CHECK_TAG(cbuf);
     Cbuffer_append(cbuf, (void*)cstr, strlen(cstr));
 }
 void Cbuffer_setSize(CbufferRef cbuf, size_t n)
 {
+    CB_CHECK_TAG(cbuf);
     cbuf->m_length = n;
     cbuf->m_size = n;
 }
@@ -189,6 +226,7 @@ void Cbuffer_setSize(CbufferRef cbuf, size_t n)
  */
 char* Cbuffer_toString(const CbufferRef cbuf)
 {
+    CB_CHECK_TAG(cbuf);
     char* p = cbuf->m_cPtr;
     return p;
 }
@@ -197,6 +235,8 @@ void Cbuffer_move(CbufferRef dest, CbufferRef src)
 {
     ASSERT_NOT_NULL(src);
     ASSERT_NOT_NULL(dest);
+    CB_CHECK_TAG(dest);
+    CB_CHECK_TAG(src);
     Cbuffer_clear(dest);
 //    Cbuffer_append(dest, src->m_memPtr, src->m_length );
     Cbuffer tmp = *dest;
@@ -214,15 +254,15 @@ void Cbuffer_move(CbufferRef dest, CbufferRef src)
  */
 bool Cbuffer_contains_voidptr(const CbufferRef cbuf, void* ptr)
 {
+    CB_CHECK_TAG(cbuf);
     char* p = (char*) ptr;
     return Cbuffer_contains_charptr(cbuf, p);
 }
 bool Cbuffer_contains_charptr(const CbufferRef cbuf, char* ptr)
 {
+    CB_CHECK_TAG(cbuf);
     char* endPtr = cbuf->m_cPtr + (long)cbuf->m_capacity;
     char* sPtr = cbuf->m_cPtr;
-//    bool r1 = ptr <= endPtr;
-//    bool r2 = ptr >= sPtr;
     bool r = ( ptr <= endPtr && ptr >= sPtr);
     return r;
 }

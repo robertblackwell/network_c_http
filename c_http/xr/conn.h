@@ -40,7 +40,7 @@ typedef enum XrWriteRC {
 } XrWriteRC;
 
 
-typedef struct XrConn_s {
+struct XrConn_s {
     int                fd;
     enum XrConnState   state;
     XrSocketWatcherRef sock_watcher_ref;
@@ -69,12 +69,15 @@ typedef struct XrConn_s {
     CbufferRef               response_buf_ref; // response as a buffer
     IOBufferRef              write_buffer_ref;
     XrSocketWatcherCallback* write_completion_handler;
+    XrConnWriteCallback      write_cb;
+    void*                    write_arg;
     XrWriteRC                write_rc;
 
     XrHandlerRef             handler_ref;
     void*                    handler_ctx;
 
-} XrConn, *XrConnRef;
+};
+typedef struct XrConn_s XrConn, *XrConnRef;
 
 XrConnRef XrConn_new(int fd, XrSocketWatcherRef socket_watcher, XrServerRef server_ref);
 void XrConn_free(XrConnRef this);
@@ -131,4 +134,9 @@ void XrConn_prepare_write(XrConnRef this, IOBufferRef buf, XrSocketWatcherCallba
  * \param completion_handler XrSocketWatcherCallback
  */
 void XrConn_write_2(XrConnRef this, IOBufferRef buf, XrSocketWatcherCallback completion_handler);
+/**
+ *
+ * \param this
+ */
+void XrConn_done(XrConnRef this);
 #endif

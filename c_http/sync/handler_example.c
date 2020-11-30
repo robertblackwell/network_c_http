@@ -67,10 +67,10 @@ int handler_example(MessageRef request, WriterRef wrtr)
 
     if((resp_hdrs = HdrList_new()) == NULL) goto finalize;
 
-    CbufferRef target = Message_get_target(request);
-    char* target_cstr = Cbuffer_cstr(target);
+    CbufferRef target = Message_get_target_cbuffer(request);
+    const char* target_cstr = Cbuffer_cstr(target);
     if(strcmp(target_cstr, "/echo") == 0) {
-        HdrListRef req_hdrs = Message_headers(request);
+        HdrListRef req_hdrs = Message_get_headerlist(request);
 
         /**
          * find the echo-id header in the request and put it in the response headers

@@ -27,7 +27,7 @@ XrConnListIter XrConnList_iterator (XrConnListRef lref);
 
 XrConnListIter XrConnList_itr_next (XrConnListRef lref, XrConnListIter iter);
 
-void XrConnList_itr_remove (XrConnListRef lref, XrConnListIter *iter);
+void XrConnList_itr_remove (XrConnListRef lref, XrConnListIter* iter_addr);
 
 void XrConnList_add_back (XrConnListRef lref, XrConnRef item);
 

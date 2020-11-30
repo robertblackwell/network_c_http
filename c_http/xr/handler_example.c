@@ -16,7 +16,68 @@
 
 #include <pthread.h>
 
+typedef enum XrHandlerState {
+    XRH_INIT = 90,
+    XRH_STATUS = 91,
+    XRH_HDRS = 92,
+    XRH_BODY = 93,
+} XrHandlerState;
 
+struct XrHandler_s {
+    XrConnRef conn_ref;  // weak non owning reference
+    MessageRef      request;   // weak non owning reference
+    IOBufferRef     status_line;
+    HdrListRef      headers;
+    BufferChainRef  body;
+    MessageRef      response;
+    IOBufferRef      resp_buf;
+    HdrListIter     hdr_iter;
+    BufferChainIter body_iter;
+    XrHandlerState  state;
+};
+
+
+void on_done(XrConnRef conn, XrHandlerRef hdlr)
+{
+    XR_PRINTF("on_done\n");
+}
+void on_error(XrConnRef conn, XrHandlerRef hdlr, int status)
+{
+    XR_PRINTF("on_error");
+}
+void on_write_iobuf(XrConnRef conn_ref, void* arg, int status)
+{
+    XrHandlerRef hdlr = arg;
+    if(status) {
+        on_error(conn_ref, hdlr, status);
+    }
+    IOBufferRef iobuf = XrHandler_execute(hdlr);
+    if(iobuf == NULL) {
+        on_done(conn_ref, hdlr);
+    } else {
+        XrConn_write(conn_ref, iobuf, &on_write_iobuf, (void*)hdlr);
+    }
+
+}
+IOBufferRef XrHandler_function(MessageRef request, XrConnRef conn_ref)
+{
+    XrHandlerRef hdlr;
+    XR_PRINTF("XrHandler_function\n");
+    if(conn_ref->handler_ref == NULL) {
+        // this is debugging stuff
+        CbufferRef ser = Message_serialize(conn_ref->req_msg_ref);
+        BufferChainRef body = Message_get_body(conn_ref->req_msg_ref);
+        CbufferRef cbody = BufferChain_compact(body);
+        int blen = BufferChain_size(body);
+        // end debugging stuff
+        hdlr = XrHandler_new(conn_ref);
+        hdlr->state = XRH_STATUS;
+        conn_ref->handler_ref = hdlr;
+    } else {
+        hdlr = conn_ref->handler_ref;
+    }
+    return XrHandler_execute(hdlr);
+}
 static char* simple_response_body(char* message, socket_handle_t socket, int pthread_self_value)
 {
     time_t t = time(NULL);
@@ -40,10 +101,10 @@ static char* simple_response_body(char* message, socket_handle_t socket, int pth
 
     return s1;
 }
-static CbufferRef XrSimpleBody(XrHandlerRef this, int fd)
+static BufferChainRef XrSimpleBody(XrHandlerRef this, int fd)
 {
     CbufferRef mserialized = Message_serialize(this->request);
-    char* msg = Cbuffer_cstr(mserialized);
+    const char* msg = Cbuffer_cstr(mserialized);
 
     time_t t = time(NULL);
     struct tm *tm = localtime(&t);
@@ -66,7 +127,10 @@ static CbufferRef XrSimpleBody(XrHandlerRef this, int fd)
     CbufferRef cbuf = Cbuffer_from_cstring(s1);
     free(s1);
     Cbuffer_free(&mserialized);
-    return cbuf;
+    BufferChainRef bc = BufferChain_new();
+    BufferChain_append_cbuffer(bc, cbuf);
+    Cbuffer_free(&cbuf);
+    return bc;
 }
 
 /**
@@ -93,26 +157,27 @@ static BufferChainRef echo_body_as_chain(MessageRef request)
 static IOBufferRef echo_body_iobuffer(MessageRef request)
 {
     CbufferRef cb_body = Message_serialize(request);
-    int len = Cbuffer_size(cb_body) + 1;
-    IOBufferRef iobuf = IOBuffer_new_with_capacity(len);
-    void* p = IOBuffer_space(iobuf);
-    int iob_len = IOBuffer_space_len(iobuf);
-    memcpy(p, Cbuffer_data(cb_body), Cbuffer_size(cb_body));
-    IOBuffer_commit(iobuf, iob_len);
-    return iobuf;
+    IOBufferRef iob2 = IOBuffer_from_cbuffer(cb_body);
+    int y = IOBuffer_data_len(iob2);
+    return iob2;
 }
 void XrEchoHandler(XrHandlerRef this)
 {
     MessageRef request = this->request;
-    CbufferRef target = Message_get_target(request);
-    char* target_cstr = Cbuffer_cstr(target);
-    assert(strcmp(target_cstr, "/echo") == 0);
-    HdrListRef req_hdrs = Message_headers(request);
-    KVPairRef kvp = HdrList_find(req_hdrs, HEADER_ECHO_ID);
-    assert(kvp != NULL);
-    HdrListRef resp_hdrs =  HdrList_new();
-    HdrList_add_cstr(resp_hdrs, HEADER_ECHO_ID, KVPair_value(kvp));
+    this->response = Message_new_response();
 
+    CbufferRef target = Message_get_target_cbuffer(request);
+    const char* target_cstr = Cbuffer_cstr(target);
+    assert(strcmp(target_cstr, "/echo") == 0);
+    HdrListRef req_hdrs = Message_get_headerlist(request);
+//    KVPairRef kvp = HdrList_find(req_hdrs, HEADER_ECHO_ID);
+//    assert(kvp != NULL);
+    HdrListRef resp_hdrs =  Message_get_headerlist(this->response);
+//    HdrList_add_cstr(resp_hdrs, HEADER_ECHO_ID, KVPair_value(kvp));
+    Message_set_status(this->response, HTTP_STATUS_OK);
+    CbufferRef cb_reason = Cbuffer_from_cstring("OK");
+    Message_set_reason_cbuffer(this->response, cb_reason);
+    Cbuffer_free(&cb_reason);
     IOBufferRef io_body_ref = echo_body_iobuffer (request);
     int body_len = IOBuffer_data_len(io_body_ref);
 
@@ -136,11 +201,21 @@ void XrEchoHandler(XrHandlerRef this)
     this->status_line = status_line_buffer;
     this->headers = resp_hdrs;
     this->body = echo_body_as_chain(request);
+    Message_set_body(this->response, this->body);
+    CbufferRef tmpb = Message_serialize(this->response);
+    this->resp_buf = IOBuffer_from_cbuffer(tmpb);
+    XR_TRACE("resp_buf len %d ", IOBuffer_data_len(this->resp_buf));
+
 }
 void XrSimpleHandler(XrHandlerRef this)
 {
     // make status line
     MessageRef request = this->request;
+    this->response = Message_new_response();
+    Message_set_status(this->response, HTTP_STATUS_OK);
+    CbufferRef reason = Cbuffer_from_cstring("OK");
+    Message_set_reason_cbuffer(this->response, reason);
+    HdrListRef resp_hdrs = Message_get_headerlist(this->response);
     char* status_line;
     asprintf(&status_line, "HTTP/1.1 %d %s\r\n", 200, "OK");
     IOBufferRef status_line_buffer = IOBuffer_new();
@@ -148,12 +223,10 @@ void XrSimpleHandler(XrHandlerRef this)
     memcpy(p, status_line, strlen(status_line));
     IOBuffer_commit(status_line_buffer, strlen(status_line));
 
-    CbufferRef body_ref = XrSimpleBody(this, 33);
-    int body_len = Cbuffer_size(body_ref);
+    BufferChainRef body_ref = XrSimpleBody(this, 33);
+    int body_len = BufferChain_size(body_ref);
     char* body_len_str;
     asprintf(&body_len_str, "%d", body_len);
-
-    HdrListRef resp_hdrs =  HdrList_new();
 
     KVPairRef hl_content_length = KVPair_new(HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
     HdrList_add_front(resp_hdrs, hl_content_length);
@@ -164,8 +237,11 @@ void XrSimpleHandler(XrHandlerRef this)
 
     this->status_line = status_line_buffer;
     this->headers = resp_hdrs;
-    this->body = echo_body_as_chain(request);
-
+    this->body = body_ref;
+    Message_set_body(this->response, this->body);
+    CbufferRef tmpb = Message_serialize(this->response);
+    this->resp_buf = IOBuffer_from_cbuffer(tmpb);
+    XR_TRACE("resp_buf len %d ", IOBuffer_data_len(this->resp_buf));
 }
 void XrHandlerEngine(XrHandlerRef this)
 {
@@ -177,8 +253,8 @@ void XrHandlerEngine(XrHandlerRef this)
     KVPairRef hl_content_length = NULL;
     KVPairRef hl_content_type = NULL;
     int return_value = 0;
-    CbufferRef target = Message_get_target(request);
-    char* target_cstr = Cbuffer_cstr(target);
+    CbufferRef target = Message_get_target_cbuffer(request);
+    const char* target_cstr = Cbuffer_cstr(target);
     if(strcmp(target_cstr, "/echo") == 0) {
         XrEchoHandler(this);
     } else {
@@ -242,4 +318,60 @@ IOBufferRef XrHandler_body_piece(XrHandlerRef this)
 BufferChainRef XrHandler_serialized_response(XrHandlerRef this)
 {
     return NULL;
+}
+IOBufferRef XrHandler_execute(XrHandlerRef hdlr)
+{
+    assert(hdlr != NULL);
+#define XRH_SIMPLE
+#ifdef XRH_SIMPLE
+    switch(hdlr->state) {
+        case XRH_STATUS: {
+            XrHandlerEngine(hdlr);
+
+            hdlr->state = XRH_HDRS;
+            HdrListRef hdrlist = Message_get_headerlist(hdlr->request);
+            hdlr->hdr_iter = HdrList_iterator(hdrlist);
+            return hdlr->resp_buf;
+        }
+        break;
+            break;
+        case XRH_HDRS:
+            return NULL;
+            break;
+        case XRH_BODY:
+            break;
+    }
+
+#else
+    switch(hdlr->state) {
+        case XRH_STATUS: {
+            XrHandlerEngine(hdlr);
+            hdlr->state = XRH_HDRS;
+            HdrListRef hdrlist = Message_headers(hdlr->request);
+            hdlr->hdr_iter = HdrList_iterator(hdrlist);
+            return hdlr->status_line;
+        }
+        break;
+        case XRH_HDRS: {
+            if(hdlr->hdr_iter != NULL) {
+                HdrListRef hdrlist = Message_headers(hdlr->request);
+                KVPairRef kvp = HdrList_itr_unpack(hdrlist, hdlr->hdr_iter);
+                return XrHdrLine(kvp);
+            } else {
+                hdlr->state = XRH_BODY;
+                return XrHandler_execute(hdlr);
+            }
+        }
+        break;
+        case XRH_BODY: {
+            if(hdlr->body_iter != NULL) {
+                IOBufferRef iobuf = XrHandler_body_piece(hdlr);
+                return iobuf;
+            } else {
+                return NULL;
+            }
+        }
+        break;
+    }
+#endif
 }

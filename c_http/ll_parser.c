@@ -216,7 +216,7 @@ int status_data_cb(llhttp_t* parser, const char* at, size_t length)
     Message_set_status(message, this->m_llhttp_ptr->status_code);
 
     Cbuffer_append(this->m_status_buf, (char*)at, length);  /*NEEDS ALLO TEST*/
-    Message_move_reason(message, this->m_status_buf);  /*NEEDS ALLO TEST*/
+    Message_set_reason_cbuffer(message, this->m_status_buf);  /*NEEDS ALLO TEST*/
     return 0;
 }
 static
@@ -224,7 +224,7 @@ int header_field_data_cb(llhttp_t* parser, const char* at, size_t length)
 {
     ParserRef this =  (ParserRef)(parser->data);
     MessageRef message = Parser_current_message(this);
-    HdrListRef hdrs = Message_headers(message);
+    HdrListRef hdrs = Message_get_headerlist(message);
     int state = this->m_header_state;
     if( (state == 0) || (state == kHEADER_STATE_NOTHING) || (state == kHEADER_STATE_VALUE)) {
         if(Cbuffer_size(this->m_name_buf) != 0) {
@@ -264,7 +264,7 @@ int headers_complete_cb(llhttp_t* parser) //, const char* aptr, size_t remainder
     ParserRef this =  (ParserRef)(parser->data);
     MessageRef message = Parser_current_message(this);
     if( Cbuffer_size(this->m_name_buf) != 0 ) {
-        HdrList_add_cbuf(Message_headers(message), this->m_name_buf, this->m_value_buf);  /*NEEDS ALLO TEST*/
+        HdrList_add_cbuf(Message_get_headerlist(message), this->m_name_buf, this->m_value_buf);  /*NEEDS ALLO TEST*/
         Cbuffer_clear(this->m_name_buf);
         Cbuffer_clear(this->m_value_buf);
     }
@@ -272,7 +272,7 @@ int headers_complete_cb(llhttp_t* parser) //, const char* aptr, size_t remainder
     if( Cbuffer_size(this->m_url_buf)  == 0 ) {
     } else {
         Message_set_method(message, (llhttp_method_t)parser->method);
-        Message_move_target(message, this->m_url_buf);  /*NEEDS ALLO TEST*/
+        Message_set_target_cbuffer(message, this->m_url_buf);  /*NEEDS ALLO TEST*/
     }
 //    if( Cbuffer_size(this->m_status_buf) == 0 ) {
 //    } else {

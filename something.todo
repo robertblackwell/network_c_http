@@ -1,31 +1,48 @@
 TODO:
- ✔ change name of HeaderLine to something like Hdr or KVPair @done (20-10-02 07:17)
- ☐ test queue add/remove
+Tests:
+ ☐ better tests for List found a bug in it recently that was not caught by tests
+ ☐ more tests for buffers - a number of new methods with no tests
+Buffers:  
+ ☐ BufferChain should have IOBUffer underneath
+Policy free(&):
+ ☐ review the policy of free(&thing) that has caused some bugs. Also an issue for List remove type functions. How to enforce
+Misc:
  ☐ convert queue to Typed List or circular style so that dont need to shuffle down
  ☐ bug - parser does not return useful code from parser error
  ☐ handler_example demo how to parse url/target, query string as tools for a meaningful handle function
  ☐ make handler_example echo the request in a way that demonstrates if picked out all the relevant bits of the request
+Template classes:
  ☐ look at alternatives for making template classes 
- ☐ documentation
- ☐ replace printf() with logger statements
  ☐ what to do about List and HDRList - preprocessor or hand coded ?
+ ☐ experiment with the macro version of template classes and think about a better preprocessor. How to debug inside a macro
+Macros:
+ ☐ replace printf() with logger statements - move xr macros to top level
+ ☐ clean up logging - too much output
+Verify and Benchmark:
  ☐ Apache ab program to test throughput of server
  ☐ use memory sanitizer
- ☐ clean up logging - too much output
  ☐ build verify app to thoroughly test the server under load + keep-alive
  ☐ turn the client into an app that can send out any request - this will really test  the parser
- ☐ url psrase has been lost with conversion away from http-parser
-Next step:
-  ☐ need a good credible benchmark setup
-  ☐ pipe trick as altermative to condition variable
-  ☐ eventfd as alternative to condition variable
-  ☐ then recast worker code to use poll/epoll
-  ☐ make all these changes conditional compilations
-  ☐ experiment with poll or epoll for io completions
+Documentation:
+ ☐ documentation
+XR:
+    Reactor Interface:
+    ☐ rethink the reactor interface - multiple watchers per socket fd, more fine grained arm/disarm - actually more convenient arming/disarming. 
+    ☐ The interface should not require knowledge of such things as epollin epollout  
+    ☐ Think about making XrXXWatcher types all the same type and use a union
+    ☐ this about having a SockReader and SockWriter as derived types of Conn rather than loading everything (all the read/write functions) into Conn    
+    Other:
+      ☐ combine new and register into a single call and use arm and disarm consistently
+      ☐ timers have their own chain and tiggered by epoll_wait return rather than use an FD
+      ☐ io watchers need to support multiple watchers per fd each watching different events and different callbacks. This is so each socket fd can have both a read watcher and a write watcher. This is necessary to handle duplex protocols such as http/1.1 tunnel.
+      ☐ inter thread queue does not seem to work find out why - how to have multi threaded async server. Maybe investigate libuv thread pool
+      ☐ clean up xr server - too much redundant code
 
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ url psrase has been lost with conversion away from http-parser @done (20-11-29 07:56) @project(Template classes)
+ ✔ change name of HeaderLine to something like Hdr or KVPair @done (20-10-02 07:17) @project(TODO)
  ✔ devise a test for XXXX_free() to ensure arg is set to NULL - all classes @done (20-10-02 07:16) @project(TODO)
  ✔ replace all malloc/free pairs with Allocate/Deallocate @done (20-09-23 18:12) @project(TODO)
  ✔ change buffer tests to be pure C @done (20-09-23 18:12) @project(TODO)

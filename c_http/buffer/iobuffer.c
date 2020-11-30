@@ -7,8 +7,19 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#define IOB_CHECK_TAG(p) \
+do { \
+    assert(strcmp((p)->tag, "IOBUF") == 0); \
+} while(0);
+
+#define IOB_SET_TAG(p) \
+do { \
+    sprintf((p)->tag, "%s", "IOBUF"); \
+} while(0);
+
 IOBufferRef IOBuffer_init(IOBufferRef this, int capacity )
 {
+    IOB_SET_TAG(this);
     this->buffer_ptr = this->mem_p = eg_alloc(capacity);
     if(this->mem_p == NULL) goto memerror;
     this->char_p = (char*)this->mem_p;
@@ -57,6 +68,7 @@ IOBufferRef IOBuffer_from_cstring(char* cstr)
 
 void* IOBuffer_data(const IOBufferRef this)
 {
+    IOB_CHECK_TAG(this);
     return this->buffer_ptr;
 }
 int IOBuffer_data_len(const IOBufferRef this)
