@@ -30,6 +30,7 @@ void Xrtw_set(XrTimerWatcherRef this, XrTimerWatcherCallback cb, void* ctx, uint
 void Xrtw_update(XrTimerWatcherRef this, uint64_t interval_ms, bool repeating);
 void Xrtw_disarm(XrTimerWatcherRef this);
 void Xrtw_rearm(XrTimerWatcherRef this, XrTimerWatcherCallback cb, void* ctx, uint64_t interval_ms, bool repeating);
+void Xrtw_rearm_2(XrTimerWatcherRef this);
 void Xrtw_clear(XrTimerWatcherRef this);
 
 

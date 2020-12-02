@@ -50,9 +50,9 @@ char* simple_response_body(char* message, socket_handle_t socket, int pthread_se
  */
 char* echo_body(MessageRef request)
 {
-    CbufferRef cb_body = Message_serialize(request);
-    char* body = malloc(Cbuffer_size(cb_body) + 1);
-    memcpy(body, Cbuffer_data(cb_body), Cbuffer_size(cb_body)+1);
+    IOBufferRef iob_body = Message_serialize(request);
+    char* body = malloc(IOBuffer_data_len(iob_body) + 1);
+    memcpy(body, IOBuffer_data(iob_body), IOBuffer_data_len(iob_body)+1);
     return body;
 }
 int handler_example(MessageRef request, WriterRef wrtr)

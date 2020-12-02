@@ -74,14 +74,19 @@ void Ctx_mk_uid(ThreadContext* ctx)
  */
 bool verify_response(ThreadContext* ctx, MessageRef request, MessageRef response)
 {
+
     BufferChainRef body = Message_get_body(response);
-    CbufferRef body_bc = BufferChain_compact(body);
-    CbufferRef req_bc = Message_serialize(request);
-    int x = strcmp(Cbuffer_cstr(body_bc), Cbuffer_cstr(req_bc));
-    if( x != 0) {
+    printf("verify_response body: %p\n", body);
+    if(body == NULL) {
+        body = BufferChain_new();
+    }
+    IOBufferRef body_iob = BufferChain_compact(body);
+    IOBufferRef req_iob = Message_serialize(request);
+    bool x = IOBuffer_equal(body_iob, req_iob);
+    if( !x ) {
         printf("Verify failed \n");
-        printf("Req     :  %s\n", Cbuffer_cstr(req_bc));
-        printf("Rsp body:  %s\n", Cbuffer_cstr(body_bc));
+        printf("Req     :  %.*s\n", IOBuffer_data_len(req_iob), (char*)IOBuffer_data(req_iob));
+        printf("Rsp body:  %.*s\n", IOBuffer_data_len(body_iob), (char*)IOBuffer_data(body_iob));
     }
     return (x == 0);
 }
@@ -109,22 +114,22 @@ void* threadfn(void* data)
         Client_connect(client, "localhost", 9001);
         Ctx_mk_uid(ctx);
         MessageRef request = mk_request(ctx);
-        CbufferRef serialized = Message_serialize(request);
+        IOBufferRef serialized = Message_serialize(request);
         const char* req_buffer[] = {
-            Cbuffer_cstr(serialized), NULL
+            IOBuffer_cstr(serialized), NULL
         };
         for(int i = 0; req_buffer[i] != NULL; i++) {
             const char* x = req_buffer[i];
         }
 
         Client_roundtrip(client, req_buffer,  &response);
-        CbufferRef cb = Message_serialize(response);
+        IOBufferRef cb = Message_serialize(response);
 
         if(! verify_response(ctx, request, response)) {
             printf("Verify response failed");
         }
         ctx->counter++;
-        Cbuffer_free(&serialized);
+        IOBuffer_free(&serialized);
         Message_free(&request);
         Message_free(&response);
         Client_free(&client);

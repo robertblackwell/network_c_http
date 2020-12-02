@@ -39,6 +39,7 @@ typedef struct IOBuffer_s {
     char   tag[5];
     void*  mem_p;             // always points to the start of buffer
     char*  char_p;
+    int    allocated_capacity; // typically allocate a little more than requested - for a trailing 0x00
     int    buffer_capacity;   // always holds the size of the buffer
     void*  buffer_ptr;        // points to the start of unused data in buffer
     int    buffer_length;     // same as capacity
@@ -79,7 +80,13 @@ IOBufferRef IOBuffer_from_buf(char* buf, int len);
  * \return IOBufferRef
  */
 IOBufferRef IOBuffer_from_cstring(char* cstr);
-
+/**
+ * Returns a c string ref to internal data
+ * @param this IOBuffer
+ * @return c string Weak reference do not free
+ */
+const char* IOBuffer_cstr(IOBufferRef this);
+IOBufferRef IOBuffer_dup(IOBufferRef this);
 void IOBuffer_set_used(IOBufferRef this, int bytes_used);
 /**
  * Returns a reference pointer to the start of active data in the buffer.
@@ -94,6 +101,8 @@ void* IOBuffer_data(const IOBufferRef this);
  * \return int
  */
 int IOBuffer_data_len(const IOBufferRef this);
+void IOBuffer_data_add(IOBufferRef this, void* p, int len);
+
 /**
  * Returns a reference pointer to the start of unused memory space after the last
  * active content in the buffer. This is the start of a memory where more data could be placed.
@@ -128,6 +137,5 @@ void IOBuffer_consume(IOBufferRef this, int byte_count);
 void IOBuffer_destroy(IOBufferRef this);
 void IOBuffer_reset(IOBufferRef this);
 void IOBuffer_free(IOBufferRef* p);
-
-
+bool IOBuffer_equal(IOBufferRef a, IOBufferRef b);
 #endif

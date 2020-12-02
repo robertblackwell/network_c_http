@@ -72,7 +72,7 @@ void HdrList_add_front(HdrListRef lref, KVPairRef item);
  * @param raw
  * @return
  */
-HdrListRef HdrList_from_array(char* raw[][2]);
+HdrListRef HdrList_from_array(const char* raw[][2]);
 
 
 ///
@@ -95,7 +95,7 @@ void HdrList_add(HdrListRef this, const CbufferRef key, const CbufferRef value);
  * \param pairs CStrPair[] An array of CStrPair terminated by null
  */
 void HdrList_add_many(HdrListRef this, CStrPair* pairs[]);
-
+void HdrList_add_arr(HdrListRef this, const char* ar[][2]);
 ///
 /// Find a KVPair in a HdrList by key/label value
 ///

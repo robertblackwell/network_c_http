@@ -5,7 +5,7 @@
 #include <c_http/xr/evfd_queue.h>
 #include <c_http/message.h>
 #include <c_http/socket_functions.h>
-#include <c_http/xr/handler_example.h>
+#include <c_http/xr/handler.h>
 
 #define XR_NBR_WORKERS 1
 struct XrServer_s {

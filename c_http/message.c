@@ -14,14 +14,10 @@ struct Message_s
     int major_vers;
     HttpMinorVersion minor_vers;
     bool is_request;
-    struct {
-        HttpStatus status_code;
-        CbufferRef reason;
-    };
-    struct {
-        HttpMethod method;
-        CbufferRef target;
-    };
+    HttpStatus status_code;
+    CbufferRef reason;
+    HttpMethod method;
+    CbufferRef target;
 };
 
 MessageRef Message_new ()
@@ -91,62 +87,37 @@ MessageRef MessageResponse(HttpStatus status, void* body)
     error_1:
         return NULL;
 }
-CbufferRef Message_serialize_request(MessageRef mref)
+IOBufferRef Message_serialize(MessageRef mref)
 {
-    CbufferRef result = Cbuffer_new();
+    BufferChainRef bc_result = BufferChain_new();
     char* first_line;
-    const char* meth = llhttp_method_name(mref->method);
-
-    int l1= asprintf(&first_line,"%s %s HTTP/%d.%d\r\n", meth, (char*)Cbuffer_data(mref->target), mref->major_vers, mref->minor_vers);
-    Cbuffer_append(result, (void*)first_line, l1);
-    free(first_line);
-    HdrListRef hdrs = mref->headers;
-    ListIterator iter = HdrList_iterator(hdrs);
-    while(iter != NULL) {
-        KVPairRef item = HdrList_itr_unpack(hdrs, iter);
-        char* s;
-        int len = asprintf(&s,"%s: %s\r\n", KVPair_label(item), KVPair_value(item));
-        Cbuffer_append(result, (void*)s, len);
-        ListIterator next = HdrList_itr_next(hdrs, iter);
-        iter = next;
-        free(s);
-    }
-    Cbuffer_append_cstr(result, "\r\n");
-    CbufferRef body = BufferChain_compact(Message_get_body(mref));
-    Cbuffer_append(result, Cbuffer_data(body), Cbuffer_size(body));
-    return result;
-}
-CbufferRef Message_serialize_response(MessageRef mref)
-{
-    CbufferRef result = Cbuffer_new();
-    char* first_line;
-    int ll = asprintf(&first_line, "HTTP/%d.%d  %d %s\r\n",mref->major_vers, mref->minor_vers, mref->status_code, (char*)Cbuffer_data(mref->reason));
-    Cbuffer_append(result, (void*)first_line, ll);
-    free(first_line);
-    HdrListRef hdrs = mref->headers;
-    ListIterator iter = HdrList_iterator(hdrs);
-    while(iter != NULL) {
-        KVPairRef item = HdrList_itr_unpack(hdrs, iter);
-        char* s;
-        int len = asprintf(&s,"%s: %s\r\n", KVPair_label(item), KVPair_value(item));
-        Cbuffer_append(result, (void*)s, len);
-        ListIterator next = HdrList_itr_next(hdrs, iter);
-        iter = next;
-        free(s);
-    }
-    Cbuffer_append_cstr(result, "\r\n");
-    CbufferRef body = BufferChain_compact(Message_get_body(mref));
-    Cbuffer_append(result, Cbuffer_data(body), Cbuffer_size(body));
-    return result;
-}
-CbufferRef Message_serialize(MessageRef mref)
-{
-    CbufferRef result;
+    int first_line_len;
     if(mref->is_request) {
-        result = Message_serialize_request(mref);
+        const char* meth = llhttp_method_name(mref->method);
+        first_line_len = asprintf(&first_line,"%s %s HTTP/%d.%d\r\n", meth, (char*)Cbuffer_data(mref->target), mref->major_vers, mref->minor_vers);
     } else {
-        result = Message_serialize_response(mref);
+        first_line_len = asprintf(&first_line, "HTTP/%d.%d  %d %s\r\n",mref->major_vers, mref->minor_vers, mref->status_code, (char*)Cbuffer_data(mref->reason));
     }
+    BufferChain_append_cstr(bc_result, first_line);
+    free(first_line);
+    HdrListRef hdrs = mref->headers;
+    ListIterator iter = HdrList_iterator(hdrs);
+    while(iter != NULL) {
+        KVPairRef item = HdrList_itr_unpack(hdrs, iter);
+        char* s;
+        int len = asprintf(&s,"%s: %s\r\n", KVPair_label(item), KVPair_value(item));
+        BufferChain_append_cstr(bc_result, s);
+        ListIterator next = HdrList_itr_next(hdrs, iter);
+        iter = next;
+        free(s);
+    }
+    BufferChain_append_cstr(bc_result, "\r\n");
+    if((mref->body != NULL) && (BufferChain_size(mref->body) != 0)) {
+        IOBufferRef iob_body = BufferChain_compact(mref->body);
+        BufferChain_add_back(bc_result, iob_body);
+    }
+    IOBufferRef result = BufferChain_compact(bc_result);
+    BufferChain_free(&bc_result);
     return result;
 }
 
@@ -253,4 +224,8 @@ BufferChainRef Message_get_body(MessageRef this)
 void Message_set_body(MessageRef this, BufferChainRef bc)
 {
     this->body = bc;
+}
+void Message_set_headers_arr(MessageRef mref, const char* ar[][2])
+{
+    HdrList_add_arr(mref->headers, ar);
 }

@@ -35,11 +35,33 @@ typedef struct XrHandler_s XrHandler, *XrHandlerRef;
 
 typedef ListRef XrConnListRef;
 typedef ListIter XrConnListIter;
+/**
+ * A generic callback function - @TODO willbe the signature of the only type of function that can be posted
+ */
+typedef void (*PostableFunction)(void* arg);
+/**
+ * Signature of functions that can handle Reactor events for a file descriptor fd
+ */
 typedef void (*WatcherCallback)(XrWatcherRef wref, void* arg, uint64_t events);
 
+/**
+ * Callback signatures for specific IO operations
+ */
 typedef void (XrConnReadCallback)(XrConnRef conn, void* arg, int bytes_read, int status);
 typedef void (*XrConnReadMsgCallback)(XrConnRef conn, void* arg, int status);
 typedef void (*XrConnWriteCallback)(XrConnRef conn, void* arg, int status);
+
+/**
+ * Signature of function passed to handler. Called to signal handler is done
+ * Must be "posted" with single argument set to the handlers XrConnRef.
+ */
+typedef void (*HandlerDoneFunction)(void* conn_ref);
+
+/**
+ * HandlerFunction
+ */
+typedef void (*HandlerFunction)(MessageRef request, XrConnRef conn_ref, HandlerDoneFunction done);
+
 
 #define XR_ASSERT(test, msg) \
 do { \
@@ -57,7 +79,7 @@ do { \
 
 #define XR_TRACE(fmt, ...) XR_PRINTF("%s" fmt " \n", __func__, __VA_ARGS__);
 
-#define XR_PRINTF_ENABLE
+#define XR_PRINTF_ENABLEX
 #ifdef XR_PRINTF_ENABLE
 #define XR_PRINTF(...) printf(__VA_ARGS__)
 #else

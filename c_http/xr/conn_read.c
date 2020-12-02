@@ -91,7 +91,7 @@ static void read_some_handler(XrWatcherRef wp, void* arg, uint64_t event)
  * XrConn_read_msg
  * **************************************************************************************************************************
  */
-static void read_msg_init(XrWatcherRef wp, void *arg, uint64_t event);
+//static void read_msg_init(XrWatcherRef wp, void *arg, uint64_t event);
 static void read_msg_handler(XrWatcherRef wp, void *arg, uint64_t event);
 void XrConn_prepare_read(XrConnRef this);
 
@@ -138,7 +138,7 @@ void XrConn_prepare_read(XrConnRef this)
  * \param arg   void*
  * \param event uint64_t
  */
-static void read_msg_cb_wrapper(XrWatcherRef wp, void *arg, uint64_t event)
+static void on_post_read_msg(XrWatcherRef wp, void *arg, uint64_t event)
 {
     XrSocketWatcherRef sw = (XrSocketWatcherRef)wp;
     XrConnRef conn_ref = arg;
@@ -201,18 +201,18 @@ static void read_msg_handler(XrWatcherRef wp, void *arg, uint64_t event)
             conn_ref->read_status = XRD_PERROR;
         }
         Xrsw_change_watch(sw, &read_msg_handler, arg, 0);
-        XrReactor_post(reactor_ref, wp, &read_msg_cb_wrapper, arg);
+        XrReactor_post(reactor_ref, wp, &on_post_read_msg, arg);
         return;
     }
 }
-static void read_msg_init(XrWatcherRef wp, void *arg, uint64_t event)
-{
-    XrSocketWatcherRef sw = (XrSocketWatcherRef)wp;
-    XrConnRef conn_ref = arg;
-    XrReactorRef reactor_ref = sw->runloop;
-    uint64_t interest = EPOLLERR | EPOLLIN;
-    Xrsw_register(sw, &read_msg_handler, conn_ref, interest);
-}
+//static void read_msg_init(XrWatcherRef wp, void *arg, uint64_t event)
+//{
+//    XrSocketWatcherRef sw = (XrSocketWatcherRef)wp;
+//    XrConnRef conn_ref = arg;
+//    XrReactorRef reactor_ref = sw->runloop;
+//    uint64_t interest = EPOLLERR | EPOLLIN;
+//    Xrsw_register(sw, &read_msg_handler, conn_ref, interest);
+//}
 int XrConn_read(XrConnRef this)
 {
     IOBufferRef iobuf = this->io_buf_ref;
@@ -277,6 +277,5 @@ int XrConn_read(XrConnRef this)
             free_req_message(this);
             return XRD_PERROR;
         }
-
     }
 }

@@ -80,162 +80,25 @@ void set_non_blocking(socket_handle_t socket)
     int fres = fcntl(socket, F_SETFL, modFlags2);
     assert(fres == 0);
 }
-typedef enum Reader_ReturnCode {
-    READER_OK = 0,             // A message was returned
-    READER_PARSE_ERROR = -1,   // An error in the format of the message was detected.
-    READER_IO_ERROR = -2,      // An IO error occurred.
-    READER_EAGAIN = -3,
-} Reader_ReturnCode;
 
-// first parameter is really an XrSocketWatchRef - but this is one of the problems with inheritence in C
-static void state_machine(XrWatcherRef wp, void *arg, uint64_t event)
+static void on_post_done(void* arg)
 {
-
-    XrSocketWatcherRef sw = (XrSocketWatcherRef)wp;
     XrConnRef conn_ref = arg;
-    XrReactorRef reactor_ref = sw->runloop;
-
-#define NEXT_STATE(state) \
-    conn_ref->state = state; \
-    Xrsw_change_watch(sw, &state_machine, arg, 0); \
-    XrReactor_post(reactor_ref, sw, &state_machine, arg);
-
-    printf("XrWorker::wrkr_state_machine fd: %d\n", conn_ref->fd);
-    uint64_t e1 = EPOLLIN;
-    uint64_t e2 = EPOLLOUT;
-    uint64_t e3 = EPOLLERR;
-    uint64_t e4 = EPOLLHUP;
-    uint64_t e5 = EPOLLRDHUP;
-    bool pollin = (event & EPOLLIN);
-    bool pollout = (event & EPOLLOUT);
-    bool pollerr = (event & EPOLLERR);
-    bool pollhup = (event & EPOLLHUP);
-    bool pollrdhup = (event & EPOLLRDHUP);
-
-    switch(conn_ref->state) {
-        case XRCONN_STATE_UNINIT:assert(false);
-            break;
-
-        case XRCONN_STATE_RDINIT: {
-            XR_PRINTF("connection state machine RDINIT\n");
-            XrConn_prepare_read(conn_ref);
-            conn_ref->state = XRCONN_STATE_READ;
-            XrReactor_post(reactor_ref, wp, &state_machine, arg);
-        }
-        break;
-        case XRCONN_STATE_READ: {
-            assert(conn_ref->req_msg_ref != NULL);
-            assert(conn_ref->parser_ref != NULL);
-            XrReadRC rc = XrConn_read(conn_ref);
-            // have to decide what next
-            XR_PRINTF("XrServer::state_machine after read rc :%d \n", rc);
-            if (rc == XRD_EAGAIN) {
-                XR_PRINTF("XrServer::state_machine EAGAIN\n");
-                return;
-            } else {
-                if(rc == XRD_EOM) {
-                    XR_PRINTF("XrServer::state_machine EOM\n");
-                    assert(conn_ref->parser_ref->m_message_done);
-                    assert(conn_ref->req_msg_ref != NULL);
-                    assert(conn_ref->req_msg_ref == conn_ref->parser_ref->m_current_message_ptr);
-                    conn_ref->state = XRCONN_STATE_HANDLE;
-                } else if(rc == XRD_EOF) {
-                    XR_PRINTF("XrServer::state_machine EOF\n");
-                    conn_ref->state = XRCONN_STATE_CLOSE;
-                } else if(rc == XRD_ERROR) {
-                    XR_PRINTF("XrServer::state_machine XRD_ERROR\n");
-                    conn_ref->state = XRCONN_STATE_ERROR;
-                } else {
-                    XR_PRINTF("XrServer::state_machine XRD_PERROR\n");
-                    assert(rc == XRD_PERROR);
-                    conn_ref->state = XRCONN_STATE_BADREQ;
-                }
-                Xrsw_change_watch(sw, &state_machine, arg, 0);
-                XrReactor_post(reactor_ref, wp, &state_machine, arg);
-                return;
-            }
-        }
-        break;
-
-        case XRCONN_STATE_HANDLE: {
-            CbufferRef ser = Message_serialize(conn_ref->req_msg_ref);
-            BufferChainRef body = Message_get_body(conn_ref->req_msg_ref);
-            CbufferRef cbody = BufferChain_compact(body);
-            int blen = BufferChain_size(body);
-            XR_PRINTF("XrServer::state_machine STATE_HANDLE new msg body length : %d\n", blen);
-
-            XrHandlerRef handler = XrHandler_new(conn_ref);
-        }
-        break;
-
-        case XRCONN_STATE_WRITE_STATUS_INIT: {
-            IOBufferRef status_line_buf = XrHandler_status_line(conn_ref->handler_ref);
-            XrConn_write_2(conn_ref, status_line_buf, &state_machine);
-            if(conn_ref->write_rc == XRW_COMPLETE) {
-                conn_ref->state = XRCONN_STATE_WRITE_HDRLINE_INIT;
-            } else {
-                conn_ref->state = XRCONN_STATE_ERROR;
-            }
-            Xrsw_change_watch(sw, &state_machine, arg, 0);
-            XrReactor_post(reactor_ref, wp, &state_machine, arg);
-        }
-        break;
-
-        case XRCONN_STATE_WRITE_STATUS:
-            // process output data
-            break;
-
-        case XRCONN_STATE_WRITE_HDRLINE_INIT:
-            // process output data
-            break;
-
-        case XRCONN_STATE_WRITE_HDRLINE:
-            // process output data
-            break;
-
-        case XRCONN_STATE_WRITE_BODY_INIT:
-            // process output data
-            break;
-
-        case XRCONN_STATE_WRITE_BODY:
-            // process output data
-            break;
-
-        case XRCONN_STATE_ERROR:
-            // process output data
-            break;
-
-        case XRCONN_STATE_BADREQ:
-            // process output data
-            break;
-
-    }
-#undef NEXT_STATE
+    XR_TRACE("conn: %p arg: %p", conn_ref, arg);
 }
-static void on_handler_write(XrConnRef conn_ref, void* arg, int status)
-{
-    XR_TRACE("conn: %p arg: %p status: %d", conn_ref, arg, status);
-    assert(conn_ref->handler_ref != NULL);
-    IOBufferRef iobuf = XrHandler_function(conn_ref->req_msg_ref, conn_ref);
-    if(iobuf != NULL) {
-        XrConn_write(conn_ref, iobuf, &on_handler_write, arg);
-    } else {
-        close(conn_ref->fd);
-        assert(false);
-    }
-}
-static void on_handle_message(XrConnRef conn_ref, void* arg, int status)
+static void on_cb_message(XrConnRef conn_ref, void* arg, int status)
 {
     XR_TRACE("conn: %p arg: %p status: %d", conn_ref, arg, status);
     assert(conn_ref->handler_ref == NULL);
-    IOBufferRef iobuf = XrHandler_function(conn_ref->req_msg_ref, conn_ref);
-    assert(iobuf != NULL);
-    assert(conn_ref->handler_ref != NULL);
-    XrConn_write(conn_ref, iobuf, &on_handler_write, arg);
+    XrHandler_function(conn_ref->req_msg_ref, conn_ref, &on_post_done);
 }
-void listening_handler(XrWatcherRef wp, void *arg, uint64_t event)
+void on_event_listening(XrWatcherRef wp, void *arg, uint64_t event)
 {
     XrSocketWatcherRef sw = (XrSocketWatcherRef)wp;
+//    assert(iobuf != NULL);
+//    assert(conn_ref->handler_ref != NULL);
+//    XrConn_write(conn_ref, iobuf, &on_handler_write, arg);
+
     printf("listening_hander \n");
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
@@ -248,11 +111,8 @@ void listening_handler(XrWatcherRef wp, void *arg, uint64_t event)
     XrSocketWatcherRef sw_ref = Xrsw_new(sref->reactor_ref, sock2);
     XrConnRef conn = XrConn_new(sock2, sw_ref, sref);
     MessageRef inmsg = Message_new();
-    XrConn_read_msg(conn, inmsg, on_handle_message, (void*)conn);
+    XrConn_read_msg(conn, inmsg, on_cb_message, (void*)conn);
     return;
-    conn->state = XRCONN_STATE_RDINIT;
-    uint64_t interest = EPOLLERR | EPOLLIN;
-    Xrsw_register(sw_ref, &state_machine, conn, interest);
 }
 
 XrServerRef XrServer_new(int port)
@@ -281,7 +141,7 @@ void XrServer_listen(XrServerRef sref)
     sref->listening_watcher_ref = Xrsw_new(sref->reactor_ref, sref->listening_socket_fd);
     XrSocketWatcherRef lw = sref->listening_watcher_ref;
     uint64_t interest = EPOLLIN | EPOLLERR;
-    Xrsw_register(lw, listening_handler, sref, interest);
+    Xrsw_register(lw, on_event_listening, sref, interest);
     XrReactor_run(sref->reactor_ref, -1);
 }
 

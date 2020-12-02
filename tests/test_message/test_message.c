@@ -11,7 +11,7 @@
 #include <c_http/message.h>
 
 
-
+#ifdef HDRXX
 ///////////////////////////////////////////////////
 int test_hdrlist_new()
 {
@@ -155,7 +155,7 @@ int test_hdr_add_many()
 }
 int test_hdrlist_ar()
 {
-    const char* ar[][2] = {
+    char* ar[][2] = {
         {"Key1", "value1"},
         {"Key2", "value2"},
         {"Key3", "value3"},
@@ -168,125 +168,125 @@ int test_hdrlist_ar()
     UT_EQUAL_CSTR(Cbuffer_cstr(cb), "KEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\n");
     return 0;
 }
-#ifdef HGHGH
-int test_list_add_front()
+#endif
+MessageRef make_request_message()
 {
-    ListRef lref = List_new(dealloc);
-    DummyObj* dref = DummyObj_new(333);
-    List_add_front(lref, (void*) dref);
-    int sz = List_size(lref);
-    int v1 = ((DummyObj*)List_first(lref))->value;
-    int v2 = ((DummyObj*)List_last(lref))->value;
-    UT_EQUAL_INT(sz, 1);
-    UT_EQUAL_INT(v1, 333);
-    UT_EQUAL_INT(v2, 333);
-    DummyObj* dref2 = DummyObj_new(444);
-    List_add_front(lref, (void*) dref2);
-    int v11 = ((DummyObj*)List_first(lref))->value;
-    int v12 = ((DummyObj*)List_last(lref))->value;
-    UT_EQUAL_INT((List_size(lref)), 2);
-    UT_EQUAL_INT(v11, 444);
-    UT_EQUAL_INT(v12, 333);
-
-    return 0;
+    const char* ar[][2] = {
+            {"Key1", "value1"},
+            {"Key2", "value2"},
+            {"Key3", "value3"},
+            {"Key4", "value4"},
+            {NULL, NULL}
+    };
+    MessageRef msg = Message_new_request();
+    Message_set_method(msg, HTTP_POST);
+    Message_set_target(msg, "/somewhere.php?a=111&b=222");
+    Message_set_headers_arr(msg, ar);
+    return msg;
 }
-int test_list_remove_front()
+MessageRef make_response_message()
 {
-    ListRef lref = List_new(dealloc);
-    DummyObj* dref = DummyObj_new(333);
-    List_add_front(lref, (void*) dref);
-    List_remove_first(lref);
-    UT_EQUAL_INT((List_size(lref)), 0);
-    DummyObj* dref1 = DummyObj_new(111);
-    DummyObj* dref2 = DummyObj_new(222);
-    DummyObj* dref3= DummyObj_new(333);
-    List_add_front(lref, (void*) dref1);
-    List_add_front(lref, (void*) dref2);
-    List_add_front(lref, (void*) dref3);
-    UT_EQUAL_INT((List_size(lref)), 3);
-    int v1 = (int)((DummyObj*)List_remove_first(lref))->value;
-    int v2 = (int)((DummyObj*)List_remove_first(lref))->value;
-    int v3 = (int)((DummyObj*)List_remove_first(lref))->value;
-    UT_EQUAL_INT((List_size(lref)), 0);
-    UT_EQUAL_INT(v1, 333);
-    UT_EQUAL_INT(v2, 222);
-    UT_EQUAL_INT(v3, 111);
-
-    return 0;
+    const char* ar[][2] = {
+            {"Key1", "value1"},
+            {"Key2", "value2"},
+            {"Key3", "value3"},
+            {"Key4", "value4"},
+            {NULL, NULL}
+    };
+    MessageRef msg = Message_new_response();
+    Message_set_status(msg, 203);
+    Message_set_reason(msg, "AREASON");
+    Message_set_headers_arr(msg, ar);
+    return msg;
 }
-int test_iter()
+MessageRef make_response_message_empty_body()
 {
-    ListRef lref = List_new(dealloc);
-    DummyObj* dref = DummyObj_new(333);
-    List_add_front(lref, (void*) dref);
-    List_remove_first(lref);
-    UT_EQUAL_INT((List_size(lref)), 0);
-    DummyObj* dref1 = DummyObj_new(111);
-    DummyObj* dref2 = DummyObj_new(222);
-    DummyObj* dref3= DummyObj_new(333);
-    List_add_front(lref, (void*) dref1);
-    List_add_front(lref, (void*) dref2);
-    List_add_front(lref, (void*) dref3);
-    UT_EQUAL_INT((List_size(lref)), 3);
-    ListIterator iter = List_iterator(lref);
-    for(int i = 3; i != 0;i--) {
-        DummyObj* dref = (DummyObj*)List_itr_unpack(lref, iter);
-        int v1 = i*100 + i*10 + i;
-        int v2 = dref->value;
-        UT_EQUAL_INT(v1, v2);
-        iter = List_itr_next(lref, iter);
+    const char* ar[][2] = {
+            {"Key1", "value1"},
+            {"Key2", "value2"},
+            {"Key3", "value3"},
+            {"Key4", "value4"},
+            {NULL, NULL}
+    };
+    MessageRef msg = Message_new_response();
+    Message_set_status(msg, 203);
+    Message_set_reason(msg, "AREASON");
+    Message_set_headers_arr(msg, ar);
+    Message_set_body(msg, BufferChain_new());
+    return msg;
+}
+static BufferChainRef make_chain_2()
+{
+    char* str[5] = {
+            (char*)"ABCDEFGH",
+            (char*)"IJKLMNOPQ",
+            (char*)"RSTUVWXYZ1234",
+            NULL
+    };
+    BufferChainRef bc = BufferChain_new();
+    for(int i = 0; i < 3; i++) {
+        IOBufferRef iob = IOBuffer_from_cstring(str[i]);
+        BufferChain_add_back(bc, iob);
+    }
+    return bc;
+}
+
+MessageRef make_response_message_with_body()
+{
+    const char* ar[][2] = {
+            {"Key1", "value1"},
+            {"Key2", "value2"},
+            {"Key3", "value3"},
+            {"Key4", "value4"},
+            {NULL, NULL}
+    };
+    MessageRef msg = Message_new_response();
+    Message_set_status(msg, 203);
+    Message_set_reason(msg, "AREASON");
+    Message_set_headers_arr(msg, ar);
+    Message_set_body(msg, make_chain_2());
+    return msg;
+}
+
+int test_serialize()
+{
+    {
+        MessageRef msg = make_request_message();
+        IOBufferRef ser = Message_serialize(msg);
+        const char *correct = "POST /somewhere.php?a=111&b=222 HTTP/1.1\r\nKEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\n\r\n";
+        const char *candidate = IOBuffer_cstr(ser);
+        int r = strcmp(candidate, correct);
+        UT_EQUAL_INT(r, 0);
+    }
+    {
+        MessageRef msg = make_response_message();
+        IOBufferRef ser = Message_serialize(msg);
+        const char *correct = "HTTP/1.1  203 AREASON\r\nKEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\n\r\n";
+        const char *candidate = IOBuffer_cstr(ser);
+        int r = strcmp(candidate, correct);
+        UT_EQUAL_INT(r, 0);
+    }
+    {
+        MessageRef msg = make_response_message_empty_body();
+        IOBufferRef ser = Message_serialize(msg);
+        const char *correct = "HTTP/1.1  203 AREASON\r\nKEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\n\r\n";
+        const char *candidate = IOBuffer_cstr(ser);
+        int r = strcmp(candidate, correct);
+        UT_EQUAL_INT(r, 0);
+    }
+    {
+        MessageRef msg = make_response_message_with_body();
+        IOBufferRef ser = Message_serialize(msg);
+        const char *correct = "HTTP/1.1  203 AREASON\r\nKEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\n\r\nABCDEFGHIJKLMNOPQRSTUVWXYZ1234";
+        const char *candidate = IOBuffer_cstr(ser);
+        int r = strcmp(candidate, correct);
+        UT_EQUAL_INT(r, 0);
     }
     return 0;
 }
-int test_list_remove_back()
-{
-    ListRef lref = List_new(dealloc);
-    DummyObj* dref = DummyObj_new(333);
-    List_add_back(lref, (void*) dref);
-    List_remove_last(lref);
-    UT_EQUAL_INT((List_size(lref)), 0);
-    DummyObj* dref1 = DummyObj_new(111);
-    DummyObj* dref2 = DummyObj_new(222);
-    DummyObj* dref3= DummyObj_new(333);
-    List_add_back(lref, (void*) dref1);
-    List_add_back(lref, (void*) dref2);
-    List_add_back(lref, (void*) dref3);
-    UT_EQUAL_INT((List_size(lref)), 3);
-    DummyObj* oref1 = (DummyObj*)List_remove_last(lref);
-    DummyObj* oref2 = (DummyObj*)List_remove_last(lref);
-    DummyObj* oref3 = (DummyObj*)List_remove_last(lref);
-    UT_EQUAL_INT((List_size(lref)), 0);
-    UT_EQUAL_INT((oref1->value), 333);
-    UT_EQUAL_INT((oref2->value), 222);
-    UT_EQUAL_INT((oref3->value), 111);
-
-    return 0;
-}
-
-
-int test_list_remove_back_one()
-{
-    ListRef lref = List_new(dealloc);
-    DummyObj* dref = DummyObj_new(333);
-    List_add_front(lref, (void*) dref);
-    List_remove_last(lref);
-    UT_EQUAL_INT((List_size(lref)), 0);
-
-    return 0;
-}
-#endif
 int main()
 {
-    UT_ADD(test_hdrlist_ar);
-	UT_ADD(test_hdrlist_new);
-    UT_ADD(test_hdrlist_add_back_get_content);
-    UT_ADD(test_hdrlist_find);
-    UT_ADD(test_hdr_add_many);
-//    UT_ADD(test_list_remove_front);
-//    UT_ADD(test_list_remove_back);
-//    UT_ADD(test_iter);
-    UT_ADD(test_serialize_headers);
-    UT_ADD(test_serialize_headers_2);
+    UT_ADD(test_serialize);
 	int rc = UT_RUN();
 	return rc;
 }

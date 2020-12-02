@@ -115,7 +115,7 @@ void Message_add_header_cstring(MessageRef mref, const char* label, const char* 
  */
 const char* Message_get_header_value(MessageRef mref, const char* labptr);
 
-
+void Message_set_headers_arr(MessageRef mref, const char* ar[][2]);
 
 //const char* Message_header_iter_deref(MessageRef mref, HeaderIter iter);
 
@@ -139,7 +139,7 @@ BufferChainRef Message_get_body(MessageRef mref);
 void Message_set_body(MessageRef mref, BufferChainRef bodyp);
 
 
-CbufferRef Message_serialize(MessageRef this);
+IOBufferRef Message_serialize(MessageRef this);
 
 
 #endif

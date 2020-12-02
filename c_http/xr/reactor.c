@@ -82,7 +82,7 @@ void XrReactor_free(XrReactorRef this)
 
 int XrReactor_register(XrReactorRef this, int fd, uint32_t interest, XrWatcherRef wref)
 {
-    printf("XrReactor::register fd : %d  for events %d\n", fd, interest);
+    XR_PRINTF("fd : %d  for events %d\n", fd, interest);
     XrReactor_epoll_ctl (this, EPOLL_CTL_ADD, fd, interest);
     FdTable_insert(this->table, wref, fd);
     return 0;

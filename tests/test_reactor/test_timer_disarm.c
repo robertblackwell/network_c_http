@@ -17,7 +17,18 @@
 #include <c_http/xr/reactor.h>
 #include <c_http/xr/watcher.h>
 #include <c_http/xr/timer_watcher.h>
-
+//
+// demonstrates that for a timer
+// the sequence :
+//      register
+//          arm
+//          disarm
+//          arm
+//          disarm
+//      deregister
+//
+// works as expected
+//
 static struct timespec current_time()
 {
     struct timespec ts;
@@ -38,9 +49,12 @@ typedef struct DisarmTestCtx_s DisarmTestCtx;
 struct DisarmTestCtx_s {
     int                 counter;
     int                 max_count;
+    bool                was_disarmed;
+    bool                rearm_other;
     struct timespec     start_time;
-    XrTimerWatcherRef   rearm_tw;
-    DisarmTestCtx*      rearm_ctx;
+    XrTimerWatcherRef   other_tw;
+    DisarmTestCtx*      other_ctx;
+    long                interval_ms;
 
 };
 
@@ -50,80 +64,91 @@ DisarmTestCtx* DisarmTestCtx_new(int counter_init, int counter_max)
     tmp->counter = counter_init;
     tmp->max_count = counter_max;
     tmp->start_time = current_time();
+    tmp->was_disarmed = false;
     return tmp;
 }
-
-static void callback_disarm_1(XrTimerWatcherRef watcher, void* ctx, XrTimerEvent event)
+// disarms itself on first call. If called subsequently and reaches its max then cancel both timers
+static void callback_disarm_clear(XrTimerWatcherRef watcher, void* ctx, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
     DisarmTestCtx* ctx_p = (DisarmTestCtx*) ctx;
-    struct timespec tnow = current_time();
-    double gap = time_diff(tnow, ctx_p->start_time);
-    ctx_p->start_time = tnow;
-    double percent_error = fabs(100.0*(((double)(watcher->interval) - gap)/((double)(watcher->interval))));
-    gap = percent_error;
 
-    printf("inside timer callback_disarm_1 counter: %d %%error: %f   event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld\n", ctx_p->counter, gap, event, epollin, error);
-
-    if(ctx_p->rearm_tw == NULL) {
-        printf("callback_rearm_1 disarm timer \n");
+    // if first call disarm
+    printf("\nXX %s counter %d\n", __func__, ctx_p->counter);
+    if(ctx_p->counter <= 0) {
+        printf("\nXX %s disarm self \n", __func__);
         Xrtw_disarm(watcher);
+        ctx_p->was_disarmed = true;
         ctx_p->counter++;
     } else {
         if(ctx_p->counter >= ctx_p->max_count) {
-            printf("rearmer if done \n");
-            Xrtw_clear(ctx_p->rearm_tw);
+            printf("\nXX %s disarm_cb clear other and self\n", __func__);
+            Xrtw_clear(ctx_p->other_tw);
             Xrtw_clear(watcher);
-        } else {
-            printf("rearming \n");
-            Xrtw_rearm(ctx_p->rearm_tw, &callback_disarm_1, ctx_p->rearm_ctx, 1000, true);
-            ctx_p->counter++;
+            return;
         }
+        ctx_p->counter++;
     }
 }
-int test_timer_disarm()
+// after being called max_count times rearm the other
+static void callback_rearm_other(XrTimerWatcherRef watcher, void* ctx, XrTimerEvent event)
 {
+    uint64_t epollin = EPOLLIN & event;
+    uint64_t error = EPOLLERR & event;
+    DisarmTestCtx* ctx_p = (DisarmTestCtx*) ctx;
 
-    DisarmTestCtx* test_ctx_p_1 = DisarmTestCtx_new(0, 1);
-    XrReactorRef rtor_ref = XrReactor_new();
-
-    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref);
-
-    Xrtw_set(tw_1, &callback_disarm_1, test_ctx_p_1, 1000, true);
-
-    XrReactor_run(rtor_ref, 10000);
-    XrReactor_free(rtor_ref);
-    UT_EQUAL_INT(test_ctx_p_1->counter, 0);
-    free(test_ctx_p_1);
-    return 0;
-
+    int x = (ctx_p->counter >= ctx_p->max_count);
+    int x2 = ((ctx_p->other_ctx->was_disarmed) && (ctx_p->counter >= ctx_p->max_count));
+    printf("\nXX %s %d counter %d max %d \n", __func__, (int)ctx_p->other_ctx->was_disarmed, ctx_p->counter, ctx_p->max_count);
+    printf("\nXX %s x %d x2 %d \n", __func__, x, x2);
+    if((ctx_p->other_ctx->was_disarmed) && (ctx_p->counter == ctx_p->max_count)) {
+        // other should be disarmed by now
+        assert(ctx_p->other_ctx->was_disarmed);
+        printf("\nXX %s rearming other\n", __func__);
+        if(true) {
+            Xrtw_rearm_2(ctx_p->other_tw);
+      } else {
+          Xrtw_rearm(ctx_p->other_tw, &callback_disarm_clear, ctx_p->other_ctx, ctx_p->other_ctx->interval_ms, true);
+        }
+    }
+    // keep counting until we are stopped by the other
+    ctx_p->counter++;
+    printf("\nXX  %s counter %d\n", __func__, ctx_p->counter);
 }
-
+//
+// timer 2 - disarms itself on the first event.
+// timer 1 - after a number of repeat calls it rearms timer 2 .. timer 1 keeps repeating
+// timer 2 - once it hits its max_count it clears or deregisters both timers allowing the reactor to return
+//
 int test_timer_disarm_rearm()
 {
 
     DisarmTestCtx* test_ctx_p_1 = DisarmTestCtx_new(0, 7);
+    test_ctx_p_1->interval_ms = 100;
     DisarmTestCtx* test_ctx_p_2 = DisarmTestCtx_new(0, 6);
+    test_ctx_p_2->interval_ms = 100;
 
     XrReactorRef rtor_ref = XrReactor_new();
 
     XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref);
     XrTimerWatcherRef tw_2 = Xrtw_new(rtor_ref);
+    // timer 1 callback will disarm itself on the first timer event
     // time 2 callback will rearm tw_1 after count of 5
-    test_ctx_p_2->rearm_tw = tw_1;
-    test_ctx_p_2->rearm_ctx = test_ctx_p_1;
-    test_ctx_p_1->rearm_tw = NULL;
-    test_ctx_p_1->rearm_ctx = NULL;
+    test_ctx_p_2->other_tw = tw_1;
+    test_ctx_p_2->other_ctx = test_ctx_p_1;
+    test_ctx_p_1->other_tw = tw_2;
+    test_ctx_p_1->other_ctx = test_ctx_p_2;
 
-
-
-    Xrtw_set(tw_1, &callback_disarm_1, test_ctx_p_1, 1000, true);
-    Xrtw_set(tw_2, &callback_disarm_1, test_ctx_p_2, 2000, true);
+    Xrtw_set(tw_1, &callback_disarm_clear, test_ctx_p_1, test_ctx_p_1->interval_ms, true);
+    Xrtw_set(tw_2, &callback_rearm_other, test_ctx_p_2, test_ctx_p_2->interval_ms, true);
 
     XrReactor_run(rtor_ref, 10000);
     UT_EQUAL_INT(test_ctx_p_1->counter, test_ctx_p_1->max_count);
-    UT_EQUAL_INT(test_ctx_p_2->counter, test_ctx_p_2->max_count);
+
+    //cannot predict how many times the rearm cb will be called before the disarm_clear cb final stops everything
+    UT_TRUE(test_ctx_p_2->counter >= test_ctx_p_2->max_count);
+
     free(test_ctx_p_1);
     free(test_ctx_p_2);
     XrReactor_free(rtor_ref);

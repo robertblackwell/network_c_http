@@ -5,19 +5,35 @@
 #include <c_http/xr/conn.h>
 
 struct XrHandler_s;
-//struct XrHandler_s {
-//    XrConnRef conn_ref;  // weak non owning reference
-//    MessageRef      request;   // weak non owning reference
-//    IOBufferRef     status_line;
-//    HdrListRef      headers;
-//    BufferChainRef  body;
-//
-//    HdrListIter     hdr_iter;
-//    BufferChainIter body_iter;
-//
-//};
+typedef enum XrHandlerState {
+    XRH_INIT = 90,
+    XRH_STATUS = 91,
+    XRH_HDRS = 92,
+    XRH_BODY = 93,
+} XrHandlerState;
 
-IOBufferRef XrHandler_function(MessageRef request, XrConnRef conn);
+struct XrHandler_s {
+    XrConnRef conn_ref;  // weak non owning reference
+    MessageRef      request;   // weak non owning reference
+    IOBufferRef     status_line;
+    HdrListRef      headers;
+    BufferChainRef  body;
+    MessageRef      response;
+    IOBufferRef     resp_buf;
+    HdrListIter     hdr_iter;
+    BufferChainIter body_iter;
+    XrHandlerState  state;
+    HandlerDoneFunction done_function;
+};
+
+/**
+ * This is an example of a handler function to be passed to an instance of xr_server
+ * @param request
+ * @param conn
+ * @param done
+ * @return nothing
+ */
+void XrHandler_function(MessageRef request, XrConnRef conn, HandlerDoneFunction done);
 
 /**
  * Makes an instance of XrHandler. This instance takes a non owning reference to

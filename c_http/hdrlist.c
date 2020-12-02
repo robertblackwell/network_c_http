@@ -88,17 +88,28 @@ void HdrList_add_front(HdrListRef lref, KVPairRef item)
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-HdrListRef HdrList_from_array(char* ar[][2])
+HdrListRef HdrList_from_array(const char* ar[][2])
 {
     HdrListRef tmp = HdrList_new();
-    char* k;
-    char* v;
+    const char* k;
+    const char* v;
     for(int row = 0; ar[row][0] != NULL ; row++) {
         k = ar[row][0];
         v = ar[row][1];
         HdrList_add_cstr(tmp, k, v);
     }
     return tmp;
+}
+void HdrList_add_arr(HdrListRef this, const char* ar[][2])
+{
+    const char* k;
+    const char* v;
+    for(int row = 0; ar[row][0] != NULL ; row++) {
+        k = ar[row][0];
+        v = ar[row][1];
+        HdrList_add_cstr(this, k, v);
+    }
+
 }
 
 HdrListIter HdrList_find_iter(const HdrListRef hlref, const char *key)

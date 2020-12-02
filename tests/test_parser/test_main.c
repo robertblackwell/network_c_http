@@ -364,7 +364,7 @@ int test_A007_vfunc (ListRef results)
         CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "11");
 
         BufferChainRef bcref = Message_get_body(m2);
-        CbufferRef cbref = BufferChain_compact(bcref);
+        IOBufferRef iobref = BufferChain_compact(bcref);
         bool x01 = BufferChain_eq_cstr(bcref, "ABCDEFGHIJK");
         int y = x01;
         CHECK_BODY(m2, "ABCDEFGHIJK");

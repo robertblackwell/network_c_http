@@ -67,7 +67,7 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 	xr/conn_list.h
 	xr/xr_reader.h
 	xr/run_list.h
-	xr/handler_example.h
+	xr/handler.h
 
 	${EXTSRC}/llhttp/llhttp.h
 	)
@@ -117,7 +117,8 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	xr/conn_list.c
 	xr/run_list.c
 	xr/xr_reader.c
-	xr/handler_example.c
+	xr/handler.c
+	xr/handler_function.c
 
 	${EXTSRC}/llhttp/api.c
 	${EXTSRC}/llhttp/http.c

@@ -70,7 +70,11 @@ void Client_roundtrip(ClientRef this, const char* req_buffers[], MessageRef* res
     }
     int rc = Reader_read(this->rdr, response_ptr);
     BufferChainRef bc = Message_get_body(*response_ptr);
-    CbufferRef cb = BufferChain_compact(Message_get_body(*response_ptr));
+    if(bc == NULL) {
+        bc = BufferChain_new();
+    }
+
+    IOBufferRef cb = BufferChain_compact(bc);
 
     close(this->sock);
 }

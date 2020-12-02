@@ -144,6 +144,8 @@ void List_add_back(ListRef lref, void* content)
 void* List_first(const ListRef lref)
 {
     ASSERT_NOT_NULL(lref);
+    if(lref->head == NULL)
+        return NULL;
     return lref->head->item;
 }
 
