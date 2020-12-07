@@ -61,7 +61,7 @@ set(other_flags "${other_flags} -frtti -fvisibility-inlines-hidden")
 set(other_flags "${other_flags} -fvisibility=hidden -D_GNU_SOURCE")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${other_flags} -pthread")
 #set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11") # this caused a problem with time.h
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fms-extensions")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fms-extensions -DTYPE_CHECK_ON")
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 set(CTEST_CUSTOM_PRE_TEST "echo THIS IS PRE TEST")

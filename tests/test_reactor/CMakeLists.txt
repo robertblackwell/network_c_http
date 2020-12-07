@@ -74,4 +74,4 @@ target_include_directories(${TARGET_Q}
 target_link_libraries(${TARGET_Q}
 		PUBLIC ${TEST_LINK_LIBS})
 
-add_test(${TARGET_IO} ${TARGET_Q})
+#add_test(${TARGET_IO} ${TARGET_Q})

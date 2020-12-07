@@ -62,6 +62,24 @@ typedef void (*HandlerDoneFunction)(void* conn_ref);
  */
 typedef void (*HandlerFunction)(MessageRef request, XrConnRef conn_ref, HandlerDoneFunction done);
 
+#define XR_PRINTF_ENABLEX
+#define XR_TRACE_ENABLEDX
+
+#ifdef XR_TRACE_ENABLE
+
+#define XR_PRINTF(...) printf(__VA_ARGS__)
+#define XR_TRACE_ENTRY() printf("TRACE:[%s] entered\n", __func__);
+#define XR_TRACE_MSG(m)  printf("TRACE:[%s] %s\n", __func__, m);
+#define XR_TRACE(fmt, ...) printf("TRACE:[%s] " fmt " \n", __func__,  __VA_ARGS__);
+
+#else
+
+#define XR_PRINTF(...)
+#define XR_TRACE_ENTRY()
+#define XR_TRACE_MSG(m)
+#define XR_TRACE(fmt, ...)
+
+#endif
 
 #define XR_ASSERT(test, msg) \
 do { \
@@ -77,14 +95,6 @@ do { \
     assert(false); \
 } while(0)
 
-#define XR_TRACE(fmt, ...) XR_PRINTF("%s" fmt " \n", __func__, __VA_ARGS__);
-
-#define XR_PRINTF_ENABLEX
-#ifdef XR_PRINTF_ENABLE
-#define XR_PRINTF(...) printf(__VA_ARGS__)
-#else
-#define XR_PRINTF(...)
-#endif
 
 #define XRSW_TYPE_CHECK(w) assert(w->type == XR_WATCHER_SOCKET);
 #define XRTW_TYPE_CHECK(w) assert(w->type == XR_WATCHER_TIMER);

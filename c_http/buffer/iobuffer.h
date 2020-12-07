@@ -36,7 +36,7 @@
  *
   */
 typedef struct IOBuffer_s {
-    char   tag[5];
+    char   tag[8];
     void*  mem_p;             // always points to the start of buffer
     char*  char_p;
     int    allocated_capacity; // typically allocate a little more than requested - for a trailing 0x00

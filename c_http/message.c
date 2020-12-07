@@ -7,8 +7,15 @@
 #include <stdio.h>
 #include <assert.h>
 
+#define TYPE Message
+#define Message_TAG "_MSG_"
+#include <c_http/check_tag.h>
+#undef TYPE
+#define CHECK_MESSAGE(p) CHECK_TAG(Message, p)
+
 struct Message_s
 {
+    DECLARE_TAG(Message);
     BufferChainRef body;
     HdrListRef headers;
     int major_vers;
@@ -24,7 +31,7 @@ MessageRef Message_new ()
 {
     MessageRef mref = (MessageRef) eg_alloc(sizeof(Message));
     if(mref == NULL) goto error_label_1;
-
+    SET_TAG(Message, mref)
     mref->body = NULL;
     mref->headers = HdrList_new();
     if(mref->headers == NULL) goto error_label_2;
@@ -62,6 +69,7 @@ MessageRef Message_new_response()
 }
 void Message_free(MessageRef* this_p)
 {
+    CHECK_MESSAGE(*this_p)
     MessageRef this = *this_p;
     HdrList_free(&(this->headers));
     Cbuffer_free(&(this->target));
@@ -89,6 +97,7 @@ MessageRef MessageResponse(HttpStatus status, void* body)
 }
 IOBufferRef Message_serialize(MessageRef mref)
 {
+    CHECK_MESSAGE(mref)
     BufferChainRef bc_result = BufferChain_new();
     char* first_line;
     int first_line_len;
@@ -123,6 +132,7 @@ IOBufferRef Message_serialize(MessageRef mref)
 
 HttpStatus Message_get_status(MessageRef this)
 {
+    CHECK_MESSAGE(this)
     return this->status_code;
 }
 void Message_set_status(MessageRef this, HttpStatus status)
@@ -131,37 +141,45 @@ void Message_set_status(MessageRef this, HttpStatus status)
 }
 bool Message_get_is_request(MessageRef this)
 {
+    CHECK_MESSAGE(this)
     return this->is_request;
 }
 void Message_set_is_request(MessageRef this, bool yn)
 {
+    CHECK_MESSAGE(this)
     this->is_request = yn;
 }
 HttpMinorVersion Message_get_minor_version(MessageRef this)
 {
+    CHECK_MESSAGE(this)
     return this->minor_vers;
 }
 
 void Message_set_minor_version(MessageRef this, HttpMinorVersion mv)
 {
+    CHECK_MESSAGE(this)
     this->minor_vers = mv;
 }
 void Message_set_version(MessageRef this, int major_vers, int minor_vers)
 {
+    CHECK_MESSAGE(this)
     this->minor_vers = minor_vers;
 }
 void Message_set_method(MessageRef this, HttpMethod method)
 {
+    CHECK_MESSAGE(this)
     this->method = method;
 }
 HttpMethod Message_get_method(MessageRef this)
 {
+    CHECK_MESSAGE(this)
     return this->method;
 }
 
 // target
 const char* Message_get_target(MessageRef this)
 {
+    CHECK_MESSAGE(this)
     return (const char*)Cbuffer_cstr(this->target);
 }
 //void Message_move_target(MessageRef this, CbufferRef target)
@@ -173,15 +191,18 @@ const char* Message_get_target(MessageRef this)
 //}
 void Message_set_target(MessageRef this, const char* targ)
 {
+    CHECK_MESSAGE(this)
     assert((this->target != NULL) && (Cbuffer_size(this->target) == 0));
     Cbuffer_append_cstr(this->target, (const char*)targ);
 }
 CbufferRef Message_get_target_cbuffer(MessageRef this)
 {
+    CHECK_MESSAGE(this)
     return Cbuffer_from_cstring(Cbuffer_cstr(this->target));
 }
 void Message_set_target_cbuffer(MessageRef this, CbufferRef target)
 {
+    CHECK_MESSAGE(this)
     assert((this->target != NULL) && (Cbuffer_size(this->target) == 0));
     Cbuffer_append_cstr(this->target, (const char*)Cbuffer_cstr(target));
 
@@ -189,6 +210,7 @@ void Message_set_target_cbuffer(MessageRef this, CbufferRef target)
 // reason
 void Message_set_reason(MessageRef this, const char* reason_cstr)
 {
+    CHECK_MESSAGE(this)
     assert((this->reason != NULL) && (Cbuffer_size(this->reason) == 0));
     Cbuffer_append_cstr(this->reason, (const char*)reason_cstr);
 }
@@ -200,14 +222,17 @@ void Message_set_reason(MessageRef this, const char* reason_cstr)
 //}
 const char* Message_get_reason(MessageRef this)
 {
+    CHECK_MESSAGE(this)
     (const char*)Cbuffer_cstr(this->reason);
 }
 CbufferRef Message_get_reason_cbuffer(MessageRef this)
 {
+    CHECK_MESSAGE(this)
     return Cbuffer_from_cstring(Cbuffer_cstr(this->reason));
 }
 void Message_set_reason_cbuffer(MessageRef this, CbufferRef target)
 {
+    CHECK_MESSAGE(this)
     assert((this->reason != NULL) && (Cbuffer_size(this->reason) == 0));
     Cbuffer_append_cstr(this->reason, (const char*)Cbuffer_cstr(target));
 }
@@ -215,17 +240,21 @@ void Message_set_reason_cbuffer(MessageRef this, CbufferRef target)
 // headers
 HdrListRef Message_get_headerlist(MessageRef this)
 {
+    CHECK_MESSAGE(this)
     return this->headers;
 }
 BufferChainRef Message_get_body(MessageRef this)
 {
+    CHECK_MESSAGE(this)
     return this->body;
 }
 void Message_set_body(MessageRef this, BufferChainRef bc)
 {
+    CHECK_MESSAGE(this)
     this->body = bc;
 }
-void Message_set_headers_arr(MessageRef mref, const char* ar[][2])
+void Message_set_headers_arr(MessageRef this, const char* ar[][2])
 {
-    HdrList_add_arr(mref->headers, ar);
+    CHECK_MESSAGE(this)
+    HdrList_add_arr(this->headers, ar);
 }

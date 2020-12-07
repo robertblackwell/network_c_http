@@ -1,4 +1,5 @@
 #define _GNU_SOURCE
+#define XR_TRACE_ENABLE
 #include "io_write.h"
 #include <assert.h>
 #include <stdio.h>
@@ -18,13 +19,24 @@
 #include <c_http/xr/timer_watcher.h>
 #include <c_http/xr/socket_watcher.h>
 
-
-void WriteCtx_init(WriteCtx* this, int fd, XrSocketWatcherRef swatcher, XrTimerWatcherRef twatcher)
+/**
+ * The writer does the following
+ *
+ *  wait on a timer to expire, then disarm the timer
+ *  wait for the fdd to become writeable and then write a show message in blocking mode
+ *
+ *  disarm writeable events
+ *  rearm the timer
+ *
+ */
+void WriteCtx_init(WriteCtx* this, int fd, XrSocketWatcherRef swatcher, XrTimerWatcherRef twatcher, int max)
 {
     this->id = "WRITE";
     this->writefd = fd;
     this->twatcher = twatcher;
     this->swatcher = swatcher;
+    this->write_count = 0;
+    this->max_write_count = max;
 }
 
 
@@ -44,41 +56,51 @@ void Writer_free(Writer* this)
     WRTR_CHECK(this)
     free(this);
 }
-void Writer_add_fd(Writer* this, int fd)
+void Writer_add_fd(Writer* this, int fd, int max, int interval_ms)
 {
     WRTR_CHECK(this)
     WriteCtx* ctx = &(this->ctx_table[this->count]);
-
+    this->ctx_table[this->count].write_count = 0;
+    this->ctx_table[this->count].max_write_count = max;
+    this->ctx_table[this->count].interval_ms = interval_ms;
     this->ctx_table[this->count].id = "WRITE";
     this->ctx_table[this->count].ctx_tag = WCTX_TAG;
     this->ctx_table[this->count].writefd = fd;
     this->count++;
 }
 static void wrtr_wait(XrTimerWatcherRef watch, void* arg, uint64_t event);
-static int write_count = 0;
 static void wrtr_cb(XrWatcherRef watch, void* arg, uint64_t event)
 {
     XrSocketWatcherRef sock_watch = (XrSocketWatcherRef)watch;
+    XrReactorRef reactor = sock_watch->runloop;
     XRSW_TYPE_CHECK(sock_watch)
+    WriteCtx* ctx = (WriteCtx*)(arg);
     XR_PRINTF("test_io: Socket watcher wrtr_callback");
 
     char* wbuf = malloc(100);
-    sprintf(wbuf, "this is a line from writer - %d\n", write_count);
+    sprintf(wbuf, "this is a line from writer - %d\n", ctx->write_count);
+    // synchronous write - assume the write buffers are big enough to take the entire message
+    // we only got here if the fd is ready for a write
     int nwrite = write(sock_watch->fd, wbuf, strlen(wbuf));
     free(wbuf);
-
-    XR_PRINTF("test_io: Socket watcher wrtr_callback fd: %d event : %lx nread: %d errno: %d\n", watch->fd,  event, nwrite, errno);
+    ctx->write_count++;
+    XR_PRINTF("test_io: Socket watcher wrtr_callback fd: %d event : %lx nread: %d errno: %d write_count %d\n", watch->fd,  event, nwrite, errno, ctx->write_count);
+    if(ctx->write_count > ctx->max_write_count) {
+        XrReactor_deregister(reactor, ctx->swatcher->fd);
+        XrReactor_deregister(reactor, ctx->twatcher->fd);
+        return;
+    }
+    // disarm writeable events oon this fd
     Xrsw_change_watch(sock_watch, NULL, NULL, 0);
-    WriteCtx* ctx = (WriteCtx*)(arg);
     WR_CTX_CHECK_TAG(ctx)
     XRSW_TYPE_CHECK(ctx->swatcher)
     XRTW_TYPE_CHECK(ctx->twatcher)
-    Xrtw_rearm(ctx->twatcher, wrtr_wait, (void*)ctx,  2000, true);
+    // rearm the timer
+    Xrtw_rearm(ctx->twatcher);
 }
 static void wrtr_wait(XrTimerWatcherRef watch, void* arg, uint64_t event)
 {
     XRTW_TYPE_CHECK(watch)
-    write_count++;
     XR_PRINTF("test_io: Socket watcher wrtr_wait\n");
     WriteCtx* ctx = (WriteCtx*)(arg);
     WR_CTX_CHECK_TAG(ctx)
@@ -89,7 +111,7 @@ static void wrtr_wait(XrTimerWatcherRef watch, void* arg, uint64_t event)
     int write_here = 0;
     if(write_here) {
         char* wbuf = malloc(100);
-        sprintf(wbuf, "this is a line from writer - %d\n", write_count);
+        sprintf(wbuf, "this is a line from writer - %d\n", ctx->write_count);
         int nwrite = write(ctx->writefd, wbuf, strlen(wbuf));
         free(wbuf);
     } else {
@@ -117,7 +139,7 @@ void* writer_thread_func(void* arg)
 
         if(wait_first) {
             // register armed - wait 2 seconds
-            Xrtw_set(ctx->twatcher, &wrtr_wait, (void*)ctx,  2000, true);
+            Xrtw_set(ctx->twatcher, &wrtr_wait, (void*)ctx,  ctx->interval_ms, true);
             // register disarmed - timer cb will arm it
             Xrsw_register(ctx->swatcher, &wrtr_cb, (void*)ctx, 0);
         } else {

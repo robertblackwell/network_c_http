@@ -26,13 +26,18 @@
 #define WRTR_CHECK(w) assert(w->wrtr_tag == WRTR_TAG);
 
 typedef struct WriteCtx_s {
-    int         ctx_tag;
-    char*       id;
-    int writefd;
+    int                 ctx_tag;
+    int                 write_count;
+    int                 max_write_count;
+    char*               id;
+    int                 writefd;
+    int                 interval_ms;
     XrSocketWatcherRef  swatcher;
     XrTimerWatcherRef   twatcher;
 } WriteCtx;
-void WriteCtx_init(WriteCtx* this, int fd, XrSocketWatcherRef swatcher, XrTimerWatcherRef twatcher);
+void WriteCtx_init(WriteCtx* this, int fd, XrSocketWatcherRef swatcher, XrTimerWatcherRef twatcher, int max);
+
+
 typedef struct Writer_s {
     int     wrtr_tag;
     int     count;
@@ -43,7 +48,7 @@ typedef struct Writer_s {
 void Writer_init(Writer* this);
 Writer* Writer_new();
 void Writer_free(Writer* this);
-void Writer_add_fd(Writer* this, int fd);
+void Writer_add_fd(Writer* this, int fd, int max, int interval_ms);
 void wrtr_callback(XrSocketWatcherRef watch, void* arg, uint64_t event);
 void* writer_thread_func(void* arg);
 #endif

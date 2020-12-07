@@ -1,4 +1,6 @@
 #define _GNU_SOURCE
+#define XR_TRACE_ENABLE
+
 #include "io_read.h"
 #include <assert.h>
 #include <stdio.h>
@@ -22,6 +24,17 @@
 #include <c_http/xr/timer_watcher.h>
 #include <c_http/xr/socket_watcher.h>
 
+/**
+ * the reader does the following
+ *
+ *  initialization is set a watcher to be called when the fd is readable
+ *
+ *      when readable read a message into a buffer
+ *      print the message or if io error print "badread"
+ *
+ */
+
+
 void Reader_init(Reader* this)
 {
     this->count = 0;
@@ -36,18 +49,21 @@ void Reader_free(Reader* this)
 {
     free(this);
 }
-void Reader_add_fd(Reader* this, int fd)
+void Reader_add_fd(Reader* this, int fd, int max)
 {
     this->ctx_table[this->count].id = "READ";
+    this->ctx_table[this->count].read_count = 0;
+    this->ctx_table[this->count].max_read_count = max;
     this->ctx_table[this->count].readfd = fd;
     this->count++;
+
 }
 
-static int read_count = 0;
 void rd_callback(XrWatcherRef watch, void* arg, uint64_t event)
 {
-    read_count++;
     ReadCtx* ctx = (ReadCtx*)arg;
+    XrSocketWatcherRef sw = (XrSocketWatcherRef)watch;
+    XrReactorRef reactor = sw->runloop;
     int in = event | EPOLLIN;
     char buf[1000];
     int nread = read(watch->fd, buf, 1000);
@@ -58,7 +74,13 @@ void rd_callback(XrWatcherRef watch, void* arg, uint64_t event)
     } else {
         s = "badread";
     }
-    XR_PRINTF("test_io: Socket watcher rd_callback read_count: %d fd: %d event %lx nread: %d buf: %s errno: %d\n", read_count, watch->fd,  event, nread, s, errno);
+    XR_PRINTF("test_io: Socket watcher rd_callback read_count: %d fd: %d event %lx nread: %d buf: %s errno: %d\n", ctx->read_count, watch->fd,  event, nread, s, errno);
+    ctx->read_count++;
+    if(ctx->read_count > ctx->max_read_count) {
+        XrReactor_deregister(reactor, watch->fd);
+    } else {
+        return;
+    }
 }
 void* reader_thread_func(void* arg)
 {
@@ -72,6 +94,7 @@ void* reader_thread_func(void* arg)
         Xrsw_register(sw, &rd_callback, (void*) ctx, 0);
         Xrsw_change_watch(sw, &rd_callback, (void*) ctx, interest);
     }
+
     XrReactor_run(rtor_ref, 1000000);
     return NULL;
 

@@ -25,6 +25,7 @@
 
 
 struct XrReactor_s {
+    XR_REACTOR_DECLARE_TAG;
     int               epoll_fd;
     FdTableRef        table; // (int, CallbackData)
     RunListRef        run_list;
@@ -39,6 +40,7 @@ static int *int_in_heap(int key) {
 }
 static void XrReactor_epoll_ctl(XrReactorRef this, int op, int fd, uint64_t interest)
 {
+    XR_REACTOR_CHECK_TAG(this)
     struct epoll_event epev = {
         .events = interest,
         .data = {
@@ -56,6 +58,7 @@ static void XrReactor_epoll_ctl(XrReactorRef this, int op, int fd, uint64_t inte
 XrReactorRef XrReactor_new(void) {
     XrReactorRef runloop = malloc(sizeof(XrReactor));
     XR_ASSERT((runloop != NULL), "malloc failed new runloop");
+    XR_REACTOR_SET_TAG(runloop)
 
     runloop->epoll_fd = epoll_create1(0);
     XR_ASSERT((runloop->epoll_fd != -1), "epoll_create failed");
@@ -67,6 +70,7 @@ XrReactorRef XrReactor_new(void) {
 
 void XrReactor_free(XrReactorRef this)
 {
+    XR_REACTOR_CHECK_TAG(this)
     int status = close(this->epoll_fd);
     XR_PRINTF("XrReactor_free status: %d errno: %d \n", status, errno);
     XR_ASSERT((status != -1), "close epoll_fd failed");
@@ -82,6 +86,8 @@ void XrReactor_free(XrReactorRef this)
 
 int XrReactor_register(XrReactorRef this, int fd, uint32_t interest, XrWatcherRef wref)
 {
+    XR_REACTOR_CHECK_TAG(this)
+
     XR_PRINTF("fd : %d  for events %d\n", fd, interest);
     XrReactor_epoll_ctl (this, EPOLL_CTL_ADD, fd, interest);
     FdTable_insert(this->table, wref, fd);
@@ -89,17 +95,17 @@ int XrReactor_register(XrReactorRef this, int fd, uint32_t interest, XrWatcherRe
 }
 int XrReactor_deregister(XrReactorRef this, int fd)
 {
+    XR_REACTOR_CHECK_TAG(this)
     XR_ASSERT((FdTable_lookup(this->table, fd) != NULL),"fd not in FdTable");
-//    XR_RL_CTL(this, EPOLL_CTL_DEL, fd, 0)
     XrReactor_epoll_ctl(this, EPOLL_CTL_DEL, fd, 0);
     FdTable_remove(this->table, fd);
     return 0;
 }
 
 int XrReactor_reregister(XrReactorRef this, int fd, uint32_t interest, XrWatcherRef wref) {
+    XR_REACTOR_CHECK_TAG(this)
     XR_ASSERT((FdTable_lookup(this->table, fd) != NULL),"fd not in FdTable");
-    XR_RL_CTL(this, EPOLL_CTL_MOD, fd, interest)
-    // entry must already be in table
+    XrReactor_epoll_ctl(this->table, EPOLL_CTL_MOD, fd, interest);
     XrWatcherRef wref_tmp = FdTable_lookup(this->table, fd);
     assert(wref == wref_tmp);
     return 0;
@@ -112,6 +118,7 @@ void print_events(struct epoll_event events[], int count)
     }
 }
 int XrReactor_run(XrReactorRef this, time_t timeout) {
+    XR_REACTOR_CHECK_TAG(this)
     int result;
     struct epoll_event events[MAX_EVENTS];
 
@@ -165,6 +172,7 @@ cleanup:
 
 int XrReactor_post(XrReactorRef this, XrWatcherRef watch, WatcherCallback cb, void* arg)
 {
+    XR_REACTOR_CHECK_TAG(this)
     FunctorRef fr = Functor_new(watch, cb, arg);
     RunList_add_back(this->run_list, fr);
 }

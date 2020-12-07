@@ -6,6 +6,14 @@
 #include <c_http/xr/socket_watcher.h>
 #include <c_http/xr/handler.h>
 
+#define TYPE XrConn
+#define XrConn_TAG "XRCON"
+#include <c_http/check_tag.h>
+#undef TYPE
+#define XR_CONN_DECLARE_TAG DECLARE_TAG(XrConn)
+#define XR_CONN_CHECK_TAG(p) CHECK_TAG(XrConn, p)
+#define XR_CONN_SET_TAG(p) SET_TAG(XrConn, p)
+
 enum XrConnState {
     XRCONN_STATE_UNINIT = 33,
     XRCONN_STATE_RDINIT = 32, //prepare for read
@@ -41,6 +49,7 @@ typedef enum XrWriteRC {
 
 
 struct XrConn_s {
+    XR_CONN_DECLARE_TAG;
     int                fd;
     enum XrConnState   state;
     XrSocketWatcherRef sock_watcher_ref;

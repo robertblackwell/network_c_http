@@ -14,6 +14,7 @@ static void read_some_handler(XrWatcherRef watcher, void* arg, uint64_t event);
 static void read_some_post_cb(XrWatcherRef wp, void* arg, uint64_t event)
 {
     XrConnRef conn_ref = (XrConnRef)arg;
+    XR_CONN_CHECK_TAG(conn_ref)
     (conn_ref->read_some_cb)(conn_ref, conn_ref->read_some_arg, conn_ref->bytes_read, conn_ref->read_status);
 }
 /**
@@ -28,6 +29,7 @@ static void read_some_post_cb(XrWatcherRef wp, void* arg, uint64_t event)
  */
 void XrConn_read_some(XrConnRef this, IOBufferRef iobuf, XrConnReadCallback cb, void* arg)
 {
+    XR_CONN_CHECK_TAG(this)
     assert(IOBuffer_space_len(iobuf) != 0);
     this->read_some_cb = cb;
     this->read_some_arg = arg;
@@ -51,6 +53,8 @@ static void read_some_handler(XrWatcherRef wp, void* arg, uint64_t event)
 {
     XrSocketWatcherRef sw = (XrSocketWatcherRef)wp;
     XrConnRef conn_ref = arg;
+    XR_CONN_CHECK_TAG(conn_ref)
+
     XrReactorRef reactor_ref = sw->runloop;
     IOBufferRef iobuf = conn_ref->io_buf_ref;
     int bytes_read;
@@ -97,6 +101,7 @@ void XrConn_prepare_read(XrConnRef this);
 
 void XrConn_read_msg(XrConnRef this, MessageRef msg, XrConnReadMsgCallback cb, void* arg)
 {
+    XR_CONN_CHECK_TAG(this)
     this->read_msg_cb = cb;
     this->read_msg_arg = arg;
     this->req_msg_ref = msg;
@@ -111,12 +116,14 @@ void XrConn_read_msg(XrConnRef this, MessageRef msg, XrConnReadMsgCallback cb, v
 // XrConn_read Reads a message with repeated calls and returns status after each call
 static void free_req_message(XrConnRef this)
 {
+    XR_CONN_CHECK_TAG(this)
     if(this->req_msg_ref != NULL) {
         Message_free(&(this->req_msg_ref));
     }
 }
 void XrConn_prepare_read(XrConnRef this)
 {
+    XR_CONN_CHECK_TAG(this)
     if(this->recvbuff_small) {
         // this is a trick to make EAGAIN errors happen to test the handler state machine and the reader function
         int recvbufflen_out;
@@ -142,6 +149,7 @@ static void on_post_read_msg(XrWatcherRef wp, void *arg, uint64_t event)
 {
     XrSocketWatcherRef sw = (XrSocketWatcherRef)wp;
     XrConnRef conn_ref = arg;
+    XR_CONN_CHECK_TAG(conn_ref)
     XrReactorRef reactor_ref = sw->runloop;
     conn_ref->read_msg_cb(conn_ref, arg, conn_ref->read_status);
 }
@@ -156,6 +164,7 @@ static void read_msg_handler(XrWatcherRef wp, void *arg, uint64_t event)
 {
     XrSocketWatcherRef sw = (XrSocketWatcherRef)wp;
     XrConnRef conn_ref = arg;
+    XR_CONN_CHECK_TAG(conn_ref)
     XrReactorRef reactor_ref = sw->runloop;
 
 #define NEXT_STATE(state) \
@@ -215,6 +224,7 @@ static void read_msg_handler(XrWatcherRef wp, void *arg, uint64_t event)
 //}
 int XrConn_read(XrConnRef this)
 {
+    XR_CONN_CHECK_TAG(this)
     IOBufferRef iobuf = this->io_buf_ref;
     int bytes_read;
     int errno_saved;

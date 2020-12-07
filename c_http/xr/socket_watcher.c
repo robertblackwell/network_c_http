@@ -22,7 +22,7 @@ void Xrsw_init(XrSocketWatcherRef this, XrReactorRef runloop, int fd)
 {
     this->type = XR_WATCHER_SOCKET;
     sprintf(this->tag, "XRSW");
-
+    XR_SOCKW_SET_TAG(this);
     this->fd = fd;
     this->runloop = runloop;
     this->free = &anonymous_free;
@@ -37,12 +37,14 @@ XrSocketWatcherRef Xrsw_new(XrReactorRef rtor_ref, int fd)
 void Xrsw_free(XrSocketWatcherRef this)
 {
     XRSW_TYPE_CHECK(this)
+    XR_SOCKW_CHECK_TAG(this)
     close(this->fd);
     free((void*)this);
 }
 void Xrsw_register(XrSocketWatcherRef this, XrSocketWatcherCallback cb, void* arg, uint64_t watch_what)
 {
     XRSW_TYPE_CHECK(this)
+    XR_SOCKW_CHECK_TAG(this)
 
     uint32_t interest = watch_what;
     this->cb = cb;
@@ -52,6 +54,7 @@ void Xrsw_register(XrSocketWatcherRef this, XrSocketWatcherCallback cb, void* ar
 }
 void Xrsw_change_watch(XrSocketWatcherRef this, XrSocketWatcherCallback cb, void* arg, uint64_t watch_what)
 {
+    XR_SOCKW_CHECK_TAG(this)
     uint32_t interest = watch_what;
     if( cb != NULL) {
         this->cb = cb;
@@ -65,6 +68,7 @@ void Xrsw_change_watch(XrSocketWatcherRef this, XrSocketWatcherCallback cb, void
 void Xrsw_deregister(XrSocketWatcherRef this)
 {
     XRSW_TYPE_CHECK(this)
+    XR_SOCKW_CHECK_TAG(this)
 
     int res =  XrReactor_deregister(this->runloop, this->fd);
     assert(res == 0);

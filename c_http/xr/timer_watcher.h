@@ -23,14 +23,39 @@ struct XrTimerWatcher_s {
     XrTimerWatcherCallback* cb;
     void*                   cb_ctx;
 };
-
+/**
+ * Create a new timer event source. This function will create a new Timer object
+ * and register it with the provided XrReactor. In order that the timer is completely
+ * specified a callback, void* arg, interval_ms and bool repeating must be provided.
+ * @param rtor_ref       XrReactorRef
+ * @param cb             XrTimerWatcherCallback an event handler function
+ * @param ctx            void*                  argument for the event handler
+ * @param interval_ms    uint64_t               timer interval in ms
+ * @param repeating      bool                   Whether repeating or not
+ * @return XrTimerWatcherRef
+ */
 XrTimerWatcherRef Xrtw_new(XrReactorRef rtor_ref);
+
+/**
+ * Release all attached resources, deregister the timer from the Reactor and free memory.
+ * @param this
+ */
 void Xrtw_free(XrTimerWatcherRef this);
+/**
+ * Set new values for the timer parameters
+ * @param this
+ * @param cb             XrTimerWatcherCallback an event handler function
+ * @param ctx            void*                  argument for the event handler
+ * @param interval_ms    uint64_t               timer interval in ms
+ * @param repeating      bool                   Whether repeating or not
+ */
 void Xrtw_set(XrTimerWatcherRef this, XrTimerWatcherCallback cb, void* ctx, uint64_t interval_ms, bool repeating);
+
 void Xrtw_update(XrTimerWatcherRef this, uint64_t interval_ms, bool repeating);
+
 void Xrtw_disarm(XrTimerWatcherRef this);
-void Xrtw_rearm(XrTimerWatcherRef this, XrTimerWatcherCallback cb, void* ctx, uint64_t interval_ms, bool repeating);
-void Xrtw_rearm_2(XrTimerWatcherRef this);
+void Xrtw_rearm_old(XrTimerWatcherRef this, XrTimerWatcherCallback cb, void* ctx, uint64_t interval_ms, bool repeating);
+void Xrtw_rearm(XrTimerWatcherRef this);
 void Xrtw_clear(XrTimerWatcherRef this);
 
 

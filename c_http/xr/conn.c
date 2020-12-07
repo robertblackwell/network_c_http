@@ -8,6 +8,7 @@
 XrConnRef XrConn_new(int fd, XrSocketWatcherRef socket_w, XrServerRef server_ref)
 {
     XrConnRef tmp = malloc(sizeof(XrConn));
+    XR_CONN_SET_TAG(tmp);
     tmp->fd = fd;
     tmp->sock_watcher_ref = socket_w;
     tmp->server_ref = server_ref;
@@ -24,6 +25,7 @@ XrConnRef XrConn_new(int fd, XrSocketWatcherRef socket_w, XrServerRef server_ref
 
 void XrConn_free(XrConnRef this)
 {
+    XR_CONN_CHECK_TAG(this)
     Xrsw_free (this->sock_watcher_ref);
     free(this);
 }

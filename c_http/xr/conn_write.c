@@ -14,6 +14,7 @@
 static void write_cb_wrapper(XrWatcherRef wp, void* arg, uint64_t event)
 {
     XrConnRef conn_ref = arg;
+    XR_CONN_CHECK_TAG(conn_ref)
     XR_TRACE("conn_ref: %p arg: %p event: %lx", conn_ref, arg, event);
     conn_ref->write_cb(conn_ref, conn_ref->write_arg, 0);
 }
@@ -21,6 +22,7 @@ static void write_event_handler(XrWatcherRef wp, void* arg, uint64_t event)
 {
     XrSocketWatcherRef sw = (XrSocketWatcherRef)wp;
     XrConnRef conn_ref = arg;
+    XR_CONN_CHECK_TAG(conn_ref)
     XrReactorRef reactor_ref = sw->runloop;
     XR_TRACE("conn_ref: %p", conn_ref);
     void* p = IOBuffer_data(conn_ref->write_buffer_ref);
@@ -43,12 +45,13 @@ void write_machine(XrWatcherRef wp, void* arg, uint64_t event);
 void XrConn_write(XrConnRef this, IOBufferRef iobuf, XrConnWriteCallback cb, void* arg)
 {
     XR_TRACE("conn_ref: %p iobuf: %p iobuf len: %d arg: %p", this, iobuf, IOBuffer_data_len(iobuf), arg);
+    XR_CONN_CHECK_TAG(this)
     this->write_buffer_ref = iobuf;
     this->write_arg = arg;
     this->write_cb = cb;
     this->write_completion_handler = &write_cb_wrapper;
     XrSocketWatcherRef sw = this->sock_watcher_ref;
-    Xrsw_change_watch(sw, &write_machine, arg, EPOLLOUT|EPOLLERR);
+    Xrsw_change_watch(sw, &write_machine, this, EPOLLOUT|EPOLLERR);
 }
 
 void XrConn_prepare_write_2(XrConnRef this, IOBufferRef buf, XrSocketWatcherCallback completion_handler)
@@ -71,6 +74,8 @@ void write_machine(XrWatcherRef wp, void* arg, uint64_t event)
     XR_TRACE("watcher: %p arg: %p event %xl", wp, arg, event);
     XrSocketWatcherRef sw = (XrSocketWatcherRef)wp;
     XrConnRef conn_ref = (XrConnRef)arg;
+    XR_CONN_CHECK_TAG(conn_ref)
+
     XrReactorRef reactor_ref = sw->runloop;
     // dont accept empty buffers
     assert(IOBuffer_data_len(conn_ref->write_buffer_ref) != 0);
@@ -110,6 +115,7 @@ void write_machine(XrWatcherRef wp, void* arg, uint64_t event)
 }
 void XrConn_write_2(XrConnRef this, IOBufferRef buf, XrSocketWatcherCallback completion_handler)
 {
+    XR_CONN_CHECK_TAG(this)
     this->write_buffer_ref = buf;
     this->write_completion_handler = completion_handler;
     XrSocketWatcherRef sw = this->sock_watcher_ref;

@@ -144,7 +144,7 @@ void Xrtw_disarm(XrTimerWatcherRef this)
     int rc = timerfd_settime(this->fd, flags, &its, NULL);
     assert(rc == 0);
 }
-void Xrtw_rearm(XrTimerWatcherRef this, XrTimerWatcherCallback cb, void* ctx, uint64_t interval_ms, bool repeating)
+void Xrtw_rearm_old(XrTimerWatcherRef this, XrTimerWatcherCallback cb, void* ctx, uint64_t interval_ms, bool repeating)
 {
     XRTW_TYPE_CHECK(this)
     this->repeating = repeating;
@@ -155,7 +155,7 @@ void Xrtw_rearm(XrTimerWatcherRef this, XrTimerWatcherCallback cb, void* ctx, ui
     int rc = timerfd_settime(this->fd, flags, &its, NULL);
     assert(rc == 0);
 }
-void Xrtw_rearm_2(XrTimerWatcherRef this)
+void Xrtw_rearm(XrTimerWatcherRef this)
 {
     XRTW_TYPE_CHECK(this)
     uint64_t interval_ms = this->interval;

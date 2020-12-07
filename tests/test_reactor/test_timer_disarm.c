@@ -1,4 +1,6 @@
 #define _GNU_SOURCE
+#define XR_TRACE_ENABLE
+#include <c_http//xr/types.h>
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -75,15 +77,15 @@ static void callback_disarm_clear(XrTimerWatcherRef watcher, void* ctx, XrTimerE
     DisarmTestCtx* ctx_p = (DisarmTestCtx*) ctx;
 
     // if first call disarm
-    printf("\nXX %s counter %d\n", __func__, ctx_p->counter);
+    XR_TRACE(" counter %d\n", ctx_p->counter);
     if(ctx_p->counter <= 0) {
-        printf("\nXX %s disarm self \n", __func__);
+        XR_TRACE_MSG(" disarm self");
         Xrtw_disarm(watcher);
         ctx_p->was_disarmed = true;
         ctx_p->counter++;
     } else {
         if(ctx_p->counter >= ctx_p->max_count) {
-            printf("\nXX %s disarm_cb clear other and self\n", __func__);
+            XR_TRACE_MSG("disarm_cb clear other and self");
             Xrtw_clear(ctx_p->other_tw);
             Xrtw_clear(watcher);
             return;
@@ -100,21 +102,17 @@ static void callback_rearm_other(XrTimerWatcherRef watcher, void* ctx, XrTimerEv
 
     int x = (ctx_p->counter >= ctx_p->max_count);
     int x2 = ((ctx_p->other_ctx->was_disarmed) && (ctx_p->counter >= ctx_p->max_count));
-    printf("\nXX %s %d counter %d max %d \n", __func__, (int)ctx_p->other_ctx->was_disarmed, ctx_p->counter, ctx_p->max_count);
-    printf("\nXX %s x %d x2 %d \n", __func__, x, x2);
+    XR_TRACE(" %d counter %d max %d \n", (int)ctx_p->other_ctx->was_disarmed, ctx_p->counter, ctx_p->max_count);
+    XR_TRACE(" x %d x2 %d \n", x, x2);
     if((ctx_p->other_ctx->was_disarmed) && (ctx_p->counter == ctx_p->max_count)) {
         // other should be disarmed by now
         assert(ctx_p->other_ctx->was_disarmed);
-        printf("\nXX %s rearming other\n", __func__);
-        if(true) {
-            Xrtw_rearm_2(ctx_p->other_tw);
-      } else {
-          Xrtw_rearm(ctx_p->other_tw, &callback_disarm_clear, ctx_p->other_ctx, ctx_p->other_ctx->interval_ms, true);
-        }
+        XR_TRACE_MSG("rearming other");
+        Xrtw_rearm(ctx_p->other_tw);
     }
     // keep counting until we are stopped by the other
     ctx_p->counter++;
-    printf("\nXX  %s counter %d\n", __func__, ctx_p->counter);
+    XR_TRACE(" counter %d\n", ctx_p->counter);
 }
 //
 // timer 2 - disarms itself on the first event.

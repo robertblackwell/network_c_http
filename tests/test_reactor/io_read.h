@@ -22,6 +22,8 @@
 
 typedef struct ReadCtx_s {
     int                 ctx_tag;
+    int                 read_count;
+    int                 max_read_count;
     char*               id;
     int                 readfd;
     XrSocketWatcherRef  swatcher;
@@ -36,7 +38,7 @@ typedef struct Reader_s {
 void Reader_init(Reader* this);
 Reader* Reader_new();
 void Reader_free(Reader* this);
-void Reader_add_fd(Reader* this, int fd);
+void Reader_add_fd(Reader* this, int fd, int max);
 
 void rd_callback(XrWatcherRef watch, void* arg, uint64_t event);
 void* reader_thread_func(void* arg);

@@ -118,6 +118,8 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	xr/run_list.c
 	xr/xr_reader.c
 	xr/handler.c
+	xr/handler_simple.c
+	xr/handler_echo.c
 	xr/handler_function.c
 
 	${EXTSRC}/llhttp/api.c
