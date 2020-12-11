@@ -10,21 +10,20 @@ struct XrQueueWatcher_s;
 typedef struct XrQueueWatcher_s XrQueueWatcher, *XrQueueWatcherRef;
 typedef uint64_t XrQueueEvent;
 
-typedef void(XrQueueWatcherCallback(XrQueueWatcherRef watcher, void* arg, XrQueueEvent event));
 typedef void(XrQueuetWatcherCaller(void* ctx));
 
 struct XrQueueWatcher_s {
     struct XrWatcher_s;
     EvfdQueueRef            queue;
     // reactor cb and arg
-    XrQueueWatcherCallback* cb;
-    void*                   cb_ctx;
+    QueueEventHandler*      queue_event_handler;
+    void*                   queue_event_handler_arg;
 };
 
 XrQueueWatcherRef Xrqw_new(XrReactorRef runloop, EvfdQueueRef qref);
 void Xrqw_free(XrQueueWatcherRef this);
-void Xrqw_register(XrQueueWatcherRef this, XrQueueWatcherCallback cb, void* arg,  uint64_t watch_what);
-void Xrqw_change_watch(XrQueueWatcherRef this, XrQueueWatcherCallback cb, void* arg, uint64_t watch_what);
+void Xrqw_register(XrQueueWatcherRef this, QueueEventHandler cb, void* arg,  uint64_t watch_what);
+void Xrqw_change_watch(XrQueueWatcherRef this, QueueEventHandler cb, void* arg, uint64_t watch_what);
 
 void Xrqw_deregister(XrQueueWatcherRef this);
 

@@ -24,7 +24,7 @@ static void handler(XrWatcherRef fdevent_ref, int fd, uint64_t event)
     uint64_t buf;
     int nread = read(fdev->fd, &buf, sizeof(buf));
     assert(fd == fdev->fd);
-    fdev->cb(fdev, fdev->cb_ctx, event);
+    fdev->fd_event_handler(fdev, fdev->fd_event_handler_arg, event);
 }
 static void anonymous_free(XrWatcherRef p)
 {
@@ -67,21 +67,21 @@ void XrFdEvent_register(XrFdEventRef this)
     XRFD_TYPE_CHECK(this)
 
     uint32_t interest = 0L;
-    this->cb = NULL;
-    this->cb_ctx = NULL;
+    this->fd_event_handler = NULL;
+    this->fd_event_handler_arg = NULL;
     int res = XrReactor_register(this->runloop, this->fd, interest, (XrWatcherRef)(this));
     assert(res ==0);
 }
-void XrFdEvent_change_watch(XrFdEventRef this, XrFdEventCallback cb, void* arg, uint64_t watch_what)
+void XrFdEvent_change_watch(XrFdEventRef this, FdEventHandler evhandler, void* arg, uint64_t watch_what)
 {
     XR_FDEV_CHECK_TAG(this)
     XRFD_TYPE_CHECK(this)
     uint32_t interest = watch_what;
-    if( cb != NULL) {
-        this->cb = cb;
+    if( evhandler != NULL) {
+        this->fd_event_handler = evhandler;
     }
     if (arg != NULL) {
-        this->cb_ctx = arg;
+        this->fd_event_handler_arg = arg;
     }
     int res = XrReactor_reregister(this->runloop, this->fd, interest, (XrWatcherRef)this);
     assert(res == 0);
@@ -99,10 +99,10 @@ void XrFdEvent_arm(XrFdEventRef this, FdEventHandler evhandler, void* arg)
     XRFD_TYPE_CHECK(this)
     uint32_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP;
     if( evhandler != NULL) {
-        this->cb = evhandler;
+        this->fd_event_handler = evhandler;
     }
     if (arg != NULL) {
-        this->cb_ctx = arg;
+        this->fd_event_handler_arg = arg;
     }
     int res = XrReactor_reregister(this->runloop, this->fd, interest, (XrWatcherRef)this);
     assert(res == 0);

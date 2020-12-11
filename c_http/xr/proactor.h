@@ -9,6 +9,6 @@ void Xrsw_start_write(XrSocketWatcherRef sock, void* buffer, int length, SocketE
 
 void Xrtw_wait(XrTimerWatcherRef timer, long interval_ms, TimerEventHandler cb, void* user_data);
 
-void Xrqw_read(XrQueueWatcherRef queue, XrQueueWatcherCallback cb, void* user_data);
+void Xrqw_read(XrQueueWatcherRef queue, QueueEventHandler cb, void* user_data);
 
 #endif;

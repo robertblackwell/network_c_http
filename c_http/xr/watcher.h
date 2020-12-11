@@ -8,8 +8,6 @@
 #include <c_http/check_tag.h>
 #undef TYPE
 #define XR_WATCHER_DECLARE_TAG DECLARE_TAG(XrWatcher)
-//#define XR_CONN_CHECK_TAG(p) CHECK_TAG(XrWatcher, p)
-//#define XR_CONN_SET_TAG(p) SET_TAG(XrWatcher, p)
 
 
 // -fms-extensions is required on compiler for the way XrWatcher_s is extended "without names"

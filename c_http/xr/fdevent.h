@@ -26,21 +26,20 @@ struct XrFdEvent_s;
 typedef struct XrFdEvent_s XrFdEvent, *XrFdEventRef;
 typedef uint64_t XrFdEventMask;
 
-typedef void(XrFdEventCallback(XrFdEventRef event, void* arg, XrFdEventMask evmask));
 typedef void(XrFdEventCaller(void* ctx));
 
 struct XrFdEvent_s {
     struct XrWatcher_s;
 
-    XrFdEventCallback* cb;
-    void*            cb_ctx;
-    int              write_fd;
+    FdEventHandler*     fd_event_handler;
+    void*               fd_event_handler_arg;
+    int                 write_fd;
 };
 
 XrFdEventRef XrFdEvent_new(XrReactorRef runloop);
 void XrFdEvent_free(XrFdEventRef this);
 void XrFdEvent_register(XrFdEventRef this);
-void Xrqw_change_watch(XrFdEventRef this, XrFdEventCallback cb, void* arg, uint64_t watch_what);
+void Xrqw_change_watch(XrFdEventRef this, FdEventHandler evhandler, void* arg, uint64_t watch_what);
 
 void XrFdEvent_arm(XrFdEventRef this,  FdEventHandler evhandler, void* arg);
 void XeFdEvent_disarm(XrFdEventRef this);
