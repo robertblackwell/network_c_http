@@ -7,9 +7,9 @@
 #include <unistd.h>
 
 
-static void handler(void* ctx, int fd, uint64_t event)
+static void handler(XrWatcherRef watcher, int fd, uint64_t event)
 {
-    XrQueueWatcherRef qw = (XrQueueWatcherRef)ctx;
+    XrQueueWatcherRef qw = (XrQueueWatcherRef)watcher;
     assert(fd == qw->fd);
     qw->cb(qw, qw->cb_ctx, event);
 }

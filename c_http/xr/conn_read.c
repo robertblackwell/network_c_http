@@ -11,7 +11,7 @@
  * **************************************************************************************************************************
  */
 static void read_some_handler(XrWatcherRef watcher, void* arg, uint64_t event);
-static void read_some_post_cb(XrWatcherRef wp, void* arg, uint64_t event)
+static void read_some_post_func(void* arg)
 {
     XrConnRef conn_ref = (XrConnRef)arg;
     XR_CONN_CHECK_TAG(conn_ref)
@@ -37,7 +37,7 @@ void XrConn_read_some(XrConnRef this, IOBufferRef iobuf, XrConnReadCallback cb, 
         IOBuffer_free(&(this->io_buf_ref));
     }
     this->io_buf_ref = iobuf;
-    Xrsw_change_watch(this->sock_watcher_ref, &read_some_handler, (void*) this, EPOLLIN | EPOLLERR);
+    Xrsw_arm_read(this->sock_watcher_ref, &read_some_handler, (void*) this);
 }
 /*
  * read_some_handler - called every time fd becomes writeable until the entire IOBuffer is written
@@ -70,8 +70,10 @@ static void read_some_handler(XrWatcherRef wp, void* arg, uint64_t event)
             conn_ref->bytes_read = IOBuffer_data_len(conn_ref->io_buf_ref);
             conn_ref->read_status = 0;
             conn_ref->errno_saved = errno_saved;
-            Xrsw_change_watch(sw, &read_some_post_cb, arg, 0);
-            XrReactor_post(reactor_ref, wp, &read_some_post_cb, arg);
+            // @TODO - fix next 2 lines
+//            Xrsw_change_watch(sw, &read_some_post_cb, arg, 0);
+//            Xrsw_disarm(sw, XR_READ);
+            XrReactor_post(reactor_ref, &read_some_post_func, conn_ref);
             return;
         } else if (bytes_read < 0) {
             if (errno_saved == EAGAIN) {
@@ -81,8 +83,10 @@ static void read_some_handler(XrWatcherRef wp, void* arg, uint64_t event)
                 conn_ref->errno_saved = errno_saved;
                 conn_ref->read_status = errno_saved;
             }
-            Xrsw_change_watch(sw, &read_some_post_cb, arg, 0);
-            XrReactor_post(reactor_ref, wp, &read_some_post_cb, arg);
+            // @TODO - fix next 2 lines
+//            Xrsw_change_watch(sw, &read_some_post_cb, arg, 0);
+//            Xrsw_disarm(sw, XR_READ);
+            XrReactor_post(reactor_ref, &read_some_post_func, conn_ref);
             return;
         } else /* (bytes_read > 0) */{
             IOBuffer_commit(iobuf, bytes_read);
@@ -109,7 +113,7 @@ void XrConn_read_msg(XrConnRef this, MessageRef msg, XrConnReadMsgCallback cb, v
     XrSocketWatcherRef sw = this->sock_watcher_ref;
     XrReactorRef reactor_ref = sw->runloop;
     uint64_t interest = EPOLLERR | EPOLLIN;
-    Xrsw_register(sw, &read_msg_handler, this, interest);
+    Xrsw_register(sw);
 
 }
 
@@ -145,10 +149,10 @@ void XrConn_prepare_read(XrConnRef this)
  * \param arg   void*
  * \param event uint64_t
  */
-static void on_post_read_msg(XrWatcherRef wp, void *arg, uint64_t event)
+static void on_post_read_msg(void *arg)
 {
-    XrSocketWatcherRef sw = (XrSocketWatcherRef)wp;
     XrConnRef conn_ref = arg;
+    XrSocketWatcherRef sw = conn_ref->sock_watcher_ref;
     XR_CONN_CHECK_TAG(conn_ref)
     XrReactorRef reactor_ref = sw->runloop;
     conn_ref->read_msg_cb(conn_ref, arg, conn_ref->read_status);
@@ -166,11 +170,6 @@ static void read_msg_handler(XrWatcherRef wp, void *arg, uint64_t event)
     XrConnRef conn_ref = arg;
     XR_CONN_CHECK_TAG(conn_ref)
     XrReactorRef reactor_ref = sw->runloop;
-
-#define NEXT_STATE(state) \
-    conn_ref->state = state; \
-    Xrsw_change_watch(sw, &state_machine, arg, 0); \
-    XrReactor_post(reactor_ref, sw, &state_machine, arg);
 
     printf("XrWorker::wrkr_state_machine fd: %d\n", conn_ref->fd);
     uint64_t e1 = EPOLLIN;
@@ -209,8 +208,10 @@ static void read_msg_handler(XrWatcherRef wp, void *arg, uint64_t event)
             assert(rc == XRD_PERROR);
             conn_ref->read_status = XRD_PERROR;
         }
-        Xrsw_change_watch(sw, &read_msg_handler, arg, 0);
-        XrReactor_post(reactor_ref, wp, &on_post_read_msg, arg);
+        // @TODO fix next 2 lines
+//        Xrsw_change_watch(sw, &read_msg_handler, arg, 0);
+        Xrsw_disarm_read(sw);
+        XrReactor_post(reactor_ref, &on_post_read_msg, conn_ref);
         return;
     }
 }

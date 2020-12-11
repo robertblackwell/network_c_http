@@ -9,7 +9,7 @@ typedef ListIter RunListIter;
 struct Functor_s;
 typedef struct Functor_s Functor, *FunctorRef;
 
-FunctorRef Functor_new(XrWatcherRef wr, WatcherCallback f, void* arg);
+FunctorRef Functor_new(PostableFunction f, void* arg);
 void Functor_free(FunctorRef this);
 void Functor_call(FunctorRef this);
 

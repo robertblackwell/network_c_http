@@ -37,6 +37,6 @@ int XrReactor_reregister(XrReactorRef rtor_ref, int fd, uint32_t interest, XrWat
 
 int XrReactor_run(XrReactorRef rtor_ref, time_t timeout);
 
-int XrReactor_post(XrReactorRef rtor_ref, XrWatcherRef watch, WatcherCallback cb, void* arg);
+int XrReactor_post(XrReactorRef rtor_ref, PostableFunction cb, void* arg);
 
 #endif

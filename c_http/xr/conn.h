@@ -77,7 +77,7 @@ struct XrConn_s {
     // writer variables
     CbufferRef               response_buf_ref; // response as a buffer
     IOBufferRef              write_buffer_ref;
-    XrSocketWatcherCallback* write_completion_handler;
+//    XrSocketWatcherCallback* write_completion_handler;
     XrConnWriteCallback      write_cb;
     void*                    write_arg;
     XrWriteRC                write_rc;

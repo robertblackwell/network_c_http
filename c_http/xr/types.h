@@ -19,6 +19,8 @@ typedef enum XrWatcherType {
     XR_WATCHER_SOCKET = 11,
     XR_WATCHER_TIMER = 12,
     XR_WATCHER_QUEUE = 13,
+    XR_WATCHER_FDEVENT = 14,
+    XR_WATCHER_LISTENER = 15,
 } XrWatcherType;
 /**
  * Forward declarations
@@ -27,6 +29,9 @@ typedef struct XrWatcher_s XrWatcher, *XrWatcherRef;
 typedef struct XrTimerWatcher_s XrTimerWatcher, *XrTimerWatcherRef;
 typedef struct XrSocketWatcher_s XrSocketWatcher, *XrSocketWatcherRef;
 typedef struct XrQueueWatcher_s XrQueueWatcher, *XrQueueWatcherRef;
+typedef struct XrListener_s XrListener, *XrListenerRef;
+typedef struct XrFdEvent_s XrFdEvent, *XrFdEventRef;
+
 typedef struct XrReactor_s XrReactor, *XrReactorRef;
 typedef struct XrWorker_s XrWorker, *XrWorkerRef;
 typedef struct XrServer_s XrServer, *XrServerRef;
@@ -36,16 +41,25 @@ typedef struct XrHandler_s XrHandler, *XrHandlerRef;
 typedef ListRef XrConnListRef;
 typedef ListIter XrConnListIter;
 /**
- * A generic callback function - @TODO willbe the signature of the only type of function that can be posted
+ * A generic callback function - @TODO will be the signature of the only type of function that can be posted
  */
 typedef void (*PostableFunction)(void* arg);
 /**
- * Signature of functions that can handle Reactor events for a file descriptor fd
+ * Signature of functions that can called by the Reactor to handle file descriptor events
  */
 typedef void (*WatcherCallback)(XrWatcherRef wref, void* arg, uint64_t events);
+/**
+ * Type specific event handlers - these are all the same except for the casting of the first arg to a specific type of pointer
+ */
+typedef void (*WatcherEventHandler)(XrWatcherRef wref, void* arg, uint64_t events);
+typedef void (*TimerEventHandler)(XrTimerWatcherRef timer_watcher_ref, void* arg, uint64_t events);
+typedef void (*FdEventHandler)(XrFdEventRef fd_event_ref, void* arg, uint64_t events);
+typedef void (*QueueEventHandler)(XrQueueWatcherRef qref, void* arg, uint64_t events);
+typedef void (*ListenerEventHandler)(XrListenerRef listener_ref, void* arg, uint64_t events);
+
 
 /**
- * Callback signatures for specific IO operations
+ * Callback signatures for specific IO operations performed on a ConnRef
  */
 typedef void (XrConnReadCallback)(XrConnRef conn, void* arg, int bytes_read, int status);
 typedef void (*XrConnReadMsgCallback)(XrConnRef conn, void* arg, int status);
@@ -99,5 +113,7 @@ do { \
 #define XRSW_TYPE_CHECK(w) assert(w->type == XR_WATCHER_SOCKET);
 #define XRTW_TYPE_CHECK(w) assert(w->type == XR_WATCHER_TIMER);
 #define XRQW_TYPE_CHECK(w) assert(w->type == XR_WATCHER_QUEUE);
+#define XRFD_TYPE_CHECK(w) assert(w->type == XR_WATCHER_FDEVENT);
+#define XRLIST_TYPE_CHECK(w) assert(w->type == XR_WATCHER_LISTENER);
 
 #endif

@@ -91,8 +91,9 @@ void* reader_thread_func(void* arg)
         rdr->ctx_table[i].swatcher = Xrsw_new(rtor_ref, ctx->readfd);
         XrSocketWatcherRef sw = rdr->ctx_table[i].swatcher;
         uint64_t interest = EPOLLERR | EPOLLIN;
-        Xrsw_register(sw, &rd_callback, (void*) ctx, 0);
-        Xrsw_change_watch(sw, &rd_callback, (void*) ctx, interest);
+        Xrsw_register(sw);
+        Xrsw_arm_read(sw, &rd_callback, (void*) ctx);
+//        Xrsw_change_watch(sw, &rd_callback, (void*) ctx, interest);
     }
 
     XrReactor_run(rtor_ref, 1000000);

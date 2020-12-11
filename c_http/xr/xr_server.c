@@ -141,7 +141,8 @@ void XrServer_listen(XrServerRef sref)
     sref->listening_watcher_ref = Xrsw_new(sref->reactor_ref, sref->listening_socket_fd);
     XrSocketWatcherRef lw = sref->listening_watcher_ref;
     uint64_t interest = EPOLLIN | EPOLLERR;
-    Xrsw_register(lw, on_event_listening, sref, interest);
+    Xrsw_register(lw);
+    Xrsw_arm_read(lw, on_event_listening, sref);
     XrReactor_run(sref->reactor_ref, -1);
 }
 

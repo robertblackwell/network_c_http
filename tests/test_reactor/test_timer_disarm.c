@@ -129,8 +129,8 @@ int test_timer_disarm_rearm()
 
     XrReactorRef rtor_ref = XrReactor_new();
 
-    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref);
-    XrTimerWatcherRef tw_2 = Xrtw_new(rtor_ref);
+    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref, &callback_disarm_clear, test_ctx_p_1, test_ctx_p_1->interval_ms, true);
+    XrTimerWatcherRef tw_2 = Xrtw_new(rtor_ref, &callback_rearm_other, test_ctx_p_2, test_ctx_p_2->interval_ms, true);
     // timer 1 callback will disarm itself on the first timer event
     // time 2 callback will rearm tw_1 after count of 5
     test_ctx_p_2->other_tw = tw_1;
@@ -138,8 +138,6 @@ int test_timer_disarm_rearm()
     test_ctx_p_1->other_tw = tw_2;
     test_ctx_p_1->other_ctx = test_ctx_p_2;
 
-    Xrtw_set(tw_1, &callback_disarm_clear, test_ctx_p_1, test_ctx_p_1->interval_ms, true);
-    Xrtw_set(tw_2, &callback_rearm_other, test_ctx_p_2, test_ctx_p_2->interval_ms, true);
 
     XrReactor_run(rtor_ref, 10000);
     UT_EQUAL_INT(test_ctx_p_1->counter, test_ctx_p_1->max_count);

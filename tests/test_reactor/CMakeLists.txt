@@ -59,6 +59,24 @@ target_link_libraries(${TARGET_IO}
 add_test(${TARGET_IO} ${TARGET_IO})
 
 #
+# test fdevent watcher
+#
+
+set(TARGET_FDEV test_fdevent)
+add_executable(${TARGET_FDEV}
+		test_fdevent.c
+		)
+
+target_include_directories(${TARGET_FDEV}
+		PUBLIC
+		${TEST_INCLUDE_dirS})
+
+target_link_libraries(${TARGET_FDEV}
+		PUBLIC ${TEST_LINK_LIBS})
+
+add_test(${TARGET_FDEV} ${TARGET_FDEV})
+
+#
 # test queue watcher
 #
 
@@ -75,3 +93,21 @@ target_link_libraries(${TARGET_Q}
 		PUBLIC ${TEST_LINK_LIBS})
 
 #add_test(${TARGET_IO} ${TARGET_Q})
+
+#
+# test listener
+#
+
+set(TARGET_LISTENER test_listener)
+add_executable(${TARGET_LISTENER}
+		test_listener.c
+		)
+
+target_include_directories(${TARGET_LISTENER}
+		PUBLIC
+		${TEST_INCLUDE_dirS})
+
+target_link_libraries(${TARGET_LISTENER}
+		PUBLIC ${TEST_LINK_LIBS})
+
+add_test(${TARGET_LISTENER} ${TARGET_LISTENER})

@@ -90,8 +90,8 @@ static void wrtr_cb(XrWatcherRef watch, void* arg, uint64_t event)
         XrReactor_deregister(reactor, ctx->twatcher->fd);
         return;
     }
-    // disarm writeable events oon this fd
-    Xrsw_change_watch(sock_watch, NULL, NULL, 0);
+    // disarm writeable events on this fd
+    Xrsw_disarm_write(sock_watch);
     WR_CTX_CHECK_TAG(ctx)
     XRSW_TYPE_CHECK(ctx->swatcher)
     XRTW_TYPE_CHECK(ctx->twatcher)
@@ -117,7 +117,7 @@ static void wrtr_wait(XrTimerWatcherRef watch, void* arg, uint64_t event)
     } else {
         Xrtw_disarm(watch);
         uint64_t interest = EPOLLERR | EPOLLOUT;
-        Xrsw_change_watch(ctx->swatcher, &wrtr_cb, (void*) ctx, interest);
+        Xrsw_arm_write(ctx->swatcher, &wrtr_cb, (void*) ctx);
     }
 }
 void* writer_thread_func(void* arg)
@@ -129,7 +129,7 @@ void* writer_thread_func(void* arg)
         WriteCtx* ctx = &(wrtr->ctx_table[i]);
 
         wrtr->ctx_table[i].swatcher = Xrsw_new(rtor_ref, ctx->writefd);
-        wrtr->ctx_table[i].twatcher = Xrtw_new(rtor_ref);
+        wrtr->ctx_table[i].twatcher = Xrtw_new(rtor_ref, &wrtr_wait, (void*)ctx,  ctx->interval_ms, true);
 
         WR_CTX_CHECK_TAG(ctx)
         XRTW_TYPE_CHECK(ctx->twatcher);
@@ -139,12 +139,14 @@ void* writer_thread_func(void* arg)
 
         if(wait_first) {
             // register armed - wait 2 seconds
-            Xrtw_set(ctx->twatcher, &wrtr_wait, (void*)ctx,  ctx->interval_ms, true);
             // register disarmed - timer cb will arm it
-            Xrsw_register(ctx->swatcher, &wrtr_cb, (void*)ctx, 0);
+            Xrsw_register(ctx->swatcher);
+            Xrsw_arm_write(ctx->swatcher, &wrtr_cb, (void*)ctx);
         } else {
+
             uint64_t interest = EPOLLERR | EPOLLOUT;
-            Xrsw_register(sw, &wrtr_cb, (void*) ctx, interest);
+            Xrsw_register(sw);
+            Xrsw_arm_write(sw, &wrtr_cb, (void*) ctx);
         }
     }
 

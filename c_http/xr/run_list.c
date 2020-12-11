@@ -4,15 +4,14 @@
 
 struct Functor_s
 {
-    XrWatcherRef wref; // this is borrowed do not free
-    WatcherCallback f;
+//    XrWatcherRef wref; // this is borrowed do not free
+    PostableFunction f;
     void *arg;
 };
 
-FunctorRef Functor_new(XrWatcherRef wr, WatcherCallback f, void *arg)
+FunctorRef Functor_new(PostableFunction f, void *arg)
 {
     FunctorRef this = malloc(sizeof(Functor));
-    this->wref = wr;
     this->f = f;
     this->arg = arg;
     return this;
@@ -25,9 +24,8 @@ void Functor_free(FunctorRef this)
 
 void Functor_call(FunctorRef this)
 {
-    this->f(this->wref, this->arg, 0L);
+    this->f(this->arg);
 }
-
 
 static void dealloc(void **ptr)
 {

@@ -56,6 +56,8 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 
 	xr/fdtable.h
 	xr/reactor.h
+	xr/listener.h
+	xr/fdevent.h
 	xr/timer_watcher.h
 	xr/queue_watcher.h
 	xr/socket_watcher.h
@@ -106,6 +108,8 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	xr/xr_server.c
 	xr/fdtable.c
 	xr/reactor.c
+	xr/listener.c
+	xr/fdevent.c
 	xr/timer_watcher.c
 	xr/socket_watcher.c
 	xr/queue_watcher.c

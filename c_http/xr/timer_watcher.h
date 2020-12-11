@@ -5,6 +5,15 @@
 #include <stdbool.h>
 #include <c_http/xr/watcher.h>
 
+#define TYPE XrTimer
+#define XrTimer_TAG "XRTW"
+#include <c_http/check_tag.h>
+#undef TYPE
+#define XR_FDEV_DECLARE_TAG DECLARE_TAG(XrTimer)
+#define XRTW_CHECK_TAG(p) CHECK_TAG(XrTimer, p)
+#define XRTW_SET_TAG(p) SET_TAG(XrTimer, p)
+
+
 struct XrTimerWatcher_s;
 typedef struct XrTimerWatcher_s XrTimerWatcher, *XrTimerWatcherRef;
 typedef uint64_t XrTimerEvent;
@@ -34,7 +43,7 @@ struct XrTimerWatcher_s {
  * @param repeating      bool                   Whether repeating or not
  * @return XrTimerWatcherRef
  */
-XrTimerWatcherRef Xrtw_new(XrReactorRef rtor_ref);
+XrTimerWatcherRef Xrtw_new(XrReactorRef rtor_ref, XrTimerWatcherCallback cb, void* ctx, uint64_t interval_ms, bool repeating);
 
 /**
  * Release all attached resources, deregister the timer from the Reactor and free memory.

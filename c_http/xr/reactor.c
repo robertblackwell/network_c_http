@@ -1,3 +1,5 @@
+#define XR_TRACE_ENABLE
+#define XR_PRINTF_ENABLE
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -105,7 +107,7 @@ int XrReactor_deregister(XrReactorRef this, int fd)
 int XrReactor_reregister(XrReactorRef this, int fd, uint32_t interest, XrWatcherRef wref) {
     XR_REACTOR_CHECK_TAG(this)
     XR_ASSERT((FdTable_lookup(this->table, fd) != NULL),"fd not in FdTable");
-    XrReactor_epoll_ctl(this->table, EPOLL_CTL_MOD, fd, interest);
+    XrReactor_epoll_ctl(this, EPOLL_CTL_MOD, fd, interest);
     XrWatcherRef wref_tmp = FdTable_lookup(this->table, fd);
     assert(wref == wref_tmp);
     return 0;
@@ -148,7 +150,8 @@ int XrReactor_run(XrReactorRef this, time_t timeout) {
             default: {
                 for (int i = 0; i < nfds; i++) {
                     int fd = events[i].data.fd;
-                    XR_PRINTF("XrReactor_run loop fd: %d\n", fd);
+                    int mask = events[i].events;
+                    XR_PRINTF("XrReactor_run loop fd: %d events: %x \n", fd, mask);
                     XrWatcherRef wref = FdTable_lookup(this->table, fd);
                     wref->handler((void*)wref, fd, events[i].events);
                     XR_PRINTF("fd: %d\n", fd);
@@ -170,9 +173,9 @@ cleanup:
     return result;
 }
 
-int XrReactor_post(XrReactorRef this, XrWatcherRef watch, WatcherCallback cb, void* arg)
+int XrReactor_post(XrReactorRef this, PostableFunction cb, void* arg)
 {
     XR_REACTOR_CHECK_TAG(this)
-    FunctorRef fr = Functor_new(watch, cb, arg);
+    FunctorRef fr = Functor_new(cb, arg);
     RunList_add_back(this->run_list, fr);
 }

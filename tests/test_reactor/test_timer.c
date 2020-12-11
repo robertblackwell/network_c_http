@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-//#define XR_TRACE_ENABLE
+#define XR_TRACE_ENABLE
 #include <c_http/xr/types.h>
 #include <assert.h>
 #include <stdio.h>
@@ -65,9 +65,7 @@ int test_timer_non_repeating()
 
     XrReactorRef rtor_ref = XrReactor_new();
 
-    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref);
-
-    Xrtw_set(tw_1, &callback_non_repeating, test_ctx_p_1, 100, false);
+    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref, &callback_non_repeating, test_ctx_p_1, 100, false);
 
     XrReactor_run(rtor_ref, 10000);
     XrReactor_free(rtor_ref);
@@ -107,9 +105,7 @@ int test_timer_single_repeating()
 
     XrReactorRef rtor_ref = XrReactor_new();
 
-    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref);
-
-    Xrtw_set(tw_1, &callback_1, (void*)test_ctx_p, 100, true);
+    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref, &callback_1, (void*)test_ctx_p, 100, true);
 
     XrReactor_run(rtor_ref, 10000);
 
@@ -149,11 +145,8 @@ int test_timer_multiple_repeating()
 
     XrReactorRef rtor_ref = XrReactor_new();
 
-    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref);
-    XrTimerWatcherRef tw_2 = Xrtw_new(rtor_ref);
-
-    Xrtw_set(tw_1, &callback_1, test_ctx_p_1, 100, true);
-    Xrtw_set(tw_2, &callback_1, test_ctx_p_2, 100, true);
+    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref, &callback_1, test_ctx_p_1, 100, true);
+    XrTimerWatcherRef tw_2 = Xrtw_new(rtor_ref, &callback_1, test_ctx_p_2, 100, true);
 
     XrReactor_run(rtor_ref, 10000);
     UT_EQUAL_INT(test_ctx_p_1->counter, test_ctx_p_1->max_count);
@@ -167,11 +160,11 @@ int test_timer_multiple_repeating()
 // post test -demonstrates that an event callback can post another handler which can post yet another handler
 // and that second handler can cancel a fd based watcher.
 //
-static void posted_from_post_cb(XrWatcherRef w, void* arg, uint64_t event)
+static void posted_from_post_cb(void* arg)
 {
     TestCtx* ctx_p = arg;
-    XrTimerWatcherRef tw = (XrTimerWatcherRef)w;
-    XR_TRACE(" watcher: %p arg: %p event: %ld counter: %d", w, arg, event, ctx_p->counter);
+    XrTimerWatcherRef tw =  ctx_p->watcher; // (XrTimerWatcherRef)w;
+    XR_TRACE(" arg: %p  counter: %d", arg, ctx_p->counter);
     if(ctx_p->counter >= ctx_p->max_count) {
         XR_TRACE_MSG(" clear timer ");
         Xrtw_clear(tw);
@@ -185,7 +178,7 @@ static void post_cb(XrWatcherRef w, void* arg, uint64_t event)
     XrTimerWatcherRef tw = (XrTimerWatcherRef)w;
     XrReactorRef reactor = w->runloop;
     XR_TRACE(" post again w: %p counter: %d", w, ctx_p->counter);
-    XrReactor_post(reactor, (XrWatcherRef)w, posted_from_post_cb, ctx_p);
+    XrReactor_post(reactor, posted_from_post_cb, ctx_p);
 }
 
 static void callback_post(XrTimerWatcherRef watcher, void* ctx, XrTimerEvent event)
@@ -200,18 +193,17 @@ static void callback_post(XrTimerWatcherRef watcher, void* ctx, XrTimerEvent eve
     gap = percent_error;
     XrReactorRef reactor = watcher->runloop;
     XR_TRACE(" counter: %d %%error: %f   event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, gap, event, epollin, error);
-    XrReactor_post(reactor, (XrWatcherRef)watcher, post_cb, ctx);
+    XrReactor_post(reactor, posted_from_post_cb, ctx);
 }
 int test_timer_post()
 {
     // counter starts at 0 and increments to max 5
     XrReactorRef rtor_ref = XrReactor_new();
-    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref);
     TestCtx* test_ctx_p = TestCtx_new(0, 5);
     test_ctx_p->reactor = rtor_ref;
-    test_ctx_p->watcher = tw_1;
 
-    Xrtw_set(tw_1, &callback_post, (void*)test_ctx_p, 100, true);
+    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref, &callback_post, (void*)test_ctx_p, 100, true);
+    test_ctx_p->watcher = tw_1;
 
     XrReactor_run(rtor_ref, 10000);
 
