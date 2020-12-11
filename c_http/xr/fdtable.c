@@ -8,7 +8,7 @@
 
 struct FdTable_s {
     uint64_t count;
-	XrWatcher* entries[CBTABLE_MAX];
+	Watcher* entries[CBTABLE_MAX];
 };
 
 typedef struct FdTable_s FdTable, *FdTableRef;
@@ -35,7 +35,7 @@ void FdTable_free(FdTableRef this)
 	}
 	free((void*)this);
 }
-void FdTable_insert(FdTableRef this, XrWatcherRef watcher, int fd)
+void FdTable_insert(FdTableRef this, WatcherRef watcher, int fd)
 {
 	assert(this->entries[fd] == NULL);
 	this->entries[fd] = watcher;
@@ -44,12 +44,12 @@ void FdTable_insert(FdTableRef this, XrWatcherRef watcher, int fd)
 void FdTable_remove(FdTableRef this, int fd)
 {
 	assert(this->entries[fd] != NULL);
-	XrWatcherRef wr = (this->entries[fd]);
+	WatcherRef wr = (this->entries[fd]);
 	wr->free(wr);
 	this->entries[fd] = NULL;
 	this->count--;
 }
-XrWatcherRef FdTable_lookup(FdTableRef this, int fd)
+WatcherRef FdTable_lookup(FdTableRef this, int fd)
 {
 	assert(this->entries[fd] != NULL);
 	return 	(this->entries[fd]);

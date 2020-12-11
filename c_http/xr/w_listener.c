@@ -1,4 +1,4 @@
-#include <c_http/xr/listener.h>
+#include <c_http/xr/w_listener.h>
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -15,7 +15,7 @@
  * @param fd        int
  * @param event     uint64_t
  */
-static void handler(XrWatcherRef watcher, int fd, uint64_t event)
+static void handler(WatcherRef watcher, int fd, uint64_t event)
 {
     XrListenerRef listener_ref = (XrListenerRef)watcher;
     assert(fd ==  listener_ref->fd);
@@ -23,7 +23,7 @@ static void handler(XrWatcherRef watcher, int fd, uint64_t event)
         listener_ref->listen_evhandler(listener_ref,  listener_ref->listen_arg, event);
     }
 }
-static void anonymous_free(XrWatcherRef p)
+static void anonymous_free(WatcherRef p)
 {
     XrListenerRef twp = (XrListenerRef)p;
     XrListener_free(twp);
@@ -64,7 +64,7 @@ void XrListener_register(XrListenerRef this, ListenerEventHandler event_handler,
     }
 
     uint32_t interest =  EPOLLIN | EPOLLEXCLUSIVE;
-    int res = XrReactor_register(this->runloop, this->fd, interest, (XrWatcherRef)(this));
+    int res = XrReactor_register(this->runloop, this->fd, interest, (WatcherRef)(this));
     if(res != 0) {
         printf("register status : %d errno: %d \n", res, errno);
     }
@@ -74,9 +74,7 @@ void XrListener_deregister(XrListenerRef this)
 {
     XRLIST_TYPE_CHECK(this)
     XR_LIST_CHECK_TAG(this)
-
-    int res =  XrReactor_deregister(this->runloop, this->fd);
-    assert(res == 0);
+    XrReactor_delete(this->runloop, this->fd);
 }
 void XrListener_arm(XrListenerRef this, ListenerEventHandler event_handler, void* arg)
 {
@@ -90,7 +88,7 @@ void XrListener_arm(XrListenerRef this, ListenerEventHandler event_handler, void
     }
     uint32_t interest = EPOLLIN | EPOLLEXCLUSIVE ;
 
-    int res = XrReactor_reregister(this->runloop, this->fd, interest, (XrWatcherRef)this);
+    int res = XrReactor_reregister(this->runloop, this->fd, interest, (WatcherRef)this);
     if(res != 0) {
         printf("arm status : %d errno: %d \n", res, errno);
     }
@@ -98,7 +96,7 @@ void XrListener_arm(XrListenerRef this, ListenerEventHandler event_handler, void
 }
 void XrListener_disarm(XrListenerRef this)
 {
-    int res = XrReactor_reregister(this->runloop, this->fd, 0L, (XrWatcherRef)this);
+    int res = XrReactor_reregister(this->runloop, this->fd, 0L, (WatcherRef)this);
     assert(res == 0);
 }
 

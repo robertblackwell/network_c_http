@@ -3,7 +3,7 @@
 #include <c_http/buffer/iobuffer.h>
 #include <c_http/message.h>
 #include <c_http/ll_parser.h>
-#include <c_http/xr/socket_watcher.h>
+#include <c_http/xr/w_socket.h>
 #include <c_http/xr/handler.h>
 
 #define TYPE XrConn
@@ -52,7 +52,7 @@ struct XrConn_s {
     XR_CONN_DECLARE_TAG;
     int                fd;
     enum XrConnState   state;
-    XrSocketWatcherRef sock_watcher_ref;
+    WSocketRef sock_watcher_ref;
     XrServerRef        server_ref;
     bool               recvbuff_small;
 
@@ -88,7 +88,7 @@ struct XrConn_s {
 };
 typedef struct XrConn_s XrConn, *XrConnRef;
 
-XrConnRef XrConn_new(int fd, XrSocketWatcherRef socket_watcher, XrServerRef server_ref);
+XrConnRef XrConn_new(int fd, WSocketRef socket_watcher, XrServerRef server_ref);
 void XrConn_free(XrConnRef this);
 
 void XrConn_read_some(XrConnRef this, IOBufferRef iobuf, XrConnReadCallback cb, void* arg);

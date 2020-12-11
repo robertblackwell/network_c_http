@@ -18,7 +18,7 @@
 #include <c_http/utils.h>
 #include <c_http/xr/reactor.h>
 #include <c_http/xr/watcher.h>
-#include <c_http/xr/timer_watcher.h>
+#include <c_http/xr/w_timer.h>
 //
 // demonstrates that for a timer
 // the sequence :
@@ -54,7 +54,7 @@ struct DisarmTestCtx_s {
     bool                was_disarmed;
     bool                rearm_other;
     struct timespec     start_time;
-    XrTimerWatcherRef   other_tw;
+    WTimerRef   other_tw;
     DisarmTestCtx*      other_ctx;
     long                interval_ms;
 
@@ -70,7 +70,7 @@ DisarmTestCtx* DisarmTestCtx_new(int counter_init, int counter_max)
     return tmp;
 }
 // disarms itself on first call. If called subsequently and reaches its max then cancel both timers
-static void callback_disarm_clear(XrTimerWatcherRef watcher, void* ctx, XrTimerEvent event)
+static void callback_disarm_clear(WTimerRef watcher, void* ctx, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
@@ -80,21 +80,21 @@ static void callback_disarm_clear(XrTimerWatcherRef watcher, void* ctx, XrTimerE
     XR_TRACE(" counter %d\n", ctx_p->counter);
     if(ctx_p->counter <= 0) {
         XR_TRACE_MSG(" disarm self");
-        Xrtw_disarm(watcher);
+        WTimer_disarm(watcher);
         ctx_p->was_disarmed = true;
         ctx_p->counter++;
     } else {
         if(ctx_p->counter >= ctx_p->max_count) {
             XR_TRACE_MSG("disarm_cb clear other and self");
-            Xrtw_clear(ctx_p->other_tw);
-            Xrtw_clear(watcher);
+            WTimer_clear(ctx_p->other_tw);
+            WTimer_clear(watcher);
             return;
         }
         ctx_p->counter++;
     }
 }
 // after being called max_count times rearm the other
-static void callback_rearm_other(XrTimerWatcherRef watcher, void* ctx, XrTimerEvent event)
+static void callback_rearm_other(WTimerRef watcher, void* ctx, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
@@ -108,7 +108,7 @@ static void callback_rearm_other(XrTimerWatcherRef watcher, void* ctx, XrTimerEv
         // other should be disarmed by now
         assert(ctx_p->other_ctx->was_disarmed);
         XR_TRACE_MSG("rearming other");
-        Xrtw_rearm(ctx_p->other_tw);
+        WTimer_rearm(ctx_p->other_tw);
     }
     // keep counting until we are stopped by the other
     ctx_p->counter++;
@@ -129,8 +129,8 @@ int test_timer_disarm_rearm()
 
     XrReactorRef rtor_ref = XrReactor_new();
 
-    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref, &callback_disarm_clear, test_ctx_p_1, test_ctx_p_1->interval_ms, true);
-    XrTimerWatcherRef tw_2 = Xrtw_new(rtor_ref, &callback_rearm_other, test_ctx_p_2, test_ctx_p_2->interval_ms, true);
+    WTimerRef tw_1 = WTimer_new(rtor_ref, &callback_disarm_clear, test_ctx_p_1, test_ctx_p_1->interval_ms, true);
+    WTimerRef tw_2 = WTimer_new(rtor_ref, &callback_rearm_other, test_ctx_p_2, test_ctx_p_2->interval_ms, true);
     // timer 1 callback will disarm itself on the first timer event
     // time 2 callback will rearm tw_1 after count of 5
     test_ctx_p_2->other_tw = tw_1;

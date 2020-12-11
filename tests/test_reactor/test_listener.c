@@ -18,12 +18,13 @@
 #include <c_http/unittest.h>
 #include <c_http/utils.h>
 #include <c_http/socket_functions.h>
+#include <c_http/sync/client.h>
 #include <c_http/xr/reactor.h>
 #include <c_http/xr/watcher.h>
-#include <c_http/xr/timer_watcher.h>
-#include <c_http/xr/socket_watcher.h>
-#include <c_http/xr/listener.h>
-#include <c_http/xr/fdevent.h>
+#include <c_http/xr/w_timer.h>
+#include <c_http/xr/w_socket.h>
+#include <c_http/xr/w_listener.h>
+#include <c_http/xr/w_fdevent.h>
 
 typedef int socket_handle_t;
 
@@ -33,6 +34,7 @@ struct TestServer_s {
     XrReactorRef            reactor_ref;
     XrListenerRef           listening_watcher_ref;
     XrConnListRef           conn_list_ref;
+    int                     listen_counter;
 };
 typedef struct  TestServer_s TestServer, *TestServerRef;
 
@@ -110,7 +112,9 @@ static void on_event_listening(XrListenerRef listener_ref, void *arg, uint64_t e
     if(sock2 <= 0) {
         LOG_FMT("%s %d %d", "Listener thread :: accept failed terminating sock2 : ", sock2, errno);
     } else {
-        printf("Sock2 successfull %d \n", sock2);
+        printf("Sock2 successfull sock: %d server_ref %p listen_ref: %p  listen_count: %d\n", sock2, server_ref, listener_ref, server_ref->listen_counter);
+        server_ref->listen_counter++;
+        sleep(2);
     }
     close(sock2);
     printf("on_event_listen new socket is : %d\n", sock2);
@@ -118,8 +122,18 @@ static void on_event_listening(XrListenerRef listener_ref, void *arg, uint64_t e
 
 static TestServerRef TestServer_new(int listen_fd)
 {
-    TestServerRef sref = (TestServerRef) eg_alloc(sizeof(TestServer));
+    TestServerRef sref = malloc(sizeof(TestServer));
     sref->listening_socket_fd = listen_fd;
+    sref->listen_counter = 0;
+    printf("TestServer_new %p   listen fd: %d\n", sref, listen_fd);
+    return sref;
+}
+static TestServerRef TestServer_init(TestServerRef sref, int listen_fd)
+{
+    sref->listening_socket_fd = listen_fd;
+    sref->listen_counter = 0;
+
+    printf("TestServer_init %p   listen fd: %d\n", sref, listen_fd);
     return sref;
 }
 
@@ -129,7 +143,6 @@ static void TestServer_free(TestServerRef *sref)
     free(*sref);
     *sref = NULL;
 }
-
 static void TestServer_listen(TestServerRef sref)
 {
     ASSERT_NOT_NULL(sref)
@@ -138,12 +151,14 @@ static void TestServer_listen(TestServerRef sref)
     sref->reactor_ref = XrReactor_new();
     sref->listening_watcher_ref = XrListener_new(sref->reactor_ref, sref->listening_socket_fd);
     XrListenerRef lw = sref->listening_watcher_ref;
+
     XrListener_register(lw, on_event_listening, sref);
     // every time I try to call EOPLL_MOD is get an invalid arg error - though it works if I only use register EPOLL_ADD
 //    XrListener_arm(lw, on_event_listening, sref);
     printf("TestServer_listen reactor: %p listen sock: %d  lw: %p\n", sref->reactor_ref, sref->listening_socket_fd, lw);
 
     XrReactor_run(sref->reactor_ref, -1);
+//    close(lw->fd);
 }
 
 
@@ -159,8 +174,8 @@ typedef struct TestCtx_s  {
     int                 max_count;
     struct timespec     start_time;
     XrReactorRef        reactor;
-    XrTimerWatcherRef   timer;
-    XrFdEventRef        fdevent;
+    WTimerRef   timer;
+    WFdEventRef        fdevent;
     int                 fdevent_counter;
 } TestCtx;
 
@@ -173,112 +188,73 @@ TestCtx* TestCtx_new(int counter_init, int counter_max)
     return tmp;
 }
 
-//
-// single repeating timer
-//
-
-//static int tw_counter_1 = 0;
-static void callback_1(XrTimerWatcherRef watcher, void* ctx, XrTimerEvent event)
-{
-    uint64_t epollin = EPOLLIN & event;
-    uint64_t error = EPOLLERR & event;
-    TestCtx* ctx_p = (TestCtx*) ctx;
-    XrFdEventRef fdev = ctx_p->fdevent;
-
-    XR_TRACE("counter: %d event is : %lx  ", ctx_p->counter, event);
-    if(ctx_p->counter >= ctx_p->max_count) {
-        XR_TRACE_MSG(" clear timer");
-        Xrtw_clear(watcher);
-        XrFdEvent_deregister(fdev);
-    } else {
-        XrFdEvent_fire(fdev);
-        ctx_p->counter++;
-    }
-}
-void fdevent_handler(XrFdEventRef fdev_ref, void* arg, uint64_t ev_mask)
-{
-    TestCtx* t = (TestCtx*)arg;
-    t->fdevent_counter++;
-    XR_TRACE("w: %p arg: %p ev mask: %ld fdevent_counter % d", fdev_ref , arg, ev_mask, t->fdevent_counter);
-}
-int test_timer_single_repeating()
-{
-    // counter starts at 0 and increments to max 5
-    TestCtx* test_ctx_p = TestCtx_new(0, 5);
-
-    XrReactorRef rtor_ref = XrReactor_new();
-    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref, &callback_1, (void*)test_ctx_p, 1000, true);
-    Xrtw_disarm(tw_1);
-    XrFdEventRef fdev = XrFdEvent_new(rtor_ref);
-
-    test_ctx_p->fdevent = fdev;
-    test_ctx_p->timer = tw_1;
-
-
-    XrFdEvent_register(fdev);
-    XrFdEvent_arm(fdev, &fdevent_handler,test_ctx_p);
-    Xrtw_rearm(tw_1);
-    XrReactor_run(rtor_ref, 10000);
-
-    // assert counter was increment correct number of times
-    UT_EQUAL_INT(test_ctx_p->counter, test_ctx_p->max_count);
-    UT_EQUAL_INT(test_ctx_p->fdevent_counter, test_ctx_p->max_count);
-    free(test_ctx_p);
-    XrReactor_free(rtor_ref);
-    return 0;
-}
-int test_timer_multiple_repeating()
-{
-    TestCtx* test_ctx_p_1 = TestCtx_new(0, 5);
-    TestCtx* test_ctx_p_2 = TestCtx_new(0, 6);
-
-    XrReactorRef rtor_ref = XrReactor_new();
-
-    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref, &callback_1, test_ctx_p_1, 100, true);
-    XrTimerWatcherRef tw_2 = Xrtw_new(rtor_ref, &callback_1, test_ctx_p_2, 100, true);
-
-    XrReactor_run(rtor_ref, 10000);
-    UT_EQUAL_INT(test_ctx_p_1->counter, test_ctx_p_1->max_count);
-    UT_EQUAL_INT(test_ctx_p_2->counter, test_ctx_p_2->max_count);
-    free(test_ctx_p_1);
-    free(test_ctx_p_2);
-    XrReactor_free(rtor_ref);
-    return 0;
-}
-
 void* listener_thread_func(void* arg)
 {
-    int fd = (int)(long)arg;
-    TestServerRef server = TestServer_new(fd);
-    printf("Listener thread server: %p \n", server);
-    TestServer_listen(server);
+    TestServerRef server_ref = (TestServerRef) arg;
+    printf("Listener thread server: %p \n", server_ref);
+    TestServer_listen(server_ref);
 }
+typedef struct TestClient {
+    int count;
+    int max_count;
+    int listen_fd;
+    TestServerRef servers[2];
+}TestClient, *TestClientRef;
+
 void* connector_thread_func(void* arg)
 {
-    sleep(100);
+    TestClient* tc = (TestClient*)arg;
+    for(int i = 0; i < tc->max_count; i++) {
+//        sleep(1);
+        printf("Client about to connect %d \n", i);
+        ClientRef client_ref = Client_new();
+        Client_connect(client_ref, "localhost", 9001);
+        sleep(1);
+        Client_free(&client_ref);
+    }
+    sleep(1);
+    for(int i = 0; i < 2; i++) {
+        TestServerRef server = tc->servers[i];
+        XrListenerRef listener = server->listening_watcher_ref;
+        XrListener_deregister(listener);
+    }
 }
 int test_listeners()
 {
     pthread_t listener_thread_1;
     pthread_t listener_thread_2;
     pthread_t connector_thread;
+    TestClient tclient;
+    tclient.max_count = 5;
+    tclient.count = 0;
     int fd = create_listener_socket(9001, "localhost");
-    set_non_blocking(fd);
-    int r1 = pthread_create(&listener_thread_1, NULL, &listener_thread_func, (void*)(long)fd);
-    int r2 = pthread_create(&listener_thread_2, NULL, &listener_thread_func, (void*)(long)fd);
-//    int r3 = pthread_create(&connector_thread, NULL, &connector_thread_func, (void*)(long)9001);
+    tclient.listen_fd = fd;
+    TestServerRef server1 = TestServer_new(fd);
+    TestServerRef server2 = TestServer_new(fd);
+    tclient.servers[0] = server1;
+    tclient.servers[1] = server2;
 
+    printf("Sizeof \n");
+    set_non_blocking(fd);
+    int r1 = pthread_create(&listener_thread_1, NULL, &listener_thread_func, server1);
+    int r2 = pthread_create(&listener_thread_2, NULL, &listener_thread_func, server2);
+    int r3 = pthread_create(&connector_thread, NULL, &connector_thread_func, &tclient);
+
+    pthread_join(connector_thread, NULL);
     pthread_join(listener_thread_1, NULL);
     pthread_join(listener_thread_2, NULL);
-//    pthread_join(connector_thread, NULL);
 
+    // all the connects were received and only those
+    UT_EQUAL_INT((server1->listen_counter + server2->listen_counter), tclient.max_count);
+    // each server thread got some of the connects
+    UT_NOT_EQUAL_INT(server1->listen_counter, 0);
+    UT_NOT_EQUAL_INT(server2->listen_counter, 0);
 
     return 0;
 }
 int main()
 {
     UT_ADD(test_listeners);
-//    UT_ADD(test_timer_multiple_repeating);
     int rc = UT_RUN();
     return rc;
 }

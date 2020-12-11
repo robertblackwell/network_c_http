@@ -21,12 +21,12 @@
 #include <c_http/utils.h>
 #include <c_http/xr/reactor.h>
 #include <c_http/xr/watcher.h>
-#include <c_http/xr/timer_watcher.h>
-#include <c_http/xr/socket_watcher.h>
+#include <c_http/xr/w_timer.h>
+#include <c_http/xr/w_socket.h>
 #include "io_read.h"
 #include "io_write.h"
 /**
-Tests Socket watcher - XrSocketWatcher
+Tests Socket watcher - WSocket
 
  Creates two threads, one will write and one will read.
 

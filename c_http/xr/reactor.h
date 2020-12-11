@@ -20,23 +20,24 @@ do { \
 
 
 typedef void (*Callback)(void *arg, int fd, uint32_t events);
-typedef void (*WatcherCallback)(XrWatcherRef wref, void* arg, uint64_t events);
+typedef void (*WatcherCallback)(WatcherRef wref, void* arg, uint64_t events);
 typedef struct XrReactor_s XrReactor, *XrReactorRef;
-typedef struct XrWatcher_s XrWatcher, *XrWatcherRef;
+typedef struct Watcher_s Watcher, *WatcherRef;
 
 
 XrReactorRef XrReactor_new(void);
 
 void XrReactor_free(XrReactorRef rtor_ref);
 
-int XrReactor_register(XrReactorRef rtor_ref, int fd, uint32_t interest, XrWatcherRef wref);
+int XrReactor_register(XrReactorRef rtor_ref, int fd, uint32_t interest, WatcherRef wref);
 
 int XrReactor_deregister(XrReactorRef rtor_ref, int fd);
 
-int XrReactor_reregister(XrReactorRef rtor_ref, int fd, uint32_t interest, XrWatcherRef wref);
+int XrReactor_reregister(XrReactorRef rtor_ref, int fd, uint32_t interest, WatcherRef wref);
 
 int XrReactor_run(XrReactorRef rtor_ref, time_t timeout);
 
 int XrReactor_post(XrReactorRef rtor_ref, PostableFunction cb, void* arg);
+void XrReactor_delete(XrReactorRef this, int fd);
 
 #endif

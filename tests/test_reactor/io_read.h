@@ -17,8 +17,8 @@
 #include <c_http/utils.h>
 #include <c_http/xr/reactor.h>
 #include <c_http/xr/watcher.h>
-#include <c_http/xr/timer_watcher.h>
-#include <c_http/xr/socket_watcher.h>
+#include <c_http/xr/w_timer.h>
+#include <c_http/xr/w_socket.h>
 
 typedef struct ReadCtx_s {
     int                 ctx_tag;
@@ -26,7 +26,7 @@ typedef struct ReadCtx_s {
     int                 max_read_count;
     char*               id;
     int                 readfd;
-    XrSocketWatcherRef  swatcher;
+    WSocketRef  swatcher;
 } ReadCtx;
 
 typedef struct Reader_s {
@@ -40,6 +40,6 @@ Reader* Reader_new();
 void Reader_free(Reader* this);
 void Reader_add_fd(Reader* this, int fd, int max);
 
-void rd_callback(XrSocketWatcherRef socket_watcher_ref, void* arg, uint64_t event);
+void rd_callback(WSocketRef socket_watcher_ref, void* arg, uint64_t event);
 void* reader_thread_func(void* arg);
 #endif

@@ -7,13 +7,13 @@
 #include <c_http/xr/reactor.h>
 #include <c_http/xr/watcher.h>
 
-#define TYPE XrSockW
-#define XrSockW_TAG "XRWS"
+#define TYPE WSocket
+#define WSocket_TAG "XRWS"
 #include <c_http/check_tag.h>
 #undef TYPE
-#define XR_SOCKW_DECLARE_TAG DECLARE_TAG(XrSockW)
-#define XR_SOCKW_CHECK_TAG(p) CHECK_TAG(XrSockW, p)
-#define XR_SOCKW_SET_TAG(p) SET_TAG(XrSockW, p)
+#define XR_SOCKW_DECLARE_TAG DECLARE_TAG(WSocket)
+#define XR_SOCKW_CHECK_TAG(p) CHECK_TAG(WSocket, p)
+#define XR_SOCKW_SET_TAG(p) SET_TAG(WSocket, p)
 
 #ifdef NOWAY
 #define XR_SOCKW_TAG "XRWS"
@@ -32,10 +32,10 @@ do { \
 
 typedef uint64_t XrSocketEvent;
 
-typedef void(XrSocketWatcherCaller(void* ctx));
+typedef void(WSocketCaller(void* ctx));
 
-struct XrSocketWatcher_s {
-    struct XrWatcher_s;
+struct WSocket_s {
+    struct Watcher_s;
 //    SocketEventHandler* cb;
 //    void*                    cb_ctx;
     uint64_t                 event_mask;
@@ -47,36 +47,36 @@ struct XrSocketWatcher_s {
 
 };
 
-XrSocketWatcherRef Xrsw_new(XrReactorRef runloop, int fd);
-void Xrsw_free(XrSocketWatcherRef this);
-void Xrsw_register(XrSocketWatcherRef this);
-void Xrsw_deregister(XrSocketWatcherRef this);
+WSocketRef WSocket_new(XrReactorRef runloop, int fd);
+void WSocket_free(WSocketRef this);
+void WSocket_register(WSocketRef this);
+void WSocket_deregister(WSocketRef this);
 /**
  * Enable reception of fd read events and set the event handler
- * @param this            XrSocketWatcherRef
+ * @param this            WSocketRef
  * @param arg             void*               Context data. Discretion of the caller
  * @param event_handler
  */
-void Xrsw_arm_read(XrSocketWatcherRef this, SocketEventHandler event_handler, void* arg);
+void WSocket_arm_read(WSocketRef this, SocketEventHandler event_handler, void* arg);
 /**
  * Enable reception of fd write events and set the event handler
- * @param this            XrSocketWatcherRef
+ * @param this            WSocketRef
  * @param arg             void*               Context data. Discretion of the caller
  * @param event_handler
  */
-void Xrsw_arm_write(XrSocketWatcherRef this, SocketEventHandler event_handler, void* arg);
+void WSocket_arm_write(WSocketRef this, SocketEventHandler event_handler, void* arg);
 
 /**
  * Disable reception of fd read events for the socket
  * @param this
  */
-void Xrsw_disarm_read(XrSocketWatcherRef this);
+void WSocket_disarm_read(WSocketRef this);
 
 /**
  * Disable reception of fd write events for the socket
  * @param this
  */
-void Xrsw_disarm_write(XrSocketWatcherRef this);
+void WSocket_disarm_write(WSocketRef this);
 
 
 #endif

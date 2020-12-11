@@ -18,8 +18,8 @@
 #include <c_http/utils.h>
 #include <c_http/xr/reactor.h>
 #include <c_http/xr/watcher.h>
-#include <c_http/xr/timer_watcher.h>
-#include <c_http/xr/fdevent.h>
+#include <c_http/xr/w_timer.h>
+#include <c_http/xr/w_fdevent.h>
 //
 // Tests fdevent
 // start two threads
@@ -32,8 +32,8 @@ typedef struct TestCtx_s  {
     int                 max_count;
     struct timespec     start_time;
     XrReactorRef        reactor;
-    XrTimerWatcherRef   timer;
-    XrFdEventRef        fdevent;
+    WTimerRef   timer;
+    WFdEventRef        fdevent;
     int                 fdevent_counter;
 } TestCtx;
 
@@ -44,24 +44,24 @@ TestCtx* TestCtx_new(int counter_init, int counter_max);
 //
 
 //static int tw_counter_1 = 0;
-static void callback_1(XrTimerWatcherRef watcher, void* ctx, XrTimerEvent event)
+static void callback_1(WTimerRef watcher, void* ctx, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
     TestCtx* ctx_p = (TestCtx*) ctx;
-    XrFdEventRef fdev = ctx_p->fdevent;
+    WFdEventRef fdev = ctx_p->fdevent;
 
     XR_TRACE("counter: %d event is : %lx  ", ctx_p->counter, event);
     if(ctx_p->counter >= ctx_p->max_count) {
         XR_TRACE_MSG(" clear timer");
-        Xrtw_clear(watcher);
-        XrFdEvent_deregister(fdev);
+        WTimer_clear(watcher);
+        WFdEvent_deregister(fdev);
     } else {
-        XrFdEvent_fire(fdev);
+        WFdEvent_fire(fdev);
         ctx_p->counter++;
     }
 }
-void fdevent_handler(XrFdEventRef fdev_ref, void* arg, uint64_t ev_mask)
+void fdevent_handler(WFdEventRef fdev_ref, void* arg, uint64_t ev_mask)
 {
     TestCtx* t = (TestCtx*)arg;
     t->fdevent_counter++;
@@ -73,17 +73,17 @@ int test_timer_single_repeating()
     TestCtx* test_ctx_p = TestCtx_new(0, 5);
 
     XrReactorRef rtor_ref = XrReactor_new();
-    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref, &callback_1, (void*)test_ctx_p, 1000, true);
-    Xrtw_disarm(tw_1);
-    XrFdEventRef fdev = XrFdEvent_new(rtor_ref);
+    WTimerRef tw_1 = WTimer_new(rtor_ref, &callback_1, (void*)test_ctx_p, 1000, true);
+    WTimer_disarm(tw_1);
+    WFdEventRef fdev = WFdEvent_new(rtor_ref);
 
     test_ctx_p->fdevent = fdev;
     test_ctx_p->timer = tw_1;
 
 
-    XrFdEvent_register(fdev);
-    XrFdEvent_arm(fdev, &fdevent_handler,test_ctx_p);
-    Xrtw_rearm(tw_1);
+    WFdEvent_register(fdev);
+    WFdEvent_arm(fdev, &fdevent_handler,test_ctx_p);
+    WTimer_rearm(tw_1);
     XrReactor_run(rtor_ref, 10000);
 
     // assert counter was increment correct number of times
@@ -100,8 +100,8 @@ int test_timer_multiple_repeating()
 
     XrReactorRef rtor_ref = XrReactor_new();
 
-    XrTimerWatcherRef tw_1 = Xrtw_new(rtor_ref, &callback_1, test_ctx_p_1, 100, true);
-    XrTimerWatcherRef tw_2 = Xrtw_new(rtor_ref, &callback_1, test_ctx_p_2, 100, true);
+    WTimerRef tw_1 = WTimer_new(rtor_ref, &callback_1, test_ctx_p_1, 100, true);
+    WTimerRef tw_2 = WTimer_new(rtor_ref, &callback_1, test_ctx_p_2, 100, true);
 
     XrReactor_run(rtor_ref, 10000);
     UT_EQUAL_INT(test_ctx_p_1->counter, test_ctx_p_1->max_count);

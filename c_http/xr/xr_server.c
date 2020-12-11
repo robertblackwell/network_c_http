@@ -19,7 +19,7 @@
 #include <c_http/socket_functions.h>
 #include <c_http/xr/evfd_queue.h>
 #include<c_http/xr/conn.h>
-#include <c_http/xr/socket_watcher.h>
+#include <c_http/xr/w_socket.h>
 #include <sys/epoll.h>
 
 
@@ -92,7 +92,7 @@ static void on_cb_message(XrConnRef conn_ref, void* arg, int status)
     assert(conn_ref->handler_ref == NULL);
     XrHandler_function(conn_ref->req_msg_ref, conn_ref, &on_post_done);
 }
-void on_event_listening(XrSocketWatcherRef socket_watcher_ref, void *arg, uint64_t event)
+void on_event_listening(WSocketRef socket_watcher_ref, void *arg, uint64_t event)
 {
 
     printf("listening_hander \n");
@@ -104,7 +104,7 @@ void on_event_listening(XrSocketWatcherRef socket_watcher_ref, void *arg, uint64
     if(sock2 <= 0) {
         LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
     }
-    XrSocketWatcherRef sw_ref = Xrsw_new(server_ref->reactor_ref, sock2);
+    WSocketRef sw_ref = WSocket_new(server_ref->reactor_ref, sock2);
     XrConnRef conn = XrConn_new(sock2, sw_ref, server_ref);
     MessageRef inmsg = Message_new();
     XrConn_read_msg(conn, inmsg, on_cb_message, (void*)conn);
@@ -134,11 +134,11 @@ void XrServer_listen(XrServerRef sref)
     sref->listening_socket_fd = create_listener_socket(port, "127.0.0.1");
     set_non_blocking(sref->listening_socket_fd);
     sref->reactor_ref = XrReactor_new();
-    sref->listening_watcher_ref = Xrsw_new(sref->reactor_ref, sref->listening_socket_fd);
-    XrSocketWatcherRef lw = sref->listening_watcher_ref;
+    sref->listening_watcher_ref = WSocket_new(sref->reactor_ref, sref->listening_socket_fd);
+    WSocketRef lw = sref->listening_watcher_ref;
     uint64_t interest = EPOLLIN | EPOLLERR;
-    Xrsw_register(lw);
-    Xrsw_arm_read(lw, on_event_listening, sref);
+    WSocket_register(lw);
+    WSocket_arm_read(lw, on_event_listening, sref);
     XrReactor_run(sref->reactor_ref, -1);
 }
 

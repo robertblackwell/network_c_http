@@ -19,9 +19,9 @@
 #include <c_http/utils.h>
 #include <c_http/xr/reactor.h>
 #include <c_http/xr/watcher.h>
-#include <c_http/xr/timer_watcher.h>
-#include <c_http/xr/socket_watcher.h>
-#include <c_http/xr/queue_watcher.h>
+#include <c_http/xr/w_timer.h>
+#include <c_http/xr/w_socket.h>
+#include <c_http/xr/w_queue.h>
 #include <c_http/xr/evfd_queue.h>
 
 typedef struct QReader_s {
@@ -60,7 +60,7 @@ void QWriter_free(QReaderRef this)
     free(this);
 }
 
-void QReaderHandler(XrQueueWatcherRef qw, void* ctx, uint64_t event)
+void QReaderHandler(WQueueRef qw, void* ctx, uint64_t event)
 {
     QReaderRef rdr = (QReaderRef)ctx;
 
@@ -73,7 +73,7 @@ void QReaderHandler(XrQueueWatcherRef qw, void* ctx, uint64_t event)
 
     rdr->count++;
     if (rdr->count >= rdr->expected_count) {
-        Xrqw_deregister(qw);
+        WQueue_deregister(qw);
     }
 
 }
@@ -82,9 +82,9 @@ void* reader_thread_func(void* arg)
 {
     QReaderRef q_rdr_ctx = (QReaderRef)arg;
     XrReactorRef rtor_ref = XrReactor_new();
-    XrQueueWatcherRef qw = Xrqw_new(rtor_ref, q_rdr_ctx->queue);
+    WQueueRef qw = WQueue_new(rtor_ref, q_rdr_ctx->queue);
     uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
-    Xrqw_register(qw, QReaderHandler, arg, interest);
+    WQueue_register(qw, QReaderHandler, arg, interest);
     XrReactor_run(rtor_ref, -1);
 }
 void* writer_thread_func(void* arg)

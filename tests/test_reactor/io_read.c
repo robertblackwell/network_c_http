@@ -21,8 +21,8 @@
 #include <c_http/utils.h>
 #include <c_http/xr/reactor.h>
 #include <c_http/xr/watcher.h>
-#include <c_http/xr/timer_watcher.h>
-#include <c_http/xr/socket_watcher.h>
+#include <c_http/xr/w_timer.h>
+#include <c_http/xr/w_socket.h>
 
 /**
  * the reader does the following
@@ -59,7 +59,7 @@ void Reader_add_fd(Reader* this, int fd, int max)
 
 }
 
-void rd_callback(XrSocketWatcherRef socket_watcher_ref, void* arg, uint64_t event)
+void rd_callback(WSocketRef socket_watcher_ref, void* arg, uint64_t event)
 {
     XR_SOCKW_CHECK_TAG(socket_watcher_ref)
     ReadCtx* ctx = (ReadCtx*)arg;
@@ -88,12 +88,12 @@ void* reader_thread_func(void* arg)
     Reader* rdr = (Reader*)arg;
     for(int i = 0; i < rdr->count; i++) {
         ReadCtx* ctx = &(rdr->ctx_table[i]);
-        rdr->ctx_table[i].swatcher = Xrsw_new(rtor_ref, ctx->readfd);
-        XrSocketWatcherRef sw = rdr->ctx_table[i].swatcher;
+        rdr->ctx_table[i].swatcher = WSocket_new(rtor_ref, ctx->readfd);
+        WSocketRef sw = rdr->ctx_table[i].swatcher;
         uint64_t interest = EPOLLERR | EPOLLIN;
-        Xrsw_register(sw);
-        Xrsw_arm_read(sw, &rd_callback, (void*) ctx);
-//        Xrsw_change_watch(sw, &rd_callback, (void*) ctx, interest);
+        WSocket_register(sw);
+        WSocket_arm_read(sw, &rd_callback, (void*) ctx);
+//        WSocket_change_watch(sw, &rd_callback, (void*) ctx, interest);
     }
 
     XrReactor_run(rtor_ref, 1000000);

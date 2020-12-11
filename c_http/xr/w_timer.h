@@ -5,23 +5,23 @@
 #include <stdbool.h>
 #include <c_http/xr/watcher.h>
 
-#define TYPE XrTimer
-#define XrTimer_TAG "XRTW"
+#define TYPE WTimer
+#define WTimer_TAG "XRTW"
 #include <c_http/check_tag.h>
 #undef TYPE
-#define XR_FDEV_DECLARE_TAG DECLARE_TAG(XrTimer)
-#define XRTW_CHECK_TAG(p) CHECK_TAG(XrTimer, p)
-#define XRTW_SET_TAG(p) SET_TAG(XrTimer, p)
+#define XRTW_DECLARE_TAG DECLARE_TAG(WTimer)
+#define XRTW_CHECK_TAG(p) CHECK_TAG(WTimer, p)
+#define XRTW_SET_TAG(p) SET_TAG(WTimer, p)
 
 
-struct XrTimerWatcher_s;
-typedef struct XrTimerWatcher_s XrTimerWatcher, *XrTimerWatcherRef;
+struct WTimer_s;
+typedef struct WTimer_s WTimer, *WTimerRef;
 typedef uint64_t XrTimerEvent;
 
-typedef void(XrTimerWatcherCaller(void* ctx, int fd, uint64_t event));
+typedef void(WTimerCaller(void* ctx, int fd, uint64_t event));
 
-struct XrTimerWatcher_s {
-    struct XrWatcher_s;
+struct WTimer_s {
+    struct Watcher_s;
     /**
      * XrTimerWatecher specific properties
      */
@@ -40,15 +40,15 @@ struct XrTimerWatcher_s {
  * @param ctx            void*                  argument for the event handler
  * @param interval_ms    uint64_t               timer interval in ms
  * @param repeating      bool                   Whether repeating or not
- * @return XrTimerWatcherRef
+ * @return WTimerRef
  */
-XrTimerWatcherRef Xrtw_new(XrReactorRef rtor_ref, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
+WTimerRef WTimer_new(XrReactorRef rtor_ref, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
 
 /**
  * Release all attached resources, deregister the timer from the Reactor and free memory.
  * @param this
  */
-void Xrtw_free(XrTimerWatcherRef this);
+void WTimer_free(WTimerRef this);
 /**
  * Set new values for the timer parameters
  * @param this
@@ -57,14 +57,14 @@ void Xrtw_free(XrTimerWatcherRef this);
  * @param interval_ms    uint64_t               timer interval in ms
  * @param repeating      bool                   Whether repeating or not
  */
-void Xrtw_set(XrTimerWatcherRef this, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
+void WTimer_set(WTimerRef this, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
 
-void Xrtw_update(XrTimerWatcherRef this, uint64_t interval_ms, bool repeating);
+void WTimer_update(WTimerRef this, uint64_t interval_ms, bool repeating);
 
-void Xrtw_disarm(XrTimerWatcherRef this);
-void Xrtw_rearm_old(XrTimerWatcherRef this, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
-void Xrtw_rearm(XrTimerWatcherRef this);
-void Xrtw_clear(XrTimerWatcherRef this);
+void WTimer_disarm(WTimerRef this);
+void WTimer_rearm_old(WTimerRef this, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
+void WTimer_rearm(WTimerRef this);
+void WTimer_clear(WTimerRef this);
 
 
 

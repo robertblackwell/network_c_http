@@ -4,7 +4,7 @@
 
 struct Functor_s
 {
-//    XrWatcherRef wref; // this is borrowed do not free
+//    WatcherRef wref; // this is borrowed do not free
     PostableFunction f;
     void *arg;
 };

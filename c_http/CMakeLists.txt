@@ -56,18 +56,17 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 
 	xr/fdtable.h
 	xr/reactor.h
-	xr/listener.h
-	xr/fdevent.h
-	xr/timer_watcher.h
-	xr/queue_watcher.h
-	xr/socket_watcher.h
+	xr/w_listener.h
+	xr/w_fdevent.h
+	xr/w_timer.h
+	xr/w_queue.h
+	xr/w_socket.h
 	xr/watcher.h
 	xr/types.h
 	xr/evfd_queue.h
 	xr/xr_server.h
 	xr/conn.h
 	xr/conn_list.h
-	xr/xr_reader.h
 	xr/run_list.h
 	xr/handler.h
 
@@ -108,11 +107,11 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	xr/xr_server.c
 	xr/fdtable.c
 	xr/reactor.c
-	xr/listener.c
-	xr/fdevent.c
-	xr/timer_watcher.c
-	xr/socket_watcher.c
-	xr/queue_watcher.c
+	xr/w_listener.c
+	xr/w_fdevent.c
+	xr/w_timer.c
+	xr/w_socket.c
+	xr/w_queue.c
 	xr/watcher.c
 	xr/evfd_queue.c
 	xr/conn.c
@@ -120,7 +119,6 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	xr/conn_write.c
 	xr/conn_list.c
 	xr/run_list.c
-	xr/xr_reader.c
 	xr/handler.c
 	xr/handler_simple.c
 	xr/handler_echo.c

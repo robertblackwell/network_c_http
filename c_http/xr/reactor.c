@@ -86,7 +86,7 @@ void XrReactor_free(XrReactorRef this)
 }
 
 
-int XrReactor_register(XrReactorRef this, int fd, uint32_t interest, XrWatcherRef wref)
+int XrReactor_register(XrReactorRef this, int fd, uint32_t interest, WatcherRef wref)
 {
     XR_REACTOR_CHECK_TAG(this)
 
@@ -99,18 +99,24 @@ int XrReactor_deregister(XrReactorRef this, int fd)
 {
     XR_REACTOR_CHECK_TAG(this)
     XR_ASSERT((FdTable_lookup(this->table, fd) != NULL),"fd not in FdTable");
-    XrReactor_epoll_ctl(this, EPOLL_CTL_DEL, fd, 0);
+    XrReactor_epoll_ctl(this, EPOLL_CTL_DEL, fd, EPOLLEXCLUSIVE | EPOLLIN);
     FdTable_remove(this->table, fd);
     return 0;
 }
 
-int XrReactor_reregister(XrReactorRef this, int fd, uint32_t interest, XrWatcherRef wref) {
+int XrReactor_reregister(XrReactorRef this, int fd, uint32_t interest, WatcherRef wref) {
     XR_REACTOR_CHECK_TAG(this)
     XR_ASSERT((FdTable_lookup(this->table, fd) != NULL),"fd not in FdTable");
     XrReactor_epoll_ctl(this, EPOLL_CTL_MOD, fd, interest);
-    XrWatcherRef wref_tmp = FdTable_lookup(this->table, fd);
+    WatcherRef wref_tmp = FdTable_lookup(this->table, fd);
     assert(wref == wref_tmp);
     return 0;
+}
+void XrReactor_delete(XrReactorRef this, int fd)
+{
+    XR_REACTOR_CHECK_TAG(this)
+    XR_ASSERT((FdTable_lookup(this->table, fd) != NULL),"fd not in FdTable");
+    FdTable_remove(this->table, fd);
 }
 void print_events(struct epoll_event events[], int count)
 {
@@ -135,7 +141,7 @@ int XrReactor_run(XrReactorRef this, time_t timeout) {
             goto cleanup;
         }
         int max_events = MAX_EVENTS;
-        int nfds = epoll_wait(this->epoll_fd, events, max_events, -1);
+        int nfds = epoll_wait(this->epoll_fd, events, max_events, 2000);
         time_t currtime = time(NULL);
         switch (nfds) {
             case -1:
@@ -152,7 +158,7 @@ int XrReactor_run(XrReactorRef this, time_t timeout) {
                     int fd = events[i].data.fd;
                     int mask = events[i].events;
                     XR_PRINTF("XrReactor_run loop fd: %d events: %x \n", fd, mask);
-                    XrWatcherRef wref = FdTable_lookup(this->table, fd);
+                    WatcherRef wref = FdTable_lookup(this->table, fd);
                     wref->handler((void*)wref, fd, events[i].events);
                     XR_PRINTF("fd: %d\n", fd);
                     // call handler

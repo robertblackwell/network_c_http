@@ -15,22 +15,22 @@
 typedef int(*XrHandlerFunction)(MessageRef request, void* wrttr);
 
 
-typedef enum XrWatcherType {
+typedef enum WatcherType {
     XR_WATCHER_SOCKET = 11,
     XR_WATCHER_TIMER = 12,
     XR_WATCHER_QUEUE = 13,
     XR_WATCHER_FDEVENT = 14,
     XR_WATCHER_LISTENER = 15,
-} XrWatcherType;
+} WatcherType;
 /**
  * Forward declarations
  */
-typedef struct XrWatcher_s XrWatcher, *XrWatcherRef;
-typedef struct XrTimerWatcher_s XrTimerWatcher, *XrTimerWatcherRef;
-typedef struct XrSocketWatcher_s XrSocketWatcher, *XrSocketWatcherRef;
-typedef struct XrQueueWatcher_s XrQueueWatcher, *XrQueueWatcherRef;
+typedef struct Watcher_s Watcher, *WatcherRef;
+typedef struct WTimer_s WTimer, *WTimerRef;
+typedef struct WSocket_s WSocket, *WSocketRef;
+typedef struct WQueue_s WQueue, *WQueueRef;
 typedef struct XrListener_s XrListener, *XrListenerRef;
-typedef struct XrFdEvent_s XrFdEvent, *XrFdEventRef;
+typedef struct WFdEvent_s WFdEvent, *WFdEventRef;
 
 typedef struct XrReactor_s XrReactor, *XrReactorRef;
 typedef struct XrWorker_s XrWorker, *XrWorkerRef;
@@ -47,15 +47,15 @@ typedef void (*PostableFunction)(void* arg);
 /**
  * Signature of functions that can called by the Reactor to handle file descriptor events
  */
-typedef void (*WatcherCallback)(XrWatcherRef wref, void* arg, uint64_t events);
+typedef void (*WatcherCallback)(WatcherRef wref, void* arg, uint64_t events);
 /**
  * Type specific event handlers - these are all the same except for the casting of the first arg to a specific type of pointer
  */
-typedef void (*WatcherEventHandler)(XrWatcherRef wref, void* arg, uint64_t events);
-typedef void (TimerEventHandler)(XrTimerWatcherRef timer_watcher_ref, void* arg, uint64_t events);
-typedef void (SocketEventHandler)(XrSocketWatcherRef socket_watcher_ref, void* arg, uint64_t events);
-typedef void (FdEventHandler)(XrFdEventRef fd_event_ref, void* arg, uint64_t events);
-typedef void (QueueEventHandler)(XrQueueWatcherRef qref, void* arg, uint64_t events);
+typedef void (*WatcherEventHandler)(WatcherRef wref, void* arg, uint64_t events);
+typedef void (TimerEventHandler)(WTimerRef timer_watcher_ref, void* arg, uint64_t events);
+typedef void (SocketEventHandler)(WSocketRef socket_watcher_ref, void* arg, uint64_t events);
+typedef void (FdEventHandler)(WFdEventRef fd_event_ref, void* arg, uint64_t events);
+typedef void (QueueEventHandler)(WQueueRef qref, void* arg, uint64_t events);
 typedef void (ListenerEventHandler)(XrListenerRef listener_ref, void* arg, uint64_t events);
 
 

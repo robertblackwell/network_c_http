@@ -1,4 +1,4 @@
-#include <c_http/xr/fdevent.h>
+#include <c_http/xr/w_fdevent.h>
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -16,9 +16,9 @@
  * @param fd
  * @param event
  */
-static void handler(XrWatcherRef fdevent_ref, int fd, uint64_t event)
+static void handler(WatcherRef fdevent_ref, int fd, uint64_t event)
 {
-    XrFdEventRef fdev = (XrFdEventRef)fdevent_ref;
+    WFdEventRef fdev = (WFdEventRef)fdevent_ref;
     XR_FDEV_CHECK_TAG(fdev)
     XRFD_TYPE_CHECK(fdev)
     uint64_t buf;
@@ -26,15 +26,15 @@ static void handler(XrWatcherRef fdevent_ref, int fd, uint64_t event)
     assert(fd == fdev->fd);
     fdev->fd_event_handler(fdev, fdev->fd_event_handler_arg, event);
 }
-static void anonymous_free(XrWatcherRef p)
+static void anonymous_free(WatcherRef p)
 {
-    XrFdEventRef fdevp = (XrFdEventRef)p;
+    WFdEventRef fdevp = (WFdEventRef)p;
     XRFD_TYPE_CHECK(fdevp)
     XR_FDEV_CHECK_TAG(fdevp)
 
-    XrFdEvent_free(fdevp);
+    WFdEvent_free(fdevp);
 }
-void XrFdEvent_init(XrFdEventRef this, XrReactorRef runloop)
+void WFdEvent_init(WFdEventRef this, XrReactorRef runloop)
 {
     this->type = XR_WATCHER_FDEVENT;
     XR_FDEV_SET_TAG(this);
@@ -48,20 +48,20 @@ void XrFdEvent_init(XrFdEventRef this, XrReactorRef runloop)
     this->free = &anonymous_free;
     this->handler = &handler;
 }
-XrFdEventRef XrFdEvent_new(XrReactorRef rtor_ref)
+WFdEventRef WFdEvent_new(XrReactorRef rtor_ref)
 {
-    XrFdEventRef this = malloc(sizeof(XrFdEvent));
-    XrFdEvent_init(this, rtor_ref);
+    WFdEventRef this = malloc(sizeof(WFdEvent));
+    WFdEvent_init(this, rtor_ref);
     return this;
 }
-void XrFdEvent_free(XrFdEventRef this)
+void WFdEvent_free(WFdEventRef this)
 {
     XR_FDEV_CHECK_TAG(this)
     XRFD_TYPE_CHECK(this)
     close(this->fd);
     free((void*)this);
 }
-void XrFdEvent_register(XrFdEventRef this)
+void WFdEvent_register(WFdEventRef this)
 {
     XR_FDEV_CHECK_TAG(this)
     XRFD_TYPE_CHECK(this)
@@ -69,10 +69,10 @@ void XrFdEvent_register(XrFdEventRef this)
     uint32_t interest = 0L;
     this->fd_event_handler = NULL;
     this->fd_event_handler_arg = NULL;
-    int res = XrReactor_register(this->runloop, this->fd, interest, (XrWatcherRef)(this));
+    int res = XrReactor_register(this->runloop, this->fd, interest, (WatcherRef)(this));
     assert(res ==0);
 }
-void XrFdEvent_change_watch(XrFdEventRef this, FdEventHandler evhandler, void* arg, uint64_t watch_what)
+void WFdEvent_change_watch(WFdEventRef this, FdEventHandler evhandler, void* arg, uint64_t watch_what)
 {
     XR_FDEV_CHECK_TAG(this)
     XRFD_TYPE_CHECK(this)
@@ -83,17 +83,17 @@ void XrFdEvent_change_watch(XrFdEventRef this, FdEventHandler evhandler, void* a
     if (arg != NULL) {
         this->fd_event_handler_arg = arg;
     }
-    int res = XrReactor_reregister(this->runloop, this->fd, interest, (XrWatcherRef)this);
+    int res = XrReactor_reregister(this->runloop, this->fd, interest, (WatcherRef)this);
     assert(res == 0);
 }
-void XrFdEvent_deregister(XrFdEventRef this)
+void WFdEvent_deregister(WFdEventRef this)
 {
     XR_FDEV_CHECK_TAG(this)
     XRFD_TYPE_CHECK(this)
     int res =  XrReactor_deregister(this->runloop, this->fd);
     assert(res == 0);
 }
-void XrFdEvent_arm(XrFdEventRef this, FdEventHandler evhandler, void* arg)
+void WFdEvent_arm(WFdEventRef this, FdEventHandler evhandler, void* arg)
 {
     XR_FDEV_CHECK_TAG(this)
     XRFD_TYPE_CHECK(this)
@@ -104,16 +104,16 @@ void XrFdEvent_arm(XrFdEventRef this, FdEventHandler evhandler, void* arg)
     if (arg != NULL) {
         this->fd_event_handler_arg = arg;
     }
-    int res = XrReactor_reregister(this->runloop, this->fd, interest, (XrWatcherRef)this);
+    int res = XrReactor_reregister(this->runloop, this->fd, interest, (WatcherRef)this);
     assert(res == 0);
 }
-void XrFdEvent_disarm(XrFdEventRef this)
+void WFdEvent_disarm(WFdEventRef this)
 {
     XR_FDEV_CHECK_TAG(this)
     XRFD_TYPE_CHECK(this)
-    int res = XrReactor_reregister(this->runloop, this->fd, 0, (XrWatcherRef)this);
+    int res = XrReactor_reregister(this->runloop, this->fd, 0, (WatcherRef)this);
 }
-void XrFdEvent_fire(XrFdEventRef this)
+void WFdEvent_fire(WFdEventRef this)
 {
     XR_FDEV_CHECK_TAG(this)
     XRFD_TYPE_CHECK(this)

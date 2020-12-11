@@ -10,7 +10,7 @@
  * read_some
  * **************************************************************************************************************************
  */
-static void read_some_handler(XrSocketWatcherRef watcher, void* arg, uint64_t event);
+static void read_some_handler(WSocketRef watcher, void* arg, uint64_t event);
 static void read_some_post_func(void* arg)
 {
     XrConnRef conn_ref = (XrConnRef)arg;
@@ -37,19 +37,19 @@ void XrConn_read_some(XrConnRef this, IOBufferRef iobuf, XrConnReadCallback cb, 
         IOBuffer_free(&(this->io_buf_ref));
     }
     this->io_buf_ref = iobuf;
-    Xrsw_arm_read(this->sock_watcher_ref, &read_some_handler, (void*) this);
+    WSocket_arm_read(this->sock_watcher_ref, &read_some_handler, (void*) this);
 }
 /*
  * read_some_handler - called every time fd becomes writeable until the entire IOBuffer is written
  *
  * On completion success or error schedules a calls conn_ref->read_some_cb
  *
- * \param watcher XrWatcherRef but really XrSocketWatcherRef.
+ * \param watcher WatcherRef but really WSocketRef.
  * \param arg     void*
  * \param event   uint64_t
  *
  */
-static void read_some_handler(XrSocketWatcherRef socket_watcher_ref, void* arg, uint64_t event)
+static void read_some_handler(WSocketRef socket_watcher_ref, void* arg, uint64_t event)
 {
     XrConnRef conn_ref = arg;
     XR_CONN_CHECK_TAG(conn_ref)
@@ -70,8 +70,8 @@ static void read_some_handler(XrSocketWatcherRef socket_watcher_ref, void* arg, 
             conn_ref->read_status = 0;
             conn_ref->errno_saved = errno_saved;
             // @TODO - fix next 2 lines
-//            Xrsw_change_watch(sw, &read_some_post_cb, arg, 0);
-//            Xrsw_disarm(sw, XR_READ);
+//            WSocket_change_watch(sw, &read_some_post_cb, arg, 0);
+//            WSocket_disarm(sw, XR_READ);
             XrReactor_post(reactor_ref, &read_some_post_func, conn_ref);
             return;
         } else if (bytes_read < 0) {
@@ -83,8 +83,8 @@ static void read_some_handler(XrSocketWatcherRef socket_watcher_ref, void* arg, 
                 conn_ref->read_status = errno_saved;
             }
             // @TODO - fix next 2 lines
-//            Xrsw_change_watch(sw, &read_some_post_cb, arg, 0);
-//            Xrsw_disarm(sw, XR_READ);
+//            WSocket_change_watch(sw, &read_some_post_cb, arg, 0);
+//            WSocket_disarm(sw, XR_READ);
             XrReactor_post(reactor_ref, &read_some_post_func, conn_ref);
             return;
         } else /* (bytes_read > 0) */{
@@ -98,8 +98,8 @@ static void read_some_handler(XrSocketWatcherRef socket_watcher_ref, void* arg, 
  * XrConn_read_msg
  * **************************************************************************************************************************
  */
-//static void read_msg_init(XrWatcherRef wp, void *arg, uint64_t event);
-static void read_msg_handler(XrWatcherRef wp, void *arg, uint64_t event);
+//static void read_msg_init(WatcherRef wp, void *arg, uint64_t event);
+static void read_msg_handler(WatcherRef wp, void *arg, uint64_t event);
 void XrConn_prepare_read(XrConnRef this);
 
 void XrConn_read_msg(XrConnRef this, MessageRef msg, XrConnReadMsgCallback cb, void* arg)
@@ -109,10 +109,10 @@ void XrConn_read_msg(XrConnRef this, MessageRef msg, XrConnReadMsgCallback cb, v
     this->read_msg_arg = arg;
     this->req_msg_ref = msg;
     XrConn_prepare_read(this);
-    XrSocketWatcherRef sw = this->sock_watcher_ref;
+    WSocketRef sw = this->sock_watcher_ref;
     XrReactorRef reactor_ref = sw->runloop;
     uint64_t interest = EPOLLERR | EPOLLIN;
-    Xrsw_register(sw);
+    WSocket_register(sw);
 
 }
 
@@ -144,14 +144,14 @@ void XrConn_prepare_read(XrConnRef this)
 /**
  * A function that can be XrReactor_post()'d that will call the read_msg_cb
  * with the correct parameters
- * \param wp    XrWatcherRef
+ * \param wp    WatcherRef
  * \param arg   void*
  * \param event uint64_t
  */
 static void on_post_read_msg(void *arg)
 {
     XrConnRef conn_ref = arg;
-    XrSocketWatcherRef sw = conn_ref->sock_watcher_ref;
+    WSocketRef sw = conn_ref->sock_watcher_ref;
     XR_CONN_CHECK_TAG(conn_ref)
     XrReactorRef reactor_ref = sw->runloop;
     conn_ref->read_msg_cb(conn_ref, arg, conn_ref->read_status);
@@ -159,13 +159,13 @@ static void on_post_read_msg(void *arg)
 /**
  * Handles data available events when reading a full message
  * On completion posts the read_mesg_cb
- * \param wp  XrWatcherRef but really XrSocketWatcherRef
+ * \param wp  WatcherRef but really WSocketRef
  * \param arg void* use data
  * \param event uint64_t
  */
-static void read_msg_handler(XrWatcherRef wp, void *arg, uint64_t event)
+static void read_msg_handler(WatcherRef wp, void *arg, uint64_t event)
 {
-    XrSocketWatcherRef sw = (XrSocketWatcherRef)wp;
+    WSocketRef sw = (WSocketRef)wp;
     XrConnRef conn_ref = arg;
     XR_CONN_CHECK_TAG(conn_ref)
     XrReactorRef reactor_ref = sw->runloop;
@@ -208,19 +208,19 @@ static void read_msg_handler(XrWatcherRef wp, void *arg, uint64_t event)
             conn_ref->read_status = XRD_PERROR;
         }
         // @TODO fix next 2 lines
-//        Xrsw_change_watch(sw, &read_msg_handler, arg, 0);
-        Xrsw_disarm_read(sw);
+//        WSocket_change_watch(sw, &read_msg_handler, arg, 0);
+        WSocket_disarm_read(sw);
         XrReactor_post(reactor_ref, &on_post_read_msg, conn_ref);
         return;
     }
 }
-//static void read_msg_init(XrWatcherRef wp, void *arg, uint64_t event)
+//static void read_msg_init(WatcherRef wp, void *arg, uint64_t event)
 //{
-//    XrSocketWatcherRef sw = (XrSocketWatcherRef)wp;
+//    WSocketRef sw = (WSocketRef)wp;
 //    XrConnRef conn_ref = arg;
 //    XrReactorRef reactor_ref = sw->runloop;
 //    uint64_t interest = EPOLLERR | EPOLLIN;
-//    Xrsw_register(sw, &read_msg_handler, conn_ref, interest);
+//    WSocket_register(sw, &read_msg_handler, conn_ref, interest);
 //}
 int XrConn_read(XrConnRef this)
 {

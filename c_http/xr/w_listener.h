@@ -7,35 +7,21 @@
 #include <c_http/xr/reactor.h>
 #include <c_http/xr/watcher.h>
 
-#define TYPE XrListener
-#define XrListener_TAG "XRLST"
+#define TYPE WListener
+#define WListener_TAG "XRLST"
 #include <c_http/check_tag.h>
 #undef TYPE
-#define XR_LIST_DECLARE_TAG DECLARE_TAG(XrListener)
-#define XR_LIST_CHECK_TAG(p) CHECK_TAG(XrListener, p)
-#define XR_LIST_SET_TAG(p) SET_TAG(XrListener, p)
+#define XR_LIST_DECLARE_TAG DECLARE_TAG(WListener)
+#define XR_LIST_CHECK_TAG(p) CHECK_TAG(WListener, p)
+#define XR_LIST_SET_TAG(p) SET_TAG(WListener, p)
 
-#ifdef NOWAY
-#define XR_SOCKW_TAG "XRWS"
-#define XR_SOCKW_TAG_LENGTH 8
-#define XR_SOCKW_DECLARE_TAG char tag[XR_SOCKW_TAG_LENGTH]
-#define XR_SOCKW_CHECK_TAG(p) \
-do { \
-    assert(strcmp((p)->tag, XR_SOCKW_TAG) == 0); \
-} while(0);
-
-#define XR_SOCKW_SET_TAG(p) \
-do { \
-    sprintf((p)->tag, "%s", XR_SOCKW_TAG); \
-} while(0);
-#endif
 
 typedef uint64_t XrSocketEvent;
 
 typedef void(XrListenerCaller(void* ctx));
 
 struct XrListener_s {
-    struct XrWatcher_s;
+    struct Watcher_s;
     ListenerEventHandler*      listen_evhandler;
     void*                    listen_arg;
 

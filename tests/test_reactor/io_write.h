@@ -17,8 +17,8 @@
 #include <c_http/utils.h>
 #include <c_http/xr/reactor.h>
 #include <c_http/xr/watcher.h>
-#include <c_http/xr/timer_watcher.h>
-#include <c_http/xr/socket_watcher.h>
+#include <c_http/xr/w_timer.h>
+#include <c_http/xr/w_socket.h>
 
 #define WRTR_TAG 123456789
 #define WCTX_TAG 918273645
@@ -32,10 +32,10 @@ typedef struct WriteCtx_s {
     char*               id;
     int                 writefd;
     int                 interval_ms;
-    XrSocketWatcherRef  swatcher;
-    XrTimerWatcherRef   twatcher;
+    WSocketRef  swatcher;
+    WTimerRef   twatcher;
 } WriteCtx;
-void WriteCtx_init(WriteCtx* this, int fd, XrSocketWatcherRef swatcher, XrTimerWatcherRef twatcher, int max);
+void WriteCtx_init(WriteCtx* this, int fd, WSocketRef swatcher, WTimerRef twatcher, int max);
 
 
 typedef struct Writer_s {
@@ -49,6 +49,6 @@ void Writer_init(Writer* this);
 Writer* Writer_new();
 void Writer_free(Writer* this);
 void Writer_add_fd(Writer* this, int fd, int max, int interval_ms);
-void wrtr_callback(XrSocketWatcherRef watch, void* arg, uint64_t event);
+void wrtr_callback(WSocketRef watch, void* arg, uint64_t event);
 void* writer_thread_func(void* arg);
 #endif
