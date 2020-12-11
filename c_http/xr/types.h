@@ -52,10 +52,11 @@ typedef void (*WatcherCallback)(XrWatcherRef wref, void* arg, uint64_t events);
  * Type specific event handlers - these are all the same except for the casting of the first arg to a specific type of pointer
  */
 typedef void (*WatcherEventHandler)(XrWatcherRef wref, void* arg, uint64_t events);
-typedef void (*TimerEventHandler)(XrTimerWatcherRef timer_watcher_ref, void* arg, uint64_t events);
+typedef void (TimerEventHandler)(XrTimerWatcherRef timer_watcher_ref, void* arg, uint64_t events);
+typedef void (SocketEventHandler)(XrSocketWatcherRef socket_watcher_ref, void* arg, uint64_t events);
 typedef void (*FdEventHandler)(XrFdEventRef fd_event_ref, void* arg, uint64_t events);
 typedef void (*QueueEventHandler)(XrQueueWatcherRef qref, void* arg, uint64_t events);
-typedef void (*ListenerEventHandler)(XrListenerRef listener_ref, void* arg, uint64_t events);
+typedef void (ListenerEventHandler)(XrListenerRef listener_ref, void* arg, uint64_t events);
 
 
 /**

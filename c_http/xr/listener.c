@@ -20,7 +20,7 @@ static void handler(XrWatcherRef watcher, int fd, uint64_t event)
     XrListenerRef listener_ref = (XrListenerRef)watcher;
     assert(fd ==  listener_ref->fd);
     if(listener_ref->listen_evhandler) {
-        listener_ref->listen_evhandler((XrWatcherRef) listener_ref,  listener_ref->listen_arg, event);
+        listener_ref->listen_evhandler(listener_ref,  listener_ref->listen_arg, event);
     }
 }
 static void anonymous_free(XrWatcherRef p)
@@ -52,7 +52,7 @@ void XrListener_free(XrListenerRef this)
     close(this->fd);
     free((void*)this);
 }
-void XrListener_register(XrListenerRef this, XrListenerCallback event_handler, void* arg)
+void XrListener_register(XrListenerRef this, ListenerEventHandler event_handler, void* arg)
 {
     XRLIST_TYPE_CHECK(this)
     XR_LIST_CHECK_TAG(this)
@@ -78,7 +78,7 @@ void XrListener_deregister(XrListenerRef this)
     int res =  XrReactor_deregister(this->runloop, this->fd);
     assert(res == 0);
 }
-void XrListener_arm(XrListenerRef this, XrListenerCallback event_handler, void* arg)
+void XrListener_arm(XrListenerRef this, ListenerEventHandler event_handler, void* arg)
 {
     XRLIST_TYPE_CHECK(this)
     XR_LIST_CHECK_TAG(this)

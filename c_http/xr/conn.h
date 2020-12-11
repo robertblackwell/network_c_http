@@ -57,7 +57,7 @@ struct XrConn_s {
     bool               recvbuff_small;
 
     // read_some variables
-    XrSocketWatcherCallback* read_completion_handler; //currently unused
+    SocketEventHandler* read_completion_handler; //currently unused
 
     IOBufferRef              read_some_iobuf;
     XrConnReadCallback*      read_some_cb;
@@ -77,7 +77,7 @@ struct XrConn_s {
     // writer variables
     CbufferRef               response_buf_ref; // response as a buffer
     IOBufferRef              write_buffer_ref;
-//    XrSocketWatcherCallback* write_completion_handler;
+//    SocketEventHandler* write_completion_handler;
     XrConnWriteCallback      write_cb;
     void*                    write_arg;
     XrWriteRC                write_rc;
@@ -130,7 +130,7 @@ int XrConn_read(XrConnRef this);
  * \param this
  */
 void XrConn_prepare_read(XrConnRef this);
-void XrConn_prepare_write(XrConnRef this, IOBufferRef buf, XrSocketWatcherCallback completion_handler);
+void XrConn_prepare_write(XrConnRef this, IOBufferRef buf, SocketEventHandler completion_handler);
 /**
  * Asynchronously writes the provided buffer to this->fd.
  * On completion of the write or error schedules the completion handler to run.
@@ -140,9 +140,9 @@ void XrConn_prepare_write(XrConnRef this, IOBufferRef buf, XrSocketWatcherCallba
  *
  * \param this XrConnRef
  * \param buf  IOBufferRef
- * \param completion_handler XrSocketWatcherCallback
+ * \param completion_handler SocketEventHandler
  */
-void XrConn_write_2(XrConnRef this, IOBufferRef buf, XrSocketWatcherCallback completion_handler);
+void XrConn_write_2(XrConnRef this, IOBufferRef buf, SocketEventHandler completion_handler);
 /**
  *
  * \param this

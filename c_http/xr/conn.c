@@ -344,7 +344,7 @@ int XrConn_read(XrConnRef this)
 #endif
 #ifdef YES_WRITE
 
-void XrConn_prepare_write_2(XrConnRef this, IOBufferRef buf, XrSocketWatcherCallback completion_handler)
+void XrConn_prepare_write_2(XrConnRef this, IOBufferRef buf, SocketEventHandler completion_handler)
 {
 }
 /**
@@ -400,7 +400,7 @@ void write_state_machine(XrWatcherRef wp, void* arg, uint64_t event)
         }
     }
 }
-void XrConn_write_2(XrConnRef this, IOBufferRef buf, XrSocketWatcherCallback completion_handler)
+void XrConn_write_2(XrConnRef this, IOBufferRef buf, SocketEventHandler completion_handler)
 {
     this->write_buffer_ref = buf;
     this->write_completion_handler = completion_handler;

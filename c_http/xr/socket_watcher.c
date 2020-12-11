@@ -19,10 +19,10 @@ static void handler(XrWatcherRef watcher, int fd, uint64_t event)
     XrSocketWatcherRef sw = (XrSocketWatcherRef)watcher;
     assert(fd == sw->fd);
     if((sw->event_mask & EPOLLIN) && (sw->read_evhandler)) {
-        sw->read_evhandler((XrWatcherRef)sw, sw->read_arg, event);
+        sw->read_evhandler(sw, sw->read_arg, event);
     }
     if((sw->event_mask & EPOLLOUT) && (sw->write_evhandler)) {
-        sw->write_evhandler((XrWatcherRef)sw, sw->write_arg, event);
+        sw->write_evhandler(sw, sw->write_arg, event);
     }
 //    sw->cb((XrWatcherRef)sw, sw->cb_ctx, event);
 }
@@ -68,7 +68,7 @@ void Xrsw_register(XrSocketWatcherRef this)
     int res = XrReactor_register(this->runloop, this->fd, 0L, (XrWatcherRef)(this));
     assert(res ==0);
 }
-//void Xrsw_change_watch(XrSocketWatcherRef this, XrSocketWatcherCallback cb, void* arg, uint64_t watch_what)
+//void Xrsw_change_watch(XrSocketWatcherRef this, SocketEventHandler cb, void* arg, uint64_t watch_what)
 //{
 //    XR_SOCKW_CHECK_TAG(this)
 //    uint32_t interest = watch_what;
@@ -89,7 +89,7 @@ void Xrsw_deregister(XrSocketWatcherRef this)
     int res =  XrReactor_deregister(this->runloop, this->fd);
     assert(res == 0);
 }
-void Xrsw_arm_read(XrSocketWatcherRef this, XrSocketWatcherCallback fd_event_handler, void* arg)
+void Xrsw_arm_read(XrSocketWatcherRef this, SocketEventHandler fd_event_handler, void* arg)
 {
     uint64_t interest = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | this->event_mask;
     this->event_mask = interest;
@@ -103,7 +103,7 @@ void Xrsw_arm_read(XrSocketWatcherRef this, XrSocketWatcherCallback fd_event_han
     int res = XrReactor_reregister(this->runloop, this->fd, interest, (XrWatcherRef)this);
     assert(res == 0);
 }
-void Xrsw_arm_write(XrSocketWatcherRef this, XrSocketWatcherCallback fd_event_handler, void* arg)
+void Xrsw_arm_write(XrSocketWatcherRef this, SocketEventHandler fd_event_handler, void* arg)
 {
     uint64_t interest = EPOLLOUT | EPOLLERR | EPOLLHUP | EPOLLRDHUP | this->event_mask;
     this->event_mask = interest;

@@ -10,7 +10,7 @@
  * read_some
  * **************************************************************************************************************************
  */
-static void read_some_handler(XrWatcherRef watcher, void* arg, uint64_t event);
+static void read_some_handler(XrSocketWatcherRef watcher, void* arg, uint64_t event);
 static void read_some_post_func(void* arg)
 {
     XrConnRef conn_ref = (XrConnRef)arg;
@@ -49,13 +49,12 @@ void XrConn_read_some(XrConnRef this, IOBufferRef iobuf, XrConnReadCallback cb, 
  * \param event   uint64_t
  *
  */
-static void read_some_handler(XrWatcherRef wp, void* arg, uint64_t event)
+static void read_some_handler(XrSocketWatcherRef socket_watcher_ref, void* arg, uint64_t event)
 {
-    XrSocketWatcherRef sw = (XrSocketWatcherRef)wp;
     XrConnRef conn_ref = arg;
     XR_CONN_CHECK_TAG(conn_ref)
 
-    XrReactorRef reactor_ref = sw->runloop;
+    XrReactorRef reactor_ref = socket_watcher_ref->runloop;
     IOBufferRef iobuf = conn_ref->io_buf_ref;
     int bytes_read;
     int errno_saved;

@@ -92,24 +92,20 @@ static void on_cb_message(XrConnRef conn_ref, void* arg, int status)
     assert(conn_ref->handler_ref == NULL);
     XrHandler_function(conn_ref->req_msg_ref, conn_ref, &on_post_done);
 }
-void on_event_listening(XrWatcherRef wp, void *arg, uint64_t event)
+void on_event_listening(XrSocketWatcherRef socket_watcher_ref, void *arg, uint64_t event)
 {
-    XrSocketWatcherRef sw = (XrSocketWatcherRef)wp;
-//    assert(iobuf != NULL);
-//    assert(conn_ref->handler_ref != NULL);
-//    XrConn_write(conn_ref, iobuf, &on_handler_write, arg);
 
     printf("listening_hander \n");
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
 
-    XrServerRef sref = arg;
-    int sock2 = accept(sref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
+    XrServerRef server_ref = arg;
+    int sock2 = accept(server_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
     if(sock2 <= 0) {
         LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
     }
-    XrSocketWatcherRef sw_ref = Xrsw_new(sref->reactor_ref, sock2);
-    XrConnRef conn = XrConn_new(sock2, sw_ref, sref);
+    XrSocketWatcherRef sw_ref = Xrsw_new(server_ref->reactor_ref, sock2);
+    XrConnRef conn = XrConn_new(sock2, sw_ref, server_ref);
     MessageRef inmsg = Message_new();
     XrConn_read_msg(conn, inmsg, on_cb_message, (void*)conn);
     return;

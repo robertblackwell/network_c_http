@@ -95,9 +95,8 @@ void set_non_blocking(socket_handle_t socket)
     assert(fres == 0);
 }
 
-static void on_event_listening(XrWatcherRef wp, void *arg, uint64_t event)
+static void on_event_listening(XrListenerRef listener_ref, void *arg, uint64_t event)
 {
-    XrSocketWatcherRef sw = (XrSocketWatcherRef)wp;
 //    assert(iobuf != NULL);
 //    assert(conn_ref->handler_ref != NULL);
 //    XrConn_write(conn_ref, iobuf, &on_handler_write, arg);
@@ -106,8 +105,8 @@ static void on_event_listening(XrWatcherRef wp, void *arg, uint64_t event)
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
 
-    TestServerRef sref = arg;
-    int sock2 = accept(sref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
+    TestServerRef server_ref = arg;
+    int sock2 = accept(server_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
     if(sock2 <= 0) {
         LOG_FMT("%s %d %d", "Listener thread :: accept failed terminating sock2 : ", sock2, errno);
     } else {
@@ -140,6 +139,7 @@ static void TestServer_listen(TestServerRef sref)
     sref->listening_watcher_ref = XrListener_new(sref->reactor_ref, sref->listening_socket_fd);
     XrListenerRef lw = sref->listening_watcher_ref;
     XrListener_register(lw, on_event_listening, sref);
+    // every time I try to call EOPLL_MOD is get an invalid arg error - though it works if I only use register EPOLL_ADD
 //    XrListener_arm(lw, on_event_listening, sref);
     printf("TestServer_listen reactor: %p listen sock: %d  lw: %p\n", sref->reactor_ref, sref->listening_socket_fd, lw);
 

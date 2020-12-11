@@ -69,9 +69,8 @@ void Writer_add_fd(Writer* this, int fd, int max, int interval_ms)
     this->count++;
 }
 static void wrtr_wait(XrTimerWatcherRef watch, void* arg, uint64_t event);
-static void wrtr_cb(XrWatcherRef watch, void* arg, uint64_t event)
+static void wrtr_cb(XrSocketWatcherRef sock_watch, void* arg, uint64_t event)
 {
-    XrSocketWatcherRef sock_watch = (XrSocketWatcherRef)watch;
     XrReactorRef reactor = sock_watch->runloop;
     XRSW_TYPE_CHECK(sock_watch)
     WriteCtx* ctx = (WriteCtx*)(arg);
@@ -84,7 +83,7 @@ static void wrtr_cb(XrWatcherRef watch, void* arg, uint64_t event)
     int nwrite = write(sock_watch->fd, wbuf, strlen(wbuf));
     free(wbuf);
     ctx->write_count++;
-    XR_PRINTF("test_io: Socket watcher wrtr_callback fd: %d event : %lx nread: %d errno: %d write_count %d\n", watch->fd,  event, nwrite, errno, ctx->write_count);
+    XR_PRINTF("test_io: Socket watcher wrtr_callback fd: %d event : %lx nread: %d errno: %d write_count %d\n", sock_watch->fd,  event, nwrite, errno, ctx->write_count);
     if(ctx->write_count > ctx->max_write_count) {
         XrReactor_deregister(reactor, ctx->swatcher->fd);
         XrReactor_deregister(reactor, ctx->twatcher->fd);

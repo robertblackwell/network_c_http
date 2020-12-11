@@ -50,14 +50,14 @@ static void handler(XrWatcherRef watcher, int fd, uint64_t event)
     if(!timer_watcher->repeating) {
         Xrtw_clear(timer_watcher);
     }
-    timer_watcher->cb(timer_watcher, timer_watcher->cb_ctx, event);
+    timer_watcher->timer_handler(timer_watcher, timer_watcher->timer_handler_arg, event);
 }
 static void anonymous_free(XrWatcherRef p)
 {
     XrTimerWatcherRef twp = (XrTimerWatcherRef)p;
     Xrtw_free(twp);
 }
-void Xrtw_init(XrTimerWatcherRef this, XrReactorRef runloop, XrTimerWatcherCallback cb, void* ctx, uint64_t interval_ms, bool repeating)
+void Xrtw_init(XrTimerWatcherRef this, XrReactorRef runloop, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating)
 {
     this->type = XR_WATCHER_TIMER;
     XRTW_SET_TAG(this)
@@ -69,7 +69,7 @@ void Xrtw_init(XrTimerWatcherRef this, XrReactorRef runloop, XrTimerWatcherCallb
     Xrtw_set(this, cb, ctx, interval_ms, repeating);
     XR_PRINTF("Xrtw_init fd: %d \n", this->fd);
 }
-XrTimerWatcherRef Xrtw_new(XrReactorRef rtor_ref, XrTimerWatcherCallback cb, void* ctx, uint64_t interval_ms, bool repeating)
+XrTimerWatcherRef Xrtw_new(XrReactorRef rtor_ref, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating)
 {
     XrTimerWatcherRef this = malloc(sizeof(XrTimerWatcher));
     Xrtw_init(this, rtor_ref, cb, ctx, interval_ms, repeating);
@@ -114,14 +114,14 @@ struct itimerspec Xrtw_update_interval(XrTimerWatcherRef this, uint64_t interval
     }
     return its;
 }
-void Xrtw_set(XrTimerWatcherRef this, XrTimerWatcherCallback cb, void* ctx, uint64_t interval_ms, bool repeating)
+void Xrtw_set(XrTimerWatcherRef this, TimerEventHandler eventHandler, void* arg, uint64_t interval_ms, bool repeating)
 {
     XRTW_CHECK_TAG(this)
     XRTW_TYPE_CHECK(this)
     this->interval = interval_ms;
     this->repeating = repeating;
-    this->cb = cb;
-    this->cb_ctx = ctx;
+    this->timer_handler = eventHandler;
+    this->timer_handler_arg = arg;
     struct itimerspec its = Xrtw_update_interval(this, interval_ms, repeating);
     int flags = 0;
     int rc = timerfd_settime(this->fd, flags, &its, NULL);
@@ -155,13 +155,13 @@ void Xrtw_disarm(XrTimerWatcherRef this)
     int rc = timerfd_settime(this->fd, flags, &its, NULL);
     assert(rc == 0);
 }
-void Xrtw_rearm_old(XrTimerWatcherRef this, XrTimerWatcherCallback cb, void* ctx, uint64_t interval_ms, bool repeating)
+void Xrtw_rearm_old(XrTimerWatcherRef this, TimerEventHandler eventHandler, void* arg, uint64_t interval_ms, bool repeating)
 {
     XRTW_CHECK_TAG(this)
     XRTW_TYPE_CHECK(this)
     this->repeating = repeating;
-    this->cb = cb;
-    this->cb_ctx = ctx;
+    this->timer_handler = eventHandler;
+    this->timer_handler_arg = arg;
     struct itimerspec its = Xrtw_update_interval(this, interval_ms, repeating);
     int flags = 0;
     int rc = timerfd_settime(this->fd, flags, &its, NULL);

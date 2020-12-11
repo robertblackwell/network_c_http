@@ -59,14 +59,14 @@ void Reader_add_fd(Reader* this, int fd, int max)
 
 }
 
-void rd_callback(XrWatcherRef watch, void* arg, uint64_t event)
+void rd_callback(XrSocketWatcherRef socket_watcher_ref, void* arg, uint64_t event)
 {
+    XR_SOCKW_CHECK_TAG(socket_watcher_ref)
     ReadCtx* ctx = (ReadCtx*)arg;
-    XrSocketWatcherRef sw = (XrSocketWatcherRef)watch;
-    XrReactorRef reactor = sw->runloop;
+    XrReactorRef reactor = socket_watcher_ref->runloop;
     int in = event | EPOLLIN;
     char buf[1000];
-    int nread = read(watch->fd, buf, 1000);
+    int nread = read(socket_watcher_ref->fd, buf, 1000);
     char* s;
     if(nread > 0) {
         buf[nread] = (char)0;
@@ -74,10 +74,10 @@ void rd_callback(XrWatcherRef watch, void* arg, uint64_t event)
     } else {
         s = "badread";
     }
-    XR_PRINTF("test_io: Socket watcher rd_callback read_count: %d fd: %d event %lx nread: %d buf: %s errno: %d\n", ctx->read_count, watch->fd,  event, nread, s, errno);
+    XR_PRINTF("test_io: Socket watcher rd_callback read_count: %d fd: %d event %lx nread: %d buf: %s errno: %d\n", ctx->read_count, socket_watcher_ref->fd,  event, nread, s, errno);
     ctx->read_count++;
     if(ctx->read_count > ctx->max_read_count) {
-        XrReactor_deregister(reactor, watch->fd);
+        XrReactor_deregister(reactor, socket_watcher_ref->fd);
     } else {
         return;
     }

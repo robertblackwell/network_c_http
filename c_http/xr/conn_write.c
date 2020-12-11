@@ -49,7 +49,7 @@ static void write_event_handler(XrWatcherRef wp, void* arg, uint64_t event)
     XrReactor_post(reactor_ref, write_complete_post_func, conn_ref);
 
 }
-void write_machine(XrWatcherRef wp, void* arg, uint64_t event);
+void write_machine(XrSocketWatcherRef socket_watcher_ref, void* arg, uint64_t event);
 void XrConn_write(XrConnRef this, IOBufferRef iobuf, XrConnWriteCallback cb, void* arg)
 {
     XR_TRACE("conn_ref: %p iobuf: %p iobuf len: %d arg: %p", this, iobuf, IOBuffer_data_len(iobuf), arg);
@@ -62,7 +62,7 @@ void XrConn_write(XrConnRef this, IOBufferRef iobuf, XrConnWriteCallback cb, voi
     Xrsw_arm_write(sw, &write_machine, this);
 }
 
-void XrConn_prepare_write_2(XrConnRef this, IOBufferRef buf, XrSocketWatcherCallback completion_handler)
+void XrConn_prepare_write_2(XrConnRef this, IOBufferRef buf, SocketEventHandler completion_handler)
 {
 }
 /**
@@ -77,14 +77,13 @@ void XrConn_prepare_write_2(XrConnRef this, IOBufferRef buf, XrSocketWatcherCall
  * invocations.
  *
  */
-void write_machine(XrWatcherRef wp, void* arg, uint64_t event)
+void write_machine(XrSocketWatcherRef socket_watcher_ref, void* arg, uint64_t event)
 {
-    XR_TRACE("watcher: %p arg: %p event %xl", wp, arg, event);
-    XrSocketWatcherRef sw = (XrSocketWatcherRef)wp;
+    XR_TRACE("watcher: %p arg: %p event %xl", socket_watcher_ref, arg, event);
     XrConnRef conn_ref = (XrConnRef)arg;
     XR_CONN_CHECK_TAG(conn_ref)
-
-    XrReactorRef reactor_ref = sw->runloop;
+    XR_SOCKW_CHECK_TAG(socket_watcher_ref)
+    XrReactorRef reactor_ref = socket_watcher_ref->runloop;
     // dont accept empty buffers
     assert(IOBuffer_data_len(conn_ref->write_buffer_ref) != 0);
 
@@ -105,7 +104,7 @@ void write_machine(XrWatcherRef wp, void* arg, uint64_t event)
                 conn_ref->write_rc = XRW_COMPLETE;
                 // @TODO fix the next two lines
 //                Xrsw_change_watch(sw, conn_ref->write_completion_handler, arg, 0);
-                Xrsw_disarm_write(sw);
+                Xrsw_disarm_write(socket_watcher_ref);
                 XrReactor_post(reactor_ref, &write_complete_post_func, arg);
                 break;
             }
@@ -118,14 +117,14 @@ void write_machine(XrWatcherRef wp, void* arg, uint64_t event)
                 conn_ref->write_rc = XRW_ERROR;
                 // @TODO fix the next two lines
 //                Xrsw_change_watch(sw, conn_ref->write_completion_handler, arg, 0);
-                Xrsw_disarm_write(sw);
+                Xrsw_disarm_write(socket_watcher_ref);
                 XrReactor_post(reactor_ref, &write_complete_post_func, arg);
                 break;
             }
         }
     }
 }
-void XrConn_write_2(XrConnRef this, IOBufferRef buf, XrSocketWatcherCallback completion_handler)
+void XrConn_write_2(XrConnRef this, IOBufferRef buf, SocketEventHandler completion_handler)
 {
     XR_CONN_CHECK_TAG(this)
     this->write_buffer_ref = buf;
