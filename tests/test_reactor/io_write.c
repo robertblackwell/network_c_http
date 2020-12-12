@@ -4,18 +4,13 @@
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <pthread.h>
-#include <fcntl.h>
 #include <stdint.h>
 #include <string.h>
-#include <stdint.h>
 #include <errno.h>
 #include <sys/epoll.h>
-#include <math.h>
 #include <c_http/utils.h>
 #include <c_http/xr/types.h>
 #include <c_http/xr/reactor.h>
-#include <c_http/xr/watcher.h>
 #include <c_http/xr/w_timer.h>
 #include <c_http/xr/w_socket.h>
 

@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 /**
- * Called whenever an fd associated with an XrListener receives an fd event.
+ * Called whenever an fd associated with an WListener receives an fd event.
  * Should dispatch the read_evhandler and/or write_evhandler depending on whether those
  * events (read events and write events) are armed.
  * @param ctx       void*
@@ -17,7 +17,7 @@
  */
 static void handler(WatcherRef watcher, int fd, uint64_t event)
 {
-    XrListenerRef listener_ref = (XrListenerRef)watcher;
+    WListenerRef listener_ref = (WListenerRef)watcher;
     assert(fd ==  listener_ref->fd);
     if(listener_ref->listen_evhandler) {
         listener_ref->listen_evhandler(listener_ref,  listener_ref->listen_arg, event);
@@ -25,10 +25,10 @@ static void handler(WatcherRef watcher, int fd, uint64_t event)
 }
 static void anonymous_free(WatcherRef p)
 {
-    XrListenerRef twp = (XrListenerRef)p;
-    XrListener_free(twp);
+    WListenerRef twp = (WListenerRef)p;
+    WListener_free(twp);
 }
-void XrListener_init(XrListenerRef this, XrReactorRef runloop, int fd)
+void WListener_init(WListenerRef this, XrReactorRef runloop, int fd)
 {
     this->type = XR_WATCHER_LISTENER;
     XR_LIST_SET_TAG(this);
@@ -39,20 +39,20 @@ void XrListener_init(XrListenerRef this, XrReactorRef runloop, int fd)
     this->listen_arg = NULL;
     this->listen_evhandler = NULL;
 }
-XrListenerRef XrListener_new(XrReactorRef rtor_ref, int fd)
+WListenerRef WListener_new(XrReactorRef rtor_ref, int fd)
 {
-    XrListenerRef this = malloc(sizeof(XrListener));
-    XrListener_init(this, rtor_ref, fd);
+    WListenerRef this = malloc(sizeof(WListener));
+    WListener_init(this, rtor_ref, fd);
     return this;
 }
-void XrListener_free(XrListenerRef this)
+void WListener_free(WListenerRef this)
 {
     XRLIST_TYPE_CHECK(this)
     XR_LIST_CHECK_TAG(this)
     close(this->fd);
     free((void*)this);
 }
-void XrListener_register(XrListenerRef this, ListenerEventHandler event_handler, void* arg)
+void WListener_register(WListenerRef this, ListenerEventHandler event_handler, void* arg)
 {
     XRLIST_TYPE_CHECK(this)
     XR_LIST_CHECK_TAG(this)
@@ -70,13 +70,13 @@ void XrListener_register(XrListenerRef this, ListenerEventHandler event_handler,
     }
     assert(res ==0);
 }
-void XrListener_deregister(XrListenerRef this)
+void WListener_deregister(WListenerRef this)
 {
     XRLIST_TYPE_CHECK(this)
     XR_LIST_CHECK_TAG(this)
     XrReactor_delete(this->runloop, this->fd);
 }
-void XrListener_arm(XrListenerRef this, ListenerEventHandler event_handler, void* arg)
+void WListener_arm(WListenerRef this, ListenerEventHandler event_handler, void* arg)
 {
     XRLIST_TYPE_CHECK(this)
     XR_LIST_CHECK_TAG(this)
@@ -94,7 +94,7 @@ void XrListener_arm(XrListenerRef this, ListenerEventHandler event_handler, void
     }
     assert(res == 0);
 }
-void XrListener_disarm(XrListenerRef this)
+void WListener_disarm(WListenerRef this)
 {
     int res = XrReactor_reregister(this->runloop, this->fd, 0L, (WatcherRef)this);
     assert(res == 0);

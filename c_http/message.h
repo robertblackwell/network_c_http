@@ -1,3 +1,4 @@
+
 #ifndef c_http_message_h
 #define c_http_message_h
 #include <stdbool.h>
@@ -6,6 +7,15 @@
 #include <c_http/buffer/buffer_chain.h>
 #include <c_http/hdrlist.h>
 #include <c_http/ll_parser_types.h>
+/**
+ * @defgroup http Http Message
+ * @brief The http module is responsible for all things related to http/1.1 messages
+ * ## Module Message
+ * This is some documentation for the messages modules.
+ * -    this is a list item
+ * -    and this another
+ * @{
+ */
 struct Message_s;
 typedef struct Message_s Message, *MessageRef;
 
@@ -38,13 +48,13 @@ MessageRef Message_new_response();
 void Message_free(MessageRef* p);
 void Message_dealloc(void* m);
 /**
- * Methods to test and set whether a message is a request or response
+ * @brief Methods to test and set whether a message is a request or response
  */
 bool Message_is_request(MessageRef mref);
 bool Message_get_is_request(MessageRef this);
 void Message_set_is_request(MessageRef this, bool yn);
 /**
- * Methods to get/set all first line fields
+ * @brief Methods to get/set all first line fields
  */
 HttpStatus Message_get_status(MessageRef mref);
 void Message_set_status(MessageRef mref, HttpStatus status);
@@ -141,5 +151,5 @@ void Message_set_body(MessageRef mref, BufferChainRef bodyp);
 
 IOBufferRef Message_serialize(MessageRef this);
 
-
+/**}*/
 #endif

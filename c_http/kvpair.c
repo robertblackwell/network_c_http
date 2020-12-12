@@ -1,3 +1,7 @@
+/**
+ * @file KVPair.c
+ * @Brief Implementation file for key/value pair
+ */
 #define _GNU_SOURCE
 #include <c_http/kvpair.h>
 #include <stdlib.h>
@@ -6,7 +10,9 @@
 #include <ctype.h>
 #include <c_http/alloc.h>
 #include <c_http/utils.h>
-
+/**
+ * @brief key value pair with string key and string value
+ */
 struct KVPair_s {
     // this string is always null terminated
     char* label_ptr;

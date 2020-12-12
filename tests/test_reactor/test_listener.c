@@ -9,12 +9,7 @@
 #include <fcntl.h>
 #include <stdint.h>
 #include <string.h>
-#include <sys/epoll.h>
 #include <errno.h>
-#include <math.h>
-#include <c_http/list.h>
-#include <c_http/operation.h>
-#include <c_http/oprlist.h>
 #include <c_http/unittest.h>
 #include <c_http/utils.h>
 #include <c_http/socket_functions.h>
@@ -32,7 +27,7 @@ struct TestServer_s {
     socket_handle_t         listening_socket_fd;
     XrHandlerFunction       handler;
     XrReactorRef            reactor_ref;
-    XrListenerRef           listening_watcher_ref;
+    WListenerRef           listening_watcher_ref;
     XrConnListRef           conn_list_ref;
     int                     listen_counter;
 };
@@ -97,7 +92,7 @@ void set_non_blocking(socket_handle_t socket)
     assert(fres == 0);
 }
 
-static void on_event_listening(XrListenerRef listener_ref, void *arg, uint64_t event)
+static void on_event_listening(WListenerRef listener_ref, void *arg, uint64_t event)
 {
 //    assert(iobuf != NULL);
 //    assert(conn_ref->handler_ref != NULL);
@@ -110,11 +105,12 @@ static void on_event_listening(XrListenerRef listener_ref, void *arg, uint64_t e
     TestServerRef server_ref = arg;
     int sock2 = accept(server_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
     if(sock2 <= 0) {
-        LOG_FMT("%s %d %d", "Listener thread :: accept failed terminating sock2 : ", sock2, errno);
+        int errno_saved = errno;
+        LOG_FMT("%s %d %d %s", "Listener thread :: accept failed terminating sock2 : ", sock2, errno, strerror(errno_saved));
     } else {
         printf("Sock2 successfull sock: %d server_ref %p listen_ref: %p  listen_count: %d\n", sock2, server_ref, listener_ref, server_ref->listen_counter);
         server_ref->listen_counter++;
-        sleep(2);
+        sleep(0.6);
     }
     close(sock2);
     printf("on_event_listen new socket is : %d\n", sock2);
@@ -149,12 +145,12 @@ static void TestServer_listen(TestServerRef sref)
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
     sref->reactor_ref = XrReactor_new();
-    sref->listening_watcher_ref = XrListener_new(sref->reactor_ref, sref->listening_socket_fd);
-    XrListenerRef lw = sref->listening_watcher_ref;
+    sref->listening_watcher_ref = WListener_new(sref->reactor_ref, sref->listening_socket_fd);
+    WListenerRef lw = sref->listening_watcher_ref;
 
-    XrListener_register(lw, on_event_listening, sref);
+    WListener_register(lw, on_event_listening, sref);
     // every time I try to call EOPLL_MOD is get an invalid arg error - though it works if I only use register EPOLL_ADD
-//    XrListener_arm(lw, on_event_listening, sref);
+//    WListener_arm(lw, on_event_listening, sref);
     printf("TestServer_listen reactor: %p listen sock: %d  lw: %p\n", sref->reactor_ref, sref->listening_socket_fd, lw);
 
     XrReactor_run(sref->reactor_ref, -1);
@@ -209,14 +205,15 @@ void* connector_thread_func(void* arg)
         printf("Client about to connect %d \n", i);
         ClientRef client_ref = Client_new();
         Client_connect(client_ref, "localhost", 9001);
-        sleep(1);
+        sleep(0.2);
         Client_free(&client_ref);
     }
+    // now wait here for all connections to be processed
     sleep(1);
     for(int i = 0; i < 2; i++) {
         TestServerRef server = tc->servers[i];
-        XrListenerRef listener = server->listening_watcher_ref;
-        XrListener_deregister(listener);
+        WListenerRef listener = server->listening_watcher_ref;
+        WListener_deregister(listener);
     }
 }
 int test_listeners()

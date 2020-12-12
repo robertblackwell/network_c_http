@@ -14,17 +14,6 @@
 #include <c_http/xr/run_list.h>
 
 #define MAX_EVENTS 4096
-/**
- * epoll_ctl call
- */
-#define XR_RL_CTL(reactor, op, fd, interest)                                 \
-    if (epoll_ctl(reactor->epoll_fd, op, fd,                                   \
-                  &(struct epoll_event){.events = interest,                    \
-                                        .data = {.fd = fd}}) == -1) {          \
-        XR_PRINTF("XR_RL_CTL epoll_fd: %d \n", reactor->epoll_fd);                                                   \
-        return -1;                                                             \
-    }
-
 
 struct XrReactor_s {
     XR_REACTOR_DECLARE_TAG;

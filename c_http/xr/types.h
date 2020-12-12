@@ -29,7 +29,7 @@ typedef struct Watcher_s Watcher, *WatcherRef;
 typedef struct WTimer_s WTimer, *WTimerRef;
 typedef struct WSocket_s WSocket, *WSocketRef;
 typedef struct WQueue_s WQueue, *WQueueRef;
-typedef struct XrListener_s XrListener, *XrListenerRef;
+typedef struct WListener_s WListener, *WListenerRef;
 typedef struct WFdEvent_s WFdEvent, *WFdEventRef;
 
 typedef struct XrReactor_s XrReactor, *XrReactorRef;
@@ -56,7 +56,7 @@ typedef void (TimerEventHandler)(WTimerRef timer_watcher_ref, void* arg, uint64_
 typedef void (SocketEventHandler)(WSocketRef socket_watcher_ref, void* arg, uint64_t events);
 typedef void (FdEventHandler)(WFdEventRef fd_event_ref, void* arg, uint64_t events);
 typedef void (QueueEventHandler)(WQueueRef qref, void* arg, uint64_t events);
-typedef void (ListenerEventHandler)(XrListenerRef listener_ref, void* arg, uint64_t events);
+typedef void (ListenerEventHandler)(WListenerRef listener_ref, void* arg, uint64_t events);
 
 
 /**

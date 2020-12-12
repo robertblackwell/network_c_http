@@ -12,7 +12,10 @@
 #include <c_http/check_tag.h>
 #undef TYPE
 #define CHECK_MESSAGE(p) CHECK_TAG(Message, p)
-
+/**
+ * @addtogroup http
+ * @{
+ */
 struct Message_s
 {
     DECLARE_TAG(Message);
@@ -46,6 +49,10 @@ MessageRef Message_new ()
     error_label_1:
         return NULL;
 }
+/**
+ * @brief Create a new request message instance
+ * @return MessageRef
+ */
 MessageRef Message_new_request()
 {
     MessageRef mref = Message_new();
@@ -258,3 +265,4 @@ void Message_set_headers_arr(MessageRef this, const char* ar[][2])
     CHECK_MESSAGE(this)
     HdrList_add_arr(this->headers, ar);
 }
+/**@}*/

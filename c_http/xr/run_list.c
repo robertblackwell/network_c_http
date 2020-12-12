@@ -1,7 +1,9 @@
 #include <c_http/xr/run_list.h>
 #include <unistd.h>
 #include <stdlib.h>
-
+/**
+ * A Functor is a generic callable - a function pointer (of type PostableFunction) and single anonymous argument
+ */
 struct Functor_s
 {
 //    WatcherRef wref; // this is borrowed do not free
@@ -26,7 +28,9 @@ void Functor_call(FunctorRef this)
 {
     this->f(this->arg);
 }
-
+/**
+ * The runlist - is a list of Functor - these are functions that are ready to run.
+ */
 static void dealloc(void **ptr)
 {
     Functor_free((FunctorRef) *ptr);
@@ -95,4 +99,15 @@ void RunList_add_back(RunListRef rl_ref, FunctorRef item)
 void RunList_add_front(RunListRef rl_ref, FunctorRef item)
 {
     List_add_front(rl_ref, (void *) item);
+}
+void RunList_exec(RunListRef this)
+{
+    RunListIter iter = RunList_iterator(this);
+    while (iter != NULL) {
+        FunctorRef fnc = RunList_itr_unpack(this, iter);
+        Functor_call(fnc);
+        RunListIter next_iter = RunList_itr_next(this, iter);
+        RunList_itr_remove(this, &iter);
+        iter = next_iter;
+    }
 }

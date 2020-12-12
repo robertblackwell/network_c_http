@@ -18,9 +18,9 @@
 
 typedef uint64_t XrSocketEvent;
 
-typedef void(XrListenerCaller(void* ctx));
+typedef void(WListenerCaller(void* ctx));
 
-struct XrListener_s {
+struct WListener_s {
     struct Watcher_s;
     ListenerEventHandler*      listen_evhandler;
     void*                    listen_arg;
@@ -28,23 +28,23 @@ struct XrListener_s {
 
 };
 
-XrListenerRef XrListener_new(XrReactorRef runloop, int fd);
-void XrListener_free(XrListenerRef this);
-void XrListener_register(XrListenerRef this, ListenerEventHandler event_handler, void* arg);
-void XrListener_deregister(XrListenerRef this);
+WListenerRef WListener_new(XrReactorRef runloop, int fd);
+void WListener_free(WListenerRef this);
+void WListener_register(WListenerRef this, ListenerEventHandler event_handler, void* arg);
+void WListener_deregister(WListenerRef this);
 
 /**
  * Enable reception of fd listener events and set the event handler
- * @param this            XrListenerRef
+ * @param this            WListenerRef
  * @param arg             void*               Context data. Discretion of the caller
  * @param fd_event_handler
  */
-void XrListener_arm(XrListenerRef this, ListenerEventHandler fd_event_handler, void* arg);
+void WListener_arm(WListenerRef this, ListenerEventHandler fd_event_handler, void* arg);
 
 /**
  * Disable reception of fd read events for the socket
  * @param this
  */
-void XrLIstener_disarm(XrListenerRef this);
+void XrLIstener_disarm(WListenerRef this);
 
 #endif

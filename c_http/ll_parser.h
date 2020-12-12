@@ -1,15 +1,21 @@
+/**
+ * @file message
+ * @brief   Module for parsing http/1.1 messages. It does this by providing a wrapper for
+ *          github.com/nodejs/llhttp which replaces github.com/joyent/http-parser
+ */
+
 
 #ifndef c_http_ll_parser_h
 #define c_http_ll_parser_h
 #include <stdint.h>
-/**
- * This modules wraps the c language http parser provided by github.com/joyent/http-parser
- * for use in this project.
- */
 #include <llhttp/llhttp.h>
 #include <c_http/ll_parser_types.h>
 #include <c_http/message.h>
 #include <c_http/buffer/cbuffer.h>
+/**
+ * @addtogroup http
+ * @{
+ */
 
 /**
  * state values used in parsing http header lines
@@ -82,7 +88,7 @@ void Parser_free(ParserRef* parser_p);
 void Parser_begin(ParserRef parser, MessageRef msg_ref);
 
 /**
- * The guts of the http message parsing process.
+ * @brief The guts of the http message parsing process.
  *
  * Call this function repeatedly with successive buffers of data.
  * These successive buffers may represent one or more messages and a single buffer is permitted to hold
@@ -107,9 +113,9 @@ void Parser_begin(ParserRef parser, MessageRef msg_ref);
 ParserReturnValue Parser_consume(ParserRef parser, const void* buffer, int length);
 
 /**
- * Returns the message currently being worked on. Only valid after Parser_consume() returns ParserReturnValue.return_code == ReturnRC_end_of_message
- * \param parser ParserRef
- * \return MessageRef or NULL
+ * @brief Returns the message currently being worked on. Only valid after Parser_consume() returns ParserReturnValue.return_code == ReturnRC_end_of_message
+ * @param parser ParserRef
+ * @return MessageRef or NULL
  */
 MessageRef      Parser_current_message(ParserRef parser);
 
@@ -119,3 +125,4 @@ ParserError     Parser_get_error(ParserRef parser);
 #endif
 
 
+/**@}*/

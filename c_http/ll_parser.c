@@ -1,6 +1,10 @@
 #include <c_http/alloc.h>
 #include <c_http/ll_parser.h>
 #include <c_http/utils.h>
+/**
+ * @addtogroup http
+ * @{
+ */
 
 /// forward declares 
 static int chunk_header_cb(llhttp_t* parser);
@@ -329,3 +333,4 @@ int message_complete_cb(llhttp_t* parser)
      */
     return HPE_PAUSED;
 }
+/**@}*/

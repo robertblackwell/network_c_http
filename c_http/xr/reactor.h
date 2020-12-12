@@ -5,25 +5,16 @@
 #include <time.h>
 #include <c_http/xr/watcher.h>
 
-#define XR_REACTOR_TAG "XRRTOR"
-#define XR_REACTOR_TAG_LENGTH 8
-#define XR_REACTOR_DECLARE_TAG char tag[XR_REACTOR_TAG_LENGTH]
-#define XR_REACTOR_CHECK_TAG(p) \
-do { \
-    assert(strcmp((p)->tag, XR_REACTOR_TAG) == 0); \
-} while(0);
 
-#define XR_REACTOR_SET_TAG(p) \
-do { \
-    sprintf((p)->tag, "%s", XR_REACTOR_TAG); \
-} while(0);
+#define TYPE Reactor
+#define Reactor_TAG "XRLRTOT"
+#include <c_http/check_tag.h>
+#undef TYPE
+#define XR_REACTOR_DECLARE_TAG DECLARE_TAG(Reactor)
+#define XR_REACTOR_CHECK_TAG(p) CHECK_TAG(Reactor, p)
+#define XR_REACTOR_SET_TAG(p) SET_TAG(Reactor, p)
 
-
-typedef void (*Callback)(void *arg, int fd, uint32_t events);
-typedef void (*WatcherCallback)(WatcherRef wref, void* arg, uint64_t events);
 typedef struct XrReactor_s XrReactor, *XrReactorRef;
-typedef struct Watcher_s Watcher, *WatcherRef;
-
 
 XrReactorRef XrReactor_new(void);
 
@@ -38,6 +29,18 @@ int XrReactor_reregister(XrReactorRef rtor_ref, int fd, uint32_t interest, Watch
 int XrReactor_run(XrReactorRef rtor_ref, time_t timeout);
 
 int XrReactor_post(XrReactorRef rtor_ref, PostableFunction cb, void* arg);
+/**
+ * Remove an fd and its associated Watcher from the Reactor fd list - BUT does not perform
+ * an epoll_ctl DEL operation.
+ *
+ * This is an alternative to Reactor_deregister for WListener objects.
+ *
+ * This function is specifically for use by a WListener only - such objects use the EPOLLEXCLUSIVE flag
+ * In the presense of EPOLLEXCLUSIVE all epoll_ctl calls after the first return an error with errno == 9
+ *
+ * @param this XrReactor
+ * @param fd   int  file descriptor
+ */
 void XrReactor_delete(XrReactorRef this, int fd);
 
 #endif

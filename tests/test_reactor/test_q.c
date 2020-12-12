@@ -4,23 +4,13 @@
 #include <unistd.h>
 #include <pthread.h>
 #define _GNU_SOURCE             /* See feature_test_macros(7) */
-#include <fcntl.h>
 #include <stdint.h>
 #include <string.h>
-#include <stdint.h>
-#include <errno.h>
 
 #include <sys/epoll.h>
-#include <math.h>
-#include <c_http/list.h>
-#include <c_http/operation.h>
-#include <c_http/oprlist.h>
 #include <c_http/unittest.h>
 #include <c_http/utils.h>
 #include <c_http/xr/reactor.h>
-#include <c_http/xr/watcher.h>
-#include <c_http/xr/w_timer.h>
-#include <c_http/xr/w_socket.h>
 #include <c_http/xr/w_queue.h>
 #include <c_http/xr/evfd_queue.h>
 
