@@ -3,7 +3,7 @@
 #include <c_http/api/reader.h>
 #include <c_http/dsl/alloc.h>
 #include <c_http/dsl/utils.h>
-#include <c_http/dsl/iobuffer.h>
+#include <c_http/api/iobuffer.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -102,14 +102,14 @@ int Reader_read(ReaderRef this, MessageRef* msgref_ptr)
                 return READER_IO_ERROR;
             }
         } else {
-            bytes_read = iobuf->buffer_remaining;
+            bytes_read = IOBuffer_data_len(iobuf);
         }
-        char* tmp = (char*)iobuf->buffer_ptr;
-        char* tmp2 = (char*)iobuf->mem_p;
+        char* tmp = IOBuffer_data(iobuf);
+        char* tmp2 = IOBuffer_memptr(iobuf);
         ParserReturnValue ret = Parser_consume(this->m_parser, (void*) IOBuffer_data(iobuf), IOBuffer_data_len(iobuf));
         int consumed = bytes_read - ret.bytes_remaining;
         IOBuffer_consume(iobuf, consumed);
-        int tmp_remaining = iobuf->buffer_remaining;
+        int tmp_remaining = IOBuffer_data_len(iobuf);
         switch(ret.return_code) {
             case ParserRC_error:
                 ///

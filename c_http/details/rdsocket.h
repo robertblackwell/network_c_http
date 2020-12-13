@@ -2,7 +2,7 @@
 #define c_http_rdsocket_h
 #include <c_http/dsl/list.h>
 #include <c_http/api/message.h>
-#include <c_http/dsl/iobuffer.h>
+#include <c_http/api/iobuffer.h>
 #include <c_http/socket_functions.h>
 #include <c_http/details/datasource.h>
 

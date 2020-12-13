@@ -1,6 +1,6 @@
 #ifndef lc_c_contig_buffer_t_hpp
 #define lc_c_contig_buffer_t_hpp
-#include <c_http/dsl/alloc.h>
+
 #include <stddef.h>
 #include <stdio.h> 
 #include <stdlib.h> 

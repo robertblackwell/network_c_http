@@ -27,9 +27,6 @@ set(EXTSRC ${C_HTTP_VENDOR_SRCDIR})
 set(C_HTTP_LIBRARY_HEADER_FILES
 	#basic data structures
 		dsl/alloc.h
-		dsl/cbuffer.h
-		dsl/buffer_chain.h
-		dsl/iobuffer.h
 		dsl/list.h
 		dsl/kvpair.h
 		dsl/queue.h
@@ -55,6 +52,9 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 		api/server.h
 		api/writer.h
 		api/handler_example.h
+		api/cbuffer.h
+		api/buffer_chain.h
+		api/iobuffer.h
 
 	#sync simple_server app
 
@@ -83,9 +83,6 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 set(C_HTTP_LIBRARY_SOURCE_FILES
 	# basic
 		dsl/alloc.c
-		dsl/buffer_chain.c
-		dsl/cbuffer.c
-		dsl/iobuffer.c
 		dsl/list.c
 		dsl/kvpair.c
 		dsl/queue.c
@@ -116,6 +113,9 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		api/reader.c
 		api/server.c
 		api/handler_example.c
+		api/buffer_chain.c
+		api/cbuffer.c
+		api/iobuffer.c
 
 	#aio runloop and aio_http/1.1 details
 		runloop/fdtable.c

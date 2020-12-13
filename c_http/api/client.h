@@ -1,8 +1,5 @@
 #define _GNU_SOURCE
 #include <c_http/api/message.h>
-#include <c_http/details/ll_parser.h>
-#include <c_http/api/reader.h>
-#include <c_http/api/writer.h>
 
 #include <assert.h>
 #include <stdio.h>

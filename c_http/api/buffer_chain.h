@@ -1,7 +1,7 @@
 #ifndef buffer_chain_template_hpp
 #define buffer_chain_template_hpp
 #include <stddef.h>
-#include <c_http/dsl/iobuffer.h>
+#include <c_http/api/iobuffer.h>
 #include <c_http/dsl/list.h>
 
 struct BufferChain_s;

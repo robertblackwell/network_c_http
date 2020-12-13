@@ -1,6 +1,6 @@
 #include <c_http/api/client.h>
 #include <c_http/dsl/alloc.h>
-#include <c_http/dsl/cbuffer.h>
+#include <c_http/api/cbuffer.h>
 #include <c_http/api/message.h>
 #include <c_http/api/reader.h>
 #include <c_http/api/writer.h>

@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include <c_http/api/message.h>
+#include <c_http/test_helpers/message_private.h>
 #include <c_http/dsl/alloc.h>
 #include <c_http/details/hdrlist.h>
 #include <stdbool.h>
@@ -138,7 +139,15 @@ IOBufferRef Message_serialize(MessageRef mref)
     BufferChain_free(&bc_result);
     return result;
 }
-
+void Message_add_header_cstring(MessageRef this, const char* key, const char* value)
+{
+    HdrListRef hdrlist = Message_get_headerlist(this);
+    HdrList_add_cstr(hdrlist, key, value);
+}
+void Message_add_header_cbuf(MessageRef this, CbufferRef key, CbufferRef value)
+{
+    HdrList_add_cbuf(Message_get_headerlist(this), key, value);
+}
 HttpStatus Message_get_status(MessageRef this)
 {
     MESSAGE_CHECK_TAG(this)
@@ -246,6 +255,23 @@ void Message_set_reason_cbuffer(MessageRef this, CbufferRef target)
     assert((this->reason != NULL) && (Cbuffer_size(this->reason) == 0));
     Cbuffer_append_cstr(this->reason, (const char*)Cbuffer_cstr(target));
 }
+int Message_get_content_length(MessageRef this)
+{
+    assert(false);
+}
+void Message_set_content_length(MessageRef this, int length)
+{
+    char buf[10];
+    assert(length >= 0);
+    int r = sprintf(buf, "%d", length);
+    HdrListRef hdrlist_ref = this->headers;
+    KVPairRef kvp = HdrList_find(hdrlist_ref, "Content-length");
+    if(kvp != NULL) {
+        KVPair_set_value(kvp, buf, strlen(buf));
+    } else {
+        HdrList_add_cstr(hdrlist_ref, "Content-length", buf);
+    }
+}
 
 // headers
 HdrListRef Message_get_headerlist(MessageRef this)
@@ -253,6 +279,12 @@ HdrListRef Message_get_headerlist(MessageRef this)
     MESSAGE_CHECK_TAG(this);
     return this->headers;
 }
+const char* Message_get_header_value(MessageRef mref, const char* labptr)
+{
+    KVPairRef kvp = HdrList_find(Message_get_headerlist(mref), labptr);
+    return KVPair_value(kvp);
+}
+
 BufferChainRef Message_get_body(MessageRef this)
 {
     MESSAGE_CHECK_TAG(this);

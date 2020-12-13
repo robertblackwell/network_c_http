@@ -1,9 +1,9 @@
 TODO:
 API for sync server: 
-  ☐ message make the HdrList non visible in the message interface
-  ☐ message add set content-length and make chunked functions
+  ✔ message make the HdrList non visible in the message interface @done (20-12-13 15:13)
+  ☐ message add set content-length and make chunked functions - not tested
   ✔ writer - make struct opaque @done (20-12-12 19:43)
-  ☐ writer - remove reference to HdrList from interface and add write body chunked
+  ☐ writer - remove reference to HdrList from interface and add write body chunked - probably have to rethink that interface
   ☐ client - make a version that takes a full message in addition to the current version that takes a string
   ✔ client - make struct opaque @done (20-12-12 19:43)
   ✔ reader make struct opaque @done (20-12-12 19:43)
@@ -12,9 +12,11 @@ API for sync server:
   ☐ of course update and extend all tests as required
   ☐ check the api is consistent about XXXX_free() does it take this or &this - change its name to make the point
   ✔ server - make opaque @done (20-12-12 19:43)
-  ☐ server - make the size of the workers array defined at runtime. If necesssary create a variable length array
+  ☐ server - make the size of the workers array defined at runtime. If necesssary create a variable length array 
+  ☐ server - give it command line options
   ☐ ceg_alloc - a better name
   ☐ make a master header file for each of the source subdirs - eg  runloop.h  api.h  c_http.h. Convert the tests first and then the two apps
+  ☐ check all header files in api for extraneous include - that is include of non api header files
 Logging:
   merge c_http/logging.h/c + print macros in aio_api/type.h
 Tests:

@@ -9,7 +9,7 @@
 
 #include <c_http/unittest.h>
 #include <c_http/dsl/utils.h>
-#include <c_http/dsl/iobuffer.h>
+#include <c_http/api/iobuffer.h>
 #include <c_http/details/rdsocket.h>
 #include <c_http/api/reader.h>
 
@@ -128,11 +128,9 @@ int WPT_read_msg(WrappedParserTestRef this, IOBufferRef ctx, MessageRef* msgref_
 int WPT_run(WrappedParserTestRef this)
 {
     MessageRef msgref;
-    IOBuffer iobuf;
-    IOBuffer_init(&iobuf, 256);
+    IOBufferRef iobuf_ref = IOBuffer_new_with_capacity(256);
     int rc = 0;
     while(1) {
-//        rc = WPT_read_msg(this, &iobuf, &msgref);
         rc = Reader_read(this->m_rdr, &msgref);
         ReadResultRef rr = ReadResult_new(msgref, rc);
         List_add_back(this->m_results, (void*)rr);
@@ -141,5 +139,6 @@ int WPT_run(WrappedParserTestRef this)
     }
     int r =this->m_verify_func(this->m_results);
     printf("Return from verify %d\n", r);
+    IOBuffer_free(&iobuf_ref);
     return r;
 }

@@ -1,6 +1,6 @@
 #ifndef c_http_xr_conn_h
 #define c_http_xr_conn_h
-#include <c_http/dsl/iobuffer.h>
+#include <c_http/api/iobuffer.h>
 #include <c_http/api/message.h>
 #include <c_http/details/ll_parser.h>
 #include <c_http/runloop/w_socket.h>

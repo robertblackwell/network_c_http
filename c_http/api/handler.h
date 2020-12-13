@@ -1,13 +1,8 @@
 #ifndef c_http_handler_h
 #define c_http_handler_h
 
-#include <c_http/constants.h>
-#include <c_http/dsl/queue.h>
 #include <c_http/api/message.h>
 #include <c_http/api/writer.h>
-#include <c_http/details/worker.h>
-#include <c_http/socket_functions.h>
-#include <c_http/api/handler_example.h>
 
 /**
  * This is the signature of a handler function. *The address) of such a function must

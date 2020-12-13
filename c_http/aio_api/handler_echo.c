@@ -49,17 +49,15 @@ static void set_status_ok_200(MessageRef response)
 }
 static void set_headers(MessageRef response)
 {
-    HdrListRef resp_hdrs = Message_get_headerlist(response);
-    HdrList_add_cstr(resp_hdrs, HEADER_CONTENT_TYPE, "text/html; charset=UTF-8");
-    HdrList_add_cstr(resp_hdrs, HEADER_CONNECTION, "close");
+    Message_add_header_cstring(response, HEADER_CONTENT_TYPE, "text/html; charset=UTF-8");
+    Message_add_header_cstring(response, HEADER_CONNECTION, "close");
 }
 static void set_body_and_content_length_header(MessageRef response, BufferChainRef body)
 {
-    HdrListRef resp_hdrs = Message_get_headerlist(response);
     int body_length = BufferChain_size(body);
     char* body_len_str;
     asprintf(&body_len_str, "%d", body_length);
-    HdrList_add_cstr(resp_hdrs, HEADER_CONTENT_LENGTH, body_len_str);
+    Message_add_header_cstring(response, HEADER_CONTENT_LENGTH, body_len_str);
     free(body_len_str);
     Message_set_body(response, body);
 }

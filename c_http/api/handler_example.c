@@ -57,27 +57,23 @@ char* echo_body(MessageRef request)
 }
 int handler_example(MessageRef request, WriterRef wrtr)
 {
+    MessageRef response = Message_new_response();
     char* msg = "<h2>this is a message</h2>";
     char* body = NULL;
     char* body_len_str = NULL;
-    HdrListRef resp_hdrs = NULL;
     KVPairRef hl_content_length = NULL;
     KVPairRef hl_content_type = NULL;
     int return_value = 0;
 
-    if((resp_hdrs = HdrList_new()) == NULL) goto finalize;
-
     CbufferRef target = Message_get_target_cbuffer(request);
     const char* target_cstr = Cbuffer_cstr(target);
     if(strcmp(target_cstr, "/echo") == 0) {
-        HdrListRef req_hdrs = Message_get_headerlist(request);
-
         /**
          * find the echo-id header in the request and put it in the response headers
          */
-        KVPairRef kvp = HdrList_find(req_hdrs, HEADER_ECHO_ID);
-        assert(kvp != NULL);
-        HdrList_add_cstr(resp_hdrs, HEADER_ECHO_ID, KVPair_value(kvp));
+        const char* echo_value = Message_get_header_value(request, HEADER_ECHO_ID);
+        assert(echo_value != NULL);
+        Message_add_header_cstring(response, HEADER_ECHO_ID, echo_value);
 
         body = echo_body(request);
     } else {
@@ -87,28 +83,19 @@ int handler_example(MessageRef request, WriterRef wrtr)
     if(-1 == asprintf(&body_len_str, "%d", body_len)) goto finalize;
 
 
-    if(true) {
-        if((hl_content_length = KVPair_new(HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str))) == NULL) goto finalize;
-        HdrList_add_front(resp_hdrs, hl_content_length);
-        char* content_type = "text/html; charset=UTF-8";
-        if((hl_content_type = KVPair_new(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type))) == NULL) goto finalize;
-        HdrList_add_front(resp_hdrs, hl_content_type);
-    } else {
-        HdrList_add_cstr(resp_hdrs, HEADER_CONTENT_LENGTH, body_len_str);
-        HdrList_add_cstr(resp_hdrs, HEADER_CONTENT_TYPE, "text/html; charset=UTF-8");
-    }
-    HdrList_add_cstr(resp_hdrs, "Connection", "close");
+    Message_add_header_cstring(response, HEADER_CONTENT_LENGTH, body_len_str);
+    Message_add_header_cstring(response, HEADER_CONTENT_TYPE, "text/html; charset=UTF-8");
+    Message_add_header_cstring(response, "Connection", "close");
     /**
      * simulate io to build the page
      */
     usleep(10000);
-    Writer_start(wrtr, HTTP_STATUS_OK, resp_hdrs);
+    Writer_write(wrtr, response);
     Writer_write_chunk(wrtr, (void*) body, body_len);
 
     return_value = 1;
 
     finalize:
-    if(resp_hdrs != NULL) HdrList_free(&resp_hdrs);
     if(body != NULL) free(body);
     if(body_len_str != NULL) free(body_len_str);
     return return_value;

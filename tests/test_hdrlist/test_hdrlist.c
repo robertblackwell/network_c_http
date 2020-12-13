@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <c_http/unittest.h>
-#include <c_http/dsl/cbuffer.h>
+#include <c_http/api/cbuffer.h>
 #include <c_http/logger.h>
 #include <c_http/dsl/list.h>
 #include <c_http/dsl/kvpair.h>

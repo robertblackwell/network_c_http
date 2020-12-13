@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <libgen.h>
 
-#include <c_http/dsl/cbuffer.h>
+#include <c_http/api/cbuffer.h>
 #include <c_http/logger.h>
 
 #define GREEN(string)   "\x1b[32m" string "\x1b[0m"

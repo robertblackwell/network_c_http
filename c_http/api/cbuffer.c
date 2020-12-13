@@ -3,7 +3,7 @@
 #include <string.h>
 #include <c_http/dsl/alloc.h>
 #include <c_http/dsl/utils.h>
-#include <c_http/dsl/cbuffer.h>
+#include <c_http/api/cbuffer.h>
 
 
 #define CBUFFER_MAX_CAPACITY 10000

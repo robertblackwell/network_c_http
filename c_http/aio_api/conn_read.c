@@ -267,14 +267,14 @@ int XrConn_read(XrConnRef this)
                 IOBuffer_commit(iobuf, bytes_read);
             }
         } else {
-            bytes_read = iobuf->buffer_remaining;
+            bytes_read = IOBuffer_data_len(iobuf);
         }
-        char* tmp = (char*)iobuf->buffer_ptr;
-        char* tmp2 = (char*)iobuf->mem_p;
+        char* tmp = IOBuffer_data(iobuf);
+        char* tmp2 = IOBuffer_memptr(iobuf);
         ParserReturnValue ret = Parser_consume(this->parser_ref, (void*) IOBuffer_data(iobuf), IOBuffer_data_len(iobuf));
         int consumed = bytes_read - ret.bytes_remaining;
         IOBuffer_consume(iobuf, consumed);
-        int tmp_remaining = iobuf->buffer_remaining;
+        int tmp_remaining = IOBuffer_data_len(iobuf);
         enum ParserRC rc = ret.return_code;
         if(rc == ParserRC_end_of_data) {
             ;  // ok end to Parser_consume call - get more data

@@ -7,7 +7,7 @@
  */
 #include <http-parser/http_parser.h>
 #include <c_http/api/message.h>
-#include <c_http/dsl/cbuffer.h>
+#include <c_http/api/cbuffer.h>
 
 /**
  * state values used in parsing http header lines

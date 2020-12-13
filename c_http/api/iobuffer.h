@@ -7,9 +7,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <c_http/dsl/alloc.h>
-#include <c_http/dsl/cbuffer.h>
+#include <c_http/api/cbuffer.h>
 #define IOBUFFER_DEFAULT_CAPACITY 4*1024
+
+#define TYPE IOBuffer
+#define IOBuffer_TAG "IOBUFF"
+#include <c_http/check_tag.h>
+#undef TYPE
+#define IOBUFFER_DECLARE_TAG DECLARE_TAG(IOBuffer)
+#define IOBUFFER_CHECK_TAG(p) CHECK_TAG(IOBuffer, p)
+#define IOBUFFER_SET_TAG(p) SET_TAG(IOBuffer, p)
 
 
 /**
@@ -35,17 +42,19 @@
  *  while the same buffer was being used for IO
  *
   */
-typedef struct IOBuffer_s {
-    char   tag[8];
-    void*  mem_p;             // always points to the start of buffer
-    char*  char_p;
-    int    allocated_capacity; // typically allocate a little more than requested - for a trailing 0x00
-    int    buffer_capacity;   // always holds the size of the buffer
-    void*  buffer_ptr;        // points to the start of unused data in buffer
-    int    buffer_length;     // same as capacity
-    int    buffer_remaining;  // length of daat no consumed
+//typedef struct IOBuffer_s {
+//    char   tag[8];
+//    void*  mem_p;             // always points to the start of buffer
+//    char*  char_p;
+//    int    allocated_capacity; // typically allocate a little more than requested - for a trailing 0x00
+//    int    buffer_capacity;   // always holds the size of the buffer
+//    void*  buffer_ptr;        // points to the start of unused data in buffer
+//    int    buffer_length;     // same as capacity
+//    int    buffer_remaining;  // length of daat no consumed
+//
+//} IOBuffer, *IOBufferRef;
 
-} IOBuffer, *IOBufferRef;
+typedef struct IOBuffer_s IOBuffer, *IOBufferRef;
 
 IOBufferRef IOBuffer_init(IOBufferRef this, int capacity);
 IOBufferRef IOBuffer_new_with_capacity(int capacity);
@@ -138,4 +147,7 @@ void IOBuffer_destroy(IOBufferRef this);
 void IOBuffer_reset(IOBufferRef this);
 void IOBuffer_free(IOBufferRef* p);
 bool IOBuffer_equal(IOBufferRef a, IOBufferRef b);
+
+void* IOBuffer_memptr(IOBufferRef this);
+
 #endif

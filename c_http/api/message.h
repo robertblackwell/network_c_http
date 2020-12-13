@@ -3,8 +3,7 @@
 #define c_http_message_h
 #include <stdbool.h>
 #include <stdint.h>
-#include <llhttp/llhttp.h>
-#include <c_http/dsl/buffer_chain.h>
+#include <c_http/api/buffer_chain.h>
 #include <c_http/details/hdrlist.h>
 #include <c_http/details/ll_parser_types.h>
 /**
@@ -97,22 +96,8 @@ const char* Message_get_reason(MessageRef this);
 
 void Message_set_reason_cbuffer(MessageRef this, CbufferRef reason);
 CbufferRef Message_get_reason_cbuffer(MessageRef this);
-/**
- * Within a Message instance header lines are stored in a HdrList structure.
- * Methods are provided to:
- * -    get the HdrList struct for manipulation             - Message_get_header_list
- * -    add a single header line from a pair of const char* - add_header_cstring
- *      this function copies the c-string parameters so the caller remains the owner.
- * -    get the value string for a header key - the const char* return value continues
- *      to be owned by the Message instance. The return value is a weak reference.
- *      Not found is signalled by return value NULL;
- */
- /**
-  * Get a reference to the internal HdrList
-  * @param this MessageRef
-  * @return HdrListRef
-  */
-HdrListRef Message_get_headerlist(MessageRef this);
+
+void Message_set_content_length(MessageRef this, int length);
 /**
  * Add a new header line to the message. If the key is already in the header list
  * replace its value with the value provided in this call
@@ -124,6 +109,7 @@ HdrListRef Message_get_headerlist(MessageRef this);
  *                          and the value is copied
  */
 void Message_add_header_cstring(MessageRef mref, const char* label, const char* value);
+void Message_add_header_cbuf(MessageRef this, CbufferRef key, CbufferRef value);
 
 /**
  * Get the value string for the header line with the given label or key.

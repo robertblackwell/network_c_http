@@ -1,11 +1,8 @@
 #ifndef c_http_reader_h
 #define c_http_reader_h
-#include <c_http/dsl/list.h>
 #include <c_http/details/rdsocket.h>
 #include <c_http/api/message.h>
 #include <c_http/details/ll_parser.h>
-#include <c_http/dsl/iobuffer.h>
-#include <c_http/socket_functions.h>
 
 #define TYPE Reader
 #define Reader_TAG "READER"

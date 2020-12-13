@@ -1,16 +1,7 @@
 #define _GNU_SOURCE
 #include <assert.h>
 #include <stdio.h>
-#include <c_http/api/url_parser.h>
-#include <c_http/dsl/alloc.h>
-#include <c_http/unittest.h>
-#include <c_http/dsl/cbuffer.h>
-#include <c_http/logger.h>
-#include <c_http/dsl/list.h>
-#include <c_http/api/server.h>
-#include <c_http/details/hdrlist.h>
-#include <c_http/api/message.h>
-
+#include <c_http/api/cbuffer.h>
 //https://github.com/uriparser/uriparser
 
 typedef struct Url_s {

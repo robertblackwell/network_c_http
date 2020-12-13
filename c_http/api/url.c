@@ -1,9 +1,12 @@
 #define _GNU_SOURCE
 #include <c_http/api/url.h>
-#include <c_http/dsl/cbuffer.h>
+#include <c_http/dsl/alloc.h>
+#include <c_http/api/url_parser.h>
+#include <c_http/api/cbuffer.h>
 
 #include <assert.h>
 #include <stdio.h>
+#include <string.h>
 
 UrlRef Url_new(char* url)
 {

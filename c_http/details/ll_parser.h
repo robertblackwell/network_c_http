@@ -11,7 +11,7 @@
 #include <llhttp/llhttp.h>
 #include <c_http/details/ll_parser_types.h>
 #include <c_http/api/message.h>
-#include <c_http/dsl/cbuffer.h>
+#include <c_http/api/cbuffer.h>
 /**
  * @addtogroup http
  * @{

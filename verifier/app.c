@@ -47,15 +47,14 @@ MessageRef mk_request(ThreadContext* ctx)
     Message_set_is_request(request, true);
     Message_set_method(request, HTTP_GET);
     Message_set_target(request, "/echo" );
-    HdrListRef request_hdrs = Message_get_headerlist(request);
     char* content_length = "0";
     char* echo_id;
 
-    HdrList_add_cstr(request_hdrs, HEADER_HOST, "ahost");
-    HdrList_add_cstr(request_hdrs, "User-agent", "x15:x15-soundtrip client");
-    HdrList_add_cstr(request_hdrs, HEADER_CONNECTION, "close");
-    HdrList_add_cstr(request_hdrs, HEADER_CONTENT_LENGTH, content_length);
-    HdrList_add_cstr(request_hdrs, HEADER_ECHO_ID, ctx->uid);
+    Message_add_header_cstring(request, HEADER_HOST, "ahost");
+    Message_add_header_cstring(request, "User-agent", "x15:x15-soundtrip client");
+    Message_add_header_cstring(request, HEADER_CONNECTION, "close");
+    Message_add_header_cstring(request, HEADER_CONTENT_LENGTH, content_length);
+    Message_add_header_cstring(request, HEADER_ECHO_ID, ctx->uid);
     Message_set_body(request, BufferChain_new());
     return request;
 }

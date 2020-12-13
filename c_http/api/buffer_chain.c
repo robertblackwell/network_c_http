@@ -1,10 +1,10 @@
-#include <c_http/dsl/buffer_chain.h>
+#include <c_http/api/buffer_chain.h>
 #include <stddef.h>
 #include <assert.h>
 #include <string.h>
 #include <c_http/dsl/alloc.h>
 #include <c_http/dsl/list.h>
-#include <c_http/dsl/iobuffer.h>
+#include <c_http/api/iobuffer.h>
 
 typedef struct BufferChain_s {
         ListRef   m_chain;

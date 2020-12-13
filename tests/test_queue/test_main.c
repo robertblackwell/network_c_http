@@ -1,7 +1,7 @@
 
 #include <pthread.h>
 #include <unistd.h>
-#include <c_http/dsl/cbuffer.h>
+#include <c_http/api/cbuffer.h>
 #include <c_http/logger.h>
 #include <c_http/dsl/queue.h>
 

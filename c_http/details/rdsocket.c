@@ -3,7 +3,7 @@
 #include <c_http/details/rdsocket.h>
 #include <c_http/dsl/alloc.h>
 #include <c_http/dsl/utils.h>
-#include <c_http/dsl/iobuffer.h>
+#include <c_http/api/iobuffer.h>
 
 #include <stdio.h>
 #include <string.h>

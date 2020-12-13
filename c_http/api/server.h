@@ -1,14 +1,7 @@
 #ifndef c_http_server_h
 #define c_http_server_h
 
-#include <c_http/constants.h>
-#include <c_http/dsl/queue.h>
-#include <c_http/details/worker.h>
-#include <c_http/api/message.h>
-#include <c_http/api/writer.h>
-#include <c_http/socket_functions.h>
 #include <c_http/api/handler.h>
-#include <c_http/api/handler_example.h>
 
 #define TYPE Server
 #define Server_TAG "SERVER"

@@ -10,6 +10,7 @@
 #include <c_http/details/datasource.h>
 #include <c_http/details/parser_test.h>
 #include <c_http/api/message.h>
+#include <c_http/test_helpers/message_private.h>
 #include <c_http/api/reader.h>
 
 #undef A_ON

@@ -1,7 +1,7 @@
 #ifndef c_ceg_hdrlist_h
 #define c_ceg_hdrlist_h
 #include <c_http/dsl/kvpair.h>
-#include <c_http/dsl/cbuffer.h>
+#include <c_http/api/cbuffer.h>
 
 
 __LIST_INCLUDE_H__
