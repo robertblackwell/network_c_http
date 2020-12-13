@@ -25,120 +25,120 @@ set(EXTSRC ${C_HTTP_VENDOR_SRCDIR})
 #)
 
 set(C_HTTP_LIBRARY_HEADER_FILES
-	alloc.h
-	#basic
-		buffer/cbuffer.h
-		buffer/buffer_chain.h
-		buffer/iobuffer.h
-		list.h
-		kvpair.h
-		queue.h
-		utils.h
+	#basic data structures
+		dsl/alloc.h
+		dsl/cbuffer.h
+		dsl/buffer_chain.h
+		dsl/iobuffer.h
+		dsl/list.h
+		dsl/kvpair.h
+		dsl/queue.h
+		dsl/utils.h
 	#misc
 		logger.h
 		unittest.h
 	#http/1.1 details
-		datasource.h
-		hdrlist.h
-		ll_parser_types.h
-		ll_parser.h
-		parser_test.h
-		rdsocket.h
+		details/hdrlist.h
+		details/ll_parser_types.h
+		details/ll_parser.h
+		details/parser_test.h
+		details/rdsocket.h
+		details/datasource.h
+		details/worker.h
 		${EXTSRC}/llhttp/llhttp.h
 	#http/1.1 API
-		message.h
-		url_parser.h
-		url.h
-		sync/client.h
-		sync/handler.h
-		sync/server.h
-		sync/worker.h
-		sync/writer.h
+		api/message.h
+		api/url_parser.h
+		api/url.h
+		api/client.h
+		api/handler.h
+		api/server.h
+		api/writer.h
+		api/handler_example.h
 
 	#sync simple_server app
-	sync/handler_example.h
 
 	#sync verifier app
 
 	#aio runloop and aio_http/1.1 details
-		xr/fdtable.h
-		xr/reactor.h
-		xr/run_list.h
-		xr/w_listener.h
-		xr/w_fdevent.h
-		xr/w_timer.h
-		xr/w_queue.h
-		xr/w_socket.h
-		xr/watcher.h
-		xr/evfd_queue.h
-		xr/conn_list.h
+		runloop/fdtable.h
+		runloop/reactor.h
+		runloop/run_list.h
+		runloop/w_listener.h
+		runloop/w_fdevent.h
+		runloop/w_timer.h
+		runloop/w_queue.h
+		runloop/w_socket.h
+		runloop/watcher.h
+		runloop/evfd_queue.h
+		runloop/conn_list.h
 	#aio api
-		xr/types.h
-		xr/xr_server.h
-		xr/conn.h
-		xr/handler.h
+		aio_api/types.h
+		aio_api/xr_server.h
+		aio_api/conn.h
+		aio_api/handler.h
 
 	)
 
 set(C_HTTP_LIBRARY_SOURCE_FILES
-	alloc.c
 	# basic
-		buffer/buffer_chain.c
-		buffer/cbuffer.c
-		buffer/iobuffer.c
-		list.c
-		kvpair.c
-		queue.c
-		utils.c
+		dsl/alloc.c
+		dsl/buffer_chain.c
+		dsl/cbuffer.c
+		dsl/iobuffer.c
+		dsl/list.c
+		dsl/kvpair.c
+		dsl/queue.c
+		dsl/utils.c
 
 	#misc
 		unittest.c
 		logger.c
 
 	#http/1.1 details
-		datasource.c
-		hdrlist.c
-		rdsocket.c
-		parser_test.c
-		ll_parser_types.c
-		ll_parser.c
-		sync/worker.c
-
-	#http/1.1 API
-		message.c
-		url_parser.c
-		url.c
-		sync/client.c
-		sync/writer.c
-		sync/ll_reader.c
-		sync/server.c
-		sync/handler_example.c
-
-	#aio runloop and aio_http/1.1 details
-		xr/fdtable.c
-		xr/reactor.c
-		xr/w_listener.c
-		xr/w_fdevent.c
-		xr/w_timer.c
-		xr/w_socket.c
-		xr/w_queue.c
-		xr/watcher.c
-		xr/evfd_queue.c
-		xr/conn_list.c
-		xr/run_list.c
+		details/datasource.c
+		details/hdrlist.c
+		details/rdsocket.c
+		details/parser_test.c
+		details/ll_parser_types.c
+		details/ll_parser.c
+		details/worker.c
 		${EXTSRC}/llhttp/api.c
 		${EXTSRC}/llhttp/http.c
 		${EXTSRC}/llhttp/llhttp.c
 
+	#http/1.1 API
+		api/message.c
+		api/url_parser.c
+		api/url.c
+		api/client.c
+		api/writer.c
+		api/reader.c
+		api/server.c
+		api/handler_example.c
+
+	#aio runloop and aio_http/1.1 details
+		runloop/fdtable.c
+		runloop/reactor.c
+		runloop/w_listener.c
+		runloop/w_fdevent.c
+		runloop/w_timer.c
+		runloop/w_socket.c
+		runloop/w_queue.c
+		runloop/watcher.c
+		runloop/evfd_queue.c
+		runloop/conn_list.c
+		runloop/run_list.c
+
 	#aio_http/1.1 api
-		xr/xr_server.c
-		xr/conn.c
-		xr/conn_read.c
-		xr/conn_write.c
-		xr/handler.c
-		xr/handler_simple.c
-		xr/handler_echo.c
-		xr/handler_function.c
+		aio_api/xr_server.c
+		aio_api/conn.c
+		aio_api/conn_read.c
+		aio_api/conn_write.c
+		aio_api/handler.c
+		aio_api/handler_simple.c
+		aio_api/handler_echo.c
+		aio_api/handler_function.c
 
 	)
 

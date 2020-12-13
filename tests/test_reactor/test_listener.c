@@ -1,6 +1,6 @@
 #define _GNU_SOURCE
 #define XR_TRACE_ENABLE
-#include <c_http/xr/types.h>
+#include <c_http/aio_api/types.h>
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -11,15 +11,15 @@
 #include <string.h>
 #include <errno.h>
 #include <c_http/unittest.h>
-#include <c_http/utils.h>
+#include <c_http/dsl/utils.h>
 #include <c_http/socket_functions.h>
-#include <c_http/sync/client.h>
-#include <c_http/xr/reactor.h>
-#include <c_http/xr/watcher.h>
-#include <c_http/xr/w_timer.h>
-#include <c_http/xr/w_socket.h>
-#include <c_http/xr/w_listener.h>
-#include <c_http/xr/w_fdevent.h>
+#include <c_http/api/client.h>
+#include <c_http/runloop/reactor.h>
+#include <c_http/runloop/watcher.h>
+#include <c_http/runloop/w_timer.h>
+#include <c_http/runloop/w_socket.h>
+#include <c_http/runloop/w_listener.h>
+#include <c_http/runloop/w_fdevent.h>
 
 typedef int socket_handle_t;
 

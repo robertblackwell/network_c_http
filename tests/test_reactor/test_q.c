@@ -9,10 +9,10 @@
 
 #include <sys/epoll.h>
 #include <c_http/unittest.h>
-#include <c_http/utils.h>
-#include <c_http/xr/reactor.h>
-#include <c_http/xr/w_queue.h>
-#include <c_http/xr/evfd_queue.h>
+#include <c_http/dsl/utils.h>
+#include <c_http/runloop/reactor.h>
+#include <c_http/runloop/w_queue.h>
+#include <c_http/runloop/evfd_queue.h>
 
 typedef struct QReader_s {
     EvfdQueueRef queue;

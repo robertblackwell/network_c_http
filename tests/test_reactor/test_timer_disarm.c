@@ -1,6 +1,6 @@
 #define _GNU_SOURCE
-#define XR_TRACE_ENABLE
-#include <c_http//xr/types.h>
+#define ENABLE_LOG
+#include <c_http/aio_api/types.h>
 #include <assert.h>
 #include <stdio.h>
 #include <pthread.h>
@@ -8,10 +8,11 @@
 #include <fcntl.h>
 #include <stdint.h>
 #include <sys/epoll.h>
+#include <c_http/logger.h>
 #include <c_http/unittest.h>
-#include <c_http/utils.h>
-#include <c_http/xr/reactor.h>
-#include <c_http/xr/w_timer.h>
+#include <c_http/dsl/utils.h>
+#include <c_http/runloop/reactor.h>
+#include <c_http/runloop/w_timer.h>
 //
 // demonstrates that for a timer
 // the sequence :
@@ -70,15 +71,15 @@ static void callback_disarm_clear(WTimerRef watcher, void* ctx, XrTimerEvent eve
     DisarmTestCtx* ctx_p = (DisarmTestCtx*) ctx;
 
     // if first call disarm
-    XR_TRACE(" counter %d\n", ctx_p->counter);
+    LOG_FMT(" counter %d\n", ctx_p->counter);
     if(ctx_p->counter <= 0) {
-        XR_TRACE_MSG(" disarm self");
+        LOG_MSG(" disarm self");
         WTimer_disarm(watcher);
         ctx_p->was_disarmed = true;
         ctx_p->counter++;
     } else {
         if(ctx_p->counter >= ctx_p->max_count) {
-            XR_TRACE_MSG("disarm_cb clear other and self");
+            LOG_MSG("disarm_cb clear other and self");
             WTimer_clear(ctx_p->other_tw);
             WTimer_clear(watcher);
             return;
@@ -95,17 +96,17 @@ static void callback_rearm_other(WTimerRef watcher, void* ctx, XrTimerEvent even
 
     int x = (ctx_p->counter >= ctx_p->max_count);
     int x2 = ((ctx_p->other_ctx->was_disarmed) && (ctx_p->counter >= ctx_p->max_count));
-    XR_TRACE(" %d counter %d max %d \n", (int)ctx_p->other_ctx->was_disarmed, ctx_p->counter, ctx_p->max_count);
-    XR_TRACE(" x %d x2 %d \n", x, x2);
+    LOG_FMT(" %d counter %d max %d \n", (int)ctx_p->other_ctx->was_disarmed, ctx_p->counter, ctx_p->max_count);
+    LOG_FMT(" x %d x2 %d \n", x, x2);
     if((ctx_p->other_ctx->was_disarmed) && (ctx_p->counter == ctx_p->max_count)) {
         // other should be disarmed by now
         assert(ctx_p->other_ctx->was_disarmed);
-        XR_TRACE_MSG("rearming other");
+        LOG_MSG("rearming other");
         WTimer_rearm(ctx_p->other_tw);
     }
     // keep counting until we are stopped by the other
     ctx_p->counter++;
-    XR_TRACE(" counter %d\n", ctx_p->counter);
+    LOG_FMT(" counter %d\n", ctx_p->counter);
 }
 //
 // timer 2 - disarms itself on the first event.

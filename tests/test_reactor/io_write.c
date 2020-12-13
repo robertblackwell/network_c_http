@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-#define XR_TRACE_ENABLE
+#define ENABLE_LOG
 #include "io_write.h"
 #include <assert.h>
 #include <stdio.h>
@@ -8,11 +8,12 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/epoll.h>
-#include <c_http/utils.h>
-#include <c_http/xr/types.h>
-#include <c_http/xr/reactor.h>
-#include <c_http/xr/w_timer.h>
-#include <c_http/xr/w_socket.h>
+#include <c_http/logger.h>
+#include <c_http/dsl/utils.h>
+#include <c_http/aio_api/types.h>
+#include <c_http/runloop/reactor.h>
+#include <c_http/runloop/w_timer.h>
+#include <c_http/runloop/w_socket.h>
 
 /**
  * The writer does the following
@@ -69,7 +70,7 @@ static void wrtr_cb(WSocketRef sock_watch, void* arg, uint64_t event)
     XrReactorRef reactor = sock_watch->runloop;
     XRSW_TYPE_CHECK(sock_watch)
     WriteCtx* ctx = (WriteCtx*)(arg);
-    XR_PRINTF("test_io: Socket watcher wrtr_callback");
+    LOG_FMT("test_io: Socket watcher wrtr_callback");
 
     char* wbuf = malloc(100);
     sprintf(wbuf, "this is a line from writer - %d\n", ctx->write_count);
@@ -78,7 +79,7 @@ static void wrtr_cb(WSocketRef sock_watch, void* arg, uint64_t event)
     int nwrite = write(sock_watch->fd, wbuf, strlen(wbuf));
     free(wbuf);
     ctx->write_count++;
-    XR_PRINTF("test_io: Socket watcher wrtr_callback fd: %d event : %lx nread: %d errno: %d write_count %d\n", sock_watch->fd,  event, nwrite, errno, ctx->write_count);
+    LOG_FMT("test_io: Socket watcher wrtr_callback fd: %d event : %lx nread: %d errno: %d write_count %d\n", sock_watch->fd,  event, nwrite, errno, ctx->write_count);
     if(ctx->write_count > ctx->max_write_count) {
         XrReactor_deregister(reactor, ctx->swatcher->fd);
         XrReactor_deregister(reactor, ctx->twatcher->fd);
@@ -95,12 +96,12 @@ static void wrtr_cb(WSocketRef sock_watch, void* arg, uint64_t event)
 static void wrtr_wait(WTimerRef watch, void* arg, uint64_t event)
 {
     XRTW_TYPE_CHECK(watch)
-    XR_PRINTF("test_io: Socket watcher wrtr_wait\n");
+    LOG_FMT("test_io: Socket watcher wrtr_wait\n");
     WriteCtx* ctx = (WriteCtx*)(arg);
     WR_CTX_CHECK_TAG(ctx)
     XRSW_TYPE_CHECK(ctx->swatcher)
     XRTW_TYPE_CHECK(ctx->twatcher)
-    XR_PRINTF("test_io: Socket watcher wrtr_wait fd: %d event : %lx errno: %d\n", watch->fd,  event, errno);
+    LOG_FMT("test_io: Socket watcher wrtr_wait fd: %d event : %lx errno: %d\n", watch->fd,  event, errno);
 
     int write_here = 0;
     if(write_here) {

@@ -1,15 +1,15 @@
 #define _GNU_SOURCE
 #include <assert.h>
 #include <stdio.h>
-#include <c_http/alloc.h>
+#include <c_http/dsl/alloc.h>
 #include <c_http/unittest.h>
-#include <c_http/buffer/cbuffer.h>
+#include <c_http/dsl/cbuffer.h>
 #include <c_http/logger.h>
-#include <c_http/list.h>
-#include <c_http/sync/server.h>
-#include <c_http/hdrlist.h>
+#include <c_http/dsl/list.h>
+#include <c_http/api/server.h>
+#include <c_http/details/hdrlist.h>
 #include <c_http/client.h>
-#include <c_http/message.h>
+#include <c_http/api/message.h>
 #include <c_http/reader.h>
 #include <c_http/writer.h>
 

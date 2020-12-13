@@ -1,6 +1,6 @@
 #define _GNU_SOURCE
-#define XR_TRACE_ENABLE
-#include <c_http/xr/types.h>
+#define ENABLE_LOG
+#include <c_http/aio_api/types.h>
 #include <stdio.h>
 #include <pthread.h>
 #define _GNU_SOURCE             /* See feature_test_macros(7) */
@@ -8,10 +8,11 @@
 #include <stdint.h>
 #include <sys/epoll.h>
 #include <math.h>
+#include <c_http/logger.h>
 #include <c_http/unittest.h>
-#include <c_http/utils.h>
-#include <c_http/xr/reactor.h>
-#include <c_http/xr/w_timer.h>
+#include <c_http/dsl/utils.h>
+#include <c_http/runloop/reactor.h>
+#include <c_http/runloop/w_timer.h>
 //
 // A)
 // theses tests deomstrate that a timer is called the expected number of times,
@@ -46,7 +47,7 @@ static void callback_non_repeating(WTimerRef watcher, void* ctx, XrTimerEvent ev
     ctx_p->start_time = tnow;
     double percent_error = fabs(100.0*(((double)(watcher->interval) - gap)/((double)(watcher->interval))));
     gap = percent_error;
-    XR_TRACE("counter : %d  %%error: %f event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, gap, event, epollin, error);
+    LOG_FMT("counter : %d  %%error: %f event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, gap, event, epollin, error);
     ctx_p->counter++;
 }
 
@@ -83,9 +84,9 @@ static void callback_1(WTimerRef watcher, void* ctx, XrTimerEvent event)
     double percent_error = fabs(100.0*(((double)(watcher->interval) - gap)/((double)(watcher->interval))));
     gap = percent_error;
 
-    XR_TRACE("counter: %d %%error: %f   event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, gap, event, epollin, error);
+    LOG_FMT("counter: %d %%error: %f   event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, gap, event, epollin, error);
     if(ctx_p->counter >= ctx_p->max_count) {
-        XR_TRACE_MSG(" clear timer");
+        LOG_MSG(" clear timer");
         WTimer_clear(watcher);
     } else {
         ctx_p->counter++;
@@ -123,9 +124,9 @@ static void callback_2(WTimerRef watcher, void* ctx, XrTimerEvent event)
     gap = percent_error;
     ctx_p->start_time = tnow;
 
-    XR_TRACE(" counter: %d  %%error : %f event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, gap, event, epollin, error);
+    LOG_FMT(" counter: %d  %%error : %f event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, gap, event, epollin, error);
     if(ctx_p->counter >= 6) {
-        XR_TRACE_MSG(" clear timer ");
+        LOG_MSG(" clear timer ");
         WTimer_clear(watcher);
     } else {
         ctx_p->counter++;
@@ -157,9 +158,9 @@ static void posted_from_post_cb(void* arg)
 {
     TestCtx* ctx_p = arg;
     WTimerRef tw =  ctx_p->watcher; // (WTimerRef)w;
-    XR_TRACE(" arg: %p  counter: %d", arg, ctx_p->counter);
+    LOG_FMT(" arg: %p  counter: %d", arg, ctx_p->counter);
     if(ctx_p->counter >= ctx_p->max_count) {
-        XR_TRACE_MSG(" clear timer ");
+        LOG_MSG(" clear timer ");
         WTimer_clear(tw);
     } else {
         ctx_p->counter++;
@@ -170,7 +171,7 @@ static void post_cb(WatcherRef w, void* arg, uint64_t event)
     TestCtx* ctx_p = arg;
     WTimerRef tw = (WTimerRef)w;
     XrReactorRef reactor = w->runloop;
-    XR_TRACE(" post again w: %p counter: %d", w, ctx_p->counter);
+    LOG_FMT(" post again w: %p counter: %d", w, ctx_p->counter);
     XrReactor_post(reactor, posted_from_post_cb, ctx_p);
 }
 
@@ -185,7 +186,7 @@ static void callback_post(WTimerRef watcher, void* ctx, XrTimerEvent event)
     double percent_error = fabs(100.0*(((double)(watcher->interval) - gap)/((double)(watcher->interval))));
     gap = percent_error;
     XrReactorRef reactor = watcher->runloop;
-    XR_TRACE(" counter: %d %%error: %f   event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, gap, event, epollin, error);
+    LOG_FMT(" counter: %d %%error: %f   event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, gap, event, epollin, error);
     XrReactor_post(reactor, posted_from_post_cb, ctx);
 }
 int test_timer_post()

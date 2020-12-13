@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-#define XR_TRACE_ENABLE
+#define ENABLE_LOG
 
 #include "io_read.h"
 #include <assert.h>
@@ -10,10 +10,11 @@
 #include <errno.h>
 
 #include <sys/epoll.h>
-#include <c_http/utils.h>
-#include <c_http/xr/reactor.h>
-#include <c_http/xr/watcher.h>
-#include <c_http/xr/w_socket.h>
+#include <c_http/logger.h>
+#include <c_http/dsl/utils.h>
+#include <c_http/runloop/reactor.h>
+#include <c_http/runloop/watcher.h>
+#include <c_http/runloop/w_socket.h>
 
 /**
  * the reader does the following
@@ -65,7 +66,7 @@ void rd_callback(WSocketRef socket_watcher_ref, void* arg, uint64_t event)
     } else {
         s = "badread";
     }
-    XR_PRINTF("test_io: Socket watcher rd_callback read_count: %d fd: %d event %lx nread: %d buf: %s errno: %d\n", ctx->read_count, socket_watcher_ref->fd,  event, nread, s, errno);
+    LOG_FMT("test_io: Socket watcher rd_callback read_count: %d fd: %d event %lx nread: %d buf: %s errno: %d\n", ctx->read_count, socket_watcher_ref->fd,  event, nread, s, errno);
     ctx->read_count++;
     if(ctx->read_count > ctx->max_read_count) {
         XrReactor_deregister(reactor, socket_watcher_ref->fd);

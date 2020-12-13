@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <c_http/unittest.h>
-#include <c_http/buffer/cbuffer.h>
+#include <c_http/dsl/cbuffer.h>
 #include <c_http/logger.h>
 
 int test_something_1()

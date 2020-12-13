@@ -1,16 +1,17 @@
 #define _GNU_SOURCE
-#define XR_TRACE_ENABLE
-#include <c_http/xr/types.h>
+#define ENABLE_LOG
+#include <c_http/aio_api/types.h>
 #include <stdio.h>
 #define _GNU_SOURCE             /* See feature_test_macros(7) */
 #include <fcntl.h>
 #include <stdint.h>
 #include <sys/epoll.h>
+#include <c_http/logger.h>
 #include <c_http/unittest.h>
-#include <c_http/utils.h>
-#include <c_http/xr/reactor.h>
-#include <c_http/xr/w_timer.h>
-#include <c_http/xr/w_fdevent.h>
+#include <c_http/dsl/utils.h>
+#include <c_http/runloop/reactor.h>
+#include <c_http/runloop/w_timer.h>
+#include <c_http/runloop/w_fdevent.h>
 //
 // Tests fdevent
 // start two threads
@@ -42,9 +43,9 @@ static void callback_1(WTimerRef watcher, void* ctx, XrTimerEvent event)
     TestCtx* ctx_p = (TestCtx*) ctx;
     WFdEventRef fdev = ctx_p->fdevent;
 
-    XR_TRACE("counter: %d event is : %lx  ", ctx_p->counter, event);
+    LOG_FMT("counter: %d event is : %lx  ", ctx_p->counter, event);
     if(ctx_p->counter >= ctx_p->max_count) {
-        XR_TRACE_MSG(" clear timer");
+        LOG_MSG(" clear timer");
         WTimer_clear(watcher);
         WFdEvent_deregister(fdev);
     } else {
@@ -56,7 +57,7 @@ void fdevent_handler(WFdEventRef fdev_ref, void* arg, uint64_t ev_mask)
 {
     TestCtx* t = (TestCtx*)arg;
     t->fdevent_counter++;
-    XR_TRACE("w: %p arg: %p ev mask: %ld fdevent_counter % d", fdev_ref , arg, ev_mask, t->fdevent_counter);
+    LOG_FMT("w: %p arg: %p ev mask: %ld fdevent_counter % d", fdev_ref , arg, ev_mask, t->fdevent_counter);
 }
 int test_timer_single_repeating()
 {

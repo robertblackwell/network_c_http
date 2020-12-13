@@ -1,6 +1,6 @@
 
 /**
- * This file defines a set of macros that add identity tags to a struct, set the value of that identity tag and test the value
+ * These macros add identity tags to a struct, set the value of that identity tag and test the value
  * I find these macros usefull in situations using c callbacks where there is a log of casting of void* to a typed pointer
  * It is very easy during development to get the type wrong. These macros catch such errors early.
  *

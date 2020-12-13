@@ -4,7 +4,7 @@
 #include <string.h>
 #include <c_http/unittest.h>
 #include <c_http/logger.h>
-#include <c_http/kvpair.h>
+#include <c_http/dsl/kvpair.h>
 
 ///////////////////////////////////////////////////
 int test_kvpair_new()

@@ -5,7 +5,7 @@
 #include <pthread.h>
 
 #include <string.h>
-#include <c_http/alloc.h>
+#include <c_http/dsl/alloc.h>
 
 #include <c_http/logger.h>
 

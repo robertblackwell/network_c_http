@@ -1,12 +1,12 @@
 #define _GNU_SOURCE
-#define XR_PRINTF_ENABLE
-#define XR_TRACE_ENABLE
-#include <c_http/xr/types.h>
+#define ENABLE_LOG
+#include <c_http/aio_api/types.h>
 #include <c_http/unittest.h>
+#include <c_http/logger.h>
 
 int test_macros()
 {
-    XR_TRACE("this is test %s ", "thisisarg");
+    LOG_FMT("this is test %s ", "thisisarg");
     return 0;
 }
 int main()

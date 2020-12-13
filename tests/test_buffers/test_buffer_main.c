@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <c_http/unittest.h>
-#include <c_http/buffer/cbuffer.h>
-#include <c_http/buffer/buffer_chain.h>
-#include <c_http/buffer/iobuffer.h>
+#include <c_http/dsl/cbuffer.h>
+#include <c_http/dsl/buffer_chain.h>
+#include <c_http/dsl/iobuffer.h>
 
 //#define IOB_FILL
 #ifdef IOB_FILL

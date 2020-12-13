@@ -1,6 +1,5 @@
 #define _GNU_SOURCE
-#define XR_TRACE_ENABLE
-#define XR_PRINTF_ENABLE
+#define ENABLE_LOG
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -8,7 +7,8 @@
 #define _GNU_SOURCE             /* See feature_test_macros(7) */
 #include <string.h>
 #include <c_http/unittest.h>
-#include <c_http/xr/watcher.h>
+#include <c_http/runloop/watcher.h>
+#include <c_http/logger.h>
 #include "io_read.h"
 #include "io_write.h"
 /**
@@ -44,8 +44,8 @@ int test_io()
     Reader* rdr = Reader_new();
     Reader_add_fd(rdr, pipe_1[0], max_io);
     Reader_add_fd(rdr, pipe_2[0], max_io);
-    printf("read fd %d %d \n", pipe_1[0], pipe_2[0]);
-    printf("write fd %d %d \n", pipe_1[1], pipe_2[1]);
+    LOG_FMT("read fd %d %d \n", pipe_1[0], pipe_2[0]);
+    LOG_FMT("write fd %d %d \n", pipe_1[1], pipe_2[1]);
     pthread_t rdr_thread;
     Writer* wrtr = Writer_new();
     Writer_add_fd(wrtr, pipe_1[1], max_io, 500);
@@ -57,7 +57,7 @@ int test_io()
 
     pthread_join(rdr_thread, NULL);
     pthread_join(wrtr_thread, NULL);
-    XR_TRACE_MSG("Trace after join\n\n")
+    LOG_MSG("Trace after join\n\n")
     printf("After join\n");
     return 0;
 }

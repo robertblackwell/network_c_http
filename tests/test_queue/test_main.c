@@ -1,9 +1,9 @@
 
 #include <pthread.h>
 #include <unistd.h>
-#include <c_http/buffer/cbuffer.h>
+#include <c_http/dsl/cbuffer.h>
 #include <c_http/logger.h>
-#include <c_http/queue.h>
+#include <c_http/dsl/queue.h>
 
 typedef struct Params_s {
 	QueueRef qref;

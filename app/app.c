@@ -1,5 +1,5 @@
-#include <c_http/sync/server.h>
-#include <c_http/sync/handler_example.h>
+#include <c_http/api/server.h>
+#include <c_http/api/handler_example.h>
 #include <stdio.h>
 #include <mcheck.h>
 #include<signal.h>

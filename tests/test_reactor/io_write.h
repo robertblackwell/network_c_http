@@ -14,11 +14,11 @@
 
 #include <sys/epoll.h>
 #include <math.h>
-#include <c_http/utils.h>
-#include <c_http/xr/reactor.h>
-#include <c_http/xr/watcher.h>
-#include <c_http/xr/w_timer.h>
-#include <c_http/xr/w_socket.h>
+#include <c_http/dsl/utils.h>
+#include <c_http/runloop/reactor.h>
+#include <c_http/runloop/watcher.h>
+#include <c_http/runloop/w_timer.h>
+#include <c_http/runloop/w_socket.h>
 
 #define WRTR_TAG 123456789
 #define WCTX_TAG 918273645

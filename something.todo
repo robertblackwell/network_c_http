@@ -1,4 +1,21 @@
 TODO:
+API for sync server: 
+  ☐ message make the HdrList non visible in the message interface
+  ☐ message add set content-length and make chunked functions
+  ✔ writer - make struct opaque @done (20-12-12 19:43)
+  ☐ writer - remove reference to HdrList from interface and add write body chunked
+  ☐ client - make a version that takes a full message in addition to the current version that takes a string
+  ✔ client - make struct opaque @done (20-12-12 19:43)
+  ✔ reader make struct opaque @done (20-12-12 19:43)
+  ☐ reader - remove the Parser from visibility - have it allocated within the new init functions
+  ✔ for all of these add CHECK_TAG @done (20-12-12 20:01)
+  ☐ of course update and extend all tests as required
+  ☐ check the api is consistent about XXXX_free() does it take this or &this
+  ✔ server - make opaque @done (20-12-12 19:43)
+  ☐ server - make the size of the workers array defined at runtime. If necesssary create a variable length array
+  ☐ ceg_alloc - a better name
+Logging:
+  merge c_http/logging.h/c + print macros in aio_api/type.h
 Tests:
  ☐ better tests for List found a bug in it recently that was not caught by tests
  ☐ more tests for buffers - a number of new methods with no tests
@@ -15,9 +32,13 @@ Template classes:
  ☐ look at alternatives for making template classes 
  ☐ what to do about List and HDRList - preprocessor or hand coded ?
  ☐ experiment with the macro version of template classes and think about a better preprocessor. How to debug inside a macro
+Queue:
+  ☐ the inter thread queue needs tidying up so that no shuffling entries down as the fron is taken away - make a it into a ring
 Macros:
  ☐ replace printf() with logger statements - move xr macros to top level
  ☐ clean up logging - too much output
+ ☐ combine trace and test macros from c_http and xr into one set
+ ☐ add the tag and type check macros to the top level macro file
 Verify and Benchmark:
  ☐ Apache ab program to test throughput of server
  ☐ use memory sanitizer
