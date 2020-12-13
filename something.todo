@@ -10,10 +10,11 @@ API for sync server:
   ☐ reader - remove the Parser from visibility - have it allocated within the new init functions
   ✔ for all of these add CHECK_TAG @done (20-12-12 20:01)
   ☐ of course update and extend all tests as required
-  ☐ check the api is consistent about XXXX_free() does it take this or &this
+  ☐ check the api is consistent about XXXX_free() does it take this or &this - change its name to make the point
   ✔ server - make opaque @done (20-12-12 19:43)
   ☐ server - make the size of the workers array defined at runtime. If necesssary create a variable length array
   ☐ ceg_alloc - a better name
+  ☐ make a master header file for each of the source subdirs - eg  runloop.h  api.h  c_http.h. Convert the tests first and then the two apps
 Logging:
   merge c_http/logging.h/c + print macros in aio_api/type.h
 Tests:
