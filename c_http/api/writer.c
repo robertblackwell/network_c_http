@@ -1,6 +1,7 @@
 #define _GNU_SOURCE
 #include <c_http/api/writer.h>
 #include <c_http/dsl/alloc.h>
+#include <c_http/test_helpers/message_private.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -39,8 +40,10 @@ void Writer_free(WriterRef* this_ptr)
     *this_ptr = NULL;
 }
 
-void Writer_write(WriterRef wrtr, MessageRef msg_ref)
+void Writer_write(WriterRef this, MessageRef msg_ref)
 {
+    IOBufferRef serialized = Message_serialize(msg_ref);
+    Writer_write_chunk(this, IOBuffer_data(serialized), IOBuffer_data_len(serialized));
 }
 /**
  *

@@ -5,7 +5,7 @@
 
 extern void log_function(char* level, const char* funcname, const char* filename, int line, char* message);
 
-#define ENABLE_LOG
+#define ENABLE_LOGX
 #define LOG_ERROR(f_, ...) do {\
 		char* s; \
 		int c  = asprintf(&s, f_, ##__VA_ARGS__); \

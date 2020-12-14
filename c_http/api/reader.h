@@ -19,8 +19,8 @@
  */
 typedef struct Reader_s Reader, *ReaderRef;
 
-ReaderRef Reader_new(ParserRef parser, RdSocket rdsock);
-void Reader_init(ReaderRef this, ParserRef parser, RdSocket rdsock);
+ReaderRef Reader_new(RdSocket rdsock);
+void Reader_init(ReaderRef this, RdSocket rdsock);
 void Reader_destroy(ReaderRef this);
 void Reader_free(ReaderRef* this_ptr);
 

@@ -20,13 +20,13 @@
 #include <pthread.h>
 
 
-char* simple_response_body(char* message, socket_handle_t socket, int pthread_self_value)
+BufferChainRef simple_response_body(char* message, socket_handle_t socket, int pthread_self_value)
 {
     time_t t = time(NULL);
     struct tm *tm = localtime(&t);
     char dt_s[64];
     assert(strftime(dt_s, sizeof(dt_s), "%c", tm));
-
+    BufferChainRef bchain = BufferChain_new();
     char* body = "<html>"
                  "<head>"
                  "</head>"
@@ -40,8 +40,9 @@ char* simple_response_body(char* message, socket_handle_t socket, int pthread_se
 
     char* s1;
     int len1 = asprintf(&s1, body, message, dt_s, socket, pthread_self_value);
-
-    return s1;
+    BufferChain_append_cstr(bchain, s1);
+    free(s1);
+    return bchain;
 }
 /**
  * Create the body of a response to an /echo request
@@ -55,10 +56,18 @@ char* echo_body(MessageRef request)
     memcpy(body, IOBuffer_data(iob_body), IOBuffer_data_len(iob_body)+1);
     return body;
 }
+BufferChainRef echo_body_buffer_chain(MessageRef request)
+{
+    IOBufferRef iob_body = Message_serialize(request);
+    BufferChainRef bufchain = BufferChain_new();
+    BufferChain_append_IOBuffer(bufchain, iob_body);
+    return bufchain;
+}
 int handler_example(MessageRef request, WriterRef wrtr)
 {
     MessageRef response = Message_new_response();
     char* msg = "<h2>this is a message</h2>";
+    BufferChainRef body_chain = NULL;
     char* body = NULL;
     char* body_len_str = NULL;
     KVPairRef hl_content_length = NULL;
@@ -72,26 +81,23 @@ int handler_example(MessageRef request, WriterRef wrtr)
          * find the echo-id header in the request and put it in the response headers
          */
         const char* echo_value = Message_get_header_value(request, HEADER_ECHO_ID);
-        assert(echo_value != NULL);
-        Message_add_header_cstring(response, HEADER_ECHO_ID, echo_value);
-
-        body = echo_body(request);
+        if(echo_value != NULL) {
+            Message_add_header_cstring(response, HEADER_ECHO_ID, echo_value);
+        }
+        body_chain = echo_body_buffer_chain(request);
     } else {
-        if((body = simple_response_body(msg, Writer_sock_fd(wrtr), pthread_self())) == NULL) goto finalize;
+        body_chain = simple_response_body(msg, Writer_sock_fd(wrtr), pthread_self());
     }
-    int body_len = strlen(body);
-    if(-1 == asprintf(&body_len_str, "%d", body_len)) goto finalize;
 
-
-    Message_add_header_cstring(response, HEADER_CONTENT_LENGTH, body_len_str);
     Message_add_header_cstring(response, HEADER_CONTENT_TYPE, "text/html; charset=UTF-8");
     Message_add_header_cstring(response, "Connection", "close");
     /**
      * simulate io to build the page
      */
     usleep(10000);
+    Message_set_body(response, body_chain);
+    Message_set_content_length(response, BufferChain_size(body_chain));
     Writer_write(wrtr, response);
-    Writer_write_chunk(wrtr, (void*) body, body_len);
 
     return_value = 1;
 

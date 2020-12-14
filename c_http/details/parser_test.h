@@ -53,8 +53,7 @@ void ReadResult_free(ReadResultRef* this_ptr);
  */
 typedef struct WrappedParserTest_s
 {
-    ParserRef           m_parser;
-    DataSource*       m_data_source;
+    DataSource*         m_data_source;
     VerifyFunctionType  m_verify_func;
     ListRef             m_results;
     RdSocket            m_rdsock;
@@ -67,7 +66,7 @@ typedef struct WrappedParserTest_s
 
 } WrappedParserTest, *WrappedParserTestRef;
     
-void WPT_init(WrappedParserTestRef this, ParserRef parser, DataSource* data_source, VerifyFunctionType verify_func);
+void WPT_init(WrappedParserTestRef this, DataSource* data_source, VerifyFunctionType verify_func);
 //void WPT_destroy(WrappedParserTestRef this);
 
 int WPT_run(WrappedParserTestRef this);

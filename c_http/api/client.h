@@ -34,3 +34,4 @@ void Client_connect(ClientRef this, char* host, int port);
  * \param response    MessageRef
  */
 void Client_roundtrip(ClientRef this, const char* req_buffers[], MessageRef* response);
+void Client_request_round_trip(ClientRef this, MessageRef request, MessageRef* response);

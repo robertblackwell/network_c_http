@@ -282,6 +282,9 @@ HdrListRef Message_get_headerlist(MessageRef this)
 const char* Message_get_header_value(MessageRef mref, const char* labptr)
 {
     KVPairRef kvp = HdrList_find(Message_get_headerlist(mref), labptr);
+    if(kvp == NULL) {
+        return NULL;
+    }
     return KVPair_value(kvp);
 }
 

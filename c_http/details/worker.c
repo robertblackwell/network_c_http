@@ -57,7 +57,6 @@ static void* Worker_main(void* data)
     bool terminate = false;
     while(!terminate) {
         wref->active = false;
-        ParserRef parser_ref = NULL;;
         ReaderRef rdr = NULL;
         WriterRef wrtr = NULL;
         MessageRef request_msg_ref = NULL;
@@ -72,9 +71,8 @@ static void* Worker_main(void* data)
         } else {
             wref->active_socket = (int) my_socket_handle;
             wref->active = true;
-            if((parser_ref = Parser_new()) == NULL) goto finalize;
             RdSocket rdsock = RealSocket(sock);
-            if((rdr = Reader_new(parser_ref, rdsock)) == NULL) goto finalize;
+            if((rdr = Reader_new(rdsock)) == NULL) goto finalize;
             if((wrtr = Writer_new(sock)) == NULL) goto finalize;
 
             while(1) {
@@ -98,7 +96,6 @@ static void* Worker_main(void* data)
         finalize:
             if(sock != 0) close(sock);
             if(request_msg_ref != NULL) Message_free(&request_msg_ref);
-            if(parser_ref != NULL) Parser_free(&parser_ref);
             if(wrtr != NULL) Writer_free(&wrtr);
             if(rdr != NULL) Reader_free(&rdr);
             wref->active = false;

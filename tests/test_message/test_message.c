@@ -284,9 +284,22 @@ int test_serialize()
     }
     return 0;
 }
+int test_content_length()
+{
+    MessageRef msg = make_response_message_empty_body();
+    Message_set_content_length(msg, 123);
+    IOBufferRef ser = Message_serialize(msg);
+    const char *correct = "HTTP/1.1  203 AREASON\r\nKEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\nCONTENT-LENGTH: 123\r\n\r\n";
+    const char *candidate = IOBuffer_cstr(ser);
+    int r = strcmp(candidate, correct);
+    UT_EQUAL_INT(r, 0);
+
+    return 0;
+}
 int main()
 {
     UT_ADD(test_serialize);
+    UT_ADD(test_content_length);
 	int rc = UT_RUN();
 	return rc;
 }

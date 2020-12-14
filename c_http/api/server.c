@@ -17,7 +17,8 @@
 #include <c_http/socket_functions.h>
 #include <c_http/dsl/queue.h>
 #include <c_http/details/worker.h>
-
+#define MAX_THREADS 100
+#define XDYN_WORKER_TAB
 struct Server_s {
     SERVER_DECLARE_TAG;
     int                     port;
@@ -25,7 +26,11 @@ struct Server_s {
     int                     nbr_workers;
     HandlerFunction         handler;
     QueueRef                qref;
-    WorkerRef               worker_tab[NBR_WORKERS];
+#ifdef DYN_WORKER_TAB
+    WorkerRef               *worker_tab;
+#else
+    WorkerRef               worker_tab[MAX_THREADS];
+#endif
 };
 
 
@@ -72,13 +77,18 @@ socket_handle_t create_listener_socket(int port, const char* host)
         assert(0);
 }
 
-ServerRef Server_new(int port, HandlerFunction handler)
+ServerRef Server_new(int port, int nbr_threads, HandlerFunction handler)
 {
     ServerRef sref = (ServerRef)eg_alloc(sizeof(Server));
-    sref->nbr_workers = NBR_WORKERS;
+    sref->nbr_workers = nbr_threads;
     sref->port = port;
     sref->handler = handler;
     sref->qref = Queue_new();
+#ifdef DYN_WORKER_TAB
+    sref->worker_tab = malloc(sizeof(WorkerRef) * nbr_threads);
+#else
+    assert(nbr_threads < MAX_THREADS);
+#endif
     SERVER_SET_TAG(sref)
     return sref;
 }

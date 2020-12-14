@@ -23,7 +23,7 @@ typedef struct  Server_s Server, *ServerRef;
  * \param handler  A function conforming to HandlerFunction (see handler.h) which will be called to handle all requests that are parsed successfully.
  * \return
  */
-ServerRef Server_new(int port, HandlerFunction handler);
+ServerRef Server_new(int port, int nbr_threads, HandlerFunction handler);
 void Server_free(ServerRef* srefptr);
 void Server_listen(ServerRef server);
 void Server_terminate(ServerRef this);

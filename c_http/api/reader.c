@@ -25,19 +25,19 @@ struct Reader_s
 
 };
 
-ReaderRef Reader_new(ParserRef parser, RdSocket rdsock)
+ReaderRef Reader_new(RdSocket rdsock)
 {
     ReaderRef rdr = eg_alloc(sizeof(Reader));
     if(rdr == NULL)
         return NULL;
-    Reader_init(rdr, parser, rdsock);
+    Reader_init(rdr, rdsock);
     return rdr;
 }
-void Reader_init(ReaderRef  this, ParserRef parser, RdSocket rdsock)
+void Reader_init(ReaderRef  this, RdSocket rdsock)
 {
     ASSERT_NOT_NULL(this);
     READER_SET_TAG(this)
-    this->m_parser = parser;
+    this->m_parser = Parser_new();
 //    this->m_socket = socket;
     this->m_rdsocket = rdsock;
     this->m_iobuffer = IOBuffer_new();
@@ -97,6 +97,7 @@ int Reader_read(ReaderRef this, MessageRef* msgref_ptr)
             } else {
                 // have an io error
                 int x = errno;
+                printf("Reader_read io error errno: %d \n", x);
                 Message_free(&(message_ptr));
                 *msgref_ptr = NULL;
                 return READER_IO_ERROR;
@@ -117,6 +118,7 @@ int Reader_read(ReaderRef this, MessageRef* msgref_ptr)
                 ///
                 Message_free(&message_ptr);
                 *msgref_ptr = NULL;
+                printf("Reader_read parser error \n");
                 return READER_PARSE_ERROR;
                 break;
             case ParserRC_end_of_data:

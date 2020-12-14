@@ -43,15 +43,14 @@ static void read_result_dealloc(void** p)
 }
 
 
-void WPT_init(WrappedParserTestRef this, ParserRef parser, DataSource* data_source, VerifyFunctionType verify_func)
+void WPT_init(WrappedParserTestRef this, DataSource* data_source, VerifyFunctionType verify_func)
 {
     ASSERT_NOT_NULL(this);
-    this->m_parser = parser;
     this-> m_data_source = data_source;
     this->m_verify_func = verify_func;
     this->m_results = List_new(read_result_dealloc);
     this->m_rdsock = DataSourceSocket(this->m_data_source);
-    this->m_rdr = Reader_new(this->m_parser, this->m_rdsock);
+    this->m_rdr = Reader_new(this->m_rdsock);
 }
 
 void WPT_destroy(WrappedParserTestRef this)

@@ -1,13 +1,13 @@
 TODO:
 API for sync server: 
   ✔ message make the HdrList non visible in the message interface @done (20-12-13 15:13)
-  ☐ message add set content-length and make chunked functions - not tested
+  ✔ message add set content-length and make chunked functions - not tested @done (20-12-13 15:47)
   ✔ writer - make struct opaque @done (20-12-12 19:43)
   ☐ writer - remove reference to HdrList from interface and add write body chunked - probably have to rethink that interface
   ☐ client - make a version that takes a full message in addition to the current version that takes a string
   ✔ client - make struct opaque @done (20-12-12 19:43)
   ✔ reader make struct opaque @done (20-12-12 19:43)
-  ☐ reader - remove the Parser from visibility - have it allocated within the new init functions
+  ✔ reader - remove the Parser from visibility - have it allocated within the new init functions @done (20-12-13 15:55)
   ✔ for all of these add CHECK_TAG @done (20-12-12 20:01)
   ☐ of course update and extend all tests as required
   ☐ check the api is consistent about XXXX_free() does it take this or &this - change its name to make the point

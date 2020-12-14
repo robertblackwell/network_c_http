@@ -4,7 +4,7 @@
 #include <c_http/api/message.h>
 #include <c_http/api/reader.h>
 #include <c_http/api/writer.h>
-
+#include <c_http/logger.h>
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -12,20 +12,19 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
+#include <errno.h>
 
 struct Client_s {
     CLIENT_DECLARE_TAG;
     socket_handle_t sock;
     WriterRef wrtr;
     ReaderRef  rdr;
-    ParserRef parser;
 };
 
 ClientRef Client_new()
 {
     ClientRef this = eg_alloc(sizeof(Client));
     CLIENT_SET_TAG(this)
-    this->parser = NULL;
     this->rdr = NULL;
     this->wrtr = NULL;
 }
@@ -33,41 +32,55 @@ void Client_free(ClientRef* this_ptr)
 {
     ClientRef this = *this_ptr;
     CLIENT_CHECK_TAG(this)
-    if(this->parser) Parser_free(&(this->parser));
+    LOG_FMT("Client_free %p  %d\n", this, this->sock);
     if(this->rdr) Reader_free(&(this->rdr));
     if(this->wrtr) Writer_free(&(this->wrtr));
     close(this->sock);
     eg_free(*this_ptr);
     *this_ptr = NULL;
 }
+void Client_raw_connect(ClientRef this, int sockfd, struct sockaddr* sockaddr_p, int sockaddr_len)
+{
+    LOG_FMT("Client_raw_connect %p sockfd: %d\n", this, sockfd);
+    if (connect(sockfd,sockaddr_p, sockaddr_len) < 0) {
+        int errno_saved = errno;
+        LOG_ERROR("Client_raw_connect ERROR client %p connecting sockfd: % derrno: %d\n", this, sockfd, errno_saved);
+    }
+    this->sock = sockfd;
+    this->wrtr = Writer_new(sockfd);
+    RdSocket rdsock = RealSocket(sockfd);
+    this->rdr = Reader_new(rdsock);
+
+}
 void Client_connect(ClientRef this, char* host, int portno)
 {
     int sockfd, n;
     CLIENT_CHECK_TAG(this)
     struct sockaddr_in serv_addr;
-    struct hostent *server;
+    struct hostent *hostent;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
-        printf("ERROR opening socket");
-    server = gethostbyname(host);
-    if (server == NULL) {
+        LOG_ERROR("ERROR opening socket");
+
+    hostent = gethostbyname(host);
+    if (hostent == NULL) {
         fprintf(stderr,"ERROR, no such host\n");
         exit(0);
     }
     bzero((char *) &serv_addr, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    bcopy((char *)server->h_addr,
-          (char *)&serv_addr.sin_addr.s_addr,
-          server->h_length);
+    bcopy((char *)hostent->h_addr, (char *)&serv_addr.sin_addr.s_addr, hostent->h_length);
     serv_addr.sin_port = htons(portno);
-    if (connect(sockfd,(struct sockaddr *)&serv_addr,sizeof(serv_addr)) < 0)
-        printf("ERROR connecting");
+    LOG_FMT("Client_connect %p sockfd: %d\n", this, sockfd);
+    if (connect(sockfd,(struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+        int errno_saved = errno;
+        LOG_ERROR("ERROR client %p connecting sockfd: % derrno: %d\n", this, sockfd, errno_saved);
+    }
     this->sock = sockfd;
     this->wrtr = Writer_new(sockfd);
-    this->parser = Parser_new();
     RdSocket rdsock = RealSocket(sockfd);
-    this->rdr = Reader_new(this->parser, rdsock);
+    this->rdr = Reader_new(rdsock);
 
 }
 void Client_roundtrip(ClientRef this, const char* req_buffers[], MessageRef* response_ptr)
@@ -83,13 +96,22 @@ void Client_roundtrip(ClientRef this, const char* req_buffers[], MessageRef* res
         buf_index++;
     }
     int rc = Reader_read(this->rdr, response_ptr);
-    BufferChainRef bc = Message_get_body(*response_ptr);
-    if(bc == NULL) {
-        bc = BufferChain_new();
+    if(rc != READER_OK) {
+        int errno_saved = errno;
+        LOG_ERROR("bad rc from Reader_read rc: errno %d\n", errno_saved);
+        assert(false);
     }
-
-    IOBufferRef cb = BufferChain_compact(bc);
-
-    close(this->sock);
 }
+void Client_request_round_trip(ClientRef this, MessageRef request, MessageRef* response_ptr)
+{
+    CLIENT_CHECK_TAG(this)
+    IOBufferRef req_io_buf = Message_serialize(request);
+    Writer_write_chunk(this->wrtr, IOBuffer_data(req_io_buf), IOBuffer_data_len(req_io_buf));
 
+    int rc = Reader_read(this->rdr, response_ptr);
+    if(rc != READER_OK) {
+        int errno_saved = errno;
+        LOG_ERROR("bad rc from Reader_read rc: errno %d\n", errno_saved);
+        assert(false);
+    }
+}

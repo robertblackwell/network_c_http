@@ -494,9 +494,8 @@ int run_list (ListRef tests)
         DataSource source;
         DataSource_init (&source, x->lines);
         WrappedParserTest wpt;
-        ParserRef parser = Parser_new ();
         printf ("Running %s\n", x->description);
-        WPT_init (&wpt, parser, &source, x->verify_function);
+        WPT_init (&wpt, &source, x->verify_function);
         result = result || WPT_run (&wpt);
         iter = next;
     }
