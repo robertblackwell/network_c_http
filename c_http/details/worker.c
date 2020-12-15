@@ -1,11 +1,9 @@
 #define _GNU_SOURCE
 #include <c_http/details/worker.h>
-#include <c_http/constants.h>
 #include <c_http/dsl/alloc.h>
 #include <c_http/dsl/utils.h>
 #include <c_http/socket_functions.h>
 #include <c_http/dsl/queue.h>
-#include <c_http/details/ll_parser_types.h>
 #include <c_http/api/reader.h>
 #include <c_http/api/writer.h>
 
@@ -13,7 +11,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <assert.h>
-#include <errno.h>
 
 #include <pthread.h>
 
@@ -71,8 +68,7 @@ static void* Worker_main(void* data)
         } else {
             wref->active_socket = (int) my_socket_handle;
             wref->active = true;
-            RdSocket rdsock = RealSocket(sock);
-            if((rdr = Reader_new(rdsock)) == NULL) goto finalize;
+            if((rdr = Reader_new(sock)) == NULL) goto finalize;
             if((wrtr = Writer_new(sock)) == NULL) goto finalize;
 
             while(1) {

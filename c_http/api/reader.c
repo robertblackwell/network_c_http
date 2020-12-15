@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-
+#include <c_http/details/rdsocket.h>
 #include <c_http/api/reader.h>
 #include <c_http/dsl/alloc.h>
 #include <c_http/dsl/utils.h>
@@ -13,6 +13,15 @@
 #include <unistd.h>
 #include <errno.h>
 
+#define TYPE Reader
+#define Reader_TAG "READER"
+#include <c_http/check_tag.h>
+#undef TYPE
+#define READER_DECLARE_TAG DECLARE_TAG(Reader)
+#define READER_CHECK_TAG(p) CHECK_TAG(Reader, p)
+#define READER_SET_TAG(p) SET_TAG(Reader, p)
+
+
 struct Reader_s
 {
     READER_DECLARE_TAG;
@@ -25,15 +34,6 @@ struct Reader_s
     char*               m_http_err_description;
 
 };
-
-ReaderRef Reader_new(RdSocket rdsock)
-{
-    ReaderRef rdr = eg_alloc(sizeof(Reader));
-    if(rdr == NULL)
-        return NULL;
-    Reader_init(rdr, rdsock);
-    return rdr;
-}
 void Reader_init(ReaderRef  this, RdSocket rdsock)
 {
     ASSERT_NOT_NULL(this);
@@ -42,6 +42,25 @@ void Reader_init(ReaderRef  this, RdSocket rdsock)
 //    this->m_socket = socket;
     this->m_rdsocket = rdsock;
     this->m_iobuffer = IOBuffer_new();
+}
+
+ReaderRef Reader_private_new(RdSocket rdsock)
+{
+    ReaderRef rdr = eg_alloc(sizeof(Reader));
+    if(rdr == NULL)
+        return NULL;
+    Reader_init(rdr, rdsock);
+    return rdr;
+}
+
+ReaderRef Reader_new(int rdsock_fd)
+{
+    return Reader_private_new(RealSocket(rdsock_fd));
+//    ReaderRef rdr = eg_alloc(sizeof(Reader));
+//    if(rdr == NULL)
+//        return NULL;
+//    Reader_init(rdr, rdsock);
+//    return rdr;
 }
 
 void Reader_destroy(ReaderRef this)

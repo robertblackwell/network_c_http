@@ -9,23 +9,19 @@
 #include <c_http/details/rdsocket.h>
 #include <c_http/api/message.h>
 
-#define TYPE Reader
-#define Reader_TAG "READER"
-#include <c_http/check_tag.h>
-#undef TYPE
-#define READER_DECLARE_TAG DECLARE_TAG(Reader)
-#define READER_CHECK_TAG(p) CHECK_TAG(Reader, p)
-#define READER_SET_TAG(p) SET_TAG(Reader, p)
-
-
 /**
- * Reader and its associated Reader_?? functions implement an object that can read and parse http messages from
+ * Reader and its associated Reader_?? functions implement an object that can read and parse compete HTTP/1.X messages from
  * either a real TCP socket or a DataSource* for testing.
  */
 typedef struct Reader_s Reader, *ReaderRef;
 
-ReaderRef Reader_new(RdSocket rdsock);
-void Reader_init(ReaderRef this, RdSocket rdsock);
+/**
+ * @brief Create a Reader from a socket fd
+ * @param rdsock_fd int
+ * @return ReaderRef
+ */
+ReaderRef Reader_new(int rdsock_fd);
+//void Reader_init(ReaderRef this, RdSocket rdsock);
 void Reader_destroy(ReaderRef this);
 void Reader_free(ReaderRef* this_ptr);
 
@@ -36,7 +32,7 @@ typedef enum Reader_ReturnCode {
 } Reader_ReturnCode;
 
 /**
- * Read a stream of http message from the m_readsocket data source/socket.
+ * @brief Read a stream of http message from the m_readsocket data source/socket.
  *
  * This Reader object handles the processing of
  * -    taking data from a data source (such as a socket) in buffers
@@ -46,9 +42,9 @@ typedef enum Reader_ReturnCode {
  *
  *
  *
- * \param this              ReaderRef - the reader object
- * \param msgref_ptr        Variable into which a MessageRef value will be placed if a message is successfully read.
- * \return Reader_ReturnCode - Indicates whether successfull and if not nature if error.
+ * @param this              ReaderRef - the reader object
+ * @param msgref_ptr        Variable into which a MessageRef value will be placed if a message is successfully read.
+ * @return Reader_ReturnCode - Indicates whether successfull and if not nature if error.
  *                          TODO - on error the Reader struct will contain details of the error
  *                          for IO error it will hold the errno value related to the error
  *                          and for a parse error will hold the relevant http_errno value

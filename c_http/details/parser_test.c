@@ -12,6 +12,7 @@
 #include <c_http/api/iobuffer.h>
 #include <c_http/details/rdsocket.h>
 #include <c_http/api/reader.h>
+#include <c_http/test_helpers/reader_private.h>
 
 ParserTestRef ParserTest_new(char* description, char** lines, VerifyFunctionType vf)
 {
@@ -50,7 +51,7 @@ void WPT_init(WrappedParserTestRef this, DataSource* data_source, VerifyFunction
     this->m_verify_func = verify_func;
     this->m_results = List_new(read_result_dealloc);
     this->m_rdsock = DataSourceSocket(this->m_data_source);
-    this->m_rdr = Reader_new(this->m_rdsock);
+    this->m_rdr = Reader_private_new(this->m_rdsock);
 }
 
 void WPT_destroy(WrappedParserTestRef this)

@@ -56,8 +56,7 @@ void Client_raw_connect(ClientRef this, int sockfd, struct sockaddr* sockaddr_p,
     }
     this->sock = sockfd;
     this->wrtr = Writer_new(sockfd);
-    RdSocket rdsock = RealSocket(sockfd);
-    this->rdr = Reader_new(rdsock);
+    this->rdr = Reader_new(sockfd);
 
 }
 void Client_connect(ClientRef this, char* host, int portno)
@@ -87,8 +86,7 @@ void Client_connect(ClientRef this, char* host, int portno)
     }
     this->sock = sockfd;
     this->wrtr = Writer_new(sockfd);
-    RdSocket rdsock = RealSocket(sockfd);
-    this->rdr = Reader_new(rdsock);
+    this->rdr = Reader_new(sockfd);
 
 }
 void Client_roundtrip(ClientRef this, const char* req_buffers[], MessageRef* response_ptr)
