@@ -4,7 +4,9 @@
 #include <c_http/dsl/queue.h>
 #include <c_http/api/handler.h>
 #include <pthread.h>
-
+/**
+ * @addtogroup group_worker
+ */
 struct Worker_s;
 typedef struct Worker_s Worker, *WorkerRef;
 
@@ -33,4 +35,7 @@ pthread_t* Worker_pthread(WorkerRef wref);
  * \param wref
  */
 void Worker_join(WorkerRef wref);
+
+/** @} */
+
 #endif

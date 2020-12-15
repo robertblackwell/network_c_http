@@ -1,6 +1,10 @@
 #ifndef c_http/macros_h
 #define c_http_macros_h
 #include <c_http/logger.h>
+/**
+ * @addtogroup group_macros
+ * @{
+ */
 
 #define CHTTP_ASSERT(test, msg) \
 do { \
@@ -16,5 +20,5 @@ do { \
     assert(false); \
 } while(0)
 
-
+/** @} */
 #endif

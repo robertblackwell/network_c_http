@@ -2,10 +2,13 @@
 #define c_c_http_datasource_h
 #include <stdbool.h>
 /**
+ * @addtogroup group_datasource
+ *
  * Purpose of this class is to demo and test  use of the parser in a situation
  * that simulates synchronously reading from some source of bytes other than a real socket
  *
  * Generally a DataSource is created from the lines in a ParserTest
+ * @{
  */
 typedef struct DataSource_s {
     /**
@@ -42,5 +45,5 @@ bool DataSource_finished(DataSource* this);
 */
 int DataSource_read(DataSource* this, void* buffer, int length);
 
-
+/** @} */
 #endif

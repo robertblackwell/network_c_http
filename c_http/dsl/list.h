@@ -1,5 +1,10 @@
-#ifndef c_ceg_list_h
-#define c_ceg_list_h
+#ifndef c_http_dsl_list_h
+#define c_http_dsl_list_h
+
+/**
+ * @addtogroup group_list
+ * @{
+*/
 
 // type of data to be held in the list
 typedef void* ListItem;
@@ -188,5 +193,5 @@ void List_itr_remove(ListRef lref, ListIterator *itr_adr);
 /// \return     void* value held by node pointed at by itr
 ///
 void* List_itr_unpack(ListRef lref, ListIterator itr);
-
+/** @} */
 #endif

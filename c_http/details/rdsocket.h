@@ -7,7 +7,7 @@
 #include <c_http/details/datasource.h>
 
 /**
- *
+ * @addtoggroup group_rdsocket
  * Want to parametrize Reader type with the function that actually does the reading
  * so that in test_parser I can substitute a mock socket reader.
  * There are two cases :
@@ -20,6 +20,7 @@
  *
  *  RdSocket is a type that generalizes both cases and provides a uniform interface
  *  for reading data from these two sources.
+ * @{
  */
 
 
@@ -74,4 +75,7 @@ int RdSocket_read(RdSocket* rdsock_ref, void* buffer, int buffer_len);
  * \return           int errno from the most recent read if that read experienced an io error
  */
 int RdSocket_errno(RdSocket* rdsock_ref);
+
+/** @} */
+
 #endif

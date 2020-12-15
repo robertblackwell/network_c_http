@@ -2,7 +2,10 @@
 #define c_ceg_hdrlist_h
 #include <c_http/dsl/kvpair.h>
 #include <c_http/api/cbuffer.h>
-
+/**
+ * @addtogroup group_hdrlist
+ * @{
+ */
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///
@@ -162,4 +165,7 @@ void HdrList_add_line(HdrListRef this, const char* label, int lablen, const char
 ///
 ///
 void HdrList_add_cstr(HdrListRef this, const char* label, const char* value);
+
+/** @} */
+
 #endif

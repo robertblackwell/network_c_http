@@ -6,7 +6,4 @@
 #include <marvin/buffer/buffer_chain.hpp>
 #include <marvin/buffer/buffer_for_tests.hpp>
 
-/**
-* \defgroup buffers Buffers
-*/
 #endif

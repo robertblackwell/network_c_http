@@ -4,6 +4,7 @@
 #include <c_http/dsl/alloc.h>
 #include <c_http/dsl/utils.h>
 #include <c_http/api/iobuffer.h>
+#include <c_http/details/ll_parser.h>
 
 #include <stdio.h>
 #include <string.h>

@@ -2,7 +2,7 @@
 #include <c_http/details/ll_parser.h>
 #include <c_http/dsl/utils.h>
 /**
- * @addtogroup http
+ * @addtogroup group_parser
  * @{
  */
 

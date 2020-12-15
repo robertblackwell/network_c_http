@@ -5,6 +5,8 @@
 //  Created by ROBERT BLACKWELL on 12/27/15.
 //  Copyright © 2015 Blackwellapps. All rights reserved.
 //
+#define _GNU_SOURCE
+#include <stdio.h>
 #include <c_http/dsl/queue.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -15,76 +17,92 @@
 
 #include <c_http/constants.h>
 #include <c_http/dsl/alloc.h>
+#define ENABLE_LOGX
+#include <c_http/logger.h>
 
+#define QUEUE_DEFAULT_SIZE 10
 #define QUEUE_CIRCULAR
+#define QUEUE_DYN_CAPACITY
 
 struct Queue_s {
+#ifdef QUEUE_DYN_CAPACITY
+    SocketFD*         q;
+#else
     SocketFD        q[QUEUE_MAX_SIZE];
+#endif
     uint32_t        size;
     uint32_t        max_size;
     /**
      * Used to make the array into a circular buffer
      */
-    uint32_t        head; // points at the next available slot
-    uint32_t        tail; //
+    uint32_t        next;  // points at the next entry to be used
+    uint32_t        first; // points at the first used entry
     bool            full;
 
     pthread_mutex_t queue_mutex;
     pthread_cond_t  not_empty_cv;
     pthread_cond_t  not_full_cv;
 };
-
 static uint32_t q_size(QueueRef q)
 {
-    uint32_t sz;
-    if(q->full) {
-        sz = q->max_size;
+    if(q->first <= q->next) {
+        return q->next - q->first;
     } else {
-        if(q->head > q->tail) {
-            sz = q->head - q->tail;
-        } else {
-            sz = q->max_size + q->head - q->tail;
-        }
+        return (q->next + q->max_size) - q->first;
     }
-    return sz;
 }
-
-static void advance_pointer(QueueRef q)
+static bool is_full(QueueRef q)
 {
-    if(q->full)
-    {
-        q->tail = (q->tail + 1) % q->max_size;
-    }
-
-    q->head = (q->head + 1) % q->max_size;
-    q->full = (q->head == q->tail);
+    return (q->first == q->next) && (q->size > 0);
 }
-static void retreat_pointer(QueueRef q)
+static bool is_empty(QueueRef q)
 {
-    q->full = false;
-    q->tail = (q->tail + 1) % q->max_size;
+    return((q->first == q->next) && (q->size == 0));
+}
+static void advance_next_pointer(QueueRef q)
+{
+    assert(!is_full(q));
+
+    q->next = (q->next + 1) % q->max_size;
+    q->full = is_full(q);
+}
+// removing an item
+static void advance_first_pointer(QueueRef q)
+{
+    assert(!is_empty(q));
+    q->first = (q->first + 1) % q->max_size;
+    q->full = is_full(q);
 }
 static bool q_full(QueueRef qref)
 {
     assert(qref);
-
+    qref->full = is_full(qref);
     return qref->full;
 }
 
-static bool q_empty(QueueRef qref)
+QueueRef Queue_new_with_capacity(size_t capacity)
 {
-    assert(qref);
-
-    return (!qref->full && (qref->head == qref->tail));
+    QueueRef q = (QueueRef)eg_alloc(sizeof(Queue));
+    q->max_size = capacity;
+    q->q = malloc(sizeof(SocketFD) * q->max_size);
+    q->size = 0;
+    q->first = 0;
+    q->next = 0;
+    q->full = false;
+    pthread_mutex_init(&(q->queue_mutex), NULL);
+    pthread_cond_init(&(q->not_empty_cv), NULL);
+    pthread_cond_init(&(q->not_full_cv), NULL);
+    return q;
 }
 
 QueueRef Queue_new()
 {
     QueueRef q = (QueueRef)eg_alloc(sizeof(Queue));
-    q->max_size = QUEUE_MAX_SIZE;
+    q->max_size = QUEUE_DEFAULT_SIZE;
+    q->q = malloc(sizeof(SocketFD) * q->max_size);
     q->size = 0;
-    q->head = 0;
-    q->tail = 0;
+    q->first = 0;
+    q->next = 0;
     q->full = false;
     pthread_mutex_init(&(q->queue_mutex), NULL);
     pthread_cond_init(&(q->not_empty_cv), NULL);
@@ -106,13 +124,14 @@ SocketFD Queue_remove(QueueRef qref)
     pthread_mutex_lock(&(qref->queue_mutex));
 
 #ifdef QUEUE_CIRCULAR
-    while( q_empty(qref) ){
+    while( is_empty(qref) ){
         pthread_cond_wait(&(qref->not_empty_cv), &(qref->queue_mutex));
     }
-    SocketFD r = qref->q[qref->tail];
-    retreat_pointer(qref);
-
-    if (qref->size == QUEUE_MAX_SIZE - 1) {
+    SocketFD r = qref->q[qref->first];
+    advance_first_pointer(qref);
+    qref->size--;
+    LOG_FMT("qref->size: %d qref->max_size %d\n", qref->size, qref->max_size);
+    if (qref->size < qref->max_size) {
         pthread_cond_broadcast(&(qref->not_full_cv));
     }
 #else
@@ -125,7 +144,7 @@ SocketFD Queue_remove(QueueRef qref)
     // clear the entry above data
     qref->q[qref->size - 1] = 0;
     qref->size -= 1;
-    if (qref->size == QUEUE_MAX_SIZE - 1) {
+    if (qref->size == qref->max_size - 1) {
         pthread_cond_broadcast(&(qref->not_full_cv));
     }
 #endif
@@ -140,10 +159,11 @@ void Queue_add(QueueRef qref, SocketFD sock)
 #ifdef QUEUE_CIRCULAR
     while(qref->size == qref->max_size) {
         pthread_cond_wait(&(qref->not_full_cv), &(qref->queue_mutex));
+        LOG_FMT("Queue_add:wait not_full qref->size: %d qref->max_size %d\n", qref->size, qref->max_size);
     }
-    qref->q[qref->head] = sock;
-    advance_pointer(qref);
-    qref->size = q_size(qref);
+    qref->q[qref->next] = sock;
+    advance_next_pointer(qref);
+    qref->size++;
     if( qref->size == 1 ){
         pthread_cond_broadcast(&(qref->not_empty_cv));
     }
@@ -157,7 +177,15 @@ void Queue_add(QueueRef qref, SocketFD sock)
         pthread_cond_broadcast(&(qref->not_empty_cv));
     }
 #endif
-    printf("Queue_add: %d\n", qref->size);
+    LOG_FMT("Queue_add: %d\n", qref->size);
     pthread_mutex_unlock(&(qref->queue_mutex));
+}
+size_t Queue_size(QueueRef this)
+{
+    return this->size;
+}
+size_t Queue_capacity(QueueRef this)
+{
+    return this->max_size;
 }
 

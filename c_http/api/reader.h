@@ -1,8 +1,13 @@
 #ifndef c_http_reader_h
 #define c_http_reader_h
+/**
+ * @addtogroup group_reader Reader
+ * @brief A module that reads complete http/1.x messages synchronously
+ * @{
+ */
+
 #include <c_http/details/rdsocket.h>
 #include <c_http/api/message.h>
-#include <c_http/details/ll_parser.h>
 
 #define TYPE Reader
 #define Reader_TAG "READER"
@@ -50,5 +55,5 @@ typedef enum Reader_ReturnCode {
  *                          together with char* pointers to the error name and description
  */
 Reader_ReturnCode Reader_read(ReaderRef this, MessageRef* msgref_ptr);
-
+/** @} */
 #endif

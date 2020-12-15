@@ -14,6 +14,14 @@
 #include <netdb.h>
 #include <errno.h>
 
+#define TYPE Client
+#define Client_TAG "CLIENT"
+#include <c_http/check_tag.h>
+#undef TYPE
+#define CLIENT_DECLARE_TAG DECLARE_TAG(Client)
+#define CLIENT_CHECK_TAG(p) CHECK_TAG(Client, p)
+#define CLIENT_SET_TAG(p) SET_TAG(Client, p)
+
 struct Client_s {
     CLIENT_DECLARE_TAG;
     socket_handle_t sock;

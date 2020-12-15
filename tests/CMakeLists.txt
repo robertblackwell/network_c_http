@@ -22,6 +22,7 @@ add_subdirectory(test_buffers)
 
 # dont run this one without a server up and running
 # add_subdirectory(test_client)
+ add_subdirectory(test_queue)
 add_subdirectory(test_istype)
 add_subdirectory(test_message)
 add_subdirectory(test_url)

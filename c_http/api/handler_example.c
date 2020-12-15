@@ -70,8 +70,6 @@ int handler_example(MessageRef request, WriterRef wrtr)
     BufferChainRef body_chain = NULL;
     char* body = NULL;
     char* body_len_str = NULL;
-    KVPairRef hl_content_length = NULL;
-    KVPairRef hl_content_type = NULL;
     int return_value = 0;
 
     CbufferRef target = Message_get_target_cbuffer(request);
@@ -94,7 +92,7 @@ int handler_example(MessageRef request, WriterRef wrtr)
     /**
      * simulate io to build the page
      */
-    usleep(10000);
+//    usleep(1000);
     Message_set_body(response, body_chain);
     Message_set_content_length(response, BufferChain_size(body_chain));
     Writer_write(wrtr, response);

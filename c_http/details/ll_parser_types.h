@@ -3,6 +3,10 @@
 #define c_http_ll_parser_types_h
 #include <stdint.h>
 #include <llhttp/llhttp.h>
+/**
+ * @addtogroup group_parser_types
+ * @{
+ */
 // from http-parser
 typedef uint16_t      HttpStatus;
 typedef llhttp_method_t HttpMethod;
@@ -81,7 +85,7 @@ enum http_status
 const char *
 http_status_str (enum http_status s);
 
-
+/** @} */
 #endif
 
 

@@ -2,6 +2,10 @@
 #define c_http_alloc_h
 #include <stddef.h>
 
+/**
+ * @addtogroup group_alloc
+ * @{
+ */
 /// used to mark return type of functions that allocate memory
 #define MEMALLOC(type) type
 #define IFNULL(A, label) do { \
@@ -16,4 +20,5 @@ void eg__free(void* p);
 #define eg_alloc(n) eg__alloc(n)
 #define eg_free(p) eg__free(p)
 
+/** @} */
 #endif

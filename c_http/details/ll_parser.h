@@ -13,7 +13,7 @@
 #include <c_http/api/message.h>
 #include <c_http/api/cbuffer.h>
 /**
- * @addtogroup http
+ * @addtogroup group_parser
  * @{
  */
 

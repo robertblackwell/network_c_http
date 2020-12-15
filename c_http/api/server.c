@@ -17,6 +17,15 @@
 #include <c_http/socket_functions.h>
 #include <c_http/dsl/queue.h>
 #include <c_http/details/worker.h>
+
+#define TYPE Server
+#define Server_TAG "SERVER"
+#include <c_http/check_tag.h>
+#undef TYPE
+#define SERVER_DECLARE_TAG DECLARE_TAG(Server)
+#define SERVER_CHECK_TAG(p) CHECK_TAG(Server, p)
+#define SERVER_SET_TAG(p) SET_TAG(Server, p)
+
 #define MAX_THREADS 100
 #define XDYN_WORKER_TAB
 struct Server_s {
@@ -112,7 +121,6 @@ void Server_listen(ServerRef sref)
     for(int i = 0; i < sref->nbr_workers; i++)
     {
         WorkerRef wref = Worker_new(sref->qref, i, sref->handler);
-//        sref->handler(NULL, NULL);
         sref->worker_tab[i] = NULL;
         if(Worker_start(wref) != 0) {
             printf("Server failed starting thread - aborting\n");

@@ -132,7 +132,7 @@ IOBufferRef BufferChain_unpack_iter(BufferChainRef this, BufferChainIter iter)
 }
 void BufferChain_remove_iter(BufferChainRef this, BufferChainIter iter)
 {
-    BufferChainIter tmp = iter;
+    ListIter tmp = iter;
     List_itr_remove(this->m_chain, &tmp);
 }
 

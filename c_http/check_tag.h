@@ -1,5 +1,6 @@
 
 /**
+ * @addtogroup group_check_tags
  * These macros add identity tags to a struct, set the value of that identity tag and test the value
  * I find these macros usefull in situations using c callbacks where there is a log of casting of void* to a typed pointer
  * It is very easy during development to get the type wrong. These macros catch such errors early.
@@ -28,7 +29,7 @@
  * void callback(void* arg) {
  *      YourType* y = (YourType*)arg;
  *      CHECK_YOURTYPE(y)
- *
+ * @{
  */
 
 #ifdef TYPE_CHECK_ON
@@ -50,3 +51,4 @@
 #define SET_TAG(TYPE, p)
 
 #endif
+/** @} */

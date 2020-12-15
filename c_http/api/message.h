@@ -4,11 +4,10 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <c_http/api/buffer_chain.h>
-#include <c_http/details/hdrlist.h>
 #include <c_http/details/ll_parser_types.h>
 /**
- * @defgroup http Http Message
- * @brief The http module is responsible for all things related to http/1.1 messages
+ * @addtogroup group_message
+ * @brief A module that implements a http/1.1 message container
  * ## Module Message
  * This is some documentation for the messages modules.
  * -    this is a list item
@@ -147,5 +146,5 @@ void Message_set_body(MessageRef mref, BufferChainRef bodyp);
 
 IOBufferRef Message_serialize(MessageRef this);
 
-/**}*/
+/**@}*/
 #endif

@@ -3,6 +3,7 @@
 
 #include <c_http/api/message.h>
 #include <c_http/aio_api/conn.h>
+#include <c_http/details/hdrlist.h>
 
 struct XrHandler_s;
 typedef enum XrHandlerState {

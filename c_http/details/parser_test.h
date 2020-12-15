@@ -6,6 +6,11 @@
 #include <c_http/api/reader.h>
 #include <c_http/details/ll_parser.h>
 /**
+ * @addtogroup group_parser_test
+ *  @{
+ */
+
+/**
  * A VerifyFunction is a callable that examines a MsgList to
  * check that is gives the expected result;
  */
@@ -71,4 +76,5 @@ void WPT_init(WrappedParserTestRef this, DataSource* data_source, VerifyFunction
 
 int WPT_run(WrappedParserTestRef this);
 
+/** @} */
 #endif

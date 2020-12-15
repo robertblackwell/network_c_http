@@ -2,7 +2,19 @@
 #define c_c_http_logger_h
 #define GNU_SOURCE
 #include <stdio.h>
+/**
+ * @addtogroup group_logger
+ * @{
+ */
 
+/**
+ *
+ * @param level
+ * @param funcname
+ * @param filename
+ * @param line
+ * @param message
+ */
 extern void log_function(char* level, const char* funcname, const char* filename, int line, char* message);
 
 #define ENABLE_LOGX
@@ -37,5 +49,5 @@ extern void log_function(char* level, const char* funcname, const char* filename
     #define LOG_ENTRY()
     #define LOG_MSG(m)
 #endif
-
+/** @} */
 #endif

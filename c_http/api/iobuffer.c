@@ -7,6 +7,15 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#define TYPE IOBuffer
+#define IOBuffer_TAG "IOBUFF"
+#include <c_http/check_tag.h>
+#undef TYPE
+#define IOBUFFER_DECLARE_TAG DECLARE_TAG(IOBuffer)
+#define IOBUFFER_CHECK_TAG(p) CHECK_TAG(IOBuffer, p)
+#define IOBUFFER_SET_TAG(p) SET_TAG(IOBuffer, p)
+
+
 //#define IOB_FILL
 #ifdef IOB_FILL
 #define IOB_TERM_CHAR '?';

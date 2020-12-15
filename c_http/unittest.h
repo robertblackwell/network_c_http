@@ -7,7 +7,10 @@
 
 #include <c_http/api/cbuffer.h>
 #include <c_http/logger.h>
-
+/**
+ * @addtogroup group_unittest
+ * @{
+ */
 #define GREEN(string)   "\x1b[32m" string "\x1b[0m"
 #define YELLOW(string)  "\x1b[33m" string  "\x1b[0m"
 #define MAGENTA(string) "\x1b[35m"  string  "\x1b[0m"
@@ -143,5 +146,5 @@ void UTRecordAssertResult(const char* fn, const char* file, int line, const char
 #define CHECK(expression) UT_TRUE((expression))
 #define UT_ADD(name) UTObject uobj_ ## name = {#name, name}; UTRegister(&uobj_ ## name);
 #define UT_RUN(tests) UTRun();
-
+/** @} */
 #endif

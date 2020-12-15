@@ -1,0 +1,17 @@
+/**
+ * @defgroup group_main My Project Modules
+ * @brief All project modules
+ *
+ * @{
+ */
+
+/** @defgroup group_api Api 
+ *  @brief This group implements the basic API for the c_http project
+ */
+
+/** @defgroup group_aio_api Async IO Api  
+ *  @brief This group is the additional functionality required to provide async-io facilities.
+ */
+
+
+/** @} */

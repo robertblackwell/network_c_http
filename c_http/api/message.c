@@ -14,7 +14,7 @@
 //#undef TYPE
 //#define CHECK_MESSAGE(p) CHECK_TAG(Message, p)
 /**
- * @addtogroup http
+ * @addtogroup group_message
  * @{
  */
 struct Message_s

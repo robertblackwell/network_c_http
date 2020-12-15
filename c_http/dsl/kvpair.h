@@ -6,7 +6,9 @@
 #define c_http_kvpair_h_guard
 
 /**
+ * @addtogroup group_kvp
  * @brief Abstract type for a key/value pair with both elements strings
+ * @{
  */
 typedef struct KVPair_s KVPair;
 
@@ -71,5 +73,5 @@ char* KVPair_label(const KVPairRef hlref);
  *                      in the KVPairRef hlref
  */
 char* KVPair_value(const KVPairRef hlref);
-
+/** @} */
 #endif

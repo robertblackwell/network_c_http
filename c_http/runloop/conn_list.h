@@ -4,7 +4,10 @@
 #include <c_http/aio_api/conn.h>
 #include <c_http/dsl/list.h>
 
-
+/**
+ * @addtogroup group_conn_list
+ * @{
+ */
 typedef ListRef XrConnListRef;
 typedef ListIter XrConnListIter;
 
@@ -33,4 +36,6 @@ void XrConnList_add_back (XrConnListRef lref, XrConnRef item);
 
 void XrConnList_add_front (XrConnListRef lref, XrConnRef item);
 
+
+/** @} */
 #endif
