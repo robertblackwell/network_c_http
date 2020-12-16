@@ -30,7 +30,7 @@ struct WQueue_s {
 };
 
 WQueueRef WQueue_new(XrReactorRef runloop, EvfdQueueRef qref);
-void WQueue_free(WQueueRef this);
+void WQueue_dispose(WQueueRef this);
 void WQueue_register(WQueueRef this, QueueEventHandler cb, void* arg,  uint64_t watch_what);
 void WQueue_change_watch(WQueueRef this, QueueEventHandler cb, void* arg, uint64_t watch_what);
 

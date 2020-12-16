@@ -16,4 +16,4 @@ typedef struct Url_s {
 } Url_t, Url, *UrlRef;
 
 UrlRef Url_new(char* url);
-void Url_free(UrlRef* this_ptr);
+void Url_dispose(UrlRef* this_ptr);

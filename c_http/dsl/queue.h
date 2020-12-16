@@ -33,7 +33,7 @@ QueueRef Queue_new();
  * Set the arg to NULL on completion.
  * @param q_p QueueRef *
  */
-void Queue_free(QueueRef* q_p);
+void Queue_dispose(QueueRef* q_p);
 /**
  * @brief Get the top entry from the Queue. Wait if Queue is empty
  * @param q QueueRef

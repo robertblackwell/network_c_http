@@ -109,7 +109,7 @@ QueueRef Queue_new()
     pthread_cond_init(&(q->not_full_cv), NULL);
     return q;
 }    
-void Queue_free(QueueRef* qref_ptr)
+void Queue_dispose(QueueRef* qref_ptr)
 {
     QueueRef qref = * qref_ptr;
     pthread_cond_destroy(&(qref->not_full_cv));

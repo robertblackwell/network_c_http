@@ -27,7 +27,7 @@ T ## ListNode * T ## ListNode_new(T * content, T ## ListNode *prev, T ## ListNod
     lnref->forward = next;                                                                      \
     lnref->backward = prev;                                                                     \
 }                                                                                               \
-void T ## ListNode_free(T ## ListRef lref, T ## ListNode ** lnref_ptr)
+void T ## ListNode_dispose(T ## ListRef lref, T ## ListNode ** lnref_ptr)
 {
     ASSERT_NOT_NULL(lref);
     ASSERT_NOT_NULL(lnref_ptr);
@@ -76,7 +76,7 @@ void List_destroy(ListRef lref)
 //            lref->dealloc(&(t->item));
 //        }
         ListNode* tnext = t->forward;
-        ListNode_free(lref, &t);
+        ListNode_dispose(lref, &t);
         t = tnext;
     }
     List_init(lref, dealloc);
@@ -159,7 +159,7 @@ void* List_remove_first(ListRef lref)
         lref->count--;
         void* content = lref->head->item;
         lref->head->item = NULL;
-        ListNode_free(lref, &(lref->head));
+        ListNode_dispose(lref, &(lref->head));
         lref->head = NULL; lref->tail = NULL;
         return content;
     }
@@ -170,7 +170,7 @@ void* List_remove_first(ListRef lref)
     first->forward = NULL;
     first->backward = NULL;
     first->item = NULL;
-    ListNode_free(lref, &first);
+    ListNode_dispose(lref, &first);
     lref->count--;
     return content;
 }
@@ -195,7 +195,7 @@ void* List_remove_last(ListRef lref)
         void* content = lref->head->item;
         lref->head->item = NULL;
 
-        ListNode_free(lref, &(lref->head));
+        ListNode_dispose(lref, &(lref->head));
         lref->head = NULL; lref->tail = NULL;
         return content;
     }
@@ -207,7 +207,7 @@ void* List_remove_last(ListRef lref)
     last->backward = NULL;
     last->item = NULL;
 
-    ListNode_free(lref, &last);
+    ListNode_dispose(lref, &last);
     lref->count--;
     return content;
 }
@@ -242,7 +242,7 @@ void List_itr_remove(ListRef lref, ListIterator* itr_ptr)
         lref->count = 0;
         lref->head = NULL;
         lref->tail = NULL;
-        ListNode_free(lref, itr_ptr);
+        ListNode_dispose(lref, itr_ptr);
         return;
     }
     if(lref->head == *itr_ptr) {
@@ -257,7 +257,7 @@ void List_itr_remove(ListRef lref, ListIterator* itr_ptr)
     }
     lref->count--;
 
-    ListNode_free(lref, itr_ptr);
+    ListNode_dispose(lref, itr_ptr);
 }
 
 // gets the value of the item held in the Node pointed at by this iterator

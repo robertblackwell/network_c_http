@@ -1,6 +1,6 @@
 TODO:
 API for sync server: 
-  ☐ XXXX_free  - change its name to make the point
+  ☐ XXX_free to var variable in aio_api and reactor folders
   ☐ ceg_alloc - a better name
   ☐ make a master header file for each of the source subdirs - eg  runloop.h  api.h  c_http.h. Convert the tests first and then the two apps
   ☐ check all header files in api for extraneous include - that is include of non api header files
@@ -15,24 +15,13 @@ Tests:
 Buffers:  
 Policy free(&):
  ☐ review the policy of free(&thing) that has caused some bugs. Also an issue for List remove type functions. How to enforce
+ ☐ document this now that we are using dispose() rather than free()
 Misc:
  ☐ handler_example demo how to parse url/target, query string as tools for a meaningful handle function
  ☐ make handler_example echo the request in a way that demonstrates if picked out all the relevant bits of the request
-Template classes:
- ☐ look at alternatives for making template classes 
- ☐ what to do about List and HDRList - preprocessor or hand coded ?
- ☐ experiment with the macro version of template classes and think about a better preprocessor. How to debug inside a macro
-Queue:
-  ☐ the inter thread queue needs tidying up so that no shuffling entries down as the fron is taken away - make a it into a ring
-  ☐ thorough testing of full and empty conditions - I think something goes wrong when server is overwhelmed by verifier
 Macros:
  ☐ add the tag and type check macros to the top level macro file
  ☐ put check_tag usage in .c file not .h file
-Verify and Benchmark:
- ☐ Apache ab program to test throughput of server
- ☐ use memory sanitizer
- ☐ build verify app to thoroughly test the server under load + keep-alive
- ☐ turn the client into an app that can send out any request - this will really test  the parser
 Documentation:
  ☐ documentation
 XR:
@@ -51,6 +40,9 @@ XR:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ thorough testing of full and empty conditions - I think something goes wrong when server is overwhelmed by verifier @done (20-12-15 16:12) @project(Queue)
+ ✔ the inter thread queue needs tidying up so that no shuffling entries down as the fron is taken away - make a it into a ring @done (20-12-15 16:12) @project(Queue)
+ ✔ XXXX_free  - change its name to make the point @done (20-12-15 16:12) @project(API for sync server)
  ✔ RdSocket forces itself into the api because of our generalization of datasource for testing - what to do about it - SOLUTION provide Reader with a private interface for testing - this interface hidden away from api @done (20-12-15 15:21) @project(API for sync server)
  ✔ queue test for corrent behaviour when full and empty @done (20-12-15 14:08) @project(API for sync server)
  ✔ convert queue to Typed List or circular style so that dont need to shuffle down @done (20-12-14 21:10) @project(Misc)

@@ -48,7 +48,7 @@ UrlRef Url_new(char* url)
 }
 
 
-void Url_free(UrlRef* this_ptr)
+void Url_dispose(UrlRef* this_ptr)
 {
     UrlRef this = *this_ptr;
     Cbuffer_dispose(&(this->scheme));
