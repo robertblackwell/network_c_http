@@ -37,7 +37,7 @@ Reader* Reader_new()
     Reader_init(tmp);
     return tmp;
 }
-void Reader_free(Reader* this)
+void Reader_dispose(Reader* this)
 {
     free(this);
 }

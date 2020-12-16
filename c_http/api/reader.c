@@ -66,10 +66,10 @@ ReaderRef Reader_new(int rdsock_fd)
 void Reader_destroy(ReaderRef this)
 {
     READER_CHECK_TAG(this)
-    IOBuffer_free(&(this->m_iobuffer));
+    IOBuffer_dispose(&(this->m_iobuffer));
 
 }
-void Reader_free(ReaderRef* this_ptr)
+void Reader_dispose(ReaderRef* this_ptr)
 {
     ReaderRef this = *this_ptr;
     READER_CHECK_TAG(this)
@@ -100,7 +100,7 @@ int Reader_read(ReaderRef this, MessageRef* msgref_ptr)
                 if (! this->m_parser->m_started) {
                     // eof no message started - there will not be any more bytes to parse so cleanup and exit
                     // return no error 
-                    Message_free(&(message_ptr));
+                    Message_dispose(&(message_ptr));
                     *msgref_ptr = NULL;
                     return 0;
                 }
@@ -118,7 +118,7 @@ int Reader_read(ReaderRef this, MessageRef* msgref_ptr)
                 // have an io error
                 int x = errno;
                 printf("Reader_read io error errno: %d \n", x);
-                Message_free(&(message_ptr));
+                Message_dispose(&(message_ptr));
                 *msgref_ptr = NULL;
                 return READER_IO_ERROR;
             }
@@ -136,7 +136,7 @@ int Reader_read(ReaderRef this, MessageRef* msgref_ptr)
                 ///
                 /// got a parse error - need some way to signal the caller so can send reply of bad message
                 ///
-                Message_free(&message_ptr);
+                Message_dispose(&message_ptr);
                 *msgref_ptr = NULL;
                 printf("Reader_read parser error \n");
                 return READER_PARSE_ERROR;

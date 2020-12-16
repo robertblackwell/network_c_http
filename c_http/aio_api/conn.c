@@ -57,7 +57,7 @@ void XrConn_read_some(XrConnRef this, IOBufferRef iobuf, XrConnReadCallback cb, 
     this->read_some_cb = cb;
     this->read_some_arg = arg;
     if(this->io_buf_ref != NULL) {
-        IOBuffer_free(&(this->io_buf_ref));
+        IOBuffer_dispose(&(this->io_buf_ref));
     }
     this->io_buf_ref = iobuf;
     WSocket_change_watch(this->sock_watcher_ref, &read_some_handler, (void*) this, EPOLLIN | EPOLLERR);
@@ -173,7 +173,7 @@ void XrConn_read_msg(XrConnRef this, MessageRef msg, XrConnReadMsgCallback cb, v
 static void free_req_message(XrConnRef this)
 {
     if(this->req_msg_ref != NULL) {
-        Message_free(&(this->req_msg_ref));
+        Message_dispose(&(this->req_msg_ref));
     }
 }
 void XrConn_prepare_read(XrConnRef this)

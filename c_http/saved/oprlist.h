@@ -18,7 +18,7 @@ typedef ListIter OprListIter;
 
 
 #define M_OprList_new() List_new(dealloc)
-#define M_OprList_free(lref) List_free(lref)
+#define M_OprList_dispose(lref) List_dispose(lref)
 #define M_OprList_first(lref) (OperationListRef)List_first(lref)
 #define M_OprList_size(lref) (OperationListRef)List_size(lref)
 #define M_OprList_last(lref) (OperationListRef)List_last(lref)
@@ -34,7 +34,7 @@ typedef ListIter OprListIter;
 
 
 OprListRef  OprList_new();
-void OprList_free(OprListRef* lref_ptr) ;
+void OprList_dispose(OprListRef* lref_ptr) ;
 int  OprList_size(OprListRef lref);
 
 Operation*  OprList_first(OprListRef lref);

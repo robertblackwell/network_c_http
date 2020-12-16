@@ -4,7 +4,7 @@ typedef ListNode* MTListIter, ListIter;
 
 
 #define M_MTList_new() List_new(dealloc)
-#define M_MTList_free(lref) List_free(lref)
+#define M_MTList_dispose(lref) List_dispose(lref)
 #define M_MTList_first(lref) (MyTypeListRef)List_first(lref)
 #define M_MTList_size(lref) (MyTypeListRef)List_size(lref)
 #define M_MTList_last(lref) (MyTypeListRef)List_last(lref)
@@ -18,7 +18,7 @@ typedef ListNode* MTListIter, ListIter;
 
 
 MTListRef  MTList_new();
-void MTList_free(MTListRef lref) ;
+void MTList_dispose(MTListRef lref) ;
 int  MTList_size(MTListRef lref);
 
 MyTypeRef  MTList_first(MTListRef lref);

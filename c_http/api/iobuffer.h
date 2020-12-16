@@ -166,7 +166,7 @@ void IOBuffer_reset(IOBufferRef this);
  *
  * @param p IOBufferRef*
  */
-void IOBuffer_free(IOBufferRef* p);
+void IOBuffer_dispose(IOBufferRef* p);
 
 bool IOBuffer_equal(IOBufferRef a, IOBufferRef b);
 /**

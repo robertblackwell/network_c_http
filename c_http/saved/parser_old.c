@@ -35,7 +35,7 @@ ParserRef Parser_new()
     return this;
 }
 
-void Parser_free(ParserRef* this_p)
+void Parser_dispose(ParserRef* this_p)
 {
     ASSERT_NOT_NULL(*this_p);
     ParserRef this= *this_p;
@@ -48,11 +48,11 @@ void Parser_free(ParserRef* this_p)
         this->m_http_parser_settings_ptr = NULL;
     }
 
-    if(this->m_name_buf != NULL) Cbuffer_free(&(this->m_name_buf));
-    if(this->m_url_buf != NULL) Cbuffer_free(&(this->m_url_buf));
-    if(this->m_status_buf != NULL) Cbuffer_free(&(this->m_status_buf));
-    if(this->m_value_buf != NULL) Cbuffer_free(&(this->m_value_buf));
-    if(this->m_name_buf != NULL) Cbuffer_free(&(this->m_name_buf));
+    if(this->m_name_buf != NULL) Cbuffer_dispose(&(this->m_name_buf));
+    if(this->m_url_buf != NULL) Cbuffer_dispose(&(this->m_url_buf));
+    if(this->m_status_buf != NULL) Cbuffer_dispose(&(this->m_status_buf));
+    if(this->m_value_buf != NULL) Cbuffer_dispose(&(this->m_value_buf));
+    if(this->m_name_buf != NULL) Cbuffer_dispose(&(this->m_name_buf));
     free(this);
     *this_p = NULL;
 

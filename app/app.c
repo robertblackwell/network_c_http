@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
     ServerRef sref = Server_new(port_number, nbr_threads, handler_example);
     g_sref = sref;
     Server_listen(sref);
-    Server_free(&sref);
+    Server_dispose(&sref);
 
 }
 

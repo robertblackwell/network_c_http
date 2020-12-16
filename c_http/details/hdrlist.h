@@ -21,7 +21,7 @@ typedef ListIter HdrListIter;
 
 
 #define M_HdrList_new() List_new(dealloc)
-#define M_HdrList_free(lref) List_free(lref)
+#define M_HdrList_dispose(lref) List_dispose(lref)
 #define M_HdrList_first(lref) (KVPairListRef)List_first(lref)
 #define M_HdrList_size(lref) (KVPairListRef)List_size(lref)
 #define M_HdrList_last(lref) (KVPairListRef)List_last(lref)
@@ -37,7 +37,7 @@ typedef ListIter HdrListIter;
 
 
 HdrListRef  HdrList_new();
-void HdrList_free(HdrListRef* lref_ptr) ;
+void HdrList_dispose(HdrListRef* lref_ptr) ;
 int  HdrList_size(HdrListRef lref);
 
 KVPairRef  HdrList_first(HdrListRef lref);
@@ -107,7 +107,7 @@ void HdrList_add_arr(HdrListRef this, const char* ar[][2]);
 /// return KVPairRef or NULL
 /// NULL on not found
 /// NOTE: If found the KVPairRef returns is still owned by the HdrList
-/// do not call KVPair_free() on the returned value
+/// do not call KVPair_dispose() on the returned value
 ///
 KVPairRef HdrList_find(const HdrListRef hlref, const char* key);
 

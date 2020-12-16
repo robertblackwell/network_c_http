@@ -28,7 +28,7 @@ QReaderRef QReader_new(EvfdQueueRef queue, int expected_count)
     this->expected_count = expected_count;
     this->count = 0;
 }
-void QReader_free(QReaderRef this)
+void QReader_dispose(QReaderRef this)
 {
     free(this);
 }
@@ -45,7 +45,7 @@ QWriterRef QWriter_new(EvfdQueueRef queue, int max)
     this->count_max = max;
 }
 
-void QWriter_free(QReaderRef this)
+void QWriter_dispose(QReaderRef this)
 {
     free(this);
 }

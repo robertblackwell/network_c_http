@@ -20,7 +20,7 @@ typedef struct Writer_s Writer, *WriterRef;
 void Writer_init(WriterRef this, int sock);
 WriterRef Writer_new(int sock);
 void Writer_destroy(WriterRef this);
-void Writer_free(WriterRef* this_ptr);
+void Writer_dispose(WriterRef* this_ptr);
 
 void Writer_write(WriterRef wrtr, MessageRef msg_ref);
 //void Writer_start(WriterRef this, HttpStatus status, HdrListRef headers);

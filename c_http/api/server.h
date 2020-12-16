@@ -28,7 +28,7 @@ ServerRef Server_new(int port, int nbr_threads, HandlerFunction handler);
  *
  * @param srefptr ServerRef*
  */
-void Server_free(ServerRef* srefptr);
+void Server_dispose(ServerRef* srefptr);
 /**
  * @brief Start listening on the servers port for incoming connections.
  *

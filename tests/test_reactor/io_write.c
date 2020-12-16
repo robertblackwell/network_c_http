@@ -47,7 +47,7 @@ Writer* Writer_new()
     Writer_init(tmp);
     return tmp;
 }
-void Writer_free(Writer* this)
+void Writer_dispose(Writer* this)
 {
     WRTR_CHECK(this)
     free(this);

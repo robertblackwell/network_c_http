@@ -4,7 +4,7 @@ typedef ListNode* HdrListIter, ListIter;
 
 
 #define M_HdrList_new() List_new(dealloc)
-#define M_HdrList_free(lref) List_free(lref)
+#define M_HdrList_dispose(lref) List_dispose(lref)
 #define M_HdrList_first(lref) (KVPairListRef)List_first(lref)
 #define M_HdrList_size(lref) (KVPairListRef)List_size(lref)
 #define M_HdrList_last(lref) (KVPairListRef)List_last(lref)
@@ -20,7 +20,7 @@ typedef ListNode* HdrListIter, ListIter;
 
 
 HdrListRef  HdrList_new();
-void HdrList_free(HdrListRef* lref_ptr) ;
+void HdrList_dispose(HdrListRef* lref_ptr) ;
 int  HdrList_size(HdrListRef lref);
 
 KVPairRef  HdrList_first(HdrListRef lref);

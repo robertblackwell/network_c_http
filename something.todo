@@ -6,7 +6,6 @@ API for sync server:
   ☐ check all header files in api for extraneous include - that is include of non api header files
   ☐ XrHandler still uses HdrList and hence peeks behind the api - fix
   ☐ Message peeks into ll_parser_types to latch onto the enums provided by llhttp - may be able to tolerate this
-  ☐ RdSocket forces itself into the api because of our generalization of datasource for testing - what to do about it - SOLUTION provide Reader with a private interface for testing - this interface hidden away from api
   ☐ more documentation for writer, bufferchain, client server - in particular explain the handler
 Logging:
   merge c_http/logging.h/c + print macros in aio_api/type.h
@@ -52,6 +51,7 @@ XR:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ RdSocket forces itself into the api because of our generalization of datasource for testing - what to do about it - SOLUTION provide Reader with a private interface for testing - this interface hidden away from api @done (20-12-15 15:21) @project(API for sync server)
  ✔ queue test for corrent behaviour when full and empty @done (20-12-15 14:08) @project(API for sync server)
  ✔ convert queue to Typed List or circular style so that dont need to shuffle down @done (20-12-14 21:10) @project(Misc)
  ✔ bug - parser does not return useful code from parser error @done (20-12-14 21:10) @project(Misc)

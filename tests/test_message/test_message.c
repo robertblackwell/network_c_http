@@ -19,7 +19,7 @@ int test_hdrlist_new()
     int sz = HdrList_size(hdrlistref);
     UT_NOT_EQUAL_PTR(hdrlistref, NULL);
     UT_EQUAL_INT(sz, 0);
-    HdrList_free(&hdrlistref);
+    HdrList_dispose(&hdrlistref);
     UT_EQUAL_PTR(hdrlistref, NULL);
 	return 0;
 }
@@ -43,7 +43,7 @@ int test_hdrlist_add_back_get_content()
     UT_EQUAL_INT(strcmp(sh2, "KVPAIRKEY2"), 0);
     UT_EQUAL_INT(strcmp(sv2, "4444"), 0);
     List_display((ListRef)hdrlistref);
-    HdrList_free(&hdrlistref);
+    HdrList_dispose(&hdrlistref);
     return 0;
 }
 int test_hdrlist_find()
@@ -96,8 +96,8 @@ int test_hdrlist_find()
     HdrList_remove(hdrlistref, "KVPAIRKEY2");
     UT_EQUAL_INT(HdrList_size(hdrlistref), 0);
 
-    HdrList_free(&hdrlistref);
-    Cbuffer_free(&cbref);
+    HdrList_dispose(&hdrlistref);
+    Cbuffer_dispose(&cbref);
 
     return 0;
 }
@@ -120,8 +120,8 @@ int test_serialize_headers()
     HdrList_add_front(hdrs, hl_content_type);
     CbufferRef ser = HdrList_serialize(hdrs);
     free(body_len_str);
-    HdrList_free(&hdrs);
-    Cbuffer_free(&ser);
+    HdrList_dispose(&hdrs);
+    Cbuffer_dispose(&ser);
     return 0;
 }
 int test_serialize_headers_2()
@@ -137,8 +137,8 @@ int test_serialize_headers_2()
 
     CbufferRef ser = HdrList_serialize(hdrs);
     free(body_len_str);
-    Cbuffer_free(&ser);
-    HdrList_free(&hdrs);
+    Cbuffer_dispose(&ser);
+    HdrList_dispose(&hdrs);
     return 0;
 }
 int test_hdr_add_many()

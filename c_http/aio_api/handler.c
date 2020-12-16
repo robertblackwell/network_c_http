@@ -30,9 +30,9 @@ XrHandlerRef XrHandler_new(XrConnRef conn_ref)
 }
 void XrHandler_free(XrHandlerRef this)
 {
-    if(this->body != NULL) BufferChain_free(&this->body);
-    if(this->headers != NULL) HdrList_free(&this->headers);
-    if(this->status_line != NULL) IOBuffer_free(&this->status_line);
+    if(this->body != NULL) BufferChain_dispose(&this->body);
+    if(this->headers != NULL) HdrList_dispose(&this->headers);
+    if(this->status_line != NULL) IOBuffer_dispose(&this->status_line);
 }
 IOBufferRef XrHandler_status_line(XrHandlerRef this)
 {

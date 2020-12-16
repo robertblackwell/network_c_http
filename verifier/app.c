@@ -164,9 +164,9 @@ void* threadfn(void* data)
         }
         LOG_FMT("end of loop thread id %d iteration %d", ctx->ident, i)
         ctx->counter++;
-        Message_free(&request);
-        Message_free(&response);
-        Client_free(&client);
+        Message_dispose(&request);
+        Message_dispose(&response);
+        Client_dispose(&client);
         struct timeval iter_end_time = get_time();
         ctx->resp_times[i] =  time_diff_ms(iter_end_time, iter_start_time);
     }

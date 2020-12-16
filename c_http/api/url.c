@@ -51,13 +51,13 @@ UrlRef Url_new(char* url)
 void Url_free(UrlRef* this_ptr)
 {
     UrlRef this = *this_ptr;
-    Cbuffer_free(&(this->scheme));
-    Cbuffer_free(&(this->host));
-    Cbuffer_free(&(this->port));
-    Cbuffer_free(&(this->fragement));
-    Cbuffer_free(&(this->path));
-    Cbuffer_free(&(this->query));
-    Cbuffer_free(&(this->user_info));
+    Cbuffer_dispose(&(this->scheme));
+    Cbuffer_dispose(&(this->host));
+    Cbuffer_dispose(&(this->port));
+    Cbuffer_dispose(&(this->fragement));
+    Cbuffer_dispose(&(this->path));
+    Cbuffer_dispose(&(this->query));
+    Cbuffer_dispose(&(this->user_info));
     eg_free(this);
     this = NULL;
 }

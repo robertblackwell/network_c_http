@@ -31,7 +31,7 @@ void Writer_destroy(WriterRef this)
 {
     WRITER_CHECK_TAG(this)
 }
-void Writer_free(WriterRef* this_ptr)
+void Writer_dispose(WriterRef* this_ptr)
 {
     WriterRef this = *(this_ptr);
     WRITER_CHECK_TAG(this)
@@ -79,8 +79,8 @@ void Writer_start(WriterRef this, HttpStatus status, HdrListRef headers)
     return_value = (void*)1;
     failed:
         if(first_line != NULL) free(first_line);
-        if(serialized_headers != NULL) Cbuffer_free(&serialized_headers);
-        if(cb_output_ref != NULL) Cbuffer_free(&cb_output_ref);
+        if(serialized_headers != NULL) Cbuffer_dispose(&serialized_headers);
+        if(cb_output_ref != NULL) Cbuffer_dispose(&cb_output_ref);
     return;
 }
 /**

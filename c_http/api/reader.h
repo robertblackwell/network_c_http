@@ -23,7 +23,7 @@ typedef struct Reader_s Reader, *ReaderRef;
 ReaderRef Reader_new(int rdsock_fd);
 //void Reader_init(ReaderRef this, RdSocket rdsock);
 void Reader_destroy(ReaderRef this);
-void Reader_free(ReaderRef* this_ptr);
+void Reader_dispose(ReaderRef* this_ptr);
 
 typedef enum Reader_ReturnCode {
         READER_OK = 0,             // A message was returned

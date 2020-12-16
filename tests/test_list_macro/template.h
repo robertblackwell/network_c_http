@@ -4,7 +4,7 @@ typedef ListNode* __PREFIX__ListIter, ListIter;
 
 
 #define M___PREFIX__List_new() List_new(dealloc)
-#define M___PREFIX__List_free(lref) List_free(lref)
+#define M___PREFIX__List_dispose(lref) List_dispose(lref)
 #define M___PREFIX__List_first(lref) (__TYPE__ListRef)List_first(lref)
 #define M___PREFIX__List_size(lref) (__TYPE__ListRef)List_size(lref)
 #define M___PREFIX__List_last(lref) (__TYPE__ListRef)List_last(lref)
@@ -20,7 +20,7 @@ typedef ListNode* __PREFIX__ListIter, ListIter;
 
 
 __PREFIX__ListRef  __PREFIX__List_new();
-void __PREFIX__List_free(__PREFIX__ListRef* lref_ptr) ;
+void __PREFIX__List_dispose(__PREFIX__ListRef* lref_ptr) ;
 int  __PREFIX__List_size(__PREFIX__ListRef lref);
 
 __TYPE__Ref  __PREFIX__List_first(__PREFIX__ListRef lref);

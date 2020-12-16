@@ -39,7 +39,7 @@ int test_make_buffer()
     UT_NOT_EQUAL_PTR(b, NULL);
     UT_EQUAL_INT(Cbuffer_size(b), 0);
     UT_NOT_EQUAL_PTR((void*)Cbuffer_data(b), NULL);
-    Cbuffer_free(&b);
+    Cbuffer_dispose(&b);
     UT_EQUAL_PTR(b, NULL);
     return 0;
 }
@@ -56,7 +56,7 @@ int test_expansion()
     printf("b2 m_capacity %ld \n", Cbuffer_capacity(b2));
     printf("b2 m_cptr %lx \n", (long)Cbuffer_data(b2));
     UT_EQUAL_INT(5*strlen(extra), Cbuffer_size(b2));
-    Cbuffer_free(&b2);
+    Cbuffer_dispose(&b2);
     free(s1);
     UT_EQUAL_PTR(b2, NULL);
     return 0;
@@ -76,7 +76,7 @@ int test_big_expansion()
     printf("b2 m_capacity %ld \n", Cbuffer_capacity(b2));
     printf("b2 m_cptr %lx \n", (long)Cbuffer_data(b2));
     UT_EQUAL_INT(2800*strlen(extra), Cbuffer_size(b2));
-    Cbuffer_free(&b2);
+    Cbuffer_dispose(&b2);
     UT_EQUAL_PTR(b2, NULL);
     free(s1);
     return 0;
@@ -99,7 +99,7 @@ int test_cbuffer_clear()
     int sz2 = Cbuffer_size(b2);
     UT_EQUAL_PTR(data1, data2);
     UT_NOT_EQUAL_INT(sz1, sz2);
-    Cbuffer_free(&b2);
+    Cbuffer_dispose(&b2);
     UT_EQUAL_PTR(b2, NULL);
     free(s1);
     return 0;
@@ -128,8 +128,8 @@ int test_cbuffer_move()
     int sz21 = Cbuffer_size(b1);
 
     UT_EQUAL_PTR(d21, d12);
-    Cbuffer_free(&b1);
-    Cbuffer_free(&b2);
+    Cbuffer_dispose(&b1);
+    Cbuffer_dispose(&b2);
     UT_EQUAL_PTR(b1, NULL);
     UT_EQUAL_PTR(b2, NULL);
     free(s1);
@@ -145,7 +145,7 @@ int test_chain_make()
     }
     int x = BufferChain_size(bcr);
     UT_EQUAL_INT(BufferChain_size(bcr), 2800*strlen(extra))
-    BufferChain_free(&bcr);
+    BufferChain_dispose(&bcr);
     UT_EQUAL_PTR(bcr, NULL);
 
     return 0;
@@ -173,9 +173,9 @@ int test_chain_compact() // and eq_cstr
     s1[3] = 'X';
     bool ok2 = BufferChain_eq_cstr(bcr, s1);
     UT_EQUAL_INT(ok2, 0);
-    BufferChain_free(&bcr);
+    BufferChain_dispose(&bcr);
     UT_EQUAL_PTR(bcr, NULL);
-    IOBuffer_free(&iob);
+    IOBuffer_dispose(&iob);
     UT_EQUAL_PTR(iob, NULL);
     return 0;
 }
@@ -234,7 +234,7 @@ int test_chain_steal()
     UT_EQUAL_INT(BufferChain_size(bc2), 0);                // notice this - this is the different between append and steal
     IOBufferRef compacted = BufferChain_compact(bc1);
     const char* s = IOBuffer_cstr(compacted);
-    IOBuffer_free(&compacted);
+    IOBuffer_dispose(&compacted);
     return 0;
 }
 int test_chain_append()
@@ -248,7 +248,7 @@ int test_chain_append()
     UT_EQUAL_INT(BufferChain_size(bc2), size2);                // notice this - this is the different between append and steal
     IOBufferRef compacted = BufferChain_compact(bc1);
     const char* s = IOBuffer_cstr(compacted);
-    IOBuffer_free(&compacted);
+    IOBuffer_dispose(&compacted);
     return 0;
 }
 
@@ -289,7 +289,7 @@ int test_iobuffer_make()
     UT_EQUAL_PTR((data+1), IOBuffer_data(ioref));
     UT_EQUAL_INT((data_length - 1), IOBuffer_data_len(ioref));
     UT_EQUAL_INT(strcmp("0123456789P", (char*)IOBuffer_data(ioref)), 0);
-    IOBuffer_free(&ioref);
+    IOBuffer_dispose(&ioref);
     return 0;
 }
 int test_iobuffer_make2()
@@ -327,7 +327,7 @@ int test_iobuffer_make2()
         UT_EQUAL_INT(strncmp(&(sconst[i]), (char*)IOBuffer_data(ioref), IOBuffer_data_len(ioref)), 0);
         i++;
     }
-    IOBuffer_free(&ioref);
+    IOBuffer_dispose(&ioref);
     return 0;
 }
 int test_iobuffer_commit_consume_extra()

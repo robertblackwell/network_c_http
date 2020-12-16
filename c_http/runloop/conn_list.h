@@ -12,7 +12,7 @@ typedef ListRef XrConnListRef;
 typedef ListIter XrConnListIter;
 
 XrConnListRef XrConnList_new();
-void XrConnList_free();
+void XrConnList_dispose();
 
 int XrConnList_size (XrConnListRef lref);
 

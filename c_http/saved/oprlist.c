@@ -17,8 +17,8 @@ static void dealloc (void **ptr)
 OprListRef OprList_new ()
 { return (OprListRef) List_new (dealloc); }
 
-void OprList_free (OprListRef *lref_ptr)
-{ List_free (lref_ptr); }
+void OprList_dispose (OprListRef *lref_ptr)
+{ List_dispose (lref_ptr); }
 
 int OprList_size (OprListRef lref)
 { return List_size (lref); }

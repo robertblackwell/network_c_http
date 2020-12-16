@@ -47,7 +47,7 @@ MessageRef Message_new ()
     return mref;
 
     error_label_2:
-        Message_free(&mref);
+        Message_dispose(&mref);
     error_label_1:
         return NULL;
 }
@@ -76,21 +76,21 @@ MessageRef Message_new_response()
     }
     return NULL;
 }
-void Message_free(MessageRef* this_p)
+void Message_dispose(MessageRef* this_p)
 {
     MESSAGE_CHECK_TAG(*this_p)
     MessageRef this = *this_p;
     MESSAGE_CHECK_TAG(this)
-    HdrList_free(&(this->headers));
-    Cbuffer_free(&(this->target));
-    Cbuffer_free(&(this->reason));
+    HdrList_dispose(&(this->headers));
+    Cbuffer_dispose(&(this->target));
+    Cbuffer_dispose(&(this->reason));
 
     eg_free(*this_p);
     *this_p = NULL;
 }
-void Message_dispose(void* p)
+void Message_dispose_anonymous(void* p)
 {
-    Message_free((MessageRef*)&p);
+    Message_dispose((MessageRef*)&p);
 }
 MessageRef MessageResponse(HttpStatus status, void* body)
 {
@@ -99,8 +99,8 @@ MessageRef MessageResponse(HttpStatus status, void* body)
     mref->is_request = false;
     mref->status_code = status;
     mref->body = body;
-    if(mref->target != NULL) Cbuffer_free(&(mref->target));
-    if(mref->reason != NULL) Cbuffer_free(&(mref->reason));
+    if(mref->target != NULL) Cbuffer_dispose(&(mref->target));
+    if(mref->reason != NULL) Cbuffer_dispose(&(mref->reason));
     return mref;
     error_1:
         return NULL;
@@ -136,7 +136,7 @@ IOBufferRef Message_serialize(MessageRef mref)
         BufferChain_add_back(bc_result, iob_body);
     }
     IOBufferRef result = BufferChain_compact(bc_result);
-    BufferChain_free(&bc_result);
+    BufferChain_dispose(&bc_result);
     return result;
 }
 void Message_add_header_cstring(MessageRef this, const char* key, const char* value)

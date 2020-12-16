@@ -12,7 +12,7 @@
 static void dealloc(void* ptr) {MyType_free((MTRef) ptr);}
 
 MTListRef  MTList_new() {return (MTListRef)List_new(dealloc);}
-void         MTList_free(MTListRef lref) {List_free(lref);}
+void         MTList_dispose(MTListRef lref) {List_dispose(lref);}
 int          MTList_size(MTListRef lref) {return List_size(lref);}
 MTRef  MTList_first(MTListRef lref) { return (MyTypeRef)List_first(lref);}
 MTRef  MTList_last(MTListRef lref)  { return (MyTypeRef)List_last(lref);}

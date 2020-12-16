@@ -36,13 +36,13 @@ ClientRef Client_new()
     this->rdr = NULL;
     this->wrtr = NULL;
 }
-void Client_free(ClientRef* this_ptr)
+void Client_dispose(ClientRef* this_ptr)
 {
     ClientRef this = *this_ptr;
     CLIENT_CHECK_TAG(this)
-    LOG_FMT("Client_free %p  %d\n", this, this->sock);
-    if(this->rdr) Reader_free(&(this->rdr));
-    if(this->wrtr) Writer_free(&(this->wrtr));
+    LOG_FMT("Client_dispose %p  %d\n", this, this->sock);
+    if(this->rdr) Reader_dispose(&(this->rdr));
+    if(this->wrtr) Writer_dispose(&(this->wrtr));
     close(this->sock);
     eg_free(*this_ptr);
     *this_ptr = NULL;

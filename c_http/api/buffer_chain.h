@@ -26,7 +26,7 @@ BufferChainRef BufferChain_new();
  * @note This fuunction upodates the argument to NULL.
  * @param this BufferChainref
  */
-void BufferChain_free(BufferChainRef* this);
+void BufferChain_dispose(BufferChainRef* this);
 /**
  * @brief Append the given data + len to the buffer chain by copying.
  *

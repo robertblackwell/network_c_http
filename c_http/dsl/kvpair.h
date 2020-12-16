@@ -46,7 +46,7 @@ KVPairRef KVPair_from_cstrpair(CStrPair cstrp);
  * @brief Release a KVPair freeing all held resources
  * @param hlref_ptr
  */
-void KVPair_free(KVPairRef* hlref_ptr);
+void KVPair_dispose(KVPairRef* hlref_ptr);
 void KVPair_dealloc(void* ptr);
 
 /**

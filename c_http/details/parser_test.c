@@ -30,17 +30,17 @@ ReadResultRef ReadResult_new(MessageRef msg, int rc)
     rdref->message = msg;
     rdref->rc = rc;
 }
-void ReadResult_free(ReadResultRef* this_ptr)
+void ReadResult_dispose(ReadResultRef* this_ptr)
 {
     ReadResultRef this = *this_ptr;
     if(this->message != NULL)
-        Message_free(&(this->message));
+        Message_dispose(&(this->message));
 }
 
 static void read_result_dealloc(void** p)
 {
     void** pp = p;
-    ReadResult_free((ReadResultRef*) p);
+    ReadResult_dispose((ReadResultRef*) p);
 }
 
 
@@ -82,12 +82,12 @@ int WPT_read_msg(WrappedParserTestRef this, IOBufferRef ctx, MessageRef* msgref_
                 if((bytes_read == 0) && this->m_parser->m_started && (!this->m_parser->m_message_done)) {
                     bytes_read = 0;
                 } else {
-                    Message_free(&(message_ptr));
+                    Message_dispose(&(message_ptr));
                     *msgref_ptr = NULL;
                     return 0;
                 }
             } else if (bytes_read < 0) {
-                Message_free(&(message_ptr));
+                Message_dispose(&(message_ptr));
                 *msgref_ptr = NULL;
                 return -1;
             }
@@ -110,7 +110,7 @@ int WPT_read_msg(WrappedParserTestRef this, IOBufferRef ctx, MessageRef* msgref_
                 ParserError pe = Parser_get_error(this->m_parser);
                 printf("Error details %s %s \n", pe.m_name, pe.m_description);
 //                assert(false);
-                Message_free(&message_ptr);
+                Message_dispose(&message_ptr);
                 *msgref_ptr = NULL;
                 return -2;
                 break;
@@ -139,6 +139,6 @@ int WPT_run(WrappedParserTestRef this)
     }
     int r =this->m_verify_func(this->m_results);
     printf("Return from verify %d\n", r);
-    IOBuffer_free(&iobuf_ref);
+    IOBuffer_dispose(&iobuf_ref);
     return r;
 }

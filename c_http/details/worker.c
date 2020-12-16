@@ -36,7 +36,7 @@ WorkerRef Worker_new(QueueRef qref, int _id, HandlerFunction handler)
     wref->handler = handler;
     return wref;
 }
-void Worker_free(WorkerRef wref)
+void Worker_dispose(WorkerRef wref)
 {
     free((void*)wref);
 }
@@ -75,7 +75,7 @@ static void* Worker_main(void* data)
                 int rc = Reader_read(rdr, &request_msg_ref);
                 if((rc == READER_OK) && (request_msg_ref != NULL)) {
                     if(0 == wref->handler(request_msg_ref, wrtr)) goto finalize;
-                    Message_free(&request_msg_ref);
+                    Message_dispose(&request_msg_ref);
                     close(sock);
                     sock = 0;
                     break;
@@ -91,9 +91,9 @@ static void* Worker_main(void* data)
 
         finalize:
             if(sock != 0) close(sock);
-            if(request_msg_ref != NULL) Message_free(&request_msg_ref);
-            if(wrtr != NULL) Writer_free(&wrtr);
-            if(rdr != NULL) Reader_free(&rdr);
+            if(request_msg_ref != NULL) Message_dispose(&request_msg_ref);
+            if(wrtr != NULL) Writer_dispose(&wrtr);
+            if(rdr != NULL) Reader_dispose(&rdr);
             wref->active = false;
     }
     printf("Worker_main exited main loop %p, %d\n", wref, wref->id);

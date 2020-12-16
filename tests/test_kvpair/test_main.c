@@ -27,7 +27,7 @@ int test_kvpair_new()
     int v2b = strcmp(v2, val2);
     UT_EQUAL_INT(v2b, 0);
     // note all labels are upper case
-    KVPair_free(&hlref);
+    KVPair_dispose(&hlref);
     return 0;
 }
 

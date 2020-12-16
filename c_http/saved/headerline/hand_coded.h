@@ -28,7 +28,7 @@ void HdrList_add(HdrListRef this, CbufferRef key, CbufferRef value);
 /// \return    KVPairRef or NULL
 ///            NULL on not found
 ///            NOTE: If found the KVPairRef returns is still owned by the HdrList
-///            do not call KVPair_free() on the returned value
+///            do not call KVPair_dispose() on the returned value
 ///
 KVPairRef HdrList_find(HdrListRef hlref, char* key);
 

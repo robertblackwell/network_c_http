@@ -32,7 +32,7 @@ ClientRef Client_new();
  *
  * @param this_ptr ClientRef*
  */
-void Client_free(ClientRef* this_ptr);
+void Client_dispose(ClientRef* this_ptr);
 
 /**
  * @brief Connecto the the given host and port.

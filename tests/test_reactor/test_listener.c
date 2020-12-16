@@ -30,6 +30,7 @@ struct TestServer_s {
     WListenerRef           listening_watcher_ref;
     XrConnListRef           conn_list_ref;
     int                     listen_counter;
+    int                     accept_count;
 };
 typedef struct  TestServer_s TestServer, *TestServerRef;
 
@@ -109,6 +110,9 @@ static void on_event_listening(WListenerRef listener_ref, void *arg, uint64_t ev
         LOG_FMT("%s %d %d %s", "Listener thread :: accept failed terminating sock2 : ", sock2, errno, strerror(errno_saved));
     } else {
         printf("Sock2 successfull sock: %d server_ref %p listen_ref: %p  listen_count: %d\n", sock2, server_ref, listener_ref, server_ref->listen_counter);
+        if(server_ref->listen_counter == 0) {
+            sleep(1);
+        }
         server_ref->listen_counter++;
         sleep(0.6);
     }
@@ -121,6 +125,7 @@ static TestServerRef TestServer_new(int listen_fd)
     TestServerRef sref = malloc(sizeof(TestServer));
     sref->listening_socket_fd = listen_fd;
     sref->listen_counter = 0;
+    sref->accept_count = 0;
     printf("TestServer_new %p   listen fd: %d\n", sref, listen_fd);
     return sref;
 }
@@ -128,12 +133,13 @@ static TestServerRef TestServer_init(TestServerRef sref, int listen_fd)
 {
     sref->listening_socket_fd = listen_fd;
     sref->listen_counter = 0;
+    sref->accept_count = 0;
 
     printf("TestServer_init %p   listen fd: %d\n", sref, listen_fd);
     return sref;
 }
 
-static void TestServer_free(TestServerRef *sref)
+static void TestServer_dispose(TestServerRef *sref)
 {
     ASSERT_NOT_NULL(*sref);
     free(*sref);
@@ -206,7 +212,7 @@ void* connector_thread_func(void* arg)
         ClientRef client_ref = Client_new();
         Client_connect(client_ref, "localhost", 9001);
         sleep(0.2);
-        Client_free(&client_ref);
+        Client_dispose(&client_ref);
     }
     // now wait here for all connections to be processed
     sleep(1);

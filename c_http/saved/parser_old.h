@@ -75,7 +75,7 @@ struct Parser_s {
 };
 
 ParserRef Parser_new();
-void Parser_free(ParserRef* parser_p);
+void Parser_dispose(ParserRef* parser_p);
 
 void Parser_begin(ParserRef parser, MessageRef msg_ref);
 

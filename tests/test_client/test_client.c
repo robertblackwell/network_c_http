@@ -128,13 +128,13 @@ void Writer_start(HttpStatus status, HdrListRef headers)
     int x = len+2;
 
     free(first_line);
-    Cbuffer_free(&serialized_headers);
-    Cbuffer_free(&cb_output_ref);
+    Cbuffer_dispose(&serialized_headers);
+    Cbuffer_dispose(&cb_output_ref);
     return;
     failed:
     if(first_line != NULL) free(first_line);
-    if(serialized_headers != NULL) Cbuffer_free(&serialized_headers);
-    if(cb_output_ref != NULL) Cbuffer_free(&cb_output_ref);
+    if(serialized_headers != NULL) Cbuffer_dispose(&serialized_headers);
+    if(cb_output_ref != NULL) Cbuffer_dispose(&cb_output_ref);
 
 }
 
@@ -157,9 +157,9 @@ int test_handle_request()
 //    Writer_start(wrtr, HTTP_STATUS_OK, hdrs);
 //    Writer_write_chunk(wrtr, (void*) body, body_len);
 
-    HdrList_free(&hdrs);
-//    KVPair_free(&(hl_content_length));
-//    KVPair_free(&(hl_content_type));
+    HdrList_dispose(&hdrs);
+//    KVPair_dispose(&(hl_content_length));
+//    KVPair_dispose(&(hl_content_type));
     free(body);
     free(body_len_str);
 

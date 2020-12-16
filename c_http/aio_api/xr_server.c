@@ -118,7 +118,7 @@ XrServerRef XrServer_new(int port)
     return sref;
 }
 
-void XrServer_free(XrServerRef *sref)
+void XrServer_dispose(XrServerRef *sref)
 {
     ASSERT_NOT_NULL(*sref);
     free(*sref);

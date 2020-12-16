@@ -10,9 +10,9 @@ XrConnListRef XrConnList_new()
     return (XrConnListRef) List_new(dealloc);
 }
 
-void XrConnList_free(XrConnListRef *lref_ptr)
+void XrConnList_dispose(XrConnListRef *lref_ptr)
 {
-    List_free(lref_ptr);
+    List_dispose(lref_ptr);
 }
 
 int XrConnList_size(XrConnListRef lref)

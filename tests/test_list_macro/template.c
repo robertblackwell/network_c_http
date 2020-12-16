@@ -2,7 +2,7 @@
 static void dealloc(void** ptr) {__TYPE___free((__TYPE__Ref*) ptr);}
 
 __PREFIX__ListRef  __PREFIX__List_new() {return (__PREFIX__ListRef)List_new(dealloc);}
-void         __PREFIX__List_free(__PREFIX__ListRef* lref_ptr) {List_free(lref_ptr);}
+void         __PREFIX__List_dispose(__PREFIX__ListRef* lref_ptr) {List_dispose(lref_ptr);}
 int          __PREFIX__List_size(__PREFIX__ListRef lref) {return List_size(lref);}
 __TYPE__Ref  __PREFIX__List_first(__PREFIX__ListRef lref) { return (__TYPE__Ref)List_first(lref);}
 __TYPE__Ref  __PREFIX__List_last(__PREFIX__ListRef lref)  { return (__TYPE__Ref)List_last(lref);}

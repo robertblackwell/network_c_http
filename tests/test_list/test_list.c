@@ -23,7 +23,7 @@ void DummyObj_free(DummyObj** dref)
 }
 
 #define DOList_new() List_new(dealloc)
-#define DOList_free(lref) List_free(lref)
+#define DOList_dispose(lref) List_dispose(lref)
 #define DOList_first(lref) (DummyObj*)List_first(lref)
 #define DOList_last(lref) (DummyObj*)List_last(lref)
 #define DOList_remove_first(lref) (DummyObj*)List_remove_first(lref)
@@ -36,7 +36,7 @@ typedef List DObjList, *DObjListRef;
 typedef ListIter DObjListIter;
 
 DObjListRef  DObj_List_new();
-void         DObj_List_free(DObjListRef* lref) ;
+void         DObj_List_dispose(DObjListRef* lref) ;
 DummyObj*  DObj_List_first(DObjListRef lref);
 DummyObj*  DObj_List_last(DObjListRef lref) ;
 DummyObj*  DObj_List_remove_first(DObjListRef lref);
@@ -51,7 +51,7 @@ static void dealloc(void** ptr)
 }
 
 DObjListRef  DObj_List_new() {return (DObjListRef)List_new(dealloc);}
-void         DObj_List_free(DObjListRef* lref) {List_free(*((ListRef**)lref)); *lref = NULL;}
+void         DObj_List_dispose(DObjListRef* lref) {List_dispose(*((ListRef**)lref)); *lref = NULL;}
 DummyObj*  DObj_List_first(DObjListRef lref) { return (DummyObj*)List_first(lref);}
 DummyObj*  DObj_List_last(DObjListRef lref)  { return (DummyObj*)List_last(lref);}
 DummyObj*  DObj_List_remove_first(DObjListRef lref) { return (DummyObj*)List_remove_first(lref);}
@@ -88,7 +88,7 @@ int test_list_add_back()
     UT_EQUAL_INT((List_size(lref)), 2);
     UT_EQUAL_INT(v11, 333);
     UT_EQUAL_INT(v12, 444);
-    List_free(&lref);
+    List_dispose(&lref);
     UT_EQUAL_PTR(lref, NULL);
     return 0;
 }
@@ -110,7 +110,7 @@ int test_list_add_front()
     UT_EQUAL_INT((List_size(lref)), 2);
     UT_EQUAL_INT(v11, 444);
     UT_EQUAL_INT(v12, 333);
-    List_free(&lref);
+    List_dispose(&lref);
     UT_EQUAL_PTR(lref, NULL);
     return 0;
 
@@ -141,7 +141,7 @@ int test_list_remove_front()
     UT_EQUAL_INT(v1, 333);
     UT_EQUAL_INT(v2, 222);
     UT_EQUAL_INT(v3, 111);
-    List_free(&lref);
+    List_dispose(&lref);
     UT_EQUAL_PTR(lref, NULL);
     return 0;
 
@@ -173,7 +173,7 @@ int test_list_remove_back()
     UT_EQUAL_INT(v1, 333);
     UT_EQUAL_INT(v2, 222);
     UT_EQUAL_INT(v3, 111);
-    List_free(&lref);
+    List_dispose(&lref);
     UT_EQUAL_PTR(lref, NULL);
     return 0;
 
@@ -203,7 +203,7 @@ int test_iter()
         UT_EQUAL_INT(v1, v2);
         iter = List_itr_next(lref, iter);
     }
-    List_free(&lref);
+    List_dispose(&lref);
     UT_EQUAL_PTR(lref, NULL);
     return 0;
 
@@ -230,7 +230,7 @@ int test_list_remove_backx()
     UT_EQUAL_INT((oref1->value), 333);
     UT_EQUAL_INT((oref2->value), 222);
     UT_EQUAL_INT((oref3->value), 111);
-    List_free(&lref);
+    List_dispose(&lref);
     UT_EQUAL_PTR(lref, NULL);
     return 0;
 
@@ -245,7 +245,7 @@ int test_list_remove_back_one()
     List_add_front(lref, (void*) dref);
     List_remove_last(lref);
     UT_EQUAL_INT((List_size(lref)), 0);
-    List_free(&lref);
+    List_dispose(&lref);
     UT_EQUAL_PTR(lref, NULL);
     return 0;
 

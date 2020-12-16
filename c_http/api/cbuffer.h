@@ -29,7 +29,7 @@ CbufferRef Cbuffer_new();
  */
 CbufferRef Cbuffer_from_cstring(const char* cstr);
 
-void Cbuffer_free(CbufferRef* cbuf);
+void Cbuffer_dispose(CbufferRef* cbuf);
 
 /**
  *  @brief Gets a void* pointer to the start of the used portion of memory area

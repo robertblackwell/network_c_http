@@ -27,7 +27,7 @@ int main()
     XrServerRef sref = XrServer_new(9001);
     g_sref = sref;
     XrServer_listen(sref);
-    XrServer_free(&sref);
+    XrServer_dispose(&sref);
 
 }
 

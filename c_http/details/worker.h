@@ -20,7 +20,7 @@ typedef struct Worker_s Worker, *WorkerRef;
  * \return WorkerRef | NULL
  */
 WorkerRef Worker_new(QueueRef qref, int _id, HandlerFunction handler);
-void Worker_free(WorkerRef wref);
+void Worker_dispose(WorkerRef wref);
 
 /**
  * Actually starts the new thread and calls the private Worker_main() function.

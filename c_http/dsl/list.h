@@ -74,11 +74,11 @@ void List_destroy(ListRef lref);
 ///
 ///   ..... do stuff with the list
 ///
-///   List_free(&mylist); Note: the & on the ListRef
-///                       Note also after the return from List_free() mylist == NULL
+///   List_dispose(&mylist); Note: the & on the ListRef
+///                       Note also after the return from List_dispose() mylist == NULL
 ///
 ///
-void List_free(ListRef *lref_adr);
+void List_dispose(ListRef *lref_adr);
 
 ///
 /// Prints a dump of the list to stdout

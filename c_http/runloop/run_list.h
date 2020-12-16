@@ -27,7 +27,7 @@ void Functor_call(FunctorRef this);
  */
 
 RunListRef RunList_new();
-void RunList_free();
+void RunList_dispose();
 void RunList_add_back(RunListRef this, FunctorRef f);
 FunctorRef RunList_remove_front(RunListRef this);
 int RunList_size (RunListRef rl_ref);

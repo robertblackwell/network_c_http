@@ -125,7 +125,7 @@ CbufferRef Cbuffer_from_cstring(const char* c_str)
  * That is one who has had their memory stolen
  * @param cbuf_ref_addr
  */
-void Cbuffer_free(CbufferRef* cbuf_ref_addr)
+void Cbuffer_dispose(CbufferRef* cbuf_ref_addr)
 {
     CbufferRef this =  *cbuf_ref_addr;
     CB_CHECK_TAG_ONLY(this);

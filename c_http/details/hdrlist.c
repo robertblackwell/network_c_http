@@ -13,7 +13,7 @@
 
 static void dealloc(void **ptr)
 {
-    KVPair_free((KVPairRef *) ptr);
+    KVPair_dispose((KVPairRef *) ptr);
 }
 
 HdrListRef HdrList_new()
@@ -21,9 +21,9 @@ HdrListRef HdrList_new()
     return (HdrListRef) List_new(dealloc);
 }
 
-void HdrList_free(HdrListRef *lref_ptr)
+void HdrList_dispose(HdrListRef *lref_ptr)
 {
-    List_free(lref_ptr);
+    List_dispose(lref_ptr);
 }
 
 int HdrList_size(HdrListRef lref)

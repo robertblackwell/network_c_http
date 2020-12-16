@@ -102,7 +102,7 @@ ServerRef Server_new(int port, int nbr_threads, HandlerFunction handler)
     return sref;
 }
 
-void Server_free(ServerRef* sref)
+void Server_dispose(ServerRef* sref)
 {
     SERVER_CHECK_TAG(*sref)
     ASSERT_NOT_NULL(*sref);
@@ -162,7 +162,7 @@ void Server_listen(ServerRef sref)
         if(wref != NULL) {
             LOG_FMT("About to joined worker %d\n", i);
             Worker_join(wref);
-            Worker_free(wref);
+            Worker_dispose(wref);
         }
     }
     Queue_free(&(sref->qref));

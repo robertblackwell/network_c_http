@@ -53,7 +53,7 @@ MessageRef Message_new();
 MessageRef Message_new_request();
 MessageRef Message_new_response();
 
-void Message_free(MessageRef* p);
+void Message_dispose(MessageRef* p);
 void Message_dealloc(void* m);
 /**
  * @brief Methods to test and set whether a message is a request or response
@@ -131,7 +131,7 @@ void Message_set_headers_arr(MessageRef mref, const char* ar[][2]);
  * @return BufferChainRef  WARNING: The return value when not NULL is a reference that is also
  *                          held by the Message instance. Be aware that there will be two
  *                          references to the same BufferChain.
- *                          The Message_free() function will dispose the buffer chain
+ *                          The Message_dispose() function will dispose the buffer chain
  *                          Consider that the MessageRef retains ownership of the BufferChainRef
  */
 BufferChainRef Message_get_body(MessageRef mref);

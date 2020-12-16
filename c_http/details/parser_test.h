@@ -46,7 +46,7 @@ typedef struct ReadResult_s {
 } ReadResult, *ReadResultRef;
 
 ReadResultRef ReadResult_new(MessageRef msg, int rc);
-void ReadResult_free(ReadResultRef* this_ptr);
+void ReadResult_dispose(ReadResultRef* this_ptr);
 
 
 /**

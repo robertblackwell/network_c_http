@@ -41,9 +41,9 @@ RunListRef RunList_new()
     return (RunListRef) List_new(dealloc);
 }
 
-void RunList_free(RunListRef *rl_ref_ptr)
+void RunList_dispose(RunListRef *rl_ref_ptr)
 {
-    List_free(rl_ref_ptr);
+    List_dispose(rl_ref_ptr);
 }
 
 int RunList_size(RunListRef rl_ref)

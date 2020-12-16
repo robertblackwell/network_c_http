@@ -173,7 +173,7 @@ void IOBuffer_reset(IOBufferRef this)
     this->buffer_ptr = this->mem_p;
     this->buffer_remaining = 0;
 }
-void IOBuffer_free(IOBufferRef* p)
+void IOBuffer_dispose(IOBufferRef* p)
 {
     IOBUFFER_CHECK_TAG(*p)
     IOBuffer_destroy(*p);

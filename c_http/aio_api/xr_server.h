@@ -25,7 +25,7 @@ typedef struct  XrServer_s XrServer, *XrServerRef;
  * \return
  */
 XrServerRef XrServer_new(int port);
-void XrServer_free(XrServerRef* srefptr);
+void XrServer_dispose(XrServerRef* srefptr);
 void XrServer_listen(XrServerRef server);
 void XrServer_terminate(XrServerRef this);
 #endif
