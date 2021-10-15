@@ -18,7 +18,7 @@ void Functor_free(FunctorRef this);
 void Functor_call(FunctorRef this);
 
 /**
- * runlist - is a list of Functor - these are functions that are ready to run.
+ * runlist - is a list of Functors - these are functions that are ready to run.
  *
  * Use should be confined to a single thread - no synchronization.
  *

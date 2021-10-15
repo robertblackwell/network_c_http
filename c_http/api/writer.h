@@ -7,13 +7,6 @@
  * @{
  */
 
-#define TYPE Writer
-#define Writer_TAG "WRITER"
-#include <c_http/check_tag.h>
-#undef TYPE
-#define WRITER_DECLARE_TAG DECLARE_TAG(Writer)
-#define WRITER_CHECK_TAG(p) CHECK_TAG(Writer, p)
-#define WRITER_SET_TAG(p) SET_TAG(Writer, p)
 
 typedef struct Writer_s Writer, *WriterRef;
 

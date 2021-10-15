@@ -6,7 +6,6 @@
  * @{
  */
 
-#include <c_http/details/rdsocket.h>
 #include <c_http/api/message.h>
 
 /**

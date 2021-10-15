@@ -119,11 +119,19 @@ void WSocket_arm_write(WSocketRef this, SocketEventHandler fd_event_handler, voi
 }
 void WSocket_disarm_read(WSocketRef this)
 {
-
+    this->event_mask &= ~EPOLLIN;
+    XR_SOCKW_CHECK_TAG(this)
+    this->read_evhandler = NULL;
+    this->read_arg = NULL;
+    int res = XrReactor_reregister(this->runloop, this->fd, this->event_mask, (WatcherRef)this);
+    assert(res == 0);
 }
 void WSocket_disarm_write(WSocketRef this)
 {
-
+    this->event_mask = ~EPOLLOUT & this->event_mask;
+    XR_SOCKW_CHECK_TAG(this)
+    int res = XrReactor_reregister(this->runloop, this->fd, this->event_mask, (WatcherRef)this);
+    assert(res == 0);
 }
 
 

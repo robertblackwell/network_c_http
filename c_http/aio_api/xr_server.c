@@ -1,27 +1,66 @@
 #define _GNU_SOURCE
+#define ENABLE_LOG
 
 #include <c_http/aio_api/xr_server.h>
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdbool.h>
 #include <unistd.h>
-#include <pthread.h>
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <c_http/logger.h>
-#include <c_http/constants.h>
 #include <c_http/dsl/alloc.h>
 #include <c_http/dsl/utils.h>
-
 #include <c_http/logger.h>
 #include <c_http/socket_functions.h>
 #include <c_http/runloop/evfd_queue.h>
 #include<c_http/aio_api/conn.h>
-#include <c_http/runloop/w_socket.h>
+#include <c_http/runloop/w_listener.h>
 #include <sys/epoll.h>
 
+
+static socket_handle_t create_listener_socket(int port, const char *host);
+static void set_non_blocking(socket_handle_t socket);
+static void on_post_done(void* arg);
+static void on_message(XrConnRef conn_ref, void* arg, int status);
+void on_event_listening(WListenerRef listener_watcher_ref, void *arg, uint64_t event);
+
+XrServerRef XrServer_new(int port)
+{
+    XrServerRef sref = (XrServerRef) eg_alloc(sizeof(XrServer));
+    sref->port = port;
+    return sref;
+}
+
+void XrServer_dispose(XrServerRef *sref)
+{
+    ASSERT_NOT_NULL(*sref);
+    free(*sref);
+    *sref = NULL;
+}
+
+void XrServer_listen(XrServerRef sref)
+{
+    ASSERT_NOT_NULL(sref)
+    int port = sref->port;
+    struct sockaddr_in peername;
+    unsigned int addr_length = (unsigned int) sizeof(peername);
+    sref->listening_socket_fd = create_listener_socket(port, "127.0.0.1");
+    set_non_blocking(sref->listening_socket_fd);
+    sref->reactor_ref = XrReactor_new();
+    sref->listening_watcher_ref = WListener_new(sref->reactor_ref, sref->listening_socket_fd);
+    WListenerRef lw = sref->listening_watcher_ref;
+    WListener_register(lw, on_event_listening, sref);
+    XrReactor_run(sref->reactor_ref, -1);
+    LOG_FMT("XrServer finishing");
+
+}
+
+void XrServer_terminate(XrServerRef this)
+{
+    close(this->listening_socket_fd);
+}
 
 //
 // create a listening socket from host and port
@@ -72,9 +111,6 @@ static socket_handle_t create_listener_socket(int port, const char *host)
 
 void set_non_blocking(socket_handle_t socket)
 {
-    //
-    // Ensure socket is in blocking mode
-    //
     int flags = fcntl(socket, F_GETFL, 0);
     int modFlags2 = flags | O_NONBLOCK;
     int fres = fcntl(socket, F_SETFL, modFlags2);
@@ -86,13 +122,13 @@ static void on_post_done(void* arg)
     XrConnRef conn_ref = arg;
     LOG_FMT("conn: %p arg: %p", conn_ref, arg);
 }
-static void on_cb_message(XrConnRef conn_ref, void* arg, int status)
+static void on_message(XrConnRef conn_ref, void* arg, int status)
 {
     LOG_FMT("conn: %p arg: %p status: %d", conn_ref, arg, status);
     assert(conn_ref->handler_ref == NULL);
     XrHandler_function(conn_ref->req_msg_ref, conn_ref, &on_post_done);
 }
-void on_event_listening(WSocketRef socket_watcher_ref, void *arg, uint64_t event)
+void on_event_listening(WListenerRef listener_watcher_ref, void *arg, uint64_t event)
 {
 
     printf("listening_hander \n");
@@ -107,43 +143,6 @@ void on_event_listening(WSocketRef socket_watcher_ref, void *arg, uint64_t event
     WSocketRef sw_ref = WSocket_new(server_ref->reactor_ref, sock2);
     XrConnRef conn = XrConn_new(sock2, sw_ref, server_ref);
     MessageRef inmsg = Message_new();
-    XrConn_read_msg(conn, inmsg, on_cb_message, (void*)conn);
-    return;
-}
-
-XrServerRef XrServer_new(int port)
-{
-    XrServerRef sref = (XrServerRef) eg_alloc(sizeof(XrServer));
-    sref->port = port;
-    return sref;
-}
-
-void XrServer_dispose(XrServerRef *sref)
-{
-    ASSERT_NOT_NULL(*sref);
-    free(*sref);
-    *sref = NULL;
-}
-
-void XrServer_listen(XrServerRef sref)
-{
-    ASSERT_NOT_NULL(sref)
-    int port = sref->port;
-    struct sockaddr_in peername;
-    unsigned int addr_length = (unsigned int) sizeof(peername);
-    sref->listening_socket_fd = create_listener_socket(port, "127.0.0.1");
-    set_non_blocking(sref->listening_socket_fd);
-    sref->reactor_ref = XrReactor_new();
-    sref->listening_watcher_ref = WSocket_new(sref->reactor_ref, sref->listening_socket_fd);
-    WSocketRef lw = sref->listening_watcher_ref;
-    uint64_t interest = EPOLLIN | EPOLLERR;
-    WSocket_register(lw);
-    WSocket_arm_read(lw, on_event_listening, sref);
-    XrReactor_run(sref->reactor_ref, -1);
-}
-
-void XrServer_terminate(XrServerRef this)
-{
-    close(this->listening_socket_fd);
+    XrConn_read_msg(conn, inmsg, on_message, conn);
 }
 

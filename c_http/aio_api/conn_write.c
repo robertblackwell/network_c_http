@@ -104,6 +104,7 @@ void write_machine(WSocketRef socket_watcher_ref, void* arg, uint64_t event)
                 conn_ref->write_rc = XRW_COMPLETE;
                 // @TODO fix the next two lines
 //                WSocket_change_watch(sw, conn_ref->write_completion_handler, arg, 0);
+                LOG_FMT("write buffer complete %d", blen);
                 WSocket_disarm_write(socket_watcher_ref);
                 XrReactor_post(reactor_ref, &write_complete_post_func, arg);
                 break;

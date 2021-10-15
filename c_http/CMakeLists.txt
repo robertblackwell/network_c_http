@@ -134,6 +134,7 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		aio_api/xr_server.c
 		aio_api/conn.c
 		aio_api/conn_read.c
+		aio_api/conn_read_msg.c
 		aio_api/conn_write.c
 		aio_api/handler.c
 		aio_api/handler_simple.c

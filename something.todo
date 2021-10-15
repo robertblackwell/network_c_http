@@ -1,21 +1,22 @@
 TODO:
 API for sync server: 
-  ☐ XXX_free to var variable in aio_api and reactor folders
   ☐ ceg_alloc - a better name
-  ☐ make a master header file for each of the source subdirs - eg  runloop.h  api.h  c_http.h. Convert the tests first and then the two apps
   ☐ check all header files in api for extraneous include - that is include of non api header files
-  ☐ XrHandler still uses HdrList and hence peeks behind the api - fix
-  ☐ Message peeks into ll_parser_types to latch onto the enums provided by llhttp - may be able to tolerate this
-  ☐ more documentation for writer, bufferchain, client server - in particular explain the handler
+  ☐ Message peeks into ll_parser_types to latch onto the enums provided by llhttp. Must be a tidier way to do this.
 Logging:
-  merge c_http/logging.h/c + print macros in aio_api/type.h
+  ☐ merge c_http/logging.h/c + print macros in aio_api/type.h
+
+master header files for each layer of the module tree:
+
 Tests:
  ☐ better tests for List found a bug in it recently that was not caught by tests
  ☐ more tests for buffers - a number of new methods with no tests
 Buffers:  
+Installation as a library:
+  ☐ add installation step to the Cmake files
 Policy free(&):
  ☐ review the policy of free(&thing) that has caused some bugs. Also an issue for List remove type functions. How to enforce
- ☐ document this now that we are using dispose() rather than free()
+ ☐ XXX_free -> XXX_dispose not yet complete
 Misc:
  ☐ handler_example demo how to parse url/target, query string as tools for a meaningful handle function
  ☐ make handler_example echo the request in a way that demonstrates if picked out all the relevant bits of the request
@@ -23,23 +24,33 @@ Macros:
  ☐ add the tag and type check macros to the top level macro file
  ☐ put check_tag usage in .c file not .h file
 Documentation:
- ☐ documentation
-XR:
-    Reactor Interface:
-    ☐ rethink the reactor interface - multiple watchers per socket fd, more fine grained arm/disarm - actually more convenient arming/disarming. 
-    ☐ The interface should not require knowledge of such things as epollin epollout  
-    ☐ Think about making XrXXWatcher types all the same type and use a union
-    ☐ this about having a SockReader and SockWriter as derived types of Conn rather than loading everything (all the read/write functions) into Conn    
-    Other:
-      ☐ combine new and register into a single call and use arm and disarm consistently
-      ☐ timers have their own chain and tiggered by epoll_wait return rather than use an FDA
-      ☐ io watchers need to support multiple watchers per fd each watching different events and different callbacks. This is so each socket fd can have both a read watcher and a write watcher. This is necessary to handle duplex protocols such as http/1.1 tunnel.
-      ☐ inter thread queue does not seem to work find out why - how to have multi threaded async server. Maybe investigate libuv thread pool
-      ☐ clean up xr server - too much redundant code
+☐ documentation
+☐ more documentation for writer, bufferchain, client server - in particular explain the handler
+☐ work out how to do read-the-docs documentation  
+AIO API:
+☐ XrHandler still uses HdrList and hence peeks behind the api - fix
+☐ XXX_free to var variable in aio_api and reactor folders
+☐ lets get the server working at least in a rudimentary fashion
+☐ then get the event interface to act like edge triggered but without necessarily using edge triggered at the epoll interface. This may make it easier
+☐ consider how to make select/epoll swappable
+☐ probably need a Connector object
+☐ this about having a SockReader and SockWriter as derived types of Conn rather than loading everything (all the read/write functions) into Conn
 
+Reactor Interface:
+☐ rethink the reactor interface - multiple watchers per socket fd, more fine grained arm/disarm - actually more convenient arming/disarming. 
+☐ The interface should not require knowledge of such things as epollin epollout  
+Other:
+☐ combine new and register into a single call and use arm and disarm consistently
+☐ timers have their own chain and tiggered by epoll_wait return rather than use an FDA
+☐ io watchers need to support multiple watchers per fd each watching different events and different callbacks. This is so each socket fd can have both a read watcher and a write watcher. This is necessary to handle duplex protocols such as http/1.1 tunnel.
+☐ inter thread queue does not seem to work find out why - how to have multi threaded async server. Maybe investigate libuv thread pool
+☐ clean up xr server - too much redundant code
+conn:
+ ☐ make conn into an opaque object
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ Think about making XrXXWatcher types all the same type and use a union NO @done (20-12-15 16:16) @project(XR)
  ✔ thorough testing of full and empty conditions - I think something goes wrong when server is overwhelmed by verifier @done (20-12-15 16:12) @project(Queue)
  ✔ the inter thread queue needs tidying up so that no shuffling entries down as the fron is taken away - make a it into a ring @done (20-12-15 16:12) @project(Queue)
  ✔ XXXX_free  - change its name to make the point @done (20-12-15 16:12) @project(API for sync server)

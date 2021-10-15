@@ -18,8 +18,10 @@ void XrHandler_function(MessageRef request, XrConnRef conn_ref, HandlerDoneFunct
     LOG_FMT("XrHandler_function\n");
     IOBufferRef ser = Message_serialize(conn_ref->req_msg_ref);
     BufferChainRef body = Message_get_body(conn_ref->req_msg_ref);
-    IOBufferRef cbody = BufferChain_compact(body);
-    int blen = BufferChain_size(body);
+    if(body != NULL) {
+        IOBufferRef cbody = BufferChain_compact(body);
+        int blen = BufferChain_size(body);
+    }
     // end debugging stuff
 
     hdlr = XrHandler_new(conn_ref);

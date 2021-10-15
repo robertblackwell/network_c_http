@@ -24,7 +24,7 @@
 
 struct Client_s {
     CLIENT_DECLARE_TAG;
-    socket_handle_t sock;
+    int       sock;
     WriterRef wrtr;
     ReaderRef  rdr;
 };

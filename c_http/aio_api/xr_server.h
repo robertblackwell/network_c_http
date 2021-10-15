@@ -13,7 +13,7 @@ struct XrServer_s {
     socket_handle_t         listening_socket_fd;
     XrHandlerFunction       handler;
     XrReactorRef            reactor_ref;
-    WSocketRef      listening_watcher_ref;
+    WListenerRef            listening_watcher_ref;
     XrConnListRef           conn_list_ref;
 };
 typedef struct  XrServer_s XrServer, *XrServerRef;

@@ -31,6 +31,10 @@ static int *int_in_heap(int key) {
     *result = key;
     return result;
 }
+/**
+ * Performa a general epoll_ctl call with error checking.
+ * In the event of an error abort 
+ */
 static void XrReactor_epoll_ctl(XrReactorRef this, int op, int fd, uint64_t interest)
 {
     XR_REACTOR_CHECK_TAG(this)
@@ -132,7 +136,7 @@ int XrReactor_run(XrReactorRef this, time_t timeout) {
             goto cleanup;
         }
         int max_events = MAX_EVENTS;
-        int nfds = epoll_wait(this->epoll_fd, events, max_events, 2000);
+        int nfds = epoll_wait(this->epoll_fd, events, max_events, -1);
         time_t currtime = time(NULL);
         switch (nfds) {
             case -1:

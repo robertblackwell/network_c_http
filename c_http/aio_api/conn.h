@@ -50,40 +50,39 @@ typedef enum XrWriteRC {
 
 struct XrConn_s {
     XR_CONN_DECLARE_TAG;
-    int                fd;
-    enum XrConnState   state;
-    WSocketRef sock_watcher_ref;
-    XrServerRef        server_ref;
-    bool               recvbuff_small;
+    int                     fd;
+    enum XrConnState        state;
+    WSocketRef              sock_watcher_ref;
+    XrServerRef             server_ref;
+    bool                    recvbuff_small;
 
     // read_some variables
-    SocketEventHandler* read_completion_handler; //currently unused
+    SocketEventHandler*     read_completion_handler; //currently unused
 
-    IOBufferRef              read_some_iobuf;
-    XrConnReadCallback*      read_some_cb;
-    void*                    read_some_arg;
-    int                      bytes_read;
-    int                      read_status;
+    IOBufferRef             read_some_iobuf;
+    XrConnReadCallback*     read_some_cb;
+    void*                   read_some_arg;
+    int                     bytes_read;
+    int                     read_status;
 
     // read msg variables
-    ParserRef                parser_ref;
-    IOBufferRef              io_buf_ref;  // input buffer
-    MessageRef               req_msg_ref; // request message
-    XrConnReadMsgCallback    read_msg_cb;
-    void*                    read_msg_arg;
-    int                      errno_saved;
-    struct ParserError_s     parser_error;
+    ParserRef               parser_ref;
+    IOBufferRef             io_buf_ref;  // input buffer
+    MessageRef              req_msg_ref; // request message
+    XrConnReadMsgCallback   read_msg_cb;
+    void*                   read_msg_arg;
+    int                     errno_saved;
+    struct ParserError_s    parser_error;
 
     // writer variables
-    CbufferRef               response_buf_ref; // response as a buffer
-    IOBufferRef              write_buffer_ref;
-//    SocketEventHandler* write_completion_handler;
-    XrConnWriteCallback      write_cb;
-    void*                    write_arg;
-    XrWriteRC                write_rc;
+    CbufferRef              response_buf_ref; // response as a buffer
+    IOBufferRef             write_buffer_ref;
+    XrConnWriteCallback     write_cb;
+    void*                   write_arg;
+    XrWriteRC               write_rc;
 
-    XrHandlerRef             handler_ref;
-    void*                    handler_ctx;
+    XrHandlerRef            handler_ref;
+    void*                   handler_ctx;
 
 };
 typedef struct XrConn_s XrConn, *XrConnRef;

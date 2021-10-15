@@ -1,6 +1,6 @@
 /**
  * @file KVPair.h
- * @brief KVPair implements a key-value pair where both key and value area char* strings
+ * @brief KVPair implements a key-value pair where both key and value are char* strings
  */
 #ifndef c_http_kvpair_h_guard
 #define c_http_kvpair_h_guard

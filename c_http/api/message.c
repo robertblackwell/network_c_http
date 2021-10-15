@@ -8,15 +8,22 @@
 #include <stdio.h>
 #include <assert.h>
 
-//#define TYPE Message
-//#define Message_TAG "_MSG_"
-//#include <c_http/check_tag.h>
-//#undef TYPE
-//#define CHECK_MESSAGE(p) CHECK_TAG(Message, p)
 /**
  * @addtogroup group_message
  * @{
  */
+
+
+#define TYPE Message
+#define Message_TAG "MESSAGE"
+#include <c_http/check_tag.h>
+#undef TYPE
+#define MESSAGE_DECLARE_TAG DECLARE_TAG(Message)
+#define MESSAGE_CHECK_TAG(p) CHECK_TAG(Message, p)
+#define MESSAGE_SET_TAG(p) SET_TAG(Message, p)
+
+
+
 struct Message_s
 {
     MESSAGE_DECLARE_TAG;

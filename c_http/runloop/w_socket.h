@@ -36,8 +36,7 @@ typedef void(WSocketCaller(void* ctx));
 
 struct WSocket_s {
     struct Watcher_s;
-//    SocketEventHandler* cb;
-//    void*                    cb_ctx;
+
     uint64_t                 event_mask;
     SocketEventHandler*      read_evhandler;
     void*                    read_arg;
