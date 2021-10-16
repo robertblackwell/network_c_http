@@ -6,7 +6,6 @@
 #include <c_http/runloop/reactor.h>
 #include <c_http/runloop/evfd_queue.h>
 
-
 #define TYPE WQueue
 #define WQueue_TAG "XRLST"
 #include <c_http/check_tag.h>

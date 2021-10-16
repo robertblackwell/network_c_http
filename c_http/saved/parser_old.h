@@ -6,8 +6,8 @@
  * for use in this project.
  */
 #include <http-parser/http_parser.h>
-#include <c_http/api/message.h>
-#include <c_http/api/cbuffer.h>
+#include <c_http/common/message.h>
+#include <c_http/common/cbuffer.h>
 
 /**
  * state values used in parsing http header lines

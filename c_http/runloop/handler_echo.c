@@ -1,12 +1,12 @@
 #define _GNU_SOURCE
-#include <c_http/aio_api/handler.h>
+#include <c_http/async/handler.h>
 #include <c_http/logger.h>
 #include <c_http/constants.h>
-#include <c_http/dsl/alloc.h>
-#include <c_http/dsl/utils.h>
+#include <c_http/common/alloc.h>
+#include <c_http/common/utils.h>
 #include <c_http/socket_functions.h>
-#include <c_http/api/message.h>
-#include <c_http/details/ll_parser.h>
+#include <c_http/common/message.h>
+#include <c_http/common/http_parser/ll_parser.h>
 
 #include <stdio.h>
 #include <stdlib.h>

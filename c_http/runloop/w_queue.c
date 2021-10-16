@@ -1,11 +1,9 @@
 #include <c_http/runloop/w_queue.h>
 #include <assert.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/epoll.h>
 #include <unistd.h>
-
 
 static void handler(WatcherRef watcher, int fd, uint64_t event)
 {

@@ -3,7 +3,7 @@
 #include <time.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <c_http/aio_api/types.h>
+#include <c_http/async/types.h>
 #include <c_http/runloop/reactor.h>
 #include <c_http/runloop/watcher.h>
 
@@ -48,8 +48,10 @@ struct WSocket_s {
 
 WSocketRef WSocket_new(XrReactorRef runloop, int fd);
 void WSocket_free(WSocketRef this);
+
 void WSocket_register(WSocketRef this);
 void WSocket_deregister(WSocketRef this);
+
 /**
  * Enable reception of fd read events and set the event handler
  * @param this            WSocketRef
@@ -57,6 +59,7 @@ void WSocket_deregister(WSocketRef this);
  * @param event_handler
  */
 void WSocket_arm_read(WSocketRef this, SocketEventHandler event_handler, void* arg);
+
 /**
  * Enable reception of fd write events and set the event handler
  * @param this            WSocketRef

@@ -3,7 +3,7 @@
 #include <time.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <c_http/aio_api/types.h>
+#include <c_http/async/types.h>
 #include <c_http/runloop/reactor.h>
 #include <c_http/runloop/watcher.h>
 

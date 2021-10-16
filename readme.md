@@ -59,7 +59,7 @@ Run it on port 9001 with 10 threads as follows:
 ./cmake-build-debug/app/simple_server -p 9001 -t 10
 ```
 
-There is also a benchmark app called `verifier_client` which can be run in conjunction with the siimple_server app.
+There is also a benchmark app called `verifier_client` which can be run in conjunction with the simple_server app.
 
 The following command will run the `verify_client` on port 9001, will run 60 threads and 300 request/response 
 per thread for a toal of 18000 request/response cycles.

@@ -1,9 +1,9 @@
 #define _GNU_SOURCE
 
 #include <c_http/reader.h>
-#include <c_http/dsl/alloc.h>
-#include <c_http/dsl/utils.h>
-#include <c_http/api/iobuffer.h>
+#include <c_http/common/alloc.h>
+#include <c_http/common/utils.h>
+#include <c_http/common/iobuffer.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -12,15 +12,15 @@
 #include <unistd.h>
 #include <errno.h>
 
-ReaderRef Reader_new(ParserRef parser, RdSocket rdsock)
+SyncReaderRef SyncReader_new(ParserRef parser, RdSocket rdsock)
 {
-    ReaderRef rdr = eg_alloc(sizeof(Reader));
+    SyncReaderRef rdr = eg_alloc(sizeof(Reader));
     if(rdr == NULL)
         return NULL;
-    Reader_init(rdr, parser, rdsock);
+    SyncReader_init(rdr, parser, rdsock);
     return rdr;
 }
-void Reader_init(ReaderRef  this, ParserRef parser, RdSocket rdsock)
+void SyncReader_init(SyncReaderRef  this, ParserRef parser, RdSocket rdsock)
 {
     ASSERT_NOT_NULL(this);
     this->m_parser = parser;
@@ -29,19 +29,19 @@ void Reader_init(ReaderRef  this, ParserRef parser, RdSocket rdsock)
     this->m_iobuffer = IOBuffer_new();
 }
 
-void Reader_destroy(ReaderRef this)
+void SyncReader_destroy(SyncReaderRef this)
 {
     IOBuffer_dispose(&(this->m_iobuffer));
 
 }
-void Reader_dispose(ReaderRef* this_ptr)
+void SyncReader_dispose(SyncReaderRef* this_ptr)
 {
-    ReaderRef this = *this_ptr;
-    Reader_destroy(this);
+    SyncReaderRef this = *this_ptr;
+    SyncReader_destroy(this);
     eg_free((void*)this);
     *this_ptr = NULL;
 }
-int Reader_read(ReaderRef this, MessageRef* msgref_ptr)
+int SyncReader_read(SyncReaderRef this, MessageRef* msgref_ptr)
 {
     IOBufferRef iobuf = this->m_iobuffer;
     MessageRef message_ptr = Message_new();

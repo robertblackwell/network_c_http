@@ -3,15 +3,15 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <c_http/details/ll_parser_types.h>
+#include <c_http/common/http_parser/ll_parser_types.h>
 #include <c_http/unittest.h>
 #include <c_http/logger.h>
-#include <c_http/dsl/kvpair.h>
-#include <c_http/details/datasource.h>
-#include <c_http/details/parser_test.h>
-#include <c_http/api/message.h>
+#include <c_http/common/kvpair.h>
+#include <c_http/common/http_parser/datasource.h>
+#include <c_http/common/http_parser/parser_test.h>
+#include <c_http/common/message.h>
 #include <c_http/test_helpers/message_private.h>
-#include <c_http/api/reader.h>
+#include <c_http/sync/sync_reader.h>
 
 #undef A_ON
 #define CHECK_HEADER(h, K, V) do {\

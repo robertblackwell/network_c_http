@@ -1,7 +1,7 @@
-#include <c_http/dsl/kvpair.h>
-#include <c_http/details/hdrlist.h>
+#include <c_http/common/kvpair.h>
+#include <c_http/common/hdrlist.h>
 #include <string.h>
-#include <c_http/dsl/utils.h>
+#include <c_http/common/utils.h>
 
 __LIST_INCLUDE_H__
 

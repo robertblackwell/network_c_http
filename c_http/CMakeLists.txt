@@ -26,41 +26,44 @@ set(EXTSRC ${C_HTTP_VENDOR_SRCDIR})
 
 set(C_HTTP_LIBRARY_HEADER_FILES
 	#basic data structures
-		dsl/alloc.h
-		dsl/list.h
-		dsl/kvpair.h
-		dsl/queue.h
-		dsl/utils.h
 	#misc
 		logger.h
 		unittest.h
-	#http/1.1 details
-		details/hdrlist.h
-		details/ll_parser_types.h
-		details/ll_parser.h
-		details/parser_test.h
-		details/rdsocket.h
-		details/datasource.h
-		details/worker.h
+	#common
+		common/alloc.h
+		common/message.h
+		common/url_parser.h
+		common/url.h
+		common/buffer_chain.h
+		common/cbuffer.h
+		common/hdrlist.h
+		common/iobuffer.h
+		common/kvpair.h
+		common/list.h
+		common/queue.h
+		common/utils.h
+		#http/1.1 parser
+		common/http_parser/ll_parser_types.h
+		common/http_parser/ll_parser.h
+		common/http_parser/parser_test.h
+		common/http_parser/rdsocket.h
+		common/http_parser/datasource.h
 		${EXTSRC}/llhttp/llhttp.h
-	#http/1.1 API
-		api/message.h
-		api/url_parser.h
-		api/url.h
-		api/client.h
-		api/handler.h
-		api/server.h
-		api/writer.h
-		api/handler_example.h
-		api/cbuffer.h
-		api/buffer_chain.h
-		api/iobuffer.h
+	#sync/
+		sync/sync_client.h
+		sync/sync_server.h
+		sync/sync_writer.h
+		sync/sync_reader.h
+		sync/sync_handler.h
+		sync/sync_handler_example.h
+		sync/worker.h
 
 	#sync simple_server app
 
 	#sync verifier app
 
 	#aio runloop and aio_http/1.1 details
+		runloop/runloop.h
 		runloop/fdtable.h
 		runloop/reactor.h
 		runloop/run_list.h
@@ -73,49 +76,50 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 		runloop/evfd_queue.h
 		runloop/conn_list.h
 	#aio api
-		aio_api/types.h
-		aio_api/xr_server.h
-		aio_api/conn.h
-		aio_api/handler.h
+		async/types.h
+		async/xr_server.h
+		async/conn.h
+		async/handler.h
 
 	)
 
 set(C_HTTP_LIBRARY_SOURCE_FILES
 	# basic
-		dsl/alloc.c
-		dsl/list.c
-		dsl/kvpair.c
-		dsl/queue.c
-		dsl/utils.c
 
 	#misc
 		unittest.c
 		logger.c
 
-	#http/1.1 details
-		details/datasource.c
-		details/hdrlist.c
-		details/rdsocket.c
-		details/parser_test.c
-		details/ll_parser_types.c
-		details/ll_parser.c
-		details/worker.c
+
+	#http/1.1 API
+		common/alloc.c
+		common/buffer_chain.c
+		common/cbuffer.c
+		common/kvpair.c
+		common/iobuffer.c
+		common/hdrlist.c
+		common/list.c
+		common/message.c
+		common/url_parser.c
+		common/url.c
+		common/utils.c
+		common/queue.c
+		#http/1.1 details
+		common/http_parser/datasource.c
+		common/http_parser/rdsocket.c
+		common/http_parser/parser_test.c
+		common/http_parser/ll_parser_types.c
+		common/http_parser/ll_parser.c
 		${EXTSRC}/llhttp/api.c
 		${EXTSRC}/llhttp/http.c
 		${EXTSRC}/llhttp/llhttp.c
-
-	#http/1.1 API
-		api/message.c
-		api/url_parser.c
-		api/url.c
-		api/client.c
-		api/writer.c
-		api/reader.c
-		api/server.c
-		api/handler_example.c
-		api/buffer_chain.c
-		api/cbuffer.c
-		api/iobuffer.c
+	#sync
+		sync/sync_client.c
+		sync/sync_writer.c
+		sync/sync_reader.c
+		sync/sync_server.c
+		sync/sync_handler_example.c
+		sync/worker.c
 
 	#aio runloop and aio_http/1.1 details
 		runloop/fdtable.c
@@ -130,16 +134,16 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		runloop/conn_list.c
 		runloop/run_list.c
 
-	#aio_http/1.1 api
-		aio_api/xr_server.c
-		aio_api/conn.c
-		aio_api/conn_read.c
-		aio_api/conn_read_msg.c
-		aio_api/conn_write.c
-		aio_api/handler.c
-		aio_api/handler_simple.c
-		aio_api/handler_echo.c
-		aio_api/handler_function.c
+	#async
+		async/xr_server.c
+		async/conn.c
+		async/conn_read.c
+		async/conn_read_msg.c
+		async/conn_write.c
+		async/handler.c
+		async/handler_simple.c
+		async/handler_echo.c
+		async/handler_function.c
 
 	)
 

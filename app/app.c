@@ -1,5 +1,5 @@
-#include <c_http/api/server.h>
-#include <c_http/api/handler_example.h>
+#include <c_http/sync/sync_server.h>
+#include <c_http/sync/sync_handler_example.h>
 #include <stdio.h>
 #include <mcheck.h>
 #include<signal.h>
@@ -8,14 +8,14 @@
 #define ENABLE_LOG
 #include <c_http/logger.h>
 
-ServerRef g_sref;
+SyncServerRef g_sref;
 
 void sig_handler(int signo)
 {
     printf("app.c signal handler \n");
     if (signo == SIGINT) {
         printf("received SIGINT\n");
-        Server_terminate( g_sref);
+        SyncServer_terminate( g_sref);
     }
 }
 
@@ -43,10 +43,10 @@ int main(int argc, char* argv[])
     }
 
     printf("Hello this is main \n");
-    ServerRef sref = Server_new(port_number, nbr_threads, handler_example);
+    SyncServerRef sref = SyncServer_new(port_number, nbr_threads, handler_example);
     g_sref = sref;
-    Server_listen(sref);
-    Server_dispose(&sref);
+    SyncServer_listen(sref);
+    SyncServer_dispose(&sref);
 
 }
 

@@ -1,6 +1,6 @@
-#include <c_http/dsl/alloc.h>
+#include <c_http/common/alloc.h>
 #include <c_http/parser.h>
-#include <c_http/dsl/utils.h>
+#include <c_http/common/utils.h>
 
 /// forward declares 
 int chunk_header_cb(http_parser* parser);

@@ -35,8 +35,9 @@ struct WTimer_s {
  * Create a new timer event source. This function will create a new Timer object
  * and register it with the provided XrReactor. In order that the timer is completely
  * specified an event handler, void* arg, interval_ms and bool repeating must be provided.
+ * 
  * @param rtor_ref       XrReactorRef
- * @param cb             TimerEventHandler an event handler function
+ * @param cb             TimerEventHandler      an event handler function
  * @param ctx            void*                  argument for the event handler
  * @param interval_ms    uint64_t               timer interval in ms
  * @param repeating      bool                   Whether repeating or not
@@ -52,7 +53,7 @@ void WTimer_free(WTimerRef this);
 /**
  * Set new values for the timer parameters
  * @param this
- * @param cb             TimerEventHandler an event handler function
+ * @param cb             TimerEventHandler      an event handler function
  * @param ctx            void*                  argument for the event handler
  * @param interval_ms    uint64_t               timer interval in ms
  * @param repeating      bool                   Whether repeating or not

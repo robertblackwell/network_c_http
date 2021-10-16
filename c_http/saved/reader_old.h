@@ -1,18 +1,18 @@
 #ifndef c_http_reader_h
 #define c_http_reader_h
-#include <c_http/dsl/list.h>
-#include <c_http/details/rdsocket.h>
-#include <c_http/api/message.h>
-#include <c_http/details/ll_parser.h>
-#include <c_http/api/iobuffer.h>
+#include <c_http/common/list.h>
+#include <c_http/common/http_parser/rdsocket.h>
+#include <c_http/common/message.h>
+#include <c_http/common/http_parser/ll_parser.h>
+#include <c_http/common/iobuffer.h>
 #include <c_http/socket_functions.h>
 
 /**
- * Reader and its associated Reader_?? functions implement an object that can read and parse http messages from
+ * Reader and its associated SyncReader_?? functions implement an object that can read and parse http messages from
  * either a real TCP socket or a DataSource* for testing.
  */
 
-typedef struct Reader_s
+typedef struct SyncReader_s
 {
     ParserRef           m_parser;
     IOBufferRef         m_iobuffer;
@@ -22,18 +22,18 @@ typedef struct Reader_s
     char*               m_http_err_name;
     char*               m_http_err_description;
 
-} Reader, *ReaderRef;
+} Reader, *SyncReaderRef;
 
-ReaderRef Reader_new(ParserRef parser, RdSocket rdsock);
-void Reader_init(ReaderRef this, ParserRef parser, RdSocket rdsock);
-void Reader_destroy(ReaderRef this);
-void Reader_dispose(ReaderRef* this_ptr);
+SyncReaderRef SyncReader_new(ParserRef parser, RdSocket rdsock);
+void SyncReader_init(SyncReaderRef this, ParserRef parser, RdSocket rdsock);
+void SyncReader_destroy(SyncReaderRef this);
+void SyncReader_dispose(SyncReaderRef* this_ptr);
 
-typedef enum Reader_ReturnCode {
+typedef enum SyncReader_ReturnCode {
         READER_OK = 0,             // A message was returned
         READER_PARSE_ERROR = -1,   // An error in the format of the message was detected.
         READER_IO_ERROR = -2,      // An IO error occurred.
-} Reader_ReturnCode;
+} SyncReader_ReturnCode;
 
 /**
  * Read a stream of http message from the m_readsocket data source/socket.
@@ -46,14 +46,14 @@ typedef enum Reader_ReturnCode {
  *
  *
  *
- * \param this              ReaderRef - the reader object
+ * \param this              SyncReaderRef - the reader object
  * \param msgref_ptr        Variable into which a MessageRef value will be placed if a message is successfully read.
- * \return Reader_ReturnCode - Indicates whether successfull and if not nature if error.
+ * \return SyncReader_ReturnCode - Indicates whether successfull and if not nature if error.
  *                          TODO - on error the Reader struct will contain details of the error
  *                          for IO error it will hold the errno value related to the error
  *                          and for a parse error will hold the relevant http_errno value
  *                          together with char* pointers to the error name and description
  */
-Reader_ReturnCode Reader_read(ReaderRef this, MessageRef* msgref_ptr);
+SyncReader_ReturnCode SyncReader_read(SyncReaderRef this, MessageRef* msgref_ptr);
 
 #endif

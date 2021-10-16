@@ -9,8 +9,8 @@
 #include <errno.h>
 #include <c_http/logger.h>
 #include <c_http/macros.h>
-#include <c_http/dsl/list.h>
-#include <c_http/aio_api/types.h>
+#include <c_http/common/list.h>
+#include <c_http/async/types.h>
 #include <c_http/runloop/fdtable.h>
 #include <c_http/runloop/reactor.h>
 #include <c_http/runloop/run_list.h>

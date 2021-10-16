@@ -4,8 +4,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <libgen.h>
-
-#include <c_http/api/cbuffer.h>
+#include <c_http/common/cbuffer.h>
 #include <c_http/logger.h>
 /**
  * @addtogroup group_unittest

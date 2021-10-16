@@ -1,5 +1,5 @@
-#include <c_http/aio_api/xr_server.h>
-#include <c_http/api/message.h>
+#include <c_http/async/xr_server.h>
+#include <c_http/common/message.h>
 
 #include <stdio.h>
 #include <mcheck.h>

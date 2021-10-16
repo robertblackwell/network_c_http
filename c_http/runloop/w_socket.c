@@ -1,6 +1,5 @@
 #include <c_http/runloop/w_socket.h>
 #include <assert.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/epoll.h>

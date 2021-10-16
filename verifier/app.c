@@ -1,4 +1,4 @@
-#include <c_http/api/client.h>
+#include <c_http/sync/sync_client.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <pthread.h>

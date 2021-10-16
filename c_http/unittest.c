@@ -1,12 +1,7 @@
-
 #include <c_http/unittest.h>
-
-#include <assert.h>
 #include <pthread.h>
-
 #include <string.h>
-#include <c_http/dsl/alloc.h>
-
+#include <c_http/common/alloc.h>
 #include <c_http/logger.h>
 
 #define UT_MAX_TESTS 100

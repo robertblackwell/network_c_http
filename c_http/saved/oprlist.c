@@ -1,7 +1,7 @@
 #include <c_http/operation.h>
 #include <c_http/oprlist.h>
 #include <string.h>
-#include <c_http/dsl/utils.h>
+#include <c_http/common/utils.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///

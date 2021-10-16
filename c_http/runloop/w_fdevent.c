@@ -1,14 +1,11 @@
 #include <c_http/runloop/w_fdevent.h>
 #include <assert.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <sys/epoll.h>
-#include <sys/eventfd.h>
-#include <fcntl.h>
 #include <unistd.h>
-#include <c_http/aio_api/types.h>
+#include <c_http/async/types.h>
 
 /**
  *

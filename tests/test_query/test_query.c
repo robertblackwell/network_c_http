@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-#include <c_http/dsl/alloc.h>
+#include <c_http/common/alloc.h>
 #include <c_http/unittest.h>
 
 #include <assert.h>

@@ -6,13 +6,11 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <stdint.h>
 #include <errno.h>
 #include <sys/eventfd.h>
 #include <c_http/logger.h>
-#include <c_http/aio_api/types.h>
-#include <c_http/dsl/list.h>
+#include <c_http/common/list.h>
 
 // enables use of eventfd rather than two pipe trick
 #define  C_HTTP_EFD_QUEUE

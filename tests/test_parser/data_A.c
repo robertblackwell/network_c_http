@@ -1,6 +1,6 @@
 #include <c_http/test_helper_types.h>
 #include <c_http/unittest.h>
-#include <c_http/api/message.h>
+#include <c_http/common/message.h>
 
 #undef A_ON
 // A001

@@ -1,3 +1,19 @@
+New list of TODOs :
+  Tidy up the async stuff:
+  ☐ review reactor and run loop functions with a view to keeping as small as possible
+  ☐ review watchers for the same reason
+  ☐ in both cases make sure comments are correct
+  ☐ simplifiy naming of the reactor/runloop
+  ☐ review packaging of aoi_api, aio_api/types.h for example seems wrong
+  ☐ ensure all reactor/runloop/watchers have tests
+  ☐ check tagging is correct everywhere and try to put tagging inside the .c file not visible in the .h file
+  ☐ have a single aio_api.h file which pulls in all the stuff needed for async io
+  ☐ can we timieout waitiing for listen/read/write events
+Tidy up sync stuff:
+  ☐ have a single interface header file for sync example
+
+
+
 TODO:
 API for sync server: 
   ☐ ceg_alloc - a better name

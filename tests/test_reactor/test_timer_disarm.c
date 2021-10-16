@@ -1,6 +1,6 @@
 #define _GNU_SOURCE
 #define ENABLE_LOG
-#include <c_http/aio_api/types.h>
+#include <c_http/async/types.h>
 #include <assert.h>
 #include <stdio.h>
 #include <pthread.h>
@@ -10,7 +10,7 @@
 #include <sys/epoll.h>
 #include <c_http/logger.h>
 #include <c_http/unittest.h>
-#include <c_http/dsl/utils.h>
+#include <c_http/common/utils.h>
 #include <c_http/runloop/reactor.h>
 #include <c_http/runloop/w_timer.h>
 //

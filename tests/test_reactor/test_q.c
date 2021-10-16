@@ -9,7 +9,7 @@
 
 #include <sys/epoll.h>
 #include <c_http/unittest.h>
-#include <c_http/dsl/utils.h>
+#include <c_http/common/utils.h>
 #include <c_http/runloop/reactor.h>
 #include <c_http/runloop/w_queue.h>
 #include <c_http/runloop/evfd_queue.h>
@@ -18,17 +18,17 @@ typedef struct QReader_s {
     EvfdQueueRef queue;
     int count;
     int expected_count;
-} QReader, *QReaderRef;
+} QReader, *QSyncReaderRef;
 
 
-QReaderRef QReader_new(EvfdQueueRef queue, int expected_count)
+QSyncReaderRef QReader_new(EvfdQueueRef queue, int expected_count)
 {
-    QReaderRef this = malloc(sizeof(QReader));
+    QSyncReaderRef this = malloc(sizeof(QReader));
     this->queue = queue;
     this->expected_count = expected_count;
     this->count = 0;
 }
-void QReader_dispose(QReaderRef this)
+void QReader_dispose(QSyncReaderRef this)
 {
     free(this);
 }
@@ -36,23 +36,23 @@ void QReader_dispose(QReaderRef this)
 typedef struct QWriter_s {
     EvfdQueueRef queue;
     int count_max;
-} QWriter, *QWriterRef;
+} QWriter, *QSyncWriterRef;
 
-QWriterRef QWriter_new(EvfdQueueRef queue, int max)
+QSyncWriterRef QWriter_new(EvfdQueueRef queue, int max)
 {
-    QWriterRef this = malloc(sizeof(QReader));
+    QSyncWriterRef this = malloc(sizeof(QReader));
     this->queue = queue;
     this->count_max = max;
 }
 
-void QWriter_dispose(QReaderRef this)
+void QWriter_dispose(QSyncReaderRef this)
 {
     free(this);
 }
 
 void QReaderHandler(WQueueRef qw, void* ctx, uint64_t event)
 {
-    QReaderRef rdr = (QReaderRef)ctx;
+    QSyncReaderRef rdr = (QSyncReaderRef)ctx;
 
     EvfdQueueRef queue = rdr->queue;
     void* queue_data = Evfdq_remove(queue);
@@ -70,7 +70,7 @@ void QReaderHandler(WQueueRef qw, void* ctx, uint64_t event)
 
 void* reader_thread_func(void* arg)
 {
-    QReaderRef q_rdr_ctx = (QReaderRef)arg;
+    QSyncReaderRef q_rdr_ctx = (QSyncReaderRef)arg;
     XrReactorRef rtor_ref = XrReactor_new();
     WQueueRef qw = WQueue_new(rtor_ref, q_rdr_ctx->queue);
     uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
@@ -79,7 +79,7 @@ void* reader_thread_func(void* arg)
 }
 void* writer_thread_func(void* arg)
 {
-    QWriterRef wrtr = (QWriterRef)arg;
+    QSyncWriterRef wrtr = (QSyncWriterRef)arg;
     for(long i = 0; i < 10; i++) {
         sleep(2);
         Evfdq_add(wrtr->queue, (void*)i);
@@ -89,8 +89,8 @@ void* writer_thread_func(void* arg)
 int test_q()
 {
     EvfdQueueRef queue = Evfdq_new();
-    QReaderRef rdr = QReader_new(queue, 10);
-    QWriterRef wrtr = QWriter_new(queue, 10);
+    QSyncReaderRef rdr = QReader_new(queue, 10);
+    QSyncWriterRef wrtr = QWriter_new(queue, 10);
 
     pthread_t rdr_thread;
     pthread_t wrtr_thread;

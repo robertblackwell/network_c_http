@@ -1,6 +1,6 @@
 #define _GNU_SOURCE
 #define XR_TRACE_ENABLE
-#include <c_http/aio_api/types.h>
+#include <c_http/async/types.h>
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -11,9 +11,9 @@
 #include <string.h>
 #include <errno.h>
 #include <c_http/unittest.h>
-#include <c_http/dsl/utils.h>
+#include <c_http/common/utils.h>
 #include <c_http/socket_functions.h>
-#include <c_http/api/client.h>
+#include <c_http/sync/sync_client.h>
 #include <c_http/runloop/reactor.h>
 #include <c_http/runloop/watcher.h>
 #include <c_http/runloop/w_timer.h>
@@ -23,7 +23,7 @@
 
 typedef int socket_handle_t;
 
-struct TestServer_s {
+struct TestSyncServer_s {
     socket_handle_t         listening_socket_fd;
     XrHandlerFunction       handler;
     XrReactorRef            reactor_ref;
@@ -32,7 +32,7 @@ struct TestServer_s {
     int                     listen_counter;
     int                     accept_count;
 };
-typedef struct  TestServer_s TestServer, *TestServerRef;
+typedef struct  TestSyncServer_s TestServer, *TestSyncServerRef;
 
 
 //
@@ -103,7 +103,7 @@ static void on_event_listening(WListenerRef listener_ref, void *arg, uint64_t ev
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
 
-    TestServerRef server_ref = arg;
+    TestSyncServerRef server_ref = arg;
     int sock2 = accept(server_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
     if(sock2 <= 0) {
         int errno_saved = errno;
@@ -120,32 +120,32 @@ static void on_event_listening(WListenerRef listener_ref, void *arg, uint64_t ev
     printf("on_event_listen new socket is : %d\n", sock2);
 }
 
-static TestServerRef TestServer_new(int listen_fd)
+static TestSyncServerRef TestSyncServer_new(int listen_fd)
 {
-    TestServerRef sref = malloc(sizeof(TestServer));
+    TestSyncServerRef sref = malloc(sizeof(TestServer));
     sref->listening_socket_fd = listen_fd;
     sref->listen_counter = 0;
     sref->accept_count = 0;
-    printf("TestServer_new %p   listen fd: %d\n", sref, listen_fd);
+    printf("TestSyncServer_new %p   listen fd: %d\n", sref, listen_fd);
     return sref;
 }
-static TestServerRef TestServer_init(TestServerRef sref, int listen_fd)
+static TestSyncServerRef TestSyncServer_init(TestSyncServerRef sref, int listen_fd)
 {
     sref->listening_socket_fd = listen_fd;
     sref->listen_counter = 0;
     sref->accept_count = 0;
 
-    printf("TestServer_init %p   listen fd: %d\n", sref, listen_fd);
+    printf("TestSyncServer_init %p   listen fd: %d\n", sref, listen_fd);
     return sref;
 }
 
-static void TestServer_dispose(TestServerRef *sref)
+static void TestSyncServer_dispose(TestSyncServerRef *sref)
 {
     ASSERT_NOT_NULL(*sref);
     free(*sref);
     *sref = NULL;
 }
-static void TestServer_listen(TestServerRef sref)
+static void TestSyncServer_listen(TestSyncServerRef sref)
 {
     ASSERT_NOT_NULL(sref)
     struct sockaddr_in peername;
@@ -157,7 +157,7 @@ static void TestServer_listen(TestServerRef sref)
     WListener_register(lw, on_event_listening, sref);
     // every time I try to call EOPLL_MOD is get an invalid arg error - though it works if I only use register EPOLL_ADD
 //    WListener_arm(lw, on_event_listening, sref);
-    printf("TestServer_listen reactor: %p listen sock: %d  lw: %p\n", sref->reactor_ref, sref->listening_socket_fd, lw);
+    printf("TestSyncServer_listen reactor: %p listen sock: %d  lw: %p\n", sref->reactor_ref, sref->listening_socket_fd, lw);
 
     XrReactor_run(sref->reactor_ref, -1);
 //    close(lw->fd);
@@ -192,15 +192,15 @@ TestCtx* TestCtx_new(int counter_init, int counter_max)
 
 void* listener_thread_func(void* arg)
 {
-    TestServerRef server_ref = (TestServerRef) arg;
+    TestSyncServerRef server_ref = (TestSyncServerRef) arg;
     printf("Listener thread server: %p \n", server_ref);
-    TestServer_listen(server_ref);
+    TestSyncServer_listen(server_ref);
 }
 typedef struct TestClient {
     int count;
     int max_count;
     int listen_fd;
-    TestServerRef servers[2];
+    TestSyncServerRef servers[2];
 }TestClient, *TestClientRef;
 
 void* connector_thread_func(void* arg)
@@ -217,7 +217,7 @@ void* connector_thread_func(void* arg)
     // now wait here for all connections to be processed
     sleep(1);
     for(int i = 0; i < 2; i++) {
-        TestServerRef server = tc->servers[i];
+        TestSyncServerRef server = tc->servers[i];
         WListenerRef listener = server->listening_watcher_ref;
         WListener_deregister(listener);
     }
@@ -232,8 +232,8 @@ int test_listeners()
     tclient.count = 0;
     int fd = create_listener_socket(9001, "localhost");
     tclient.listen_fd = fd;
-    TestServerRef server1 = TestServer_new(fd);
-    TestServerRef server2 = TestServer_new(fd);
+    TestSyncServerRef server1 = TestSyncServer_new(fd);
+    TestSyncServerRef server2 = TestSyncServer_new(fd);
     tclient.servers[0] = server1;
     tclient.servers[1] = server2;
 

@@ -1,8 +1,8 @@
 #ifndef c_http_xr_conn_list_h
 #define c_http_xr_conn_list_h
 
-#include <c_http/aio_api/conn.h>
-#include <c_http/dsl/list.h>
+#include <c_http/async/conn.h>
+#include <c_http/common/list.h>
 
 /**
  * @addtogroup group_conn_list

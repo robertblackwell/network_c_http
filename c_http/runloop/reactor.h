@@ -5,7 +5,6 @@
 #include <time.h>
 #include <c_http/runloop/watcher.h>
 
-
 #define TYPE Reactor
 #define Reactor_TAG "XRLRTOT"
 #include <c_http/check_tag.h>

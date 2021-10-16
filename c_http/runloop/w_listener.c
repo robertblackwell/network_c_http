@@ -1,11 +1,11 @@
 #include <c_http/runloop/w_listener.h>
 #include <assert.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/epoll.h>
 #include <errno.h>
 #include <unistd.h>
+
 
 /**
  * Called whenever an fd associated with an WListener receives an fd event.

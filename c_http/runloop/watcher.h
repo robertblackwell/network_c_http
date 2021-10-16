@@ -1,8 +1,7 @@
 #ifndef c_http_watcher_h
 #define c_http_watcher_h
-#include <c_http/aio_api/types.h>
+#include <c_http/async/types.h>
 #include <stdint.h>
-
 
 /**
  * Watcher_s is a base "class" for a number of different type specific watchers. 
