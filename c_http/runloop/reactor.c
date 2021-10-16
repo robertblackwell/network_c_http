@@ -4,7 +4,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/epoll.h>
 #include <unistd.h>
 #include <errno.h>
 #include <c_http/logger.h>
@@ -20,6 +19,7 @@
 struct XrReactor_s {
     XR_REACTOR_DECLARE_TAG;
     int               epoll_fd;
+    bool              closed_flag;
     FdTableRef        table; // (int, CallbackData)
     RunListRef        run_list;
 };
@@ -58,6 +58,7 @@ XrReactorRef XrReactor_new(void) {
     XR_REACTOR_SET_TAG(runloop)
 
     runloop->epoll_fd = epoll_create1(0);
+    runloop->closed_flag = false;
     CHTTP_ASSERT((runloop->epoll_fd != -1), "epoll_create failed");
     LOG_FMT("XrReactor_new epoll_fd %d\n", runloop->epoll_fd);
     runloop->table = FdTable_new();
@@ -65,17 +66,34 @@ XrReactorRef XrReactor_new(void) {
     return runloop;
 }
 
-void XrReactor_free(XrReactorRef this)
+void XrReactor_close(XrReactorRef this)
 {
     XR_REACTOR_CHECK_TAG(this)
+    this->closed_flag = true;
     int status = close(this->epoll_fd);
-    LOG_FMT("XrReactor_free status: %d errno: %d \n", status, errno);
+    LOG_FMT("XrReactor_close status: %d errno: %d \n", status, errno);
     CHTTP_ASSERT((status != -1), "close epoll_fd failed");
     int next_fd = FdTable_iterator(this->table);
     while (next_fd  != -1) {
         close(next_fd);
         next_fd = FdTable_next_iterator(this->table, next_fd);
     }
+}
+
+void XrReactor_free(XrReactorRef this)
+{
+    XR_REACTOR_CHECK_TAG(this)
+    if(! this->closed_flag) {
+        XrReactor_close(this);
+    }
+//    int status = close(this->epoll_fd);
+//    LOG_FMT("XrReactor_free status: %d errno: %d \n", status, errno);
+//    CHTTP_ASSERT((status != -1), "close epoll_fd failed");
+//    int next_fd = FdTable_iterator(this->table);
+//    while (next_fd  != -1) {
+//        close(next_fd);
+//        next_fd = FdTable_next_iterator(this->table, next_fd);
+//    }
     FdTable_free(this->table);
     free(this);
 }
@@ -129,9 +147,7 @@ int XrReactor_run(XrReactorRef this, time_t timeout) {
 
     while (true) {
         time_t passed = time(NULL) - start;
-        // test to see if watcher list is empty - in which case exit loop
         if(FdTable_size(this->table) == 0) {
-//            close(this->epoll_fd);
             LOG_FMT("XrReactor_run() FdTable_size == 0");
             goto cleanup;
         }
@@ -140,9 +156,13 @@ int XrReactor_run(XrReactorRef this, time_t timeout) {
         time_t currtime = time(NULL);
         switch (nfds) {
             case -1:
-                perror("epoll_wait");
-                result = -1;
-                int ern = errno;
+                if(this->closed_flag) {
+                    result = 0;
+                } else {
+                    perror("XXX epoll_wait");
+                    result = -1;
+                    int ern = errno;
+                }
                 goto cleanup;
             case 0:
                 result = 0;

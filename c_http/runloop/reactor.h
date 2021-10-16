@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <time.h>
+#include <sys/epoll.h>
 #include <c_http/runloop/watcher.h>
 
 #define TYPE Reactor
@@ -30,6 +31,15 @@ typedef struct XrReactor_s XrReactor, *XrReactorRef;
  */ 
 XrReactorRef XrReactor_new(void);
 
+/**
+ * Close a reactor. This call closes the epoll fd, closes all the fds in the FDTable
+ * and flags the XrReactor as closed.
+ * This will force an error return from epoll_wait. This will not be reported as an error
+ * because of the close flag == true
+ *
+ * @param XrReactorRef stor_ref
+ */
+void XrReactor_close(XrReactorRef rtor_ref);
 /**
  * Destroy a reactor including release all fds associated with the reactor
  */

@@ -1,4 +1,5 @@
 New list of TODOs :
+  ✔ refactor folders and files to have more logical groupings @done (21-10-16 21:55)
   Tidy up the async stuff:
   ☐ review reactor and run loop functions with a view to keeping as small as possible
   ☐ review watchers for the same reason

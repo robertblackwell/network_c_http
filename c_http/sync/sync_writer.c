@@ -13,19 +13,19 @@
 #define SyncWriter_TAG "SYNCWRTR"
 #include <c_http/check_tag.h>
 #undef TYPE
-#define WRITER_DECLARE_TAG DECLARE_TAG(SyncWriter)
-#define WRITER_CHECK_TAG(p) CHECK_TAG(SyncWriter, p)
-#define WRITER_SET_TAG(p) SET_TAG(SyncWriter, p)
+#define SYNCWRITER_DECLARE_TAG DECLARE_TAG(SyncWriter)
+#define SYNCWRITER_CHECK_TAG(p) CHECK_TAG(SyncWriter, p)
+#define SYNCWRITER_SET_TAG(p) SET_TAG(SyncWriter, p)
 
 
 struct SyncWriter_s {
-    WRITER_DECLARE_TAG;
+    SYNCWRITER_DECLARE_TAG;
     int m_sock;
 };
 
 void SyncWriter_init(SyncWriterRef this, int sock)
 {
-    WRITER_SET_TAG(this)
+    SYNCWRITER_SET_TAG(this)
     this->m_sock = sock;
 }
 SyncWriterRef SyncWriter_new(int socket)
@@ -38,12 +38,12 @@ SyncWriterRef SyncWriter_new(int socket)
 }
 void SyncWriter_destroy(SyncWriterRef this)
 {
-    WRITER_CHECK_TAG(this)
+    SYNCWRITER_CHECK_TAG(this)
 }
 void SyncWriter_dispose(SyncWriterRef* this_ptr)
 {
     SyncWriterRef this = *(this_ptr);
-    WRITER_CHECK_TAG(this)
+    SYNCWRITER_CHECK_TAG(this)
     SyncWriter_destroy(this);
     eg_free(*this_ptr);
     *this_ptr = NULL;
@@ -65,7 +65,7 @@ void SyncWriter_write(SyncWriterRef this, MessageRef msg_ref)
  */
 void SyncWriter_start(SyncWriterRef this, HttpStatus status, HdrListRef headers)
 {
-    WRITER_CHECK_TAG(this)
+    SYNCWRITER_CHECK_TAG(this)
     char* first_line = NULL;
     CbufferRef cb_output_ref = NULL;
     CbufferRef serialized_headers = NULL;
@@ -103,7 +103,7 @@ void SyncWriter_start(SyncWriterRef this, HttpStatus status, HdrListRef headers)
  */
 void SyncWriter_write_chunk(SyncWriterRef this, void* buffer, int len)
 {
-    WRITER_CHECK_TAG(this)
+    SYNCWRITER_CHECK_TAG(this)
     char* c = (char*)buffer;
     void* tmp_buffer = buffer;
     int tmp_len = len;
@@ -132,10 +132,10 @@ void SyncWriter_write_chunk(SyncWriterRef this, void* buffer, int len)
  */
 void SyncWriter_end(SyncWriterRef this)
 {
-    WRITER_CHECK_TAG(this)
+    SYNCWRITER_CHECK_TAG(this)
 }
 int SyncWriter_sock_fd(SyncWriterRef this)
 {
-    WRITER_CHECK_TAG(this)
+    SYNCWRITER_CHECK_TAG(this)
     return this->m_sock;
 }

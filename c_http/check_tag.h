@@ -33,7 +33,7 @@
  */
 
 #ifdef TYPE_CHECK_ON
-#define TAG_LENGTH 8
+#define TAG_LENGTH 10
     #define TAG(TYPE) TYPE ## _TAG
     #define DECLARE_TAG(TYPE) char tag[TAG_LENGTH]
     #define CHECK_TAG(TYPE, p) \
@@ -42,7 +42,8 @@
     } while(0);
 
     #define SET_TAG(TYPE, p) \
-    do { \
+    do {                     \
+        assert(strlen(TAG(TYPE)) < TAG_LENGTH);                     \
         sprintf((p)->tag, "%s", TAG(TYPE)); \
     } while(0);
 #else
