@@ -1,15 +1,11 @@
-#ifndef c_ceg_unittest_h
-#define C_ceg_unittest_h
+#ifndef iracoon_unittest_h
+#define iracoon_unittest_h
 #define _GNU_SOURCE
 #include <assert.h>
 #include <stdio.h>
 #include <libgen.h>
-#include <c_http/common/cbuffer.h>
-#include <c_http/logger.h>
-/**
- * @addtogroup group_unittest
- * @{
- */
+#include <stdbool.h>
+
 #define GREEN(string)   "\x1b[32m" string "\x1b[0m"
 #define YELLOW(string)  "\x1b[33m" string  "\x1b[0m"
 #define MAGENTA(string) "\x1b[35m"  string  "\x1b[0m"
@@ -145,5 +141,5 @@ void UTRecordAssertResult(const char* fn, const char* file, int line, const char
 #define CHECK(expression) UT_TRUE((expression))
 #define UT_ADD(name) UTObject uobj_ ## name = {#name, name}; UTRegister(&uobj_ ## name);
 #define UT_RUN(tests) UTRun();
-/** @} */
+
 #endif

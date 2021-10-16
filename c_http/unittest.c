@@ -1,11 +1,10 @@
 #include <c_http/unittest.h>
 #include <pthread.h>
 #include <string.h>
-#include <c_http/common/alloc.h>
-#include <c_http/logger.h>
+#include <stdlib.h>
 
-#define UT_MAX_TESTS 100
-#define UT_MAX_ASSERTS 2000
+#define UT_MAX_TESTS 1000
+#define UT_MAX_ASSERTS 3000
 
 pthread_mutex_t ut_lock;
 static int utest_count = 0;
@@ -30,6 +29,18 @@ void UTRegister(UTObjectRef uto)
 
 	utest_table[utest_count] = uto;
 	utest_count++;
+    if(utest_count >= UT_MAX_TESTS) {
+        printf(
+                BRIGHT_RED("TESTS ABORTED - TOO Many Tests\n")
+                BRIGHT_CYAN("Maximum number of tests        -- UT_MAX_TESTS   is : ")
+                WHITE("%d \n")
+                BRIGHT_CYAN("Maximum number of UT_ asserts  -- UT_MAX_ASSERTS is : ")
+                WHITE("%d \n")
+                WHITE("Change #define values in unittest.c")
+                "\n", UT_MAX_TESTS, UT_MAX_ASSERTS
+        );
+        exit(-1);
+    }
 
 }
 int UTRunOne(UTObjectRef utoref)
@@ -69,11 +80,25 @@ void UTRecordAssertResult(const char* fn, const char* file, int line, const char
 {
     // only asserts are to be running from multiple threads
     pthread_mutex_lock(&ut_lock);
-    UTAssertResultRef arref = eg_alloc(sizeof(UTAssertResult));
+    UTAssertResultRef arref = malloc(sizeof(UTAssertResult));
     strcpy(arref->msg, msg);
     arref->fn_name = fn;
     arref->file_name = file;
     ut_assert_table[ut_assert_count] = arref;
     ut_assert_count++;
+    if(ut_assert_count >= UT_MAX_ASSERTS) {
+        printf(
+                BRIGHT_RED("TESTS ABORTED - TOO Many ASSERTS\n")
+                BRIGHT_CYAN("Maximum number of tests        -- UT_MAX_TESTS   is : ")
+                WHITE("%d \n")
+                BRIGHT_CYAN("Maximum number of UT_ asserts  -- UT_MAX_ASSERTS is : ")
+                WHITE("%d \n")
+                WHITE("Change #define values in unittest.c")
+                "\n", UT_MAX_TESTS, UT_MAX_ASSERTS
+        );
+        pthread_mutex_unlock(&ut_lock);
+        exit(-1);
+    }
+
     pthread_mutex_unlock(&ut_lock);
 }
