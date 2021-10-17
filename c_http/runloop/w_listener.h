@@ -8,12 +8,12 @@
 #include <c_http/runloop/watcher.h>
 
 #define TYPE WListener
-#define WListener_TAG "XRLST"
+#define WListener_TAG "XRLSTNR"
 #include <c_http/check_tag.h>
 #undef TYPE
-#define XR_LIST_DECLARE_TAG DECLARE_TAG(WListener)
-#define XR_LIST_CHECK_TAG(p) CHECK_TAG(WListener, p)
-#define XR_LIST_SET_TAG(p) SET_TAG(WListener, p)
+#define XR_LISTNER_DECLARE_TAG DECLARE_TAG(WListener)
+#define XR_LISTNER_CHECK_TAG(p) CHECK_TAG(WListener, p)
+#define XR_LISTNER_SET_TAG(p) SET_TAG(WListener, p)
 
 
 typedef uint64_t XrSocketEvent;
@@ -24,8 +24,6 @@ struct WListener_s {
     struct Watcher_s;
     ListenerEventHandler*    listen_evhandler;
     void*                    listen_arg;
-
-
 };
 
 WListenerRef WListener_new(XrReactorRef runloop, int fd);

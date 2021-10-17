@@ -48,11 +48,16 @@ struct Watcher_s {
     XrReactorRef          runloop;
     int                   fd;
     /**
-     * function that knows how to free the specific type of watcher from a general ref
+     * function that knows how to free the specific sub type of watcher from a general ref.
+     * each derived type must provide this function when an instance is created or initializez.
      */
     void(*free)(WatcherRef);
     /**
-     * first level handler function - first parameter must be cast to specific type of watcher
+     * first level handler function
+     * each derived type provides thier own type specific handler when an instance is created
+     * or initialized and must cast the first parameter to their own specific type of watcher.
+     * 
+     * This handler will be calledd directly from the epoll_wait code inside reactor.c
     */
     void(*handler)(WatcherRef watcher_ref, int fd, uint64_t event);
 };

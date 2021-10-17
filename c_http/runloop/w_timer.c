@@ -37,7 +37,7 @@ static void handler(WatcherRef watcher, int fd, uint64_t event)
     uint64_t tns = ts.tv_sec * 1000000 + ts.tv_nsec;
     LOG_FMT("XtWatcher::caller current time secs: %ld ns: %ld \n", ts.tv_sec, ts.tv_nsec);
     WTimerRef timer_watcher = (WTimerRef)watcher;
-    XRTW_TYPE_CHECK(timer_watcher)
+    XRTW_CHECK_TAG(timer_watcher)
 
     int r2 = timerfd_gettime(timer_watcher->fd, &its_old);
     assert(fd == timer_watcher->fd);
@@ -79,14 +79,12 @@ WTimerRef WTimer_new(XrReactorRef rtor_ref, TimerEventHandler cb, void* ctx, uin
 void WTimer_free(WTimerRef this)
 {
     XRTW_CHECK_TAG(this)
-    XRTW_TYPE_CHECK(this)
     close(this->fd);
     free((void*)this);
 }
 struct itimerspec WTimer_update_interval(WTimerRef this, uint64_t interval_ms, bool repeating)
 {
     XRTW_CHECK_TAG(this)
-    XRTW_TYPE_CHECK(this)
     this->repeating = repeating;
     struct timespec ts;
     struct itimerspec its;
@@ -118,7 +116,6 @@ struct itimerspec WTimer_update_interval(WTimerRef this, uint64_t interval_ms, b
 void WTimer_set(WTimerRef this, TimerEventHandler eventHandler, void* arg, uint64_t interval_ms, bool repeating)
 {
     XRTW_CHECK_TAG(this)
-    XRTW_TYPE_CHECK(this)
     this->interval = interval_ms;
     this->repeating = repeating;
     this->timer_handler = eventHandler;
@@ -138,7 +135,6 @@ void WTimer_set(WTimerRef this, TimerEventHandler eventHandler, void* arg, uint6
 void WTimer_update(WTimerRef this, uint64_t interval_ms, bool repeating)
 {
     XRTW_CHECK_TAG(this)
-    XRTW_TYPE_CHECK(this)
     uint32_t interest = 0;
     struct itimerspec its = WTimer_update_interval(this, interval_ms, repeating);
     int flags = 0;
@@ -150,7 +146,6 @@ void WTimer_update(WTimerRef this, uint64_t interval_ms, bool repeating)
 void WTimer_disarm(WTimerRef this)
 {
     XRTW_CHECK_TAG(this)
-    XRTW_TYPE_CHECK(this)
     struct itimerspec its = WTimer_update_interval(this, this->interval, this->repeating);
     int flags = 0;
     int rc = timerfd_settime(this->fd, flags, &its, NULL);
@@ -159,7 +154,6 @@ void WTimer_disarm(WTimerRef this)
 void WTimer_rearm_old(WTimerRef this, TimerEventHandler eventHandler, void* arg, uint64_t interval_ms, bool repeating)
 {
     XRTW_CHECK_TAG(this)
-    XRTW_TYPE_CHECK(this)
     this->repeating = repeating;
     this->timer_handler = eventHandler;
     this->timer_handler_arg = arg;
@@ -171,7 +165,6 @@ void WTimer_rearm_old(WTimerRef this, TimerEventHandler eventHandler, void* arg,
 void WTimer_rearm(WTimerRef this)
 {
     XRTW_CHECK_TAG(this)
-    XRTW_TYPE_CHECK(this)
     uint64_t interval_ms = this->interval;
     bool repeating = this->repeating;
     struct itimerspec its = WTimer_update_interval(this, interval_ms, repeating);
@@ -183,7 +176,6 @@ void WTimer_rearm(WTimerRef this)
 void WTimer_clear(WTimerRef this)
 {
     XRTW_CHECK_TAG(this)
-    XRTW_TYPE_CHECK(this)
     LOG_FMT("WTimer_clear this->fd : %d\n", this->fd);
     int res =  XrReactor_deregister(this->runloop, this->fd);
     if(res != 0) {
@@ -192,5 +184,3 @@ void WTimer_clear(WTimerRef this)
     LOG_FMT("WTimer_clear res: %d errno: %d \n", res, errno);
     assert(res == 0);
 }
-
-

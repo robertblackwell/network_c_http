@@ -53,14 +53,12 @@ WSocketRef WSocket_new(XrReactorRef rtor_ref, int fd)
 }
 void WSocket_free(WSocketRef this)
 {
-    XRSW_TYPE_CHECK(this)
     XR_SOCKW_CHECK_TAG(this)
     close(this->fd);
     free((void*)this);
 }
 void WSocket_register(WSocketRef this)
 {
-    XRSW_TYPE_CHECK(this)
     XR_SOCKW_CHECK_TAG(this)
 
     uint32_t interest = 0;
@@ -82,7 +80,6 @@ void WSocket_register(WSocketRef this)
 //}
 void WSocket_deregister(WSocketRef this)
 {
-    XRSW_TYPE_CHECK(this)
     XR_SOCKW_CHECK_TAG(this)
 
     int res =  XrReactor_deregister(this->runloop, this->fd);

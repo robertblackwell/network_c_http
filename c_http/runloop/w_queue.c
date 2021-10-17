@@ -8,18 +8,19 @@
 static void handler(WatcherRef watcher, int fd, uint64_t event)
 {
     WQueueRef queue_watcher_ref = (WQueueRef)watcher;
-    XR_QUEUE_CHECK_TAG(queue_watcher_ref)
+    XR_WQUEUE_CHECK_TAG(queue_watcher_ref)
     assert(fd == queue_watcher_ref->fd);
     queue_watcher_ref->queue_event_handler(queue_watcher_ref, queue_watcher_ref->queue_event_handler_arg, event);
 }
 static void anonymous_free(WatcherRef p)
 {
     WQueueRef queue_watcher_ref = (WQueueRef)p;
-    XR_QUEUE_CHECK_TAG(queue_watcher_ref)
+    XR_WQUEUE_CHECK_TAG(queue_watcher_ref)
     WQueue_dispose(queue_watcher_ref);
 }
 void WQueue_init(WQueueRef this, XrReactorRef runloop, EvfdQueueRef qref)
 {
+    XR_WQUEUE_SET_TAG(this);
     this->type = XR_WATCHER_QUEUE;
     sprintf(this->tag, "XRQW");
     this->queue = qref;
@@ -36,15 +37,13 @@ WQueueRef WQueue_new(XrReactorRef rtor_ref, EvfdQueueRef qref)
 }
 void WQueue_dispose(WQueueRef this)
 {
-    XRQW_TYPE_CHECK(this)
-    XR_QUEUE_CHECK_TAG(this)
+    XR_WQUEUE_CHECK_TAG(this)
     close(this->fd);
     free((void*)this);
 }
 void WQueue_register(WQueueRef this, QueueEventHandler evhandler, void* arg, uint64_t watch_what)
 {
-    XRQW_TYPE_CHECK(this)
-    XR_QUEUE_CHECK_TAG(this)
+    XR_WQUEUE_CHECK_TAG(this)
 
     uint32_t interest = watch_what;
     this->queue_event_handler = evhandler;
@@ -54,8 +53,7 @@ void WQueue_register(WQueueRef this, QueueEventHandler evhandler, void* arg, uin
 }
 void WQueue_change_watch(WQueueRef this, QueueEventHandler evhandler, void* arg, uint64_t watch_what)
 {
-    XRQW_TYPE_CHECK(this)
-    XR_QUEUE_CHECK_TAG(this)
+    XR_WQUEUE_CHECK_TAG(this)
     uint32_t interest = watch_what;
     if( evhandler != NULL) {
         this->queue_event_handler = evhandler;
@@ -68,8 +66,7 @@ void WQueue_change_watch(WQueueRef this, QueueEventHandler evhandler, void* arg,
 }
 void WQueue_deregister(WQueueRef this)
 {
-    XRQW_TYPE_CHECK(this)
-    XR_QUEUE_CHECK_TAG(this)
+    XR_WQUEUE_CHECK_TAG(this)
 
     int res =  XrReactor_deregister(this->runloop, this->fd);
     assert(res == 0);

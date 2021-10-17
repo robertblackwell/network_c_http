@@ -79,44 +79,4 @@ typedef void (*HandlerDoneFunction)(void* conn_ref);
  */
 typedef void (*HandlerFunction)(MessageRef request, XrConnRef conn_ref, HandlerDoneFunction done);
 
-// #define LOG_FMT_ENABLEX
-// #define XR_TRACE_ENABLEDX
-
-// #ifdef XR_TRACE_ENABLE
-
-// #define LOG_FMT(...) printf(__VA_ARGS__)
-// #define XR_TRACE_ENTRY() printf("TRACE:[%s] entered\n", __func__);
-// #define XR_TRACE_MSG(m)  printf("TRACE:[%s] %s\n", __func__, m);
-// #define XR_TRACE(fmt, ...) printf("TRACE:[%s] " fmt " \n", __func__,  __VA_ARGS__);
-
-// #else
-
-// #define LOG_FMT(...)
-// #define XR_TRACE_ENTRY()
-// #define XR_TRACE_MSG(m)
-// #define XR_TRACE(fmt, ...)
-
-// #endif
-
-// #define XR_ASSERT(test, msg) \
-// do { \
-//     if(!test) { \
-//         LOG_FMT("XR_ASSERT failed file: %s line %d msg: %s", __FILE__, __LINE__, msg ); \
-//         assert(test); \
-//     } \
-// } while(0)
-
-// #define XR_FATAL_ERROR(msg) \
-// do { \
-//     LOG_FMT("Fatal error file: %s line %d msg: %s", __file__, __line__, msg ); \
-//     assert(false); \
-// } while(0)
-
-
-#define XRSW_TYPE_CHECK(w) assert(w->type == XR_WATCHER_SOCKET);
-#define XRTW_TYPE_CHECK(w) assert(w->type == XR_WATCHER_TIMER);
-#define XRQW_TYPE_CHECK(w) assert(w->type == XR_WATCHER_QUEUE);
-#define XRFD_TYPE_CHECK(w) assert(w->type == XR_WATCHER_FDEVENT);
-#define XRLIST_TYPE_CHECK(w) assert(w->type == XR_WATCHER_LISTENER);
-
 #endif

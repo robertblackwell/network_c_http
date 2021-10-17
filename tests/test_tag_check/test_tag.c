@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdlib.h>
 #include <c_http/unittest.h>
 
 
@@ -8,6 +9,7 @@
 #include <c_http/check_tag.h>
 #undef TYPE
 #define CHECK_A(p) CHECK_TAG(TypeA, p)
+#define FAIL_CHECK_A(p) FAIL_CHECK_TAG(TypeA, p)
 
 typedef struct TypeA_s {
     DECLARE_TAG(TypeA);
@@ -26,6 +28,7 @@ TypeARef TypeA_new()
 #include <c_http/check_tag.h>
 #undef TYPE
 #define CHECK_B(p) CHECK_TAG(TypeB, p)
+#define FAIL_CHECK_B(p) FAIL_CHECK_TAG(TypeB, p)
 
 typedef struct TypeB_s {
     DECLARE_TAG(TypeB);
@@ -44,8 +47,8 @@ int test_a()
     CHECK_TAG(TypeA, a);
     CHECK_A(a);
     CHECK_B(b)
-    CHECK_B(a)
-    CHECK_TAG(TypeB, a);
+    FAIL_CHECK_B(a)
+    FAIL_CHECK_TAG(TypeB, a);
 
     return 0;
 }

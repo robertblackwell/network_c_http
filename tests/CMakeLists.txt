@@ -34,7 +34,7 @@ add_subdirectory(test_hdrlist)
 add_subdirectory(test_parser)
 add_subdirectory(test_reactor)
 add_subdirectory(test_xr_macros)
-#add_subdirectory(test_tag_check)
+add_subdirectory(test_tag_check)
 #add_subdirectory(test_list_macro)
 
 if (OFF)

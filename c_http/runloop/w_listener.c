@@ -31,7 +31,7 @@ static void anonymous_free(WatcherRef p)
 void WListener_init(WListenerRef this, XrReactorRef runloop, int fd)
 {
     this->type = XR_WATCHER_LISTENER;
-    XR_LIST_SET_TAG(this);
+    XR_LISTNER_SET_TAG(this);
     this->fd = fd;
     this->runloop = runloop;
     this->free = &anonymous_free;
@@ -47,15 +47,13 @@ WListenerRef WListener_new(XrReactorRef rtor_ref, int fd)
 }
 void WListener_free(WListenerRef this)
 {
-    XRLIST_TYPE_CHECK(this)
-    XR_LIST_CHECK_TAG(this)
+    XR_LISTNER_CHECK_TAG(this)
     close(this->fd);
     free((void*)this);
 }
 void WListener_register(WListenerRef this, ListenerEventHandler event_handler, void* arg)
 {
-    XRLIST_TYPE_CHECK(this)
-    XR_LIST_CHECK_TAG(this)
+    XR_LISTNER_CHECK_TAG(this)
     if( event_handler != NULL) {
         this->listen_evhandler = event_handler;
     }
@@ -72,14 +70,12 @@ void WListener_register(WListenerRef this, ListenerEventHandler event_handler, v
 }
 void WListener_deregister(WListenerRef this)
 {
-    XRLIST_TYPE_CHECK(this)
-    XR_LIST_CHECK_TAG(this)
+    XR_LISTNER_CHECK_TAG(this)
     XrReactor_delete(this->runloop, this->fd);
 }
 void WListener_arm(WListenerRef this, ListenerEventHandler event_handler, void* arg)
 {
-    XRLIST_TYPE_CHECK(this)
-    XR_LIST_CHECK_TAG(this)
+    XR_LISTNER_CHECK_TAG(this)
     if( event_handler != NULL) {
         this->listen_evhandler = event_handler;
     }
@@ -99,5 +95,3 @@ void WListener_disarm(WListenerRef this)
     int res = XrReactor_reregister(this->runloop, this->fd, 0L, (WatcherRef)this);
     assert(res == 0);
 }
-
-

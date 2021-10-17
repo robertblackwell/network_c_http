@@ -6,13 +6,26 @@
 #include <c_http/runloop/reactor.h>
 #include <c_http/runloop/evfd_queue.h>
 
+/**
+ * NOT tested yet - also not used
+ *
+ * The goal of this object is to provide an interthread synchronization mechaism that
+ * can be used qith epoll.
+ *
+ * So that the mechanism used for listen, read, write and timer can also be used
+ * for inter thread communication.
+ *
+ * One would normally do this with a Condition Variable, but condition variables dont integrate
+ * with the epoll_wait mechaism.
+ */
+
 #define TYPE WQueue
 #define WQueue_TAG "XRLST"
 #include <c_http/check_tag.h>
 #undef TYPE
-#define XR_QUEUE_DECLARE_TAG DECLARE_TAG(WQueue)
-#define XR_QUEUE_CHECK_TAG(p) CHECK_TAG(WQueue, p)
-#define XR_QUEUE_SET_TAG(p) SET_TAG(WQueue, p)
+#define XR_WQUEUE_DECLARE_TAG DECLARE_TAG(WQueue)
+#define XR_WQUEUE_CHECK_TAG(p) CHECK_TAG(WQueue, p)
+#define XR_WQUEUE_SET_TAG(p) SET_TAG(WQueue, p)
 
 struct WQueue_s;
 typedef struct WQueue_s WQueue, *WQueueRef;

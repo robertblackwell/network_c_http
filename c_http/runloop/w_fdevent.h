@@ -42,8 +42,8 @@ void WFdEvent_register(WFdEventRef this);
 void WQueue_change_watch(WFdEventRef this, FdEventHandler evhandler, void* arg, uint64_t watch_what);
 
 void WFdEvent_arm(WFdEventRef this,  FdEventHandler evhandler, void* arg);
-void XeFdEvent_disarm(WFdEventRef this);
-void XeFdEvent_fire(WFdEventRef this);
+void WFdEvent_disarm(WFdEventRef this);
+void WFdEvent_fire(WFdEventRef this);
 void WFdEvent_deregister(WFdEventRef this);
 void WFdEvent_fire(WFdEventRef this);
 

@@ -1,5 +1,9 @@
 New list of TODOs :
-  ✔ refactor folders and files to have more logical groupings @done (21-10-16 21:55)
+  ☐ rename XrReactor to something simpler and more generally introduce a runloop naming scheme
+  ☐ what is evfd_event and w_queue - do they both work and do we need them ?
+  ☐ make the reactor tests more understandable 
+  ☐ make sure all the reactor tests actually run - there are some commented out
+  ☐ reactor q test fails
   Tidy up the async stuff:
   ☐ review reactor and run loop functions with a view to keeping as small as possible
   ☐ review watchers for the same reason
@@ -67,6 +71,8 @@ conn:
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+ ✔ ensure that tagggin does not break quietly if the tag is too big - gets caught at runtiime @done (21-10-17 10:39) @project(New list of TODOs )
+ ✔ refactor folders and files to have more logical groupings @done (21-10-16 21:55) @project(New list of TODOs )
  ✔ Think about making XrXXWatcher types all the same type and use a union NO @done (20-12-15 16:16) @project(XR)
  ✔ thorough testing of full and empty conditions - I think something goes wrong when server is overwhelmed by verifier @done (20-12-15 16:12) @project(Queue)
  ✔ the inter thread queue needs tidying up so that no shuffling entries down as the fron is taken away - make a it into a ring @done (20-12-15 16:12) @project(Queue)
