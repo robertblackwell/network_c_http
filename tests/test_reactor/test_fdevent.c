@@ -20,12 +20,13 @@
 //
 
 typedef struct TestCtx_s  {
+    int                 callback1_counter;
     int                 counter;
     int                 max_count;
     struct timespec     start_time;
     XrReactorRef        reactor;
     WTimerRef   timer;
-    WFdEventRef        fdevent;
+    WFdEventRef         fdevent;
     int                 fdevent_counter;
 } TestCtx;
 
@@ -35,36 +36,31 @@ TestCtx* TestCtx_new(int counter_init, int counter_max);
 // single repeating timer
 //
 
-//static int tw_counter_1 = 0;
-static void callback_1(WTimerRef watcher, void* ctx, XrTimerEvent event)
-{
-    uint64_t epollin = EPOLLIN & event;
-    uint64_t error = EPOLLERR & event;
-    TestCtx* ctx_p = (TestCtx*) ctx;
-    WFdEventRef fdev = ctx_p->fdevent;
+int test_timer_multiple_repeating();
+int test_timer_single_repeating();
+static void callback_1(WTimerRef watcher, void* ctx, XrTimerEvent event);
+void fdevent_handler(WFdEventRef fdev_ref, void* arg, uint64_t ev_mask);
 
-    LOG_FMT("counter: %d event is : %lx  ", ctx_p->counter, event);
-    if(ctx_p->counter >= ctx_p->max_count) {
-        LOG_MSG(" clear timer");
-        WTimer_clear(watcher);
-        WFdEvent_deregister(fdev);
-    } else {
-        WFdEvent_fire(fdev);
-        ctx_p->counter++;
-    }
-}
-void fdevent_handler(WFdEventRef fdev_ref, void* arg, uint64_t ev_mask)
+
+int main()
 {
-    TestCtx* t = (TestCtx*)arg;
-    t->fdevent_counter++;
-    LOG_FMT("w: %p arg: %p ev mask: %ld fdevent_counter % d", fdev_ref , arg, ev_mask, t->fdevent_counter);
+    UT_ADD(test_timer_single_repeating);
+//    UT_ADD(test_timer_multiple_repeating);
+    int rc = UT_RUN();
+    return rc;
 }
+/**
+ * Use a time to repeatedly fire a fdevent and check that the
+ * fdevent watcher catches all the fired events.
+ * All happens in a single thread
+ */
+#define NBR_TIMES_FIRE 10
 int test_timer_single_repeating()
 {
-    // counter starts at 0 and increments to max 5
-    TestCtx* test_ctx_p = TestCtx_new(0, 5);
+    TestCtx* test_ctx_p = TestCtx_new(0, NBR_TIMES_FIRE);
 
     XrReactorRef rtor_ref = XrReactor_new();
+    test_ctx_p->reactor = rtor_ref;
     WTimerRef tw_1 = WTimer_new(rtor_ref, &callback_1, (void*)test_ctx_p, 1000, true);
     WTimer_disarm(tw_1);
     WFdEventRef fdev = WFdEvent_new(rtor_ref);
@@ -85,6 +81,7 @@ int test_timer_single_repeating()
     XrReactor_free(rtor_ref);
     return 0;
 }
+
 int test_timer_multiple_repeating()
 {
     TestCtx* test_ctx_p_1 = TestCtx_new(0, 5);
@@ -103,19 +100,40 @@ int test_timer_multiple_repeating()
     XrReactor_free(rtor_ref);
     return 0;
 }
+static void callback_1(WTimerRef watcher, void* ctx, XrTimerEvent event)
+{
+    uint64_t epollin = EPOLLIN & event;
+    uint64_t error = EPOLLERR & event;
+    TestCtx* ctx_p = (TestCtx*) ctx;
+    WFdEventRef fdev = ctx_p->fdevent;
+    LOG_FMT("callback1_counter %d counter: %d event is : %lx  ", ctx_p->callback1_counter, ctx_p->counter, event);
+    if(ctx_p->counter >= ctx_p->max_count) {
+        LOG_MSG(" clear timer");
+        XrReactor_close(ctx_p->reactor);
+//        WTimer_clear(watcher);
+//        WFdEvent_deregister(fdev);
+    } else {
+        WFdEvent_fire(fdev);
+        ctx_p->counter++;
+        WFdEvent_fire(fdev);
+        ctx_p->counter++;
+
+    }
+    ctx_p->callback1_counter++;
+}
+void fdevent_handler(WFdEventRef fdev_ref, void* arg, uint64_t ev_mask)
+{
+    TestCtx* t = (TestCtx*)arg;
+    t->fdevent_counter++;
+    LOG_FMT("w: %p arg: %p ev mask: %ld fdevent_counter % d", fdev_ref , arg, ev_mask, t->fdevent_counter);
+}
+
 TestCtx* TestCtx_new(int counter_init, int counter_max)
 {
     TestCtx* tmp = malloc(sizeof(TestCtx));
     tmp->counter = counter_init;
+    tmp->callback1_counter = 0;
     tmp->max_count = counter_max;
     tmp->fdevent_counter = 0;
     return tmp;
-}
-
-int main()
-{
-    UT_ADD(test_timer_single_repeating);
-//    UT_ADD(test_timer_multiple_repeating);
-    int rc = UT_RUN();
-    return rc;
 }

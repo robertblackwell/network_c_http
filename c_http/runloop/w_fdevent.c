@@ -4,8 +4,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <sys/epoll.h>
+#include <sys/eventfd.h>
 #include <unistd.h>
 #include <c_http/async/types.h>
+
+#define TWO_PIPE_TRICKx
+#define SEMAPHORE
 
 /**
  *
@@ -19,14 +23,18 @@ static void handler(WatcherRef fdevent_ref, int fd, uint64_t event)
     XR_FDEV_CHECK_TAG(fdev)
     uint64_t buf;
     int nread = read(fdev->fd, &buf, sizeof(buf));
+    printf("XXXX value read from fdevent fd: nread %d value %ld\n", nread, buf);
     assert(fd == fdev->fd);
-    fdev->fd_event_handler(fdev, fdev->fd_event_handler_arg, event);
+    if(nread == sizeof(buf)) {
+        fdev->fd_event_handler(fdev, fdev->fd_event_handler_arg, event);
+    } else {
+
+    }
 }
 static void anonymous_free(WatcherRef p)
 {
     WFdEventRef fdevp = (WFdEventRef)p;
     XR_FDEV_CHECK_TAG(fdevp)
-
     WFdEvent_free(fdevp);
 }
 void WFdEvent_init(WFdEventRef this, XrReactorRef runloop)
@@ -34,11 +42,18 @@ void WFdEvent_init(WFdEventRef this, XrReactorRef runloop)
     this->type = XR_WATCHER_FDEVENT;
     XR_FDEV_SET_TAG(this);
     XR_FDEV_CHECK_TAG(this)
-//    this->fd = eventfd(0, O_NONBLOCK | O_CLOEXEC);
+#ifdef TWO_PIPE_TRICK
     int pipefds[2];
     pipe(pipefds);
     this->fd = pipefds[0];
     this->write_fd = pipefds[1];
+#else
+    #ifdef SEMAPHORE
+        this->fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC | EFD_SEMAPHORE);
+    #else
+        this->fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+    #endif
+#endif
     this->runloop = runloop;
     this->free = &anonymous_free;
     this->handler = &handler;
@@ -105,6 +120,12 @@ void WFdEvent_disarm(WFdEventRef this)
 void WFdEvent_fire(WFdEventRef this)
 {
     XR_FDEV_CHECK_TAG(this)
+#ifdef TWO_PIPE_TRICK
     uint64_t buf = 1;
     write(this->write_fd, &buf, sizeof(buf));
+#else
+    uint64_t buf = 1;
+    int x = write(this->fd, &buf, sizeof(buf));
+    assert(x == sizeof(buf));
+#endif
 }
