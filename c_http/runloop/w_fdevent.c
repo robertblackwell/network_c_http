@@ -9,7 +9,7 @@
 #include <c_http/async/types.h>
 
 #define TWO_PIPE_TRICKx
-#define SEMAPHORE
+#define SEMAPHORE;lkj
 
 /**
  *

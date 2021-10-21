@@ -10,8 +10,8 @@
 #include <c_http/check_tag.h>
 #undef TYPE
 #define XRTW_DECLARE_TAG DECLARE_TAG(WTimer)
-#define XRTW_CHECK_TAG(p) CHECK_TAG(WTimer, p)
-#define XRTW_SET_TAG(p) SET_TAG(WTimer, p)
+#define XR_WTIMER_CHECK_TAG(p) CHECK_TAG(WTimer, p)
+#define XR_WTIMER_SET_TAG(p) SET_TAG(WTimer, p)
 
 
 struct WTimer_s;

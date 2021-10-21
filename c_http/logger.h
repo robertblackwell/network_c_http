@@ -1,6 +1,6 @@
 #ifndef c_c_http_logger_h
 #define c_c_http_logger_h
-#define GNU_SOURCE
+#define _GNU_SOURCE
 #include <stdio.h>
 /**
  * @addtogroup group_logger

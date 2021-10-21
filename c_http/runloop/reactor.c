@@ -1,5 +1,6 @@
-#define XR_TRACE_ENABLE
-#define ENABLE_LOG
+#define XR_TRACE_ENABLEx
+#define ENABLE_LOGx
+#define _GNU_SOURCE
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -46,9 +47,9 @@ static void XrReactor_epoll_ctl(XrReactorRef this, int op, int fd, uint64_t inte
     };
     int status = epoll_ctl(this->epoll_fd, op, fd, &(epev));
     if (status != 0) {
-        LOG_FMT("XrReactor_epoll_ctl epoll_fd: %d status : %d errno : %d\n", this->epoll_fd, status, errno);
+        LOG_FMT("XrReactor_epoll_ctl epoll_fd: %d status : %d errno : %d", this->epoll_fd, status, errno);
     }
-    LOG_FMT("XrReactor_epoll_ctl epoll_fd: %d status : %d errno : %d\n", this->epoll_fd, status, errno);
+    LOG_FMT("XrReactor_epoll_ctl epoll_fd: %d status : %d errno : %d", this->epoll_fd, status, errno);
     CHTTP_ASSERT((status == 0), "epoll ctl call failed");
 }
 
@@ -60,7 +61,7 @@ XrReactorRef XrReactor_new(void) {
     runloop->epoll_fd = epoll_create1(0);
     runloop->closed_flag = false;
     CHTTP_ASSERT((runloop->epoll_fd != -1), "epoll_create failed");
-    LOG_FMT("XrReactor_new epoll_fd %d\n", runloop->epoll_fd);
+    LOG_FMT("XrReactor_new epoll_fd %d", runloop->epoll_fd);
     runloop->table = FdTable_new();
     runloop->run_list = RunList_new();
     return runloop;
@@ -71,7 +72,7 @@ void XrReactor_close(XrReactorRef this)
     XR_REACTOR_CHECK_TAG(this)
     this->closed_flag = true;
     int status = close(this->epoll_fd);
-    LOG_FMT("XrReactor_close status: %d errno: %d \n", status, errno);
+    LOG_FMT("XrReactor_close status: %d errno: %d", status, errno);
     CHTTP_ASSERT((status != -1), "close epoll_fd failed");
     int next_fd = FdTable_iterator(this->table);
     while (next_fd  != -1) {
@@ -103,7 +104,7 @@ int XrReactor_register(XrReactorRef this, int fd, uint32_t interest, WatcherRef 
 {
     XR_REACTOR_CHECK_TAG(this)
 
-    LOG_FMT("fd : %d  for events %d\n", fd, interest);
+    LOG_FMT("fd : %d  for events %d", fd, interest);
     XrReactor_epoll_ctl (this, EPOLL_CTL_ADD, fd, interest);
     FdTable_insert(this->table, wref, fd);
     return 0;
@@ -172,10 +173,10 @@ int XrReactor_run(XrReactorRef this, time_t timeout) {
                 for (int i = 0; i < nfds; i++) {
                     int fd = events[i].data.fd;
                     int mask = events[i].events;
-                    LOG_FMT("XrReactor_run loop fd: %d events: %x \n", fd, mask);
+                    LOG_FMT("XrReactor_run loop fd: %d events: %x", fd, mask);
                     WatcherRef wref = FdTable_lookup(this->table, fd);
                     wref->handler((void*)wref, fd, events[i].events);
-                    LOG_FMT("fd: %d\n", fd);
+                    LOG_FMT("fd: %d", fd);
                     // call handler
                 }
             }

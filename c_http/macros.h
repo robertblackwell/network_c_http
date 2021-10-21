@@ -1,5 +1,6 @@
-#ifndef c_http/macros_h
+#ifndef c_http_macros_h
 #define c_http_macros_h
+#include <stdio.h>
 #include <c_http/logger.h>
 /**
  * @addtogroup group_macros
