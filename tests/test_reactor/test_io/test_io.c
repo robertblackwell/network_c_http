@@ -31,6 +31,8 @@ Reader thread
     wait for fd to become readable
     read and print message
 
+  @TODO - would be worth seeing how to d this in a single thread
+
  */
 
 
