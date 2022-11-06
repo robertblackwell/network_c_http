@@ -14,29 +14,33 @@
 #include <c_http/runloop/reactor.h>
 #include <c_http/runloop/w_timerfd.h>
 //
-// A)
-// theses tests deomstrate that a timer is called the expected number of times,
-// that the timer callback can cancel the timer
-// when all timers have been cancelled the reactor::run() function exits
+// A) These tests deomstrate that
+// -    a timer is called the expected number of times,
+// -    that the timer callback can cancel the timer
+// -    when all timers have been cancelled the reactor::run() function exits
 //
-// b) how to "post" a callback function to run on the "next tick" in javascript language
+// B) how to "post" a callback function to run on the "next tick" in javascript language style
 //
 static struct timespec current_time();
 static double time_diff(struct timespec a, struct timespec b);
 
 typedef struct TestCtx_s  {
-    int                 counter;
-    int                 max_count;
-    struct timespec     start_time;
-    ReactorRef        reactor;
-    WTimerFdRef   watcher;
+    int                 counter;    //  How many times a callback received this instance as a void* argument
+    int                 max_count;  //  The expected maximum tnumber of times a callback should be called with this
+                                    //  instance
+    struct timespec     start_time; //  the time at which the timer was first scheduled
+    ReactorRef          reactor;    //  the reactor being used for the timer
+    WTimerFdRef         watcher;    //  the timer being used for this experiment
 } TestCtx;
 
 TestCtx* TestCtx_new(int counter_init, int counter_max);
 
-//
-// non repeating test
-//
+//////////////////////////////////////////////////////////////////////////////////////////////////////
+// A callback for the non repeating test.
+// It expects to get called with the ctx argument as a void* pointing to an instance of TestCtx.
+// The ctx arg contains enough info for the callback to calculate the margin by which it failed to
+// be called when it was expected to be called
+///////////////////////////////////////////////////////////////////////////////////////////////////////
 static void callback_non_repeating(WTimerFdRef watcher, void* ctx, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
@@ -50,7 +54,15 @@ static void callback_non_repeating(WTimerFdRef watcher, void* ctx, XrTimerEvent 
     LOG_FMT("counter : %d  %%error: %f event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, gap, event, epollin, error);
     ctx_p->counter++;
 }
-
+/**
+ * A test harness for demonstrating a non-repeating timer.
+ * A timer is initiated and the callback increments a counter on each call.
+ * After a set number of calls to the callback
+ * The timer is cancelled by the callback
+ * Cancellation of the timer causes the runloop to end
+ * After end of the runloop the TestCtx->counter is verified to be equal to the
+ * required number of invocations
+ */
 int test_timer_non_repeating()
 {
 
@@ -62,18 +74,23 @@ int test_timer_non_repeating()
     WTimerFdRef tw_1 = WTimerFd_new(rtor_ref, &callback_non_repeating, test_ctx_p_1, 100, false);
 
     XrReactor_run(rtor_ref, 10000);
+    /*We should only get here when there are no more timers or other events pending in the runloop*/
     XrReactor_free(rtor_ref);
-    // prove callback_non_repeating was called exactly once
+    /* prove callback_non_repeating was called exactly once */
     UT_EQUAL_INT(test_ctx_p_1->counter, 1);
     free(test_ctx_p_1);
     return 0;
 }
 //
-// single repeating timer
-//
-
-//static int tw_counter_1 = 0;
-static void callback_1(WTimerFdRef watcher, void* ctx, XrTimerEvent event)
+/* single repeating timer
+* A timer is initiated and the callback increments a counter on each call.
+* After a set number of calls to the callback
+* The timer is cancelled by the callback
+* Cancellation of the timer causes the runloop to end
+* After end of the runloop the TestCtx->counter is verified to be equal to the
+* required number of invocations
+*/
+static void callback_repeating(WTimerFdRef watcher, void* ctx, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
@@ -99,7 +116,7 @@ int test_timer_single_repeating()
 
     ReactorRef rtor_ref = XrReactor_new();
 
-    WTimerFdRef tw_1 = WTimerFd_new(rtor_ref, &callback_1, (void*)test_ctx_p, 100, true);
+    WTimerFdRef tw_1 = WTimerFd_new(rtor_ref, &callback_repeating, (void*)test_ctx_p, 100, true);
 
     XrReactor_run(rtor_ref, 10000);
 
@@ -113,7 +130,7 @@ int test_timer_single_repeating()
 // multiple repeating times
 //
 //static int tw_counter_2 = 0;
-static void callback_2(WTimerFdRef watcher, void* ctx, XrTimerEvent event)
+static void callback_multiple_repeating_timers(WTimerFdRef watcher, void* ctx, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
@@ -124,9 +141,9 @@ static void callback_2(WTimerFdRef watcher, void* ctx, XrTimerEvent event)
     gap = percent_error;
     ctx_p->start_time = tnow;
 
-    LOG_FMT(" counter: %d  %%error : %f event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, gap, event, epollin, error);
-    if(ctx_p->counter >= 6) {
-        LOG_MSG(" clear timer ");
+    LOG_FMT(" counter: %d  ctx: %p  event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, ctx, event, epollin, error);
+    if(ctx_p->counter >= ctx_p->max_count) {
+        LOG_FMT(" clear timer %p", ctx);
         WTimerFd_clear(watcher);
     } else {
         ctx_p->counter++;
@@ -139,8 +156,8 @@ int test_timer_multiple_repeating()
 
     ReactorRef rtor_ref = XrReactor_new();
 
-    WTimerFdRef tw_1 = WTimerFd_new(rtor_ref, &callback_1, test_ctx_p_1, 100, true);
-    WTimerFdRef tw_2 = WTimerFd_new(rtor_ref, &callback_1, test_ctx_p_2, 100, true);
+    WTimerFdRef tw_1 = WTimerFd_new(rtor_ref, &callback_multiple_repeating_timers, test_ctx_p_1, 100, true);
+    WTimerFdRef tw_2 = WTimerFd_new(rtor_ref, &callback_multiple_repeating_timers, test_ctx_p_2, 100, true);
 
     XrReactor_run(rtor_ref, 10000);
     UT_EQUAL_INT(test_ctx_p_1->counter, test_ctx_p_1->max_count);
