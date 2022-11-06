@@ -10,15 +10,15 @@
 
 
 static MessageRef make_simple_response(XrHandlerRef this, MessageRef request);
-static void on_write_cb_simple(XrConnRef conn_ref, void* arg, int status);
+static void on_write_cb_simple(TcpConnRef conn_ref, void* arg, int status);
 
 static void set_status_ok_200(MessageRef response);
 static void set_headers(MessageRef response);
 static void set_body_and_content_length_header(MessageRef response, BufferChainRef body);
 
 static BufferChainRef make_simple_body(XrHandlerRef this, int fd);
-static void on_done(XrConnRef conn, XrHandlerRef hdlr);
-static void on_error(XrConnRef conn, XrHandlerRef hdlr, int status);
+static void on_done(TcpConnRef conn, XrHandlerRef hdlr);
+static void on_error(TcpConnRef conn, XrHandlerRef hdlr, int status);
 
 /**
  * XrSimpleHandler - handles a non echo request
@@ -29,7 +29,7 @@ void XrSimpleHandler(XrHandlerRef this)
     MessageRef request = this->request;
     MessageRef response = make_simple_response(this, request);
     this->resp_buf = Message_serialize(response);
-    XrConn_write(this->conn_ref, this->resp_buf, on_write_cb_simple, this);
+    TcpConn_write(this->conn_ref, this->resp_buf, on_write_cb_simple, this);
 }
 /**
  * make_simple_response
@@ -44,7 +44,7 @@ static MessageRef make_simple_response(XrHandlerRef this, MessageRef request)
     set_body_and_content_length_header(response, make_simple_body(this, fd));
     return response;
 }
-static void on_write_cb_simple(XrConnRef conn_ref, void* arg, int status)
+static void on_write_cb_simple(TcpConnRef conn_ref, void* arg, int status)
 {
     LOG_FMT("conn_ref: %p arg: %p status: %d", conn_ref, arg, status);
     XrHandlerRef hdlr = arg;
@@ -107,11 +107,11 @@ static BufferChainRef make_simple_body(XrHandlerRef this, int fd)
 /**
  * on_write_cb on_error on_done
  */
-static void on_done(XrConnRef conn, XrHandlerRef hdlr)
+static void on_done(TcpConnRef conn, XrHandlerRef hdlr)
 {
     LOG_FMT("on_done\n");
 }
-static void on_error(XrConnRef conn, XrHandlerRef hdlr, int status)
+static void on_error(TcpConnRef conn, XrHandlerRef hdlr, int status)
 {
     LOG_FMT("on_error");
 }

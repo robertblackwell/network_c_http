@@ -19,10 +19,10 @@
 #include <c_http/sync/sync_client.h>
 #include <c_http/runloop/reactor.h>
 #include <c_http/runloop/watcher.h>
-#include <c_http/runloop/w_timer.h>
-#include <c_http/runloop/w_socket.h>
+#include <c_http/runloop/w_timerfd.h>
+#include <c_http/runloop/w_iofd.h>
 #include <c_http/runloop/w_listener.h>
-#include <c_http/runloop/w_fdevent.h>
+#include <c_http/runloop/w_eventfd.h>
 
 typedef int socket_handle_t;
 
@@ -38,10 +38,10 @@ typedef int socket_handle_t;
 struct Listener_s {
     socket_handle_t         listening_socket_fd;
     XrHandlerFunction       handler;
-    XrReactorRef            reactor_ref;
-    WListenerRef            listening_watcher_ref;
-    WTimerRef               timer_ref;
-    XrConnListRef           conn_list_ref;
+    ReactorRef            reactor_ref;
+    WListenerFdRef            listening_watcher_ref;
+    WTimerFdRef               timer_ref;
+    TcpConnListRef           conn_list_ref;
     int                     listen_counter;
     int                     accept_count;
 };

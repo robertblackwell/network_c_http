@@ -1,26 +1,26 @@
-#ifndef c_http_twatcher_h
-#define c_http_twatcher_h
-#include <c_http/runloop/reactor.h>
+#ifndef c_http_w_timerfd_h
+#define c_http_w_timerfd_h
 #include <stdint.h>
 #include <stdbool.h>
+#include <c_http/runloop/types.h>
+#include <c_http/runloop/reactor.h>
 #include <c_http/runloop/watcher.h>
 
-#define TYPE WTimer
-#define WTimer_TAG "XRTW"
+#define TYPE WTimerFd
+#define WTimerFd_TAG "XRTW"
 #include <c_http/check_tag.h>
 #undef TYPE
-#define XRTW_DECLARE_TAG DECLARE_TAG(WTimer)
-#define XR_WTIMER_CHECK_TAG(p) CHECK_TAG(WTimer, p)
-#define XR_WTIMER_SET_TAG(p) SET_TAG(WTimer, p)
+#define XRTW_DECLARE_TAG DECLARE_TAG(WTimerFd)
+#define XR_WTIMER_CHECK_TAG(p) CHECK_TAG(WTimerFd, p)
+#define XR_WTIMER_SET_TAG(p) SET_TAG(WTimerFd, p)
 
 
-struct WTimer_s;
-typedef struct WTimer_s WTimer, *WTimerRef;
+struct WTimerFd_s;
+typedef struct WTimerFd_s WTimerFd, *WTimerFdRef;
 typedef uint64_t XrTimerEvent;
 
-typedef void(WTimerCaller(void* ctx, int fd, uint64_t event));
 
-struct WTimer_s {
+struct WTimerFd_s {
     struct Watcher_s;
     /**
      * XrTimerWatecher specific properties
@@ -36,20 +36,20 @@ struct WTimer_s {
  * and register it with the provided XrReactor. In order that the timer is completely
  * specified an event handler, void* arg, interval_ms and bool repeating must be provided.
  * 
- * @param rtor_ref       XrReactorRef
+ * @param rtor_ref       ReactorRef
  * @param cb             TimerEventHandler      an event handler function
  * @param ctx            void*                  argument for the event handler
  * @param interval_ms    uint64_t               timer interval in ms
  * @param repeating      bool                   Whether repeating or not
- * @return WTimerRef
+ * @return WTimerFdRef
  */
-WTimerRef WTimer_new(XrReactorRef rtor_ref, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
+WTimerFdRef WTimerFd_new(ReactorRef rtor_ref, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
 
 /**
  * Release all attached resources, deregister the timer from the Reactor and free memory.
  * @param this
  */
-void WTimer_free(WTimerRef this);
+void WTimerFd_free(WTimerFdRef this);
 /**
  * Set new values for the timer parameters
  * @param this
@@ -58,14 +58,14 @@ void WTimer_free(WTimerRef this);
  * @param interval_ms    uint64_t               timer interval in ms
  * @param repeating      bool                   Whether repeating or not
  */
-void WTimer_set(WTimerRef this, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
+void WTimerFd_set(WTimerFdRef this, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
 
-void WTimer_update(WTimerRef this, uint64_t interval_ms, bool repeating);
+void WTimerFd_update(WTimerFdRef this, uint64_t interval_ms, bool repeating);
 
-void WTimer_disarm(WTimerRef this);
-void WTimer_rearm_old(WTimerRef this, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
-void WTimer_rearm(WTimerRef this);
-void WTimer_clear(WTimerRef this);
+void WTimerFd_disarm(WTimerFdRef this);
+void WTimerFd_rearm_old(WTimerFdRef this, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
+void WTimerFd_rearm(WTimerFdRef this);
+void WTimerFd_clear(WTimerFdRef this);
 
 
 

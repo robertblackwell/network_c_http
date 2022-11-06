@@ -18,7 +18,7 @@ static void anonymous_free(WatcherRef p)
     XR_WQUEUE_CHECK_TAG(queue_watcher_ref)
     WQueue_dispose(queue_watcher_ref);
 }
-void WQueue_init(WQueueRef this, XrReactorRef runloop, EvfdQueueRef qref)
+void WQueue_init(WQueueRef this, ReactorRef runloop, EvfdQueueRef qref)
 {
     XR_WQUEUE_SET_TAG(this);
     this->type = XR_WATCHER_QUEUE;
@@ -29,7 +29,7 @@ void WQueue_init(WQueueRef this, XrReactorRef runloop, EvfdQueueRef qref)
     this->free = &anonymous_free;
     this->handler = &handler;
 }
-WQueueRef WQueue_new(XrReactorRef rtor_ref, EvfdQueueRef qref)
+WQueueRef WQueue_new(ReactorRef rtor_ref, EvfdQueueRef qref)
 {
     WQueueRef this = malloc(sizeof(WQueue));
     WQueue_init(this, rtor_ref, qref);

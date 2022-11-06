@@ -3,46 +3,47 @@
 #include <time.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <c_http/async/types.h>
-#include <c_http/runloop/reactor.h>
+#include <c_http/runloop/types.h>
 #include <c_http/runloop/watcher.h>
+#include <c_http/runloop/reactor.h>
 
-#define TYPE WListener
-#define WListener_TAG "XRLSTNR"
+
+#define TYPE WListenerFd
+#define WListenerFd_TAG "XRLSTNR"
 #include <c_http/check_tag.h>
 #undef TYPE
-#define XR_LISTNER_DECLARE_TAG DECLARE_TAG(WListener)
-#define XR_LISTNER_CHECK_TAG(p) CHECK_TAG(WListener, p)
-#define XR_LISTNER_SET_TAG(p) SET_TAG(WListener, p)
+#define XR_LISTNER_DECLARE_TAG DECLARE_TAG(WListenerFd)
+#define XR_LISTNER_CHECK_TAG(p) CHECK_TAG(WListenerFd, p)
+#define XR_LISTNER_SET_TAG(p) SET_TAG(WListenerFd, p)
 
 
-typedef uint64_t XrSocketEvent;
+// typedef uint64_t XrSocketEvent;
 
-typedef void(WListenerCaller(void* ctx));
+// typedef void(WListenerCaller(void* ctx));
 
-struct WListener_s {
+struct WListenerFd_s {
     struct Watcher_s;
     ListenerEventHandler*    listen_evhandler;
     void*                    listen_arg;
 };
 
-WListenerRef WListener_new(XrReactorRef runloop, int fd);
-void WListener_free(WListenerRef this);
-void WListener_register(WListenerRef this, ListenerEventHandler event_handler, void* arg);
-void WListener_deregister(WListenerRef this);
+WListenerFdRef WListenerFd_new(ReactorRef runloop, int fd);
+void WListenerFd_free(WListenerFdRef this);
+void WListenerFd_register(WListenerFdRef this, ListenerEventHandler event_handler, void* arg);
+void WListenerFd_deregister(WListenerFdRef this);
 
 /**
  * Enable reception of fd listener events and set the event handler
- * @param this            WListenerRef
+ * @param this            WListenerFdRef
  * @param arg             void*               Context data. Discretion of the caller
  * @param fd_event_handler
  */
-void WListener_arm(WListenerRef this, ListenerEventHandler fd_event_handler, void* arg);
+void WListenerFd_arm(WListenerFdRef this, ListenerEventHandler fd_event_handler, void* arg);
 
 /**
  * Disable reception of fd read events for the socket
  * @param this
  */
-void XrLIstener_disarm(WListenerRef this);
+void XrLIstener_disarm(WListenerFdRef this);
 
 #endif

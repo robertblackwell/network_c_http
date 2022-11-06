@@ -2,8 +2,12 @@
 #define c_http_xr_handler_example_h
 
 #include <c_http/common/message.h>
-#include <c_http/async/conn.h>
 #include <c_http/common/hdrlist.h>
+#include <c_http/async/types.h>
+#include <c_http/async/tcp_conn.h>
+#include "types.h"
+#include "tcp_conn.h"
+#include "tcp_conn_list.h"
 
 struct XrHandler_s;
 typedef enum XrHandlerState {
@@ -14,7 +18,7 @@ typedef enum XrHandlerState {
 } XrHandlerState;
 
 struct XrHandler_s {
-    XrConnRef conn_ref;  // weak non owning reference
+    TcpConnRef conn_ref;  // weak non owning reference
     MessageRef      request;   // weak non owning reference
     IOBufferRef     status_line;
     HdrListRef      headers;
@@ -34,15 +38,15 @@ struct XrHandler_s {
  * @param done
  * @return nothing
  */
-void XrHandler_function(MessageRef request, XrConnRef conn, HandlerDoneFunction done);
+void XrHandler_function(MessageRef request, TcpConnRef conn, HandlerDoneFunction done);
 
 /**
  * Makes an instance of XrHandler. This instance takes a non owning reference to
- * the XrConn instance and the MessageRef req_msg_ref held by the conn_ref
- * \param conn XrConnRef
+ * the TcpConn instance and the MessageRef req_msg_ref held by the conn_ref
+ * \param conn TcpConnRef
  * \return
  */
-XrHandlerRef XrHandler_new(XrConnRef conn);
+XrHandlerRef XrHandler_new(TcpConnRef conn);
 void XrHandler_free(XrHandlerRef this);
 /**
  * Returns an IOBufferRef containing the status line of the response

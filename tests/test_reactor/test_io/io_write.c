@@ -12,8 +12,8 @@
 #include <c_http/common/utils.h>
 #include <c_http/async/types.h>
 #include <c_http/runloop/reactor.h>
-#include <c_http/runloop/w_timer.h>
-#include <c_http/runloop/w_socket.h>
+#include <c_http/runloop/w_timerfd.h>
+#include <c_http/runloop/w_iofd.h>
 
 /**
  * The writer does the following
@@ -25,7 +25,7 @@
  *  rearm the timer
  *
  */
-void WriteCtx_init(WriteCtx* this, int fd, WSocketRef swatcher, WTimerRef twatcher, int max)
+void WriteCtx_init(WriteCtx* this, int fd, WIoFdRef swatcher, WTimerFdRef twatcher, int max)
 {
     this->id = "WRITE";
     this->writefd = fd;
@@ -64,10 +64,10 @@ void Writer_add_fd(Writer* this, int fd, int max, int interval_ms)
     this->ctx_table[this->count].writefd = fd;
     this->count++;
 }
-static void wrtr_wait(WTimerRef watch, void* arg, uint64_t event);
-static void wrtr_cb(WSocketRef sock_watch, void* arg, uint64_t event)
+static void wrtr_wait(WTimerFdRef watch, void* arg, uint64_t event);
+static void wrtr_cb(WIoFdRef sock_watch, void* arg, uint64_t event)
 {
-    XrReactorRef reactor = sock_watch->runloop;
+    ReactorRef reactor = sock_watch->runloop;
     XR_SOCKW_CHECK_TAG(sock_watch)
     WriteCtx* ctx = (WriteCtx*)(arg);
     LOG_FMT("test_io: Socket watcher wrtr_callback");
@@ -86,14 +86,14 @@ static void wrtr_cb(WSocketRef sock_watch, void* arg, uint64_t event)
         return;
     }
     // disarm writeable events on this fd
-    WSocket_disarm_write(sock_watch);
+    WIoFd_disarm_write(sock_watch);
     WR_CTX_CHECK_TAG(ctx)
     XR_SOCKW_CHECK_TAG(ctx->swatcher)
     XR_WTIMER_CHECK_TAG(ctx->twatcher)
     // rearm the timer
-    WTimer_rearm(ctx->twatcher);
+    WTimerFd_rearm(ctx->twatcher);
 }
-static void wrtr_wait(WTimerRef watch, void* arg, uint64_t event)
+static void wrtr_wait(WTimerFdRef watch, void* arg, uint64_t event)
 {
     XR_WTIMER_CHECK_TAG(watch)
     LOG_FMT("test_io: Socket watcher wrtr_wait\n");
@@ -110,38 +110,38 @@ static void wrtr_wait(WTimerRef watch, void* arg, uint64_t event)
         int nwrite = write(ctx->writefd, wbuf, strlen(wbuf));
         free(wbuf);
     } else {
-        WTimer_disarm(watch);
+        WTimerFd_disarm(watch);
         uint64_t interest = EPOLLERR | EPOLLOUT;
-        WSocket_arm_write(ctx->swatcher, &wrtr_cb, (void*) ctx);
+        WIoFd_arm_write(ctx->swatcher, &wrtr_cb, (void*) ctx);
     }
 }
 void* writer_thread_func(void* arg)
 {
     int wait_first = 1;
-    XrReactorRef rtor_ref = XrReactor_new();
+    ReactorRef rtor_ref = XrReactor_new();
     Writer* wrtr = (Writer*)arg;
     for(int i = 0; i < wrtr->count; i++) {
         WriteCtx* ctx = &(wrtr->ctx_table[i]);
 
-        wrtr->ctx_table[i].swatcher = WSocket_new(rtor_ref, ctx->writefd);
-        wrtr->ctx_table[i].twatcher = WTimer_new(rtor_ref, &wrtr_wait, (void*)ctx,  ctx->interval_ms, true);
+        wrtr->ctx_table[i].swatcher = WIoFd_new(rtor_ref, ctx->writefd);
+        wrtr->ctx_table[i].twatcher = WTimerFd_new(rtor_ref, &wrtr_wait, (void*)ctx,  ctx->interval_ms, true);
 
         WR_CTX_CHECK_TAG(ctx)
         XR_WTIMER_CHECK_TAG(ctx->twatcher);
         XR_SOCKW_CHECK_TAG(ctx->swatcher);
 
-        WSocketRef sw = wrtr->ctx_table[i].swatcher;
+        WIoFdRef sw = wrtr->ctx_table[i].swatcher;
 
         if(wait_first) {
             // register armed - wait 2 seconds
             // register disarmed - timer cb will arm it
-            WSocket_register(ctx->swatcher);
-            WSocket_arm_write(ctx->swatcher, &wrtr_cb, (void*)ctx);
+            WIoFd_register(ctx->swatcher);
+            WIoFd_arm_write(ctx->swatcher, &wrtr_cb, (void*)ctx);
         } else {
 
             uint64_t interest = EPOLLERR | EPOLLOUT;
-            WSocket_register(sw);
-            WSocket_arm_write(sw, &wrtr_cb, (void*) ctx);
+            WIoFd_register(sw);
+            WIoFd_arm_write(sw, &wrtr_cb, (void*) ctx);
         }
     }
 

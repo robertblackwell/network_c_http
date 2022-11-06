@@ -1,7 +1,7 @@
 #define _GNU_SOURCE
 #define ENABLE_LOG
 
-#include <c_http/async/xr_server.h>
+#include <c_http/async/async_server.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -13,31 +13,31 @@
 #include <c_http/common/alloc.h>
 #include <c_http/common/utils.h>
 #include <c_http/socket_functions.h>
-#include<c_http/async/conn.h>
+#include<c_http/async/tcp_conn.h>
 #include <c_http/runloop/w_listener.h>
 
 
 static socket_handle_t create_listener_socket(int port, const char *host);
 static void set_non_blocking(socket_handle_t socket);
 static void on_post_done(void* arg);
-static void on_message(XrConnRef conn_ref, void* arg, int status);
-void on_event_listening(WListenerRef listener_watcher_ref, void *arg, uint64_t event);
+static void on_message(TcpConnRef conn_ref, void* arg, int status);
+void on_event_listening(WListenerFdRef listener_watcher_ref, void *arg, uint64_t event);
 
-XrServerRef XrServer_new(int port)
+AsyncServerRef AsyncServer_new(int port)
 {
-    XrServerRef sref = (XrServerRef) eg_alloc(sizeof(XrServer));
+    AsyncServerRef sref = (AsyncServerRef) eg_alloc(sizeof(AsyncServer));
     sref->port = port;
     return sref;
 }
 
-void XrServer_dispose(XrServerRef *sref)
+void AsyncServer_dispose(AsyncServerRef *sref)
 {
     ASSERT_NOT_NULL(*sref);
     free(*sref);
     *sref = NULL;
 }
 
-void XrServer_listen(XrServerRef sref)
+void AsyncServer_listen(AsyncServerRef sref)
 {
     ASSERT_NOT_NULL(sref)
     int port = sref->port;
@@ -46,15 +46,15 @@ void XrServer_listen(XrServerRef sref)
     sref->listening_socket_fd = create_listener_socket(port, "127.0.0.1");
     set_non_blocking(sref->listening_socket_fd);
     sref->reactor_ref = XrReactor_new();
-    sref->listening_watcher_ref = WListener_new(sref->reactor_ref, sref->listening_socket_fd);
-    WListenerRef lw = sref->listening_watcher_ref;
-    WListener_register(lw, on_event_listening, sref);
+    sref->listening_watcher_ref = WListenerFd_new(sref->reactor_ref, sref->listening_socket_fd);
+    WListenerFdRef lw = sref->listening_watcher_ref;
+    WListenerFd_register(lw, on_event_listening, sref);
     XrReactor_run(sref->reactor_ref, -1);
-    LOG_FMT("XrServer finishing");
+    LOG_FMT("AsyncServer finishing");
 
 }
 
-void XrServer_terminate(XrServerRef this)
+void AsyncServer_terminate(AsyncServerRef this)
 {
     close(this->listening_socket_fd);
 }
@@ -116,30 +116,30 @@ void set_non_blocking(socket_handle_t socket)
 
 static void on_post_done(void* arg)
 {
-    XrConnRef conn_ref = arg;
+    TcpConnRef conn_ref = arg;
     LOG_FMT("conn: %p arg: %p", conn_ref, arg);
 }
-static void on_message(XrConnRef conn_ref, void* arg, int status)
+static void on_message(TcpConnRef conn_ref, void* arg, int status)
 {
     LOG_FMT("conn: %p arg: %p status: %d", conn_ref, arg, status);
     assert(conn_ref->handler_ref == NULL);
     XrHandler_function(conn_ref->req_msg_ref, conn_ref, &on_post_done);
 }
-void on_event_listening(WListenerRef listener_watcher_ref, void *arg, uint64_t event)
+void on_event_listening(WListenerFdRef listener_watcher_ref, void *arg, uint64_t event)
 {
 
     printf("listening_hander \n");
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
 
-    XrServerRef server_ref = arg;
+    AsyncServerRef server_ref = arg;
     int sock2 = accept(server_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
     if(sock2 <= 0) {
         LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
     }
-    WSocketRef sw_ref = WSocket_new(server_ref->reactor_ref, sock2);
-    XrConnRef conn = XrConn_new(sock2, sw_ref, server_ref);
+    WIoFdRef sw_ref = WIoFd_new(server_ref->reactor_ref, sock2);
+    TcpConnRef conn = TcpConn_new(sock2, sw_ref, server_ref);
     MessageRef inmsg = Message_new();
-    XrConn_read_msg(conn, inmsg, on_message, conn);
+    TcpConn_read_msg(conn, inmsg, on_message, conn);
 }
 

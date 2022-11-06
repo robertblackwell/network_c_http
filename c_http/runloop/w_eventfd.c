@@ -1,4 +1,4 @@
-#include <c_http/runloop/w_fdevent.h>
+#include <c_http/runloop/w_eventfd.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -9,7 +9,7 @@
 #include <c_http/async/types.h>
 
 #define TWO_PIPE_TRICKx
-#define SEMAPHORE;lkj
+#define SEMAPHORE
 
 /**
  *
@@ -35,9 +35,9 @@ static void anonymous_free(WatcherRef p)
 {
     WFdEventRef fdevp = (WFdEventRef)p;
     XR_FDEV_CHECK_TAG(fdevp)
-    WFdEvent_free(fdevp);
+    WEventFd_free(fdevp);
 }
-void WFdEvent_init(WFdEventRef this, XrReactorRef runloop)
+void WEventFd_init(WFdEventRef this, ReactorRef runloop)
 {
     this->type = XR_WATCHER_FDEVENT;
     XR_FDEV_SET_TAG(this);
@@ -58,19 +58,19 @@ void WFdEvent_init(WFdEventRef this, XrReactorRef runloop)
     this->free = &anonymous_free;
     this->handler = &handler;
 }
-WFdEventRef WFdEvent_new(XrReactorRef rtor_ref)
+WFdEventRef WEventFd_new(ReactorRef rtor_ref)
 {
     WFdEventRef this = malloc(sizeof(WFdEvent));
-    WFdEvent_init(this, rtor_ref);
+    WEventFd_init(this, rtor_ref);
     return this;
 }
-void WFdEvent_free(WFdEventRef this)
+void WEventFd_free(WFdEventRef this)
 {
     XR_FDEV_CHECK_TAG(this)
     close(this->fd);
     free((void*)this);
 }
-void WFdEvent_register(WFdEventRef this)
+void WEventFd_register(WFdEventRef this)
 {
     XR_FDEV_CHECK_TAG(this)
 
@@ -80,7 +80,7 @@ void WFdEvent_register(WFdEventRef this)
     int res = XrReactor_register(this->runloop, this->fd, interest, (WatcherRef)(this));
     assert(res ==0);
 }
-void WFdEvent_change_watch(WFdEventRef this, FdEventHandler evhandler, void* arg, uint64_t watch_what)
+void WEventFd_change_watch(WFdEventRef this, FdEventHandler evhandler, void* arg, uint64_t watch_what)
 {
     XR_FDEV_CHECK_TAG(this)
     uint32_t interest = watch_what;
@@ -93,13 +93,13 @@ void WFdEvent_change_watch(WFdEventRef this, FdEventHandler evhandler, void* arg
     int res = XrReactor_reregister(this->runloop, this->fd, interest, (WatcherRef)this);
     assert(res == 0);
 }
-void WFdEvent_deregister(WFdEventRef this)
+void WEventFd_deregister(WFdEventRef this)
 {
     XR_FDEV_CHECK_TAG(this)
     int res =  XrReactor_deregister(this->runloop, this->fd);
     assert(res == 0);
 }
-void WFdEvent_arm(WFdEventRef this, FdEventHandler evhandler, void* arg)
+void WEventFd_arm(WFdEventRef this, FdEventHandler evhandler, void* arg)
 {
     XR_FDEV_CHECK_TAG(this)
     uint32_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP;
@@ -112,12 +112,12 @@ void WFdEvent_arm(WFdEventRef this, FdEventHandler evhandler, void* arg)
     int res = XrReactor_reregister(this->runloop, this->fd, interest, (WatcherRef)this);
     assert(res == 0);
 }
-void WFdEvent_disarm(WFdEventRef this)
+void WEventFd_disarm(WFdEventRef this)
 {
     XR_FDEV_CHECK_TAG(this)
     int res = XrReactor_reregister(this->runloop, this->fd, 0, (WatcherRef)this);
 }
-void WFdEvent_fire(WFdEventRef this)
+void WEventFd_fire(WFdEventRef this)
 {
     XR_FDEV_CHECK_TAG(this)
 #ifdef TWO_PIPE_TRICK

@@ -1,4 +1,4 @@
-#include <c_http/runloop/w_socket.h>
+#include <c_http/runloop/w_iofd.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,7 +15,7 @@
  */
 static void handler(WatcherRef watcher, int fd, uint64_t event)
 {
-    WSocketRef sw = (WSocketRef)watcher;
+    WIoFdRef sw = (WIoFdRef)watcher;
     assert(fd == sw->fd);
     if((sw->event_mask & EPOLLIN) && (sw->read_evhandler)) {
         sw->read_evhandler(sw, sw->read_arg, event);
@@ -27,10 +27,10 @@ static void handler(WatcherRef watcher, int fd, uint64_t event)
 }
 static void anonymous_free(WatcherRef p)
 {
-    WSocketRef twp = (WSocketRef)p;
-    WSocket_free(twp);
+    WIoFdRef twp = (WIoFdRef)p;
+    WIoFd_free(twp);
 }
-void WSocket_init(WSocketRef this, XrReactorRef runloop, int fd)
+void WIoFd_init(WIoFdRef this, ReactorRef runloop, int fd)
 {
     this->type = XR_WATCHER_SOCKET;
     sprintf(this->tag, "XRSW");
@@ -45,19 +45,19 @@ void WSocket_init(WSocketRef this, XrReactorRef runloop, int fd)
     this->write_arg = NULL;
     this->write_evhandler = NULL;
 }
-WSocketRef WSocket_new(XrReactorRef rtor_ref, int fd)
+WIoFdRef WIoFd_new(ReactorRef rtor_ref, int fd)
 {
-    WSocketRef this = malloc(sizeof(WSocket));
-    WSocket_init(this, rtor_ref, fd);
+    WIoFdRef this = malloc(sizeof(WSocket));
+    WIoFd_init(this, rtor_ref, fd);
     return this;
 }
-void WSocket_free(WSocketRef this)
+void WIoFd_free(WIoFdRef this)
 {
     XR_SOCKW_CHECK_TAG(this)
     close(this->fd);
     free((void*)this);
 }
-void WSocket_register(WSocketRef this)
+void WIoFd_register(WIoFdRef this)
 {
     XR_SOCKW_CHECK_TAG(this)
 
@@ -65,7 +65,7 @@ void WSocket_register(WSocketRef this)
     int res = XrReactor_register(this->runloop, this->fd, 0L, (WatcherRef)(this));
     assert(res ==0);
 }
-//void WSocket_change_watch(WSocketRef this, SocketEventHandler cb, void* arg, uint64_t watch_what)
+//void WIoFd_change_watch(WIoFdRef this, SocketEventHandler cb, void* arg, uint64_t watch_what)
 //{
 //    XR_SOCKW_CHECK_TAG(this)
 //    uint32_t interest = watch_what;
@@ -78,14 +78,14 @@ void WSocket_register(WSocketRef this)
 //    int res = XrReactor_reregister(this->runloop, this->fd, interest, (WatcherRef)this);
 //    assert(res == 0);
 //}
-void WSocket_deregister(WSocketRef this)
+void WIoFd_deregister(WIoFdRef this)
 {
     XR_SOCKW_CHECK_TAG(this)
 
     int res =  XrReactor_deregister(this->runloop, this->fd);
     assert(res == 0);
 }
-void WSocket_arm_read(WSocketRef this, SocketEventHandler fd_event_handler, void* arg)
+void WIoFd_arm_read(WIoFdRef this, SocketEventHandler fd_event_handler, void* arg)
 {
     uint64_t interest = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | this->event_mask;
     this->event_mask = interest;
@@ -99,7 +99,7 @@ void WSocket_arm_read(WSocketRef this, SocketEventHandler fd_event_handler, void
     int res = XrReactor_reregister(this->runloop, this->fd, interest, (WatcherRef)this);
     assert(res == 0);
 }
-void WSocket_arm_write(WSocketRef this, SocketEventHandler fd_event_handler, void* arg)
+void WIoFd_arm_write(WIoFdRef this, SocketEventHandler fd_event_handler, void* arg)
 {
     uint64_t interest = EPOLLOUT | EPOLLERR | EPOLLHUP | EPOLLRDHUP | this->event_mask;
     this->event_mask = interest;
@@ -113,7 +113,7 @@ void WSocket_arm_write(WSocketRef this, SocketEventHandler fd_event_handler, voi
     int res = XrReactor_reregister(this->runloop, this->fd, interest, (WatcherRef)this);
     assert(res == 0);
 }
-void WSocket_disarm_read(WSocketRef this)
+void WIoFd_disarm_read(WIoFdRef this)
 {
     this->event_mask &= ~EPOLLIN;
     XR_SOCKW_CHECK_TAG(this)
@@ -122,7 +122,7 @@ void WSocket_disarm_read(WSocketRef this)
     int res = XrReactor_reregister(this->runloop, this->fd, this->event_mask, (WatcherRef)this);
     assert(res == 0);
 }
-void WSocket_disarm_write(WSocketRef this)
+void WIoFd_disarm_write(WIoFdRef this)
 {
     this->event_mask = ~EPOLLOUT & this->event_mask;
     XR_SOCKW_CHECK_TAG(this)

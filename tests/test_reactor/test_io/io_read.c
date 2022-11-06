@@ -14,7 +14,7 @@
 #include <c_http/common/utils.h>
 #include <c_http/runloop/reactor.h>
 #include <c_http/runloop/watcher.h>
-#include <c_http/runloop/w_socket.h>
+#include <c_http/runloop/w_iofd.h>
 
 /**
  * the reader does the following
@@ -51,11 +51,11 @@ void Reader_add_fd(Reader* this, int fd, int max)
 
 }
 
-void rd_callback(WSocketRef socket_watcher_ref, void* arg, uint64_t event)
+void rd_callback(WIoFdRef socket_watcher_ref, void* arg, uint64_t event)
 {
     XR_SOCKW_CHECK_TAG(socket_watcher_ref)
     ReadCtx* ctx = (ReadCtx*)arg;
-    XrReactorRef reactor = socket_watcher_ref->runloop;
+    ReactorRef reactor = socket_watcher_ref->runloop;
     int in = event | EPOLLIN;
     char buf[1000];
     int nread = read(socket_watcher_ref->fd, buf, 1000);
@@ -76,16 +76,16 @@ void rd_callback(WSocketRef socket_watcher_ref, void* arg, uint64_t event)
 }
 void* reader_thread_func(void* arg)
 {
-    XrReactorRef rtor_ref = XrReactor_new();
+    ReactorRef rtor_ref = XrReactor_new();
     Reader* rdr = (Reader*)arg;
     for(int i = 0; i < rdr->count; i++) {
         ReadCtx* ctx = &(rdr->ctx_table[i]);
-        rdr->ctx_table[i].swatcher = WSocket_new(rtor_ref, ctx->readfd);
-        WSocketRef sw = rdr->ctx_table[i].swatcher;
+        rdr->ctx_table[i].swatcher = WIoFd_new(rtor_ref, ctx->readfd);
+        WIoFdRef sw = rdr->ctx_table[i].swatcher;
         uint64_t interest = EPOLLERR | EPOLLIN;
-        WSocket_register(sw);
-        WSocket_arm_read(sw, &rd_callback, (void*) ctx);
-//        WSocket_change_watch(sw, &rd_callback, (void*) ctx, interest);
+        WIoFd_register(sw);
+        WIoFd_arm_read(sw, &rd_callback, (void*) ctx);
+//        WIoFd_change_watch(sw, &rd_callback, (void*) ctx, interest);
     }
 
     XrReactor_run(rtor_ref, 1000000);

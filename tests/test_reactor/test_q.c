@@ -71,7 +71,7 @@ void QReaderHandler(WQueueRef qw, void* ctx, uint64_t event)
 void* reader_thread_func(void* arg)
 {
     QSyncReaderRef q_rdr_ctx = (QSyncReaderRef)arg;
-    XrReactorRef rtor_ref = XrReactor_new();
+    ReactorRef rtor_ref = XrReactor_new();
     WQueueRef qw = WQueue_new(rtor_ref, q_rdr_ctx->queue);
     uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
     WQueue_register(qw, QReaderHandler, arg, interest);

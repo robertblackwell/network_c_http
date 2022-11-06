@@ -11,13 +11,14 @@
 #include <c_http/macros.h>
 #include <c_http/common/list.h>
 #include <c_http/async/types.h>
+#include <c_http/runloop/watcher.h>
 #include <c_http/runloop/fdtable.h>
 #include <c_http/runloop/reactor.h>
 #include <c_http/runloop/run_list.h>
 
 #define MAX_EVENTS 4096
 
-struct XrReactor_s {
+struct Reactor_s {
     XR_REACTOR_DECLARE_TAG;
     int               epoll_fd;
     bool              closed_flag;
@@ -36,7 +37,7 @@ static int *int_in_heap(int key) {
  * Performa a general epoll_ctl call with error checking.
  * In the event of an error abort 
  */
-static void XrReactor_epoll_ctl(XrReactorRef this, int op, int fd, uint64_t interest)
+static void XrReactor_epoll_ctl(ReactorRef this, int op, int fd, uint64_t interest)
 {
     XR_REACTOR_CHECK_TAG(this)
     struct epoll_event epev = {
@@ -53,8 +54,8 @@ static void XrReactor_epoll_ctl(XrReactorRef this, int op, int fd, uint64_t inte
     CHTTP_ASSERT((status == 0), "epoll ctl call failed");
 }
 
-XrReactorRef XrReactor_new(void) {
-    XrReactorRef runloop = malloc(sizeof(XrReactor));
+ReactorRef XrReactor_new(void) {
+    ReactorRef runloop = malloc(sizeof(XrReactor));
     CHTTP_ASSERT((runloop != NULL), "malloc failed new runloop");
     XR_REACTOR_SET_TAG(runloop)
 
@@ -67,7 +68,7 @@ XrReactorRef XrReactor_new(void) {
     return runloop;
 }
 
-void XrReactor_close(XrReactorRef this)
+void XrReactor_close(ReactorRef this)
 {
     XR_REACTOR_CHECK_TAG(this)
     this->closed_flag = true;
@@ -81,7 +82,7 @@ void XrReactor_close(XrReactorRef this)
     }
 }
 
-void XrReactor_free(XrReactorRef this)
+void XrReactor_free(ReactorRef this)
 {
     XR_REACTOR_CHECK_TAG(this)
     if(! this->closed_flag) {
@@ -100,7 +101,7 @@ void XrReactor_free(XrReactorRef this)
 }
 
 
-int XrReactor_register(XrReactorRef this, int fd, uint32_t interest, WatcherRef wref)
+int XrReactor_register(ReactorRef this, int fd, uint32_t interest, WatcherRef wref)
 {
     XR_REACTOR_CHECK_TAG(this)
 
@@ -109,7 +110,7 @@ int XrReactor_register(XrReactorRef this, int fd, uint32_t interest, WatcherRef 
     FdTable_insert(this->table, wref, fd);
     return 0;
 }
-int XrReactor_deregister(XrReactorRef this, int fd)
+int XrReactor_deregister(ReactorRef this, int fd)
 {
     XR_REACTOR_CHECK_TAG(this)
     CHTTP_ASSERT((FdTable_lookup(this->table, fd) != NULL),"fd not in FdTable");
@@ -118,7 +119,7 @@ int XrReactor_deregister(XrReactorRef this, int fd)
     return 0;
 }
 
-int XrReactor_reregister(XrReactorRef this, int fd, uint32_t interest, WatcherRef wref) {
+int XrReactor_reregister(ReactorRef this, int fd, uint32_t interest, WatcherRef wref) {
     XR_REACTOR_CHECK_TAG(this)
     CHTTP_ASSERT((FdTable_lookup(this->table, fd) != NULL),"fd not in FdTable");
     XrReactor_epoll_ctl(this, EPOLL_CTL_MOD, fd, interest);
@@ -126,7 +127,7 @@ int XrReactor_reregister(XrReactorRef this, int fd, uint32_t interest, WatcherRe
     assert(wref == wref_tmp);
     return 0;
 }
-void XrReactor_delete(XrReactorRef this, int fd)
+void XrReactor_delete(ReactorRef this, int fd)
 {
     XR_REACTOR_CHECK_TAG(this)
     CHTTP_ASSERT((FdTable_lookup(this->table, fd) != NULL),"fd not in FdTable");
@@ -139,7 +140,7 @@ void print_events(struct epoll_event events[], int count)
         printf("\n");
     }
 }
-int XrReactor_run(XrReactorRef this, time_t timeout) {
+int XrReactor_run(ReactorRef this, time_t timeout) {
     XR_REACTOR_CHECK_TAG(this)
     int result;
     struct epoll_event events[MAX_EVENTS];
@@ -195,7 +196,7 @@ cleanup:
     return result;
 }
 
-int XrReactor_post(XrReactorRef this, PostableFunction cb, void* arg)
+int XrReactor_post(ReactorRef this, PostableFunction cb, void* arg)
 {
     XR_REACTOR_CHECK_TAG(this)
     FunctorRef fr = Functor_new(cb, arg);

@@ -4,12 +4,12 @@
 #include <c_http/common/message.h>
 #include <stdio.h>
 
-void on_done(XrConnRef conn, XrHandlerRef hdlr);
-void on_error(XrConnRef conn, XrHandlerRef hdlr, int status);
+void on_done(TcpConnRef conn, XrHandlerRef hdlr);
+void on_error(TcpConnRef conn, XrHandlerRef hdlr, int status);
 void XrSimpleHandler(XrHandlerRef this);
 void XrEchoHandler(XrHandlerRef this);
 
-void XrHandler_function(MessageRef request, XrConnRef conn_ref, HandlerDoneFunction done)
+void XrHandler_function(MessageRef request, TcpConnRef conn_ref, HandlerDoneFunction done)
 {
     XrHandlerRef hdlr;
     LOG_FMT("XrHandler_function\n");

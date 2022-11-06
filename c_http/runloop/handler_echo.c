@@ -16,13 +16,13 @@
 
 #include <pthread.h>
 
-static void on_done(XrConnRef conn, XrHandlerRef hdlr);
-static void on_error(XrConnRef conn, XrHandlerRef hdlr, int status);
+static void on_done(TcpConnRef conn, XrHandlerRef hdlr);
+static void on_error(TcpConnRef conn, XrHandlerRef hdlr, int status);
 
 void XrEchoHandler(XrHandlerRef this);
 
 static MessageRef make_echo_response(MessageRef request);
-static void on_write_cb_echo(XrConnRef conn_ref, void* arg, int status);
+static void on_write_cb_echo(TcpConnRef conn_ref, void* arg, int status);
 
 static void set_status_ok_200(MessageRef response);
 static void set_headers(MessageRef response);
@@ -38,7 +38,7 @@ void XrEchoHandler(XrHandlerRef this)
     MessageRef request = this->request;
     MessageRef response = make_echo_response(request);
     this->resp_buf = Message_serialize(response);
-    XrConn_write(this->conn_ref, this->resp_buf, on_write_cb_echo, this);
+    TcpConn_write(this->conn_ref, this->resp_buf, on_write_cb_echo, this);
 }
 static MessageRef make_echo_response(MessageRef request)
 {
@@ -73,7 +73,7 @@ static void set_body_and_content_length_header(MessageRef response, BufferChainR
     Message_set_body(response, body);
 }
 
-static void on_write_cb_echo(XrConnRef conn_ref, void* arg, int status)
+static void on_write_cb_echo(TcpConnRef conn_ref, void* arg, int status)
 {
     XR_TRACE("conn_ref: %p arg: %p status: %d", conn_ref, arg, status);
     XrHandlerRef hdlr = arg;
@@ -84,12 +84,12 @@ static void on_write_cb_echo(XrConnRef conn_ref, void* arg, int status)
     }
 }
 
-static void on_done(XrConnRef conn, XrHandlerRef hdlr)
+static void on_done(TcpConnRef conn, XrHandlerRef hdlr)
 {
     LOG_FMT("on_done\n");
     hdlr->done_function(conn);
 }
-static void on_error(XrConnRef conn, XrHandlerRef hdlr, int status)
+static void on_error(TcpConnRef conn, XrHandlerRef hdlr, int status)
 {
     LOG_FMT("on_error");
 }

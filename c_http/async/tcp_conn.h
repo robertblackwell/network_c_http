@@ -3,19 +3,23 @@
 #include <c_http/common/iobuffer.h>
 #include <c_http/common/message.h>
 #include <c_http/common/http_parser/ll_parser.h>
-#include <c_http/runloop/w_socket.h>
+#include <c_http/runloop/w_iofd.h>
+
+#include <c_http/async/types.h>
+#include <c_http/async/async_server.h>
 #include <c_http/async/handler.h>
 
 
-#define TYPE XrConn
-#define XrConn_TAG "XRCON"
+
+#define TYPE TcpConn
+#define TcpConn_TAG "TCPCON"
 #include <c_http/check_tag.h>
 #undef TYPE
-#define XR_CONN_DECLARE_TAG DECLARE_TAG(XrConn)
-#define XR_CONN_CHECK_TAG(p) CHECK_TAG(XrConn, p)
-#define XR_CONN_SET_TAG(p) SET_TAG(XrConn, p)
+#define TCP_CONN_DECLARE_TAG DECLARE_TAG(TcpConn)
+#define TCP_CONN_CHECK_TAG(p) CHECK_TAG(TcpConn, p)
+#define TCP_CONN_SET_TAG(p) SET_TAG(TcpConn, p)
 
-enum XrConnState {
+enum TcpConnState {
     XRCONN_STATE_UNINIT = 33,
     XRCONN_STATE_RDINIT = 32, //prepare for read
     XRCONN_STATE_READ = 34,   //read
@@ -49,19 +53,19 @@ typedef enum XrWriteRC {
 } XrWriteRC;
 
 
-struct XrConn_s {
-    XR_CONN_DECLARE_TAG;
+struct TcpConn_s {
+    TCP_CONN_DECLARE_TAG;
     int                     fd;
-    enum XrConnState        state;
-    WSocketRef              sock_watcher_ref;
-    XrServerRef             server_ref;
+    enum TcpConnState        state;
+    WIoFdRef                sock_watcher_ref;
+    AsyncServerRef          server_ref;
     bool                    recvbuff_small;
 
     // read_some variables
     SocketEventHandler*     read_completion_handler; //currently unused
 
     IOBufferRef             read_some_iobuf;
-    XrConnReadCallback*     read_some_cb;
+    TcpConnReadCallback*     read_some_cb;
     void*                   read_some_arg;
     int                     bytes_read;
     int                     read_status;
@@ -70,7 +74,7 @@ struct XrConn_s {
     ParserRef               parser_ref;
     IOBufferRef             io_buf_ref;  // input buffer
     MessageRef              req_msg_ref; // request message
-    XrConnReadMsgCallback   read_msg_cb;
+    TcpConnReadMsgCallback   read_msg_cb;
     void*                   read_msg_arg;
     int                     errno_saved;
     struct ParserError_s    parser_error;
@@ -78,7 +82,7 @@ struct XrConn_s {
     // writer variables
     CbufferRef              response_buf_ref; // response as a buffer
     IOBufferRef             write_buffer_ref;
-    XrConnWriteCallback     write_cb;
+    TcpConnWriteCallback     write_cb;
     void*                   write_arg;
     XrWriteRC               write_rc;
 
@@ -86,14 +90,14 @@ struct XrConn_s {
     void*                   handler_ctx;
 
 };
-typedef struct XrConn_s XrConn, *XrConnRef;
+//typedef struct TcpConn_s TcpConn, *TcpConnRef;
 
-XrConnRef XrConn_new(int fd, WSocketRef socket_watcher, XrServerRef server_ref);
-void XrConn_free(XrConnRef this);
+TcpConnRef TcpConn_new(int fd, WIoFdRef socket_watcher, AsyncServerRef server_ref);
+void TcpConn_free(TcpConnRef this);
 
-void XrConn_read_some(XrConnRef this, IOBufferRef iobuf, XrConnReadCallback cb, void* arg);
-void XrConn_read_msg(XrConnRef this, MessageRef msg, XrConnReadMsgCallback cb, void* arg);
-void XrConn_write(XrConnRef this, IOBufferRef iobuf, XrConnWriteCallback cb, void* arg);
+void TcpConn_read_some(TcpConnRef this, IOBufferRef iobuf, TcpConnReadCallback cb, void* arg);
+void TcpConn_read_msg(TcpConnRef this, MessageRef msg, TcpConnReadMsgCallback cb, void* arg);
+void TcpConn_write(TcpConnRef this, IOBufferRef iobuf, TcpConnWriteCallback cb, void* arg);
 
 /**
  * Read a stream of http message from the m_readsocket data source/socket.
@@ -124,28 +128,28 @@ void XrConn_write(XrConnRef this, IOBufferRef iobuf, XrConnWriteCallback cb, voi
  *  If the reader experiences an io error the erro value will be in this->errno_saved
  *  If the reader experiences a html parsing error and error description will be in this->parser_error
  */
-int XrConn_read(XrConnRef this);
+int TcpConn_read(TcpConnRef this);
 /**
  * Called to prepare for a read
  * \param this
  */
-void XrConn_prepare_read(XrConnRef this);
-void XrConn_prepare_write(XrConnRef this, IOBufferRef buf, SocketEventHandler completion_handler);
+void TcpConn_prepare_read(TcpConnRef this);
+void TcpConn_prepare_write(TcpConnRef this, IOBufferRef buf, SocketEventHandler completion_handler);
 /**
  * Asynchronously writes the provided buffer to this->fd.
  * On completion of the write or error schedules the completion handler to run.
  *
  * The completion handler can assess the outcome of the write operation by examining the write_rc property of
- * the XrConn instance.
+ * the TcpConn instance.
  *
- * \param this XrConnRef
+ * \param this TcpConnRef
  * \param buf  IOBufferRef
  * \param completion_handler SocketEventHandler
  */
-void XrConn_write_2(XrConnRef this, IOBufferRef buf, SocketEventHandler completion_handler);
+void TcpConn_write_2(TcpConnRef this, IOBufferRef buf, SocketEventHandler completion_handler);
 /**
  *
  * \param this
  */
-void XrConn_done(XrConnRef this);
+void TcpConn_done(TcpConnRef this);
 #endif

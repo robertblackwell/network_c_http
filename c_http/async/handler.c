@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-XrHandlerRef XrHandler_new(XrConnRef conn_ref)
+XrHandlerRef XrHandler_new(TcpConnRef conn_ref)
 {
     XrHandlerRef tmp = malloc(sizeof(XrHandler));
     tmp->body = NULL;

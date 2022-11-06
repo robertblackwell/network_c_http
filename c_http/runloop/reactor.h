@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <sys/epoll.h>
-#include <c_http/runloop/watcher.h>
+#include <c_http/runloop/types.h>
 
 #define TYPE Reactor
 #define Reactor_TAG "XRLRTOT"
@@ -23,13 +23,13 @@
  *  to continue their processing after others have had a go.
  *  
  */
-typedef struct XrReactor_s XrReactor, *XrReactorRef;
+typedef struct Reactor_s Reactor, *ReactorRef;
 
 
 /**
  * Create a new reactor using dynamic memory
  */ 
-XrReactorRef XrReactor_new(void);
+ReactorRef XrReactor_new(void);
 
 /**
  * Close a reactor. This call closes the epoll fd, closes all the fds in the FDTable
@@ -39,11 +39,11 @@ XrReactorRef XrReactor_new(void);
  *
  * @param XrReactorRef stor_ref
  */
-void XrReactor_close(XrReactorRef rtor_ref);
+void XrReactor_close(ReactorRef rtor_ref);
 /**
  * Destroy a reactor including release all fds associated with the reactor
  */
-void XrReactor_free(XrReactorRef rtor_ref);
+void XrReactor_free(ReactorRef rtor_ref);
 
 /**
  * Register an fd with the reactor. The fd is then "of interest" and the reactor will
@@ -57,7 +57,7 @@ void XrReactor_free(XrReactorRef rtor_ref);
  * @param WatcherRef   wref      A reference to an fd Watcher. See watcher.h and w_xxxx.h
  * @return int always 0 TODO should return void
  */
-int XrReactor_register(XrReactorRef rtor_ref, int fd, uint32_t interest, WatcherRef wref);
+int XrReactor_register(ReactorRef rtor_ref, int fd, uint32_t interest, WatcherRef wref);
 
 /**
  * Deregister an fd with the reactor. Removes the fd from the field of interest for the reactor.
@@ -70,12 +70,12 @@ int XrReactor_register(XrReactorRef rtor_ref, int fd, uint32_t interest, Watcher
  * @param int          fd        subject File descriptor
  * @return int always 0 TODO should return void
  */
-int XrReactor_deregister(XrReactorRef rtor_ref, int fd);
+int XrReactor_deregister(ReactorRef rtor_ref, int fd);
 
 /**
  * TODO should be deprecated OR need a lightweight deregister
  */
-int XrReactor_reregister(XrReactorRef rtor_ref, int fd, uint32_t interest, WatcherRef wref);
+int XrReactor_reregister(ReactorRef rtor_ref, int fd, uint32_t interest, WatcherRef wref);
 
 /**
  * Waits for events. When an fd event is triggered for a registered fd 
@@ -88,7 +88,7 @@ int XrReactor_reregister(XrReactorRef rtor_ref, int fd, uint32_t interest, Watch
  *                                  events before runniing the run list
  * @return int always 0 - TODO should return void
  */
-int XrReactor_run(XrReactorRef rtor_ref, time_t timeout);
+int XrReactor_run(ReactorRef rtor_ref, time_t timeout);
 
 /**
  * TODO - should replace PostableFunction cb, void* arg with a type called PostableFunctor
@@ -102,7 +102,7 @@ int XrReactor_run(XrReactorRef rtor_ref, time_t timeout);
  *  
  * @return int always 0 - TODO should return void
  */
-int XrReactor_post(XrReactorRef rtor_ref, PostableFunction cb, void* arg);
+int XrReactor_post(ReactorRef rtor_ref, PostableFunction cb, void* arg);
 
 /**
  * Remove an fd and its associated Watcher from the Reactor fd list - BUT does not perform
@@ -116,6 +116,6 @@ int XrReactor_post(XrReactorRef rtor_ref, PostableFunction cb, void* arg);
  * @param this XrReactor
  * @param fd   int  file descriptor
  */
-void XrReactor_delete(XrReactorRef this, int fd);
+void XrReactor_delete(ReactorRef this, int fd);
 
 #endif
