@@ -62,18 +62,9 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 
 	#sync verifier app
 
-	#aio runloop and aio_http/1.1 details
-		runloop/runloop.h
-		runloop/fdtable.h
-		runloop/reactor.h
-		runloop/run_list.h
-		runloop/w_listener.h
-		runloop/w_eventfd.h
-		runloop/w_timerfd.h
-		runloop/w_queue.h
-		runloop/w_iofd.h
-		runloop/watcher.h
-		runloop/evfd_queue.h
+	#aio simple_runloop and aio_http/1.1 details
+		simple_runloop/runloop.h
+		simple_runloop/rl_internal.h
 	#aio api
         async/tcp_conn_list.h
 		async/types.h
@@ -121,17 +112,17 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		sync/sync_handler_example.c
 		sync/worker.c
 
-	#aio runloop and aio_http/1.1 details
-		runloop/fdtable.c
-		runloop/reactor.c
-		runloop/w_listener.c
-		runloop/w_eventfd.c
-		runloop/w_timerfd.c
-		runloop/w_iofd.c
-		runloop/w_queue.c
-		runloop/watcher.c
-		runloop/evfd_queue.c
-		runloop/run_list.c
+	#aio simple_runloop and aio_http/1.1 details
+		simple_runloop/fdtable.c
+		simple_runloop/reactor.c
+		simple_runloop/w_listener.c
+		simple_runloop/w_eventfd.c
+		simple_runloop/w_timerfd.c
+		simple_runloop/w_iofd.c
+		simple_runloop/w_queue.c
+		simple_runloop/watcher.c
+		simple_runloop/evfd_queue.c
+#		simple_runloop/run_list.c
 
 	#async
 		async/async_server.c

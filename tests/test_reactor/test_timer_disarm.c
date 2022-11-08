@@ -11,8 +11,8 @@
 #include <c_http/logger.h>
 #include <c_http/unittest.h>
 #include <c_http/common/utils.h>
-#include <c_http/runloop/reactor.h>
-#include <c_http/runloop/w_timerfd.h>
+#include <c_http/simple_runloop/runloop.h>
+#include <c_http/simple_runloop/rl_internal.h>
 //
 // demonstrates that for a timer
 // the sequence :

@@ -9,9 +9,8 @@
 #include <c_http/logger.h>
 #include <c_http/unittest.h>
 #include <c_http/common/utils.h>
-#include <c_http/runloop/reactor.h>
-#include <c_http/runloop/w_timerfd.h>
-#include <c_http/runloop/w_eventfd.h>
+#include <c_http/simple_runloop/runloop.h>
+#include <c_http/simple_runloop/rl_internal.h>
 //
 // Tests fdevent
 // start two threads
@@ -24,9 +23,9 @@ typedef struct TestCtx_s  {
     int                 counter;
     int                 max_count;
     struct timespec     start_time;
-    ReactorRef        reactor;
-    WTimerFdRef   timer;
-    WFdEventRef         fdevent;
+    ReactorRef          reactor;
+    WTimerFdRef         timer;
+    WEventFdRef         fdevent;
     int                 fdevent_counter;
 } TestCtx;
 
@@ -39,7 +38,7 @@ TestCtx* TestCtx_new(int counter_init, int counter_max);
 int test_timer_multiple_repeating();
 int test_timer_single_repeating();
 static void callback_1(WTimerFdRef watcher, void* ctx, XrTimerEvent event);
-void fdevent_handler(WFdEventRef fdev_ref, void* arg, uint64_t ev_mask);
+void fdevent_handler(WEventFdRef fdev_ref, void* arg, uint64_t ev_mask);
 
 
 int main()
@@ -63,7 +62,7 @@ int test_timer_single_repeating()
     test_ctx_p->reactor = rtor_ref;
     WTimerFdRef tw_1 = WTimerFd_new(rtor_ref, &callback_1, (void*)test_ctx_p, 1000, true);
     WTimerFd_disarm(tw_1);
-    WFdEventRef fdev = WEventFd_new(rtor_ref);
+    WEventFdRef fdev = WEventFd_new(rtor_ref);
 
     test_ctx_p->fdevent = fdev;
     test_ctx_p->timer = tw_1;
@@ -105,7 +104,7 @@ static void callback_1(WTimerFdRef watcher, void* ctx, XrTimerEvent event)
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
     TestCtx* ctx_p = (TestCtx*) ctx;
-    WFdEventRef fdev = ctx_p->fdevent;
+    WEventFdRef fdev = ctx_p->fdevent;
     LOG_FMT("callback1_counter %d counter: %d event is : %lx  ", ctx_p->callback1_counter, ctx_p->counter, event);
     if(ctx_p->counter >= ctx_p->max_count) {
         LOG_MSG(" clear timer");
@@ -121,7 +120,7 @@ static void callback_1(WTimerFdRef watcher, void* ctx, XrTimerEvent event)
     }
     ctx_p->callback1_counter++;
 }
-void fdevent_handler(WFdEventRef fdev_ref, void* arg, uint64_t ev_mask)
+void fdevent_handler(WEventFdRef fdev_ref, void* arg, uint64_t ev_mask)
 {
     TestCtx* t = (TestCtx*)arg;
     t->fdevent_counter++;

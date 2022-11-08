@@ -1,11 +1,12 @@
 #ifndef c_http_iofd_watcher_h
 #define c_http_iofd_watcher_h
+#if 0
 #include <time.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <c_http/runloop/types.h>
-#include <c_http/runloop/watcher.h>
-#include <c_http/runloop/reactor.h>
+#include <c_http/simple_runloop/types.h>
+#include <c_http/simple_runloop/watcher.h>
+#include <c_http/simple_runloop/reactor.h>
 
 
 #define TYPE WIoFd
@@ -32,10 +33,10 @@ struct WIoFd_s {
 };
 
 WIoFdRef WIoFd_new(ReactorRef runloop, int fd);
-void WIoFd_free(WIoFdRef this);
+void WIoFd_free(WIoFdRef athis);
 
-void WIoFd_register(WIoFdRef this);
-void WIoFd_deregister(WIoFdRef this);
+void WIoFd_register(WIoFdRef athis);
+void WIoFd_deregister(WIoFdRef athis);
 
 /**
  * Enable reception of fd read events and set the event handler
@@ -43,7 +44,7 @@ void WIoFd_deregister(WIoFdRef this);
  * @param arg             void*               Context data. Discretion of the caller
  * @param event_handler
  */
-void WIoFd_arm_read(WIoFdRef this, SocketEventHandler event_handler, void* arg);
+void WIoFd_arm_read(WIoFdRef athis, SocketEventHandler event_handler, void* arg);
 
 /**
  * Enable reception of fd write events and set the event handler
@@ -51,19 +52,19 @@ void WIoFd_arm_read(WIoFdRef this, SocketEventHandler event_handler, void* arg);
  * @param arg             void*               Context data. Discretion of the caller
  * @param event_handler
  */
-void WIoFd_arm_write(WIoFdRef this, SocketEventHandler event_handler, void* arg);
+void WIoFd_arm_write(WIoFdRef athis, SocketEventHandler event_handler, void* arg);
 
 /**
  * Disable reception of fd read events for the socket
  * @param this
  */
-void WIoFd_disarm_read(WIoFdRef this);
+void WIoFd_disarm_read(WIoFdRef athis);
 
 /**
  * Disable reception of fd write events for the socket
  * @param this
  */
-void WIoFd_disarm_write(WIoFdRef this);
+void WIoFd_disarm_write(WIoFdRef athis);
 
-
+#endif
 #endif

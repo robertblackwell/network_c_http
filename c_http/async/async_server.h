@@ -3,7 +3,7 @@
 
 #include <c_http/socket_functions.h>
 #include <c_http/constants.h>
-#include <c_http/runloop/types.h>
+#include <c_http/simple_runloop/runloop.h>
 #include <c_http//async/types.h>
 #include <c_http/common/message.h>
 #include <c_http/async/handler.h>

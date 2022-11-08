@@ -11,9 +11,6 @@
 #include <c_http/logger.h>
 #include <c_http/common/utils.h>
 #include <c_http/async/types.h>
-#include <c_http/runloop/reactor.h>
-#include <c_http/runloop/w_timerfd.h>
-#include <c_http/runloop/w_iofd.h>
 
 /**
  * The writer does the following
@@ -68,7 +65,7 @@ static void wrtr_wait(WTimerFdRef watch, void* arg, uint64_t event);
 static void wrtr_cb(WIoFdRef sock_watch, void* arg, uint64_t event)
 {
     ReactorRef reactor = sock_watch->runloop;
-    XR_SOCKW_CHECK_TAG(sock_watch)
+    WIoFd_verify(sock_watch);
     WriteCtx* ctx = (WriteCtx*)(arg);
     LOG_FMT("test_io: Socket watcher wrtr_callback");
 

@@ -1,4 +1,5 @@
-#include <c_http/runloop/w_timerfd.h>
+#include <c_http/simple_runloop/runloop.h>
+#include <c_http/simple_runloop/rl_internal.h>
 #include <time.h>
 #include <sys/timerfd.h>
 #include <unistd.h>
@@ -72,7 +73,7 @@ void WTimerFd_init(WTimerFdRef this, ReactorRef runloop, TimerEventHandler cb, v
 }
 WTimerFdRef WTimerFd_new(ReactorRef rtor_ref, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating)
 {
-    WTimerFdRef this = malloc(sizeof(WTimer));
+    WTimerFdRef this = malloc(sizeof(WTimerFd));
     WTimerFd_init(this, rtor_ref, cb, ctx, interval_ms, repeating);
     return this;
 }
@@ -183,4 +184,17 @@ void WTimerFd_clear(WTimerFdRef this)
     }
     LOG_FMT("WTimerFd_clear res: %d errno: %d \n", res, errno);
     assert(res == 0);
+}
+ReactorRef WTimerFd_get_reactor(WTimerFdRef athis)
+{
+    return athis->runloop;
+}
+int WTimerFd_get_fd(WTimerFdRef athis)
+{
+    return athis->fd;
+}
+void WTimerFd_verify(WTimerFdRef this)
+{
+    XR_WTIMER_CHECK_TAG(this)
+
 }

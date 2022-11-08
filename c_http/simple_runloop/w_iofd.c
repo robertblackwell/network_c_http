@@ -1,4 +1,5 @@
-#include <c_http/runloop/w_iofd.h>
+#include <c_http//simple_runloop/runloop.h>
+#include <c_http/simple_runloop/rl_internal.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,7 +48,7 @@ void WIoFd_init(WIoFdRef this, ReactorRef runloop, int fd)
 }
 WIoFdRef WIoFd_new(ReactorRef rtor_ref, int fd)
 {
-    WIoFdRef this = malloc(sizeof(WSocket));
+    WIoFdRef this = malloc(sizeof(WIoFd));
     WIoFd_init(this, rtor_ref, fd);
     return this;
 }
@@ -75,7 +76,7 @@ void WIoFd_register(WIoFdRef this)
 //    if (arg != NULL) {
 //        this->cb_ctx = arg;
 //    }
-//    int res = XrReactor_reregister(this->runloop, this->fd, interest, (WatcherRef)this);
+//    int res = XrReactor_reregister(this->simple_runloop, this->fd, interest, (WatcherRef)this);
 //    assert(res == 0);
 //}
 void WIoFd_deregister(WIoFdRef this)
@@ -128,6 +129,20 @@ void WIoFd_disarm_write(WIoFdRef this)
     XR_SOCKW_CHECK_TAG(this)
     int res = XrReactor_reregister(this->runloop, this->fd, this->event_mask, (WatcherRef)this);
     assert(res == 0);
+}
+ReactorRef WIoFd_get_reactor(WIoFdRef athis)
+{
+    return athis->runloop;
+}
+int WIoFd_get_fd(WIoFdRef athis)
+{
+    return athis->fd;
+}
+
+void WIoFd_verify(WIoFdRef this)
+{
+    XR_SOCKW_CHECK_TAG(this)
+
 }
 
 

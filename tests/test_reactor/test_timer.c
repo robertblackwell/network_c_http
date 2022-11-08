@@ -11,8 +11,8 @@
 #include <c_http/logger.h>
 #include <c_http/unittest.h>
 #include <c_http/common/utils.h>
-#include <c_http/runloop/reactor.h>
-#include <c_http/runloop/w_timerfd.h>
+#include <c_http/simple_runloop/runloop.h>
+#include <c_http/simple_runloop/rl_internal.h>
 //
 // A) These tests deomstrate that
 // -    a timer is called the expected number of times,
@@ -59,8 +59,8 @@ static void callback_non_repeating(WTimerFdRef watcher, void* ctx, XrTimerEvent 
  * A timer is initiated and the callback increments a counter on each call.
  * After a set number of calls to the callback
  * The timer is cancelled by the callback
- * Cancellation of the timer causes the runloop to end
- * After end of the runloop the TestCtx->counter is verified to be equal to the
+ * Cancellation of the timer causes the simple_runloop to end
+ * After end of the simple_runloop the TestCtx->counter is verified to be equal to the
  * required number of invocations
  */
 int test_timer_non_repeating()
@@ -74,7 +74,7 @@ int test_timer_non_repeating()
     WTimerFdRef tw_1 = WTimerFd_new(rtor_ref, &callback_non_repeating, test_ctx_p_1, 100, false);
 
     XrReactor_run(rtor_ref, 10000);
-    /*We should only get here when there are no more timers or other events pending in the runloop*/
+    /*We should only get here when there are no more timers or other events pending in the simple_runloop*/
     XrReactor_free(rtor_ref);
     /* prove callback_non_repeating was called exactly once */
     UT_EQUAL_INT(test_ctx_p_1->counter, 1);
@@ -86,8 +86,8 @@ int test_timer_non_repeating()
 * A timer is initiated and the callback increments a counter on each call.
 * After a set number of calls to the callback
 * The timer is cancelled by the callback
-* Cancellation of the timer causes the runloop to end
-* After end of the runloop the TestCtx->counter is verified to be equal to the
+* Cancellation of the timer causes the simple_runloop to end
+* After end of the simple_runloop the TestCtx->counter is verified to be equal to the
 * required number of invocations
 */
 static void callback_repeating(WTimerFdRef watcher, void* ctx, XrTimerEvent event)

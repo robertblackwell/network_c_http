@@ -15,10 +15,7 @@
 #include <sys/epoll.h>
 #include <math.h>
 #include <c_http/common/utils.h>
-#include <c_http/runloop/reactor.h>
-#include <c_http/runloop/watcher.h>
-#include <c_http/runloop/w_timerfd.h>
-#include <c_http/runloop/w_iofd.h>
+#include <c_http/simple_runloop/runloop.h>
 
 typedef struct ReadCtx_s {
     int                 ctx_tag;
@@ -26,7 +23,7 @@ typedef struct ReadCtx_s {
     int                 max_read_count;
     char*               id;
     int                 readfd;
-    WIoFdRef  swatcher;
+    WIoFdRef            swatcher;
 } ReadCtx;
 
 typedef struct Reader_s {

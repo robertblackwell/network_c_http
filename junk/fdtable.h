@@ -1,6 +1,6 @@
 #ifndef c_http_xr_wtable_h
 #define c_http_xr_wtable_h
-#include <c_http/runloop/types.h>
+#include <c_http/simple_runloop/runloop.h>
 
 struct FdTable_s;
 

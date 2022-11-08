@@ -58,8 +58,8 @@ static void read_some_handler(WIoFdRef socket_watcher_ref, void* arg, uint64_t e
     TcpConnRef conn_ref = arg;
     TCP_CONN_CHECK_TAG(conn_ref)
 
-    ReactorRef reactor_ref = socket_watcher_ref->runloop;
-    WIoFd_disarm(socket_watcher_ref);
+    ReactorRef reactor_ref = WIoFd_get_reactor(socket_watcher_ref);
+    WIoFd_disarm_read(socket_watcher_ref);
 
     IOBufferRef iobuf = conn_ref->io_buf_ref;
     int bytes_read;
@@ -116,7 +116,7 @@ static void read_some_handler(WIoFdRef socket_watcher_ref, void* arg, uint64_t e
 //    this->req_msg_ref = msg;
 //    TcpConn_prepare_read(this);
 //    WIoFdRef sw = this->sock_watcher_ref;
-//    ReactorRef reactor_ref = sw->runloop;
+//    ReactorRef reactor_ref = sw->simple_runloop;
 //    uint64_t interest = EPOLLERR | EPOLLIN;
 //    WIoFd_register(sw);
 //    WIoFd_arm_read(sw, read_msg_handler, arg);
@@ -159,7 +159,7 @@ static void read_some_handler(WIoFdRef socket_watcher_ref, void* arg, uint64_t e
 //    TcpConnRef conn_ref = arg;
 //    WIoFdRef sw = conn_ref->sock_watcher_ref;
 //    TCP_CONN_CHECK_TAG(conn_ref)
-//    ReactorRef reactor_ref = sw->runloop;
+//    ReactorRef reactor_ref = sw->simple_runloop;
 //    conn_ref->read_msg_cb(conn_ref, arg, conn_ref->read_status);
 //}
 ///**
@@ -174,7 +174,7 @@ static void read_some_handler(WIoFdRef socket_watcher_ref, void* arg, uint64_t e
 //    WIoFdRef sw = (WIoFdRef)wp;
 //    TcpConnRef conn_ref = arg;
 //    TCP_CONN_CHECK_TAG(conn_ref)
-//    ReactorRef reactor_ref = sw->runloop;
+//    ReactorRef reactor_ref = sw->simple_runloop;
 //
 //    printf("XrWorker::wrkr_state_machine fd: %d\n", conn_ref->fd);
 //    uint64_t e1 = EPOLLIN;
@@ -224,7 +224,7 @@ static void read_some_handler(WIoFdRef socket_watcher_ref, void* arg, uint64_t e
 ////{
 ////    WIoFdRef sw = (WIoFdRef)wp;
 ////    TcpConnRef conn_ref = arg;
-////    ReactorRef reactor_ref = sw->runloop;
+////    ReactorRef reactor_ref = sw->simple_runloop;
 ////    uint64_t interest = EPOLLERR | EPOLLIN;
 ////    WIoFd_register(sw, &read_msg_handler, conn_ref, interest);
 ////}

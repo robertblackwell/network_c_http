@@ -12,9 +12,7 @@
 #include <sys/epoll.h>
 #include <c_http/logger.h>
 #include <c_http/common/utils.h>
-#include <c_http/runloop/reactor.h>
-#include <c_http/runloop/watcher.h>
-#include <c_http/runloop/w_iofd.h>
+#include <c_http/simple_runloop/runloop.h>
 
 /**
  * the reader does the following
@@ -53,12 +51,12 @@ void Reader_add_fd(Reader* this, int fd, int max)
 
 void rd_callback(WIoFdRef socket_watcher_ref, void* arg, uint64_t event)
 {
-    XR_SOCKW_CHECK_TAG(socket_watcher_ref)
+    WIoFd_verify(socket_watcher_ref);
     ReadCtx* ctx = (ReadCtx*)arg;
-    ReactorRef reactor = socket_watcher_ref->runloop;
+    ReactorRef reactor = WIoFd_get_reactor(socket_watcher_ref);
     int in = event | EPOLLIN;
     char buf[1000];
-    int nread = read(socket_watcher_ref->fd, buf, 1000);
+    int nread = read(WIoFd_get_fd(socket_watcher_ref), buf, 1000);
     char* s;
     if(nread > 0) {
         buf[nread] = (char)0;
@@ -66,10 +64,11 @@ void rd_callback(WIoFdRef socket_watcher_ref, void* arg, uint64_t event)
     } else {
         s = "badread";
     }
-    LOG_FMT("test_io: Socket watcher rd_callback read_count: %d fd: %d event %lx nread: %d buf: %s errno: %d\n", ctx->read_count, socket_watcher_ref->fd,  event, nread, s, errno);
+    LOG_FMT("test_io: Socket watcher rd_callback read_count: %d fd: %d event %lx nread: %d buf: %s errno: %d\n", ctx->read_count,
+            WIoFd_get_fd(socket_watcher_ref),  event, nread, s, errno);
     ctx->read_count++;
     if(ctx->read_count > ctx->max_read_count) {
-        XrReactor_deregister(reactor, socket_watcher_ref->fd);
+        XrReactor_deregister(reactor,  WIoFd_get_fd(socket_watcher_ref));
     } else {
         return;
     }

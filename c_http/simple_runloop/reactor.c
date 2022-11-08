@@ -1,6 +1,11 @@
 #define XR_TRACE_ENABLEx
 #define ENABLE_LOGx
 #define _GNU_SOURCE
+#include <c_http/simple_runloop/runloop.h>
+#include <c_http/simple_runloop/rl_internal.h>
+#include <stdint.h>
+#include <time.h>
+#include <sys/epoll.h>
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -11,20 +16,25 @@
 #include <c_http/macros.h>
 #include <c_http/common/list.h>
 #include <c_http/async/types.h>
-#include <c_http/runloop/watcher.h>
-#include <c_http/runloop/fdtable.h>
-#include <c_http/runloop/reactor.h>
-#include <c_http/runloop/run_list.h>
 
 #define MAX_EVENTS 4096
-
-struct Reactor_s {
-    XR_REACTOR_DECLARE_TAG;
-    int               epoll_fd;
-    bool              closed_flag;
-    FdTableRef        table; // (int, CallbackData)
-    RunListRef        run_list;
-};
+//#define TYPE Reactor
+//#define Reactor_TAG "XRLRTOT"
+//#include <c_http/check_tag.h>
+//#undef TYPE
+//#define XR_REACTOR_DECLARE_TAG DECLARE_TAG(Reactor)
+//#define XR_REACTOR_CHECK_TAG(p) CHECK_TAG(Reactor, p)
+//#define XR_REACTOR_SET_TAG(p) SET_TAG(Reactor, p)
+//
+//struct Reactor_s {
+//    XR_REACTOR_DECLARE_TAG;
+//    int               epoll_fd;
+//    bool              closed_flag;
+//    FdTableRef        table; // (int, CallbackData)
+//    RunListRef        run_list;
+//};
+//typedef struct Reactor_s Reactor;
+//typedef struct Reactor_s *ReactorPtr;
 
 static int *int_in_heap(int key) {
     int *result;
@@ -37,16 +47,16 @@ static int *int_in_heap(int key) {
  * Performa a general epoll_ctl call with error checking.
  * In the event of an error abort 
  */
-static void XrReactor_epoll_ctl(ReactorRef this, int op, int fd, uint64_t interest)
+static void XrReactor_epoll_ctl(ReactorRef athis, int op, int fd, uint64_t interest)
 {
-    XR_REACTOR_CHECK_TAG(this)
+    XR_REACTOR_CHECK_TAG(athis)
     struct epoll_event epev = {
         .events = interest,
         .data = {
             .fd = fd
         }
     };
-    int status = epoll_ctl(this->epoll_fd, op, fd, &(epev));
+    int status = epoll_ctl(athis->epoll_fd, op, fd, &(epev));
     if (status != 0) {
         LOG_FMT("XrReactor_epoll_ctl epoll_fd: %d status : %d errno : %d", this->epoll_fd, status, errno);
     }
@@ -55,8 +65,8 @@ static void XrReactor_epoll_ctl(ReactorRef this, int op, int fd, uint64_t intere
 }
 
 ReactorRef XrReactor_new(void) {
-    ReactorRef runloop = malloc(sizeof(XrReactor));
-    CHTTP_ASSERT((runloop != NULL), "malloc failed new runloop");
+    ReactorRef runloop = malloc(sizeof(Reactor));
+    CHTTP_ASSERT((runloop != NULL), "malloc failed new simple_runloop");
     XR_REACTOR_SET_TAG(runloop)
 
     runloop->epoll_fd = epoll_create1(0);
@@ -65,28 +75,28 @@ ReactorRef XrReactor_new(void) {
     LOG_FMT("XrReactor_new epoll_fd %d", runloop->epoll_fd);
     runloop->table = FdTable_new();
     runloop->run_list = RunList_new();
-    return runloop;
+    return (ReactorRef)runloop;
 }
 
-void XrReactor_close(ReactorRef this)
+void XrReactor_close(ReactorRef athis)
 {
-    XR_REACTOR_CHECK_TAG(this)
-    this->closed_flag = true;
-    int status = close(this->epoll_fd);
+    XR_REACTOR_CHECK_TAG(athis)
+    athis->closed_flag = true;
+    int status = close(athis->epoll_fd);
     LOG_FMT("XrReactor_close status: %d errno: %d", status, errno);
     CHTTP_ASSERT((status != -1), "close epoll_fd failed");
-    int next_fd = FdTable_iterator(this->table);
+    int next_fd = FdTable_iterator(athis->table);
     while (next_fd  != -1) {
         close(next_fd);
-        next_fd = FdTable_next_iterator(this->table, next_fd);
+        next_fd = FdTable_next_iterator(athis->table, next_fd);
     }
 }
 
-void XrReactor_free(ReactorRef this)
+void XrReactor_free(ReactorRef athis)
 {
-    XR_REACTOR_CHECK_TAG(this)
-    if(! this->closed_flag) {
-        XrReactor_close(this);
+    XR_REACTOR_CHECK_TAG(athis)
+    if(! athis->closed_flag) {
+        XrReactor_close(athis);
     }
 //    int status = close(this->epoll_fd);
 //    LOG_FMT("XrReactor_free status: %d errno: %d \n", status, errno);
@@ -96,42 +106,42 @@ void XrReactor_free(ReactorRef this)
 //        close(next_fd);
 //        next_fd = FdTable_next_iterator(this->table, next_fd);
 //    }
-    FdTable_free(this->table);
-    free(this);
+    FdTable_free(athis->table);
+    free(athis);
 }
 
 
-int XrReactor_register(ReactorRef this, int fd, uint32_t interest, WatcherRef wref)
+int XrReactor_register(ReactorRef athis, int fd, uint32_t interest, WatcherRef wref)
 {
-    XR_REACTOR_CHECK_TAG(this)
+    XR_REACTOR_CHECK_TAG(athis)
 
     LOG_FMT("fd : %d  for events %d", fd, interest);
-    XrReactor_epoll_ctl (this, EPOLL_CTL_ADD, fd, interest);
-    FdTable_insert(this->table, wref, fd);
+    XrReactor_epoll_ctl (athis, EPOLL_CTL_ADD, fd, interest);
+    FdTable_insert(athis->table, wref, fd);
     return 0;
 }
-int XrReactor_deregister(ReactorRef this, int fd)
+int XrReactor_deregister(ReactorRef athis, int fd)
 {
-    XR_REACTOR_CHECK_TAG(this)
-    CHTTP_ASSERT((FdTable_lookup(this->table, fd) != NULL),"fd not in FdTable");
-    XrReactor_epoll_ctl(this, EPOLL_CTL_DEL, fd, EPOLLEXCLUSIVE | EPOLLIN);
-    FdTable_remove(this->table, fd);
+    XR_REACTOR_CHECK_TAG(athis)
+    CHTTP_ASSERT((FdTable_lookup(athis->table, fd) != NULL),"fd not in FdTable");
+    XrReactor_epoll_ctl(athis, EPOLL_CTL_DEL, fd, EPOLLEXCLUSIVE | EPOLLIN);
+    FdTable_remove(athis->table, fd);
     return 0;
 }
 
-int XrReactor_reregister(ReactorRef this, int fd, uint32_t interest, WatcherRef wref) {
-    XR_REACTOR_CHECK_TAG(this)
-    CHTTP_ASSERT((FdTable_lookup(this->table, fd) != NULL),"fd not in FdTable");
-    XrReactor_epoll_ctl(this, EPOLL_CTL_MOD, fd, interest);
-    WatcherRef wref_tmp = FdTable_lookup(this->table, fd);
+int XrReactor_reregister(ReactorRef athis, int fd, uint32_t interest, WatcherRef wref) {
+    XR_REACTOR_CHECK_TAG(athis)
+    CHTTP_ASSERT((FdTable_lookup(athis->table, fd) != NULL),"fd not in FdTable");
+    XrReactor_epoll_ctl(athis, EPOLL_CTL_MOD, fd, interest);
+    WatcherRef wref_tmp = FdTable_lookup(athis->table, fd);
     assert(wref == wref_tmp);
     return 0;
 }
-void XrReactor_delete(ReactorRef this, int fd)
+void XrReactor_delete(ReactorRef athis, int fd)
 {
-    XR_REACTOR_CHECK_TAG(this)
-    CHTTP_ASSERT((FdTable_lookup(this->table, fd) != NULL),"fd not in FdTable");
-    FdTable_remove(this->table, fd);
+    XR_REACTOR_CHECK_TAG(athis)
+    CHTTP_ASSERT((FdTable_lookup(athis->table, fd) != NULL),"fd not in FdTable");
+    FdTable_remove(athis->table, fd);
 }
 void print_events(struct epoll_event events[], int count)
 {
@@ -140,8 +150,8 @@ void print_events(struct epoll_event events[], int count)
         printf("\n");
     }
 }
-int XrReactor_run(ReactorRef this, time_t timeout) {
-    XR_REACTOR_CHECK_TAG(this)
+int XrReactor_run(ReactorRef athis, time_t timeout) {
+    XR_REACTOR_CHECK_TAG(athis)
     int result;
     struct epoll_event events[MAX_EVENTS];
 
@@ -149,16 +159,16 @@ int XrReactor_run(ReactorRef this, time_t timeout) {
 
     while (true) {
         time_t passed = time(NULL) - start;
-        if(FdTable_size(this->table) == 0) {
+        if(FdTable_size(athis->table) == 0) {
             LOG_FMT("XrReactor_run() FdTable_size == 0");
             goto cleanup;
         }
         int max_events = MAX_EVENTS;
-        int nfds = epoll_wait(this->epoll_fd, events, max_events, -1);
+        int nfds = epoll_wait(athis->epoll_fd, events, max_events, -1);
         time_t currtime = time(NULL);
         switch (nfds) {
             case -1:
-                if(this->closed_flag) {
+                if(athis->closed_flag) {
                     result = 0;
                 } else {
                     perror("XXX epoll_wait");
@@ -168,26 +178,26 @@ int XrReactor_run(ReactorRef this, time_t timeout) {
                 goto cleanup;
             case 0:
                 result = 0;
-                close(this->epoll_fd);
+                close(athis->epoll_fd);
                 goto cleanup;
             default: {
                 for (int i = 0; i < nfds; i++) {
                     int fd = events[i].data.fd;
                     int mask = events[i].events;
                     LOG_FMT("XrReactor_run loop fd: %d events: %x", fd, mask);
-                    WatcherRef wref = FdTable_lookup(this->table, fd);
+                    WatcherRef wref = FdTable_lookup(athis->table, fd);
                     wref->handler((void*)wref, fd, events[i].events);
                     LOG_FMT("fd: %d", fd);
                     // call handler
                 }
             }
         }
-        RunListIter iter = RunList_iterator(this->run_list);
+        RunListIter iter = RunList_iterator(athis->run_list);
         while(iter != NULL) {
-            FunctorRef fnc = RunList_itr_unpack(this->run_list, iter);
+            FunctorRef fnc = RunList_itr_unpack(athis->run_list, iter);
             Functor_call(fnc);
-            RunListIter next_iter = RunList_itr_next(this->run_list, iter);
-            RunList_itr_remove(this->run_list, &iter);
+            RunListIter next_iter = RunList_itr_next(athis->run_list, iter);
+            RunList_itr_remove(athis->run_list, &iter);
             iter = next_iter;
         }
     }
@@ -196,9 +206,9 @@ cleanup:
     return result;
 }
 
-int XrReactor_post(ReactorRef this, PostableFunction cb, void* arg)
+int XrReactor_post(ReactorRef athis, PostableFunction cb, void* arg)
 {
-    XR_REACTOR_CHECK_TAG(this)
+    XR_REACTOR_CHECK_TAG(athis)
     FunctorRef fr = Functor_new(cb, arg);
-    RunList_add_back(this->run_list, fr);
+    RunList_add_back(athis->run_list, fr);
 }

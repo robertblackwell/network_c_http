@@ -11,21 +11,16 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/epoll.h>
 #include <c_http/unittest.h>
 #include <c_http/logger.h>
 #include <c_http/common/utils.h>
 #include <c_http/socket_functions.h>
 #include <c_http/sync/sync_client.h>
-#include <c_http/runloop/reactor.h>
-#include <c_http/runloop/watcher.h>
-#include <c_http/runloop/w_timerfd.h>
-#include <c_http/runloop/w_iofd.h>
-#include <c_http/runloop/w_listener.h>
-#include <c_http/runloop/w_eventfd.h>
 
 
 static void on_event_listening(WListenerFdRef listener_ref, void *arg, uint64_t event);
-static void on_timer(WTimerFdRef timer_ref, void *arg, XrTimerEvent event);
+static void on_timer(WTimerFdRef timer_ref, void *arg, EventMask event);
 
 
 ListenerRef Listener_new(int listen_fd)
@@ -70,7 +65,7 @@ void Listener_listen(ListenerRef sref)
 /**
  * When the timer fires it is time to kill the listener.
  */
-static void on_timer(WTimerFdRef watcher, void* ctx, XrTimerEvent event)
+static void on_timer(WTimerFdRef watcher, void* ctx, EventMask event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;

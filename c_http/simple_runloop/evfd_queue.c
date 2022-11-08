@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-#include <c_http/runloop/evfd_queue.h>
+#include <c_http/simple_runloop/runloop.h>
 
 #include <assert.h>
 #include <pthread.h>
@@ -15,7 +15,7 @@
 // enables use of eventfd rather than two pipe trick
 #define  C_HTTP_EFD_QUEUE
 
-struct EvfdQueue_s {
+typedef struct EvfdQueue_s {
     ListRef         list;
     pthread_mutex_t queue_mutex;
 #ifdef C_HTTP_EFD_QUEUE
@@ -25,16 +25,19 @@ struct EvfdQueue_s {
     int             readfd;
     int             writefd;
     int             id;
-};
+} EvfdQueue;
+typedef EvfdQueue* EvfQueuePtr;
+
 static void dealloc(void** p)
 {
 }
-static void mk_fds(EvfdQueueRef this)
+static void mk_fds(EvfdQueueRef athis)
 {
+    EvfQueuePtr me = (EvfQueuePtr)athis;
 #ifdef C_HTTP_EFD_QUEUE
     int fd = eventfd(0, O_NONBLOCK | O_CLOEXEC);
-    this->readfd = fd;
-    this->writefd = fd;
+    me->readfd = fd;
+    me->writefd = fd;
     uint64_t buf;
     while(1) {
         int nread = read(fd, &buf, sizeof(buf));
@@ -47,11 +50,12 @@ static void mk_fds(EvfdQueueRef this)
     this->writefd = this->pipefds[1];
 #endif
 }
-void Evfdq_init(EvfdQueueRef this)
+void Evfdq_init(EvfdQueueRef athis)
 {
-    this->list = List_new(&dealloc);
-    pthread_mutex_init(&(this->queue_mutex), NULL);
-    mk_fds(this);
+    EvfQueuePtr me = (EvfQueuePtr)athis;
+    me->list = List_new(&dealloc);
+    pthread_mutex_init(&(me->queue_mutex), NULL);
+    mk_fds(me);
 }
 EvfdQueueRef Evfdq_new()
 {
@@ -63,29 +67,31 @@ void Evfdq_free(EvfdQueueRef this)
 {
     free(this);
 }
-int Evfdq_readfd(EvfdQueueRef this)
+int Evfdq_readfd(EvfdQueueRef athis)
 {
-    return this->readfd;
+    EvfQueuePtr me = (EvfQueuePtr)athis;
+    return me->readfd;
 }
-void Evfdq_add(EvfdQueueRef this, void* item)
+void Evfdq_add(EvfdQueueRef athis, void* item)
 {
-    pthread_mutex_lock(&(this->queue_mutex));
-    List_add_back(this->list, item);
-    LOG_FMT("Queue_add: %d\n", List_size(this->list));
+    EvfQueuePtr me = (EvfQueuePtr)athis;
+    pthread_mutex_lock(&(me->queue_mutex));
+    List_add_back(me->list, item);
+    LOG_FMT("Queue_add: %d\n", List_size(me->list));
     uint64_t buf = 1;
-    write(this->writefd, &buf, sizeof(buf));
-    pthread_mutex_unlock(&(this->queue_mutex));
+    write(me->writefd, &buf, sizeof(buf));
+    pthread_mutex_unlock(&(me->queue_mutex));
 
 }
-void* Evfdq_remove(EvfdQueueRef this)
+void* Evfdq_remove(EvfdQueueRef athis)
 {
-    pthread_mutex_lock(&(this->queue_mutex));
-    void* op = List_remove_first(this->list);
+    EvfQueuePtr me = (EvfQueuePtr)athis;
+    pthread_mutex_lock(&(me->queue_mutex));
+    void* op = List_remove_first(me->list);
     uint64_t buf;
-    int nread = read(this->readfd, &buf, sizeof(buf));
-    pthread_mutex_unlock(&(this->queue_mutex));
+    int nread = read(me->readfd, &buf, sizeof(buf));
+    pthread_mutex_unlock(&(me->queue_mutex));
     LOG_FMT("Queue_pop: socket is %ld nread: %d buf : %ld\n", (long)op, nread, buf);
     // remember to read from the pipe to clear the event
     return op;
 }
-

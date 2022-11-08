@@ -1,14 +1,14 @@
-#include <c_http/runloop/fdtable.h>
+#include <c_http/simple_runloop/run_list.c>
+#include <c_http/simple_runloop/rl_internal.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <c_http/runloop/watcher.h>
 
 #define CBTABLE_MAX 4096
 
 struct FdTable_s {
-    uint64_t count;
-	Watcher* entries[CBTABLE_MAX];
+    uint64_t    count;
+	Watcher*    entries[CBTABLE_MAX];
 };
 
 typedef struct FdTable_s FdTable, *FdTableRef;
@@ -41,13 +41,13 @@ void FdTable_insert(FdTableRef this, WatcherRef watcher, int fd)
 	this->entries[fd] = watcher;
 	this->count++;
 }
-void FdTable_remove(FdTableRef this, int fd)
+void FdTable_remove(FdTableRef athis, int fd)
 {
-	assert(this->entries[fd] != NULL);
-	WatcherRef wr = (this->entries[fd]);
+	assert(athis->entries[fd] != NULL);
+	WatcherRef wr = (athis->entries[fd]);
 	wr->free(wr);
-	this->entries[fd] = NULL;
-	this->count--;
+	athis->entries[fd] = NULL;
+	athis->count--;
 }
 WatcherRef FdTable_lookup(FdTableRef this, int fd)
 {

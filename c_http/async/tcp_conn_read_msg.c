@@ -53,7 +53,7 @@
 //    TcpConnRef conn_ref = arg;
 //    TCP_CONN_CHECK_TAG(conn_ref)
 //
-//    ReactorRef reactor_ref = socket_watcher_ref->runloop;
+//    ReactorRef reactor_ref = socket_watcher_ref->simple_runloop;
 //    IOBufferRef iobuf = conn_ref->io_buf_ref;
 //    int bytes_read;
 //    int errno_saved;
@@ -109,7 +109,7 @@ void TcpConn_read_msg(TcpConnRef this, MessageRef msg, TcpConnReadMsgCallback cb
     this->req_msg_ref = msg;
     TcpConn_prepare_read(this);
     WIoFdRef sw = this->sock_watcher_ref;
-    ReactorRef reactor_ref = sw->runloop;
+    ReactorRef reactor_ref = WIoFd_get_reactor(sw);
     uint64_t interest = EPOLLERR | EPOLLIN;
     WIoFd_register(sw);
     WIoFd_arm_read(sw, read_msg_handler, arg);
@@ -152,7 +152,7 @@ static void on_post_read_msg(void *arg)
     TcpConnRef conn_ref = arg;
     WIoFdRef sw = conn_ref->sock_watcher_ref;
     TCP_CONN_CHECK_TAG(conn_ref)
-    ReactorRef reactor_ref = sw->runloop;
+    ReactorRef reactor_ref = WIoFd_get_reactor(sw);
     conn_ref->read_msg_cb(conn_ref, arg, conn_ref->read_status);
 }
 /**
@@ -167,7 +167,7 @@ static void read_msg_handler(WIoFdRef socket_watcher_ref, void *arg, uint64_t ev
     WIoFdRef sw = socket_watcher_ref;
     TcpConnRef conn_ref = arg;
     TCP_CONN_CHECK_TAG(conn_ref)
-    ReactorRef reactor_ref = sw->runloop;
+    ReactorRef reactor_ref = WIoFd_get_reactor(sw);
 
     printf("XrWorker::wrkr_state_machine fd: %d\n", conn_ref->fd);
     uint64_t e1 = EPOLLIN;
@@ -217,7 +217,7 @@ static void read_msg_handler(WIoFdRef socket_watcher_ref, void *arg, uint64_t ev
 //{
 //    WIoFdRef sw = (WIoFdRef)wp;
 //    TcpConnRef conn_ref = arg;
-//    ReactorRef reactor_ref = sw->runloop;
+//    ReactorRef reactor_ref = sw->simple_runloop;
 //    uint64_t interest = EPOLLERR | EPOLLIN;
 //    WIoFd_register(sw, &read_msg_handler, conn_ref, interest);
 //}

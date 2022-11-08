@@ -1,10 +1,11 @@
 #ifndef c_http_xr_runloop_h
 #define c_http_xr_runloop_h
+#if 0
 #define _GNU_SOURCE
 #include <stdint.h>
 #include <time.h>
 #include <sys/epoll.h>
-#include <c_http/runloop/types.h>
+#include <c_http/simple_runloop/types.h>
 
 #define TYPE Reactor
 #define Reactor_TAG "XRLRTOT"
@@ -14,11 +15,12 @@
 #define XR_REACTOR_CHECK_TAG(p) CHECK_TAG(Reactor, p)
 #define XR_REACTOR_SET_TAG(p) SET_TAG(Reactor, p)
 
+
 /**
  * An opaque struct that represents a reactor. 
  *
  *  A reactor is an object that waits for events associated with fds(file descriptors)
- *  and also manages a runloop so that eveant handling code can "yield" the processor
+ *  and also manages a simple_runloop so that eveant handling code can "yield" the processor
  *  but post a callback function (function pointer and void* context pointer)
  *  to continue their processing after others have had a go.
  *  
@@ -117,5 +119,5 @@ int XrReactor_post(ReactorRef rtor_ref, PostableFunction cb, void* arg);
  * @param fd   int  file descriptor
  */
 void XrReactor_delete(ReactorRef this, int fd);
-
+#endif
 #endif

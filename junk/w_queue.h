@@ -2,9 +2,9 @@
 #define c_http_queue_watcher_h
 #include <time.h>
 #include <stdint.h>
-#include <c_http/runloop/watcher.h>
-#include <c_http/runloop/reactor.h>
-#include <c_http/runloop/evfd_queue.h>
+#include <c_http/simple_runloop/watcher.h>
+#include <c_http/simple_runloop/reactor.h>
+#include <c_http/simple_runloop/evfd_queue.h>
 
 /**
  * NOT tested yet - also not used

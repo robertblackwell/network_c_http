@@ -7,7 +7,7 @@
 #define _GNU_SOURCE             /* See feature_test_macros(7) */
 #include <string.h>
 #include <c_http/unittest.h>
-#include <c_http/runloop/watcher.h>
+#include <c_http/simple_runloop/runloop.h>
 #include <c_http/logger.h>
 #include "io_read.h"
 #include "io_write.h"

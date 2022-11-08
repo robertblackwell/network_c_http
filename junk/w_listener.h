@@ -1,11 +1,9 @@
 #ifndef c_http_listener_watcher_h
 #define c_http_listener_watcher_h
+#include <c_http/simple_runloop/rl_internal.h>
 #include <time.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <c_http/runloop/types.h>
-#include <c_http/runloop/watcher.h>
-#include <c_http/runloop/reactor.h>
 
 
 #define TYPE WListenerFd
@@ -21,11 +19,11 @@
 
 // typedef void(WListenerCaller(void* ctx));
 
-struct WListenerFd_s {
-    struct Watcher_s;
-    ListenerEventHandler*    listen_evhandler;
-    void*                    listen_arg;
-};
+//struct WListenerFd_s {
+//    struct Watcher_s;
+//    ListenerEventHandler*    listen_evhandler;
+//    void*                    listen_arg;
+//};
 
 WListenerFdRef WListenerFd_new(ReactorRef runloop, int fd);
 void WListenerFd_free(WListenerFdRef this);

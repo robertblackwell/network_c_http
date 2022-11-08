@@ -1,4 +1,5 @@
-#include <c_http/runloop/w_queue.h>
+#include <c_http/simple_runloop/runloop.h>
+#include <c_http//simple_runloop/rl_internal.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -70,4 +71,18 @@ void WQueue_deregister(WQueueRef this)
 
     int res =  XrReactor_deregister(this->runloop, this->fd);
     assert(res == 0);
+}
+ReactorRef WQueue_get_reactor(WQueueRef athis)
+{
+    return athis->runloop;
+}
+int WQueue_get_fd(WQueueRef athis)
+{
+    return athis->fd;
+}
+
+void WQueue_verify(WQueueRef this)
+{
+    XR_WQUEUE_CHECK_TAG(this)
+
 }

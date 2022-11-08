@@ -1,4 +1,5 @@
 #include <c_http/async/tcp_conn.h>
+#include <c_http/simple_runloop/runloop.h>
 #include <unistd.h>
 #include <errno.h>
 #include <sys/socket.h>
@@ -28,7 +29,7 @@ static void write_event_handler(WatcherRef wp, void* arg, uint64_t event)
     WIoFdRef sw = (WIoFdRef)wp;
     TcpConnRef conn_ref = arg;
     TCP_CONN_CHECK_TAG(conn_ref)
-    ReactorRef reactor_ref = sw->runloop;
+    ReactorRef reactor_ref = WIoFd_get_reactor(sw);
     LOG_FMT("conn_ref: %p", conn_ref);
     void* p = IOBuffer_data(conn_ref->write_buffer_ref);
     int len = IOBuffer_data_len(conn_ref->write_buffer_ref);
@@ -81,8 +82,8 @@ void write_machine(WIoFdRef socket_watcher_ref, void* arg, uint64_t event)
     LOG_FMT("watcher: %p arg: %p event %lx", socket_watcher_ref, arg, event);
     TcpConnRef conn_ref = (TcpConnRef)arg;
     TCP_CONN_CHECK_TAG(conn_ref)
-    XR_SOCKW_CHECK_TAG(socket_watcher_ref)
-    ReactorRef reactor_ref = socket_watcher_ref->runloop;
+    WIoFd_verify(socket_watcher_ref);
+    ReactorRef reactor_ref = WIoFd_get_reactor(socket_watcher_ref);
     // dont accept empty buffers
     assert(IOBuffer_data_len(conn_ref->write_buffer_ref) != 0);
 
