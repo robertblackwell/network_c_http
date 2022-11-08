@@ -23,7 +23,6 @@ void WQueue_init(WQueueRef this, ReactorRef runloop, EvfdQueueRef qref)
 {
     XR_WQUEUE_SET_TAG(this);
     this->type = XR_WATCHER_QUEUE;
-    sprintf(this->tag, "XRQW");
     this->queue = qref;
     this->fd = Evfdq_readfd(qref);
     this->runloop = runloop;
@@ -44,7 +43,7 @@ void WQueue_dispose(WQueueRef this)
 }
 void WQueue_register(WQueueRef this, QueueEventHandler evhandler, void* arg, uint64_t watch_what)
 {
-    XR_WQUEUE_CHECK_TAG(this)
+//    XR_WQUEUE_CHECK_TAG(this)
 
     uint32_t interest = watch_what;
     this->queue_event_handler = evhandler;

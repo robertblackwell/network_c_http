@@ -1,12 +1,12 @@
 #ifndef rl_internal_h
 #define rl_internal_h
 #include <c_http/simple_runloop/runloop.h>
-#include <c_http/simple_runloop/rl_checktag.h>
-
+#include <c_http/simple_runloop/rl_internal.h>
 #include <pthread.h>
 #include <stdbool.h>
 #include <string.h>
 #include <c_http/common/list.h>
+#include <c_http/check_tag.h>
 
 
 struct FdTable_s;
@@ -55,6 +55,15 @@ void RunList_itr_remove (RunListRef rl_ref, RunListIter *iter);
  */
 void RunList_exec(RunListRef this);
 
+#define TAG_LENGTH 10
+#define TYPE Reactor
+#define Reactor_TAG "XRLRTOT"
+#undef TYPE
+#define XR_REACTOR_DECLARE_TAG DECLARE_TAG(Reactor)
+#define XR_REACTOR_CHECK_TAG(p) CHECK_TAG(Reactor, p)
+#define XR_REACTOR_SET_TAG(p) SET_TAG(Reactor, p)
+struct Reactor_s;
+typedef struct Reactor_s Rector, *ReactorRef, RunloopRef;
 struct Reactor_s {
     XR_REACTOR_DECLARE_TAG;
     int               epoll_fd;
@@ -65,6 +74,10 @@ struct Reactor_s {
 /**
  * Watcher - a generic observer object
  */
+#define TYPE Watcher
+#define Watcher_TAG "XRWCHR"
+#undef TYPE
+#define XR_WATCHER_DECLARE_TAG DECLARE_TAG(Watcher)
 typedef enum WatcherType {
     XR_WATCHER_SOCKET = 11,
     XR_WATCHER_TIMER = 12,
@@ -72,6 +85,47 @@ typedef enum WatcherType {
     XR_WATCHER_FDEVENT = 14,
     XR_WATCHER_LISTENER = 15,
 } WatcherType;
+
+#define RL_TIMER_TAG "RL_TIMER"
+#define RL_QUEUE_TAG "RL_QUEUE"
+#define RL_LISTENER_TAG "RL_LISTN"
+#define RL_IOFD_TAG "RL_IOFD"
+#define RL_EVFD_TAG "RL_EVFD"
+
+
+#ifdef TYPE_CHECK_ON
+#define TAG_LENGTH 10
+#define TAG(TYPE) TYPE ## _TAG
+#define DECLARE_TAG(TYPE) char tag[TAG_LENGTH]
+#define CHECK_TAG(TYPE, p) \
+    do { \
+        assert(strcmp((p)->tag, TAG(TYPE)) == 0); \
+    } while(0);
+
+// used for testing only
+#define FAIL_CHECK_TAG(TYPE, p) \
+    do { \
+        assert(strcmp((p)->tag, TAG(TYPE)) != 0); \
+    } while(0);
+
+#define SET_TAG(TYPE, p) \
+    do {                     \
+        assert(strlen(TAG(TYPE)) < TAG_LENGTH);                     \
+        sprintf((p)->tag, "%s", TAG(TYPE)); \
+    } while(0);
+#else
+    #define DECLARE_TAG(TYPE)
+    #define CHECK_TAG(TYPE, p)
+    #define SET_TAG(TYPE, p)
+#endif
+
+#define WEventFd_TAG    "XRFDEV"
+#define WIoFd_TAG       "XRWS"
+#define WListenerFd_TAG "XRLSTNR"
+#define WQueue_TAG      "XRLST"
+#define WTimerFd_TAG    "XRTW"
+
+
 
 
 struct Watcher_s {
@@ -109,7 +163,17 @@ typedef struct EvfdQueue_s {
     int             writefd;
     int             id;
 } EvfdQueue;
+typedef EvfdQueue* EvfQueuePtr;
 
+
+#define TYPE WEventFd
+#define WEventFd_TAG "XRFDEV"
+#undef TYPE
+#define XR_FDEV_DECLARE_TAG DECLARE_TAG(WEventFd)
+#define XR_FDEV_CHECK_TAG(p) CHECK_TAG(WEventFd, p)
+#define XR_FDEV_SET_TAG(p) SET_TAG(WEventFd, p)
+struct WEventFd_s;
+typedef struct WEventFd_s WEventFd, *WEventFdPtr;
 typedef uint64_t WEventFdMask;
 struct WEventFd_s {
     struct Watcher_s;
@@ -121,6 +185,12 @@ struct WEventFd_s {
 /**
  * WIoFd
  */
+#define TYPE WIoFd
+#define WIoFd_TAG "XRWS"
+#undef TYPE
+#define XR_SOCKW_DECLARE_TAG DECLARE_TAG(WIoFd)
+#define XR_SOCKW_CHECK_TAG(p) CHECK_TAG(WIoFd, p)
+#define XR_SOCKW_SET_TAG(p) SET_TAG(WIoFd, p)
 struct WIoFd_s {
     struct Watcher_s;
 
@@ -130,19 +200,36 @@ struct WIoFd_s {
     SocketEventHandler       write_evhandler;
     void*                    write_arg;
 };
+typedef struct WIoFd_s WIoFd, *WIoFdPtr;
 
 /**
  * WListener
  */
+#define TYPE WListenerFd
+#define WListenerFd_TAG "XRLSTNR"
+#undef TYPE
+#define XR_LISTNER_DECLARE_TAG DECLARE_TAG(WListenerFd)
+#define XR_LISTNER_CHECK_TAG(p) CHECK_TAG(WListenerFd, p)
+#define XR_LISTNER_SET_TAG(p) SET_TAG(WListenerFd, p)
 typedef struct WListenerFd_s {
     struct Watcher_s;
     ListenerEventHandler     listen_evhandler;
     void*                    listen_arg;
 } WListenerFd;
+typedef WListenerFd *WListenerFdPtr;
 
 /**
  * WQueue
  */
+#define TYPE WQueue
+#define WQueue_TAG "XRLST"
+#undef TYPE
+#define XR_WQUEUE_DECLARE_TAG DECLARE_TAG(WQueue)
+//#define XR_WQUEUE_CHECK_TAG(p) CHECK_TAG(WQueue, p)
+#define XR_WQUEUE_CHECK_TAG(p)
+#define XR_WQUEUE_SET_TAG(p) SET_TAG(WQueue, p)
+struct WQueue_s;
+typedef struct WQueue_s WQueue, *WQueuePtr;
 typedef uint64_t XrQueueEvent;
 typedef void(XrQueuetWatcherCaller(void* ctx));
 struct WQueue_s {
@@ -153,9 +240,24 @@ struct WQueue_s {
     void*                   queue_event_handler_arg;
 };
 
+//WQueueRef WQueue_new(ReactorRef runloop, EvfdQueueRef qref);
+//void WQueue_dispose(WQueueRef this);
+//void WQueue_register(WQueueRef this, QueueEventHandler cb, void* arg,  uint64_t watch_what);
+//void WQueue_change_watch(WQueueRef this, QueueEventHandler cb, void* arg, uint64_t watch_what);
+//
+//void WQueue_deregister(WQueueRef this);
+
 /**
  * WTimerFd
  */
+#define TYPE WTimerFd
+#define WTimerFd_TAG "XRTW"
+#undef TYPE
+#define XRTW_DECLARE_TAG DECLARE_TAG(WTimerFd)
+#define XR_WTIMER_CHECK_TAG(p) CHECK_TAG(WTimerFd, p)
+#define XR_WTIMER_SET_TAG(p) SET_TAG(WTimerFd, p)
+struct WTimerFd_s;
+typedef struct WTimerFd_s WTimerFd, *WTimerFdPtr;
 typedef uint64_t XrTimerEvent;
 struct WTimerFd_s {
     struct Watcher_s;

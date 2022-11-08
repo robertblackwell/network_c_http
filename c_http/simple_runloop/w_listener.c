@@ -30,6 +30,7 @@ static void anonymous_free(WatcherRef p)
 }
 void WListenerFd_init(WListenerFdRef athis, ReactorRef runloop, int fd)
 {
+    XR_LISTNER_SET_TAG(athis);
     athis->type = XR_WATCHER_LISTENER;
     athis->fd = fd;
     athis->runloop = runloop;
@@ -46,13 +47,13 @@ WListenerFdRef WListenerFd_new(ReactorRef rtor_ref, int fd)
 }
 void WListenerFd_free(WListenerFdRef athis)
 {
-    XR_LISTNER_CHECK_TAG(athis)
+    WListenerFd_verify(athis);
     close(athis->fd);
     free((void*)athis);
 }
 void WListenerFd_register(WListenerFdRef athis, ListenerEventHandler event_handler, void* arg)
 {
-    XR_LISTNER_CHECK_TAG(athis)
+    WListenerFd_verify(athis);
     if( event_handler != NULL) {
         athis->listen_evhandler = event_handler;
     }
@@ -65,7 +66,7 @@ void WListenerFd_register(WListenerFdRef athis, ListenerEventHandler event_handl
     if(res != 0) {
         printf("register status : %d errno: %d \n", res, errno);
     }
-    assert(res ==0);
+    assert(res == 0);
 }
 void WListenerFd_deregister(WListenerFdRef athis)
 {
@@ -104,8 +105,8 @@ int WListenerFd_get_fd(WListenerFdRef athis)
     return athis->fd;
 }
 
-void WListenerFd_verify(WListenerFdRef this)
+void WListenerFd_verify(WListenerFdRef athis)
 {
-    XR_LISTNER_CHECK_TAG(this)
+    XR_LISTNER_CHECK_TAG(athis)
 
 }
