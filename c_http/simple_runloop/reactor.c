@@ -18,23 +18,6 @@
 #include <c_http/async/types.h>
 
 #define MAX_EVENTS 4096
-//#define TYPE Reactor
-//#define Reactor_TAG "XRLRTOT"
-//#include <c_http/check_tag.h>
-//#undef TYPE
-//#define XR_REACTOR_DECLARE_TAG DECLARE_TAG(Reactor)
-//#define XR_REACTOR_CHECK_TAG(p) CHECK_TAG(Reactor, p)
-//#define XR_REACTOR_SET_TAG(p) SET_TAG(Reactor, p)
-//
-//struct Reactor_s {
-//    XR_REACTOR_DECLARE_TAG;
-//    int               epoll_fd;
-//    bool              closed_flag;
-//    FdTableRef        table; // (int, CallbackData)
-//    RunListRef        run_list;
-//};
-//typedef struct Reactor_s Reactor;
-//typedef struct Reactor_s *ReactorPtr;
 
 static int *int_in_heap(int key) {
     int *result;
@@ -63,7 +46,11 @@ static void XrReactor_epoll_ctl(ReactorRef athis, int op, int fd, uint64_t inter
     LOG_FMT("XrReactor_epoll_ctl epoll_fd: %d status : %d errno : %d", this->epoll_fd, status, errno);
     CHTTP_ASSERT((status == 0), "epoll ctl call failed");
 }
-
+/**
+ * Create a new reactor runloop. Should only be one per thread
+ * @TODO - store a runloop/reactor for each thread in thread local storage
+ * @NOTE - this implementation only works for Linux and uses epoll
+ */
 ReactorRef XrReactor_new(void) {
     ReactorRef runloop = malloc(sizeof(Reactor));
     CHTTP_ASSERT((runloop != NULL), "malloc failed new simple_runloop");
@@ -98,23 +85,17 @@ void XrReactor_free(ReactorRef athis)
     if(! athis->closed_flag) {
         XrReactor_close(athis);
     }
-//    int status = close(this->epoll_fd);
-//    LOG_FMT("XrReactor_free status: %d errno: %d \n", status, errno);
-//    CHTTP_ASSERT((status != -1), "close epoll_fd failed");
-//    int next_fd = FdTable_iterator(this->table);
-//    while (next_fd  != -1) {
-//        close(next_fd);
-//        next_fd = FdTable_next_iterator(this->table, next_fd);
-//    }
     FdTable_free(athis->table);
     free(athis);
 }
 
-
+/**
+ * Register a Watcher (actuallyr one of its derivatives) and its associated file descriptor
+ * with the epoll instance. Specify the types of events the watcher is interested in
+ */
 int XrReactor_register(ReactorRef athis, int fd, uint32_t interest, WatcherRef wref)
 {
     XR_REACTOR_CHECK_TAG(athis)
-
     LOG_FMT("fd : %d  for events %d", fd, interest);
     XrReactor_epoll_ctl (athis, EPOLL_CTL_ADD, fd, interest);
     FdTable_insert(athis->table, wref, fd);
