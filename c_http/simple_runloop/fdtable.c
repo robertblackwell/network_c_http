@@ -3,8 +3,10 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdbool.h>
 
 #define CBTABLE_MAX 4096
+
 
 struct FdTable_s {
     uint64_t    count;

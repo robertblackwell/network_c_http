@@ -145,6 +145,10 @@ int XrReactor_run(ReactorRef athis, time_t timeout) {
             goto cleanup;
         }
         int max_events = MAX_EVENTS;
+        /**
+         * All entries on the runllist should be executed before we look for more fd events
+         */
+        assert(RunList_iterator(athis->run_list) == NULL);
         int nfds = epoll_wait(athis->epoll_fd, events, max_events, -1);
         time_t currtime = time(NULL);
         switch (nfds) {
@@ -173,6 +177,19 @@ int XrReactor_run(ReactorRef athis, time_t timeout) {
                 }
             }
         }
+        /**
+         * @TODO - the loop should be changed to continually remove the front entry and process it until the list is empty.
+         * Invariant - the runlist should never have more than 1 entry for any given file desacriptor.
+         * This is currently not being checked. Need a paranoid option that checks it
+         */
+#if 1
+//        fd_map_init();
+        FunctorRef fnc;
+        while(fnc = RunList_remove_first(athis->run_list)) {
+
+            Functor_call(fnc);
+        }
+#else
         RunListIter iter = RunList_iterator(athis->run_list);
         while(iter != NULL) {
             FunctorRef fnc = RunList_itr_unpack(athis->run_list, iter);
@@ -181,6 +198,7 @@ int XrReactor_run(ReactorRef athis, time_t timeout) {
             RunList_itr_remove(athis->run_list, &iter);
             iter = next_iter;
         }
+#endif
     }
 
 cleanup:

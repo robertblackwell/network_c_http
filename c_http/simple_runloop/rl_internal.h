@@ -11,6 +11,8 @@
 
 struct FdTable_s;
 //===============
+#define CBTABLE_MAX 4096
+
 typedef struct FdTable_s FdTable, *FdTableRef;
 FdTableRef FdTable_new();
 void       FdTable_free(FdTableRef athis);
@@ -49,6 +51,11 @@ FunctorRef  RunList_itr_unpack (RunListRef rl_ref, RunListIter iter);
 RunListIter RunList_iterator (RunListRef rl_ref);
 RunListIter RunList_itr_next (RunListRef rl_ref, RunListIter iter);
 void RunList_itr_remove (RunListRef rl_ref, RunListIter *iter);
+
+void fd_map_init();
+bool fd_map_at(int j);
+bool fd_map_set(int j);
+
 /**
  * Scan down the run list calling each Functor entry until the list is empty;
  * @param this

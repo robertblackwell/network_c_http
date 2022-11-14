@@ -114,6 +114,7 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 
 	#aio simple_runloop and aio_http/1.1 details
 		simple_runloop/fdtable.c
+		simple_runloop/fd_map.c
 		simple_runloop/reactor.c
 		simple_runloop/w_listener.c
 		simple_runloop/w_eventfd.c
