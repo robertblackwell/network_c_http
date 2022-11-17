@@ -16,19 +16,19 @@
  * @param fd        int
  * @param event     uint64_t
  */
-static void handler(WatcherRef watcher, int fd, uint64_t event)
+static void handler(RtorWatcherRef watcher, int fd, uint64_t event)
 {
-    WListenerFdRef listener_ref = (WListenerFdRef)watcher;
+    RtorListenerRef listener_ref = (RtorListenerRef)watcher;
     assert(fd ==  listener_ref->fd);
     if(listener_ref->listen_evhandler) {
         listener_ref->listen_evhandler(listener_ref,  listener_ref->listen_arg, event);
     }
 }
-static void anonymous_free(WatcherRef p)
+static void anonymous_free(RtorWatcherRef p)
 {
-    WListenerFd_free((WListenerFdRef)p);
+    rtor_Listener_free((RtorListenerRef) p);
 }
-void WListenerFd_init(WListenerFdRef athis, ReactorRef runloop, int fd)
+void WListenerFd_init(RtorListenerRef athis, ReactorRef runloop, int fd)
 {
     XR_LISTNER_SET_TAG(athis);
     athis->type = XR_WATCHER_LISTENER;
@@ -39,21 +39,21 @@ void WListenerFd_init(WListenerFdRef athis, ReactorRef runloop, int fd)
     athis->listen_arg = NULL;
     athis->listen_evhandler = NULL;
 }
-WListenerFdRef WListenerFd_new(ReactorRef rtor_ref, int fd)
+RtorListenerRef rtor_listener_new(ReactorRef runloop, int fd)
 {
-    WListenerFdRef this = malloc(sizeof(WListenerFd));
-    WListenerFd_init(this, rtor_ref, fd);
+    RtorListenerRef this = malloc(sizeof(RtorListener));
+    WListenerFd_init(this, runloop, fd);
     return this;
 }
-void WListenerFd_free(WListenerFdRef athis)
+void rtor_Listener_free(RtorListenerRef athis)
 {
-    WListenerFd_verify(athis);
+    rtor_listener_verify(athis);
     close(athis->fd);
     free((void*)athis);
 }
-void WListenerFd_register(WListenerFdRef athis, ListenerEventHandler event_handler, void* arg)
+void rtor_listener_register(RtorListenerRef athis, ListenerEventHandler event_handler, void* arg)
 {
-    WListenerFd_verify(athis);
+    rtor_listener_verify(athis);
     if( event_handler != NULL) {
         athis->listen_evhandler = event_handler;
     }
@@ -62,51 +62,51 @@ void WListenerFd_register(WListenerFdRef athis, ListenerEventHandler event_handl
     }
 
     uint32_t interest =  EPOLLIN | EPOLLEXCLUSIVE;
-    int res = XrReactor_register(athis->runloop, athis->fd, interest, (WatcherRef)(athis));
+    int res = rtor_register(athis->runloop, athis->fd, interest, (RtorWatcherRef) (athis));
     if(res != 0) {
         printf("register status : %d errno: %d \n", res, errno);
     }
     assert(res == 0);
 }
-void WListenerFd_deregister(WListenerFdRef athis)
+void rtor_listener_deregister(RtorListenerRef athis)
 {
     XR_LISTNER_CHECK_TAG(athis)
-    XrReactor_delete(athis->runloop, athis->fd);
+    rtor_delete(athis->runloop, athis->fd);
 }
-void WListenerFd_arm(WListenerFdRef athis, ListenerEventHandler event_handler, void* arg)
+void rtor_listener_arm(RtorListenerRef athis, ListenerEventHandler fd_event_handler, void* arg)
 {
     XR_LISTNER_CHECK_TAG(athis)
-    if( event_handler != NULL) {
-        athis->listen_evhandler = event_handler;
+    if(fd_event_handler != NULL) {
+        athis->listen_evhandler = fd_event_handler;
     }
     if (arg != NULL) {
         athis->listen_arg = arg;
     }
     uint32_t interest = EPOLLIN | EPOLLEXCLUSIVE ;
 
-    int res = XrReactor_reregister(athis->runloop, athis->fd, interest, (WatcherRef)athis);
+    int res = rtor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
     if(res != 0) {
         printf("arm status : %d errno: %d \n", res, errno);
     }
     assert(res == 0);
 }
-void WListenerFd_disarm(WListenerFdRef athis)
+void WListenerFd_disarm(RtorListenerRef athis)
 {
     XR_LISTNER_CHECK_TAG(athis)
-    int res = XrReactor_reregister(athis->runloop, athis->fd, 0L, (WatcherRef)athis);
+    int res = rtor_reregister(athis->runloop, athis->fd, 0L, (RtorWatcherRef) athis);
     assert(res == 0);
 }
-ReactorRef WListenerFd_get_reactor(WListenerFdRef athis)
+ReactorRef WListenerFd_get_reactor(RtorListenerRef athis)
 {
     return athis->runloop;
 }
-int WListenerFd_get_fd(WListenerFdRef athis)
+int rtor_listener_get_fd(RtorListenerRef this)
 {
-    return athis->fd;
+    return this->fd;
 }
 
-void WListenerFd_verify(WListenerFdRef athis)
+void rtor_listener_verify(RtorListenerRef r)
 {
-    XR_LISTNER_CHECK_TAG(athis)
+    XR_LISTNER_CHECK_TAG(r)
 
 }

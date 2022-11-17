@@ -31,7 +31,7 @@ void* connector_thread_func(void* arg)
     sleep(1);
     // for(int i = 0; i < 2; i++) {
     //     TestAsyncServerRef server = tc->servers[i];
-    //     WListenerFdRef listener = server->listening_watcher_ref;
-    //     WListenerFd_deregister(listener);
+    //     RtorListenerRef listener = server->listening_watcher_ref;
+    //     rtor_listener_deregister(listener);
     // }
 }

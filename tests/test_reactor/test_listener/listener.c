@@ -19,8 +19,8 @@
 #include <c_http/sync/sync_client.h>
 
 
-static void on_event_listening(WListenerFdRef listener_ref, void *arg, uint64_t event);
-static void on_timer(WTimerFdRef timer_ref, void *arg, EventMask event);
+static void on_event_listening(RtorListenerRef listener_ref, void *arg, uint64_t event);
+static void on_timer(RtorTimerRef timer_ref, void *arg, EventMask event);
 
 
 ListenerRef Listener_new(int listen_fd)
@@ -53,28 +53,28 @@ void Listener_listen(ListenerRef sref)
     ASSERT_NOT_NULL(sref)
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
-    sref->reactor_ref = XrReactor_new();
-    sref->listening_watcher_ref = WListenerFd_new(sref->reactor_ref, sref->listening_socket_fd);
-    WListenerFdRef lw = sref->listening_watcher_ref;
+    sref->reactor_ref = rtor_new();
+    sref->listening_watcher_ref = rtor_listener_new(sref->reactor_ref, sref->listening_socket_fd);
+    RtorListenerRef lw = sref->listening_watcher_ref;
 
-    WListenerFd_register(lw, on_event_listening, sref);
+    rtor_listener_register(lw, on_event_listening, sref);
     printf("Listener_listen reactor: %p listen sock: %d  lw: %p\n", sref->reactor_ref, sref->listening_socket_fd, lw);
-    sref->timer_ref = WTimerFd_new(sref->reactor_ref, &on_timer, (void*)sref, 5000, false);
-    XrReactor_run(sref->reactor_ref, -1);
+    sref->timer_ref = rtor_timer_new(sref->reactor_ref, &on_timer, (void *) sref, 5000, false);
+    rtor_run(sref->reactor_ref, -1);
 }
 /**
  * When the timer fires it is time to kill the listener.
  */
-static void on_timer(WTimerFdRef watcher, void* ctx, EventMask event)
+static void on_timer(RtorTimerRef watcher, void* ctx, EventMask event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
     ListenerRef listener_ref = (ListenerRef) ctx;
     LOG_FMT("event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", event, epollin, error);
-    XrReactor_free(listener_ref->reactor_ref);
+    rtor_free(listener_ref->reactor_ref);
 }
 
-static void on_event_listening(WListenerFdRef listener_ref, void *arg, uint64_t event)
+static void on_event_listening(RtorListenerRef listener_ref, void *arg, uint64_t event)
 {
 //    assert(iobuf != NULL);
 //    assert(conn_ref->handler_ref != NULL);

@@ -18,9 +18,9 @@
  * @param fd
  * @param event
  */
-static void handler(WatcherRef fdevent_ref, int fd, uint64_t event)
+static void handler(RtorWatcherRef fdevent_ref, int fd, uint64_t event)
 {
-    WEventFdRef fdev = (WEventFdRef)fdevent_ref;
+    RtorEventfdRef fdev = (RtorEventfdRef)fdevent_ref;
     XR_FDEV_CHECK_TAG(fdev)
     uint64_t buf;
     int nread = read(fdev->fd, &buf, sizeof(buf));
@@ -32,13 +32,13 @@ static void handler(WatcherRef fdevent_ref, int fd, uint64_t event)
 
     }
 }
-static void anonymous_free(WatcherRef p)
+static void anonymous_free(RtorWatcherRef p)
 {
-    WEventFdRef fdevp = (WEventFdRef)p;
+    RtorEventfdRef fdevp = (RtorEventfdRef)p;
     XR_FDEV_CHECK_TAG(fdevp)
-    WEventFd_free(fdevp);
+    rtor_eventfd_free(fdevp);
 }
-void WEventFd_init(WEventFdRef this, ReactorRef runloop)
+void WEventFd_init(RtorEventfdRef this, ReactorRef runloop)
 {
     this->type = XR_WATCHER_FDEVENT;
     XR_FDEV_SET_TAG(this);
@@ -59,88 +59,88 @@ void WEventFd_init(WEventFdRef this, ReactorRef runloop)
     this->free = &anonymous_free;
     this->handler = &handler;
 }
-WEventFdRef WEventFd_new(ReactorRef rtor_ref)
+RtorEventfdRef rtor_eventfd(ReactorRef runloop)
 {
-    WEventFdRef this = malloc(sizeof(WEventFd));
-    WEventFd_init(this, rtor_ref);
+    RtorEventfdRef this = malloc(sizeof(RtorEventfd));
+    WEventFd_init(this, runloop);
     return this;
 }
-void WEventFd_free(WEventFdRef this)
+void rtor_eventfd_free(RtorEventfdRef athis)
 {
-    XR_FDEV_CHECK_TAG(this)
-    close(this->fd);
-    free((void*)this);
+    XR_FDEV_CHECK_TAG(athis)
+    close(athis->fd);
+    free((void*)athis);
 }
-void WEventFd_register(WEventFdRef this)
+void rtor_eventfd_register(RtorEventfdRef athis)
 {
-    XR_FDEV_CHECK_TAG(this)
+    XR_FDEV_CHECK_TAG(athis)
 
     uint32_t interest = 0L;
-    this->fd_event_handler = NULL;
-    this->fd_event_handler_arg = NULL;
-    int res = XrReactor_register(this->runloop, this->fd, interest, (WatcherRef)(this));
+    athis->fd_event_handler = NULL;
+    athis->fd_event_handler_arg = NULL;
+    int res = rtor_register(athis->runloop, athis->fd, interest, (RtorWatcherRef) (athis));
     assert(res ==0);
 }
-void WEventFd_change_watch(WEventFdRef this, FdEventHandler evhandler, void* arg, uint64_t watch_what)
+void rtor_eventfd_change_watch(RtorEventfdRef athis, FdEventHandler evhandler, void* arg, uint64_t watch_what)
 {
-    XR_FDEV_CHECK_TAG(this)
+    XR_FDEV_CHECK_TAG(athis)
     uint32_t interest = watch_what;
     if( evhandler != NULL) {
-        this->fd_event_handler = evhandler;
+        athis->fd_event_handler = evhandler;
     }
     if (arg != NULL) {
-        this->fd_event_handler_arg = arg;
+        athis->fd_event_handler_arg = arg;
     }
-    int res = XrReactor_reregister(this->runloop, this->fd, interest, (WatcherRef)this);
+    int res = rtor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
     assert(res == 0);
 }
-void WEventFd_deregister(WEventFdRef this)
+void rtor_eventfd_deregister(RtorEventfdRef athis)
 {
-    XR_FDEV_CHECK_TAG(this)
-    int res =  XrReactor_deregister(this->runloop, this->fd);
+    XR_FDEV_CHECK_TAG(athis)
+    int res = rtor_deregister(athis->runloop, athis->fd);
     assert(res == 0);
 }
-void WEventFd_arm(WEventFdRef this, FdEventHandler evhandler, void* arg)
+void rtor_eventfd_arm(RtorEventfdRef athis, FdEventHandler evhandler, void* arg)
 {
-    XR_FDEV_CHECK_TAG(this)
+    XR_FDEV_CHECK_TAG(athis)
     uint32_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP;
     if( evhandler != NULL) {
-        this->fd_event_handler = evhandler;
+        athis->fd_event_handler = evhandler;
     }
     if (arg != NULL) {
-        this->fd_event_handler_arg = arg;
+        athis->fd_event_handler_arg = arg;
     }
-    int res = XrReactor_reregister(this->runloop, this->fd, interest, (WatcherRef)this);
+    int res = rtor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
     assert(res == 0);
 }
-void WEventFd_disarm(WEventFdRef this)
+void rtor_eventfd_disarm(RtorEventfdRef athis)
 {
-    XR_FDEV_CHECK_TAG(this)
-    int res = XrReactor_reregister(this->runloop, this->fd, 0, (WatcherRef)this);
+    XR_FDEV_CHECK_TAG(athis)
+    int res = rtor_reregister(athis->runloop, athis->fd, 0, (RtorWatcherRef) athis);
 }
-void WEventFd_fire(WEventFdRef this)
+void rtor_eventfd_fire(RtorEventfdRef athis)
 {
-    XR_FDEV_CHECK_TAG(this)
+    XR_FDEV_CHECK_TAG(athis)
 #ifdef TWO_PIPE_TRICK
     uint64_t buf = 1;
     write(this->write_fd, &buf, sizeof(buf));
 #else
     uint64_t buf = 1;
-    int x = write(this->fd, &buf, sizeof(buf));
+    int x = write(athis->fd, &buf, sizeof(buf));
     assert(x == sizeof(buf));
 #endif
 }
-ReactorRef WEventFd_get_reactor(WEventFdRef athis)
+ReactorRef rtor_eventfd_get_reactor(RtorEventfdRef athis)
 {
     return athis->runloop;
 }
-int WEventFd_get_fd(WEventFdRef athis)
+int rtor_eventfd_get_fd(RtorEventfdRef this)
 {
-    return athis->fd;
+    return this->fd;
 }
 
-void WEventFd_verify(WEventFdRef this)
+void rtor_eventfd_verify(RtorEventfdRef r)
 {
-    XR_FDEV_CHECK_TAG(this)
+    XR_FDEV_CHECK_TAG(r)
 
 }

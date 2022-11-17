@@ -6,14 +6,14 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 
-static void handler(WatcherRef watcher, int fd, uint64_t event)
+static void handler(RtorWatcherRef watcher, int fd, uint64_t event)
 {
     WQueueRef queue_watcher_ref = (WQueueRef)watcher;
     XR_WQUEUE_CHECK_TAG(queue_watcher_ref)
     assert(fd == queue_watcher_ref->fd);
     queue_watcher_ref->queue_event_handler(queue_watcher_ref, queue_watcher_ref->queue_event_handler_arg, event);
 }
-static void anonymous_free(WatcherRef p)
+static void anonymous_free(RtorWatcherRef p)
 {
     WQueueRef queue_watcher_ref = (WQueueRef)p;
     XR_WQUEUE_CHECK_TAG(queue_watcher_ref)
@@ -48,7 +48,7 @@ void WQueue_register(WQueueRef this, QueueEventHandler evhandler, void* arg, uin
     uint32_t interest = watch_what;
     this->queue_event_handler = evhandler;
     this->queue_event_handler_arg = arg;
-    int res = XrReactor_register(this->runloop, this->fd, interest, (WatcherRef)(this));
+    int res = rtor_register(this->runloop, this->fd, interest, (RtorWatcherRef) (this));
     assert(res ==0);
 }
 void WQueue_change_watch(WQueueRef this, QueueEventHandler evhandler, void* arg, uint64_t watch_what)
@@ -61,14 +61,14 @@ void WQueue_change_watch(WQueueRef this, QueueEventHandler evhandler, void* arg,
     if (arg != NULL) {
         this->queue_event_handler_arg = arg;
     }
-    int res = XrReactor_reregister(this->runloop, this->fd, interest, (WatcherRef)this);
+    int res = rtor_reregister(this->runloop, this->fd, interest, (RtorWatcherRef) this);
     assert(res == 0);
 }
 void WQueue_deregister(WQueueRef this)
 {
     XR_WQUEUE_CHECK_TAG(this)
 
-    int res =  XrReactor_deregister(this->runloop, this->fd);
+    int res = rtor_deregister(this->runloop, this->fd);
     assert(res == 0);
 }
 ReactorRef WQueue_get_reactor(WQueueRef athis)

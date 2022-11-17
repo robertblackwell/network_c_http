@@ -3,8 +3,8 @@
 
 bool fd_map[CBTABLE_MAX];
 void fd_map_init() {
-    for(int i = 0; i < CBTABLE_MAX)
-        fd_map[i] = false
+    for(int i = 0; i < CBTABLE_MAX; i++)
+        fd_map[i] = false;
 }
 
 bool fd_map_at(int j) {

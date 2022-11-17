@@ -15,7 +15,7 @@
  *      when another thread connects to the same host/port.
  *
  * 2.   In addition we are testing that multiple threads can be listening on the same socket and that
- *      a connect to that host/port will only cuase a listen even on one of the listening threads.
+ *      a connect to that host/port will only cause a listen even on one of the listening threads.
  *
  *      This is of particular interest as it allows a multi-threaded server to operate without additional
  *      listener thread and without synchronization between the listener and the thread that services the connection.

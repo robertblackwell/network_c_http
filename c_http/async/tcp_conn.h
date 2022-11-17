@@ -57,7 +57,7 @@ struct TcpConn_s {
     TCP_CONN_DECLARE_TAG;
     int                     fd;
     enum TcpConnState        state;
-    WIoFdRef                sock_watcher_ref;
+    RtorRdrWrtrRef                sock_watcher_ref;
     AsyncServerRef          server_ref;
     bool                    recvbuff_small;
 
@@ -92,7 +92,7 @@ struct TcpConn_s {
 };
 //typedef struct TcpConn_s TcpConn, *TcpConnRef;
 
-TcpConnRef TcpConn_new(int fd, WIoFdRef socket_watcher, AsyncServerRef server_ref);
+TcpConnRef TcpConn_new(int fd, RtorRdrWrtrRef socket_watcher, AsyncServerRef server_ref);
 void TcpConn_free(TcpConnRef this);
 
 void TcpConn_read_some(TcpConnRef this, IOBufferRef iobuf, TcpConnReadCallback cb, void* arg);

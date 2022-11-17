@@ -24,12 +24,12 @@ static void write_complete_post_func(void* arg)
     conn_ref->write_cb(conn_ref, conn_ref->write_arg, 0);
 }
 
-static void write_event_handler(WatcherRef wp, void* arg, uint64_t event)
+static void write_event_handler(RtorWatcherRef wp, void* arg, uint64_t event)
 {
-    WIoFdRef sw = (WIoFdRef)wp;
+    RtorRdrWrtrRef sw = (RtorRdrWrtrRef)wp;
     TcpConnRef conn_ref = arg;
     TCP_CONN_CHECK_TAG(conn_ref)
-    ReactorRef reactor_ref = WIoFd_get_reactor(sw);
+    ReactorRef reactor_ref = rtor_rdrwrtr_get_reactor(sw);
     LOG_FMT("conn_ref: %p", conn_ref);
     void* p = IOBuffer_data(conn_ref->write_buffer_ref);
     int len = IOBuffer_data_len(conn_ref->write_buffer_ref);
@@ -45,11 +45,11 @@ static void write_event_handler(WatcherRef wp, void* arg, uint64_t event)
     assert(conn_ref->handler_ref != NULL);
     // @TODO fix next 2 lines
 //    WIoFd_change_watch(sw, &write_event_handler, arg, 0);
-    WIoFd_disarm_write(sw);
-    XrReactor_post(reactor_ref, write_complete_post_func, conn_ref);
+    rtor_rdrwrtr_disarm_write(sw);
+    rtor_post(reactor_ref, write_complete_post_func, conn_ref);
 
 }
-void write_machine(WIoFdRef socket_watcher_ref, void* arg, uint64_t event);
+void write_machine(RtorRdrWrtrRef socket_watcher_ref, void* arg, uint64_t event);
 void TcpConn_write(TcpConnRef this, IOBufferRef iobuf, TcpConnWriteCallback cb, void* arg)
 {
     LOG_FMT("conn_ref: %p iobuf: %p iobuf len: %d arg: %p", this, iobuf, IOBuffer_data_len(iobuf), arg);
@@ -58,8 +58,8 @@ void TcpConn_write(TcpConnRef this, IOBufferRef iobuf, TcpConnWriteCallback cb, 
     this->write_arg = arg;
     this->write_cb = cb;
 //    this->write_completion_handler = &write_complete_post_func;
-    WIoFdRef sw = this->sock_watcher_ref;
-    WIoFd_arm_write(sw, &write_machine, this);
+    RtorRdrWrtrRef sw = this->sock_watcher_ref;
+    rtor_rdrwrtr_arm_write(sw, &write_machine, this);
 }
 
 void TcpConn_prepare_write_2(TcpConnRef this, IOBufferRef buf, SocketEventHandler completion_handler)
@@ -68,7 +68,7 @@ void TcpConn_prepare_write_2(TcpConnRef this, IOBufferRef buf, SocketEventHandle
 /**
  * This function is called by the Reactor on EPOLLOUT or EPOLLERR. It keeps getting called until
  * the entire buffer is written or an error occurs which is not an EAGAIN
- * \param wp    WatcherRef (but really an WIoFdRef)
+ * \param wp    RtorWatcherRef (but really an RtorRdrWrtrRef)
  * \param arg   void* But typecast it to TcpConnRef
  * \param event EPOLL event not used
  *
@@ -77,13 +77,13 @@ void TcpConn_prepare_write_2(TcpConnRef this, IOBufferRef buf, SocketEventHandle
  * invocations.
  *
  */
-void write_machine(WIoFdRef socket_watcher_ref, void* arg, uint64_t event)
+void write_machine(RtorRdrWrtrRef socket_watcher_ref, void* arg, uint64_t event)
 {
     LOG_FMT("watcher: %p arg: %p event %lx", socket_watcher_ref, arg, event);
     TcpConnRef conn_ref = (TcpConnRef)arg;
     TCP_CONN_CHECK_TAG(conn_ref)
-    WIoFd_verify(socket_watcher_ref);
-    ReactorRef reactor_ref = WIoFd_get_reactor(socket_watcher_ref);
+    rtor_rdrwrtr_verify(socket_watcher_ref);
+    ReactorRef reactor_ref = rtor_rdrwrtr_get_reactor(socket_watcher_ref);
     // dont accept empty buffers
     assert(IOBuffer_data_len(conn_ref->write_buffer_ref) != 0);
 
@@ -105,8 +105,8 @@ void write_machine(WIoFdRef socket_watcher_ref, void* arg, uint64_t event)
                 // @TODO fix the next two lines
 //                WIoFd_change_watch(sw, conn_ref->write_completion_handler, arg, 0);
                 LOG_FMT("write buffer complete %d", blen);
-                WIoFd_disarm_write(socket_watcher_ref);
-                XrReactor_post(reactor_ref, &write_complete_post_func, arg);
+                rtor_rdrwrtr_disarm_write(socket_watcher_ref);
+                rtor_post(reactor_ref, &write_complete_post_func, arg);
                 break;
             }
         } else {
@@ -118,8 +118,8 @@ void write_machine(WIoFdRef socket_watcher_ref, void* arg, uint64_t event)
                 conn_ref->write_rc = XRW_ERROR;
                 // @TODO fix the next two lines
 //                WIoFd_change_watch(sw, conn_ref->write_completion_handler, arg, 0);
-                WIoFd_disarm_write(socket_watcher_ref);
-                XrReactor_post(reactor_ref, &write_complete_post_func, arg);
+                rtor_rdrwrtr_disarm_write(socket_watcher_ref);
+                rtor_post(reactor_ref, &write_complete_post_func, arg);
                 break;
             }
         }
@@ -130,6 +130,6 @@ void TcpConn_write_2(TcpConnRef this, IOBufferRef buf, SocketEventHandler comple
     TCP_CONN_CHECK_TAG(this)
     this->write_buffer_ref = buf;
 //    this->write_completion_handler = completion_handler;
-    WIoFdRef sw = this->sock_watcher_ref;
-    WIoFd_arm_write(sw, &write_machine, (void*)this);
+    RtorRdrWrtrRef sw = this->sock_watcher_ref;
+    rtor_rdrwrtr_arm_write(sw, &write_machine, (void *) this);
 }

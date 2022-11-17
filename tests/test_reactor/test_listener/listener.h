@@ -34,8 +34,8 @@ struct Listener_s {
     socket_handle_t         listening_socket_fd;
     XrHandlerFunction       handler;
     ReactorRef            reactor_ref;
-    WListenerFdRef            listening_watcher_ref;
-    WTimerFdRef               timer_ref;
+    RtorListenerRef            listening_watcher_ref;
+    RtorTimerRef               timer_ref;
     TcpConnListRef           conn_list_ref;
     int                     listen_counter;
     int                     accept_count;

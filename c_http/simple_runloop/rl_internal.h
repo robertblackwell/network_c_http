@@ -16,9 +16,9 @@ struct FdTable_s;
 typedef struct FdTable_s FdTable, *FdTableRef;
 FdTableRef FdTable_new();
 void       FdTable_free(FdTableRef athis);
-void       FdTable_insert(FdTableRef athis, WatcherRef wref, int fd);
+void       FdTable_insert(FdTableRef athis, RtorWatcherRef wref, int fd);
 void       FdTable_remove(FdTableRef athis, int fd);
-WatcherRef FdTable_lookup(FdTableRef athis,int fd);
+RtorWatcherRef FdTable_lookup(FdTableRef athis, int fd);
 int        FdTable_iterator(FdTableRef athis);
 int        FdTable_next_iterator(FdTableRef athis, int iter);
 uint64_t   FdTable_size(FdTableRef athis);
@@ -52,6 +52,9 @@ RunListIter RunList_iterator (RunListRef rl_ref);
 RunListIter RunList_itr_next (RunListRef rl_ref, RunListIter iter);
 void RunList_itr_remove (RunListRef rl_ref, RunListIter *iter);
 
+typedef struct InterthreadRunList_s InterthreadRunList, *InterthreadRunListRef;
+
+
 void fd_map_init();
 bool fd_map_at(int j);
 bool fd_map_set(int j);
@@ -68,9 +71,10 @@ struct Reactor_s {
     bool              closed_flag;
     FdTableRef        table; // (int, CallbackData)
     RunListRef        run_list;
+    IntertheadListRef interthread_run_list;
 };
 /**
- * Watcher - a generic observer object
+ * RtorWatcher - a generic observer object
  */
 typedef enum WatcherType {
     XR_WATCHER_SOCKET = 11,
@@ -81,7 +85,7 @@ typedef enum WatcherType {
 } WatcherType;
 
 
-struct Watcher_s {
+struct RtorWatcher_s {
     XR_WATCHER_DECLARE_TAG;
     WatcherType           type;
     ReactorRef            runloop;
@@ -91,7 +95,7 @@ struct Watcher_s {
      * each derived type must provide this function when an instance is created or initializez.
      * In the case of timerfd and event fd watchers must also close the fd
      */
-    void(*free)(WatcherRef);
+    void(*free)(RtorWatcherRef);
     /**
      * first level handler function
      * each derived type provides thier own type specific handler when an instance is created
@@ -100,7 +104,7 @@ struct Watcher_s {
      * 
      * This handler will be calledd directly from the epoll_wait code inside reactor.c
     */
-    void(*handler)(WatcherRef watcher_ref, int fd, uint64_t event);
+    void(*handler)(RtorWatcherRef watcher_ref, int fd, uint64_t event);
 };
 
 
@@ -118,18 +122,18 @@ typedef struct EvfdQueue_s {
 } EvfdQueue;
 
 typedef uint64_t WEventFdMask;
-struct WEventFd_s {
-    struct Watcher_s;
+struct RtorEventfd_s {
+    struct RtorWatcher_s;
     FdEventHandler      fd_event_handler;
     void*               fd_event_handler_arg;
     int                 write_fd;
 };
 
 /**
- * WIoFd
+ * RtorRdrWrtr
  */
-struct WIoFd_s {
-    struct Watcher_s;
+struct RtorRdrWrtr_s {
+    struct RtorWatcher_s;
 
     uint64_t                 event_mask;
     SocketEventHandler       read_evhandler;
@@ -141,11 +145,11 @@ struct WIoFd_s {
 /**
  * WListener
  */
-typedef struct WListenerFd_s {
-    struct Watcher_s;
+typedef struct RtorListener_s {
+    struct RtorWatcher_s;
     ListenerEventHandler     listen_evhandler;
     void*                    listen_arg;
-} WListenerFd;
+} RtorListener;
 
 /**
  * WQueue
@@ -153,7 +157,7 @@ typedef struct WListenerFd_s {
 typedef uint64_t XrQueueEvent;
 typedef void(XrQueuetWatcherCaller(void* ctx));
 struct WQueue_s {
-    struct Watcher_s;
+    struct RtorWatcher_s;
     EvfdQueueRef            queue;
     // reactor cb and arg
     QueueEventHandler       queue_event_handler;
@@ -161,11 +165,11 @@ struct WQueue_s {
 };
 
 /**
- * WTimerFd
+ * RtorTimer
  */
 typedef uint64_t XrTimerEvent;
-struct WTimerFd_s {
-    struct Watcher_s;
+struct RtorTimer_s {
+    struct RtorWatcher_s;
     /**
      * XrTimerWatecher specific properties
      */

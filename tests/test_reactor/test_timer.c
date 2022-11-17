@@ -30,7 +30,7 @@ typedef struct TestCtx_s  {
                                     //  instance
     struct timespec     start_time; //  the time at which the timer was first scheduled
     ReactorRef          reactor;    //  the reactor being used for the timer
-    WTimerFdRef         watcher;    //  the timer being used for this experiment
+    RtorTimerRef         watcher;    //  the timer being used for this experiment
 } TestCtx;
 
 TestCtx* TestCtx_new(int counter_init, int counter_max);
@@ -41,7 +41,7 @@ TestCtx* TestCtx_new(int counter_init, int counter_max);
 // The ctx arg contains enough info for the callback to calculate the margin by which it failed to
 // be called when it was expected to be called
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
-static void callback_non_repeating(WTimerFdRef watcher, void* ctx, XrTimerEvent event)
+static void callback_non_repeating(RtorTimerRef watcher, void* ctx, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
@@ -69,13 +69,13 @@ int test_timer_non_repeating()
     TestCtx* test_ctx_p_1 = TestCtx_new(0, 1);
     // previous call sets test_ctx_p_1->counter == 0
 
-    ReactorRef rtor_ref = XrReactor_new();
+    ReactorRef rtor_ref = rtor_new();
 
-    WTimerFdRef tw_1 = WTimerFd_new(rtor_ref, &callback_non_repeating, test_ctx_p_1, 100, false);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, &callback_non_repeating, test_ctx_p_1, 100, false);
 
-    XrReactor_run(rtor_ref, 10000);
+    rtor_run(rtor_ref, 10000);
     /*We should only get here when there are no more timers or other events pending in the simple_runloop*/
-    XrReactor_free(rtor_ref);
+    rtor_free(rtor_ref);
     /* prove callback_non_repeating was called exactly once */
     UT_EQUAL_INT(test_ctx_p_1->counter, 1);
     free(test_ctx_p_1);
@@ -90,7 +90,7 @@ int test_timer_non_repeating()
 * After end of the simple_runloop the TestCtx->counter is verified to be equal to the
 * required number of invocations
 */
-static void callback_repeating(WTimerFdRef watcher, void* ctx, XrTimerEvent event)
+static void callback_repeating(RtorTimerRef watcher, void* ctx, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
@@ -104,7 +104,7 @@ static void callback_repeating(WTimerFdRef watcher, void* ctx, XrTimerEvent even
     LOG_FMT("counter: %d %%error: %f   event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, gap, event, epollin, error);
     if(ctx_p->counter >= ctx_p->max_count) {
         LOG_MSG(" clear timer");
-        WTimerFd_clear(watcher);
+        rtor_timer_clear(watcher);
     } else {
         ctx_p->counter++;
     }
@@ -114,23 +114,23 @@ int test_timer_single_repeating()
     // counter starts at 0 and increments to max 5
     TestCtx* test_ctx_p = TestCtx_new(0, 5);
 
-    ReactorRef rtor_ref = XrReactor_new();
+    ReactorRef rtor_ref = rtor_new();
 
-    WTimerFdRef tw_1 = WTimerFd_new(rtor_ref, &callback_repeating, (void*)test_ctx_p, 100, true);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, &callback_repeating, (void *) test_ctx_p, 100, true);
 
-    XrReactor_run(rtor_ref, 10000);
+    rtor_run(rtor_ref, 10000);
 
     // assert counter was increment correct number of times
     UT_EQUAL_INT(test_ctx_p->counter, test_ctx_p->max_count);
     free(test_ctx_p);
-    XrReactor_free(rtor_ref);
+    rtor_free(rtor_ref);
     return 0;
 }
 //
 // multiple repeating times
 //
 //static int tw_counter_2 = 0;
-static void callback_multiple_repeating_timers(WTimerFdRef watcher, void* ctx, XrTimerEvent event)
+static void callback_multiple_repeating_timers(RtorTimerRef watcher, void* ctx, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
@@ -144,7 +144,7 @@ static void callback_multiple_repeating_timers(WTimerFdRef watcher, void* ctx, X
     LOG_FMT(" counter: %d  ctx: %p  event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, ctx, event, epollin, error);
     if(ctx_p->counter >= ctx_p->max_count) {
         LOG_FMT(" clear timer %p", ctx);
-        WTimerFd_clear(watcher);
+        rtor_timer_clear(watcher);
     } else {
         ctx_p->counter++;
     }
@@ -154,17 +154,17 @@ int test_timer_multiple_repeating()
     TestCtx* test_ctx_p_1 = TestCtx_new(0, 5);
     TestCtx* test_ctx_p_2 = TestCtx_new(0, 6);
 
-    ReactorRef rtor_ref = XrReactor_new();
+    ReactorRef rtor_ref = rtor_new();
 
-    WTimerFdRef tw_1 = WTimerFd_new(rtor_ref, &callback_multiple_repeating_timers, test_ctx_p_1, 100, true);
-    WTimerFdRef tw_2 = WTimerFd_new(rtor_ref, &callback_multiple_repeating_timers, test_ctx_p_2, 100, true);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, &callback_multiple_repeating_timers, test_ctx_p_1, 100, true);
+    RtorTimerRef tw_2 = rtor_timer_new(rtor_ref, &callback_multiple_repeating_timers, test_ctx_p_2, 100, true);
 
-    XrReactor_run(rtor_ref, 10000);
+    rtor_run(rtor_ref, 10000);
     UT_EQUAL_INT(test_ctx_p_1->counter, test_ctx_p_1->max_count);
     UT_EQUAL_INT(test_ctx_p_2->counter, test_ctx_p_2->max_count);
     free(test_ctx_p_1);
     free(test_ctx_p_2);
-    XrReactor_free(rtor_ref);
+    rtor_free(rtor_ref);
     return 0;
 }
 //
@@ -174,25 +174,25 @@ int test_timer_multiple_repeating()
 static void posted_from_post_cb(void* arg)
 {
     TestCtx* ctx_p = arg;
-    WTimerFdRef tw =  ctx_p->watcher; // (WTimerFdRef)w;
+    RtorTimerRef tw =  ctx_p->watcher; // (RtorTimerRef)w;
     LOG_FMT(" arg: %p  counter: %d", arg, ctx_p->counter);
     if(ctx_p->counter >= ctx_p->max_count) {
         LOG_MSG(" clear timer ");
-        WTimerFd_clear(tw);
+        rtor_timer_clear(tw);
     } else {
         ctx_p->counter++;
     }
 }
-static void post_cb(WatcherRef w, void* arg, uint64_t event)
+static void post_cb(RtorWatcherRef w, void* arg, uint64_t event)
 {
     TestCtx* ctx_p = arg;
-    WTimerFdRef tw = (WTimerFdRef)w;
+    RtorTimerRef tw = (RtorTimerRef)w;
     ReactorRef reactor = w->runloop;
     LOG_FMT(" post again w: %p counter: %d", w, ctx_p->counter);
-    XrReactor_post(reactor, posted_from_post_cb, ctx_p);
+    rtor_post(reactor, posted_from_post_cb, ctx_p);
 }
 
-static void callback_post(WTimerFdRef watcher, void* ctx, XrTimerEvent event)
+static void callback_post(RtorTimerRef watcher, void* ctx, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
@@ -204,24 +204,24 @@ static void callback_post(WTimerFdRef watcher, void* ctx, XrTimerEvent event)
     gap = percent_error;
     ReactorRef reactor = watcher->runloop;
     LOG_FMT(" counter: %d %%error: %f   event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, gap, event, epollin, error);
-    XrReactor_post(reactor, posted_from_post_cb, ctx);
+    rtor_post(reactor, posted_from_post_cb, ctx);
 }
 int test_timer_post()
 {
     // counter starts at 0 and increments to max 5
-    ReactorRef rtor_ref = XrReactor_new();
+    ReactorRef rtor_ref = rtor_new();
     TestCtx* test_ctx_p = TestCtx_new(0, 5);
     test_ctx_p->reactor = rtor_ref;
 
-    WTimerFdRef tw_1 = WTimerFd_new(rtor_ref, &callback_post, (void*)test_ctx_p, 100, true);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, &callback_post, (void *) test_ctx_p, 100, true);
     test_ctx_p->watcher = tw_1;
 
-    XrReactor_run(rtor_ref, 10000);
+    rtor_run(rtor_ref, 10000);
 
     // assert counter was increment correct number of times
     UT_EQUAL_INT(test_ctx_p->counter, test_ctx_p->max_count);
     free(test_ctx_p);
-    XrReactor_free(rtor_ref);
+    rtor_free(rtor_ref);
     return 0;
 }
 

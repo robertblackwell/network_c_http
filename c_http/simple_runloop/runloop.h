@@ -12,26 +12,26 @@
 struct Reactor_s;
 typedef struct Reactor_s Reactor, *ReactorRef;
 
-struct Watcher_s;
-typedef struct Watcher_s Watcher, *WatcherRef;       // Base object for objects that wait for an fd event
+struct RtorWatcher_s;
+typedef struct RtorWatcher_s RtorWatcher, *RtorWatcherRef;       // Base object for objects that wait for an fd event
 
 // There are 5 types of evets that can be waited for 
 // each type event-wait required a specific type of opaque object
 // in order to perform such an event wait
-struct WTimerFd_s;
-typedef struct WTimerFd_s WTimerFd,  *WTimerFdRef;      // Wait for a timer event
+struct RtorTimer_s;
+typedef struct RtorTimer_s RtorTimer,  *RtorTimerRef;      // Wait for a timer event
 
-struct WIoFd_s;
-typedef struct WIoFd_s WIoFd, *WIoFdRef;         // Wait for an IO event on a fd
+struct RtorRdrWrtr_s;
+typedef struct RtorRdrWrtr_s RtorRdrWrtr, *RtorRdrWrtrRef;         // Wait for an IO event on a fd
 
 struct WQueue_s;
 typedef struct WQueue_s WQueue, *WQueueRef;        // Wait for a inter thread queue event
 
-struct WListenerFd_s;
-typedef struct WListenerFd_s WListenerFd, * WListenerFdRef;   // Special event for socket listen()
+struct RtorListener_s;
+typedef struct RtorListener_s RtorListener, * RtorListenerRef;   // Special event for socket listen()
 
-struct WEventFd_s;
-typedef struct WEventFd_s WEventFd, *WEventFdRef;      // Waiter for epoll event fd event
+struct RtorEventfd_s;
+typedef struct RtorEventfd_s RtorEventfd, *RtorEventfdRef;      // Waiter for epoll event fd event
 
 struct EvfdQueue_s;
 typedef struct EvfdQueue_s EvfdQueue, * EvfdQueueRef;
@@ -41,44 +41,119 @@ typedef uint64_t EventMask, XrTimerEvent;
 // A generic callback function - @TODO will be the signature of the only type of function that can be posted
 typedef void (*PostableFunction)    (void* arg);
 // Signature of functions that can called by the Reactor to handle file descriptor events
-typedef void (*WatcherCallback)     (WatcherRef wref, void* arg, uint64_t events);
+typedef void (*WatcherCallback)     (RtorWatcherRef wref, void* arg, uint64_t events);
 // Type specific event handlers - these are all the same except for the casting of the first arg to a specific type of pointer
-typedef void (*WatcherEventHandler) (WatcherRef wref, void* arg, uint64_t events);
-typedef void (*TimerEventHandler)   (WTimerFdRef timer_watcher_ref, void* arg, uint64_t events);
-typedef void (*SocketEventHandler)  (WIoFdRef socket_watcher_ref, void* arg, uint64_t events);
-typedef void (*FdEventHandler)      (WEventFdRef fd_event_ref, void* arg, uint64_t events);
+typedef void (*WatcherEventHandler) (RtorWatcherRef wref, void* arg, uint64_t events);
+typedef void (*TimerEventHandler)   (RtorTimerRef timer_watcher_ref, void* arg, uint64_t events);
+typedef void (*SocketEventHandler)  (RtorRdrWrtrRef socket_watcher_ref, void* arg, uint64_t events);
+typedef void (*FdEventHandler)      (RtorEventfdRef fd_event_ref, void* arg, uint64_t events);
 typedef void (*QueueEventHandler)   (WQueueRef qref, void* arg, uint64_t events);
-typedef void (*ListenerEventHandler)(WListenerFdRef listener_ref, void* arg, uint64_t events);
+typedef void (*ListenerEventHandler)(RtorListenerRef listener_ref, void* arg, uint64_t events);
 
-
-ReactorRef XrReactor_new(void);
-void XrReactor_close(ReactorRef rtor_ref);
-void XrReactor_free(ReactorRef rtor_ref);
-int  XrReactor_register(ReactorRef rtor_ref, int fd, uint32_t interest, WatcherRef wref);
-int  XrReactor_deregister(ReactorRef rtor_ref, int fd);
-int  XrReactor_reregister(ReactorRef rtor_ref, int fd, uint32_t interest, WatcherRef wref);
-int  XrReactor_run(ReactorRef rtor_ref, time_t timeout);
-int  XrReactor_post(ReactorRef rtor_ref, PostableFunction cb, void* arg);
-void XrReactor_delete(ReactorRef rtor_ref, int fd);
+/**
+ * A reactor is a device that uses Linux epoll to allow client code to watch for events on file descriptors.
+ * The key significance of the device is that many file descriptors can be monitored simultaiously.
+ *
+ * To watch or observe a file descriptor for events an object of type RtorWatcher (or derived from RtorWatcher)
+ * and passed to the reactor.
+ *
+ * The RtorWatcher holds at least 2 pieces of information:
+ * -    a function to be called when an event of interest happens
+ * -    optionally a context pointer for the callback function
+ *
+ * in this sense the various watchers are generalizations of a callback closure
+ *
+ * For convenience a number of special purposes watchers/observers have been provided.
+ */
+ReactorRef rtor_new(void);
+void rtor_close(ReactorRef athis);
+void rtor_init(ReactorRef athis);
+void rtor_free(ReactorRef athis);
+int  rtor_register(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref);
+int  rtor_deregister(ReactorRef athis, int fd);
+int  rtor_reregister(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref);
+int  rtor_run(ReactorRef athis, time_t timeout);
+int  rtor_post(ReactorRef athis, PostableFunction cb, void* arg);
+int  rtor_interthread_post(ReactorRef athis, PostableFunction cb, void* arg);
+void rtor_delete(ReactorRef athis, int fd);
 void XrReactor_verify(ReactorRef r);
-ReactorRef Watcher_get_reactor(WatcherRef athis);
-int Watcher_get_fd(WatcherRef this);
-// Create a new timer event source. This function will create a new Timer object
-// and register it with the provided XrReactor. In order that the timer is completely
-// specified an event handler, void* arg, interval_ms and bool repeating must be provided.
-WTimerFdRef WTimerFd_new(ReactorRef rtor_ref, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
-void WTimerFd_free(WTimerFdRef athis);
-void WTimerFd_set(WTimerFdRef athis, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
-void WTimerFd_update(WTimerFdRef athis, uint64_t interval_ms, bool repeating);
-void WTimerFd_disarm(WTimerFdRef athis);
-void WTimerFd_rearm_old(WTimerFdRef athis, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
-void WTimerFd_rearm(WTimerFdRef athis);
-void WTimerFd_clear(WTimerFdRef athis);
-void WTimerFd_verify(WTimerFdRef r);
+ReactorRef Watcher_get_reactor(RtorWatcherRef athis);
+int Watcher_get_fd(RtorWatcherRef this);
 
-ReactorRef WTimerFd_get_reactor(WTimerFdRef athis);
-int WTimerFd_get_fd(WTimerFdRef this);
-//#define WTimerFd_get_reactor(p) Watcher_get_reactor((WatcherRef)p)
+/**
+ * A RtorTimer is a spcial type of RtorWatcher that make it easy to use a Reactor
+ * to implement single shot and repeating timers.
+*/
+RtorTimerRef rtor_timer_new(ReactorRef rtor_ref, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
+void rtor_timer_init(RtorTimerRef athis, ReactorRef rtor_ref, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
+void rtor_timer_free(RtorTimerRef athis);
+void rtor_timer_set(RtorTimerRef athis, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
+void rtor_timer_update(RtorTimerRef athis, uint64_t interval_ms, bool repeating);
+void rtor_timer_disarm(RtorTimerRef athis);
+void rtor_timer_rearm_old(RtorTimerRef athis, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
+void rtor_timer_rearm(RtorTimerRef athis);
+void rtor_timer_clear(RtorTimerRef athis);
+void WTimerFd_verify(RtorTimerRef r);
+ReactorRef rtor_timer_get_reactor(RtorTimerRef athis);
+int rtor_timer_get_fd(RtorTimerRef this);
+//#define rtor_timer_get_reactor(p) Watcher_get_reactor((RtorWatcherRef)p)
+
+/**
+ * RtorListener is a special kind of RtorWatcher that is intended spcifically for situations
+ * where code is a server of sometype waiting for a listen() call to return signalling
+ * a new connection.
+ */
+RtorListenerRef rtor_listener_new(ReactorRef runloop, int fd);
+void rtor_Listener_init(RtorListenerRef athis, ReactorRef runloop, int fd);
+void rtor_Listener_free(RtorListenerRef athis);
+void rtor_listener_register(RtorListenerRef athis, ListenerEventHandler event_handler, void* arg);
+void rtor_listener_deregister(RtorListenerRef athis);
+void rtor_listener_arm(RtorListenerRef athis, ListenerEventHandler fd_event_handler, void* arg);
+void rtor_lIstener_disarm(RtorListenerRef athis);
+void rtor_listener_verify(RtorListenerRef r);
+ReactorRef rtor_listener_get_reactor(RtorListenerRef athis);
+int rtor_listener_get_fd(RtorListenerRef this);
+//#define WListenerFd_get_reactor(p) Watcher_get_reactor((RtorWatcherRef)p)
+
+/**
+ * RtorRdrWrtrWatcher is a special type of watcher designed to watch stream style file descriptors
+ * (such a sockets and pipes) to detect when such an fd is ready to perform a read operation or ready
+ * to perform a write operation without BLOCKING. This type of watcher is intended for situations
+ * where a single thread may be performing both read and write operations on the same fd and on
+ * multiple file descriptors.
+ */
+RtorRdrWrtrRef rtor_rdrwrtr_new(ReactorRef runloop, int fd);
+void rtor_rdrwrtr_init(RtorRdrWrtrRef athis, ReactorRef runloop, int fd);
+void rtor_rdrwrtr_free(RtorRdrWrtrRef athis);
+void rtor_rdrwrtr_register(RtorRdrWrtrRef athis);
+void rtor_rdrwrtr_deregister(RtorRdrWrtrRef athis);
+void rtor_rdrwrtr_arm_read(RtorRdrWrtrRef athis, SocketEventHandler event_handler, void* arg);
+void rtor_rdrwrtr_arm_write(RtorRdrWrtrRef athis, SocketEventHandler event_handler, void* arg);
+void rtor_rdrwrtr_disarm_read(RtorRdrWrtrRef athis);
+void rtor_rdrwrtr_disarm_write(RtorRdrWrtrRef athis);
+void rtor_rdrwrtr_verify(RtorRdrWrtrRef r);
+ReactorRef rtor_rdrwrtr_get_reactor(RtorRdrWrtrRef athis);
+int rtor_rdrwrtr_get_fd(RtorRdrWrtrRef this);
+//#define rtor_rdrwrtr_get_reactor(p) Watcher_get_reactor((RtorWatcherRef)p)
+
+/**
+ * epoll provides a facility to create a file descriptor that is not attached to any file/pipe/device
+ * and to "fire" events on that file descriptor that can be waited for using the epoll call.
+ * This facility provides a mechanism to create and wait on arbitary event sources.
+ */
+RtorEventfdRef rtor_eventfd(ReactorRef runloop);
+void rtor_eventfd_init(RtorEventfdRef athis);
+void rtor_eventfd_free(RtorEventfdRef athis);
+void rtor_eventfd_register(RtorEventfdRef athis);
+void rtor_eventfd_change_watch(RtorEventfdRef athis, FdEventHandler evhandler, void* arg, uint64_t watch_what);
+void rtor_eventfd_arm(RtorEventfdRef athis, FdEventHandler evhandler, void* arg);
+void rtor_eventfd_disarm(RtorEventfdRef athis);
+void rtor_eventfd_fire(RtorEventfdRef athis);
+void rtor_eventfd_deregister(RtorEventfdRef athis);
+void rtor_eventfd_verify(RtorEventfdRef r);
+ReactorRef rtor_eventfd_get_reactor(RtorEventfdRef athis);
+int rtor_eventfd_get_fd(RtorEventfdRef this);
+//#define rtor_eventfd_get_reactor(p) Watcher_get_reactor((RtorWatcherRef)p)
 
 
 EvfdQueueRef Evfdq_new();
@@ -87,31 +162,8 @@ int   Evfdq_readfd(EvfdQueueRef athis);
 void  Evfdq_add(EvfdQueueRef athis, void* item);
 void* Evfdq_remove(EvfdQueueRef athis);
 //ReactorRef Evfdq_get_reactor(EvfdQueueRef athis);
-//#define Evfdq_get_reactor(p) Watcher_get_reactor((WatcherRef)p)
+//#define Evfdq_get_reactor(p) Watcher_get_reactor((RtorWatcherRef)p)
 
-WListenerFdRef WListenerFd_new(ReactorRef runloop, int fd);
-void WListenerFd_free(WListenerFdRef athis);
-void WListenerFd_register(WListenerFdRef athis, ListenerEventHandler event_handler, void* arg);
-void WListenerFd_deregister(WListenerFdRef athis);
-void WListenerFd_arm(WListenerFdRef athis, ListenerEventHandler fd_event_handler, void* arg);
-void XrLIstener_disarm(WListenerFdRef athis);
-void WListenerFd_verify(WListenerFdRef r);
-ReactorRef WListener_get_reactor(WListenerFdRef athis);
-int WListenerFd_get_fd(WListenerFdRef this);
-//#define WListenerFd_get_reactor(p) Watcher_get_reactor((WatcherRef)p)
-
-WIoFdRef WIoFd_new(ReactorRef runloop, int fd);
-void WIoFd_free(WIoFdRef athis);
-void WIoFd_register(WIoFdRef athis);
-void WIoFd_deregister(WIoFdRef athis);
-void WIoFd_arm_read(WIoFdRef athis, SocketEventHandler event_handler, void* arg);
-void WIoFd_arm_write(WIoFdRef athis, SocketEventHandler event_handler, void* arg);
-void WIoFd_disarm_read(WIoFdRef athis);
-void WIoFd_disarm_write(WIoFdRef athis);
-void WIoFd_verify(WIoFdRef r);
-ReactorRef WIoFd_get_reactor(WIoFdRef athis);
-int WIoFd_get_fd(WIoFdRef this);
-//#define WIoFd_get_reactor(p) Watcher_get_reactor((WatcherRef)p)
 
 WQueueRef WQueue_new(ReactorRef runloop, EvfdQueueRef qref);
 void WQueue_dispose(WQueueRef athis);
@@ -121,19 +173,7 @@ void WQueue_deregister(WQueueRef athis);
 void WQueue_verify(WQueueRef r);
 ReactorRef WQueue_get_reactor(WQueueRef athis);
 int WQueue_get_fd(WQueueRef this);
-//#define WQueue_get_reactor(p) Watcher_get_reactor((WatcherRef)p)
+//#define WQueue_get_reactor(p) Watcher_get_reactor((RtorWatcherRef)p)
 
-WEventFdRef WEventFd_new(ReactorRef runloop);
-void WEventFd_free(WEventFdRef athis);
-void WEventFd_register(WEventFdRef athis);
-void WEventFd_change_watch(WEventFdRef athis, FdEventHandler evhandler, void* arg, uint64_t watch_what);
-void WEventFd_arm(WEventFdRef athis,  FdEventHandler evhandler, void* arg);
-void WEventFd_disarm(WEventFdRef athis);
-void WEventFd_fire(WEventFdRef athis);
-void WEventFd_deregister(WEventFdRef athis);
-void WEventFd_verify(WEventFdRef r);
-ReactorRef WEventFd_get_reactor(WEventFdRef athis);
-int WEventFd_get_fd(WEventFdRef this);
-//#define WEventFd_get_reactor(p) Watcher_get_reactor((WatcherRef)p)
 
 #endif

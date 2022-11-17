@@ -23,7 +23,7 @@ typedef struct ReadCtx_s {
     int                 max_read_count;
     char*               id;
     int                 readfd;
-    WIoFdRef            swatcher;
+    RtorRdrWrtrRef            swatcher;
 } ReadCtx;
 
 typedef struct Reader_s {
@@ -37,6 +37,6 @@ Reader* Reader_new();
 void Reader_dispose(Reader* this);
 void Reader_add_fd(Reader* this, int fd, int max);
 
-void rd_callback(WIoFdRef socket_watcher_ref, void* arg, uint64_t event);
+void rd_callback(RtorRdrWrtrRef socket_watcher_ref, void* arg, uint64_t event);
 void* reader_thread_func(void* arg);
 #endif

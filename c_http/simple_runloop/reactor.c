@@ -30,7 +30,7 @@ static int *int_in_heap(int key) {
  * Performa a general epoll_ctl call with error checking.
  * In the event of an error abort 
  */
-static void XrReactor_epoll_ctl(ReactorRef athis, int op, int fd, uint64_t interest)
+static void rtor_epoll_ctl(ReactorRef athis, int op, int fd, uint64_t interest)
 {
     XR_REACTOR_CHECK_TAG(athis)
     struct epoll_event epev = {
@@ -41,9 +41,9 @@ static void XrReactor_epoll_ctl(ReactorRef athis, int op, int fd, uint64_t inter
     };
     int status = epoll_ctl(athis->epoll_fd, op, fd, &(epev));
     if (status != 0) {
-        LOG_FMT("XrReactor_epoll_ctl epoll_fd: %d status : %d errno : %d", this->epoll_fd, status, errno);
+        LOG_FMT("rtor_epoll_ctl epoll_fd: %d status : %d errno : %d", this->epoll_fd, status, errno);
     }
-    LOG_FMT("XrReactor_epoll_ctl epoll_fd: %d status : %d errno : %d", this->epoll_fd, status, errno);
+    LOG_FMT("rtor_epoll_ctl epoll_fd: %d status : %d errno : %d", this->epoll_fd, status, errno);
     CHTTP_ASSERT((status == 0), "epoll ctl call failed");
 }
 /**
@@ -51,7 +51,7 @@ static void XrReactor_epoll_ctl(ReactorRef athis, int op, int fd, uint64_t inter
  * @TODO - store a runloop/reactor for each thread in thread local storage
  * @NOTE - this implementation only works for Linux and uses epoll
  */
-ReactorRef XrReactor_new(void) {
+ReactorRef rtor_new(void) {
     ReactorRef runloop = malloc(sizeof(Reactor));
     CHTTP_ASSERT((runloop != NULL), "malloc failed new simple_runloop");
     XR_REACTOR_SET_TAG(runloop)
@@ -59,18 +59,18 @@ ReactorRef XrReactor_new(void) {
     runloop->epoll_fd = epoll_create1(0);
     runloop->closed_flag = false;
     CHTTP_ASSERT((runloop->epoll_fd != -1), "epoll_create failed");
-    LOG_FMT("XrReactor_new epoll_fd %d", runloop->epoll_fd);
+    LOG_FMT("rtor_new epoll_fd %d", runloop->epoll_fd);
     runloop->table = FdTable_new();
     runloop->run_list = RunList_new();
     return (ReactorRef)runloop;
 }
 
-void XrReactor_close(ReactorRef athis)
+void rtor_close(ReactorRef athis)
 {
     XR_REACTOR_CHECK_TAG(athis)
     athis->closed_flag = true;
     int status = close(athis->epoll_fd);
-    LOG_FMT("XrReactor_close status: %d errno: %d", status, errno);
+    LOG_FMT("rtor_close status: %d errno: %d", status, errno);
     CHTTP_ASSERT((status != -1), "close epoll_fd failed");
     int next_fd = FdTable_iterator(athis->table);
     while (next_fd  != -1) {
@@ -79,46 +79,46 @@ void XrReactor_close(ReactorRef athis)
     }
 }
 
-void XrReactor_free(ReactorRef athis)
+void rtor_free(ReactorRef athis)
 {
     XR_REACTOR_CHECK_TAG(athis)
     if(! athis->closed_flag) {
-        XrReactor_close(athis);
+        rtor_close(athis);
     }
     FdTable_free(athis->table);
     free(athis);
 }
 
 /**
- * Register a Watcher (actuallyr one of its derivatives) and its associated file descriptor
+ * Register a RtorWatcher (actuallyr one of its derivatives) and its associated file descriptor
  * with the epoll instance. Specify the types of events the watcher is interested in
  */
-int XrReactor_register(ReactorRef athis, int fd, uint32_t interest, WatcherRef wref)
+int rtor_register(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref)
 {
     XR_REACTOR_CHECK_TAG(athis)
     LOG_FMT("fd : %d  for events %d", fd, interest);
-    XrReactor_epoll_ctl (athis, EPOLL_CTL_ADD, fd, interest);
+    rtor_epoll_ctl(athis, EPOLL_CTL_ADD, fd, interest);
     FdTable_insert(athis->table, wref, fd);
     return 0;
 }
-int XrReactor_deregister(ReactorRef athis, int fd)
+int rtor_deregister(ReactorRef athis, int fd)
 {
     XR_REACTOR_CHECK_TAG(athis)
     CHTTP_ASSERT((FdTable_lookup(athis->table, fd) != NULL),"fd not in FdTable");
-    XrReactor_epoll_ctl(athis, EPOLL_CTL_DEL, fd, EPOLLEXCLUSIVE | EPOLLIN);
+    rtor_epoll_ctl(athis, EPOLL_CTL_DEL, fd, EPOLLEXCLUSIVE | EPOLLIN);
     FdTable_remove(athis->table, fd);
     return 0;
 }
 
-int XrReactor_reregister(ReactorRef athis, int fd, uint32_t interest, WatcherRef wref) {
+int rtor_reregister(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref) {
     XR_REACTOR_CHECK_TAG(athis)
     CHTTP_ASSERT((FdTable_lookup(athis->table, fd) != NULL),"fd not in FdTable");
-    XrReactor_epoll_ctl(athis, EPOLL_CTL_MOD, fd, interest);
-    WatcherRef wref_tmp = FdTable_lookup(athis->table, fd);
+    rtor_epoll_ctl(athis, EPOLL_CTL_MOD, fd, interest);
+    RtorWatcherRef wref_tmp = FdTable_lookup(athis->table, fd);
     assert(wref == wref_tmp);
     return 0;
 }
-void XrReactor_delete(ReactorRef athis, int fd)
+void rtor_delete(ReactorRef athis, int fd)
 {
     XR_REACTOR_CHECK_TAG(athis)
     CHTTP_ASSERT((FdTable_lookup(athis->table, fd) != NULL),"fd not in FdTable");
@@ -131,7 +131,7 @@ void print_events(struct epoll_event events[], int count)
         printf("\n");
     }
 }
-int XrReactor_run(ReactorRef athis, time_t timeout) {
+int rtor_run(ReactorRef athis, time_t timeout) {
     XR_REACTOR_CHECK_TAG(athis)
     int result;
     struct epoll_event events[MAX_EVENTS];
@@ -141,7 +141,7 @@ int XrReactor_run(ReactorRef athis, time_t timeout) {
     while (true) {
         time_t passed = time(NULL) - start;
         if(FdTable_size(athis->table) == 0) {
-            LOG_FMT("XrReactor_run() FdTable_size == 0");
+            LOG_FMT("rtor_run() FdTable_size == 0");
             goto cleanup;
         }
         int max_events = MAX_EVENTS;
@@ -169,8 +169,8 @@ int XrReactor_run(ReactorRef athis, time_t timeout) {
                 for (int i = 0; i < nfds; i++) {
                     int fd = events[i].data.fd;
                     int mask = events[i].events;
-                    LOG_FMT("XrReactor_run loop fd: %d events: %x", fd, mask);
-                    WatcherRef wref = FdTable_lookup(athis->table, fd);
+                    LOG_FMT("rtor_run loop fd: %d events: %x", fd, mask);
+                    RtorWatcherRef wref = FdTable_lookup(athis->table, fd);
                     wref->handler((void*)wref, fd, events[i].events);
                     LOG_FMT("fd: %d", fd);
                     // call handler
@@ -205,7 +205,7 @@ cleanup:
     return result;
 }
 
-int XrReactor_post(ReactorRef athis, PostableFunction cb, void* arg)
+int rtor_post(ReactorRef athis, PostableFunction cb, void* arg)
 {
     XR_REACTOR_CHECK_TAG(athis)
     FunctorRef fr = Functor_new(cb, arg);

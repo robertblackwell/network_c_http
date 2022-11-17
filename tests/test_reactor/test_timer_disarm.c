@@ -48,7 +48,7 @@ struct DisarmTestCtx_s {
     bool                was_disarmed;
     bool                rearm_other;
     struct timespec     start_time;
-    WTimerFdRef   other_tw;
+    RtorTimerRef   other_tw;
     DisarmTestCtx*      other_ctx;
     long                interval_ms;
 
@@ -64,7 +64,7 @@ DisarmTestCtx* DisarmTestCtx_new(int counter_init, int counter_max)
     return tmp;
 }
 // disarms itself on first call. If called subsequently and reaches its max then cancel both timers
-static void callback_disarm_clear(WTimerFdRef watcher, void* ctx, XrTimerEvent event)
+static void callback_disarm_clear(RtorTimerRef watcher, void* ctx, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
@@ -74,21 +74,21 @@ static void callback_disarm_clear(WTimerFdRef watcher, void* ctx, XrTimerEvent e
     LOG_FMT(" counter %d\n", ctx_p->counter);
     if(ctx_p->counter <= 0) {
         LOG_MSG(" disarm self");
-        WTimerFd_disarm(watcher);
+        rtor_timer_disarm(watcher);
         ctx_p->was_disarmed = true;
         ctx_p->counter++;
     } else {
         if(ctx_p->counter >= ctx_p->max_count) {
             LOG_MSG("disarm_cb clear other and self");
-            WTimerFd_clear(ctx_p->other_tw);
-            WTimerFd_clear(watcher);
+            rtor_timer_clear(ctx_p->other_tw);
+            rtor_timer_clear(watcher);
             return;
         }
         ctx_p->counter++;
     }
 }
 // after being called max_count times rearm the other
-static void callback_rearm_other(WTimerFdRef watcher, void* ctx, XrTimerEvent event)
+static void callback_rearm_other(RtorTimerRef watcher, void* ctx, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
@@ -102,7 +102,7 @@ static void callback_rearm_other(WTimerFdRef watcher, void* ctx, XrTimerEvent ev
         // other should be disarmed by now
         assert(ctx_p->other_ctx->was_disarmed);
         LOG_MSG("rearming other");
-        WTimerFd_rearm(ctx_p->other_tw);
+        rtor_timer_rearm(ctx_p->other_tw);
     }
     // keep counting until we are stopped by the other
     ctx_p->counter++;
@@ -121,10 +121,10 @@ int test_timer_disarm_rearm()
     DisarmTestCtx* test_ctx_p_2 = DisarmTestCtx_new(0, 6);
     test_ctx_p_2->interval_ms = 100;
 
-    ReactorRef rtor_ref = XrReactor_new();
+    ReactorRef rtor_ref = rtor_new();
 
-    WTimerFdRef tw_1 = WTimerFd_new(rtor_ref, &callback_disarm_clear, test_ctx_p_1, test_ctx_p_1->interval_ms, true);
-    WTimerFdRef tw_2 = WTimerFd_new(rtor_ref, &callback_rearm_other, test_ctx_p_2, test_ctx_p_2->interval_ms, true);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, &callback_disarm_clear, test_ctx_p_1, test_ctx_p_1->interval_ms, true);
+    RtorTimerRef tw_2 = rtor_timer_new(rtor_ref, &callback_rearm_other, test_ctx_p_2, test_ctx_p_2->interval_ms, true);
     // timer 1 callback will disarm itself on the first timer event
     // time 2 callback will rearm tw_1 after count of 5
     test_ctx_p_2->other_tw = tw_1;
@@ -133,7 +133,7 @@ int test_timer_disarm_rearm()
     test_ctx_p_1->other_ctx = test_ctx_p_2;
 
 
-    XrReactor_run(rtor_ref, 10000);
+    rtor_run(rtor_ref, 10000);
     UT_EQUAL_INT(test_ctx_p_1->counter, test_ctx_p_1->max_count);
 
     //cannot predict how many times the rearm cb will be called before the disarm_clear cb final stops everything
@@ -141,7 +141,7 @@ int test_timer_disarm_rearm()
 
     free(test_ctx_p_1);
     free(test_ctx_p_2);
-    XrReactor_free(rtor_ref);
+    rtor_free(rtor_ref);
     return 0;
 }
 

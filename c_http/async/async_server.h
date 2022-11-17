@@ -14,7 +14,7 @@ struct AsyncServer_s {
     socket_handle_t         listening_socket_fd;
     XrHandlerFunction       handler;
     ReactorRef            reactor_ref;
-    WListenerFdRef          listening_watcher_ref;
+    RtorListenerRef          listening_watcher_ref;
     TcpConnListRef           conn_list_ref;
 };
 typedef struct  AsyncServer_s AsyncServer, *AsyncServerRef;

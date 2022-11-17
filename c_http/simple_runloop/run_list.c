@@ -7,7 +7,7 @@
  */
 struct Functor_s
 {
-//    WatcherRef wref; // this is borrowed do not free
+//    RtorWatcherRef wref; // this is borrowed do not free
     PostableFunction f;
     void *arg;
 };

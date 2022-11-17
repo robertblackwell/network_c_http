@@ -49,14 +49,14 @@ void Reader_add_fd(Reader* this, int fd, int max)
 
 }
 
-void rd_callback(WIoFdRef socket_watcher_ref, void* arg, uint64_t event)
+void rd_callback(RtorRdrWrtrRef socket_watcher_ref, void* arg, uint64_t event)
 {
-    WIoFd_verify(socket_watcher_ref);
+    rtor_rdrwrtr_verify(socket_watcher_ref);
     ReadCtx* ctx = (ReadCtx*)arg;
-    ReactorRef reactor = WIoFd_get_reactor(socket_watcher_ref);
+    ReactorRef reactor = rtor_rdrwrtr_get_reactor(socket_watcher_ref);
     int in = event | EPOLLIN;
     char buf[1000];
-    int nread = read(WIoFd_get_fd(socket_watcher_ref), buf, 1000);
+    int nread = read(rtor_rdrwrtr_get_fd(socket_watcher_ref), buf, 1000);
     char* s;
     if(nread > 0) {
         buf[nread] = (char)0;
@@ -65,29 +65,29 @@ void rd_callback(WIoFdRef socket_watcher_ref, void* arg, uint64_t event)
         s = "badread";
     }
     LOG_FMT("test_io: Socket watcher rd_callback read_count: %d fd: %d event %lx nread: %d buf: %s errno: %d\n", ctx->read_count,
-            WIoFd_get_fd(socket_watcher_ref),  event, nread, s, errno);
+            rtor_rdrwrtr_get_fd(socket_watcher_ref), event, nread, s, errno);
     ctx->read_count++;
     if(ctx->read_count > ctx->max_read_count) {
-        XrReactor_deregister(reactor,  WIoFd_get_fd(socket_watcher_ref));
+        rtor_deregister(reactor, rtor_rdrwrtr_get_fd(socket_watcher_ref));
     } else {
         return;
     }
 }
 void* reader_thread_func(void* arg)
 {
-    ReactorRef rtor_ref = XrReactor_new();
+    ReactorRef rtor_ref = rtor_new();
     Reader* rdr = (Reader*)arg;
     for(int i = 0; i < rdr->count; i++) {
         ReadCtx* ctx = &(rdr->ctx_table[i]);
         rdr->ctx_table[i].swatcher = WIoFd_new(rtor_ref, ctx->readfd);
-        WIoFdRef sw = rdr->ctx_table[i].swatcher;
+        RtorRdrWrtrRef sw = rdr->ctx_table[i].swatcher;
         uint64_t interest = EPOLLERR | EPOLLIN;
-        WIoFd_register(sw);
-        WIoFd_arm_read(sw, &rd_callback, (void*) ctx);
+        rtor_rdrwrtr_register(sw);
+        rtor_rdrwrtr_arm_read(sw, &rd_callback, (void *) ctx);
 //        WIoFd_change_watch(sw, &rd_callback, (void*) ctx, interest);
     }
 
-    XrReactor_run(rtor_ref, 1000000);
+    rtor_run(rtor_ref, 1000000);
     return NULL;
 
 }

@@ -22,7 +22,7 @@
  *  rearm the timer
  *
  */
-void WriteCtx_init(WriteCtx* this, int fd, WIoFdRef swatcher, WTimerFdRef twatcher, int max)
+void WriteCtx_init(WriteCtx* this, int fd, RtorRdrWrtrRef swatcher, RtorTimerRef twatcher, int max)
 {
     this->id = "WRITE";
     this->writefd = fd;
@@ -61,11 +61,11 @@ void Writer_add_fd(Writer* this, int fd, int max, int interval_ms)
     this->ctx_table[this->count].writefd = fd;
     this->count++;
 }
-static void wrtr_wait(WTimerFdRef watch, void* arg, uint64_t event);
-static void wrtr_cb(WIoFdRef sock_watch, void* arg, uint64_t event)
+static void wrtr_wait(RtorTimerRef watch, void* arg, uint64_t event);
+static void wrtr_cb(RtorRdrWrtrRef sock_watch, void* arg, uint64_t event)
 {
     ReactorRef reactor = sock_watch->runloop;
-    WIoFd_verify(sock_watch);
+    rtor_rdrwrtr_verify(sock_watch);
     WriteCtx* ctx = (WriteCtx*)(arg);
     LOG_FMT("test_io: Socket watcher wrtr_callback");
 
@@ -78,19 +78,19 @@ static void wrtr_cb(WIoFdRef sock_watch, void* arg, uint64_t event)
     ctx->write_count++;
     LOG_FMT("test_io: Socket watcher wrtr_callback fd: %d event : %lx nread: %d errno: %d write_count %d\n", sock_watch->fd,  event, nwrite, errno, ctx->write_count);
     if(ctx->write_count > ctx->max_write_count) {
-        XrReactor_deregister(reactor, ctx->swatcher->fd);
-        XrReactor_deregister(reactor, ctx->twatcher->fd);
+        rtor_deregister(reactor, ctx->swatcher->fd);
+        rtor_deregister(reactor, ctx->twatcher->fd);
         return;
     }
     // disarm writeable events on this fd
-    WIoFd_disarm_write(sock_watch);
+    rtor_rdrwrtr_disarm_write(sock_watch);
     WR_CTX_CHECK_TAG(ctx)
     XR_SOCKW_CHECK_TAG(ctx->swatcher)
     XR_WTIMER_CHECK_TAG(ctx->twatcher)
     // rearm the timer
-    WTimerFd_rearm(ctx->twatcher);
+    rtor_timer_rearm(ctx->twatcher);
 }
-static void wrtr_wait(WTimerFdRef watch, void* arg, uint64_t event)
+static void wrtr_wait(RtorTimerRef watch, void* arg, uint64_t event)
 {
     XR_WTIMER_CHECK_TAG(watch)
     LOG_FMT("test_io: Socket watcher wrtr_wait\n");
@@ -107,41 +107,41 @@ static void wrtr_wait(WTimerFdRef watch, void* arg, uint64_t event)
         int nwrite = write(ctx->writefd, wbuf, strlen(wbuf));
         free(wbuf);
     } else {
-        WTimerFd_disarm(watch);
+        rtor_timer_disarm(watch);
         uint64_t interest = EPOLLERR | EPOLLOUT;
-        WIoFd_arm_write(ctx->swatcher, &wrtr_cb, (void*) ctx);
+        rtor_rdrwrtr_arm_write(ctx->swatcher, &wrtr_cb, (void *) ctx);
     }
 }
 void* writer_thread_func(void* arg)
 {
     int wait_first = 1;
-    ReactorRef rtor_ref = XrReactor_new();
+    ReactorRef rtor_ref = rtor_new();
     Writer* wrtr = (Writer*)arg;
     for(int i = 0; i < wrtr->count; i++) {
         WriteCtx* ctx = &(wrtr->ctx_table[i]);
 
         wrtr->ctx_table[i].swatcher = WIoFd_new(rtor_ref, ctx->writefd);
-        wrtr->ctx_table[i].twatcher = WTimerFd_new(rtor_ref, &wrtr_wait, (void*)ctx,  ctx->interval_ms, true);
+        wrtr->ctx_table[i].twatcher = rtor_timer_new(rtor_ref, &wrtr_wait, (void *) ctx, ctx->interval_ms, true);
 
         WR_CTX_CHECK_TAG(ctx)
         XR_WTIMER_CHECK_TAG(ctx->twatcher);
         XR_SOCKW_CHECK_TAG(ctx->swatcher);
 
-        WIoFdRef sw = wrtr->ctx_table[i].swatcher;
+        RtorRdrWrtrRef sw = wrtr->ctx_table[i].swatcher;
 
         if(wait_first) {
             // register armed - wait 2 seconds
             // register disarmed - timer cb will arm it
-            WIoFd_register(ctx->swatcher);
-            WIoFd_arm_write(ctx->swatcher, &wrtr_cb, (void*)ctx);
+            rtor_rdrwrtr_register(ctx->swatcher);
+            rtor_rdrwrtr_arm_write(ctx->swatcher, &wrtr_cb, (void *) ctx);
         } else {
 
             uint64_t interest = EPOLLERR | EPOLLOUT;
-            WIoFd_register(sw);
-            WIoFd_arm_write(sw, &wrtr_cb, (void*) ctx);
+            rtor_rdrwrtr_register(sw);
+            rtor_rdrwrtr_arm_write(sw, &wrtr_cb, (void *) ctx);
         }
     }
 
-    XrReactor_run(rtor_ref, 10000000);
+    rtor_run(rtor_ref, 10000000);
     return NULL;
 }
