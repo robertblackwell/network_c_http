@@ -14,17 +14,15 @@
  * @param fd        int
  * @param event     uint64_t
  */
-static void handler(RtorWatcherRef watcher, int fd, uint64_t event)
+static void handler(RtorWatcherRef watcher, uint64_t event)
 {
     RtorRdrWrtrRef sw = (RtorRdrWrtrRef)watcher;
-    assert(fd == sw->fd);
     if((sw->event_mask & EPOLLIN) && (sw->read_evhandler)) {
-        sw->read_evhandler(sw, sw->read_arg, event);
+        sw->read_evhandler(sw, event);
     }
     if((sw->event_mask & EPOLLOUT) && (sw->write_evhandler)) {
-        sw->write_evhandler(sw, sw->write_arg, event);
+        sw->write_evhandler(sw, event);
     }
-//    sw->cb((RtorWatcherRef)sw, sw->cb_ctx, event);
 }
 static void anonymous_free(RtorWatcherRef p)
 {

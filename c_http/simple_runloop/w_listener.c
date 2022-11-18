@@ -16,12 +16,11 @@
  * @param fd        int
  * @param event     uint64_t
  */
-static void handler(RtorWatcherRef watcher, int fd, uint64_t event)
+static void handler(RtorWatcherRef watcher, uint64_t event)
 {
     RtorListenerRef listener_ref = (RtorListenerRef)watcher;
-    assert(fd ==  listener_ref->fd);
     if(listener_ref->listen_evhandler) {
-        listener_ref->listen_evhandler(listener_ref,  listener_ref->listen_arg, event);
+        listener_ref->listen_evhandler(listener_ref,  event);
     }
 }
 static void anonymous_free(RtorWatcherRef p)

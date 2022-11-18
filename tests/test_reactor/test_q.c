@@ -49,8 +49,9 @@ void QWriter_dispose(QSyncReaderRef this)
     free(this);
 }
 
-void QReaderHandler(WQueueRef qw, void* ctx, uint64_t event)
+void QReaderHandler(WQueueRef qw, uint64_t event)
 {
+    void* ctx = qw->queue_event_handler_arg;
     QSyncReaderRef rdr = (QSyncReaderRef)ctx;
 
     EvfdQueueRef queue = rdr->queue;

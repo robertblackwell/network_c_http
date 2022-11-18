@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-#define ENABLE_LOG
+#define ENABLE_LOGx
 #include <c_http/async/types.h>
 #include <stdio.h>
 #define _GNU_SOURCE             /* See feature_test_macros(7) */
@@ -35,16 +35,16 @@ TestCtx* TestCtx_new(int counter_init, int counter_max);
 // single repeating timer
 //
 
-int test_timer_multiple_repeating();
-int test_timer_single_repeating();
-static void callback_1(RtorTimerRef watcher, void* ctx, XrTimerEvent event);
-void fdevent_handler(RtorEventfdRef fdev_ref, void* arg, uint64_t ev_mask);
+int test_fdevent_multiple();
+int test_fdevent_1();
+static void callback_1(RtorTimerRef watcher, XrTimerEvent event);
+void fdevent_handler(RtorEventfdRef fdev_ref, uint64_t ev_mask);
 
 
 int main()
 {
-    UT_ADD(test_timer_single_repeating);
-//    UT_ADD(test_timer_multiple_repeating);
+    UT_ADD(test_fdevent_1);
+//    UT_ADD(test_fdevent_multiple);
     int rc = UT_RUN();
     return rc;
 }
@@ -54,7 +54,7 @@ int main()
  * All happens in a single thread
  */
 #define NBR_TIMES_FIRE 10
-int test_timer_single_repeating()
+int test_fdevent_1()
 {
     TestCtx* test_ctx_p = TestCtx_new(0, NBR_TIMES_FIRE);
 
@@ -81,7 +81,7 @@ int test_timer_single_repeating()
     return 0;
 }
 
-int test_timer_multiple_repeating()
+int test_fdevent_multiple()
 {
     TestCtx* test_ctx_p_1 = TestCtx_new(0, 5);
     TestCtx* test_ctx_p_2 = TestCtx_new(0, 6);
@@ -99,10 +99,11 @@ int test_timer_multiple_repeating()
     rtor_free(rtor_ref);
     return 0;
 }
-static void callback_1(RtorTimerRef watcher, void* ctx, XrTimerEvent event)
+static void callback_1(RtorTimerRef watcher, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
+    void* ctx = watcher->timer_handler_arg;
     TestCtx* ctx_p = (TestCtx*) ctx;
     RtorEventfdRef fdev = ctx_p->fdevent;
     LOG_FMT("callback1_counter %d counter: %d event is : %lx  ", ctx_p->callback1_counter, ctx_p->counter, event);
@@ -120,8 +121,9 @@ static void callback_1(RtorTimerRef watcher, void* ctx, XrTimerEvent event)
     }
     ctx_p->callback1_counter++;
 }
-void fdevent_handler(RtorEventfdRef fdev_ref, void* arg, uint64_t ev_mask)
+void fdevent_handler(RtorEventfdRef fdev_ref, uint64_t ev_mask)
 {
+    void* arg = fdev_ref->fd_event_handler_arg;
     TestCtx* t = (TestCtx*)arg;
     t->fdevent_counter++;
     LOG_FMT("w: %p arg: %p ev mask: %ld fdevent_counter % d", fdev_ref , arg, ev_mask, t->fdevent_counter);

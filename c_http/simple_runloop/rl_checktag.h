@@ -39,7 +39,7 @@
 #define WListenerFd_TAG "XRLSTNR"
 #define WQueue_TAG      "XRQUE"
 #define WTimerFd_TAG    "XRTIMER"
-#define ITQueue_TAG         "ITQUEUE"
+#define ITQueue_TAG     "ITQUEUE"
 
 #define XR_WATCHER_DECLARE_TAG DECLARE_TAG(Watcher)
 

@@ -20,16 +20,14 @@
  * @param fd
  * @param event
  */
-static void handler(RtorWatcherRef fdevent_ref, int fd, uint64_t event)
+static void handler(RtorWatcherRef fdevent_ref, uint64_t event)
 {
     RtorEventfdRef fdev = (RtorEventfdRef)fdevent_ref;
     XR_FDEV_CHECK_TAG(fdev)
     uint64_t buf;
     int nread = read(fdev->fd, &buf, sizeof(buf));
-    printf("XXXX value read from fdevent fd: nread %d value %ld\n", nread, buf);
-    assert(fd == fdev->fd);
     if(nread == sizeof(buf)) {
-        fdev->fd_event_handler(fdev, fdev->fd_event_handler_arg, event);
+        fdev->fd_event_handler(fdev, event);
     } else {
 
     }

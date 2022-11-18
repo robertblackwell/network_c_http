@@ -28,7 +28,7 @@ static void drain_callback(void* arg)
     printf("drain callback\n");
 //    rtor_post(my_reactor_ptr, )
 }
-static void interthread_queue_handler(WQueueRef watcher, void* arg, uint64_t event)
+static void interthread_queue_handler(WQueueRef watcher, uint64_t event)
 {
     printf("interthread_queue_handler\n");
     ReactorRef rx = WQueue_get_reactor(watcher);
@@ -36,9 +36,11 @@ static void interthread_queue_handler(WQueueRef watcher, void* arg, uint64_t eve
     void* queue_data = Evfdq_remove(evqref);
     FunctorRef fref = (FunctorRef) queue_data;
     void* pf = fref->f;
+    watcher->queue_event_handler_arg = fref->arg;
+    void* arg = (void*) watcher;
     long d = (long) fref->arg;
     printf("reactor::interthread_queue_handler f: %p d: %ld \n", pf, d);
-    rtor_post(rx, fref->f, fref->arg);
+    rtor_post(rx, fref->f, arg);
 }
 static int *int_in_heap(int key) {
     int *result;
@@ -62,9 +64,9 @@ static void rtor_epoll_ctl(ReactorRef athis, int op, int fd, uint64_t interest)
     };
     int status = epoll_ctl(athis->epoll_fd, op, fd, &(epev));
     if (status != 0) {
-        LOG_FMT("rtor_epoll_ctl epoll_fd: %d status : %d errno : %d", this->epoll_fd, status, errno);
+        LOG_FMT("rtor_epoll_ctl epoll_fd: %d status : %d errno : %d", athis->epoll_fd, status, errno);
     }
-    LOG_FMT("rtor_epoll_ctl epoll_fd: %d status : %d errno : %d", this->epoll_fd, status, errno);
+    LOG_FMT("rtor_epoll_ctl epoll_fd: %d status : %d errno : %d", athis->epoll_fd, status, errno);
     CHTTP_ASSERT((status == 0), "epoll ctl call failed");
 }
 
@@ -96,20 +98,14 @@ void rtor_init(ReactorRef athis) {
     LOG_FMT("rtor_new epoll_fd %d", runloop->epoll_fd);
     runloop->table = FdTable_new();
     runloop->run_list = RunList_new();
-#if 1
-    runloop->interthread_queue_ref = Evfdq_new();
-    runloop->interthread_queue_watcher_ref = WQueue_new(runloop, runloop->interthread_queue_ref);
-#if REGISTER_WQUEUE_REACTOR
-    uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
-    WQueue_register(runloop->interthread_queue_watcher_ref,  &interthread_queue_handler, (void*)runloop->interthread_queue_ref, interest);
-#endif
-#else
-    runloop->interthread_queue = rtor_interthread_queue_new(athis);
-    uint64_t itq_interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
-    rtor_interthread_queue_register(runloop->interthread_queue, interthread_queue_handler, (void*)runloop, itq_interest);
-#endif
 }
-
+void rtor_enable_interthread_queue(ReactorRef rtor_ref)
+{
+    rtor_ref->interthread_queue_ref = Evfdq_new();
+    rtor_ref->interthread_queue_watcher_ref = WQueue_new(rtor_ref, rtor_ref->interthread_queue_ref);
+    uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
+    WQueue_register(rtor_ref->interthread_queue_watcher_ref,  &interthread_queue_handler, (void*)rtor_ref->interthread_queue_ref, interest);
+}
 void rtor_close(ReactorRef athis)
 {
     XR_REACTOR_CHECK_TAG(athis)
@@ -193,7 +189,6 @@ int rtor_run(ReactorRef athis, time_t timeout) {
     while (true) {
         time_t passed = time(NULL) - start;
         if(FdTable_size(athis->table) == 0) {
-            LOG_FMT("rtor_run() FdTable_size == 0");
             goto cleanup;
         }
         int max_events = MAX_EVENTS;
@@ -207,6 +202,7 @@ int rtor_run(ReactorRef athis, time_t timeout) {
             case -1:
                 if (errno == EINTR) {
                     printf("reactor interripted\n");
+                    goto cleanup;
                     continue;
                 } else if(athis->closed_flag) {
                     result = 0;
@@ -226,7 +222,7 @@ int rtor_run(ReactorRef athis, time_t timeout) {
                     int mask = events[i].events;
                     LOG_FMT("rtor_run loop fd: %d events: %x", fd, mask);
                     RtorWatcherRef wref = FdTable_lookup(athis->table, fd);
-                    wref->handler(wref, fd, events[i].events);
+                    wref->handler(wref, events[i].events);
                     LOG_FMT("fd: %d", fd);
                     // call handler
                 }

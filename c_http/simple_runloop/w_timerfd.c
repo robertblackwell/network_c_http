@@ -28,7 +28,7 @@ static void print_current_tme(char* prefix)
  * @param fd
  * @param event
  */
-static void handler(RtorWatcherRef watcher, int fd, uint64_t event)
+static void handler(RtorWatcherRef watcher, uint64_t event)
 {
     struct timespec ts;
     struct itimerspec its;
@@ -41,7 +41,6 @@ static void handler(RtorWatcherRef watcher, int fd, uint64_t event)
     XR_WTIMER_CHECK_TAG(timer_watcher)
 
     int r2 = timerfd_gettime(timer_watcher->fd, &its_old);
-    assert(fd == timer_watcher->fd);
     /**
      * Have to read from the fd to reset the EPOLLIN event
      */
@@ -52,7 +51,7 @@ static void handler(RtorWatcherRef watcher, int fd, uint64_t event)
     if(!timer_watcher->repeating) {
         rtor_timer_clear(timer_watcher);
     }
-    timer_watcher->timer_handler(timer_watcher, timer_watcher->timer_handler_arg, event);
+    timer_watcher->timer_handler(timer_watcher, event);
 }
 static void anonymous_free(RtorWatcherRef p)
 {
@@ -120,6 +119,7 @@ void rtor_timer_set(RtorTimerRef athis, TimerEventHandler cb, void* ctx, uint64_
     athis->interval = interval_ms;
     athis->repeating = repeating;
     athis->timer_handler = cb;
+    athis->context = ctx;
     athis->timer_handler_arg = ctx;
     struct itimerspec its = WTimerFd_update_interval(athis, interval_ms, repeating);
     int flags = 0;

@@ -6,12 +6,11 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 
-static void handler(RtorWatcherRef watcher, int fd, uint64_t event)
+static void handler(RtorWatcherRef watcher, uint64_t event)
 {
     WQueueRef queue_watcher_ref = (WQueueRef)watcher;
     XR_WQUEUE_CHECK_TAG(queue_watcher_ref)
-    assert(fd == queue_watcher_ref->fd);
-    queue_watcher_ref->queue_event_handler(queue_watcher_ref, queue_watcher_ref->queue_event_handler_arg, event);
+    queue_watcher_ref->queue_event_handler(queue_watcher_ref, event);
 }
 static void anonymous_free(RtorWatcherRef p)
 {

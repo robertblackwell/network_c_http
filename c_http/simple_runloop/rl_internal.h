@@ -101,7 +101,7 @@ struct RtorWatcher_s {
     XR_WATCHER_DECLARE_TAG;
     WatcherType           type;
     ReactorRef            runloop;
-    void*                 context; //context
+    void*                 context;
     int                   fd;
     /**
      * function that knows how to free the specific sub type of watcher from a general ref.
@@ -117,7 +117,7 @@ struct RtorWatcher_s {
      * 
      * This handler will be calledd directly from the epoll_wait code inside reactor.c
     */
-    void(*handler)(RtorWatcherRef watcher_ref, int fd, uint64_t event);
+    void(*handler)(RtorWatcherRef watcher_ref, uint64_t event);
 };
 
 

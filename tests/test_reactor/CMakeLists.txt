@@ -41,7 +41,7 @@ add_test(${TARGET_TIMER_DISARM} ${TARGET_TIMER_DISARM})
 #
 # test fdevent watcher
 #
-
+#
 set(TARGET_FDEV test_fdevent)
 add_executable(${TARGET_FDEV}
 		test_fdevent.c
@@ -93,5 +93,5 @@ target_link_libraries(${TARGET_ITQ}
 add_test(${TARGET_ITQ} ${TARGET_ITQ})
 
 
-add_subdirectory(test_io)
-add_subdirectory(test_listener)
+#add_subdirectory(test_io)
+#add_subdirectory(test_listener)

@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-#define ENABLE_LOG
+#define ENABLE_LOGx
 #include <c_http/async/types.h>
 #include <assert.h>
 #include <stdio.h>
@@ -64,11 +64,11 @@ DisarmTestCtx* DisarmTestCtx_new(int counter_init, int counter_max)
     return tmp;
 }
 // disarms itself on first call. If called subsequently and reaches its max then cancel both timers
-static void callback_disarm_clear(RtorTimerRef watcher, void* ctx, XrTimerEvent event)
+static void callback_disarm_clear(RtorTimerRef watcher, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
-    DisarmTestCtx* ctx_p = (DisarmTestCtx*) ctx;
+    DisarmTestCtx* ctx_p = (DisarmTestCtx*) watcher->timer_handler_arg;
 
     // if first call disarm
     LOG_FMT(" counter %d\n", ctx_p->counter);
@@ -88,10 +88,11 @@ static void callback_disarm_clear(RtorTimerRef watcher, void* ctx, XrTimerEvent 
     }
 }
 // after being called max_count times rearm the other
-static void callback_rearm_other(RtorTimerRef watcher, void* ctx, XrTimerEvent event)
+static void callback_rearm_other(RtorTimerRef watcher, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
+    void* ctx = watcher->timer_handler_arg;
     DisarmTestCtx* ctx_p = (DisarmTestCtx*) ctx;
 
     int x = (ctx_p->counter >= ctx_p->max_count);

@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-#define ENABLE_LOG
+#define ENABLE_LOGx
 #include <c_http/async/types.h>
 #include <stdio.h>
 #include <pthread.h>
@@ -41,11 +41,11 @@ TestCtx* TestCtx_new(int counter_init, int counter_max);
 // The ctx arg contains enough info for the callback to calculate the margin by which it failed to
 // be called when it was expected to be called
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
-static void callback_non_repeating(RtorTimerRef watcher, void* ctx, XrTimerEvent event)
+static void callback_non_repeating(RtorTimerRef watcher, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
-    TestCtx* ctx_p = (TestCtx*) ctx;
+    TestCtx* ctx_p = (TestCtx*) watcher->timer_handler_arg;
     struct timespec tnow = current_time();
     double gap = time_diff(tnow, ctx_p->start_time);
     ctx_p->start_time = tnow;
@@ -90,11 +90,11 @@ int test_timer_non_repeating()
 * After end of the simple_runloop the TestCtx->counter is verified to be equal to the
 * required number of invocations
 */
-static void callback_repeating(RtorTimerRef watcher, void* ctx, XrTimerEvent event)
+static void callback_repeating(RtorTimerRef watcher, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
-    TestCtx* ctx_p = (TestCtx*) ctx;
+    TestCtx* ctx_p = (TestCtx*) watcher->timer_handler_arg;
     struct timespec tnow = current_time();
     double gap = time_diff(tnow, ctx_p->start_time);
     ctx_p->start_time = tnow;
@@ -119,31 +119,32 @@ int test_timer_single_repeating()
     RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, &callback_repeating, (void *) test_ctx_p, 100, true);
 
     rtor_run(rtor_ref, 10000);
-
+    LOG_MSG("timer_single_repeating - rtor_run has exited")
     // assert counter was increment correct number of times
     UT_EQUAL_INT(test_ctx_p->counter, test_ctx_p->max_count);
     free(test_ctx_p);
     rtor_free(rtor_ref);
+
     return 0;
 }
 //
 // multiple repeating times
 //
 //static int tw_counter_2 = 0;
-static void callback_multiple_repeating_timers(RtorTimerRef watcher, void* ctx, XrTimerEvent event)
+static void callback_multiple_repeating_timers(RtorTimerRef watcher, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
-    TestCtx* ctx_p = (TestCtx*) ctx;
+    TestCtx* ctx_p = (TestCtx*) watcher->timer_handler_arg;
     struct timespec tnow = current_time();
     double gap = time_diff(tnow, ctx_p->start_time);
     double percent_error = fabs(100.0*(((double)(watcher->interval) - gap)/((double)(watcher->interval))));
     gap = percent_error;
     ctx_p->start_time = tnow;
 
-    LOG_FMT(" counter: %d  ctx: %p  event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, ctx, event, epollin, error);
+    LOG_FMT(" counter: %d  ctx: %p  event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, ctx_p, event, epollin, error);
     if(ctx_p->counter >= ctx_p->max_count) {
-        LOG_FMT(" clear timer %p", ctx);
+        LOG_FMT(" clear timer %p", ctx_p);
         rtor_timer_clear(watcher);
     } else {
         ctx_p->counter++;
@@ -192,11 +193,11 @@ static void post_cb(RtorWatcherRef w, void* arg, uint64_t event)
     rtor_post(reactor, posted_from_post_cb, ctx_p);
 }
 
-static void callback_post(RtorTimerRef watcher, void* ctx, XrTimerEvent event)
+static void callback_post(RtorTimerRef watcher, XrTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
-    TestCtx* ctx_p = (TestCtx*) ctx;
+    TestCtx* ctx_p = (TestCtx*) watcher->timer_handler_arg;
     struct timespec tnow = current_time();
     double gap = time_diff(tnow, ctx_p->start_time);
     ctx_p->start_time = tnow;
@@ -204,7 +205,7 @@ static void callback_post(RtorTimerRef watcher, void* ctx, XrTimerEvent event)
     gap = percent_error;
     ReactorRef reactor = watcher->runloop;
     LOG_FMT(" counter: %d %%error: %f   event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, gap, event, epollin, error);
-    rtor_post(reactor, posted_from_post_cb, ctx);
+    rtor_post(reactor, posted_from_post_cb, ctx_p);
 }
 int test_timer_post()
 {
