@@ -62,7 +62,7 @@ int test_timer_single_repeating()
     test_ctx_p->reactor = rtor_ref;
     RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, &callback_1, (void *) test_ctx_p, 1000, true);
     rtor_timer_disarm(tw_1);
-    RtorEventfdRef fdev = rtor_eventfd(rtor_ref);
+    RtorEventfdRef fdev = rtor_eventfd_new(rtor_ref);
 
     test_ctx_p->fdevent = fdev;
     test_ctx_p->timer = tw_1;

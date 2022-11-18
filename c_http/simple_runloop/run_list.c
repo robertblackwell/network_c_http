@@ -2,15 +2,15 @@
 #include <c_http/simple_runloop/rl_internal.h>
 #include <unistd.h>
 #include <stdlib.h>
-/**
- * A Functor is a generic callable - a function pointer (of type PostableFunction) and single anonymous argument
- */
-struct Functor_s
-{
-//    RtorWatcherRef wref; // this is borrowed do not free
-    PostableFunction f;
-    void *arg;
-};
+///**
+// * A Functor is a generic callable - a function pointer (of type PostableFunction) and single anonymous argument
+// */
+//struct Functor_s
+//{
+////    RtorWatcherRef wref; // this is borrowed do not free
+//    PostableFunction f;
+//    void *arg;
+//};
 
 FunctorRef Functor_new(PostableFunction f, void *arg)
 {

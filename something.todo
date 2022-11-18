@@ -1,6 +1,12 @@
 New list of TODOs :
+  ☐ need to find ways to reduce the malloc-ing that is taking place
+      ☐ for the 2 run lists use an array of Functors with pass and return by value for adding and removing
+      ☐ the fdtable should work without frequent mallocs as indexes are fds and we could use a bit map for iused
   ☐ naming is still an issue
-  ☐ what is evfd_event and w_queue - do they both work and do we need them ?- - this needs fixing
+  ☐ what is evfd_event and w_queue - do they both work and do we need them ?- - this needs fixing as does test_q
+  ☐ w_rdrwrtr should not have 2 fd fields and reconsider having two callbacks - that should happen in tcp related objects
+  ☐ tcpconn should not both read_some() and read_message() thats is mixing levels 
+  ☐ add posting to a reactor from another thread
   ☐ make the reactor tests more understandable 
   ☐ reactor q test fails
   Tidy up the async stuff:

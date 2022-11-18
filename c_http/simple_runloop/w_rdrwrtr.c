@@ -46,7 +46,7 @@ void WIoFd_init(RtorRdrWrtrRef this, ReactorRef runloop, int fd)
     this->write_arg = NULL;
     this->write_evhandler = NULL;
 }
-RtorRdrWrtrRef WIoFd_new(ReactorRef rtor_ref, int fd)
+RtorRdrWrtrRef rtor_rdrwrtr_new(ReactorRef rtor_ref, int fd)
 {
     RtorRdrWrtrRef this = malloc(sizeof(RtorRdrWrtr));
     WIoFd_init(this, rtor_ref, fd);

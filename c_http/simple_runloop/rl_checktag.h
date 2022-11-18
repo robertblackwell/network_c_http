@@ -39,6 +39,7 @@
 #define WListenerFd_TAG "XRLSTNR"
 #define WQueue_TAG      "XRQUE"
 #define WTimerFd_TAG    "XRTIMER"
+#define ITQueue_TAG         "ITQUEUE"
 
 #define XR_WATCHER_DECLARE_TAG DECLARE_TAG(Watcher)
 
@@ -70,6 +71,14 @@
 #define XR_WQUEUE_DECLARE_TAG DECLARE_TAG(WQueue_TAG)
 #define XR_WQUEUE_CHECK_TAG(p) CHECK_TAG(WQueue_TAG, p)
 #define XR_WQUEUE_SET_TAG(p) SET_TAG(WQueue_TAG, p)
+
+/**
+ * ITQueue
+ */
+#define XR_ITQUEUE_DECLARE_TAG DECLARE_TAG(ITQueue_TAG)
+#define XR_ITQUEUE_CHECK_TAG(p) CHECK_TAG(ITQueue_TAG, p)
+#define XR_ITQUEUE_SET_TAG(p) SET_TAG(ITQueue_TAG, p)
+
 
 /**
  * RtorTimer

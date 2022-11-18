@@ -79,7 +79,7 @@ void* reader_thread_func(void* arg)
     Reader* rdr = (Reader*)arg;
     for(int i = 0; i < rdr->count; i++) {
         ReadCtx* ctx = &(rdr->ctx_table[i]);
-        rdr->ctx_table[i].swatcher = WIoFd_new(rtor_ref, ctx->readfd);
+        rdr->ctx_table[i].swatcher = rtor_rdrwrtr_new(rtor_ref, ctx->readfd);
         RtorRdrWrtrRef sw = rdr->ctx_table[i].swatcher;
         uint64_t interest = EPOLLERR | EPOLLIN;
         rtor_rdrwrtr_register(sw);

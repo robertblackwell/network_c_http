@@ -4,12 +4,14 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <errno.h>
+
 #include <sys/epoll.h>
 #include <sys/eventfd.h>
 #include <unistd.h>
 #include <c_http/async/types.h>
 
-#define TWO_PIPE_TRICKx
+#define TWO_PIPE_TRICK
 #define SEMAPHORE
 
 /**
@@ -59,7 +61,7 @@ void WEventFd_init(RtorEventfdRef this, ReactorRef runloop)
     this->free = &anonymous_free;
     this->handler = &handler;
 }
-RtorEventfdRef rtor_eventfd(ReactorRef runloop)
+RtorEventfdRef rtor_eventfd_new(ReactorRef runloop)
 {
     RtorEventfdRef this = malloc(sizeof(RtorEventfd));
     WEventFd_init(this, runloop);
@@ -123,13 +125,28 @@ void rtor_eventfd_fire(RtorEventfdRef athis)
     XR_FDEV_CHECK_TAG(athis)
 #ifdef TWO_PIPE_TRICK
     uint64_t buf = 1;
-    write(this->write_fd, &buf, sizeof(buf));
+    write(athis->write_fd, &buf, sizeof(buf));
 #else
     uint64_t buf = 1;
     int x = write(athis->fd, &buf, sizeof(buf));
     assert(x == sizeof(buf));
 #endif
 }
+void rtor_eventfd_clear_one_event(RtorEventfdRef athis)
+{
+    uint64_t buf;
+    int nread = read(athis->fd, &buf, sizeof(buf));
+}
+void rtor_eventfd_clear_all_events(RtorEventfdRef athis)
+{
+    uint64_t buf;
+    while(1) {
+        int nread = read(athis->fd,  &buf, sizeof(buf));
+        if (nread == -1) break;
+    }
+    assert(errno == EAGAIN);
+}
+
 ReactorRef rtor_eventfd_get_reactor(RtorEventfdRef athis)
 {
     return athis->runloop;

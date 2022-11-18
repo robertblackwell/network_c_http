@@ -121,6 +121,7 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		simple_runloop/w_timerfd.c
         simple_runloop/w_rdrwrtr.c
 		simple_runloop/w_queue.c
+		simple_runloop/interthread_queue.c
 		simple_runloop/watcher.c
 		simple_runloop/evfd_queue.c
 #		simple_runloop/run_list.c

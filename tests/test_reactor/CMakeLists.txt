@@ -74,5 +74,24 @@ target_link_libraries(${TARGET_Q}
 
 add_test(${TARGET_Q} ${TARGET_Q})
 
+#
+# test interthread queue
+#
+
+set(TARGET_ITQ test_itq)
+add_executable(${TARGET_ITQ}
+		test_itq.c
+		)
+
+target_include_directories(${TARGET_ITQ}
+		PUBLIC
+		${TEST_INCLUDE_dirS})
+
+target_link_libraries(${TARGET_ITQ}
+		PUBLIC ${TEST_LINK_LIBS})
+
+add_test(${TARGET_ITQ} ${TARGET_ITQ})
+
+
 add_subdirectory(test_io)
 add_subdirectory(test_listener)

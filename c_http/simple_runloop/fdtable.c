@@ -9,7 +9,7 @@
 
 
 struct FdTable_s {
-    uint64_t    count;
+    uint64_t        count;
 	RtorWatcher*    entries[CBTABLE_MAX];
 };
 

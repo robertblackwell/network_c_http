@@ -31,6 +31,12 @@ typedef struct Functor_s Functor, *FunctorRef;
 FunctorRef Functor_new(PostableFunction f, void* arg);
 void Functor_free(FunctorRef athis);
 void Functor_call(FunctorRef athis);
+struct Functor_s
+{
+//    RtorWatcherRef wref; // this is borrowed do not free
+    PostableFunction f;
+    void *arg;
+};
 
 /**
  * runlist - is a list of Functors - these are functions that are ready to run.
@@ -59,6 +65,7 @@ void fd_map_init();
 bool fd_map_at(int j);
 bool fd_map_set(int j);
 
+#define REGISTER_WQUEUE_REACTOR 1
 /**
  * Scan down the run list calling each Functor entry until the list is empty;
  * @param this
@@ -67,11 +74,16 @@ void RunList_exec(RunListRef this);
 
 struct Reactor_s {
     XR_REACTOR_DECLARE_TAG;
-    int               epoll_fd;
-    bool              closed_flag;
-    FdTableRef        table; // (int, CallbackData)
-    RunListRef        run_list;
-    IntertheadListRef interthread_run_list;
+    int                     epoll_fd;
+    bool                    closed_flag;
+    FdTableRef              table; // (int, CallbackData)
+    RunListRef              run_list;
+#if 1
+    EvfdQueueRef            interthread_queue_ref;
+    WQueueRef               interthread_queue_watcher_ref;
+#else
+    RtorInterthreadQueueRef interthread_queue;
+#endif
 };
 /**
  * RtorWatcher - a generic observer object
@@ -134,7 +146,6 @@ struct RtorEventfd_s {
  */
 struct RtorRdrWrtr_s {
     struct RtorWatcher_s;
-
     uint64_t                 event_mask;
     SocketEventHandler       read_evhandler;
     void*                    read_arg;
@@ -158,11 +169,27 @@ typedef uint64_t XrQueueEvent;
 typedef void(XrQueuetWatcherCaller(void* ctx));
 struct WQueue_s {
     struct RtorWatcher_s;
+
     EvfdQueueRef            queue;
     // reactor cb and arg
     QueueEventHandler       queue_event_handler;
     void*                   queue_event_handler_arg;
 };
+
+/**
+ * InterThreadQueue
+ */
+typedef uint64_t XrITQueueEvent;
+typedef void(XrITQueuetWatcherCaller(void* ctx));
+struct RtorInterthreadQueue_s {
+    XR_ITQUEUE_DECLARE_TAG;
+    RtorEventfdRef                      eventfd_ref;
+    ListRef                             queue;
+    pthread_mutex_t                     queue_mutex;
+    InterthreadQueueEventHandler        queue_event_handler;
+    void*                               queue_event_handler_arg;
+};
+
 
 /**
  * RtorTimer

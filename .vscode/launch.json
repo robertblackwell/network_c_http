@@ -36,11 +36,11 @@
     }],
     "configurations": [
         {
-            "name": "(gdb) xr_server",
+            "name": "(gdb) test_q",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/cmake-build-debug/async_app/xr_server",
-            "args": ["--marvin-home", "${workspaceFolder}", "--proxy-port", "9992"],
+            "program": "${workspaceFolder}/cmake-build-debug/tests/test_reactor/test_q",
+            "args": [],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
             "environment": [

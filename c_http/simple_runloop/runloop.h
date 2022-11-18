@@ -36,6 +36,9 @@ typedef struct RtorEventfd_s RtorEventfd, *RtorEventfdRef;      // Waiter for ep
 struct EvfdQueue_s;
 typedef struct EvfdQueue_s EvfdQueue, * EvfdQueueRef;
 
+struct RtorInterthreadQueue_s;
+typedef struct RtorInterthreadQueue_s RtorInterthreadQueue, *RtorInterthreadQueueRef;        // Wait for a inter thread queue event
+
 typedef uint64_t EventMask, XrTimerEvent;
 
 // A generic callback function - @TODO will be the signature of the only type of function that can be posted
@@ -48,6 +51,7 @@ typedef void (*TimerEventHandler)   (RtorTimerRef timer_watcher_ref, void* arg, 
 typedef void (*SocketEventHandler)  (RtorRdrWrtrRef socket_watcher_ref, void* arg, uint64_t events);
 typedef void (*FdEventHandler)      (RtorEventfdRef fd_event_ref, void* arg, uint64_t events);
 typedef void (*QueueEventHandler)   (WQueueRef qref, void* arg, uint64_t events);
+typedef void (*InterthreadQueueEventHandler)   (RtorInterthreadQueueRef qref);
 typedef void (*ListenerEventHandler)(RtorListenerRef listener_ref, void* arg, uint64_t events);
 
 /**
@@ -65,6 +69,7 @@ typedef void (*ListenerEventHandler)(RtorListenerRef listener_ref, void* arg, ui
  *
  * For convenience a number of special purposes watchers/observers have been provided.
  */
+ReactorRef rtor_get_threads_reactor();
 ReactorRef rtor_new(void);
 void rtor_close(ReactorRef athis);
 void rtor_init(ReactorRef athis);
@@ -74,7 +79,7 @@ int  rtor_deregister(ReactorRef athis, int fd);
 int  rtor_reregister(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref);
 int  rtor_run(ReactorRef athis, time_t timeout);
 int  rtor_post(ReactorRef athis, PostableFunction cb, void* arg);
-int  rtor_interthread_post(ReactorRef athis, PostableFunction cb, void* arg);
+void  rtor_interthread_post(ReactorRef athis, PostableFunction cb, void* arg);
 void rtor_delete(ReactorRef athis, int fd);
 void XrReactor_verify(ReactorRef r);
 ReactorRef Watcher_get_reactor(RtorWatcherRef athis);
@@ -141,7 +146,7 @@ int rtor_rdrwrtr_get_fd(RtorRdrWrtrRef this);
  * and to "fire" events on that file descriptor that can be waited for using the epoll call.
  * This facility provides a mechanism to create and wait on arbitary event sources.
  */
-RtorEventfdRef rtor_eventfd(ReactorRef runloop);
+RtorEventfdRef rtor_eventfd_new(ReactorRef runloop);
 void rtor_eventfd_init(RtorEventfdRef athis);
 void rtor_eventfd_free(RtorEventfdRef athis);
 void rtor_eventfd_register(RtorEventfdRef athis);
@@ -149,6 +154,8 @@ void rtor_eventfd_change_watch(RtorEventfdRef athis, FdEventHandler evhandler, v
 void rtor_eventfd_arm(RtorEventfdRef athis, FdEventHandler evhandler, void* arg);
 void rtor_eventfd_disarm(RtorEventfdRef athis);
 void rtor_eventfd_fire(RtorEventfdRef athis);
+void rtor_eventfd_clear_one_event(RtorEventfdRef athis);
+void rtor_eventfd_clear_all_events(RtorEventfdRef athis);
 void rtor_eventfd_deregister(RtorEventfdRef athis);
 void rtor_eventfd_verify(RtorEventfdRef r);
 ReactorRef rtor_eventfd_get_reactor(RtorEventfdRef athis);
@@ -174,6 +181,17 @@ void WQueue_verify(WQueueRef r);
 ReactorRef WQueue_get_reactor(WQueueRef athis);
 int WQueue_get_fd(WQueueRef this);
 //#define WQueue_get_reactor(p) Watcher_get_reactor((RtorWatcherRef)p)
+
+RtorInterthreadQueueRef rtor_interthread_queue_new(ReactorRef rtor_ref);
+void rtor_interthread_queue_init(RtorInterthreadQueueRef this, ReactorRef runloop);
+void rtor_interthread_queue_dispose(RtorInterthreadQueueRef this);
+void rtor_interthread_queue_add(RtorInterthreadQueueRef this, void* item);
+void rtor_interthread_queue_drain(RtorInterthreadQueueRef this, void(*draincb)(void*));
+void rtor_interthread_queue_register(RtorInterthreadQueueRef this, InterthreadQueueEventHandler evhandler, void* arg, uint64_t watch_what);
+void rtor_interthreaD_queue_deregister(RtorInterthreadQueueRef this);
+ReactorRef rtor_interthread_queue_get_reactor(RtorInterthreadQueueRef athis);
+int rtor_interthread_queue_get_fd(RtorInterthreadQueueRef athis);
+void rtor_interthread_queue_verify(RtorInterthreadQueueRef this);
 
 
 #endif
