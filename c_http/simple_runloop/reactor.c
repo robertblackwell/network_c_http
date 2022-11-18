@@ -28,7 +28,6 @@ static void drain_callback(void* arg)
     printf("drain callback\n");
 //    rtor_post(my_reactor_ptr, )
 }
-#if 1
 static void interthread_queue_handler(WQueueRef watcher, void* arg, uint64_t event)
 {
     printf("interthread_queue_handler\n");
@@ -41,13 +40,6 @@ static void interthread_queue_handler(WQueueRef watcher, void* arg, uint64_t eve
     printf("reactor::interthread_queue_handler f: %p d: %ld \n", pf, d);
     rtor_post(rx, fref->f, fref->arg);
 }
-#else
-static void interthread_queue_handler(RtorInterthreadQueueRef itq_ref)
-{
-    ReactorRef reactor_ref = rtor_eventfd_get_reactor(itq_ref->eventfd_ref);
-    rtor_interthread_queue_drain(itq_ref, drain_callback);
-}
-#endif
 static int *int_in_heap(int key) {
     int *result;
     if ((result = malloc(sizeof(*result))) == NULL)
@@ -234,7 +226,7 @@ int rtor_run(ReactorRef athis, time_t timeout) {
                     int mask = events[i].events;
                     LOG_FMT("rtor_run loop fd: %d events: %x", fd, mask);
                     RtorWatcherRef wref = FdTable_lookup(athis->table, fd);
-                    wref->handler((void*)wref, fd, events[i].events);
+                    wref->handler(wref, fd, events[i].events);
                     LOG_FMT("fd: %d", fd);
                     // call handler
                 }

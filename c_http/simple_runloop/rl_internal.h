@@ -101,6 +101,7 @@ struct RtorWatcher_s {
     XR_WATCHER_DECLARE_TAG;
     WatcherType           type;
     ReactorRef            runloop;
+    void*                 context; //context
     int                   fd;
     /**
      * function that knows how to free the specific sub type of watcher from a general ref.
@@ -169,7 +170,6 @@ typedef uint64_t XrQueueEvent;
 typedef void(XrQueuetWatcherCaller(void* ctx));
 struct WQueue_s {
     struct RtorWatcher_s;
-
     EvfdQueueRef            queue;
     // reactor cb and arg
     QueueEventHandler       queue_event_handler;
