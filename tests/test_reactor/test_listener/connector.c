@@ -24,7 +24,7 @@ void* connector_thread_func(void* arg)
         printf("Client about to connect %d \n", i);
         ClientRef client_ref = Client_new();
         Client_connect(client_ref, "localhost", 9001);
-        sleep(0.2);
+        usleep(200000);
         Client_dispose(&client_ref);
     }
     // now wait here for all connections to be processed

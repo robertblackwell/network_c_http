@@ -60,7 +60,7 @@ void Listener_listen(ListenerRef sref)
 
     rtor_listener_register(lw, on_event_listening, sref);
     printf("Listener_listen reactor: %p listen sock: %d  lw: %p\n", sref->reactor_ref, sref->listening_socket_fd, lw);
-    sref->timer_ref = rtor_timer_new(sref->reactor_ref, 5000, false);
+    sref->timer_ref = rtor_timer_new(sref->reactor_ref);
     rtor_timer_register(sref->timer_ref, &on_timer, (void *) sref, 5000, false);
     rtor_run(sref->reactor_ref, -1);
 }

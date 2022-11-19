@@ -60,7 +60,7 @@ int test_fdevent_1()
 
     ReactorRef rtor_ref = rtor_new();
     test_ctx_p->reactor = rtor_ref;
-    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, 1000, true);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref);
     rtor_timer_register(tw_1, &callback_1, (void *) test_ctx_p, 1000, true);
     rtor_timer_disarm(tw_1);
     RtorEventfdRef fdev = rtor_eventfd_new(rtor_ref);
@@ -89,10 +89,10 @@ int test_fdevent_multiple()
 
     ReactorRef rtor_ref = rtor_new();
 
-    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, 100, true);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref);
     rtor_timer_register(tw_1, &callback_1, test_ctx_p_1, 100, true);
 
-    RtorTimerRef tw_2 = rtor_timer_new(rtor_ref, 100, true);
+    RtorTimerRef tw_2 = rtor_timer_new(rtor_ref);
     rtor_timer_register(tw_2, &callback_1, test_ctx_p_2, 100, true);
 
     rtor_run(rtor_ref, 10000);

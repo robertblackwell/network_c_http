@@ -124,10 +124,10 @@ int test_timer_disarm_rearm()
 
     ReactorRef rtor_ref = rtor_new();
 
-    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, test_ctx_p_1->interval_ms, true);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref);
     rtor_timer_register(tw_1, &callback_disarm_clear, test_ctx_p_1, test_ctx_p_1->interval_ms, true);
 
-    RtorTimerRef tw_2 = rtor_timer_new(rtor_ref, test_ctx_p_2->interval_ms, true);
+    RtorTimerRef tw_2 = rtor_timer_new(rtor_ref);
     rtor_timer_register(tw_2, &callback_rearm_other, test_ctx_p_2, test_ctx_p_2->interval_ms, true);
 
     // timer 1 callback will disarm itself on the first timer event

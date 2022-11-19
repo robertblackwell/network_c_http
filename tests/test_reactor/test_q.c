@@ -81,7 +81,7 @@ void* writer_thread_func(void* arg)
 {
     QSyncWriterRef wrtr = (QSyncWriterRef)arg;
     for(long i = 0; i < 10; i++) {
-        sleep(2);
+        usleep(500000);
         Evfdq_add(wrtr->queue, (void*)i);
     }
 }

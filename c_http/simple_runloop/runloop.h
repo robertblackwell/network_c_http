@@ -91,8 +91,8 @@ int        Watcher_get_fd(RtorWatcherRef this);
  * A RtorTimer is a spcial type of RtorWatcher that make it easy to use a Reactor
  * to implement single shot and repeating timers.
 */
-RtorTimerRef rtor_timer_new(ReactorRef rtor_ref, uint64_t interval_ms, bool repeating);
-void rtor_timer_init(RtorTimerRef this, ReactorRef runloop, uint64_t interval_ms, bool repeating);
+RtorTimerRef rtor_timer_new(ReactorRef rtor_ref);
+void rtor_timer_init(RtorTimerRef this, ReactorRef runloop);
 void rtor_timer_free(RtorTimerRef athis);
 void rtor_timer_register(RtorTimerRef athis, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
 void rtor_timer_update(RtorTimerRef athis, uint64_t interval_ms, bool repeating);

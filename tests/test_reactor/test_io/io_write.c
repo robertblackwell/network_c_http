@@ -122,7 +122,7 @@ void* writer_thread_func(void* arg)
         WriteCtx* ctx = &(wrtr->ctx_table[i]);
 
         wrtr->ctx_table[i].swatcher = rtor_stream_new(rtor_ref, ctx->writefd);
-        wrtr->ctx_table[i].twatcher = rtor_timer_new(rtor_ref, ctx->interval_ms, true);
+        wrtr->ctx_table[i].twatcher = rtor_timer_new(rtor_ref);
         rtor_timer_register(wrtr->ctx_table[i].twatcher, &wrtr_wait, (void *) ctx, ctx->interval_ms, true);
 
         WR_CTX_CHECK_TAG(ctx)

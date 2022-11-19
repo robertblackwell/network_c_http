@@ -71,7 +71,7 @@ int test_timer_non_repeating()
 
     ReactorRef rtor_ref = rtor_new();
 
-    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, 100, false);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref);
     rtor_timer_register(tw_1, &callback_non_repeating, test_ctx_p_1, 100, false);
 
     rtor_run(rtor_ref, 10000);
@@ -117,7 +117,7 @@ int test_timer_single_repeating()
 
     ReactorRef rtor_ref = rtor_new();
 
-    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, 100, true);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref);
     rtor_timer_register(tw_1, &callback_repeating, (void *) test_ctx_p, 100, true);
 
     rtor_run(rtor_ref, 10000);
@@ -159,10 +159,10 @@ int test_timer_multiple_repeating()
 
     ReactorRef rtor_ref = rtor_new();
 
-    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, 100, true);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref);
     rtor_timer_register(tw_1, &callback_multiple_repeating_timers, test_ctx_p_1, 100, true);
 
-    RtorTimerRef tw_2 = rtor_timer_new(rtor_ref, 100, true);
+    RtorTimerRef tw_2 = rtor_timer_new(rtor_ref);
     rtor_timer_register(tw_2, &callback_multiple_repeating_timers, test_ctx_p_2, 100, true);
 
     rtor_run(rtor_ref, 10000);
@@ -219,7 +219,7 @@ int test_timer_post()
     TestCtx* test_ctx_p = TestCtx_new(0, 5);
     test_ctx_p->reactor = rtor_ref;
 
-    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, 100, true);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref);
     rtor_timer_register(tw_1, &callback_post, (void *) test_ctx_p, 100, true);
     test_ctx_p->watcher = tw_1;
 

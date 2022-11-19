@@ -60,7 +60,7 @@ static void anonymous_free(RtorWatcherRef p)
     RtorTimerRef twp = (RtorTimerRef)p;
     rtor_timer_free(twp);
 }
-void rtor_timer_init(RtorTimerRef this, ReactorRef runloop, uint64_t interval_ms, bool repeating)
+void rtor_timer_init(RtorTimerRef this, ReactorRef runloop)
 {
     this->type = XR_WATCHER_TIMER;
     XR_WTIMER_SET_TAG(this)
@@ -70,14 +70,15 @@ void rtor_timer_init(RtorTimerRef this, ReactorRef runloop, uint64_t interval_ms
     this->handler = &handler;
     this->timer_handler = NULL;
     this->timer_handler_arg = NULL;
+    this->interval = 0;
     this->repeating = false;
     this->fd = timerfd_create(CLOCK_REALTIME, TFD_CLOEXEC | TFD_NONBLOCK);
     LOG_FMT("rtor_timer_init fd: %d \n", this->fd);
 }
-RtorTimerRef rtor_timer_new(ReactorRef rtor_ref, uint64_t interval_ms, bool repeating)
+RtorTimerRef rtor_timer_new(ReactorRef rtor_ref)
 {
     RtorTimerRef this = malloc(sizeof(RtorTimer));
-    rtor_timer_init(this, rtor_ref, interval_ms, repeating);
+    rtor_timer_init(this, rtor_ref);
     return this;
 }
 void rtor_timer_free(RtorTimerRef athis)
