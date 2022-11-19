@@ -122,7 +122,7 @@ int test_timer_disarm_rearm()
     DisarmTestCtx* test_ctx_p_2 = DisarmTestCtx_new(0, 6);
     test_ctx_p_2->interval_ms = 100;
 
-    ReactorRef rtor_ref = rtor_new();
+    ReactorRef rtor_ref = rtor_reactor_new();
 
     RtorTimerRef tw_1 = rtor_timer_new(rtor_ref);
     rtor_timer_register(tw_1, &callback_disarm_clear, test_ctx_p_1, test_ctx_p_1->interval_ms, true);
@@ -138,7 +138,7 @@ int test_timer_disarm_rearm()
     test_ctx_p_1->other_ctx = test_ctx_p_2;
 
 
-    rtor_run(rtor_ref, 10000);
+    rtor_reactor_run(rtor_ref, 10000);
     UT_EQUAL_INT(test_ctx_p_1->counter, test_ctx_p_1->max_count);
 
     //cannot predict how many times the rearm cb will be called before the disarm_clear cb final stops everything

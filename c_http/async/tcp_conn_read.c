@@ -81,7 +81,7 @@ static void read_some_handler(RtorStreamRef socket_watcher_ref, uint64_t event)
             // @TODO - fix next 2 lines
 //            WIoFd_change_watch(sw, &read_some_post_cb, arg, 0);
 //            WIoFd_disarm(sw, XR_READ);
-            rtor_post(reactor_ref, &read_some_post_func, conn_ref);
+            rtor_reactor_post(reactor_ref, &read_some_post_func, conn_ref);
             return;
         } else if (bytes_read < 0) {
             if (errno_saved == EAGAIN) {
@@ -94,7 +94,7 @@ static void read_some_handler(RtorStreamRef socket_watcher_ref, uint64_t event)
             // @TODO - fix next 2 lines
 //            WIoFd_change_watch(sw, &read_some_post_cb, arg, 0);
 //            WIoFd_disarm(sw, XR_READ);
-            rtor_post(reactor_ref, &read_some_post_func, conn_ref);
+            rtor_reactor_post(reactor_ref, &read_some_post_func, conn_ref);
             return;
         } else /* (bytes_read > 0) */{
             IOBuffer_commit(iobuf, bytes_read);
@@ -151,7 +151,7 @@ static void read_some_handler(RtorStreamRef socket_watcher_ref, uint64_t event)
 //    Parser_begin(this->parser_ref, this->req_msg_ref);
 //}
 ///**
-// * A function that can be rtor_post()'d that will call the read_msg_cb
+// * A function that can be rtor_reactor_post()'d that will call the read_msg_cb
 // * with the correct parameters
 // * \param wp    RtorWatcherRef
 // * \param arg   void*
@@ -219,7 +219,7 @@ static void read_some_handler(RtorStreamRef socket_watcher_ref, uint64_t event)
 //        // @TODO fix next 2 lines
 ////        WIoFd_change_watch(sw, &read_msg_handler, arg, 0);
 //        rtor_stream_disarm_read(sw);
-//        rtor_post(reactor_ref, &on_post_read_msg, conn_ref);
+//        rtor_reactor_post(reactor_ref, &on_post_read_msg, conn_ref);
 //        return;
 //    }
 //}

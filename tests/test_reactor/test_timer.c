@@ -69,12 +69,12 @@ int test_timer_non_repeating()
     TestCtx* test_ctx_p_1 = TestCtx_new(0, 1);
     // previous call sets test_ctx_p_1->counter == 0
 
-    ReactorRef rtor_ref = rtor_new();
+    ReactorRef rtor_ref = rtor_reactor_new();
 
     RtorTimerRef tw_1 = rtor_timer_new(rtor_ref);
     rtor_timer_register(tw_1, &callback_non_repeating, test_ctx_p_1, 100, false);
 
-    rtor_run(rtor_ref, 10000);
+    rtor_reactor_run(rtor_ref, 10000);
     /*We should only get here when there are no more timers or other events pending in the simple_runloop*/
     rtor_free(rtor_ref);
     /* prove callback_non_repeating was called exactly once */
@@ -115,13 +115,13 @@ int test_timer_single_repeating()
     // counter starts at 0 and increments to max 5
     TestCtx* test_ctx_p = TestCtx_new(0, 5);
 
-    ReactorRef rtor_ref = rtor_new();
+    ReactorRef rtor_ref = rtor_reactor_new();
 
     RtorTimerRef tw_1 = rtor_timer_new(rtor_ref);
     rtor_timer_register(tw_1, &callback_repeating, (void *) test_ctx_p, 100, true);
 
-    rtor_run(rtor_ref, 10000);
-    LOG_MSG("timer_single_repeating - rtor_run has exited")
+    rtor_reactor_run(rtor_ref, 10000);
+    LOG_MSG("timer_single_repeating - rtor_reactor_run has exited")
     // assert counter was increment correct number of times
     UT_EQUAL_INT(test_ctx_p->counter, test_ctx_p->max_count);
     free(test_ctx_p);
@@ -157,7 +157,7 @@ int test_timer_multiple_repeating()
     TestCtx* test_ctx_p_1 = TestCtx_new(0, 5);
     TestCtx* test_ctx_p_2 = TestCtx_new(0, 6);
 
-    ReactorRef rtor_ref = rtor_new();
+    ReactorRef rtor_ref = rtor_reactor_new();
 
     RtorTimerRef tw_1 = rtor_timer_new(rtor_ref);
     rtor_timer_register(tw_1, &callback_multiple_repeating_timers, test_ctx_p_1, 100, true);
@@ -165,7 +165,7 @@ int test_timer_multiple_repeating()
     RtorTimerRef tw_2 = rtor_timer_new(rtor_ref);
     rtor_timer_register(tw_2, &callback_multiple_repeating_timers, test_ctx_p_2, 100, true);
 
-    rtor_run(rtor_ref, 10000);
+    rtor_reactor_run(rtor_ref, 10000);
     UT_EQUAL_INT(test_ctx_p_1->counter, test_ctx_p_1->max_count);
     UT_EQUAL_INT(test_ctx_p_2->counter, test_ctx_p_2->max_count);
     free(test_ctx_p_1);
@@ -195,7 +195,7 @@ static void posted_from_post_cb(ReactorRef rtor_ref,  void* arg)
 //    RtorTimerRef tw = (RtorTimerRef)w;
 //    ReactorRef reactor = w->runloop;
 //    LOG_FMT(" post again w: %p counter: %d", w, ctx_p->counter);
-//    rtor_post(reactor, posted_from_post_cb, ctx_p);
+//    rtor_reactor_post(reactor, posted_from_post_cb, ctx_p);
 //}
 
 static void callback_post(RtorTimerRef watcher, XrTimerEvent event)
@@ -210,12 +210,12 @@ static void callback_post(RtorTimerRef watcher, XrTimerEvent event)
     gap = percent_error;
     ReactorRef reactor = watcher->runloop;
     LOG_FMT(" counter: %d %%error: %f   event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, gap, event, epollin, error);
-    rtor_post(reactor, posted_from_post_cb, ctx_p);
+    rtor_reactor_post(reactor, posted_from_post_cb, ctx_p);
 }
 int test_timer_post()
 {
     // counter starts at 0 and increments to max 5
-    ReactorRef rtor_ref = rtor_new();
+    ReactorRef rtor_ref = rtor_reactor_new();
     TestCtx* test_ctx_p = TestCtx_new(0, 5);
     test_ctx_p->reactor = rtor_ref;
 
@@ -223,7 +223,7 @@ int test_timer_post()
     rtor_timer_register(tw_1, &callback_post, (void *) test_ctx_p, 100, true);
     test_ctx_p->watcher = tw_1;
 
-    rtor_run(rtor_ref, 10000);
+    rtor_reactor_run(rtor_ref, 10000);
 
     // assert counter was increment correct number of times
     UT_EQUAL_INT(test_ctx_p->counter, test_ctx_p->max_count);

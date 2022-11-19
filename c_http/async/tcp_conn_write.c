@@ -48,7 +48,7 @@ static void write_event_handler(RtorWatcherRef wp, uint64_t event)
     // @TODO fix next 2 lines
 //    WIoFd_change_watch(sw, &write_event_handler, arg, 0);
     rtor_stream_disarm_write(sw);
-    rtor_post(reactor_ref, write_complete_post_func, conn_ref);
+    rtor_reactor_post(reactor_ref, write_complete_post_func, conn_ref);
 
 }
 void write_machine(RtorStreamRef socket_watcher_ref, uint64_t event);
@@ -109,7 +109,7 @@ void write_machine(RtorStreamRef socket_watcher_ref, uint64_t event)
 //                WIoFd_change_watch(sw, conn_ref->write_completion_handler, arg, 0);
                 LOG_FMT("write buffer complete %d", blen);
                 rtor_stream_disarm_write(socket_watcher_ref);
-                rtor_post(reactor_ref, &write_complete_post_func, arg);
+                rtor_reactor_post(reactor_ref, &write_complete_post_func, arg);
                 break;
             }
         } else {
@@ -122,7 +122,7 @@ void write_machine(RtorStreamRef socket_watcher_ref, uint64_t event)
                 // @TODO fix the next two lines
 //                WIoFd_change_watch(sw, conn_ref->write_completion_handler, arg, 0);
                 rtor_stream_disarm_write(socket_watcher_ref);
-                rtor_post(reactor_ref, &write_complete_post_func, arg);
+                rtor_reactor_post(reactor_ref, &write_complete_post_func, arg);
                 break;
             }
         }

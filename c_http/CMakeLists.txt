@@ -124,8 +124,9 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 #		simple_runloop/interthread_queue.c
 		simple_runloop/watcher.c
 		simple_runloop/evfd_queue.c
-#		simple_runloop/run_list.c
-
+		simple_runloop/run_list.c
+		simple_runloop/functor.c
+		simple_runloop/functor_list.c
 	#async
 		async/async_server.c
         async/tcp_conn.c

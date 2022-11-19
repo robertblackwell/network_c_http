@@ -8,6 +8,12 @@
 #include <string.h>
 #include <c_http/common/list.h>
 
+#define RTOR_MAX_FDS        4096
+#define RTOR_MAX_RUNLIST    4096
+#define RTOR_MAX_ITQ        1024
+#define RTOR_MAX_WATCHERS   RTOR_MAX_FDS
+
+
 
 struct FdTable_s;
 //===============
@@ -30,8 +36,10 @@ typedef ListIter RunListIter;
 struct Functor_s;
 typedef struct Functor_s Functor, *FunctorRef;
 FunctorRef Functor_new(PostableFunction f, void* arg);
+void Functor_init(FunctorRef funref, PostableFunction f, void* arg);
 void Functor_free(FunctorRef athis);
 void Functor_call(FunctorRef athis, ReactorRef rtor_ref);
+void Functor_dealloc(void **p);
 struct Functor_s
 {
 //    RtorWatcherRef wref; // this is borrowed do not free
@@ -46,6 +54,7 @@ struct Functor_s
  */
 RunListRef RunList_new();
 //======================
+
 void RunList_dispose();
 void RunList_add_back(RunListRef this, FunctorRef f);
 FunctorRef RunList_remove_front(RunListRef this);
@@ -61,17 +70,28 @@ void RunList_itr_remove (RunListRef rl_ref, RunListIter *iter);
 
 typedef struct InterthreadRunList_s InterthreadRunList, *InterthreadRunListRef;
 
+#define RTOR_FUNCTOR_LIST_MAX 100
+typedef struct FunctorList_s {
+    int        capacity;
+    int        head;
+    int        tail_plus;
+    FunctorRef list[RTOR_FUNCTOR_LIST_MAX];
+} FunctorList, *FunctorListRef;
+
+/**
+ * NOTE: FunctionList acceptt and return values of a Functor NOT a pointer
+ */
+FunctorListRef functor_list_new(int capacity);
+void functor_list_free(FunctorListRef this);
+void functor_list_add(FunctorListRef this, Functor func);
+Functor functor_list_remove(FunctorListRef this);
+int functor_list_size(FunctorListRef this);
 
 void fd_map_init();
 bool fd_map_at(int j);
 bool fd_map_set(int j);
 
 #define REGISTER_WQUEUE_REACTOR 1
-/**
- * Scan down the run list calling each Functor entry until the list is empty;
- * @param this
- */
-void RunList_exec(RunListRef this, ReactorRef rtor_ref);
 
 struct Reactor_s {
     XR_REACTOR_DECLARE_TAG;

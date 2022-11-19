@@ -26,12 +26,12 @@ __thread ReactorRef my_reactor_ptr = NULL;
 static void drain_callback(void* arg)
 {
     printf("drain callback\n");
-//    rtor_post(my_reactor_ptr, )
+//    rtor_reactor_post(my_reactor_ptr, )
 }
 static void interthread_queue_handler(RtorWQueueRef watcher, uint64_t event)
 {
     printf("interthread_queue_handler\n");
-    ReactorRef rx = WQueue_get_reactor(watcher);
+    ReactorRef rx = rtor_wqueue_get_reactor(watcher);
     EvfdQueueRef evqref = watcher->queue;
     void* queue_data = Evfdq_remove(evqref);
     FunctorRef fref = (FunctorRef) queue_data;
@@ -40,7 +40,7 @@ static void interthread_queue_handler(RtorWQueueRef watcher, uint64_t event)
     void* arg = (void*) watcher;
     long d = (long) fref->arg;
     printf("reactor::interthread_queue_handler f: %p d: %ld \n", pf, d);
-    rtor_post(rx, fref->f, arg);
+    rtor_reactor_post(rx, fref->f, arg);
 }
 static int *int_in_heap(int key) {
     int *result;
@@ -70,7 +70,7 @@ static void rtor_epoll_ctl(ReactorRef athis, int op, int fd, uint64_t interest)
     CHTTP_ASSERT((status == 0), "epoll ctl call failed");
 }
 
-ReactorRef rtor_get_threads_reactor()
+ReactorRef rtor_reactor_get_threads_reactor()
 {
     return my_reactor_ptr;
 }
@@ -80,13 +80,13 @@ ReactorRef rtor_get_threads_reactor()
  * @TODO - store a runloop/reactor for each thread in thread local storage
  * @NOTE - this implementation only works for Linux and uses epoll
  */
-ReactorRef rtor_new(void) {
+ReactorRef rtor_reactor_new(void) {
     ReactorRef runloop = malloc(sizeof(Reactor));
     CHTTP_ASSERT((runloop != NULL), "malloc failed new simple_runloop");
-    rtor_init(runloop);
+    rtor_reactor_init(runloop);
     return (ReactorRef)runloop;
 }
-void rtor_init(ReactorRef athis) {
+void rtor_reactor_init(ReactorRef athis) {
 //    assert(my_reactor_ptr == NULL);
     my_reactor_ptr = athis;
     ReactorRef runloop = athis;
@@ -95,24 +95,25 @@ void rtor_init(ReactorRef athis) {
     runloop->epoll_fd = epoll_create1(0);
     runloop->closed_flag = false;
     CHTTP_ASSERT((runloop->epoll_fd != -1), "epoll_create failed");
-    LOG_FMT("rtor_new epoll_fd %d", runloop->epoll_fd);
+    LOG_FMT("rtor_reactor_new epoll_fd %d", runloop->epoll_fd);
     runloop->table = FdTable_new();
     runloop->run_list = RunList_new();
 }
-void rtor_enable_interthread_queue(ReactorRef rtor_ref)
+void rtor_reactor_enable_interthread_queue(ReactorRef rtor_ref)
 {
     rtor_ref->interthread_queue_ref = Evfdq_new();
-    rtor_ref->interthread_queue_watcher_ref = WQueue_new(rtor_ref, rtor_ref->interthread_queue_ref);
+    rtor_ref->interthread_queue_watcher_ref = rtor_wqueue_new(rtor_ref, rtor_ref->interthread_queue_ref);
     uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
-    WQueue_register(rtor_ref->interthread_queue_watcher_ref,  &interthread_queue_handler, (void*)rtor_ref->interthread_queue_ref, interest);
+    rtor_wqueue_register(rtor_ref->interthread_queue_watcher_ref, &interthread_queue_handler,
+                         (void *) rtor_ref->interthread_queue_ref, interest);
 }
-void rtor_close(ReactorRef athis)
+void rtor_reactor_close(ReactorRef athis)
 {
     XR_REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
     athis->closed_flag = true;
     int status = close(athis->epoll_fd);
-    LOG_FMT("rtor_close status: %d errno: %d", status, errno);
+    LOG_FMT("rtor_reactor_close status: %d errno: %d", status, errno);
     CHTTP_ASSERT((status != -1), "close epoll_fd failed");
     int next_fd = FdTable_iterator(athis->table);
     while (next_fd  != -1) {
@@ -126,7 +127,7 @@ void rtor_free(ReactorRef athis)
     XR_REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
     if(! athis->closed_flag) {
-        rtor_close(athis);
+        rtor_reactor_close(athis);
     }
     FdTable_free(athis->table);
     free(athis);
@@ -136,7 +137,7 @@ void rtor_free(ReactorRef athis)
  * Register a RtorWatcher (actuallyr one of its derivatives) and its associated file descriptor
  * with the epoll instance. Specify the types of events the watcher is interested in
  */
-int rtor_register(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref)
+int rtor_reactor_register(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref)
 {
     XR_REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
@@ -145,7 +146,7 @@ int rtor_register(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wr
     FdTable_insert(athis->table, wref, fd);
     return 0;
 }
-int rtor_deregister(ReactorRef athis, int fd)
+int rtor_reactor_deregister(ReactorRef athis, int fd)
 {
     XR_REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
@@ -155,7 +156,7 @@ int rtor_deregister(ReactorRef athis, int fd)
     return 0;
 }
 
-int rtor_reregister(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref) {
+int rtor_reactor_reregister(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref) {
     XR_REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
     CHTTP_ASSERT((FdTable_lookup(athis->table, fd) != NULL),"fd not in FdTable");
@@ -178,7 +179,7 @@ void print_events(struct epoll_event events[], int count)
         printf("\n");
     }
 }
-int rtor_run(ReactorRef athis, time_t timeout) {
+int rtor_reactor_run(ReactorRef athis, time_t timeout) {
     XR_REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
     int result;
@@ -189,6 +190,10 @@ int rtor_run(ReactorRef athis, time_t timeout) {
     while (true) {
         time_t passed = time(NULL) - start;
         if(FdTable_size(athis->table) == 0) {
+            goto cleanup;
+        }
+        if((FdTable_size(athis->table) == 1) && (athis->interthread_queue_ref != NULL)) {
+            rtor_wqueue_deregister(athis->interthread_queue_watcher_ref);
             goto cleanup;
         }
         int max_events = MAX_EVENTS;
@@ -220,7 +225,7 @@ int rtor_run(ReactorRef athis, time_t timeout) {
                 for (int i = 0; i < nfds; i++) {
                     int fd = events[i].data.fd;
                     int mask = events[i].events;
-                    LOG_FMT("rtor_run loop fd: %d events: %x", fd, mask);
+                    LOG_FMT("rtor_reactor_run loop fd: %d events: %x", fd, mask);
                     RtorWatcherRef wref = FdTable_lookup(athis->table, fd);
                     wref->handler(wref, events[i].events);
                     LOG_FMT("fd: %d", fd);
@@ -232,6 +237,7 @@ int rtor_run(ReactorRef athis, time_t timeout) {
         while(fnc = RunList_remove_first(athis->run_list)) {
 
             Functor_call(fnc, athis);
+            Functor_free(fnc);
         }
     }
 
@@ -239,14 +245,14 @@ cleanup:
     return result;
 }
 
-int rtor_post(ReactorRef athis, PostableFunction cb, void* arg)
+int rtor_reactor_post(ReactorRef athis, PostableFunction cb, void* arg)
 {
     XR_REACTOR_CHECK_TAG(athis)
     FunctorRef fr = Functor_new(cb, arg);
     RunList_add_back(athis->run_list, fr);
 }
 
-void rtor_interthread_post(ReactorRef athis, PostableFunction cb, void* arg)
+void rtor_reactor_interthread_post(ReactorRef athis, PostableFunction cb, void* arg)
 {
     XR_REACTOR_CHECK_TAG(athis)
     FunctorRef fr = Functor_new(cb, arg);

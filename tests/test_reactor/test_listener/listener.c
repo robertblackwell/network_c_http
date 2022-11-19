@@ -54,7 +54,7 @@ void Listener_listen(ListenerRef sref)
     ASSERT_NOT_NULL(sref)
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
-    sref->reactor_ref = rtor_new();
+    sref->reactor_ref = rtor_reactor_new();
     sref->listening_watcher_ref = rtor_listener_new(sref->reactor_ref, sref->listening_socket_fd);
     RtorListenerRef lw = sref->listening_watcher_ref;
 
@@ -62,7 +62,7 @@ void Listener_listen(ListenerRef sref)
     printf("Listener_listen reactor: %p listen sock: %d  lw: %p\n", sref->reactor_ref, sref->listening_socket_fd, lw);
     sref->timer_ref = rtor_timer_new(sref->reactor_ref);
     rtor_timer_register(sref->timer_ref, &on_timer, (void *) sref, 5000, false);
-    rtor_run(sref->reactor_ref, -1);
+    rtor_reactor_run(sref->reactor_ref, -1);
 }
 /**
  * When the timer fires it is time to kill the listener.

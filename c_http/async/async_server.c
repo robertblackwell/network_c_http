@@ -46,11 +46,11 @@ void AsyncServer_listen(AsyncServerRef sref)
     unsigned int addr_length = (unsigned int) sizeof(peername);
     sref->listening_socket_fd = create_listener_socket(port, "127.0.0.1");
     set_non_blocking(sref->listening_socket_fd);
-    sref->reactor_ref = rtor_new();
+    sref->reactor_ref = rtor_reactor_new();
     sref->listening_watcher_ref = rtor_listener_new(sref->reactor_ref, sref->listening_socket_fd);
     RtorListenerRef lw = sref->listening_watcher_ref;
     rtor_listener_register(lw, on_event_listening, sref);
-    rtor_run(sref->reactor_ref, -1);
+    rtor_reactor_run(sref->reactor_ref, -1);
     LOG_FMT("AsyncServer finishing");
 
 }

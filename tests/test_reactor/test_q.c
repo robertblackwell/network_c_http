@@ -63,7 +63,7 @@ void QReaderHandler(RtorWQueueRef qw, uint64_t event)
 
     rdr->count++;
     if (rdr->count >= rdr->expected_count) {
-        WQueue_deregister(qw);
+        rtor_wqueue_deregister(qw);
     }
 
 }
@@ -71,11 +71,11 @@ void QReaderHandler(RtorWQueueRef qw, uint64_t event)
 void* reader_thread_func(void* arg)
 {
     QSyncReaderRef q_rdr_ctx = (QSyncReaderRef)arg;
-    ReactorRef rtor_ref = rtor_new();
-    RtorWQueueRef qw = WQueue_new(rtor_ref, q_rdr_ctx->queue);
+    ReactorRef rtor_ref = rtor_reactor_new();
+    RtorWQueueRef qw = rtor_wqueue_new(rtor_ref, q_rdr_ctx->queue);
     uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
-    WQueue_register(qw, QReaderHandler, arg, interest);
-    rtor_run(rtor_ref, -1);
+    rtor_wqueue_register(qw, QReaderHandler, arg, interest);
+    rtor_reactor_run(rtor_ref, -1);
 }
 void* writer_thread_func(void* arg)
 {

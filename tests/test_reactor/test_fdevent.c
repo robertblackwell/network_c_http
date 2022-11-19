@@ -58,7 +58,7 @@ int test_fdevent_1()
 {
     TestCtx* test_ctx_p = TestCtx_new(0, NBR_TIMES_FIRE);
 
-    ReactorRef rtor_ref = rtor_new();
+    ReactorRef rtor_ref = rtor_reactor_new();
     test_ctx_p->reactor = rtor_ref;
     RtorTimerRef tw_1 = rtor_timer_new(rtor_ref);
     rtor_timer_register(tw_1, &callback_1, (void *) test_ctx_p, 1000, true);
@@ -72,7 +72,7 @@ int test_fdevent_1()
     rtor_eventfd_register(fdev);
     rtor_eventfd_arm(fdev, &fdevent_handler, test_ctx_p);
     rtor_timer_rearm(tw_1);
-    rtor_run(rtor_ref, 10000);
+    rtor_reactor_run(rtor_ref, 10000);
 
     // assert counter was increment correct number of times
     UT_EQUAL_INT(test_ctx_p->counter, test_ctx_p->max_count);
@@ -87,7 +87,7 @@ int test_fdevent_multiple()
     TestCtx* test_ctx_p_1 = TestCtx_new(0, 5);
     TestCtx* test_ctx_p_2 = TestCtx_new(0, 6);
 
-    ReactorRef rtor_ref = rtor_new();
+    ReactorRef rtor_ref = rtor_reactor_new();
 
     RtorTimerRef tw_1 = rtor_timer_new(rtor_ref);
     rtor_timer_register(tw_1, &callback_1, test_ctx_p_1, 100, true);
@@ -95,7 +95,7 @@ int test_fdevent_multiple()
     RtorTimerRef tw_2 = rtor_timer_new(rtor_ref);
     rtor_timer_register(tw_2, &callback_1, test_ctx_p_2, 100, true);
 
-    rtor_run(rtor_ref, 10000);
+    rtor_reactor_run(rtor_ref, 10000);
     UT_EQUAL_INT(test_ctx_p_1->counter, test_ctx_p_1->max_count);
     UT_EQUAL_INT(test_ctx_p_2->counter, test_ctx_p_2->max_count);
     free(test_ctx_p_1);
@@ -113,7 +113,7 @@ static void callback_1(RtorTimerRef watcher, XrTimerEvent event)
     LOG_FMT("callback1_counter %d counter: %d event is : %lx  ", ctx_p->callback1_counter, ctx_p->counter, event);
     if(ctx_p->counter >= ctx_p->max_count) {
         LOG_MSG(" clear timer");
-        rtor_close(ctx_p->reactor);
+        rtor_reactor_close(ctx_p->reactor);
 //        rtor_timer_deregister(watcher);
 //        rtor_eventfd_deregister(fdev);
     } else {

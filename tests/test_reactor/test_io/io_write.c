@@ -79,8 +79,8 @@ static void wrtr_cb(RtorStreamRef sock_watch, uint64_t event)
     ctx->write_count++;
     LOG_FMT("test_io: Socket watcher wrtr_callback fd: %d event : %lx nread: %d errno: %d write_count %d\n", sock_watch->fd,  event, nwrite, errno, ctx->write_count);
     if(ctx->write_count > ctx->max_write_count) {
-        rtor_deregister(reactor, ctx->swatcher->fd);
-        rtor_deregister(reactor, ctx->twatcher->fd);
+        rtor_reactor_deregister(reactor, ctx->swatcher->fd);
+        rtor_reactor_deregister(reactor, ctx->twatcher->fd);
         return;
     }
     // disarm writeable events on this fd
@@ -116,7 +116,7 @@ static void wrtr_wait(RtorTimerRef watch, uint64_t event)
 void* writer_thread_func(void* arg)
 {
     int wait_first = 1;
-    ReactorRef rtor_ref = rtor_new();
+    ReactorRef rtor_ref = rtor_reactor_new();
     Writer* wrtr = (Writer*)arg;
     for(int i = 0; i < wrtr->count; i++) {
         WriteCtx* ctx = &(wrtr->ctx_table[i]);
@@ -144,6 +144,6 @@ void* writer_thread_func(void* arg)
         }
     }
 
-    rtor_run(rtor_ref, 10000000);
+    rtor_reactor_run(rtor_ref, 10000000);
     return NULL;
 }

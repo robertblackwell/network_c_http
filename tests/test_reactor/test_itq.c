@@ -45,9 +45,9 @@ QReaderRef qreader_new(int expected_count)
     QREADER_SET_TAG(this);
     this->expected_count = expected_count;
     this->count = 0;
-    this->_reactor_ref = rtor_new();
+    this->_reactor_ref = rtor_reactor_new();
     XR_REACTOR_CHECK_TAG(this->_reactor_ref)
-    rtor_enable_interthread_queue(this->_reactor_ref);
+    rtor_reactor_enable_interthread_queue(this->_reactor_ref);
     return this;
 }
 
@@ -76,7 +76,7 @@ RtorWQueueRef qreader_get_queue_watcher(QReaderRef qr)
 void qreader_post(QReaderRef rdrref, PostableFunction f, void* arg)
 {
     ReactorRef rx = qreader_get_reactor(rdrref);
-    rtor_post(rx, f, arg);
+    rtor_reactor_post(rx, f, arg);
 }
 
 typedef struct QWriter_s {
@@ -111,7 +111,7 @@ void* reader_thread_func(void* arg)
     XR_REACTOR_CHECK_TAG(rtor_ref)
     RtorWQueueRef qw = qreader_get_queue_watcher(q_rdr_ctx);
     XR_WQUEUE_CHECK_TAG(qw)
-    rtor_run(rtor_ref, -1);
+    rtor_reactor_run(rtor_ref, -1);
 }
 void writers_postable_func(ReactorRef rtor_ref, void* arg)
 {
@@ -122,7 +122,7 @@ void writers_postable_func(ReactorRef rtor_ref, void* arg)
     printf("writers postable func arg: %p rdrref:%p count:%d max_count:%d\n", arg, wrtref, wrtref->count, wrtref->count_max);
     if (wrtref->count >= wrtref->count_max) {
         printf("writer is done\n");
-        WQueue_deregister(wqref);
+        rtor_wqueue_deregister(wqref);
     }
 }
 void* writer_thread_func(void* arg)
@@ -137,7 +137,7 @@ void* writer_thread_func(void* arg)
         /**
          * This is the big test - send to a reactor on an other thread
          */
-        rtor_interthread_post(rtor_ref, &writers_postable_func, (void*) wrtr);
+        rtor_reactor_interthread_post(rtor_ref, &writers_postable_func, (void *) wrtr);
     }
 }
 

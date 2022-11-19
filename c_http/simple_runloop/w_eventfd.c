@@ -78,7 +78,7 @@ void rtor_eventfd_register(RtorEventfdRef athis)
     uint32_t interest = 0L;
     athis->fd_event_handler = NULL;
     athis->fd_event_handler_arg = NULL;
-    int res = rtor_register(athis->runloop, athis->fd, interest, (RtorWatcherRef) (athis));
+    int res = rtor_reactor_register(athis->runloop, athis->fd, interest, (RtorWatcherRef) (athis));
     assert(res ==0);
 }
 void rtor_eventfd_change_watch(RtorEventfdRef athis, FdEventHandler evhandler, void* arg, uint64_t watch_what)
@@ -91,13 +91,13 @@ void rtor_eventfd_change_watch(RtorEventfdRef athis, FdEventHandler evhandler, v
     if (arg != NULL) {
         athis->fd_event_handler_arg = arg;
     }
-    int res = rtor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
+    int res = rtor_reactor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
     assert(res == 0);
 }
 void rtor_eventfd_deregister(RtorEventfdRef athis)
 {
     XR_FDEV_CHECK_TAG(athis)
-    int res = rtor_deregister(athis->runloop, athis->fd);
+    int res = rtor_reactor_deregister(athis->runloop, athis->fd);
     assert(res == 0);
 }
 void rtor_eventfd_arm(RtorEventfdRef athis, FdEventHandler evhandler, void* arg)
@@ -110,13 +110,13 @@ void rtor_eventfd_arm(RtorEventfdRef athis, FdEventHandler evhandler, void* arg)
     if (arg != NULL) {
         athis->fd_event_handler_arg = arg;
     }
-    int res = rtor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
+    int res = rtor_reactor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
     assert(res == 0);
 }
 void rtor_eventfd_disarm(RtorEventfdRef athis)
 {
     XR_FDEV_CHECK_TAG(athis)
-    int res = rtor_reregister(athis->runloop, athis->fd, 0, (RtorWatcherRef) athis);
+    int res = rtor_reactor_reregister(athis->runloop, athis->fd, 0, (RtorWatcherRef) athis);
 }
 void rtor_eventfd_fire(RtorEventfdRef athis)
 {

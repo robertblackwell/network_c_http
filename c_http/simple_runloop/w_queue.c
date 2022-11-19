@@ -16,7 +16,7 @@ static void anonymous_free(RtorWatcherRef p)
 {
     RtorWQueueRef queue_watcher_ref = (RtorWQueueRef)p;
     XR_WQUEUE_CHECK_TAG(queue_watcher_ref)
-    WQueue_dispose(queue_watcher_ref);
+    rtor_wqueue_dispose(queue_watcher_ref);
 }
 void WQueue_init(RtorWQueueRef this, ReactorRef runloop, EvfdQueueRef qref)
 {
@@ -28,59 +28,59 @@ void WQueue_init(RtorWQueueRef this, ReactorRef runloop, EvfdQueueRef qref)
     this->free = &anonymous_free;
     this->handler = &handler;
 }
-RtorWQueueRef WQueue_new(ReactorRef rtor_ref, EvfdQueueRef qref)
+RtorWQueueRef rtor_wqueue_new(ReactorRef runloop, EvfdQueueRef qref)
 {
     RtorWQueueRef this = malloc(sizeof(RtorWQueue));
-    WQueue_init(this, rtor_ref, qref);
+    WQueue_init(this, runloop, qref);
     return this;
 }
-void WQueue_dispose(RtorWQueueRef this)
+void rtor_wqueue_dispose(RtorWQueueRef athis)
 {
-    XR_WQUEUE_CHECK_TAG(this)
-    close(this->fd);
-    free((void*)this);
+    XR_WQUEUE_CHECK_TAG(athis)
+    close(athis->fd);
+    free((void*)athis);
 }
-void WQueue_register(RtorWQueueRef this, QueueEventHandler evhandler, void* arg, uint64_t watch_what)
+void rtor_wqueue_register(RtorWQueueRef athis, QueueEventHandler cb, void* arg, uint64_t watch_what)
 {
 //    XR_WQUEUE_CHECK_TAG(this)
 
     uint32_t interest = watch_what;
-    this->queue_event_handler = evhandler;
-    this->queue_event_handler_arg = arg;
-    int res = rtor_register(this->runloop, this->fd, interest, (RtorWatcherRef) (this));
+    athis->queue_event_handler = cb;
+    athis->queue_event_handler_arg = arg;
+    int res = rtor_reactor_register(athis->runloop, athis->fd, interest, (RtorWatcherRef) (athis));
     assert(res ==0);
 }
-void WQueue_change_watch(RtorWQueueRef this, QueueEventHandler evhandler, void* arg, uint64_t watch_what)
+void rtor_wqueue_change_watch(RtorWQueueRef athis, QueueEventHandler cb, void* arg, uint64_t watch_what)
 {
-    XR_WQUEUE_CHECK_TAG(this)
+    XR_WQUEUE_CHECK_TAG(athis)
     uint32_t interest = watch_what;
-    if( evhandler != NULL) {
-        this->queue_event_handler = evhandler;
+    if(cb != NULL) {
+        athis->queue_event_handler = cb;
     }
     if (arg != NULL) {
-        this->queue_event_handler_arg = arg;
+        athis->queue_event_handler_arg = arg;
     }
-    int res = rtor_reregister(this->runloop, this->fd, interest, (RtorWatcherRef) this);
+    int res = rtor_reactor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
     assert(res == 0);
 }
-void WQueue_deregister(RtorWQueueRef this)
+void rtor_wqueue_deregister(RtorWQueueRef athis)
 {
-    XR_WQUEUE_CHECK_TAG(this)
+    XR_WQUEUE_CHECK_TAG(athis)
 
-    int res = rtor_deregister(this->runloop, this->fd);
+    int res = rtor_reactor_deregister(athis->runloop, athis->fd);
     assert(res == 0);
 }
-ReactorRef WQueue_get_reactor(RtorWQueueRef athis)
+ReactorRef rtor_wqueue_get_reactor(RtorWQueueRef athis)
 {
     return athis->runloop;
 }
-int WQueue_get_fd(RtorWQueueRef athis)
+int rtor_wqueue_get_fd(RtorWQueueRef this)
 {
-    return athis->fd;
+    return this->fd;
 }
 
-void WQueue_verify(RtorWQueueRef this)
+void rtor_wqueue_verify(RtorWQueueRef r)
 {
-    XR_WQUEUE_CHECK_TAG(this)
+    XR_WQUEUE_CHECK_TAG(r)
 
 }

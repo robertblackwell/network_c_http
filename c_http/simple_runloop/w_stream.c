@@ -61,7 +61,7 @@ void rtor_stream_register(RtorStreamRef athis)
     XR_SOCKW_CHECK_TAG(athis)
 
     uint32_t interest = 0;
-    int res = rtor_register(athis->runloop, athis->fd, 0L, (RtorWatcherRef) (athis));
+    int res = rtor_reactor_register(athis->runloop, athis->fd, 0L, (RtorWatcherRef) (athis));
     assert(res ==0);
 }
 //void WIoFd_change_watch(RtorStreamRef this, SocketEventHandler cb, void* arg, uint64_t watch_what)
@@ -74,14 +74,14 @@ void rtor_stream_register(RtorStreamRef athis)
 //    if (arg != NULL) {
 //        this->cb_ctx = arg;
 //    }
-//    int res = rtor_reregister(this->simple_runloop, this->fd, interest, (RtorWatcherRef)this);
+//    int res = rtor_reactor_reregister(this->simple_runloop, this->fd, interest, (RtorWatcherRef)this);
 //    assert(res == 0);
 //}
 void rtor_stream_deregister(RtorStreamRef athis)
 {
     XR_SOCKW_CHECK_TAG(athis)
 
-    int res = rtor_deregister(athis->runloop, athis->fd);
+    int res = rtor_reactor_deregister(athis->runloop, athis->fd);
     assert(res == 0);
 }
 void rtor_stream_arm_read(RtorStreamRef athis, SocketEventHandler event_handler, void* arg)
@@ -95,7 +95,7 @@ void rtor_stream_arm_read(RtorStreamRef athis, SocketEventHandler event_handler,
     if (arg != NULL) {
         athis->read_arg = arg;
     }
-    int res = rtor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
+    int res = rtor_reactor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
     assert(res == 0);
 }
 void rtor_stream_arm_write(RtorStreamRef athis, SocketEventHandler event_handler, void* arg)
@@ -109,7 +109,7 @@ void rtor_stream_arm_write(RtorStreamRef athis, SocketEventHandler event_handler
     if (arg != NULL) {
         athis->write_arg = arg;
     }
-    int res = rtor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
+    int res = rtor_reactor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
     assert(res == 0);
 }
 void rtor_stream_disarm_read(RtorStreamRef athis)
@@ -118,14 +118,14 @@ void rtor_stream_disarm_read(RtorStreamRef athis)
     XR_SOCKW_CHECK_TAG(athis)
     athis->read_evhandler = NULL;
     athis->read_arg = NULL;
-    int res = rtor_reregister(athis->runloop, athis->fd, athis->event_mask, (RtorWatcherRef) athis);
+    int res = rtor_reactor_reregister(athis->runloop, athis->fd, athis->event_mask, (RtorWatcherRef) athis);
     assert(res == 0);
 }
 void rtor_stream_disarm_write(RtorStreamRef athis)
 {
     athis->event_mask = ~EPOLLOUT & athis->event_mask;
     XR_SOCKW_CHECK_TAG(athis)
-    int res = rtor_reregister(athis->runloop, athis->fd, athis->event_mask, (RtorWatcherRef) athis);
+    int res = rtor_reactor_reregister(athis->runloop, athis->fd, athis->event_mask, (RtorWatcherRef) athis);
     assert(res == 0);
 }
 ReactorRef rtor_stream_get_reactor(RtorStreamRef athis)

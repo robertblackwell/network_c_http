@@ -69,14 +69,14 @@ void rd_callback(RtorStreamRef io_watcher_ref, uint64_t event)
             rtor_stream_get_fd(io_watcher_ref), event, nread, s, errno);
     ctx->read_count++;
     if(ctx->read_count > ctx->max_read_count) {
-        rtor_deregister(reactor, rtor_stream_get_fd(io_watcher_ref));
+        rtor_reactor_deregister(reactor, rtor_stream_get_fd(io_watcher_ref));
     } else {
         return;
     }
 }
 void* reader_thread_func(void* arg)
 {
-    ReactorRef rtor_ref = rtor_new();
+    ReactorRef rtor_ref = rtor_reactor_new();
     Reader* rdr = (Reader*)arg;
     for(int i = 0; i < rdr->count; i++) {
         ReadCtx* ctx = &(rdr->ctx_table[i]);
@@ -88,7 +88,7 @@ void* reader_thread_func(void* arg)
 //        WIoFd_change_watch(sw, &rd_callback, (void*) ctx, interest);
     }
 
-    rtor_run(rtor_ref, 1000000);
+    rtor_reactor_run(rtor_ref, 1000000);
     return NULL;
 
 }

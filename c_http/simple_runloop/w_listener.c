@@ -61,7 +61,7 @@ void rtor_listener_register(RtorListenerRef athis, ListenerEventHandler event_ha
     }
 
     uint32_t interest =  EPOLLIN | EPOLLEXCLUSIVE;
-    int res = rtor_register(athis->runloop, athis->fd, interest, (RtorWatcherRef) (athis));
+    int res = rtor_reactor_register(athis->runloop, athis->fd, interest, (RtorWatcherRef) (athis));
     if(res != 0) {
         printf("register status : %d errno: %d \n", res, errno);
     }
@@ -83,7 +83,7 @@ void rtor_listener_arm(RtorListenerRef athis, ListenerEventHandler fd_event_hand
     }
     uint32_t interest = EPOLLIN | EPOLLEXCLUSIVE ;
 
-    int res = rtor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
+    int res = rtor_reactor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
     if(res != 0) {
         printf("arm status : %d errno: %d \n", res, errno);
     }
@@ -92,7 +92,7 @@ void rtor_listener_arm(RtorListenerRef athis, ListenerEventHandler fd_event_hand
 void WListenerFd_disarm(RtorListenerRef athis)
 {
     XR_LISTNER_CHECK_TAG(athis)
-    int res = rtor_reregister(athis->runloop, athis->fd, 0L, (RtorWatcherRef) athis);
+    int res = rtor_reactor_reregister(athis->runloop, athis->fd, 0L, (RtorWatcherRef) athis);
     assert(res == 0);
 }
 ReactorRef WListenerFd_get_reactor(RtorListenerRef athis)

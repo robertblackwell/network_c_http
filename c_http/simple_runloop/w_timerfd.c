@@ -135,7 +135,7 @@ void rtor_timer_register(RtorTimerRef athis, TimerEventHandler cb, void* ctx, ui
     print_current_tme("rtor_timer_register");
     LOG_FMT("rtor_timer_register its.it_value secs %ld nsecs: %ld \n", its.it_value.tv_sec, its.it_value.tv_nsec);
     LOG_FMT("rtor_timer_register its.it_interval secs %ld nsecs: %ld\n", its.it_interval.tv_sec, its.it_interval.tv_nsec);
-    int res = rtor_register(athis->runloop, athis->fd, interest, (RtorWatcherRef) (athis));
+    int res = rtor_reactor_register(athis->runloop, athis->fd, interest, (RtorWatcherRef) (athis));
     assert(res ==0);
 }
 void rtor_timer_update(RtorTimerRef athis, uint64_t interval_ms, bool repeating)
@@ -146,7 +146,7 @@ void rtor_timer_update(RtorTimerRef athis, uint64_t interval_ms, bool repeating)
     int flags = 0;
     int rc = timerfd_settime(athis->fd, flags, &its, NULL);
     assert(rc == 0);
-    int res = rtor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
+    int res = rtor_reactor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
     assert(res == 0);
 }
 void rtor_timer_disarm(RtorTimerRef athis)
@@ -183,7 +183,7 @@ void rtor_timer_deregister(RtorTimerRef athis)
 {
     XR_WTIMER_CHECK_TAG(athis)
     LOG_FMT("rtor_timer_deregister this->fd : %d\n", athis->fd);
-    int res = rtor_deregister(athis->runloop, athis->fd);
+    int res = rtor_reactor_deregister(athis->runloop, athis->fd);
     if(res != 0) {
         LOG_FMT("rtor_timer_deregister res: %d errno: %d \n", res, errno);
     }

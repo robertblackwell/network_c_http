@@ -69,19 +69,19 @@ typedef void (*ListenerEventHandler)(RtorListenerRef listener_ref, uint64_t even
  *
  * For convenience a number of special purposes watchers/observers have been provided.
  */
-ReactorRef rtor_get_threads_reactor();
-ReactorRef rtor_new(void);
-void       rtor_close(ReactorRef athis);
-void       rtor_init(ReactorRef athis);
+ReactorRef rtor_reactor_get_threads_reactor();
+ReactorRef rtor_reactor_new(void);
+void       rtor_reactor_close(ReactorRef athis);
+void       rtor_reactor_init(ReactorRef athis);
 void       rtor_free(ReactorRef athis);
-int        rtor_register(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref);
-int        rtor_deregister(ReactorRef athis, int fd);
-int        rtor_reregister(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref);
-int        rtor_run(ReactorRef athis, time_t timeout);
-int        rtor_post(ReactorRef athis, PostableFunction cb, void* arg);
-void       rtor_interthread_post(ReactorRef athis, PostableFunction cb, void* arg);
+int        rtor_reactor_register(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref);
+int        rtor_reactor_deregister(ReactorRef athis, int fd);
+int        rtor_reactor_reregister(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref);
+int        rtor_reactor_run(ReactorRef athis, time_t timeout);
+int        rtor_reactor_post(ReactorRef athis, PostableFunction cb, void* arg);
+void       rtor_reactor_interthread_post(ReactorRef athis, PostableFunction cb, void* arg);
 void       rtor_delete(ReactorRef athis, int fd);
-void       rtor_enable_interthread_queue(ReactorRef rtor_ref);
+void       rtor_reactor_enable_interthread_queue(ReactorRef rtor_ref);
 void       XrReactor_verify(ReactorRef r);
 
 ReactorRef Watcher_get_reactor(RtorWatcherRef athis);
@@ -174,15 +174,15 @@ void* Evfdq_remove(EvfdQueueRef athis);
 //#define Evfdq_get_reactor(p) Watcher_get_reactor((RtorWatcherRef)p)
 
 
-RtorWQueueRef WQueue_new(ReactorRef runloop, EvfdQueueRef qref);
-void WQueue_dispose(RtorWQueueRef athis);
-void WQueue_register(RtorWQueueRef athis, QueueEventHandler cb, void* arg, uint64_t watch_what);
-void WQueue_change_watch(RtorWQueueRef athis, QueueEventHandler cb, void* arg, uint64_t watch_what);
-void WQueue_deregister(RtorWQueueRef athis);
-void WQueue_verify(RtorWQueueRef r);
-ReactorRef WQueue_get_reactor(RtorWQueueRef athis);
-int WQueue_get_fd(RtorWQueueRef this);
-//#define WQueue_get_reactor(p) Watcher_get_reactor((RtorWatcherRef)p)
+RtorWQueueRef rtor_wqueue_new(ReactorRef runloop, EvfdQueueRef qref);
+void rtor_wqueue_dispose(RtorWQueueRef athis);
+void rtor_wqueue_register(RtorWQueueRef athis, QueueEventHandler cb, void* arg, uint64_t watch_what);
+void rtor_wqueue_change_watch(RtorWQueueRef athis, QueueEventHandler cb, void* arg, uint64_t watch_what);
+void rtor_wqueue_deregister(RtorWQueueRef athis);
+void rtor_wqueue_verify(RtorWQueueRef r);
+ReactorRef rtor_wqueue_get_reactor(RtorWQueueRef athis);
+int rtor_wqueue_get_fd(RtorWQueueRef this);
+//#define rtor_wqueue_get_reactor(p) Watcher_get_reactor((RtorWatcherRef)p)
 
 RtorInterthreadQueueRef rtor_interthread_queue_new(ReactorRef rtor_ref);
 void rtor_interthread_queue_init(RtorInterthreadQueueRef this, ReactorRef runloop);
