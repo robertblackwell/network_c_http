@@ -101,7 +101,7 @@ struct Reactor_s {
     RunListRef              run_list;
 #if 1
     EvfdQueueRef            interthread_queue_ref;
-    RtorWQueueRef               interthread_queue_watcher_ref;
+    RtorWQueueRef           interthread_queue_watcher_ref;
 #else
     RtorInterthreadQueueRef interthread_queue;
 #endif
@@ -144,15 +144,15 @@ struct RtorWatcher_s {
 
 #define  C_HTTP_EFD_QUEUE
 typedef struct EvfdQueue_s {
-    ListRef         list;
-    pthread_mutex_t queue_mutex;
+    FunctorListRef      list;
+    pthread_mutex_t     queue_mutex;
 #ifdef C_HTTP_EFD_QUEUE
 #else
-    int             pipefds[2];
+    int                 pipefds[2];
 #endif
-    int             readfd;
-    int             writefd;
-    int             id;
+    int                 readfd;
+    int                 writefd;
+    int                 id;
 } EvfdQueue;
 
 typedef uint64_t WEventFdMask;

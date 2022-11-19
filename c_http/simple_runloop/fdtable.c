@@ -5,6 +5,9 @@
 #include <assert.h>
 #include <stdbool.h>
 
+/**
+ * @TODO - bring all tuning constants together
+ */
 #define CBTABLE_MAX 4096
 
 

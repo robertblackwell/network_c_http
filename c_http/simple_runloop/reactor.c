@@ -33,14 +33,13 @@ static void interthread_queue_handler(RtorWQueueRef watcher, uint64_t event)
     printf("interthread_queue_handler\n");
     ReactorRef rx = rtor_wqueue_get_reactor(watcher);
     EvfdQueueRef evqref = watcher->queue;
-    void* queue_data = Evfdq_remove(evqref);
-    FunctorRef fref = (FunctorRef) queue_data;
-    void* pf = fref->f;
-    watcher->queue_event_handler_arg = fref->arg;
+    Functor func = Evfdq_remove(evqref);
+    void* pf = func.f;
+    watcher->queue_event_handler_arg = func.arg;
     void* arg = (void*) watcher;
-    long d = (long) fref->arg;
+    long d = (long) func.arg;
     printf("reactor::interthread_queue_handler f: %p d: %ld \n", pf, d);
-    rtor_reactor_post(rx, fref->f, arg);
+    rtor_reactor_post(rx, func.f, arg);
 }
 static int *int_in_heap(int key) {
     int *result;
@@ -255,8 +254,10 @@ int rtor_reactor_post(ReactorRef athis, PostableFunction cb, void* arg)
 void rtor_reactor_interthread_post(ReactorRef athis, PostableFunction cb, void* arg)
 {
     XR_REACTOR_CHECK_TAG(athis)
-    FunctorRef fr = Functor_new(cb, arg);
-    Evfdq_add(athis->interthread_queue_ref, fr);
+    Functor func = {.f = cb, .arg = arg};
+//    func.f = cb;
+//    func.arg = arg;
+    Evfdq_add(athis->interthread_queue_ref, func);
 #if 1
 #else
     rtor_interthread_queue_add(athis->interthread_queue, fr);

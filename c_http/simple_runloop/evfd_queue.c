@@ -1,5 +1,6 @@
 #define _GNU_SOURCE
 #include <c_http/simple_runloop/runloop.h>
+#include <c_http//simple_runloop/rl_internal.h>
 
 #include <assert.h>
 #include <pthread.h>
@@ -15,17 +16,18 @@
 // enables use of eventfd rather than two pipe trick
 #define  C_HTTP_EFD_QUEUE
 
-typedef struct EvfdQueue_s {
-    ListRef         list;
-    pthread_mutex_t queue_mutex;
-#ifdef C_HTTP_EFD_QUEUE
-#else
-    int             pipefds[2];
-#endif
-    int             readfd;
-    int             writefd;
-    int             id;
-} EvfdQueue;
+//typedef struct EvfdQueue_s {
+//    ListRef         list;
+//    pthread_mutex_t queue_mutex;
+//#ifdef C_HTTP_EFD_QUEUE
+//#else
+//    int             pipefds[2];
+//#endif
+//    int             readfd;
+//    int             writefd;
+//    int             id;
+//} EvfdQueue;
+
 typedef EvfdQueue* EvfQueuePtr;
 
 static void dealloc(void** p)
@@ -53,7 +55,7 @@ static void mk_fds(EvfdQueueRef athis)
 void Evfdq_init(EvfdQueueRef athis)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
-    me->list = List_new(&dealloc);
+    me->list = functor_list_new(RTOR_MAX_FDS);
     pthread_mutex_init(&(me->queue_mutex), NULL);
     mk_fds(me);
 }
@@ -72,22 +74,22 @@ int Evfdq_readfd(EvfdQueueRef athis)
     EvfQueuePtr me = (EvfQueuePtr)athis;
     return me->readfd;
 }
-void Evfdq_add(EvfdQueueRef athis, void* item)
+void Evfdq_add(EvfdQueueRef athis, Functor item)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
     pthread_mutex_lock(&(me->queue_mutex));
-    List_add_back(me->list, item);
+    functor_list_add(me->list, item);
     LOG_FMT("Queue_add: %d\n", List_size(me->list));
     uint64_t buf = 1;
     write(me->writefd, &buf, sizeof(buf));
     pthread_mutex_unlock(&(me->queue_mutex));
 
 }
-void* Evfdq_remove(EvfdQueueRef athis)
+Functor Evfdq_remove(EvfdQueueRef athis)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
     pthread_mutex_lock(&(me->queue_mutex));
-    void* op = List_remove_first(me->list);
+    Functor op = functor_list_remove(me->list);
     uint64_t buf;
     int nread = read(me->readfd, &buf, sizeof(buf));
     pthread_mutex_unlock(&(me->queue_mutex));

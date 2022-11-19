@@ -55,10 +55,10 @@ void QReaderHandler(RtorWQueueRef qw, uint64_t event)
     QSyncReaderRef rdr = (QSyncReaderRef)ctx;
 
     EvfdQueueRef queue = rdr->queue;
-    void* queue_data = Evfdq_remove(queue);
+    Functor queue_data = Evfdq_remove(queue);
 
-    printf("Q Handler received %p count: %d\n", queue_data, rdr->count);
-    bool x = (long)queue_data == (long)rdr->count;
+    printf("Q Handler received %p count: %d\n", &queue_data, rdr->count);
+    bool x = (long)queue_data.arg == (long)rdr->count;
     assert(x);
 
     rdr->count++;
@@ -82,7 +82,8 @@ void* writer_thread_func(void* arg)
     QSyncWriterRef wrtr = (QSyncWriterRef)arg;
     for(long i = 0; i < 10; i++) {
         usleep(500000);
-        Evfdq_add(wrtr->queue, (void*)i);
+        Functor func = {.f = (void*)i, .arg = (void*) i};
+        Evfdq_add(wrtr->queue, func);
     }
 }
 

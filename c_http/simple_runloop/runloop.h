@@ -39,6 +39,9 @@ typedef struct EvfdQueue_s EvfdQueue, * EvfdQueueRef;
 struct RtorInterthreadQueue_s;
 typedef struct RtorInterthreadQueue_s RtorInterthreadQueue, *RtorInterthreadQueueRef;        // Wait for a inter thread queue event
 
+struct Functor_s;
+typedef struct Functor_s Functor;
+
 typedef uint64_t EventMask, XrTimerEvent;
 
 // A generic callback function - @TODO will be the signature of the only type of function that can be posted
@@ -168,8 +171,8 @@ int rtor_eventfd_get_fd(RtorEventfdRef this);
 EvfdQueueRef Evfdq_new();
 void  Evfdq_free(EvfdQueueRef athis);
 int   Evfdq_readfd(EvfdQueueRef athis);
-void  Evfdq_add(EvfdQueueRef athis, void* item);
-void* Evfdq_remove(EvfdQueueRef athis);
+void  Evfdq_add(EvfdQueueRef athis, Functor item);
+Functor Evfdq_remove(EvfdQueueRef athis);
 //ReactorRef Evfdq_get_reactor(EvfdQueueRef athis);
 //#define Evfdq_get_reactor(p) Watcher_get_reactor((RtorWatcherRef)p)
 
