@@ -4,15 +4,22 @@
 #include <unistd.h>
 #include <pthread.h>
 #define _GNU_SOURCE             /* See feature_test_macros(7) */
-#include <stdint.h>
 #include <string.h>
 
-#include <sys/epoll.h>
 #include <c_http/unittest.h>
 #include <c_http/common/utils.h>
 #include <c_http/simple_runloop/runloop.h>
 #include <c_http/simple_runloop/rl_internal.h>
-
+/**
+ * The purpose of this test is to demonstrate the function of inter thread queues.
+ *
+ * Runs two threads A and B.
+ * Thread A has a reactor or run loop
+ * Thread B is just any old thread.
+ *  -   but it has a reference to A's reactor
+ *  -   uses that to send data to thread A via A's reactor
+ *
+ */
 #define QRDR_TAG     "ITQ_QRDR"
 #define QWRT_TAG     "ITQ_QWRT"
 
@@ -32,7 +39,7 @@ typedef struct QReader_s {
 } QReader, *QReaderRef;
 
 
-QReaderRef QReader_new(int expected_count)
+QReaderRef qreader_new(int expected_count)
 {
     QReaderRef this = malloc(sizeof(QReader));
     QREADER_SET_TAG(this);
@@ -41,76 +48,74 @@ QReaderRef QReader_new(int expected_count)
     this->_reactor_ref = rtor_new();
     XR_REACTOR_CHECK_TAG(this->_reactor_ref)
     rtor_enable_interthread_queue(this->_reactor_ref);
-
     return this;
 }
-ReactorRef Qreader_get_reactor(QReaderRef qr)
+
+void qreader_free(QReaderRef rdrref)
+{
+    QREADER_SET_TAG(rdrref);
+    rtor_free(rdrref->_reactor_ref);
+    free(rdrref);
+}
+ReactorRef qreader_get_reactor(QReaderRef qr)
 {
     QREADER_CHECK_TAG(qr);
     return qr->_reactor_ref;
 }
-EvfdQueueRef  QReader_get_evqueue(QReaderRef qr)
+EvfdQueueRef  qreader_get_evqueue(QReaderRef qr)
 {
     QREADER_CHECK_TAG(qr);
     return qr->_reactor_ref->interthread_queue_ref;
 }
-WQueueRef QReader_get_queue_watcher(QReaderRef qr)
+RtorWQueueRef qreader_get_queue_watcher(QReaderRef qr)
 {
     QREADER_CHECK_TAG(qr);
     return qr->_reactor_ref->interthread_queue_watcher_ref;
 }
-void QReader_dispose(QReaderRef this)
-{
-    QREADER_CHECK_TAG(this);
-    free(this);
-}
 
-void QReader_post(QReaderRef rdrref, PostableFunction f, void* arg)
+void qreader_post(QReaderRef rdrref, PostableFunction f, void* arg)
 {
-    ReactorRef rx = Qreader_get_reactor(rdrref);
+    ReactorRef rx = qreader_get_reactor(rdrref);
     rtor_post(rx, f, arg);
 }
 
 typedef struct QWriter_s {
     QWRITER_DECLARE_TAG;
+    QReaderRef   qrdr_ref;
     EvfdQueueRef queue;
     int count_max;
     int count;
 } QWriter, *QWriterRef;
 
-QWriterRef QWriter_new(EvfdQueueRef queue, int max)
+QWriterRef QWriter_new(QReaderRef qrdr, int max)
 {
     QWriterRef this = malloc(sizeof(QWriter));
     QWRITER_SET_TAG(this);
-    this->queue = queue;
+    this->qrdr_ref = qrdr;
+    this->queue = qreader_get_evqueue(this->qrdr_ref);
     this->count_max = max;
     this->count = 0;
 }
 
-void QWriter_dispose(QReaderRef this)
+void QWriter_free(QWriterRef this)
 {
+    qreader_free(this->qrdr_ref);
     free(this);
 }
-
-void postable_function(void* arg)
-{
-
-}
-
 
 void* reader_thread_func(void* arg)
 {
     QReaderRef q_rdr_ctx = (QReaderRef)arg;
     QREADER_CHECK_TAG(q_rdr_ctx)
-    ReactorRef rtor_ref = Qreader_get_reactor(q_rdr_ctx);
+    ReactorRef rtor_ref = qreader_get_reactor(q_rdr_ctx);
     XR_REACTOR_CHECK_TAG(rtor_ref)
-    WQueueRef qw = QReader_get_queue_watcher(q_rdr_ctx);
+    RtorWQueueRef qw = qreader_get_queue_watcher(q_rdr_ctx);
     XR_WQUEUE_CHECK_TAG(qw)
     rtor_run(rtor_ref, -1);
 }
-void writers_postable_func(void* arg)
+void writers_postable_func(ReactorRef rtor_ref, void* arg)
 {
-    WQueueRef wqref = (WQueueRef)arg;
+    RtorWQueueRef wqref = (RtorWQueueRef)arg;
     XR_WQUEUE_CHECK_TAG(wqref)
     QWriterRef wrtref = (QWriterRef)wqref->queue_event_handler_arg;
     QWRITER_CHECK_TAG(wrtref);
@@ -123,20 +128,23 @@ void writers_postable_func(void* arg)
 void* writer_thread_func(void* arg)
 {
     QWriterRef wrtr = (QWriterRef)arg;
+    ReactorRef rtor_ref = qreader_get_reactor(wrtr->qrdr_ref);
     QWRITER_CHECK_TAG(wrtr)
     for(long i = 0; i <= wrtr->count_max; i++) {
-        sleep(2);
+        usleep(500000);
         wrtr->count = i;
-        FunctorRef f = Functor_new(&writers_postable_func, (void*)wrtr);
-        printf("writer thread f: %p i: %ld\n", f, i);
-        Evfdq_add(wrtr->queue, (void*)f);
+        printf("writer thread  i: %ld\n", i);
+        /**
+         * This is the big test - send to a reactor on an other thread
+         */
+        rtor_interthread_post(rtor_ref, &writers_postable_func, (void*) wrtr);
     }
 }
 
 int test_itq()
 {
-    QReaderRef rdr = QReader_new(10);
-    QWriterRef wrtr = QWriter_new(QReader_get_evqueue(rdr), 10);
+    QReaderRef rdr = qreader_new(10);
+    QWriterRef wrtr = QWriter_new(rdr, 10);
 
     pthread_t rdr_thread;
     pthread_t wrtr_thread;

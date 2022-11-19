@@ -2,7 +2,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-TcpConnRef TcpConn_new(int fd, RtorRdrWrtrRef socket_w, AsyncServerRef server_ref)
+TcpConnRef TcpConn_new(int fd, RtorStreamRef socket_w, AsyncServerRef server_ref)
 {
     TcpConnRef tmp = malloc(sizeof(TcpConn));
     TCP_CONN_SET_TAG(tmp);
@@ -23,7 +23,7 @@ TcpConnRef TcpConn_new(int fd, RtorRdrWrtrRef socket_w, AsyncServerRef server_re
 void TcpConn_free(TcpConnRef this)
 {
     TCP_CONN_CHECK_TAG(this)
-    rtor_rdrwrtr_free(this->sock_watcher_ref);
+    rtor_stream_free(this->sock_watcher_ref);
     free(this);
 }
 #ifdef YES_READ
@@ -64,14 +64,14 @@ void TcpConn_read_some(TcpConnRef this, IOBufferRef iobuf, TcpConnReadCallback c
  *
  * On completion success or error schedules a calls conn_ref->read_some_cb
  *
- * \param watcher RtorWatcherRef but really RtorRdrWrtrRef.
+ * \param watcher RtorWatcherRef but really RtorStreamRef.
  * \param arg     void*
  * \param event   uint64_t
  *
  */
 static void read_some_handler(RtorWatcherRef wp, void* arg, uint64_t event)
 {
-    RtorRdrWrtrRef sw = (RtorRdrWrtrRef)wp;
+    RtorStreamRef sw = (RtorStreamRef)wp;
     TcpConnRef conn_ref = arg;
     ReactorRef reactor_ref = sw->runloop;
     IOBufferRef iobuf = conn_ref->io_buf_ref;
@@ -116,7 +116,7 @@ static void read_some_handler(RtorWatcherRef wp, void* arg, uint64_t event)
  */
 static void write_event_handler(RtorWatcherRef wp, void* arg, uint64_t event)
 {
-    RtorRdrWrtrRef sw = (RtorRdrWrtrRef)wp;
+    RtorStreamRef sw = (RtorStreamRef)wp;
     TcpConnRef conn_ref = arg;
     ReactorRef reactor_ref = sw->runloop;
     XR_TRACE("conn_ref: %p", conn_ref);
@@ -139,7 +139,7 @@ void TcpConn_write(TcpConnRef this, IOBufferRef iobuf, TcpConnWriteCallback cb, 
     this->write_buffer_ref = iobuf;
     this->write_arg = arg;
     this->write_cb = cb;
-    RtorRdrWrtrRef sw = this->sock_watcher_ref;
+    RtorStreamRef sw = this->sock_watcher_ref;
     WIoFd_change_watch(sw, &write_event_handler, arg, EPOLLOUT|EPOLLERR);
 }
 #endif
@@ -159,7 +159,7 @@ void TcpConn_read_msg(TcpConnRef this, MessageRef msg, TcpConnReadMsgCallback cb
     this->read_msg_arg = arg;
     this->req_msg_ref = msg;
     TcpConn_prepare_read(this);
-    RtorRdrWrtrRef sw = this->sock_watcher_ref;
+    RtorStreamRef sw = this->sock_watcher_ref;
     ReactorRef reactor_ref = sw->runloop;
     uint64_t interest = EPOLLERR | EPOLLIN;
     WIoFd_register(sw, &read_msg_handler, this, interest);
@@ -198,7 +198,7 @@ void TcpConn_prepare_read(TcpConnRef this)
  */
 static void read_msg_cb_wrapper(RtorWatcherRef wp, void *arg, uint64_t event)
 {
-    RtorRdrWrtrRef sw = (RtorRdrWrtrRef)wp;
+    RtorStreamRef sw = (RtorStreamRef)wp;
     TcpConnRef conn_ref = arg;
     ReactorRef reactor_ref = sw->runloop;
     conn_ref->read_msg_cb(conn_ref, arg, conn_ref->read_status);
@@ -206,13 +206,13 @@ static void read_msg_cb_wrapper(RtorWatcherRef wp, void *arg, uint64_t event)
 /**
  * Handles data available events when reading a full message
  * On completion posts the read_mesg_cb
- * \param wp  RtorWatcherRef but really RtorRdrWrtrRef
+ * \param wp  RtorWatcherRef but really RtorStreamRef
  * \param arg void* use data
  * \param event uint64_t
  */
 static void read_msg_handler(RtorWatcherRef wp, void *arg, uint64_t event)
 {
-    RtorRdrWrtrRef sw = (RtorRdrWrtrRef)wp;
+    RtorStreamRef sw = (RtorStreamRef)wp;
     TcpConnRef conn_ref = arg;
     ReactorRef reactor_ref = sw->runloop;
 
@@ -265,7 +265,7 @@ static void read_msg_handler(RtorWatcherRef wp, void *arg, uint64_t event)
 }
 static void read_msg_init(RtorWatcherRef wp, void *arg, uint64_t event)
 {
-    RtorRdrWrtrRef sw = (RtorRdrWrtrRef)wp;
+    RtorStreamRef sw = (RtorStreamRef)wp;
     TcpConnRef conn_ref = arg;
     ReactorRef reactor_ref = sw->runloop;
     uint64_t interest = EPOLLERR | EPOLLIN;
@@ -347,7 +347,7 @@ void TcpConn_prepare_write_2(TcpConnRef this, IOBufferRef buf, SocketEventHandle
 /**
  * This function is called by the Reactor on EPOLLOUT or EPOLLERR. It keeps getting called until
  * the entire buffer is written or an error occurs which is not an EAGAIN
- * \param wp    RtorWatcherRef (but really an RtorRdrWrtrRef)
+ * \param wp    RtorWatcherRef (but really an RtorStreamRef)
  * \param arg   void* But typecast it to TcpConnRef
  * \param event EPOLL event not used
  *
@@ -358,7 +358,7 @@ void TcpConn_prepare_write_2(TcpConnRef this, IOBufferRef buf, SocketEventHandle
  */
 void write_state_machine(RtorWatcherRef wp, void* arg, uint64_t event)
 {
-    RtorRdrWrtrRef sw = (RtorRdrWrtrRef)wp;
+    RtorStreamRef sw = (RtorStreamRef)wp;
     TcpConnRef conn_ref = (TcpConnRef)arg;
     ReactorRef reactor_ref = sw->runloop;
     // dont accept empty buffers
@@ -401,7 +401,7 @@ void TcpConn_write_2(TcpConnRef this, IOBufferRef buf, SocketEventHandler comple
 {
     this->write_buffer_ref = buf;
     this->write_completion_handler = completion_handler;
-    RtorRdrWrtrRef sw = this->sock_watcher_ref;
+    RtorStreamRef sw = this->sock_watcher_ref;
     WIoFd_change_watch(sw, &write_state_machine, (void*)this, EPOLLERR | EPOLLOUT);
 }
 #endif

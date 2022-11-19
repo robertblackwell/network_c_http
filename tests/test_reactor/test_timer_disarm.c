@@ -80,8 +80,8 @@ static void callback_disarm_clear(RtorTimerRef watcher, XrTimerEvent event)
     } else {
         if(ctx_p->counter >= ctx_p->max_count) {
             LOG_MSG("disarm_cb clear other and self");
-            rtor_timer_clear(ctx_p->other_tw);
-            rtor_timer_clear(watcher);
+            rtor_timer_deregister(ctx_p->other_tw);
+            rtor_timer_deregister(watcher);
             return;
         }
         ctx_p->counter++;
@@ -124,8 +124,12 @@ int test_timer_disarm_rearm()
 
     ReactorRef rtor_ref = rtor_new();
 
-    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, &callback_disarm_clear, test_ctx_p_1, test_ctx_p_1->interval_ms, true);
-    RtorTimerRef tw_2 = rtor_timer_new(rtor_ref, &callback_rearm_other, test_ctx_p_2, test_ctx_p_2->interval_ms, true);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, test_ctx_p_1->interval_ms, true);
+    rtor_timer_register(tw_1, &callback_disarm_clear, test_ctx_p_1, test_ctx_p_1->interval_ms, true);
+
+    RtorTimerRef tw_2 = rtor_timer_new(rtor_ref, test_ctx_p_2->interval_ms, true);
+    rtor_timer_register(tw_2, &callback_rearm_other, test_ctx_p_2, test_ctx_p_2->interval_ms, true);
+
     // timer 1 callback will disarm itself on the first timer event
     // time 2 callback will rearm tw_1 after count of 5
     test_ctx_p_2->other_tw = tw_1;

@@ -25,12 +25,13 @@ uint64_t   FdTable_size(FdTableRef athis);
 
 typedef ListRef RunListRef;
 typedef ListIter RunListIter;
+
 // A Functor is a generic callable - a function pointer (of type PostableFunction) and single anonymous argument
 struct Functor_s;
 typedef struct Functor_s Functor, *FunctorRef;
 FunctorRef Functor_new(PostableFunction f, void* arg);
 void Functor_free(FunctorRef athis);
-void Functor_call(FunctorRef athis);
+void Functor_call(FunctorRef athis, ReactorRef rtor_ref);
 struct Functor_s
 {
 //    RtorWatcherRef wref; // this is borrowed do not free
@@ -70,7 +71,7 @@ bool fd_map_set(int j);
  * Scan down the run list calling each Functor entry until the list is empty;
  * @param this
  */
-void RunList_exec(RunListRef this);
+void RunList_exec(RunListRef this, ReactorRef rtor_ref);
 
 struct Reactor_s {
     XR_REACTOR_DECLARE_TAG;
@@ -80,7 +81,7 @@ struct Reactor_s {
     RunListRef              run_list;
 #if 1
     EvfdQueueRef            interthread_queue_ref;
-    WQueueRef               interthread_queue_watcher_ref;
+    RtorWQueueRef               interthread_queue_watcher_ref;
 #else
     RtorInterthreadQueueRef interthread_queue;
 #endif
@@ -143,9 +144,9 @@ struct RtorEventfd_s {
 };
 
 /**
- * RtorRdrWrtr
+ * RtorStream
  */
-struct RtorRdrWrtr_s {
+struct RtorStream_s {
     struct RtorWatcher_s;
     uint64_t                 event_mask;
     SocketEventHandler       read_evhandler;
@@ -164,11 +165,11 @@ typedef struct RtorListener_s {
 } RtorListener;
 
 /**
- * WQueue
+ * RtorWQueue
  */
 typedef uint64_t XrQueueEvent;
 typedef void(XrQueuetWatcherCaller(void* ctx));
-struct WQueue_s {
+struct RtorWQueue_s {
     struct RtorWatcher_s;
     EvfdQueueRef            queue;
     // reactor cb and arg

@@ -28,7 +28,7 @@ static void drain_callback(void* arg)
     printf("drain callback\n");
 //    rtor_post(my_reactor_ptr, )
 }
-static void interthread_queue_handler(WQueueRef watcher, uint64_t event)
+static void interthread_queue_handler(RtorWQueueRef watcher, uint64_t event)
 {
     printf("interthread_queue_handler\n");
     ReactorRef rx = WQueue_get_reactor(watcher);
@@ -231,7 +231,7 @@ int rtor_run(ReactorRef athis, time_t timeout) {
         FunctorRef fnc;
         while(fnc = RunList_remove_first(athis->run_list)) {
 
-            Functor_call(fnc);
+            Functor_call(fnc, athis);
         }
     }
 

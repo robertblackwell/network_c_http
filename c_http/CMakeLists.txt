@@ -105,12 +105,12 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		${EXTSRC}/llhttp/http.c
 		${EXTSRC}/llhttp/llhttp.c
 	#sync
-#		sync/sync_client.c
-#		sync/sync_writer.c
-#		sync/sync_reader.c
-#		sync/sync_server.c
-#		sync/sync_handler_example.c
-#		sync/worker.c
+		sync/sync_client.c
+		sync/sync_writer.c
+		sync/sync_reader.c
+		sync/sync_server.c
+		sync/sync_handler_example.c
+		sync/worker.c
 
 	#aio simple_runloop and aio_http/1.1 details
 		simple_runloop/fdtable.c
@@ -119,7 +119,7 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		simple_runloop/w_listener.c
 		simple_runloop/w_eventfd.c
 		simple_runloop/w_timerfd.c
-        simple_runloop/w_rdrwrtr.c
+        simple_runloop/w_stream.c
 		simple_runloop/w_queue.c
 #		simple_runloop/interthread_queue.c
 		simple_runloop/watcher.c
@@ -127,16 +127,16 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 #		simple_runloop/run_list.c
 
 	#async
-#		async/async_server.c
-#        async/tcp_conn.c
-#		async/tcp_conn_read.c
-#		async/tcp_conn_read_msg.c
-#		async/tcp_conn_write.c
-#        async/tcp_conn_list.c
-#		async/handler.c
-#		async/handler_simple.c
-#		async/handler_echo.c
-#		async/handler_function.c
+		async/async_server.c
+        async/tcp_conn.c
+		async/tcp_conn_read.c
+		async/tcp_conn_read_msg.c
+		async/tcp_conn_write.c
+        async/tcp_conn_list.c
+		async/handler.c
+		async/handler_simple.c
+		async/handler_echo.c
+		async/handler_function.c
 
 	)
 

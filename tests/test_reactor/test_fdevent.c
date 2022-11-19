@@ -60,7 +60,8 @@ int test_fdevent_1()
 
     ReactorRef rtor_ref = rtor_new();
     test_ctx_p->reactor = rtor_ref;
-    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, &callback_1, (void *) test_ctx_p, 1000, true);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, 1000, true);
+    rtor_timer_register(tw_1, &callback_1, (void *) test_ctx_p, 1000, true);
     rtor_timer_disarm(tw_1);
     RtorEventfdRef fdev = rtor_eventfd_new(rtor_ref);
 
@@ -88,8 +89,11 @@ int test_fdevent_multiple()
 
     ReactorRef rtor_ref = rtor_new();
 
-    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, &callback_1, test_ctx_p_1, 100, true);
-    RtorTimerRef tw_2 = rtor_timer_new(rtor_ref, &callback_1, test_ctx_p_2, 100, true);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, 100, true);
+    rtor_timer_register(tw_1, &callback_1, test_ctx_p_1, 100, true);
+
+    RtorTimerRef tw_2 = rtor_timer_new(rtor_ref, 100, true);
+    rtor_timer_register(tw_2, &callback_1, test_ctx_p_2, 100, true);
 
     rtor_run(rtor_ref, 10000);
     UT_EQUAL_INT(test_ctx_p_1->counter, test_ctx_p_1->max_count);
@@ -110,7 +114,7 @@ static void callback_1(RtorTimerRef watcher, XrTimerEvent event)
     if(ctx_p->counter >= ctx_p->max_count) {
         LOG_MSG(" clear timer");
         rtor_close(ctx_p->reactor);
-//        rtor_timer_clear(watcher);
+//        rtor_timer_deregister(watcher);
 //        rtor_eventfd_deregister(fdev);
     } else {
         rtor_eventfd_fire(fdev);

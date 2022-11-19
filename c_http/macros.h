@@ -1,5 +1,6 @@
 #ifndef c_http_macros_h
 #define c_http_macros_h
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <c_http/logger.h>
 /**

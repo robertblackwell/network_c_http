@@ -1,5 +1,7 @@
 #define _GNU_SOURCE
 #define XR_TRACE_ENABLE
+#include <c_http/simple_runloop/runloop.h>
+#include <c_http/simple_runloop/rl_internal.h>
 #include "listener.h"
 #include <c_http/async/types.h>
 #include <assert.h>
@@ -19,8 +21,8 @@
 #include <c_http/sync/sync_client.h>
 
 
-static void on_event_listening(RtorListenerRef listener_ref, void *arg, uint64_t event);
-static void on_timer(RtorTimerRef timer_ref, void *arg, EventMask event);
+static void on_event_listening(RtorListenerRef listener_ref, uint64_t event);
+static void on_timer(RtorTimerRef watcher, EventMask event);
 
 
 ListenerRef Listener_new(int listen_fd)
@@ -41,7 +43,6 @@ ListenerRef Listener_init(ListenerRef sref, int listen_fd)
     printf("Listener_init %p   listen fd: %d\n", sref, listen_fd);
     return sref;
 }
-
 void Listener_dispose(ListenerRef *sref)
 {
     ASSERT_NOT_NULL(*sref);
@@ -59,32 +60,29 @@ void Listener_listen(ListenerRef sref)
 
     rtor_listener_register(lw, on_event_listening, sref);
     printf("Listener_listen reactor: %p listen sock: %d  lw: %p\n", sref->reactor_ref, sref->listening_socket_fd, lw);
-    sref->timer_ref = rtor_timer_new(sref->reactor_ref, &on_timer, (void *) sref, 5000, false);
+    sref->timer_ref = rtor_timer_new(sref->reactor_ref, 5000, false);
+    rtor_timer_register(sref->timer_ref, &on_timer, (void *) sref, 5000, false);
     rtor_run(sref->reactor_ref, -1);
 }
 /**
  * When the timer fires it is time to kill the listener.
  */
-static void on_timer(RtorTimerRef watcher, void* ctx, EventMask event)
+static void on_timer(RtorTimerRef watcher, EventMask event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
-    ListenerRef listener_ref = (ListenerRef) ctx;
+    ListenerRef listener_ref = (ListenerRef) watcher->timer_handler_arg;
     LOG_FMT("event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", event, epollin, error);
     rtor_free(listener_ref->reactor_ref);
 }
 
-static void on_event_listening(RtorListenerRef listener_ref, void *arg, uint64_t event)
+static void on_event_listening(RtorListenerRef listener_ref, uint64_t event)
 {
-//    assert(iobuf != NULL);
-//    assert(conn_ref->handler_ref != NULL);
-//    TcpConn_write(conn_ref, iobuf, &on_handler_write, arg);
-
     printf("listening_hander \n");
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
 
-    ListenerRef server_ref = arg;
+    ListenerRef server_ref = listener_ref->listen_arg;
     int sock2 = accept(server_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
     if(sock2 <= 0) {
         int errno_saved = errno;
@@ -92,6 +90,7 @@ static void on_event_listening(RtorListenerRef listener_ref, void *arg, uint64_t
     } else {
         printf("Sock2 successfull sock: %d server_ref %p listen_ref: %p  listen_count: %d\n", sock2, server_ref, listener_ref, server_ref->listen_counter);
         if(server_ref->listen_counter == 0) {
+            // pretend to be busy
             sleep(1);
         }
         server_ref->listen_counter++;
@@ -104,7 +103,6 @@ static void on_event_listening(RtorListenerRef listener_ref, void *arg, uint64_t
 
 socket_handle_t create_listener_socket(int port, const char *host)
 {
-
     struct sockaddr_in sin;
     memset(&sin, 0, sizeof(sin));
     socket_handle_t tmp_socket;
@@ -117,16 +115,12 @@ socket_handle_t create_listener_socket(int port, const char *host)
     if((tmp_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1) {
         goto error_01;
     }
-
-    // sin.sin_len = sizeof(sin);
     if((result = setsockopt(tmp_socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes))) != 0) {
         goto error_02;
     }
-
     if((result = bind(tmp_socket, (struct sockaddr *) &sin, sizeof(sin))) != 0) {
         goto error_03;
     }
-
     if((result = listen(tmp_socket, SOMAXCONN)) != 0) {
         goto error_04;
     }
@@ -148,9 +142,6 @@ socket_handle_t create_listener_socket(int port, const char *host)
 
 void set_non_blocking(socket_handle_t socket)
 {
-    //
-    // Ensure socket is in blocking mode
-    //
     int flags = fcntl(socket, F_GETFL, 0);
     int modFlags2 = flags | O_NONBLOCK;
     int fres = fcntl(socket, F_SETFL, modFlags2);

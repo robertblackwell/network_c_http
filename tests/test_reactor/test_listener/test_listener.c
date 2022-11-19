@@ -15,7 +15,7 @@
  *      when another thread connects to the same host/port.
  *
  * 2.   In addition we are testing that multiple threads can be listening on the same socket and that
- *      a connect to that host/port will only cause a listen even on one of the listening threads.
+ *      a connect to that host/port will only cause a listen event on one of the listening threads.
  *
  *      This is of particular interest as it allows a multi-threaded server to operate without additional
  *      listener thread and without synchronization between the listener and the thread that services the connection.
@@ -50,7 +50,10 @@ int test_listeners()
     pthread_join(connector_thread, NULL);
     pthread_join(listener_thread_1, NULL);
     pthread_join(listener_thread_2, NULL);
-
+    /**
+     * Test that each listener got some of the connections and that
+     * all connections were recorded
+     */
     UT_EQUAL_INT((server1->listen_counter + server2->listen_counter), tclient.max_count);
     UT_NOT_EQUAL_INT(server1->listen_counter, 0);
     UT_NOT_EQUAL_INT(server2->listen_counter, 0);

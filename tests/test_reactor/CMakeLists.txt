@@ -93,5 +93,5 @@ target_link_libraries(${TARGET_ITQ}
 add_test(${TARGET_ITQ} ${TARGET_ITQ})
 
 
-#add_subdirectory(test_io)
-#add_subdirectory(test_listener)
+add_subdirectory(test_io)
+add_subdirectory(test_listener)

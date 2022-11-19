@@ -25,9 +25,9 @@ void Functor_free(FunctorRef this)
     free(this);
 }
 
-void Functor_call(FunctorRef this)
+void Functor_call(FunctorRef this, ReactorRef rtor_ref)
 {
-    this->f(this->arg);
+    this->f(rtor_ref, this->arg);
 }
 /**
  * The runlist - is a list of Functor - these are functions that are ready to run.
@@ -101,12 +101,12 @@ void RunList_add_front(RunListRef rl_ref, FunctorRef item)
 {
     List_add_front(rl_ref, (void *) item);
 }
-void RunList_exec(RunListRef this)
+void RunList_exec(RunListRef this, ReactorRef rtor_ref)
 {
     RunListIter iter = RunList_iterator(this);
     while (iter != NULL) {
         FunctorRef fnc = RunList_itr_unpack(this, iter);
-        Functor_call(fnc);
+        Functor_call(rtor_ref, fnc);
         RunListIter next_iter = RunList_itr_next(this, iter);
         RunList_itr_remove(this, &iter);
         iter = next_iter;

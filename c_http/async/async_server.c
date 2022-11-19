@@ -15,13 +15,14 @@
 #include <c_http/socket_functions.h>
 #include<c_http/async/tcp_conn.h>
 #include <c_http/simple_runloop/runloop.h>
+#include <c_http/simple_runloop/rl_internal.h>
 
 
 static socket_handle_t create_listener_socket(int port, const char *host);
 static void set_non_blocking(socket_handle_t socket);
 static void on_post_done(void* arg);
 static void on_message(TcpConnRef conn_ref, void* arg, int status);
-void on_event_listening(RtorListenerRef listener_watcher_ref, void *arg, uint64_t event);
+void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event);
 
 AsyncServerRef AsyncServer_new(int port)
 {
@@ -125,19 +126,19 @@ static void on_message(TcpConnRef conn_ref, void* arg, int status)
     assert(conn_ref->handler_ref == NULL);
     XrHandler_function(conn_ref->req_msg_ref, conn_ref, &on_post_done);
 }
-void on_event_listening(RtorListenerRef listener_watcher_ref, void *arg, uint64_t event)
+void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event)
 {
 
     printf("listening_hander \n");
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
 
-    AsyncServerRef server_ref = arg;
+    AsyncServerRef server_ref = listener_watcher_ref->listen_arg;
     int sock2 = accept(server_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
     if(sock2 <= 0) {
         LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
     }
-    RtorRdrWrtrRef sw_ref = rtor_rdrwrtr_new(server_ref->reactor_ref, sock2);
+    RtorStreamRef sw_ref = rtor_stream_new(server_ref->reactor_ref, sock2);
     TcpConnRef conn = TcpConn_new(sock2, sw_ref, server_ref);
     MessageRef inmsg = Message_new();
     TcpConn_read_msg(conn, inmsg, on_message, conn);

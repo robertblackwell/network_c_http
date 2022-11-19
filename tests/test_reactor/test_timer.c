@@ -71,7 +71,8 @@ int test_timer_non_repeating()
 
     ReactorRef rtor_ref = rtor_new();
 
-    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, &callback_non_repeating, test_ctx_p_1, 100, false);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, 100, false);
+    rtor_timer_register(tw_1, &callback_non_repeating, test_ctx_p_1, 100, false);
 
     rtor_run(rtor_ref, 10000);
     /*We should only get here when there are no more timers or other events pending in the simple_runloop*/
@@ -104,7 +105,7 @@ static void callback_repeating(RtorTimerRef watcher, XrTimerEvent event)
     LOG_FMT("counter: %d %%error: %f   event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, gap, event, epollin, error);
     if(ctx_p->counter >= ctx_p->max_count) {
         LOG_MSG(" clear timer");
-        rtor_timer_clear(watcher);
+        rtor_timer_deregister(watcher);
     } else {
         ctx_p->counter++;
     }
@@ -116,7 +117,8 @@ int test_timer_single_repeating()
 
     ReactorRef rtor_ref = rtor_new();
 
-    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, &callback_repeating, (void *) test_ctx_p, 100, true);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, 100, true);
+    rtor_timer_register(tw_1, &callback_repeating, (void *) test_ctx_p, 100, true);
 
     rtor_run(rtor_ref, 10000);
     LOG_MSG("timer_single_repeating - rtor_run has exited")
@@ -145,7 +147,7 @@ static void callback_multiple_repeating_timers(RtorTimerRef watcher, XrTimerEven
     LOG_FMT(" counter: %d  ctx: %p  event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, ctx_p, event, epollin, error);
     if(ctx_p->counter >= ctx_p->max_count) {
         LOG_FMT(" clear timer %p", ctx_p);
-        rtor_timer_clear(watcher);
+        rtor_timer_deregister(watcher);
     } else {
         ctx_p->counter++;
     }
@@ -157,8 +159,11 @@ int test_timer_multiple_repeating()
 
     ReactorRef rtor_ref = rtor_new();
 
-    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, &callback_multiple_repeating_timers, test_ctx_p_1, 100, true);
-    RtorTimerRef tw_2 = rtor_timer_new(rtor_ref, &callback_multiple_repeating_timers, test_ctx_p_2, 100, true);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, 100, true);
+    rtor_timer_register(tw_1, &callback_multiple_repeating_timers, test_ctx_p_1, 100, true);
+
+    RtorTimerRef tw_2 = rtor_timer_new(rtor_ref, 100, true);
+    rtor_timer_register(tw_2, &callback_multiple_repeating_timers, test_ctx_p_2, 100, true);
 
     rtor_run(rtor_ref, 10000);
     UT_EQUAL_INT(test_ctx_p_1->counter, test_ctx_p_1->max_count);
@@ -172,26 +177,26 @@ int test_timer_multiple_repeating()
 // post test -demonstrates that an event callback can post another handler which can post yet another handler
 // and that second handler can cancel a fd based watcher.
 //
-static void posted_from_post_cb(void* arg)
+static void posted_from_post_cb(ReactorRef rtor_ref,  void* arg)
 {
     TestCtx* ctx_p = arg;
     RtorTimerRef tw =  ctx_p->watcher; // (RtorTimerRef)w;
     LOG_FMT(" arg: %p  counter: %d", arg, ctx_p->counter);
     if(ctx_p->counter >= ctx_p->max_count) {
         LOG_MSG(" clear timer ");
-        rtor_timer_clear(tw);
+        rtor_timer_deregister(tw);
     } else {
         ctx_p->counter++;
     }
 }
-static void post_cb(RtorWatcherRef w, void* arg, uint64_t event)
-{
-    TestCtx* ctx_p = arg;
-    RtorTimerRef tw = (RtorTimerRef)w;
-    ReactorRef reactor = w->runloop;
-    LOG_FMT(" post again w: %p counter: %d", w, ctx_p->counter);
-    rtor_post(reactor, posted_from_post_cb, ctx_p);
-}
+//static void post_cb(RtorWatcherRef w, void* arg, uint64_t event)
+//{
+//    TestCtx* ctx_p = arg;
+//    RtorTimerRef tw = (RtorTimerRef)w;
+//    ReactorRef reactor = w->runloop;
+//    LOG_FMT(" post again w: %p counter: %d", w, ctx_p->counter);
+//    rtor_post(reactor, posted_from_post_cb, ctx_p);
+//}
 
 static void callback_post(RtorTimerRef watcher, XrTimerEvent event)
 {
@@ -214,7 +219,8 @@ int test_timer_post()
     TestCtx* test_ctx_p = TestCtx_new(0, 5);
     test_ctx_p->reactor = rtor_ref;
 
-    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, &callback_post, (void *) test_ctx_p, 100, true);
+    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref, 100, true);
+    rtor_timer_register(tw_1, &callback_post, (void *) test_ctx_p, 100, true);
     test_ctx_p->watcher = tw_1;
 
     rtor_run(rtor_ref, 10000);

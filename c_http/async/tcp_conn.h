@@ -13,11 +13,11 @@
 
 #define TYPE TcpConn
 #define TcpConn_TAG "TCPCON"
-#include <c_http/check_tag.h>
+#include <c_http/async/check_tag.h>
 #undef TYPE
-#define TCP_CONN_DECLARE_TAG DECLARE_TAG(TcpConn)
-#define TCP_CONN_CHECK_TAG(p) CHECK_TAG(TcpConn, p)
-#define TCP_CONN_SET_TAG(p) SET_TAG(TcpConn, p)
+#define TCP_CONN_DECLARE_TAG DECLARE_TAG(TcpConn_TAG)
+#define TCP_CONN_CHECK_TAG(p) CHECK_TAG(TcpConn_TAG, p)
+#define TCP_CONN_SET_TAG(p) SET_TAG(TcpConn_TAG, p)
 
 enum TcpConnState {
     XRCONN_STATE_UNINIT = 33,
@@ -57,7 +57,7 @@ struct TcpConn_s {
     TCP_CONN_DECLARE_TAG;
     int                     fd;
     enum TcpConnState        state;
-    RtorRdrWrtrRef                sock_watcher_ref;
+    RtorStreamRef                sock_watcher_ref;
     AsyncServerRef          server_ref;
     bool                    recvbuff_small;
 
@@ -92,7 +92,7 @@ struct TcpConn_s {
 };
 //typedef struct TcpConn_s TcpConn, *TcpConnRef;
 
-TcpConnRef TcpConn_new(int fd, RtorRdrWrtrRef socket_watcher, AsyncServerRef server_ref);
+TcpConnRef TcpConn_new(int fd, RtorStreamRef socket_watcher, AsyncServerRef server_ref);
 void TcpConn_free(TcpConnRef this);
 
 void TcpConn_read_some(TcpConnRef this, IOBufferRef iobuf, TcpConnReadCallback cb, void* arg);

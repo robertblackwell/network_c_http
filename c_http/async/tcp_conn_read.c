@@ -1,3 +1,5 @@
+#include <c_http//simple_runloop/runloop.h>
+#include <c_http/simple_runloop/rl_internal.h>
 #include <c_http/async/tcp_conn.h>
 #include <unistd.h>
 #include <errno.h>
@@ -8,8 +10,8 @@
  * read_some
  * **************************************************************************************************************************
  */
-static void read_some_handler(RtorRdrWrtrRef watcher, void* arg, uint64_t event);
-static void read_some_post_func(void* arg)
+static void read_some_handler(RtorStreamRef socket_watcher_ref, uint64_t event);
+static void read_some_post_func(ReactorRef rtor_ref, void* arg)
 {
     TcpConnRef conn_ref = (TcpConnRef)arg;
     TCP_CONN_CHECK_TAG(conn_ref)
@@ -40,26 +42,27 @@ void TcpConn_read_some(TcpConnRef this, IOBufferRef iobuf, TcpConnReadCallback c
 
 
     this->io_buf_ref = iobuf;
-    rtor_rdrwrtr_arm_read(this->sock_watcher_ref, &read_some_handler, (void *) this);
+    rtor_stream_arm_read(this->sock_watcher_ref, &read_some_handler, (void *) this);
 }
 /*
  * read_some_handler - called every time fd becomes readable after a read has been initiated
  *
  * On completion success or error schedules a calls conn_ref->read_some_cb
  *
- * \param watcher RtorWatcherRef but really RtorRdrWrtrRef.
+ * \param watcher RtorWatcherRef but really RtorStreamRef.
  * \param arg     void*
  * \param event   uint64_t
  *
  */
-static void read_some_handler(RtorRdrWrtrRef socket_watcher_ref, void* arg, uint64_t event)
+static void read_some_handler(RtorStreamRef socket_watcher_ref, uint64_t event)
 {
     // first thing should be disarmed
+    void* arg = socket_watcher_ref->read_arg;
     TcpConnRef conn_ref = arg;
     TCP_CONN_CHECK_TAG(conn_ref)
 
-    ReactorRef reactor_ref = rtor_rdrwrtr_get_reactor(socket_watcher_ref);
-    rtor_rdrwrtr_disarm_read(socket_watcher_ref);
+    ReactorRef reactor_ref = rtor_stream_get_reactor(socket_watcher_ref);
+    rtor_stream_disarm_read(socket_watcher_ref);
 
     IOBufferRef iobuf = conn_ref->io_buf_ref;
     int bytes_read;
@@ -115,11 +118,11 @@ static void read_some_handler(RtorRdrWrtrRef socket_watcher_ref, void* arg, uint
 //    this->read_msg_arg = arg;
 //    this->req_msg_ref = msg;
 //    TcpConn_prepare_read(this);
-//    RtorRdrWrtrRef sw = this->sock_watcher_ref;
+//    RtorStreamRef sw = this->sock_watcher_ref;
 //    ReactorRef reactor_ref = sw->simple_runloop;
 //    uint64_t interest = EPOLLERR | EPOLLIN;
-//    rtor_rdrwrtr_register(sw);
-//    rtor_rdrwrtr_arm_read(sw, read_msg_handler, arg);
+//    rtor_stream_register(sw);
+//    rtor_stream_arm_read(sw, read_msg_handler, arg);
 //}
 //
 //// TcpConn_read Reads a message with repeated calls and returns status after each call
@@ -157,7 +160,7 @@ static void read_some_handler(RtorRdrWrtrRef socket_watcher_ref, void* arg, uint
 //static void on_post_read_msg(void *arg)
 //{
 //    TcpConnRef conn_ref = arg;
-//    RtorRdrWrtrRef sw = conn_ref->sock_watcher_ref;
+//    RtorStreamRef sw = conn_ref->sock_watcher_ref;
 //    TCP_CONN_CHECK_TAG(conn_ref)
 //    ReactorRef reactor_ref = sw->simple_runloop;
 //    conn_ref->read_msg_cb(conn_ref, arg, conn_ref->read_status);
@@ -165,13 +168,13 @@ static void read_some_handler(RtorRdrWrtrRef socket_watcher_ref, void* arg, uint
 ///**
 // * Handles data available events when reading a full message
 // * On completion posts the read_mesg_cb
-// * \param wp  RtorWatcherRef but really RtorRdrWrtrRef
+// * \param wp  RtorWatcherRef but really RtorStreamRef
 // * \param arg void* use data
 // * \param event uint64_t
 // */
 //static void read_msg_handler(RtorWatcherRef wp, void *arg, uint64_t event)
 //{
-//    RtorRdrWrtrRef sw = (RtorRdrWrtrRef)wp;
+//    RtorStreamRef sw = (RtorStreamRef)wp;
 //    TcpConnRef conn_ref = arg;
 //    TCP_CONN_CHECK_TAG(conn_ref)
 //    ReactorRef reactor_ref = sw->simple_runloop;
@@ -215,18 +218,18 @@ static void read_some_handler(RtorRdrWrtrRef socket_watcher_ref, void* arg, uint
 //        }
 //        // @TODO fix next 2 lines
 ////        WIoFd_change_watch(sw, &read_msg_handler, arg, 0);
-//        rtor_rdrwrtr_disarm_read(sw);
+//        rtor_stream_disarm_read(sw);
 //        rtor_post(reactor_ref, &on_post_read_msg, conn_ref);
 //        return;
 //    }
 //}
 ////static void read_msg_init(RtorWatcherRef wp, void *arg, uint64_t event)
 ////{
-////    RtorRdrWrtrRef sw = (RtorRdrWrtrRef)wp;
+////    RtorStreamRef sw = (RtorStreamRef)wp;
 ////    TcpConnRef conn_ref = arg;
 ////    ReactorRef reactor_ref = sw->simple_runloop;
 ////    uint64_t interest = EPOLLERR | EPOLLIN;
-////    rtor_rdrwrtr_register(sw, &read_msg_handler, conn_ref, interest);
+////    rtor_stream_register(sw, &read_msg_handler, conn_ref, interest);
 ////}
 //int TcpConn_read(TcpConnRef this)
 //{

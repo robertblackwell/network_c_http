@@ -25,9 +25,9 @@ static void handler(RtorWatcherRef watcher, uint64_t event)
 }
 static void anonymous_free(RtorWatcherRef p)
 {
-    rtor_Listener_free((RtorListenerRef) p);
+    rtor_listener_free((RtorListenerRef) p);
 }
-void WListenerFd_init(RtorListenerRef athis, ReactorRef runloop, int fd)
+void rtor_listener_init(RtorListenerRef athis, ReactorRef runloop, int fd)
 {
     XR_LISTNER_SET_TAG(athis);
     athis->type = XR_WATCHER_LISTENER;
@@ -41,10 +41,10 @@ void WListenerFd_init(RtorListenerRef athis, ReactorRef runloop, int fd)
 RtorListenerRef rtor_listener_new(ReactorRef runloop, int fd)
 {
     RtorListenerRef this = malloc(sizeof(RtorListener));
-    WListenerFd_init(this, runloop, fd);
+    rtor_listener_init(this, runloop, fd);
     return this;
 }
-void rtor_Listener_free(RtorListenerRef athis)
+void rtor_listener_free(RtorListenerRef athis)
 {
     rtor_listener_verify(athis);
     close(athis->fd);

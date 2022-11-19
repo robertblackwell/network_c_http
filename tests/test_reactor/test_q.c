@@ -49,7 +49,7 @@ void QWriter_dispose(QSyncReaderRef this)
     free(this);
 }
 
-void QReaderHandler(WQueueRef qw, uint64_t event)
+void QReaderHandler(RtorWQueueRef qw, uint64_t event)
 {
     void* ctx = qw->queue_event_handler_arg;
     QSyncReaderRef rdr = (QSyncReaderRef)ctx;
@@ -72,7 +72,7 @@ void* reader_thread_func(void* arg)
 {
     QSyncReaderRef q_rdr_ctx = (QSyncReaderRef)arg;
     ReactorRef rtor_ref = rtor_new();
-    WQueueRef qw = WQueue_new(rtor_ref, q_rdr_ctx->queue);
+    RtorWQueueRef qw = WQueue_new(rtor_ref, q_rdr_ctx->queue);
     uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
     WQueue_register(qw, QReaderHandler, arg, interest);
     rtor_run(rtor_ref, -1);

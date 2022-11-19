@@ -38,7 +38,7 @@ static void anonymous_free(RtorWatcherRef p)
     XR_FDEV_CHECK_TAG(fdevp)
     rtor_eventfd_free(fdevp);
 }
-void WEventFd_init(RtorEventfdRef this, ReactorRef runloop)
+void rtor_eventfd_init(RtorEventfdRef this, ReactorRef runloop)
 {
     this->type = XR_WATCHER_FDEVENT;
     XR_FDEV_SET_TAG(this);
@@ -62,7 +62,7 @@ void WEventFd_init(RtorEventfdRef this, ReactorRef runloop)
 RtorEventfdRef rtor_eventfd_new(ReactorRef runloop)
 {
     RtorEventfdRef this = malloc(sizeof(RtorEventfd));
-    WEventFd_init(this, runloop);
+    rtor_eventfd_init(this, runloop);
     return this;
 }
 void rtor_eventfd_free(RtorEventfdRef athis)

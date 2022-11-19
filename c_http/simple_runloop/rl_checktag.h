@@ -52,7 +52,7 @@
 #define XR_FDEV_SET_TAG(p) SET_TAG(WEventFd_TAG, p)
 
 /**
- * RtorRdrWrtr
+ * RtorStream
  */
 #define XR_SOCKW_DECLARE_TAG DECLARE_TAG(WIoFd_TAG)
 #define XR_SOCKW_CHECK_TAG(p) CHECK_TAG(WIoFd_TAG, p)
@@ -66,7 +66,7 @@
 #define XR_LISTNER_SET_TAG(p) SET_TAG(WListenerFd_TAG, p)
 
 /**
- * WQueue
+ * RtorWQueue
  */
 #define XR_WQUEUE_DECLARE_TAG DECLARE_TAG(WQueue_TAG)
 #define XR_WQUEUE_CHECK_TAG(p) CHECK_TAG(WQueue_TAG, p)

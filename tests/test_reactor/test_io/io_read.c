@@ -13,6 +13,7 @@
 #include <c_http/logger.h>
 #include <c_http/common/utils.h>
 #include <c_http/simple_runloop/runloop.h>
+#include <c_http/simple_runloop/rl_internal.h>
 
 /**
  * the reader does the following
@@ -49,14 +50,14 @@ void Reader_add_fd(Reader* this, int fd, int max)
 
 }
 
-void rd_callback(RtorRdrWrtrRef socket_watcher_ref, void* arg, uint64_t event)
+void rd_callback(RtorStreamRef io_watcher_ref, uint64_t event)
 {
-    rtor_rdrwrtr_verify(socket_watcher_ref);
-    ReadCtx* ctx = (ReadCtx*)arg;
-    ReactorRef reactor = rtor_rdrwrtr_get_reactor(socket_watcher_ref);
+    rtor_stream_verify(io_watcher_ref);
+    ReadCtx* ctx = (ReadCtx*)io_watcher_ref->read_arg;
+    ReactorRef reactor = rtor_stream_get_reactor(io_watcher_ref);
     int in = event | EPOLLIN;
     char buf[1000];
-    int nread = read(rtor_rdrwrtr_get_fd(socket_watcher_ref), buf, 1000);
+    int nread = read(rtor_stream_get_fd(io_watcher_ref), buf, 1000);
     char* s;
     if(nread > 0) {
         buf[nread] = (char)0;
@@ -65,10 +66,10 @@ void rd_callback(RtorRdrWrtrRef socket_watcher_ref, void* arg, uint64_t event)
         s = "badread";
     }
     LOG_FMT("test_io: Socket watcher rd_callback read_count: %d fd: %d event %lx nread: %d buf: %s errno: %d\n", ctx->read_count,
-            rtor_rdrwrtr_get_fd(socket_watcher_ref), event, nread, s, errno);
+            rtor_stream_get_fd(io_watcher_ref), event, nread, s, errno);
     ctx->read_count++;
     if(ctx->read_count > ctx->max_read_count) {
-        rtor_deregister(reactor, rtor_rdrwrtr_get_fd(socket_watcher_ref));
+        rtor_deregister(reactor, rtor_stream_get_fd(io_watcher_ref));
     } else {
         return;
     }
@@ -79,11 +80,11 @@ void* reader_thread_func(void* arg)
     Reader* rdr = (Reader*)arg;
     for(int i = 0; i < rdr->count; i++) {
         ReadCtx* ctx = &(rdr->ctx_table[i]);
-        rdr->ctx_table[i].swatcher = rtor_rdrwrtr_new(rtor_ref, ctx->readfd);
-        RtorRdrWrtrRef sw = rdr->ctx_table[i].swatcher;
+        rdr->ctx_table[i].swatcher = rtor_stream_new(rtor_ref, ctx->readfd);
+        RtorStreamRef sw = rdr->ctx_table[i].swatcher;
         uint64_t interest = EPOLLERR | EPOLLIN;
-        rtor_rdrwrtr_register(sw);
-        rtor_rdrwrtr_arm_read(sw, &rd_callback, (void *) ctx);
+        rtor_stream_register(sw);
+        rtor_stream_arm_read(sw, &rd_callback, (void *) ctx);
 //        WIoFd_change_watch(sw, &rd_callback, (void*) ctx, interest);
     }
 
