@@ -50,6 +50,7 @@ int test_listeners()
     pthread_join(connector_thread, NULL);
     pthread_join(listener_thread_1, NULL);
     pthread_join(listener_thread_2, NULL);
+    printf("test_listener all threads hace joined \n");
     /**
      * Test that each listener got some of the connections and that
      * all connections were recorded

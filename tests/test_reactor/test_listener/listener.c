@@ -63,17 +63,21 @@ void Listener_listen(ListenerRef sref)
     sref->timer_ref = rtor_timer_new(sref->reactor_ref);
     rtor_timer_register(sref->timer_ref, &on_timer, (void *) sref, 5000, false);
     rtor_reactor_run(sref->reactor_ref, -1);
+    printf("Listener reactor ended \n");
+    rtor_reactor_free(sref->reactor_ref);
 }
 /**
  * When the timer fires it is time to kill the listener.
  */
 static void on_timer(RtorTimerRef watcher, EventMask event)
 {
+    printf("on_timer entered \n");
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
     ListenerRef listener_ref = (ListenerRef) watcher->timer_handler_arg;
     LOG_FMT("event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", event, epollin, error);
-    rtor_free(listener_ref->reactor_ref);
+    rtor_reactor_close(listener_ref->reactor_ref);
+//    rtor_reactor_free(listener_ref->reactor_ref);
 }
 
 static void on_event_listening(RtorListenerRef listener_ref, uint64_t event)

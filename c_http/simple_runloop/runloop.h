@@ -44,7 +44,7 @@ typedef struct Functor_s Functor;
 
 typedef uint64_t EventMask, XrTimerEvent;
 
-// A generic callback function - @TODO will be the signature of the only type of function that can be posted
+// A generic callback function
 typedef void (*PostableFunction)    (ReactorRef rtor_ref, void* arg);
 // Signature of functions that can called by the Reactor to handle file descriptor events
 typedef void (*WatcherCallback)     (RtorWatcherRef wref, uint64_t events);
@@ -76,14 +76,14 @@ ReactorRef rtor_reactor_get_threads_reactor();
 ReactorRef rtor_reactor_new(void);
 void       rtor_reactor_close(ReactorRef athis);
 void       rtor_reactor_init(ReactorRef athis);
-void       rtor_free(ReactorRef athis);
+void       rtor_reactor_free(ReactorRef athis);
 int        rtor_reactor_register(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref);
 int        rtor_reactor_deregister(ReactorRef athis, int fd);
 int        rtor_reactor_reregister(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref);
 int        rtor_reactor_run(ReactorRef athis, time_t timeout);
 int        rtor_reactor_post(ReactorRef athis, PostableFunction cb, void* arg);
 void       rtor_reactor_interthread_post(ReactorRef athis, PostableFunction cb, void* arg);
-void       rtor_delete(ReactorRef athis, int fd);
+void       rtor_reactor_delete(ReactorRef athis, int fd);
 void       rtor_reactor_enable_interthread_queue(ReactorRef rtor_ref);
 void       XrReactor_verify(ReactorRef r);
 

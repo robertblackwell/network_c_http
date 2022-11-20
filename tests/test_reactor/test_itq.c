@@ -54,7 +54,7 @@ QReaderRef qreader_new(int expected_count)
 void qreader_free(QReaderRef rdrref)
 {
     QREADER_SET_TAG(rdrref);
-    rtor_free(rdrref->_reactor_ref);
+    rtor_reactor_free(rdrref->_reactor_ref);
     free(rdrref);
 }
 ReactorRef qreader_get_reactor(QReaderRef qr)

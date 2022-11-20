@@ -8,10 +8,15 @@
 #include <string.h>
 #include <c_http/common/list.h>
 
-#define RTOR_MAX_FDS        4096
-#define RTOR_MAX_RUNLIST    4096
-#define RTOR_MAX_ITQ        1024
-#define RTOR_MAX_WATCHERS   RTOR_MAX_FDS
+#define RTOR_MAX_FDS            1024
+#define RTOR_MAX_RUNLIST        1024
+#define RTOR_MAX_ITQ            256
+#define RTOR_MAX_WATCHERS       RTOR_MAX_FDS
+#define RTOR_FUNCTOR_LIST_MAX   RTOR_MAX_ITQ
+#define RTOR_MAX_EPOLL_FDS      RTOR_MAX_FDS
+#define CBTABLE_MAX             RTOR_MAX_FDS
+#define RTOR_FDTABLE_MAX        RTOR_MAX_FDS
+#define RTOR_READY_LIST_MAX     (2 * RTOR_MAX_FDS)
 
 
 
@@ -70,12 +75,13 @@ void RunList_itr_remove (RunListRef rl_ref, RunListIter *iter);
 
 typedef struct InterthreadRunList_s InterthreadRunList, *InterthreadRunListRef;
 
-#define RTOR_FUNCTOR_LIST_MAX 100
 typedef struct FunctorList_s {
+    char       tag[TAG_LENGTH];
     int        capacity;
     int        head;
     int        tail_plus;
-    FunctorRef list[RTOR_FUNCTOR_LIST_MAX];
+    FunctorRef    list[RTOR_READY_LIST_MAX];
+    char       end_tag[TAG_LENGTH];
 } FunctorList, *FunctorListRef;
 
 /**
@@ -98,7 +104,7 @@ struct Reactor_s {
     int                     epoll_fd;
     bool                    closed_flag;
     FdTableRef              table; // (int, CallbackData)
-    RunListRef              run_list;
+    FunctorListRef          ready_list;
 #if 1
     EvfdQueueRef            interthread_queue_ref;
     RtorWQueueRef           interthread_queue_watcher_ref;

@@ -78,7 +78,7 @@ int test_fdevent_1()
     UT_EQUAL_INT(test_ctx_p->counter, test_ctx_p->max_count);
     UT_EQUAL_INT(test_ctx_p->fdevent_counter, test_ctx_p->max_count);
     free(test_ctx_p);
-    rtor_free(rtor_ref);
+    rtor_reactor_free(rtor_ref);
     return 0;
 }
 
@@ -100,7 +100,7 @@ int test_fdevent_multiple()
     UT_EQUAL_INT(test_ctx_p_2->counter, test_ctx_p_2->max_count);
     free(test_ctx_p_1);
     free(test_ctx_p_2);
-    rtor_free(rtor_ref);
+    rtor_reactor_free(rtor_ref);
     return 0;
 }
 static void callback_1(RtorTimerRef watcher, XrTimerEvent event)

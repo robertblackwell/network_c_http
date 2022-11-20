@@ -1,18 +1,18 @@
 #include <c_http/simple_runloop/rl_internal.h>
 #include <assert.h>
 
-bool fd_map[CBTABLE_MAX];
+bool fd_map[RTOR_MAX_FDS];
 void fd_map_init() {
-    for(int i = 0; i < CBTABLE_MAX; i++)
+    for(int i = 0; i < RTOR_MAX_FDS; i++)
         fd_map[i] = false;
 }
 
 bool fd_map_at(int j) {
-    assert(j >= 0 && j < CBTABLE_MAX);
+    assert(j >= 0 && j < RTOR_MAX_FDS);
     return fd_map[j];
 }
 
 bool fd_map_set(int j) {
-    assert(j >= 0 && j < CBTABLE_MAX);
+    assert(j >= 0 && j < RTOR_MAX_FDS);
     return fd_map[j] = true;
 }

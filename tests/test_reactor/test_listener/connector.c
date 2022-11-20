@@ -27,6 +27,7 @@ void* connector_thread_func(void* arg)
         usleep(200000);
         Client_dispose(&client_ref);
     }
+    printf("Connector loop ended \n");
     // now wait here for all connections to be processed
     sleep(1);
     // for(int i = 0; i < 2; i++) {

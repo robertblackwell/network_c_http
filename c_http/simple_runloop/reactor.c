@@ -21,7 +21,7 @@ __thread ReactorRef my_reactor_ptr = NULL;
 
 #define CHECK_THREAD(reactor_ref) //assert(reactor_ref == my_reactor_ptr);
 
-#define MAX_EVENTS 4096
+
 
 static void drain_callback(void* arg)
 {
@@ -76,7 +76,6 @@ ReactorRef rtor_reactor_get_threads_reactor()
 
 /**
  * Create a new reactor runloop. Should only be one per thread
- * @TODO - store a runloop/reactor for each thread in thread local storage
  * @NOTE - this implementation only works for Linux and uses epoll
  */
 ReactorRef rtor_reactor_new(void) {
@@ -96,7 +95,8 @@ void rtor_reactor_init(ReactorRef athis) {
     CHTTP_ASSERT((runloop->epoll_fd != -1), "epoll_create failed");
     LOG_FMT("rtor_reactor_new epoll_fd %d", runloop->epoll_fd);
     runloop->table = FdTable_new();
-    runloop->run_list = RunList_new();
+//    runloop->ready_list = RunList_new();
+    runloop->ready_list = functor_list_new(RTOR_READY_LIST_MAX);
 }
 void rtor_reactor_enable_interthread_queue(ReactorRef rtor_ref)
 {
@@ -121,7 +121,7 @@ void rtor_reactor_close(ReactorRef athis)
     }
 }
 
-void rtor_free(ReactorRef athis)
+void rtor_reactor_free(ReactorRef athis)
 {
     XR_REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
@@ -129,6 +129,7 @@ void rtor_free(ReactorRef athis)
         rtor_reactor_close(athis);
     }
     FdTable_free(athis->table);
+    functor_list_free(athis->ready_list);
     free(athis);
 }
 
@@ -164,7 +165,7 @@ int rtor_reactor_reregister(ReactorRef athis, int fd, uint32_t interest, RtorWat
     assert(wref == wref_tmp);
     return 0;
 }
-void rtor_delete(ReactorRef athis, int fd)
+void rtor_reactor_delete(ReactorRef athis, int fd)
 {
     XR_REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
@@ -182,11 +183,12 @@ int rtor_reactor_run(ReactorRef athis, time_t timeout) {
     XR_REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
     int result;
-    struct epoll_event events[MAX_EVENTS];
+    struct epoll_event events[RTOR_MAX_EPOLL_FDS];
 
     time_t start = time(NULL);
 
     while (true) {
+        XR_REACTOR_CHECK_TAG(athis)
         time_t passed = time(NULL) - start;
         if(FdTable_size(athis->table) == 0) {
             goto cleanup;
@@ -195,11 +197,11 @@ int rtor_reactor_run(ReactorRef athis, time_t timeout) {
             rtor_wqueue_deregister(athis->interthread_queue_watcher_ref);
             goto cleanup;
         }
-        int max_events = MAX_EVENTS;
+        int max_events = RTOR_MAX_EPOLL_FDS;
         /**
-         * All entries on the runllist should be executed before we look for more fd events
+         * All entries on the ready should be executed before we look for more fd events
          */
-        assert(RunList_iterator(athis->run_list) == NULL);
+        assert(functor_list_size(athis->ready_list) == 0);
         int nfds = epoll_wait(athis->epoll_fd, events, max_events, -1);
         time_t currtime = time(NULL);
         switch (nfds) {
@@ -222,6 +224,7 @@ int rtor_reactor_run(ReactorRef athis, time_t timeout) {
                 goto cleanup;
             default: {
                 for (int i = 0; i < nfds; i++) {
+                    XR_REACTOR_CHECK_TAG(athis)
                     int fd = events[i].data.fd;
                     int mask = events[i].events;
                     LOG_FMT("rtor_reactor_run loop fd: %d events: %x", fd, mask);
@@ -229,15 +232,22 @@ int rtor_reactor_run(ReactorRef athis, time_t timeout) {
                     wref->handler(wref, events[i].events);
                     LOG_FMT("fd: %d", fd);
                     // call handler
+                    XR_REACTOR_CHECK_TAG(athis)
                 }
             }
         }
         FunctorRef fnc;
-        while(fnc = RunList_remove_first(athis->run_list)) {
-
-            Functor_call(fnc, athis);
-            Functor_free(fnc);
+        while(functor_list_size(athis->ready_list) != 0) {
+            XR_REACTOR_CHECK_TAG(athis)
+            Functor func = functor_list_remove(athis->ready_list);
+            func.f(athis, func.arg);
+            XR_REACTOR_CHECK_TAG(athis)
         }
+//        while(fnc = RunList_remove_first(athis->ready_list)) {
+//
+//            Functor_call(fnc, athis);
+//            Functor_free(fnc);
+//        }
     }
 
 cleanup:
@@ -247,16 +257,14 @@ cleanup:
 int rtor_reactor_post(ReactorRef athis, PostableFunction cb, void* arg)
 {
     XR_REACTOR_CHECK_TAG(athis)
-    FunctorRef fr = Functor_new(cb, arg);
-    RunList_add_back(athis->run_list, fr);
+    Functor func = {.f = cb, .arg = arg};
+    functor_list_add(athis->ready_list, func);
 }
 
 void rtor_reactor_interthread_post(ReactorRef athis, PostableFunction cb, void* arg)
 {
     XR_REACTOR_CHECK_TAG(athis)
     Functor func = {.f = cb, .arg = arg};
-//    func.f = cb;
-//    func.arg = arg;
     Evfdq_add(athis->interthread_queue_ref, func);
 #if 1
 #else

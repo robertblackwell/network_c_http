@@ -76,7 +76,7 @@ int test_timer_non_repeating()
 
     rtor_reactor_run(rtor_ref, 10000);
     /*We should only get here when there are no more timers or other events pending in the simple_runloop*/
-    rtor_free(rtor_ref);
+    rtor_reactor_free(rtor_ref);
     /* prove callback_non_repeating was called exactly once */
     UT_EQUAL_INT(test_ctx_p_1->counter, 1);
     free(test_ctx_p_1);
@@ -125,7 +125,7 @@ int test_timer_single_repeating()
     // assert counter was increment correct number of times
     UT_EQUAL_INT(test_ctx_p->counter, test_ctx_p->max_count);
     free(test_ctx_p);
-    rtor_free(rtor_ref);
+    rtor_reactor_free(rtor_ref);
 
     return 0;
 }
@@ -170,7 +170,7 @@ int test_timer_multiple_repeating()
     UT_EQUAL_INT(test_ctx_p_2->counter, test_ctx_p_2->max_count);
     free(test_ctx_p_1);
     free(test_ctx_p_2);
-    rtor_free(rtor_ref);
+    rtor_reactor_free(rtor_ref);
     return 0;
 }
 //
@@ -228,7 +228,7 @@ int test_timer_post()
     // assert counter was increment correct number of times
     UT_EQUAL_INT(test_ctx_p->counter, test_ctx_p->max_count);
     free(test_ctx_p);
-    rtor_free(rtor_ref);
+    rtor_reactor_free(rtor_ref);
     return 0;
 }
 

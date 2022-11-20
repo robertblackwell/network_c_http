@@ -44,6 +44,11 @@
 ///////////////////////////////////////////////////
 int test_List_new()
 {
+    FunctorRef tab = malloc(10*sizeof(Functor));
+    for(int i = 0; i < 10; i++) {
+        char* pch = &(tab[i]);
+        memset(pch, (int)('A') + i, sizeof(Functor));
+    }
     FunctorListRef lref = functor_list_new(10);
     int sz = functor_list_size(lref);
     UT_EQUAL_INT(sz, 0);

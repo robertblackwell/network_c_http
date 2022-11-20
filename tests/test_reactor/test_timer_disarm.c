@@ -146,7 +146,7 @@ int test_timer_disarm_rearm()
 
     free(test_ctx_p_1);
     free(test_ctx_p_2);
-    rtor_free(rtor_ref);
+    rtor_reactor_free(rtor_ref);
     return 0;
 }
 

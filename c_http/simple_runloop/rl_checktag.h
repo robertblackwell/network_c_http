@@ -9,6 +9,13 @@
 #ifdef TYPE_CHECK_ON
 #define TAG_LENGTH 10
 #define DECLARE_TAG(TAG) char tag[TAG_LENGTH]
+#define CHECK_TAG_FIELD(TAG, p, field) \
+    do { \
+        if(strcmp((p)->field, TAG) != 0) { \
+            assert(false);                  \
+        } \
+    } while(0);
+
 #define CHECK_TAG(TAG, p) \
     do { \
         if(strcmp((p)->tag, TAG) != 0) { \
@@ -21,6 +28,13 @@
     do { \
         assert(strcmp((p)->tag, TAG) != 0); \
     } while(0);
+
+#define SET_TAG_FIELD(TAG, p, field) \
+    do {                     \
+        static_assert(strlen(TAG) < TAG_LENGTH, "Tag too long in SET_TAG");                     \
+        sprintf((p)->field, "%s", TAG); \
+    } while(0);
+
 
 #define SET_TAG(TAG, p) \
     do {                     \
@@ -40,6 +54,8 @@
 #define WQueue_TAG      "XRQUE"
 #define WTimerFd_TAG    "XRTIMER"
 #define ITQueue_TAG     "ITQUEUE"
+#define FdTable_TAG     "FDTABL"
+#define FunctorList_TAG "FUNCLST"
 
 #define XR_WATCHER_DECLARE_TAG DECLARE_TAG(Watcher)
 
@@ -86,5 +102,19 @@
 #define XRTW_DECLARE_TAG DECLARE_TAG(WTimerFd_TAG)
 #define XR_WTIMER_CHECK_TAG(p) CHECK_TAG(WTimerFd_TAG, p)
 #define XR_WTIMER_SET_TAG(p) SET_TAG(WTimerFd_TAG, p)
+/**
+ * FdTable
+ */
+#define XR_FDTABL_DECLARE_TAG DECLARE_TAG(FdTable_TAG)
+#define XR_FDTABL_CHECK_TAG(p) CHECK_TAG(FdTable_TAG, p)
+#define XR_FDTABL_SET_TAG(p) SET_TAG(FdTable_TAG, p)
+
+/**
+ * Functor List
+ */
+#define XR_FNCLST_DECLARE_TAG DECLARE_TAG(FunctorList_TAG)
+#define XR_FNCLST_CHECK_TAG(p) CHECK_TAG(FunctorList_TAG, p)
+#define XR_FNCLST_SET_TAG(p) SET_TAG(FunctorList_TAG, p)
+
 
 #endif
