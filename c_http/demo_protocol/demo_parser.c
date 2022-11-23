@@ -34,7 +34,7 @@ enum State {
 #define is_ascii(ch) (isascii(ch))
 
 #define ERROR_RETURN(THIS, BYTES, ERRC) do{ \
-    DemoParserReturnValue rv = {.return_code = (ERRC), .bytes_consumed = (BYTES)}; \
+    DemoParserReturnValue rv = {.eom_flag = false, .error_code = (ERRC), .bytes_consumed = (BYTES)}; \
     return rv;               \
 }while(0);
 
@@ -94,7 +94,7 @@ DemoParserReturnValue DemoParser_consume(DemoParserRef this, const void* buf, in
                         break;
                     }
                     default:
-                        ERROR_RETURN(this, i, DemoParserRC_invalid_opcode)
+                        ERROR_RETURN(this, i, DemoParserErr_invalid_opcode)
                         break;
                 }
                 break;
@@ -103,7 +103,7 @@ DemoParserReturnValue DemoParser_consume(DemoParserRef this, const void* buf, in
                     this->m_state = STATE_BODY;
                 } else {
                     this->m_state = STATE_IDLE;
-                    ERROR_RETURN(this, i, DemoParserRC_expected_stx);
+                    ERROR_RETURN(this, i, DemoParserErr_expected_stx);
                 }
                 break;
             }
@@ -118,14 +118,14 @@ DemoParserReturnValue DemoParser_consume(DemoParserRef this, const void* buf, in
 //                    finalize_body(this);
                 } else {
                     this->m_state == STATE_IDLE;
-                    ERROR_RETURN(this, i, DemoParserRC_expected_ascii);
+                    ERROR_RETURN(this, i, DemoParserErr_expected_ascii);
                 }
                 break;
             }
             case STATE_LRC:
                 demo_message_set_lrc(this->m_current_message_ptr, ch);
                 this->m_state = STATE_IDLE;
-                DemoParserReturnValue r = {.return_code = DemoParserRC_end_of_message, .bytes_consumed = i + 1};
+                DemoParserReturnValue r = {.eom_flag = true, .error_code = 0, .bytes_consumed = i + 1};
                 return r;
                 break;
             case STATE_EOT_WAIT:
@@ -134,7 +134,7 @@ DemoParserReturnValue DemoParser_consume(DemoParserRef this, const void* buf, in
                 assert(false);
         }
     }
-    DemoParserReturnValue r = {.bytes_consumed = length, .return_code = DemoParserRC_message_incomplete};
+    DemoParserReturnValue r = {.eom_flag = false, .bytes_consumed = length, .error_code = 0};
     return r;
 }
 

@@ -247,11 +247,13 @@ static void reader(DemoHandlerRef handler_ref) {
         DemoParserReturnValue rv = DemoParser_consume(handler_ref->parser_ref, input_buffer_ptr, bytes_available);
         IOBuffer_consume(iob, rv.bytes_consumed);
         DemoMessageRef response = NULL;
-        if(rv.return_code == DemoParserRC_end_of_message) {
-            response = process_request(handler_ref);
-        } else if(rv.return_code == DemoParserRC_message_incomplete) {
-
-        } else {
+        if(rv.error_code == 0) {
+            if (rv.eom_flag) {
+                response = process_request(handler_ref);
+            } else {
+                // incomplete message
+            }
+        }else {
             // TODO - really reply to invalid messages ? probably not
             response = reply_invalid_request(handler_ref, rv);
         }

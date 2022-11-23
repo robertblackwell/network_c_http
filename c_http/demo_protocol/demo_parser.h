@@ -23,20 +23,27 @@ typedef struct DemoParserError_s DemoParserError;
  * \brief  Return code used as part of the value returned by Parser_consume() when processing data.
  */
 enum DemoParserRC {
-    DemoParserRC_end_of_message = 0x00,
-    DemoParserRC_message_incomplete = 0x01,
-    DemoParserRC_invalid_opcode,
-    DemoParserRC_expected_stx,
-    DemoParserRC_expected_ascii,
+    DemoParserRC_end_of_message = 0x01,
+    DemoParserRC_message_incomplete = 0x00,
+    DemoParserRC_error = -1,
+//    DemoParserRC_invalid_opcode,
+//    DemoParserRC_expected_stx,
+//    DemoParserRC_expected_ascii,
 };
+typedef int DemoParseErrCode;
+#define DemoParserErr_invalid_opcode -11
+#define DemoParserErr_expected_stx   -12
+#define DemoParserErr_expected_ascii -13
+
 typedef enum DemoParserRC DemoParserRC;
 
 /**
  * Value object return by Parser_consume()
  */
 struct DemoParserReturnValue {
-    DemoParserRC   return_code;
-    int            bytes_consumed;
+    long            bytes_consumed;
+    bool            eom_flag;
+    int             error_code;
 };
 
 typedef struct DemoParserReturnValue DemoParserReturnValue;
@@ -64,6 +71,7 @@ void DemoParser_dispose(DemoParserRef* parser_p);
 
 void DemoParser_begin(DemoParserRef parser, DemoMessageRef msg_ref);
 
+DemoParserReturnValue DemoParser_comsume_iobuffer(DemoParserRef parser_ref, IOBufferRef iobuf);
 DemoParserReturnValue DemoParser_consume(DemoParserRef parser, const void* buffer, int length);
 
 /**

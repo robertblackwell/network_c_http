@@ -129,6 +129,7 @@ int demosync_reader_read(DemoSyncReaderRef this, DemoMessageRef* msgref_ptr)
         int consumed = ret.bytes_consumed;
         IOBuffer_consume(iobuf, consumed);
         int tmp_remaining = IOBuffer_data_len(iobuf);
+#if 0
         switch(ret.return_code) {
             case DemoParserRC_invalid_opcode:
                 ///
@@ -147,5 +148,6 @@ int demosync_reader_read(DemoSyncReaderRef this, DemoMessageRef* msgref_ptr)
                 // return ok
                 return READER_OK;
         }
+#endif
     }
 }
