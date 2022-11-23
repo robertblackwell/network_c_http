@@ -1,6 +1,8 @@
 #include <c_http/demo_protocol/demo_parser.h>
 #include <c_http/common/utils.h>
 #include <ctype.h>
+
+
 /**
  * @addtogroup group_parser
  * @{
@@ -47,6 +49,7 @@ void DemoParser_initialize(DemoParserRef this);
 DemoParserRef DemoParser_new()
 {
     DemoParserRef this = malloc(sizeof(DemoParser));
+    DEMO_PARSER_SET_TAG(this)
     if(this == NULL)
         return NULL;
     this->m_message_done = false;
@@ -55,6 +58,7 @@ DemoParserRef DemoParser_new()
 
 void DemoParser_dispose(DemoParserRef* this_p)
 {
+    DEMO_PARSER_CHECK_TAG(*this_p)
     ASSERT_NOT_NULL(*this_p);
     DemoParserRef this= *this_p;
     free(this);
@@ -63,14 +67,17 @@ void DemoParser_dispose(DemoParserRef* this_p)
 }
 DemoMessageRef DemoParser_current_message(DemoParserRef this)
 {
+    DEMO_PARSER_CHECK_TAG(this)
     return this->m_current_message_ptr;
 }
 int DemoParser_append_bytes(DemoParserRef this, void *buffer, unsigned length)
 {
+    DEMO_PARSER_CHECK_TAG(this)
     return 0;
 }
 void DemoParser_begin(DemoParserRef this, DemoMessageRef message_ptr)
 {
+    DEMO_PARSER_CHECK_TAG(this)
     DemoParser_initialize(this);
     this->m_current_message_ptr = message_ptr;
     this->m_state = STATE_IDLE;
@@ -78,6 +85,7 @@ void DemoParser_begin(DemoParserRef this, DemoMessageRef message_ptr)
 
 DemoParserReturnValue DemoParser_consume(DemoParserRef this, const void* buf, int length)
 {
+    DEMO_PARSER_CHECK_TAG(this)
     char* charbuf = (char*) buf;
     for(int i = 0; i < length; i++) {
         int ch = charbuf[i];
@@ -140,6 +148,7 @@ DemoParserReturnValue DemoParser_consume(DemoParserRef this, const void* buf, in
 
 int DemoParser_get_errno(DemoParserRef this)
 {
+    DEMO_PARSER_CHECK_TAG(this)
     return 0;
 }
 DemoParserError DemoParser_get_error(DemoParserRef this)
@@ -147,6 +156,7 @@ DemoParserError DemoParser_get_error(DemoParserRef this)
 //    llhttp_errno_t x = llhttp_get_errno(this->m_llhttp_ptr);
 //    char* n = (char*)llhttp_errno_name(x);
 //    char* d = (char*)llhttp_errno_name(x);
+    DEMO_PARSER_CHECK_TAG(this)
     DemoParserError erst;
     erst.m_err_number = 1;
     erst.m_name = "";
@@ -156,6 +166,7 @@ DemoParserError DemoParser_get_error(DemoParserRef this)
 
 void DemoParser_initialize(DemoParserRef this)
 {
+    DEMO_PARSER_CHECK_TAG(this)
     this->m_started = false;
     this->m_message_done = false;
     this->m_current_message_ptr = NULL;

@@ -13,6 +13,8 @@
 #include <c_http/simple_runloop/runloop.h>
 #include <c_http/demo_protocol/demo_message.h>
 
+
+
 typedef struct Input_s {
 
 }Input, *InputRef;
@@ -35,7 +37,7 @@ static void writer(DemoHandlerRef handler_ref);
 static void handler(RtorStreamRef stream_ref, uint64_t event);
 static void error(DemoHandlerRef href, char* message);
 static DemoMessageRef reply_invalid_request(DemoHandlerRef href, DemoParserReturnValue rv);
-static DemoMessageRef process_request(DemoHandlerRef href);
+static DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef request);
 //static void handler_post(DemoHandlerRef handler_ref)
 //{
 //    handler_ref->post_active = true;
@@ -56,6 +58,8 @@ DemoHandlerRef demohandler_new(int socket, ReactorRef reactor_ref, DemoServerRef
 }
 void demohandler_init(DemoHandlerRef this, int socket, ReactorRef reactor_ref, DemoServerRef server_ref)
 {
+    DEMO_HANDLER_SET_TAG(this)
+    DEMO_HANDLER_CHECK_TAG(this)
     this->raw_socket = socket;
     this->reactor_ref = reactor_ref;
     this->server_ref = server_ref;
@@ -64,6 +68,7 @@ void demohandler_init(DemoHandlerRef this, int socket, ReactorRef reactor_ref, D
     this->active_input_buffer_ref = NULL;
     this->active_output_buffer_ref = NULL;
     this->input_list = List_new(NULL);
+    this->output_list = List_new(NULL);
     this->parser_ref = DemoParser_new();
     rtor_stream_register(this->socket_stream_ref);
     this->socket_stream_ref->both_arg = this;
@@ -76,12 +81,14 @@ void democlient_close(DemoHandlerRef this)
 }
 void demohandler_free(DemoHandlerRef this)
 {
+    DEMO_HANDLER_CHECK_TAG(this)
     rtor_stream_free(this->socket_stream_ref);
     free(this);
 }
 static void post_handler(ReactorRef reactor_ref, void* arg)
 {
     DemoHandlerRef handler_ref = arg;
+    DEMO_HANDLER_CHECK_TAG(handler_ref)
     handler_ref->post_active = false;
     if(!handler_ref->write_eagained) {
         writer(handler_ref);
@@ -97,6 +104,7 @@ static void event_handler(RtorStreamRef stream_ref, uint64_t event)
 {
     printf("event_handler %lx\n", event);
     DemoHandlerRef handler_ref = stream_ref->context;
+    DEMO_HANDLER_CHECK_TAG(handler_ref)
     printf("demohandler handler \n");
     if(event & EPOLLOUT) {
         write_epollout(handler_ref);
@@ -117,8 +125,9 @@ static void event_handler(RtorStreamRef stream_ref, uint64_t event)
  */
 static void write_start_maybe(DemoHandlerRef handler_ref)
 {
+    DEMO_HANDLER_CHECK_TAG(handler_ref)
     if(handler_ref->active_output_buffer_ref == NULL) {
-        DemoResponseRef resp = List_remove_first(handler_ref->input_list);
+        DemoResponseRef resp = List_remove_first(handler_ref->output_list);
         if(resp != NULL) {
             handler_ref->active_output_buffer_ref = demo_message_serialize(resp);
             if(!handler_ref->write_eagained) {
@@ -135,6 +144,7 @@ static void write_start_maybe(DemoHandlerRef handler_ref)
  */
 static void write_epollout(DemoHandlerRef handler_ref)
 {
+    DEMO_HANDLER_CHECK_TAG(handler_ref)
     if(handler_ref->active_output_buffer_ref != NULL) {
         if(handler_ref->write_eagained) {
             // need to restart write
@@ -143,7 +153,7 @@ static void write_epollout(DemoHandlerRef handler_ref)
         }
     } else {
         handler_ref->write_eagained = false;
-        DemoResponseRef resp = List_first(handler_ref->input_list);
+        DemoResponseRef resp = List_first(handler_ref->output_list);
         if(resp != NULL) {
             handler_ref->active_output_buffer_ref = demo_message_serialize(resp);
             if(handler_ref->write_eagained) {
@@ -154,6 +164,7 @@ static void write_epollout(DemoHandlerRef handler_ref)
 }
 static void writer(DemoHandlerRef handler_ref)
 {
+    DEMO_HANDLER_CHECK_TAG(handler_ref)
     CHTTP_ASSERT((handler_ref->active_output_buffer_ref != NULL), "writer");
     IOBufferRef iob = handler_ref->active_output_buffer_ref;
 
@@ -180,6 +191,7 @@ static void writer(DemoHandlerRef handler_ref)
 static void postable_write_handler(ReactorRef reactor_ref, void* arg)
 {
     DemoHandlerRef handler_ref = arg;
+    DEMO_HANDLER_CHECK_TAG(handler_ref)
     CHTTP_ASSERT((handler_ref->active_output_buffer_ref != NULL), "post_write_handler");
     writer(handler_ref);
 }
@@ -190,14 +202,17 @@ static void postable_read_handler(ReactorRef reactor_ref, void* arg)
 }
 static void read_start(DemoHandlerRef handler_ref)
 {
+    DEMO_HANDLER_CHECK_TAG(handler_ref)
     rtor_reactor_post(handler_ref->reactor_ref, &postable_read_handler, handler_ref);
 }
 static void postable_reader(ReactorRef reactor_ref, void* arg)
 {
     DemoHandlerRef handler_ref = arg;
+    DEMO_HANDLER_CHECK_TAG(handler_ref)
     reader(handler_ref);
 }
 static void reader(DemoHandlerRef handler_ref) {
+    DEMO_HANDLER_CHECK_TAG(handler_ref)
     int buffer_size = 1000;
     IOBufferRef iob;
     void *input_buffer_ptr;
@@ -249,16 +264,28 @@ static void reader(DemoHandlerRef handler_ref) {
         DemoMessageRef response = NULL;
         if(rv.error_code == 0) {
             if (rv.eom_flag) {
-                response = process_request(handler_ref);
+                DemoMessageRef request = handler_ref->parser_ref->m_current_message_ptr;
+                List_add_back(handler_ref->input_list, request);
+                response = process_request(handler_ref, request);
+//                demo_message_dispose(&(handler_ref->parser_ref->m_current_message_ptr));
+//                handler_ref->parser_ref->m_current_message_ptr = NULL;
+                handler_ref->parser_ref->m_current_message_ptr = demo_message_new();
+                List_add_back(handler_ref->output_list, response);
+                if(IOBuffer_data_len(handler_ref->active_input_buffer_ref) == 0) {
+                    // if the buffer has not been fully processed leave the remainder for the next iteration
+                    IOBuffer_dispose(&(handler_ref->active_input_buffer_ref));
+                }
+                write_start_maybe(handler_ref);
+//                demo_message_dispose(&(handler_ref->parser_ref->m_current_message_ptr));
+//                handler_ref->parser_ref->m_current_message_ptr = NULL;
+//                handler_ref->parser_ref->m_current_message_ptr = demo_message_new();
             } else {
                 // incomplete message
             }
         }else {
             // TODO - really reply to invalid messages ? probably not
             response = reply_invalid_request(handler_ref, rv);
-        }
-        if(response != NULL) {
-            List_add_back(handler_ref->input_list, response);
+            List_add_back(handler_ref->output_list, response);
             if(IOBuffer_data_len(handler_ref->active_input_buffer_ref) == 0) {
                 // if the buffer has not been fully processed leave the remainder for the next iteration
                 IOBuffer_dispose(&(handler_ref->active_input_buffer_ref));
@@ -268,20 +295,38 @@ static void reader(DemoHandlerRef handler_ref) {
             handler_ref->parser_ref->m_current_message_ptr = NULL;
             handler_ref->parser_ref->m_current_message_ptr = demo_message_new();
         }
+//        if(response != NULL) {
+//            List_add_back(handler_ref->output_list, response);
+//            if(IOBuffer_data_len(handler_ref->active_input_buffer_ref) == 0) {
+//                // if the buffer has not been fully processed leave the remainder for the next iteration
+//                IOBuffer_dispose(&(handler_ref->active_input_buffer_ref));
+//            }
+//            write_start_maybe(handler_ref);
+//            demo_message_dispose(&(handler_ref->parser_ref->m_current_message_ptr));
+//            handler_ref->parser_ref->m_current_message_ptr = NULL;
+//            handler_ref->parser_ref->m_current_message_ptr = demo_message_new();
+//        }
         rtor_reactor_post(handler_ref->reactor_ref, &postable_reader, handler_ref);
 
     } else if(bytes_available == 0) {
+        /**
+         * TODO - handle close of the socket and release of the related data structures
+         */
         error(handler_ref, "reader zero bytes - peer closed connection");
     } else {
         if (errno_save == eagain) {
             handler_ref->read_eagained = true;
         } else {
+            /**
+             * TODO - handle close of the socket and release of the related data structures
+             */
             error(handler_ref, "reader - io error close and move on");
         }
     }
 }
 static void read_epollin(DemoHandlerRef handler_ref)
 {
+    DEMO_HANDLER_CHECK_TAG(handler_ref)
     handler_ref->read_eagained = false;
     if(handler_ref->active_input_buffer_ref == NULL) {
         read_start(handler_ref);
@@ -291,16 +336,19 @@ static void read_epollin(DemoHandlerRef handler_ref)
 }
 static void queue_response(DemoHandlerRef handler_ref, DemoResponseRef response_ref)
 {
-    List_add_back(handler_ref->input_list, response_ref);
+    DEMO_HANDLER_CHECK_TAG(handler_ref)
+    List_add_back(handler_ref->output_list, response_ref);
     write_start_maybe(handler_ref);
 }
 
 static void error(DemoHandlerRef href, char* msg)
 {
+    DEMO_HANDLER_CHECK_TAG(href)
     printf("Got an error this is the message: %s\n", msg);
 }
 static DemoMessageRef reply_invalid_request(DemoHandlerRef href, DemoParserReturnValue rv)
 {
+    DEMO_HANDLER_CHECK_TAG(href)
     DemoMessageRef m = demo_message_new();
     demo_message_set_is_request(m, false);
     BufferChainRef bdy =  BufferChain_new();
@@ -308,10 +356,11 @@ static DemoMessageRef reply_invalid_request(DemoHandlerRef href, DemoParserRetur
     demo_message_set_body(m, bdy);
     return m;
 }
-static DemoMessageRef process_request(DemoHandlerRef href)
+static DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef request)
 {
+    DEMO_HANDLER_CHECK_TAG(href)
     DemoMessageRef reply = demo_message_new();
-    DemoMessageRef request = href->parser_ref->m_current_message_ptr;
+//    DemoMessageRef request = href->parser_ref->m_current_message_ptr;
     demo_message_set_is_request(reply, false);
     BufferChainRef request_body = demo_message_get_body(request);
     BufferChainRef bc = BufferChain_new();
