@@ -123,6 +123,8 @@ void rtor_timer_register(RtorTimerRef athis, TimerEventHandler cb, void* ctx, ui
     XR_WTIMER_CHECK_TAG(athis)
     athis->interval = interval_ms;
     athis->repeating = repeating;
+    // interpose our own handler to do repeating stuff
+    athis->handler = &handler;
     athis->timer_handler = cb;
     athis->context = ctx;
     athis->timer_handler_arg = ctx;

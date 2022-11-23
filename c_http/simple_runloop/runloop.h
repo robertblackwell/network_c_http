@@ -123,7 +123,7 @@ void rtor_lIstener_disarm(RtorListenerRef athis);
 void rtor_listener_verify(RtorListenerRef r);
 ReactorRef rtor_listener_get_reactor(RtorListenerRef athis);
 int rtor_listener_get_fd(RtorListenerRef this);
-//#define WListenerFd_get_reactor(p) Watcher_get_reactor((RtorWatcherRef)p)
+//#define rtor_listenerFd_get_reactor(p) Watcher_get_reactor((RtorWatcherRef)p)
 
 /**
  * RtorRdrWrtrWatcher is a special type of watcher designed to watch stream style file descriptors
@@ -137,6 +137,7 @@ void rtor_stream_init(RtorStreamRef athis, ReactorRef runloop, int fd);
 void rtor_stream_free(RtorStreamRef athis);
 void rtor_stream_register(RtorStreamRef athis);
 void rtor_stream_deregister(RtorStreamRef athis);
+void rtor_stream_arm_both(RtorStreamRef athis, SocketEventHandler event_handler, void* arg);
 void rtor_stream_arm_read(RtorStreamRef athis, SocketEventHandler event_handler, void* arg);
 void rtor_stream_arm_write(RtorStreamRef athis, SocketEventHandler event_handler, void* arg);
 void rtor_stream_disarm_read(RtorStreamRef athis);
@@ -179,7 +180,7 @@ Functor Evfdq_remove(EvfdQueueRef athis);
 
 RtorWQueueRef rtor_wqueue_new(ReactorRef runloop, EvfdQueueRef qref);
 void rtor_wqueue_dispose(RtorWQueueRef athis);
-void rtor_wqueue_register(RtorWQueueRef athis, QueueEventHandler cb, void* arg, uint64_t watch_what);
+void rtor_wqueue_register(RtorWQueueRef athis, QueueEventHandler cb, void* arg);
 void rtor_wqueue_change_watch(RtorWQueueRef athis, QueueEventHandler cb, void* arg, uint64_t watch_what);
 void rtor_wqueue_deregister(RtorWQueueRef athis);
 void rtor_wqueue_verify(RtorWQueueRef r);

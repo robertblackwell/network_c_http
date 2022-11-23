@@ -73,8 +73,8 @@ void* reader_thread_func(void* arg)
     QSyncReaderRef q_rdr_ctx = (QSyncReaderRef)arg;
     ReactorRef rtor_ref = rtor_reactor_new();
     RtorWQueueRef qw = rtor_wqueue_new(rtor_ref, q_rdr_ctx->queue);
-    uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
-    rtor_wqueue_register(qw, QReaderHandler, arg, interest);
+//    uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
+    rtor_wqueue_register(qw, QReaderHandler, arg);
     rtor_reactor_run(rtor_ref, -1);
 }
 void* writer_thread_func(void* arg)

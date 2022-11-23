@@ -95,7 +95,6 @@ void rtor_reactor_init(ReactorRef athis) {
     CHTTP_ASSERT((runloop->epoll_fd != -1), "epoll_create failed");
     LOG_FMT("rtor_reactor_new epoll_fd %d", runloop->epoll_fd);
     runloop->table = FdTable_new();
-//    runloop->ready_list = RunList_new();
     runloop->ready_list = functor_list_new(RTOR_READY_LIST_MAX);
 }
 void rtor_reactor_enable_interthread_queue(ReactorRef rtor_ref)
@@ -104,7 +103,7 @@ void rtor_reactor_enable_interthread_queue(ReactorRef rtor_ref)
     rtor_ref->interthread_queue_watcher_ref = rtor_wqueue_new(rtor_ref, rtor_ref->interthread_queue_ref);
     uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
     rtor_wqueue_register(rtor_ref->interthread_queue_watcher_ref, &interthread_queue_handler,
-                         (void *) rtor_ref->interthread_queue_ref, interest);
+                         (void *) rtor_ref->interthread_queue_ref);
 }
 void rtor_reactor_close(ReactorRef athis)
 {

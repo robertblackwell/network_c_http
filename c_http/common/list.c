@@ -104,6 +104,21 @@ void List_display(const ListRef this)
         iter = next;
     }
 }
+ListIterator List_find(ListRef this, void* needle)
+{
+    printf("List[%p] count: %d head %p tail %p\n", (void*)this, this->count, (void*)this->head, (void*)this->tail);
+    ListNode* iter = this->head;
+    while(iter != NULL) {
+        if(iter->item == needle) {
+            return iter;
+        }
+        printf("Node[%p] forward:%p backwards:%p  item:%p  %ld\n", (void*)iter, (void*)iter->forward, (void*)iter->backward, iter->item, (long)iter->item);
+        ListNode* next = iter->forward;
+        iter = next;
+    }
+    return NULL;
+}
+
 // add to the front of the list
 void List_add_front(ListRef lref, void* content)
 {

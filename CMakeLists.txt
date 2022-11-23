@@ -177,7 +177,7 @@ add_subdirectory(c_http)
 add_subdirectory(tests)
 add_subdirectory(app)
 add_subdirectory(verifier)
-#add_subdirectory(async_app)
+add_subdirectory(demo_app)
 
 # Doxygen
 

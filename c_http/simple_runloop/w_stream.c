@@ -17,6 +17,9 @@
 static void handler(RtorWatcherRef watcher, uint64_t event)
 {
     RtorStreamRef sw = (RtorStreamRef)watcher;
+    if(sw->both_handler) {
+        sw->both_handler(sw, event);
+    }
     if((sw->event_mask & EPOLLIN) && (sw->read_evhandler)) {
         sw->read_evhandler(sw, event);
     }
@@ -24,6 +27,7 @@ static void handler(RtorWatcherRef watcher, uint64_t event)
         sw->write_evhandler(sw, event);
     }
 }
+
 static void anonymous_free(RtorWatcherRef p)
 {
     RtorStreamRef twp = (RtorStreamRef)p;
@@ -84,6 +88,21 @@ void rtor_stream_deregister(RtorStreamRef athis)
     int res = rtor_reactor_deregister(athis->runloop, athis->fd);
     assert(res == 0);
 }
+void rtor_stream_arm_both(RtorStreamRef athis, SocketEventHandler event_handler, void* arg)
+{
+    uint64_t interest = EPOLLET | EPOLLOUT | EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | athis->event_mask;
+    athis->event_mask = interest;
+    XR_SOCKW_CHECK_TAG(athis)
+    if(event_handler != NULL) {
+        athis->both_handler = event_handler;
+    }
+    if (arg != NULL) {
+        athis->both_arg = arg;
+    }
+    int res = rtor_reactor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
+    assert(res == 0);
+}
+
 void rtor_stream_arm_read(RtorStreamRef athis, SocketEventHandler event_handler, void* arg)
 {
     uint64_t interest = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | athis->event_mask;

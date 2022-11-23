@@ -14,7 +14,7 @@
 #include <c_http/common/list.h>
 
 // enables use of eventfd rather than two pipe trick
-#define  C_HTTP_EFD_QUEUE
+//#define  C_HTTP_EFD_QUEUE
 
 //typedef struct EvfdQueue_s {
 //    ListRef         list;
@@ -36,21 +36,22 @@ static void dealloc(void** p)
 static void mk_fds(EvfdQueueRef athis)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
-#ifdef C_HTTP_EFD_QUEUE
+#ifdef RTOR_EVENTFD_ENABLE
     int fd = eventfd(0, O_NONBLOCK | O_CLOEXEC);
     me->readfd = fd;
     me->writefd = fd;
+#else
+    pipe2(this->pipefds, O_NONBLOCK | O_CLOEXEC);
+    this->readfd = this->pipefds[0];
+    this->writefd = this->pipefds[1];
+#endif
     uint64_t buf;
     while(1) {
         int nread = read(fd, &buf, sizeof(buf));
         if (nread == -1) break;
     }
     assert(errno == EAGAIN);
-#else
-    pipe2(this->pipefds, O_NONBLOCK | O_CLOEXEC);
-    this->readfd = this->pipefds[0];
-    this->writefd = this->pipefds[1];
-#endif
+
 }
 void Evfdq_init(EvfdQueueRef athis)
 {

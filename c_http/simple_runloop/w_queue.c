@@ -27,6 +27,7 @@ void WQueue_init(RtorWQueueRef this, ReactorRef runloop, EvfdQueueRef qref)
     this->runloop = runloop;
     this->free = &anonymous_free;
     this->handler = &handler;
+    this->context = this;
 }
 RtorWQueueRef rtor_wqueue_new(ReactorRef runloop, EvfdQueueRef qref)
 {
@@ -40,11 +41,12 @@ void rtor_wqueue_dispose(RtorWQueueRef athis)
     close(athis->fd);
     free((void*)athis);
 }
-void rtor_wqueue_register(RtorWQueueRef athis, QueueEventHandler cb, void* arg, uint64_t watch_what)
+void rtor_wqueue_register(RtorWQueueRef athis, QueueEventHandler cb, void* arg)
 {
 //    XR_WQUEUE_CHECK_TAG(this)
+    uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
 
-    uint32_t interest = watch_what;
+//    uint32_t interest = watch_what;
     athis->queue_event_handler = cb;
     athis->queue_event_handler_arg = arg;
     int res = rtor_reactor_register(athis->runloop, athis->fd, interest, (RtorWatcherRef) (athis));

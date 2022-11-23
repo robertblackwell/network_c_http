@@ -160,6 +160,17 @@ void IOBuffer_destroy(IOBufferRef this);
  */
 void IOBuffer_reset(IOBufferRef this);
 /**
+ * @brief Make more space in the buffer. Without changing the overall capacity of the buffer
+ * There are two strategies used in this function:
+ * Strategy 1 - move used area to front of allocated memory
+ *      When a buffer contains data but no space for new data
+ *      this operation will move the active data to the front of the allocated
+ *      memory and relase some memory for space for new data.
+ * Strategy 2 - when strategy 1 will not work expand the allocated memory space
+ *      by doing a realloc
+ */
+void IOBuffer_consolidate_space(IOBufferRef this);
+/**
  * @brief Free an IOBuffer and all its associated resources.
  *
  * @Note: The argument is updated to NULL after this call.

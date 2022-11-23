@@ -18,6 +18,8 @@
 #define RTOR_FDTABLE_MAX        RTOR_MAX_FDS
 #define RTOR_READY_LIST_MAX     (2 * RTOR_MAX_FDS)
 
+// enables use of eventfd rather than two pipe trick
+#define  RTOR_EVENTFD_ENABLE
 
 
 struct FdTable_s;
@@ -80,7 +82,7 @@ typedef struct FunctorList_s {
     int        capacity;
     int        head;
     int        tail_plus;
-    FunctorRef    list[RTOR_READY_LIST_MAX];
+    FunctorRef list; // points to an array of Functor objects
     char       end_tag[TAG_LENGTH];
 } FunctorList, *FunctorListRef;
 
@@ -148,7 +150,6 @@ struct RtorWatcher_s {
 };
 
 
-#define  C_HTTP_EFD_QUEUE
 typedef struct EvfdQueue_s {
     FunctorListRef      list;
     pthread_mutex_t     queue_mutex;
@@ -175,6 +176,8 @@ struct RtorEventfd_s {
 struct RtorStream_s {
     struct RtorWatcher_s;
     uint64_t                 event_mask;
+    SocketEventHandler       both_handler;
+    void*                    both_arg;
     SocketEventHandler       read_evhandler;
     void*                    read_arg;
     SocketEventHandler       write_evhandler;
@@ -224,9 +227,6 @@ struct RtorInterthreadQueue_s {
 typedef uint64_t XrTimerEvent;
 struct RtorTimer_s {
     struct RtorWatcher_s;
-    /**
-     * XrTimerWatecher specific properties
-     */
     time_t                  expiry_time;
     uint64_t                interval;
     bool                    repeating;

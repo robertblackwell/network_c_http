@@ -1,7 +1,8 @@
 #define _GNU_SOURCE
 #define ENABLE_LOG
-
-#include <c_http/async/async_server.h>
+#include <c_http/simple_runloop/rl_internal.h>
+#include <c_http/demo_protocol//demo_server.h>
+#include <c_http/demo_protocol//demo_handler.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -13,32 +14,37 @@
 #include <c_http/common/alloc.h>
 #include <c_http/common/utils.h>
 #include <c_http/socket_functions.h>
-#include<c_http/async/tcp_conn.h>
-#include <c_http/simple_runloop/runloop.h>
-#include <c_http/simple_runloop/rl_internal.h>
 
+static DemoHandlerRef my_only_client;
 
 static socket_handle_t create_listener_socket(int port, const char *host);
 static void set_non_blocking(socket_handle_t socket);
 static void on_post_done(void* arg);
 static void on_message(TcpConnRef conn_ref, void* arg, int status);
 void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event);
-
-AsyncServerRef AsyncServer_new(int port)
+void completion_cb(DemoServerRef server_ref, DemoHandlerRef handler_ref)
 {
-    AsyncServerRef sref = (AsyncServerRef) eg_alloc(sizeof(AsyncServer));
+    ListIter x = List_find(server_ref->handler_list, handler_ref);
+    List_itr_remove(server_ref->handler_list, &x);
+    // cleanup the handler_ref ??
+}
+DemoServerRef DemoServer_new(int port)
+{
+    DemoServerRef sref = (DemoServerRef) eg_alloc(sizeof(DemoServer));
     sref->port = port;
+    // NOTE: List will only displse the nodes not the item
+    sref->handler_list = List_new(NULL);
     return sref;
 }
 
-void AsyncServer_dispose(AsyncServerRef *sref)
+void DemoServer_dispose(DemoServerRef *sref)
 {
     ASSERT_NOT_NULL(*sref);
     free(*sref);
     *sref = NULL;
 }
 
-void AsyncServer_listen(AsyncServerRef sref)
+void DemoServer_listen(DemoServerRef sref)
 {
     ASSERT_NOT_NULL(sref)
     int port = sref->port;
@@ -51,11 +57,11 @@ void AsyncServer_listen(AsyncServerRef sref)
     RtorListenerRef lw = sref->listening_watcher_ref;
     rtor_listener_register(lw, on_event_listening, sref);
     rtor_reactor_run(sref->reactor_ref, -1);
-    LOG_FMT("AsyncServer finishing");
+    LOG_FMT("DemoServer finishing");
 
 }
 
-void AsyncServer_terminate(AsyncServerRef this)
+void DemoServer_terminate(DemoServerRef this)
 {
     close(this->listening_socket_fd);
 }
@@ -81,6 +87,7 @@ static socket_handle_t create_listener_socket(int port, const char *host)
         goto error_02;
     }
     if((result = bind(tmp_socket, (struct sockaddr *) &sin, sizeof(sin))) != 0) {
+        int x = errno;
         goto error_03;
     }
     if((result = listen(tmp_socket, SOMAXCONN)) != 0) {
@@ -89,16 +96,16 @@ static socket_handle_t create_listener_socket(int port, const char *host)
     return tmp_socket;
 
     error_01:
-    printf("socket call failed with errno %d \n", errno);
+    printf("socket call failed with errno %d %s\n", errno, strerror(errno));
     assert(0);
     error_02:
-    printf("setsockopt call failed with errno %d \n", errno);
+    printf("setsockopt call failed with errno %d %s\n", errno, strerror(errno));
     assert(0);
     error_03:
-    printf("bind call failed with errno %d \n", errno);
+    printf("bind call failed with errno %d %s\n", errno, strerror(errno));
     assert(0);
     error_04:
-    printf("listen call failed with errno %d \n", errno);
+    printf("listen call failed with errno %d %s\n", errno, strerror(errno));
     assert(0);
 }
 
@@ -125,17 +132,18 @@ void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event)
 {
 
     printf("listening_hander \n");
+    DemoServerRef server_ref = listener_watcher_ref->listen_arg;
+//    DemoServerRef server_ref = listener_watcher_ref->listen_arg;
+
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
 
-    AsyncServerRef server_ref = listener_watcher_ref->listen_arg;
     int sock2 = accept(server_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
     if(sock2 <= 0) {
+        printf("accpt failed errno %d  sttrerror: %s\n", errno, strerror(errno));
         LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
     }
-    RtorStreamRef sw_ref = rtor_stream_new(server_ref->reactor_ref, sock2);
-    TcpConnRef conn = TcpConn_new(sock2, sw_ref, server_ref);
-    MessageRef inmsg = Message_new();
-    TcpConn_read_msg(conn, inmsg, on_message, conn);
+    DemoHandlerRef handler = demohandler_new(sock2, rtor_listener_get_reactor(listener_watcher_ref), server_ref);
+    List_add_back(server_ref->handler_list, handler);
 }
 

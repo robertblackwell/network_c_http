@@ -7,13 +7,19 @@
 #include <assert.h>
 #include <c_http/macros.h>
 
-//typedef struct FunctorList_s {
-//    int        capacity;
-//    int        head;
-//    int        tail_plus;
-//    FunctorRef list[100];
-//} FunctorList, *FunctorListRef;
-
+// TODO - make these macros at some point
+static FunctorRef addr_of_functor_entry(FunctorListRef lstref, int index)
+{
+    return (&(lstref->list[index]));
+}
+static void set_functor_entry(FunctorListRef lstref, int index, Functor func)
+{
+    lstref->list[index] = func;
+}
+static Functor get_functor_entry(FunctorListRef lstref, int index)
+{
+    return (lstref->list[index]);
+}
 FunctorListRef functor_list_new(int capacity)
 {
     CHTTP_ASSERT((capacity <= RTOR_READY_LIST_MAX), "Functor List capacity is too big");
@@ -23,33 +29,26 @@ FunctorListRef functor_list_new(int capacity)
     st->capacity = capacity;
     st->head = 0;
     st->tail_plus = 0;
-    for(int i = 0; i < capacity; i++) {
-        st->list[i] = (FunctorRef)malloc(sizeof(Functor)*2);
-//        st->list[i] = malloc(sizeof(Functor)*2);
-    }
+    st->list = malloc(sizeof(Functor) * (capacity + 1));
     XR_FNCLST_CHECK_TAG(st);
     CHECK_TAG_FIELD(FunctorList_TAG, st, end_tag)
     return st;
 }
 void functor_list_free(FunctorListRef this)
 {
-//    return;
-    for(int i = 0; i < this->capacity; i++) {
-        free(this->list[i]);
-    }
+    free(this->list);
     free(this);
 }
 void functor_list_add(FunctorListRef lstref, Functor func)
 {
     XR_FNCLST_CHECK_TAG(lstref);
     CHECK_TAG_FIELD(FunctorList_TAG, lstref, end_tag)
-
     int tmp = (lstref->head + 1) % lstref->capacity;
     if(tmp == lstref->tail_plus) {
         CHTTP_ASSERT(false, "functor list is full cannot add another element");
     }
     lstref->head = tmp;
-    *(lstref->list[lstref->head]) = func;
+    set_functor_entry(lstref, (lstref->head), func);
     CHECK_TAG_FIELD(FunctorList_TAG, lstref, end_tag)
 }
 int functor_list_size(FunctorListRef lstref)
@@ -68,5 +67,6 @@ Functor functor_list_remove(FunctorListRef lstref)
     int tmpix = (lstref->tail_plus + 1) % lstref->capacity;
     lstref->tail_plus = tmpix;
     CHECK_TAG_FIELD(FunctorList_TAG, lstref, end_tag)
-    return *(lstref->list[tmpix]);
+
+    return get_functor_entry(lstref, tmpix);
 }

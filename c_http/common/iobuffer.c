@@ -33,7 +33,7 @@ typedef struct IOBuffer_s {
     int    buffer_capacity;   // always holds the size of the buffer
     void*  buffer_ptr;        // points to the start of unused data in buffer
     int    buffer_length;     // same as capacity
-    int    buffer_remaining;  // length of daat no consumed
+    int    buffer_remaining;  // length of data no consumed
 
 } IOBuffer, *IOBufferRef;
 
@@ -143,10 +143,28 @@ int IOBuffer_space_len(const IOBufferRef this)
 void IOBuffer_commit(IOBufferRef this, int bytes_used)
 {
     IOBUFFER_CHECK_TAG(this)
+    assert(bytes_used > 0);
     //@TODO  this looks like a bug test with two successive commits
+    // TODO - what happens if the bytes_used parameter is too big
     this->buffer_remaining += bytes_used;
     *(char*)(this->mem_p + this->buffer_remaining) = IOB_TERM_CHAR;
 }
+void IOBuffer_consolidate_space(IOBufferRef this)
+{
+    IOBUFFER_CHECK_TAG(this)
+    IOBufferRef tmp = IOBuffer_new_with_capacity(this->buffer_capacity);
+    IOBuffer_data_add(tmp, IOBuffer_data(this), IOBuffer_data_len(this));
+    void* tmp_mem_p = this->mem_p;
+    this->mem_p = tmp->mem_p;
+    free(tmp_mem_p);
+    this->buffer_ptr = tmp->buffer_ptr;
+    this->buffer_remaining = tmp->buffer_remaining;
+    this->buffer_capacity = tmp->buffer_capacity;
+    this->allocated_capacity = tmp->allocated_capacity;
+    this->char_p = this->mem_p;
+    free(tmp);
+}
+
 void IOBuffer_consume(IOBufferRef this, int byte_count)
 {
     IOBUFFER_CHECK_TAG(this)

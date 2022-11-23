@@ -193,5 +193,7 @@ void List_itr_remove(ListRef lref, ListIterator *itr_adr);
 /// \return     void* value held by node pointed at by itr
 ///
 void* List_itr_unpack(ListRef lref, ListIterator itr);
+
+ListIterator List_find(ListRef lref, void* needle);
 /** @} */
 #endif

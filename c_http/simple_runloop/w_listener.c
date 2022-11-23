@@ -35,6 +35,7 @@ void rtor_listener_init(RtorListenerRef athis, ReactorRef runloop, int fd)
     athis->runloop = runloop;
     athis->free = &anonymous_free;
     athis->handler = &handler;
+    athis->context = athis;
     athis->listen_arg = NULL;
     athis->listen_evhandler = NULL;
 }
@@ -53,6 +54,8 @@ void rtor_listener_free(RtorListenerRef athis)
 void rtor_listener_register(RtorListenerRef athis, ListenerEventHandler event_handler, void* arg)
 {
     rtor_listener_verify(athis);
+    athis->handler = &handler;
+    athis->context = athis;
     if( event_handler != NULL) {
         athis->listen_evhandler = event_handler;
     }
@@ -60,8 +63,12 @@ void rtor_listener_register(RtorListenerRef athis, ListenerEventHandler event_ha
         athis->listen_arg = arg;
     }
 
+    /**
+     * NOTE the EPOLLEXCLUSIVE - prevents the thundering herd problem. Defaults to level triggered
+     */
     uint32_t interest =  EPOLLIN | EPOLLEXCLUSIVE;
     int res = rtor_reactor_register(athis->runloop, athis->fd, interest, (RtorWatcherRef) (athis));
+
     if(res != 0) {
         printf("register status : %d errno: %d \n", res, errno);
     }
@@ -95,7 +102,7 @@ void WListenerFd_disarm(RtorListenerRef athis)
     int res = rtor_reactor_reregister(athis->runloop, athis->fd, 0L, (RtorWatcherRef) athis);
     assert(res == 0);
 }
-ReactorRef WListenerFd_get_reactor(RtorListenerRef athis)
+ReactorRef rtor_listener_get_reactor(RtorListenerRef athis)
 {
     return athis->runloop;
 }

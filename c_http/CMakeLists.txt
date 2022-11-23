@@ -57,8 +57,20 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 		sync/sync_handler.h
 		sync/sync_handler_example.h
 		sync/worker.h
+	#demo_protocol
+		demo_protocol/demo_client.h
+		demo_protocol/demo_handler.h
+		demo_protocol/demo_message.h
+		demo_protocol/demo_parser.h
+		demo_protocol/demo_parser_test.h
+		demo_protocol/demo_server.h
+		demo_protocol/demo_sync_reader.h
+		demo_protocol/demo_sync_writer.h
+		demo_protocol/demo_parser_test.h
+		demo_protocol/demo_sync_reader_private.h
 
-	#sync simple_server app
+
+		#sync simple_server app
 
 	#sync verifier app
 
@@ -138,7 +150,18 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		async/handler_simple.c
 		async/handler_echo.c
 		async/handler_function.c
-
+	#demo_protocol
+		demo_protocol/demo_client.c
+		demo_protocol/demo_handler.c
+		demo_protocol/demo_message.c
+		demo_protocol/demo_parser.c
+		demo_protocol/demo_parser_test.c
+		demo_protocol/demo_server.c
+		demo_protocol/demo_sync_reader.c
+		demo_protocol/demo_sync_writer.c
+	#async_demo
+#		async_demo/demo_server.c
+#		async_demo/demo_handler.c
 	)
 
 set_source_files_properties(${C_HTTP_LIBRARY_SOURCE_FILES} PROPERTIES LANGUAGE C)
