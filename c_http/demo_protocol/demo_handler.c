@@ -36,7 +36,9 @@ static void reader(DemoHandlerRef handler_ref);
 static void writer(DemoHandlerRef handler_ref);
 static void handler(RtorStreamRef stream_ref, uint64_t event);
 static void error(DemoHandlerRef href, char* message);
-static DemoMessageRef reply_invalid_request(DemoHandlerRef href, DemoParserReturnValue rv);
+static void read_message_handler(DemoHandlerRef handler_ref, DemoMessageRef msg);
+static void read_parser_error_handler(DemoHandlerRef handler_ref, const char* error_message);
+static DemoMessageRef reply_invalid_request(DemoHandlerRef href, const char* error_message);
 static DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef request);
 //static void handler_post(DemoHandlerRef handler_ref)
 //{
@@ -69,7 +71,7 @@ void demohandler_init(DemoHandlerRef this, int socket, ReactorRef reactor_ref, D
     this->active_output_buffer_ref = NULL;
     this->input_list = List_new(NULL);
     this->output_list = List_new(NULL);
-    this->parser_ref = DemoParser_new();
+    this->parser_ref = DemoParser_new((void*)&read_message_handler, (void*)(&read_parser_error_handler), this);
     rtor_stream_register(this->socket_stream_ref);
     this->socket_stream_ref->both_arg = this;
     rtor_stream_arm_both(this->socket_stream_ref, &event_handler, this);
@@ -211,80 +213,49 @@ static void postable_reader(ReactorRef reactor_ref, void* arg)
     DEMO_HANDLER_CHECK_TAG(handler_ref)
     reader(handler_ref);
 }
+static void read_parser_error_handler(DemoHandlerRef handler_ref, const char* error_message)
+{
+    printf("read_error_handler\n");
+    // TODO - really reply to invalid messages ? probably not
+    DemoMessageRef response = NULL;
+    response = reply_invalid_request(handler_ref, error_message);
+    List_add_back(handler_ref->output_list, response);
+    write_start_maybe(handler_ref);
+
+}
+static void read_message_handler(DemoHandlerRef handler_ref, DemoMessageRef msg)
+{
+    DemoMessageRef response = NULL;
+    DemoMessageRef request = handler_ref->parser_ref->m_current_message_ptr;
+    response = process_request(handler_ref, request);
+    List_add_back(handler_ref->output_list, response);
+    write_start_maybe(handler_ref);
+}
+
 static void reader(DemoHandlerRef handler_ref) {
     DEMO_HANDLER_CHECK_TAG(handler_ref)
     int buffer_size = 1000;
-    IOBufferRef iob;
-    void *input_buffer_ptr;
-    int input_buffer_length;
-    int data_length_still_in_iobuffer;
     if (handler_ref->active_input_buffer_ref == NULL) {
         handler_ref->active_input_buffer_ref = IOBuffer_new_with_capacity(buffer_size);
-        if(handler_ref->parser_ref->m_current_message_ptr == NULL) {
-            DemoMessageRef m = demo_message_new();
-            DemoParser_begin(handler_ref->parser_ref, m);
-        }
     }
-#if 0
-    if (IOBuffer_space_len(handler_ref->active_input_buffer_ref) == 0) {
-#if 1
-        IOBuffer_consolidate_space(handler_ref->active_input_buffer_ref);
-#else
-        IOBufferRef tmp = handler_ref->active_input_buffer_ref;
-        handler_ref->active_input_buffer_ref = IOBuffer_new_with_capacity(buffer_size);
-        IOBuffer_data_add(handler_ref->active_input_buffer_ref, IOBuffer_data(tmp), IOBuffer_data_len(tmp));
-        IOBuffer_dispose(&tmp);
-#endif
-    }
-#endif
-    iob = handler_ref->active_input_buffer_ref;
-    input_buffer_ptr = IOBuffer_space(iob);
-    input_buffer_length = IOBuffer_space_len(iob);
-    data_length_still_in_iobuffer = IOBuffer_data_len(handler_ref->active_input_buffer_ref);
+    IOBufferRef iob = handler_ref->active_input_buffer_ref;
+    void* input_buffer_ptr = IOBuffer_space(iob);
+    int input_buffer_length = IOBuffer_space_len(iob);
     int fd = handler_ref->socket_stream_ref->fd;
     int bytes_available;
-    if (data_length_still_in_iobuffer == 0) {
-        // no data left in buffer after previous read and parse - read more
-        bytes_available = recv(fd, input_buffer_ptr, input_buffer_length, MSG_DONTWAIT);
-        if(bytes_available > 0)
-            IOBuffer_commit(iob, bytes_available);
-    } else {
-        // there is data still in the buffer from the last parse operation
-        // that means the last parse stopped short probably end-of-message
-        // just parse the remaining data
-        bytes_available = data_length_still_in_iobuffer;
-        input_buffer_ptr = IOBuffer_data(handler_ref->active_input_buffer_ref);
-    }
+    bytes_available = recv(fd, input_buffer_ptr, input_buffer_length, MSG_DONTWAIT);
     int errno_save = errno;
     int eagain = EAGAIN;
     char* errstr = strerror(errno_save);
     if(bytes_available > 0) {
-        DemoParserReturnValue rv = DemoParser_consume(handler_ref->parser_ref, input_buffer_ptr, bytes_available);
-        IOBuffer_consume(iob, rv.bytes_consumed);
-        DemoMessageRef response = NULL;
+        IOBuffer_commit(iob, bytes_available);
+        DemoParserPrivateReturnValue rv = DemoParser_consume(handler_ref->parser_ref, iob);
         if(rv.error_code == 0) {
-            if (rv.eom_flag) {
-                DemoMessageRef request = handler_ref->parser_ref->m_current_message_ptr;
-                List_add_back(handler_ref->input_list, request);
-                response = process_request(handler_ref, request);
-//                demo_message_dispose(&(handler_ref->parser_ref->m_current_message_ptr));
-//                handler_ref->parser_ref->m_current_message_ptr = NULL;
-                handler_ref->parser_ref->m_current_message_ptr = demo_message_new();
-                List_add_back(handler_ref->output_list, response);
-                if(IOBuffer_data_len(handler_ref->active_input_buffer_ref) == 0) {
-                    // if the buffer has not been fully processed leave the remainder for the next iteration
-                    IOBuffer_dispose(&(handler_ref->active_input_buffer_ref));
-                }
-                write_start_maybe(handler_ref);
-//                demo_message_dispose(&(handler_ref->parser_ref->m_current_message_ptr));
-//                handler_ref->parser_ref->m_current_message_ptr = NULL;
-//                handler_ref->parser_ref->m_current_message_ptr = demo_message_new();
-            } else {
-                // incomplete message
-            }
-        }else {
+            // handled in the on_message_cb
+        } else {
             // TODO - really reply to invalid messages ? probably not
-            response = reply_invalid_request(handler_ref, rv);
+            DemoMessageRef response = NULL;
+            response = reply_invalid_request(handler_ref, "an error message");
             List_add_back(handler_ref->output_list, response);
             if(IOBuffer_data_len(handler_ref->active_input_buffer_ref) == 0) {
                 // if the buffer has not been fully processed leave the remainder for the next iteration
@@ -295,17 +266,6 @@ static void reader(DemoHandlerRef handler_ref) {
             handler_ref->parser_ref->m_current_message_ptr = NULL;
             handler_ref->parser_ref->m_current_message_ptr = demo_message_new();
         }
-//        if(response != NULL) {
-//            List_add_back(handler_ref->output_list, response);
-//            if(IOBuffer_data_len(handler_ref->active_input_buffer_ref) == 0) {
-//                // if the buffer has not been fully processed leave the remainder for the next iteration
-//                IOBuffer_dispose(&(handler_ref->active_input_buffer_ref));
-//            }
-//            write_start_maybe(handler_ref);
-//            demo_message_dispose(&(handler_ref->parser_ref->m_current_message_ptr));
-//            handler_ref->parser_ref->m_current_message_ptr = NULL;
-//            handler_ref->parser_ref->m_current_message_ptr = demo_message_new();
-//        }
         rtor_reactor_post(handler_ref->reactor_ref, &postable_reader, handler_ref);
 
     } else if(bytes_available == 0) {
@@ -346,13 +306,16 @@ static void error(DemoHandlerRef href, char* msg)
     DEMO_HANDLER_CHECK_TAG(href)
     printf("Got an error this is the message: %s\n", msg);
 }
-static DemoMessageRef reply_invalid_request(DemoHandlerRef href, DemoParserReturnValue rv)
+static DemoMessageRef reply_invalid_request(DemoHandlerRef href, const char* error_message)
 {
     DEMO_HANDLER_CHECK_TAG(href)
     DemoMessageRef m = demo_message_new();
     demo_message_set_is_request(m, false);
     BufferChainRef bdy =  BufferChain_new();
-    BufferChain_append_cstr(bdy, "You made a mistake");
+    BufferChain_append_cstr(bdy, "You made a mistake. message: ");
+    char tmp[100];
+    sprintf(tmp, "%s", error_message);
+    BufferChain_append_cstr(bdy, tmp);
     demo_message_set_body(m, bdy);
     return m;
 }

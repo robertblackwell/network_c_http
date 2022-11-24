@@ -125,7 +125,7 @@ int demosync_reader_read(DemoSyncReaderRef this, DemoMessageRef* msgref_ptr)
         }
         char* tmp = IOBuffer_data(iobuf);
         char* tmp2 = IOBuffer_memptr(iobuf);
-        DemoParserReturnValue ret = DemoParser_consume(this->m_parser, (void*) IOBuffer_data(iobuf), IOBuffer_data_len(iobuf));
+        DemoParserPrivateReturnValue_s ret = DemoParser_consume(this->m_parser, (void*) IOBuffer_data(iobuf), IOBuffer_data_len(iobuf));
         int consumed = ret.bytes_consumed;
         IOBuffer_consume(iobuf, consumed);
         int tmp_remaining = IOBuffer_data_len(iobuf);

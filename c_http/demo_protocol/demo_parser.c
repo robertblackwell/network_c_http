@@ -2,11 +2,6 @@
 #include <c_http/common/utils.h>
 #include <ctype.h>
 
-
-/**
- * @addtogroup group_parser
- * @{
- */
 //
 // simple ascii protocol.
 // Frame is :
@@ -35,9 +30,11 @@ enum State {
 #define CH_EOT 0x04
 #define is_ascii(ch) (isascii(ch))
 
-#define ERROR_RETURN(THIS, BYTES, ERRC) do{ \
-    DemoParserReturnValue rv = {.eom_flag = false, .error_code = (ERRC), .bytes_consumed = (BYTES)}; \
-    return rv;               \
+#define PARSE_ERROR_CB(THIS, BYTES, ERRC) do{ \
+    IOBuffer_consume(iobuffer_ref, BYTES);                                        \
+    DemoParserPrivateReturnValue rv = {.eom_flag = false, .error_code = (ERRC), .bytes_consumed = (BYTES)}; \
+    THIS->on_read_parser_error_cb(THIS->on_read_ctx, ERRC##_message);                                        \
+    /*return rv;*/               \
 }while(0);
 
 #define SET_IS_REQUEST(THIS, V) (DemoMessage_set_is_request(THIS->m_current_message_ptr, V)
@@ -46,16 +43,28 @@ enum State {
 
 void DemoParser_initialize(DemoParserRef this);
 
-DemoParserRef DemoParser_new()
+DemoParserRef DemoParser_new(
+        void(*on_read_message_cb)(void* ctx, DemoMessageRef),
+        void(*on_read_parser_error_cb)(void* ctx, const char* error_message),
+        void* on_read_ctx)
 {
     DemoParserRef this = malloc(sizeof(DemoParser));
     DEMO_PARSER_SET_TAG(this)
     if(this == NULL)
         return NULL;
-    this->m_message_done = false;
+//    this->m_message_done = false;
+    this->m_current_message_ptr = NULL;
+    this->on_read_message_cb = on_read_message_cb;
+    this->on_read_parser_error_cb = on_read_parser_error_cb;
+    this->on_read_ctx = on_read_ctx;
     return this;
 }
-
+void DemoParser_free(DemoParserRef this)
+{
+    DEMO_PARSER_CHECK_TAG(this)
+    ASSERT_NOT_NULL(this);
+    free(this);
+}
 void DemoParser_dispose(DemoParserRef* this_p)
 {
     DEMO_PARSER_CHECK_TAG(*this_p)
@@ -75,22 +84,51 @@ int DemoParser_append_bytes(DemoParserRef this, void *buffer, unsigned length)
     DEMO_PARSER_CHECK_TAG(this)
     return 0;
 }
-void DemoParser_begin(DemoParserRef this, DemoMessageRef message_ptr)
+void DemoParser_begin(DemoParserRef this)
 {
     DEMO_PARSER_CHECK_TAG(this)
     DemoParser_initialize(this);
-    this->m_current_message_ptr = message_ptr;
+    if(this->m_current_message_ptr != NULL) {
+        demo_message_dispose(&(this->m_current_message_ptr));
+    }
+    this->m_current_message_ptr = demo_message_new();
     this->m_state = STATE_IDLE;
 }
-
-DemoParserReturnValue DemoParser_consume(DemoParserRef this, const void* buf, int length)
+/**
+ * Comsumes some or all of the data given by buf and length and either partially or fully parses a DemoMessage.
+ * The possible outcomes are:
+ *   1   consumes all of the data annd only parses a partial message
+ *   2   comsumes only some of the data and only parses part of a message - THIS SHOULD NEVER HAPPEN
+ *   3   consume all of the data and complete the parsing of a message.
+ *          IN which case the message is in m_current_message_ptr
+ *          and the bytes_consumed == length or the input IOBUffer is now empty
+ *   4   consume only some of the data and completes the parsing of a message.
+ *          this means that the input buffer had the tail of one message and the start of another
+ *          the completed message is in m_current_message_ptr
+ *          bytes_consumed < length
+ *          the input IOBUffer is NOT empty
+ *          the input IOBuffer MUST be presented again to the parser because there is unprocessed data in it
+ *    3. error - a parse error was detected and there is data left in the buffer unprocessed
+ *          error_code will give details of the error
+ *          the buffer must be presented again
+ *    4. error - a parse error was detected and the is NO data left unprocessed in the buffer
+ *          error_code will give details of the error
+ *          the buffer should NOT be presented again
+ */
+DemoParserPrivateReturnValue DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_ref)
 {
+    void* buf = IOBuffer_data(iobuffer_ref);
+    int length = IOBuffer_data_len(iobuffer_ref);
     DEMO_PARSER_CHECK_TAG(this)
+
     char* charbuf = (char*) buf;
     for(int i = 0; i < length; i++) {
         int ch = charbuf[i];
         switch (this->m_state) {
             case STATE_IDLE:
+                if(this->m_current_message_ptr == NULL) {
+                    this->m_current_message_ptr = demo_message_new();
+                }
                 if(ch == CH_SOH) this->m_state = STATE_OPCODE;
                 break;
             case STATE_OPCODE:
@@ -102,7 +140,7 @@ DemoParserReturnValue DemoParser_consume(DemoParserRef this, const void* buf, in
                         break;
                     }
                     default:
-                        ERROR_RETURN(this, i, DemoParserErr_invalid_opcode)
+                        PARSE_ERROR_CB(this, i, DemoParserErr_invalid_opcode)
                         break;
                 }
                 break;
@@ -111,7 +149,7 @@ DemoParserReturnValue DemoParser_consume(DemoParserRef this, const void* buf, in
                     this->m_state = STATE_BODY;
                 } else {
                     this->m_state = STATE_IDLE;
-                    ERROR_RETURN(this, i, DemoParserErr_expected_stx);
+                    PARSE_ERROR_CB(this, i, DemoParserErr_expected_stx);
                 }
                 break;
             }
@@ -126,15 +164,15 @@ DemoParserReturnValue DemoParser_consume(DemoParserRef this, const void* buf, in
 //                    finalize_body(this);
                 } else {
                     this->m_state == STATE_IDLE;
-                    ERROR_RETURN(this, i, DemoParserErr_expected_ascii);
+                    PARSE_ERROR_CB(this, i, DemoParserErr_expected_ascii);
                 }
                 break;
             }
             case STATE_LRC:
                 demo_message_set_lrc(this->m_current_message_ptr, ch);
                 this->m_state = STATE_IDLE;
-                DemoParserReturnValue r = {.eom_flag = true, .error_code = 0, .bytes_consumed = i + 1};
-                return r;
+                this->on_read_message_cb(this->on_read_ctx, this->m_current_message_ptr);
+                this->m_current_message_ptr = demo_message_new();
                 break;
             case STATE_EOT_WAIT:
                 break;
@@ -142,7 +180,8 @@ DemoParserReturnValue DemoParser_consume(DemoParserRef this, const void* buf, in
                 assert(false);
         }
     }
-    DemoParserReturnValue r = {.eom_flag = false, .bytes_consumed = length, .error_code = 0};
+    IOBuffer_consume(iobuffer_ref, length);
+    DemoParserPrivateReturnValue r = {.eom_flag = false, .bytes_consumed = length, .error_code = 0};
     return r;
 }
 
@@ -167,7 +206,5 @@ DemoParserError DemoParser_get_error(DemoParserRef this)
 void DemoParser_initialize(DemoParserRef this)
 {
     DEMO_PARSER_CHECK_TAG(this)
-    this->m_started = false;
-    this->m_message_done = false;
     this->m_current_message_ptr = NULL;
 }

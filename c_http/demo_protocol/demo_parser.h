@@ -47,18 +47,28 @@ typedef int DemoParseErrCode;
 #define DemoParserErr_expected_stx   -12
 #define DemoParserErr_expected_ascii -13
 
+#define DemoParserErr_invalid_opcode_message "invalid opcode"
+#define DemoParserErr_expected_stx_message   "expected etx"
+#define DemoParserErr_expected_ascii_message "expected printable"
+
 typedef enum DemoParserRC DemoParserRC;
+
 
 /**
  * Value object return by Parser_consume()
  */
-struct DemoParserReturnValue {
+struct DemoParserPrivateReturnValue_s {
     long            bytes_consumed;
     bool            eom_flag;
     int             error_code;
 };
-
-typedef struct DemoParserReturnValue DemoParserReturnValue;
+typedef struct DemoParserPrivateReturnValue_s DemoParserPrivateReturnValue;
+typedef struct DemoParserReturnValue_s {
+    void*       completed_message_ref;
+    IOBufferRef remaining_data_ref;
+    bool        error_flag;
+    int         error_code;
+}DemoParserReturnValue, *DemoParserReturnValueRef;
 
 /**
  * Type holding context data for Parser functions. Allows for parsing to continue
@@ -69,30 +79,21 @@ typedef struct DemoParser_s DemoParser, *DemoParserRef;
 
 struct DemoParser_s {
     DEMO_PARSER_DECLARE_TAG;
-    bool m_started;
-    bool m_message_done;
     int  m_state;
+    void* on_read_ctx;
+    void(*on_read_message_cb)(void* read_ctx, DemoMessageRef msg);
+    void(*on_read_parser_error_cb)(void* read_ctx, const char* error_message);
     DemoMessageRef  m_current_message_ptr;
-    ///////////////////////////////////////////////////////////////////////////////////
-    // String buffers used to accumulate values demo-parser
-    ///////////////////////////////////////////////////////////////////////////////////
-    CbufferRef             m_opcode_buf;
 };
 
-DemoParserRef DemoParser_new();
+DemoParserRef DemoParser_new(
+        void(*on_read_message_cb)(void* ctx, DemoMessageRef),
+        void(*on_read_parser_error_cb)(void* ctx, const char* error_message),
+        void* on_read_ctx);
 void DemoParser_dispose(DemoParserRef* parser_p);
+void DemoParser_free(DemoParserRef this);
 
-void DemoParser_begin(DemoParserRef parser, DemoMessageRef msg_ref);
-
-DemoParserReturnValue DemoParser_comsume_iobuffer(DemoParserRef parser_ref, IOBufferRef iobuf);
-DemoParserReturnValue DemoParser_consume(DemoParserRef parser, const void* buffer, int length);
-
-/**
- * @brief Returns the message currently being worked on. Only valid after Parser_consume() returns ParserReturnValue.return_code == ReturnRC_end_of_message
- * @param parser ParserRef
- * @return MessageRef or NULL
- */
-DemoMessageRef      DemoParser_current_message(DemoParserRef parser);
+DemoParserPrivateReturnValue DemoParser_consume(DemoParserRef parser, IOBufferRef iobuffer_ref);
 
 int  DemoParser_get_errno(DemoParserRef parser);
 DemoParserError     DemoParser_get_error(DemoParserRef parser);

@@ -126,6 +126,6 @@ def test_send_big_fragments():
 # expected = make_frame("R", "[mnbvcxzlkjhgfdsapoiuytrewq][QWERTYUIOPASDFGHJKLZXCVBNM]")
 
 test_simple()
-# test_message_data_left_in_buffer()
-# test_simple_multiple_buffers()
-# test_send_big_fragments()
+test_message_data_left_in_buffer()
+test_simple_multiple_buffers()
+test_send_big_fragments()

@@ -157,8 +157,8 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		demo_protocol/demo_parser.c
 		demo_protocol/demo_parser_test.c
 		demo_protocol/demo_server.c
-		demo_protocol/demo_sync_reader.c
-		demo_protocol/demo_sync_writer.c
+#		demo_protocol/demo_sync_reader.c
+#		demo_protocol/demo_sync_writer.c
 	#async_demo
 #		async_demo/demo_server.c
 #		async_demo/demo_handler.c
