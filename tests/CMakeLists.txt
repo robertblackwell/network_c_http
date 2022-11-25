@@ -22,8 +22,8 @@ add_subdirectory(test_buffers)
 
 # dont run this one without a server up and running
 # add_subdirectory(test_client)
-add_subdirectory(test_static_list)
-add_subdirectory(test_demo_parser)
+#add_subdirectory(test_static_list)
+#add_subdirectory(test_demo_parser)
 #add_subdirectory(test_memalloc)
 add_subdirectory(test_queue)
 add_subdirectory(test_istype)

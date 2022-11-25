@@ -1,6 +1,7 @@
 #include <c_http/demo_protocol/demo_parser.h>
 #include <c_http/common/utils.h>
 #include <ctype.h>
+#include <c_http//logger.h>
 
 //
 // simple ascii protocol.
@@ -171,8 +172,12 @@ DemoParserPrivateReturnValue DemoParser_consume(DemoParserRef this, IOBufferRef 
             case STATE_LRC:
                 demo_message_set_lrc(this->m_current_message_ptr, ch);
                 this->m_state = STATE_IDLE;
+                LOG_FMT("DemmoParser_consume got a message will call new message handler \n");
                 this->on_read_message_cb(this->on_read_ctx, this->m_current_message_ptr);
                 this->m_current_message_ptr = demo_message_new();
+                DemoParserPrivateReturnValue r = {.eom_flag = false, .bytes_consumed = i+1, .error_code = 0};
+                IOBuffer_consume(iobuffer_ref, i+1);
+                return r;
                 break;
             case STATE_EOT_WAIT:
                 break;

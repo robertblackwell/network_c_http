@@ -1,8 +1,8 @@
 #define _GNU_SOURCE
 #define ENABLE_LOG
 #include <c_http/simple_runloop/rl_internal.h>
-#include <c_http/demo_protocol//demo_server.h>
-#include <c_http/demo_protocol//demo_handler.h>
+#include <c_http/demo_protocol/demo_server.h>
+#include <c_http/demo_protocol/demo_handler.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -22,23 +22,35 @@ static void set_non_blocking(socket_handle_t socket);
 static void on_post_done(void* arg);
 static void on_message(TcpConnRef conn_ref, void* arg, int status);
 void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event);
-void completion_cb(DemoServerRef server_ref, DemoHandlerRef handler_ref)
+void on_handler_completion_cb(void* void_server_ref, DemoHandlerRef handler_ref)
 {
+    printf("file: demo_server.c on_handler_completeion_cb \n");
+
+    DemoServerRef server_ref = void_server_ref;
+    DEMO_SERVER_CHECK_TAG(server_ref)
     ListIter x = List_find(server_ref->handler_list, handler_ref);
+    DemoHandlerRef href = List_itr_unpack(server_ref->handler_list, x);
+    List_itr_remove(server_ref->handler_list, &x);
+    printf("");
+    // now free up all the objects
+    return;
     List_itr_remove(server_ref->handler_list, &x);
     // cleanup the handler_ref ??
 }
 DemoServerRef DemoServer_new(int port)
 {
     DemoServerRef sref = (DemoServerRef) eg_alloc(sizeof(DemoServer));
+    DEMO_SERVER_SET_TAG(sref)
     sref->port = port;
     // NOTE: List will only displse the nodes not the item
     sref->handler_list = List_new(NULL);
+//    sref->completion_callback = &on_handler_completion_cb;
     return sref;
 }
 
 void DemoServer_dispose(DemoServerRef *sref)
 {
+    DEMO_SERVER_CHECK_TAG(*sref)
     ASSERT_NOT_NULL(*sref);
     free(*sref);
     *sref = NULL;
@@ -46,6 +58,7 @@ void DemoServer_dispose(DemoServerRef *sref)
 
 void DemoServer_listen(DemoServerRef sref)
 {
+    DEMO_SERVER_CHECK_TAG(sref)
     ASSERT_NOT_NULL(sref)
     int port = sref->port;
     struct sockaddr_in peername;
@@ -63,6 +76,7 @@ void DemoServer_listen(DemoServerRef sref)
 
 void DemoServer_terminate(DemoServerRef this)
 {
+    DEMO_SERVER_CHECK_TAG(this)
     close(this->listening_socket_fd);
 }
 
@@ -133,6 +147,8 @@ void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event)
 
     printf("listening_hander \n");
     DemoServerRef server_ref = listener_watcher_ref->listen_arg;
+    DEMO_SERVER_CHECK_TAG(server_ref)
+
 //    DemoServerRef server_ref = listener_watcher_ref->listen_arg;
 
     struct sockaddr_in peername;
@@ -143,7 +159,13 @@ void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event)
         printf("accpt failed errno %d  sttrerror: %s\n", errno, strerror(errno));
         LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
     }
-    DemoHandlerRef handler = demohandler_new(sock2, rtor_listener_get_reactor(listener_watcher_ref), server_ref);
+    LOG_FMT("Listerner accepted sock fd: %d\n", sock2);
+    DemoHandlerRef handler = demohandler_new(
+            sock2,
+            rtor_listener_get_reactor(listener_watcher_ref),
+            on_handler_completion_cb,
+            server_ref);
+
     List_add_back(server_ref->handler_list, handler);
 }
 

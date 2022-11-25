@@ -34,7 +34,7 @@ int test_B001_vfunc (ListRef results)
     BufferChainRef b = demo_message_get_body(rref->message);
     IOBufferRef cb = BufferChain_compact(b);
     IOBufferRef bb = demo_message_serialize(m1);
-    char* x = IOBuffer_cstr(cb);
+    const char* x = IOBuffer_cstr(cb);
     return 0;
 }
 ListRef make_demo_test()

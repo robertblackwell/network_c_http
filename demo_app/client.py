@@ -35,6 +35,8 @@ def make_big_bytes_response_frame(body: str, repeat:int):
 def fragment_frame(frame: str, nbr_fragments: int):
     ln = len(frame)
     frag_size = ln // nbr_fragments    
+    if nbr_fragments == 1:
+        return frame
     frags = []
     for i in range(nbr_fragments - 1):
         pos = i * frag_size
@@ -89,7 +91,7 @@ def test_message_data_left_in_buffer():
         s.sendall(b"ABCDEFGHIJK\x03L")
         delay()
         data = s.recv(3*1024)
-        s.settimeout(3)
+        s.settimeout(5)
         try:
             data2 = s.recv(3*1024)
             data_total = data + data2
@@ -100,6 +102,24 @@ def test_message_data_left_in_buffer():
         test_check("test_message_data_left_in_buffer", expected, data_total)
     s.close()
         
+def test_send_2_frames_1_buffer():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(('localhost', 9011))
+    for i in range(1):
+        frame1 = make_frame("Q", "[mnbvcxzlkjhgfdsapoiuytrewq]")
+        frame2 = make_frame("Q", "[QWERTYUIOPASDFGHJKLZXCVBNM]")
+        frame = b"\x01Q\x02[mnbvcxzlkjhgfdsapoiuytrewq]\x03L\x01Q\x02[QWERTYUIOPASDFGHJKLZXCVBNM]\x03L"
+        s.sendall(frame)
+        data = s.recv(3*1024)
+        s.settimeout(3)
+        try:
+            data2 = s.recv(3*1024)
+            data_total = data + data2
+        except:
+            data_total = data
+        expected = b"\x01R\x02[mnbvcxzlkjhgfdsapoiuytrewq]\x03L\x04\x01R\x02[QWERTYUIOPASDFGHJKLZXCVBNM]\x03L\x04"
+        test_check("test_send_fragments", expected, data_total)
+    s.close();
 
 def test_send_fragments():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -111,6 +131,7 @@ def test_send_fragments():
         expected = make_bytes_response_frame("[mnbvcxzlkjhgfdsapoiuytrewq][QWERTYUIOPASDFGHJKLZXCVBNM]")
         test_check("test_send_fragments", expected, data)
     s.close();
+
 def test_send_big_fragments():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('localhost', 9011))
@@ -124,8 +145,9 @@ def test_send_big_fragments():
 
     
 # expected = make_frame("R", "[mnbvcxzlkjhgfdsapoiuytrewq][QWERTYUIOPASDFGHJKLZXCVBNM]")
-
-test_simple()
-test_message_data_left_in_buffer()
-test_simple_multiple_buffers()
-test_send_big_fragments()
+for i in range(1):
+    test_send_2_frames_1_buffer()
+    test_simple()
+    test_message_data_left_in_buffer()
+    test_simple_multiple_buffers()
+    test_send_big_fragments()

@@ -59,6 +59,7 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 		sync/worker.h
 	#demo_protocol
 		demo_protocol/demo_client.h
+		demo_protocol/demo_connection.h
 		demo_protocol/demo_handler.h
 		demo_protocol/demo_message.h
 		demo_protocol/demo_parser.h
@@ -153,6 +154,7 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	#demo_protocol
 		demo_protocol/demo_client.c
 		demo_protocol/demo_handler.c
+		demo_protocol/demo_connection.c
 		demo_protocol/demo_message.c
 		demo_protocol/demo_parser.c
 		demo_protocol/demo_parser_test.c
