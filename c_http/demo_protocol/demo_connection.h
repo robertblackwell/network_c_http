@@ -18,6 +18,18 @@
 
 
 typedef struct DemoConnection_s DemoConnection, *DemoConnectionRef;
+/**
+ * In the following void* href is aan anonymous reference
+ * passed to the connection at init time by the parent/sibling object
+ * that created the DemoConnection object
+ *
+ */
+typedef void(*DC_Read_CB)(void* href, DemoMessageRef, int status);
+typedef void(*DC_Write_CB)(void* href, int status);
+/**
+ * DC_Close_CB is called by the connection when it is closing down
+ */
+typedef void(*DC_Close_CB)(void* href);
 
 typedef struct DemoConnection_s {
     DEMO_PARSER_DECLARE_TAG;
@@ -29,9 +41,9 @@ typedef struct DemoConnection_s {
     DemoParserRef   parser_ref;
     int             read_state;
     int             write_state;
-    void(*on_read_cb)(void* href, DemoMessageRef, int status);
-    void(*on_write_cb)(void* href, int status);
-    void(*on_close_cb)(void* href);
+    DC_Read_CB      on_read_cb;
+    DC_Write_CB     on_write_cb;
+    DC_Close_CB     on_close_cb;
     bool            readside_posted;
     bool            writeside_posted;
     bool            post_active;

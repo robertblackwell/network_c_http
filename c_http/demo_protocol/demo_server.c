@@ -31,11 +31,6 @@ void on_handler_completion_cb(void* void_server_ref, DemoHandlerRef handler_ref)
     ListIter x = List_find(server_ref->handler_list, handler_ref);
     DemoHandlerRef href = List_itr_unpack(server_ref->handler_list, x);
     List_itr_remove(server_ref->handler_list, &x);
-    printf("");
-    // now free up all the objects
-    return;
-    List_itr_remove(server_ref->handler_list, &x);
-    // cleanup the handler_ref ??
 }
 DemoServerRef DemoServer_new(int port)
 {

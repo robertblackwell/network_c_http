@@ -23,7 +23,8 @@ enum State {
     STATE_BODY,
     STATE_EXT_WAIT,
     STATE_LRC,
-    STATE_EOT_WAIT
+    STATE_EOT_WAIT,
+    STATE_ERROR_RECOVERY
 };
 #define CH_SOH 0x01
 #define CH_STX 0x02
@@ -33,7 +34,7 @@ enum State {
 
 #define PARSE_ERROR_CB(THIS, BYTES, ERRC) do{ \
     IOBuffer_consume(iobuffer_ref, BYTES);                                        \
-    DemoParserPrivateReturnValue rv = {.eom_flag = false, .error_code = (ERRC), .bytes_consumed = (BYTES)}; \
+    DemoParserPrivateReturnValue rv = {.error_code = (ERRC)}; \
     THIS->on_read_parser_error_cb(THIS->on_read_ctx, ERRC##_message);                                        \
     /*return rv;*/               \
 }while(0);
@@ -45,8 +46,7 @@ enum State {
 void DemoParser_initialize(DemoParserRef this);
 
 DemoParserRef DemoParser_new(
-        void(*on_read_message_cb)(void* ctx, DemoMessageRef),
-        void(*on_read_parser_error_cb)(void* ctx, const char* error_message),
+        DP_MessageComple_CB on_message_complete_cb,
         void* on_read_ctx)
 {
     DemoParserRef this = malloc(sizeof(DemoParser));
@@ -55,8 +55,7 @@ DemoParserRef DemoParser_new(
         return NULL;
 //    this->m_message_done = false;
     this->m_current_message_ptr = NULL;
-    this->on_read_message_cb = on_read_message_cb;
-    this->on_read_parser_error_cb = on_read_parser_error_cb;
+    this->on_message_complete = on_message_complete_cb;
     this->on_read_ctx = on_read_ctx;
     return this;
 }
@@ -120,6 +119,7 @@ DemoParserPrivateReturnValue DemoParser_consume(DemoParserRef this, IOBufferRef 
 {
     void* buf = IOBuffer_data(iobuffer_ref);
     int length = IOBuffer_data_len(iobuffer_ref);
+    int error_code = 0;
     DEMO_PARSER_CHECK_TAG(this)
 
     char* charbuf = (char*) buf;
@@ -141,7 +141,8 @@ DemoParserPrivateReturnValue DemoParser_consume(DemoParserRef this, IOBufferRef 
                         break;
                     }
                     default:
-                        PARSE_ERROR_CB(this, i, DemoParserErr_invalid_opcode)
+                        this->m_state = STATE_ERROR_RECOVERY;
+                        error_code = DemoParserErr_invalid_opcode;
                         break;
                 }
                 break;
@@ -149,8 +150,8 @@ DemoParserPrivateReturnValue DemoParser_consume(DemoParserRef this, IOBufferRef 
                 if (ch == CH_STX) {
                     this->m_state = STATE_BODY;
                 } else {
-                    this->m_state = STATE_IDLE;
-                    PARSE_ERROR_CB(this, i, DemoParserErr_expected_stx);
+                    this->m_state = STATE_ERROR_RECOVERY;
+                    error_code = DemoParserErr_expected_stx;
                 }
                 break;
             }
@@ -164,8 +165,8 @@ DemoParserPrivateReturnValue DemoParser_consume(DemoParserRef this, IOBufferRef 
                     this->m_state = STATE_LRC;
 //                    finalize_body(this);
                 } else {
-                    this->m_state == STATE_IDLE;
-                    PARSE_ERROR_CB(this, i, DemoParserErr_expected_ascii);
+                    this->m_state = STATE_ERROR_RECOVERY;
+                    error_code = DemoParserErr_expected_ascii;
                 }
                 break;
             }
@@ -173,20 +174,40 @@ DemoParserPrivateReturnValue DemoParser_consume(DemoParserRef this, IOBufferRef 
                 demo_message_set_lrc(this->m_current_message_ptr, ch);
                 this->m_state = STATE_IDLE;
                 LOG_FMT("DemmoParser_consume got a message will call new message handler \n");
-                this->on_read_message_cb(this->on_read_ctx, this->m_current_message_ptr);
+                this->on_message_complete(this->on_read_ctx, this->m_current_message_ptr, 0);
                 this->m_current_message_ptr = demo_message_new();
-                DemoParserPrivateReturnValue r = {.eom_flag = false, .bytes_consumed = i+1, .error_code = 0};
+                DemoParserPrivateReturnValue r = {/*.eom_flag = false, .bytes_consumed = i+1,*/ .error_code = 0};
                 IOBuffer_consume(iobuffer_ref, i+1);
                 return r;
                 break;
             case STATE_EOT_WAIT:
+                break;
+            case STATE_ERROR_RECOVERY:
+                /**
+                 * Come to this state after a parse error - search for SOH until end of buffer.
+                 * If not found the terminate the read operation with an error
+                 */
+                if((ch == CH_SOH) && (i < length - 1)) {
+                    this->m_state = STATE_OPCODE;
+                } else {
+                    if(i == length - 1) {
+                        LOG_FMT("DemmoParser_consume parse error \n");
+                        this->on_message_complete(this->on_read_ctx, NULL, DemoParserErr_expected_stx);
+                        demo_message_dispose(&(this->m_current_message_ptr));
+                        this->m_current_message_ptr = demo_message_new();
+                        DemoParserPrivateReturnValue r = {/*.eom_flag = false, .bytes_consumed = i+1,*/ .error_code = DemoParserErr_expected_stx};
+                        IOBuffer_consume(iobuffer_ref, i + 1);
+                        return r;
+
+                    }
+                }
                 break;
             default:
                 assert(false);
         }
     }
     IOBuffer_consume(iobuffer_ref, length);
-    DemoParserPrivateReturnValue r = {.eom_flag = false, .bytes_consumed = length, .error_code = 0};
+    DemoParserPrivateReturnValue r = {/*.eom_flag = false, .bytes_consumed = length,*/ .error_code = 0};
     return r;
 }
 

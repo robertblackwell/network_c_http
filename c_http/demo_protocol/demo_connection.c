@@ -35,7 +35,7 @@ static void postable_write_call_cb(ReactorRef reactor_ref, void* arg);
 static void writer(DemoConnectionRef connection_ref);
 
 static void error(DemoConnectionRef connection_ref, char* message);
-static void read_message_handler(DemoConnectionRef connection_ref, DemoMessageRef msg);
+static void on_read_complete(DemoConnectionRef connection_ref, DemoMessageRef msg, int error_code);
 static void read_parser_error_handler(DemoConnectionRef connection_ref, const char* error_message);
 static DemoMessageRef reply_invalid_request(DemoConnectionRef connection_ref, const char* error_message);
 
@@ -78,8 +78,7 @@ void democonnection_init(
     this->on_read_cb = NULL;
     this->on_close_cb = connection_completion_cb;
     this->parser_ref = DemoParser_new(
-            (void*)&read_message_handler,
-            (void*)(&read_parser_error_handler),
+            (void*)&on_read_complete,
             this);
     rtor_stream_register(this->socket_stream_ref);
     this->socket_stream_ref->both_arg = this;
@@ -181,25 +180,10 @@ static void reader(DemoConnectionRef connection_ref) {
         LOG_FMT("After DemoParser_consume returns error_code: %d  errno: %d read_state %d \n", rv.error_code, errno_save, connection_ref->read_state);
         if(rv.error_code == 0) {
             if(connection_ref->read_state == READ_STATE_ACTIVE) {
-                connection_ref->readside_posted = true;
                 LOG_FMT("reader post postable_reader connection_ref->read_state: %d\n", connection_ref->read_state);
                 rtor_reactor_post(connection_ref->reactor_ref, &postable_reader, connection_ref);
             }
         } else {
-#if 0
-            // TODO - really reply to invalid messages ? probably not
-            DemoMessageRef response = NULL;
-            response = reply_invalid_request(connection_ref, "an error message");
-            List_add_back(connection_ref->output_list, response);
-            if(IOBuffer_data_len(connection_ref->active_input_buffer_ref) == 0) {
-                // if the buffer has not been fully processed leave the remainder for the next iteration
-                IOBuffer_dispose(&(connection_ref->active_input_buffer_ref));
-            }
-            write_start_maybe(connection_ref);
-            demo_message_dispose(&(connection_ref->parser_ref->m_current_message_ptr));
-            connection_ref->parser_ref->m_current_message_ptr = NULL;
-            connection_ref->parser_ref->m_current_message_ptr = demo_message_new();
-#endif
         }
 
     } else if(bytes_available == 0) {
@@ -219,26 +203,23 @@ static void reader(DemoConnectionRef connection_ref) {
     }
     LOG_FMT("reader return\n");
 }
-static void read_parser_error_handler(DemoConnectionRef connection_ref, const char* error_message)
-{
-    LOG_FMT("read_error_handler\n");
-    // TODO - really reply to invalid messages ? probably not
-
-}
 static void postable_read_cb(ReactorRef reactor_ref, void* arg)
 {
     DemoConnectionRef connection_ref = arg;
 
 }
-static void read_message_handler(DemoConnectionRef connection_ref, DemoMessageRef msg)
+static void on_read_complete(DemoConnectionRef connection_ref, DemoMessageRef msg, int error_code)
 {
     DEMO_CONNECTION_CHECK_TAG(connection_ref)
+    CHTTP_ASSERT( (((msg != NULL) && (error_code == 0)) || ((msg == NULL) && (error_code != 0))), "msg != NULL and error_code == 0 failed OR msg == NULL and error_code != 0 failed");
     connection_ref->read_state = READ_STATE_IDLE;
-    CHTTP_ASSERT((connection_ref->readside_posted == false), "should not get here");
     LOG_FMT("read_message_handler - on_write_cb  read_state: %d\n", connection_ref->read_state);
-    void(*tmp)(void*, DemoMessageRef, int) = connection_ref->on_read_cb;
+    DC_Read_CB tmp = connection_ref->on_read_cb;
+    /**
+     * Need the on_read_cb property NULL befor going further
+     */
     connection_ref->on_read_cb = NULL;
-    tmp(connection_ref->handler_ref, msg, 0);
+    tmp(connection_ref->handler_ref, msg, error_code);
 }
 /////////////////////////////////////////////////////////////////////////////////////
 // end of read sequence

@@ -58,17 +58,17 @@ typedef enum DemoParserRC DemoParserRC;
  * Value object return by Parser_consume()
  */
 struct DemoParserPrivateReturnValue_s {
-    long            bytes_consumed;
-    bool            eom_flag;
+//    long            bytes_consumed;
+//    bool            eom_flag;
     int             error_code;
 };
 typedef struct DemoParserPrivateReturnValue_s DemoParserPrivateReturnValue;
-typedef struct DemoParserReturnValue_s {
-    void*       completed_message_ref;
-    IOBufferRef remaining_data_ref;
-    bool        error_flag;
-    int         error_code;
-}DemoParserReturnValue, *DemoParserReturnValueRef;
+//typedef struct DemoParserReturnValue_s {
+//    void*       completed_message_ref;
+//    IOBufferRef remaining_data_ref;
+//    bool        error_flag;
+//    int         error_code;
+//}DemoParserReturnValue, *DemoParserReturnValueRef;
 
 /**
  * Type holding context data for Parser functions. Allows for parsing to continue
@@ -76,19 +76,19 @@ typedef struct DemoParserReturnValue_s {
  */
 struct DemoParser_s;
 typedef struct DemoParser_s DemoParser, *DemoParserRef;
-
+typedef void(*DP_MessageComple_CB)(void* ctx, DemoMessageRef, int error_code);
 struct DemoParser_s {
     DEMO_PARSER_DECLARE_TAG;
     int  m_state;
     void* on_read_ctx;
-    void(*on_read_message_cb)(void* read_ctx, DemoMessageRef msg);
-    void(*on_read_parser_error_cb)(void* read_ctx, const char* error_message);
+    DP_MessageComple_CB on_message_complete;
+//    void(*on_read_message_cb)(void* read_ctx, DemoMessageRef msg, int error_code);
+//    void(*on_read_parser_error_cb)(void* read_ctx, const char* error_message);
     DemoMessageRef  m_current_message_ptr;
 };
 
 DemoParserRef DemoParser_new(
-        void(*on_read_message_cb)(void* ctx, DemoMessageRef),
-        void(*on_read_parser_error_cb)(void* ctx, const char* error_message),
+        DP_MessageComple_CB on_message_complete_cb,
         void* on_read_ctx);
 void DemoParser_dispose(DemoParserRef* parser_p);
 void DemoParser_free(DemoParserRef this);

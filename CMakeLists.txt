@@ -145,6 +145,7 @@ set_property(GLOBAL PROPERTY XCODE_GENERATE_SCHEME ON)
 
 if (C_HTTP_Verbose)
 	message("Project Name                      ${CMAKE_PROJECT_NAME}")
+	message("C Compiler                        ${CMAKE_C_COMPILER}")
 	message("Build Type                        ${CMAKE_BUILD_TYPE}")
 	message("CMAKE_CXX_STANDARD                ${CMAKE_CXX_STANDARD}")
 	message("CMAKE_CXX_FLAGS                   ${CMAKE_CXX_FLAGS}")

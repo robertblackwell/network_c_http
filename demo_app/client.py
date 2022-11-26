@@ -69,6 +69,20 @@ def test_simple():
             print("test_simple Passed")
         s.close()
 
+def test_frame_error_simple():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(('localhost', 9011))
+    for i in range(1):
+        s.sendall(b"\x01Q\x03123456789\x03L")
+        data = s.recv(1024)
+        expected = b"\x01R\x02123456789\x03L\x04"
+        if data != expected:
+            print("test_simple failed expected : {} got: {}".format(expected, data))
+        else:
+            print("test_simple Passed")
+        s.close()
+        
+        
 def test_simple_multiple_buffers():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('localhost', 9011))
@@ -146,6 +160,7 @@ def test_send_big_fragments():
     
 # expected = make_frame("R", "[mnbvcxzlkjhgfdsapoiuytrewq][QWERTYUIOPASDFGHJKLZXCVBNM]")
 for i in range(1):
+    test_frame_error_simple()
     test_send_2_frames_1_buffer()
     test_simple()
     test_message_data_left_in_buffer()

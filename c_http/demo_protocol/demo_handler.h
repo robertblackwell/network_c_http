@@ -18,13 +18,20 @@
 
 typedef struct DemoHandler_s DemoHandler, *DemoHandlerRef;
 
+/**
+ * Instance of a DemoHamdler calls this CB when it is closing down.
+ * void* server_ref is an anonymous reference passed at handler creation by its parent object
+ */
+typedef void(*DH_Completion_CB)(void* server_ref, DemoHandlerRef href);
+
 typedef struct DemoHandler_s {
     DEMO_PARSER_DECLARE_TAG;
     int                 raw_socket;
     ReactorRef          reactor_ref;
     DemoConnectionRef   demo_connection_ref;
-    void(*completion_callback)(void* server_ref, DemoHandlerRef href);
-    void*               completion_cb_arg;
+    DH_Completion_CB    completion_callback;
+//    void(*completion_callback)(void* server_ref, DemoHandlerRef href);
+    void*               server_ref;
     ListRef             input_list;
     ListRef             output_list; // List of DemoMessageRef - responses
 
