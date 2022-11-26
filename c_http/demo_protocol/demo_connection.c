@@ -34,7 +34,8 @@ static void postable_writer(ReactorRef reactor_ref, void* arg);
 static void postable_write_call_cb(ReactorRef reactor_ref, void* arg);
 static void writer(DemoConnectionRef connection_ref);
 
-static void error(DemoConnectionRef connection_ref, char* message);
+static void read_error(DemoConnectionRef connection_ref, char* message);
+static void write_error(DemoConnectionRef connection_ref, char* message);
 static void on_read_complete(DemoConnectionRef connection_ref, DemoMessageRef msg, int error_code);
 static void read_parser_error_handler(DemoConnectionRef connection_ref, const char* error_message);
 static DemoMessageRef reply_invalid_request(DemoConnectionRef connection_ref, const char* error_message);
@@ -83,7 +84,6 @@ void democonnection_init(
     rtor_stream_register(this->socket_stream_ref);
     this->socket_stream_ref->both_arg = this;
     rtor_stream_arm_both(this->socket_stream_ref, &event_handler, this);
-//    read_start(this);
 }
 void democonnection_free(DemoConnectionRef this)
 {
@@ -140,7 +140,7 @@ void democonnection_read(DemoConnectionRef connection_ref, void(*on_demo_read_cb
         read_start(connection_ref);
     } else if(connection_ref->read_state == READ_STATE_EAGAINED) {
         connection_ref->on_read_cb = on_demo_read_cb;
-    }
+    } 
 }
 static void read_start(DemoConnectionRef connection_ref)
 {
@@ -190,7 +190,8 @@ static void reader(DemoConnectionRef connection_ref) {
         /**
          * TODO - handle close of the socket and release of the related data structures
          */
-        error(connection_ref, "reader zero bytes - peer closed connection");
+        read_error(connection_ref, "reader zero bytes - peer closed connection");
+
     } else {
         if (errno_save == eagain) {
             connection_ref->read_state = READ_STATE_EAGAINED;
@@ -198,7 +199,7 @@ static void reader(DemoConnectionRef connection_ref) {
             /**
              * TODO - handle close of the socket and release of the related data structures
              */
-            error(connection_ref, "reader - io error close and move on");
+            read_error(connection_ref, "reader - io error close and move on");
         }
     }
     LOG_FMT("reader return\n");
@@ -270,13 +271,17 @@ static void writer(DemoConnectionRef connection_ref)
             rtor_reactor_post(connection_ref->reactor_ref, &postable_writer, connection_ref);
         }
     } else if (wrc == 0) {
-        error(connection_ref, "think the fd is closed by other end");
+        write_error(connection_ref, "think the fd is closed by other end");
     } else if ((wrc == -1) && (errno == EAGAIN)) {
         connection_ref->write_state = WRITE_STATE_EAGAINED;
         return;
     } else if(wrc == -1) {
         error(connection_ref, "think this was an io error");
     }
+}
+static void post_to_reactor(DemoConnectionRef connection_ref, void(*postable_function)(ReactorRef, void*))
+{
+    rtor_reactor_post(connection_ref->reactor_ref, postable_function, connection_ref);
 }
 static void postable_write_call_cb(ReactorRef reactor_ref, void* arg)
 {
@@ -285,8 +290,16 @@ static void postable_write_call_cb(ReactorRef reactor_ref, void* arg)
     CHTTP_ASSERT((connection_ref->on_write_cb != NULL), "write call back is NULL");
     connection_ref->on_write_cb(connection_ref->handler_ref, 0);
 }
+static void write_error(DemoConnectionRef connection_ref, char* msg)
+{
+    DEMO_CONNECTION_CHECK_TAG(connection_ref)
+    printf("Got an error this is the message: %s  fd: %d\n", msg, connection_ref->socket_stream_ref->fd);
+    rtor_stream_deregister(connection_ref->socket_stream_ref);
+    close(connection_ref->socket_stream_ref->fd);
+    connection_ref->on_close_cb(connection_ref->handler_ref);
+}
 
-static void error(DemoConnectionRef connection_ref, char* msg)
+static void read_error(DemoConnectionRef connection_ref, char* msg)
 {
     DEMO_CONNECTION_CHECK_TAG(connection_ref)
     printf("Got an error this is the message: %s  fd: %d\n", msg, connection_ref->socket_stream_ref->fd);

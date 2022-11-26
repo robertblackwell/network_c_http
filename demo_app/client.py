@@ -81,7 +81,31 @@ def test_frame_error_simple():
         else:
             print("test_simple Passed")
         s.close()
-        
+
+def test_error_close_during_frame():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(('localhost', 9011))
+    
+    s.sendall(b"\x01Q\x02123456789poiuytrew")
+    s.close()
+    print("End of test_error_close_during_frame")
+                
+def test_error_close_after_frame():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(('localhost', 9011))
+    
+    s.sendall(b"\x01Q\x02123456789poiuytrew\x03L")
+    s.close()
+    print("End of test_error_close_during_frame")
+                
+def test_error_close_during_receive():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(('localhost', 9011))
+    s.sendall(b"\x01Q\x02123456789poiuytrew\x03L")
+    data = s.recv(3);
+    s.close();
+    print("End of test_error_close_during_receive")
+                
         
 def test_simple_multiple_buffers():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -157,12 +181,19 @@ def test_send_big_fragments():
         test_check("test_send_big_fragments", expected, data)
     s.close()
 
-    
-# expected = make_frame("R", "[mnbvcxzlkjhgfdsapoiuytrewq][QWERTYUIOPASDFGHJKLZXCVBNM]")
-for i in range(1):
-    test_frame_error_simple()
-    test_send_2_frames_1_buffer()
-    test_simple()
-    test_message_data_left_in_buffer()
-    test_simple_multiple_buffers()
-    test_send_big_fragments()
+def test_errors():
+    for i in range(1):
+        test_error_close_during_receive()
+        test_error_close_after_frame()
+        test_error_close_during_frame()
+        # test_frame_error_simple()
+def test_good():
+    for i in range(1):
+        test_send_2_frames_1_buffer()
+        test_simple()
+        test_message_data_left_in_buffer()
+        test_simple_multiple_buffers()
+        test_send_big_fragments()
+
+test_errors() 
+test_good()           
