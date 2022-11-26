@@ -42,7 +42,7 @@ enum DemoParserRC {
 //    DemoParserRC_expected_stx,
 //    DemoParserRC_expected_ascii,
 };
-typedef int DemoParseErrCode;
+typedef int DemoParserErrCode;
 #define DemoParserErr_invalid_opcode -11
 #define DemoParserErr_expected_stx   -12
 #define DemoParserErr_expected_ascii -13
@@ -93,7 +93,7 @@ DemoParserRef DemoParser_new(
 void DemoParser_dispose(DemoParserRef* parser_p);
 void DemoParser_free(DemoParserRef this);
 
-DemoParserPrivateReturnValue DemoParser_consume(DemoParserRef parser, IOBufferRef iobuffer_ref);
+DemoParserErrCode DemoParser_consume(DemoParserRef parser, IOBufferRef iobuffer_ref);
 
 int  DemoParser_get_errno(DemoParserRef parser);
 DemoParserError     DemoParser_get_error(DemoParserRef parser);

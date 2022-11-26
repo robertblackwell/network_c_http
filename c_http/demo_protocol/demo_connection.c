@@ -125,7 +125,7 @@ static void write_epollout(DemoConnectionRef connection_ref)
     if(connection_ref->write_state == WRITE_STATE_EAGAINED) {
         connection_ref->write_state = WRITE_STATE_ACTIVE;
         connection_ref->writeside_posted = true;
-        rtor_reactor_post(connection_ref->reactor_ref, &postable_writer, connection_ref);
+        post_to_reactor(connection_ref,&postable_writer);
     }
 }
 
@@ -151,7 +151,7 @@ static void read_start(DemoConnectionRef connection_ref)
 {
     DEMO_CONNECTION_CHECK_TAG(connection_ref)
     connection_ref->readside_posted = true;
-    rtor_reactor_post(connection_ref->reactor_ref, &postable_reader, connection_ref);
+    post_to_reactor(connection_ref, &postable_reader);
 }
 static void postable_reader(ReactorRef reactor_ref, void* arg)
 {
@@ -187,12 +187,12 @@ static void reader(DemoConnectionRef connection_ref) {
     char* errstr = strerror(errno_save);
     if(bytes_available > 0) {
         LOG_FMT("Before DemoParser_consume read_state %d\n", connection_ref->read_state);
-        DemoParserPrivateReturnValue rv = DemoParser_consume(connection_ref->parser_ref, iob);
+        int ec = DemoParser_consume(connection_ref->parser_ref, iob);
         LOG_FMT("After DemoParser_consume returns error_code: %d  errno: %d read_state %d \n", rv.error_code, errno_save, connection_ref->read_state);
-        if(rv.error_code == 0) {
+        if(ec == 0) {
             if(connection_ref->read_state == READ_STATE_ACTIVE) {
                 LOG_FMT("reader post postable_reader connection_ref->read_state: %d\n", connection_ref->read_state);
-                rtor_reactor_post(connection_ref->reactor_ref, &postable_reader, connection_ref);
+                post_to_reactor(connection_ref, &postable_reader);
             }
         } else {
         }
@@ -244,7 +244,7 @@ void democonnection_write(
         connection_ref->on_write_cb(connection_ref->handler_ref, DemoConnectionErrCode_is_closed);
         return;
     }
-    rtor_reactor_post(connection_ref->reactor_ref, &postable_writer, connection_ref);
+    post_to_reactor(connection_ref, &postable_writer);
 }
 static void postable_writer(ReactorRef reactor_ref, void* arg)
 {
@@ -273,11 +273,11 @@ static void writer(DemoConnectionRef connection_ref)
             connection_ref->write_state = WRITE_STATE_IDLE;
             IOBuffer_dispose(&(connection_ref->active_output_buffer_ref));
             connection_ref->active_output_buffer_ref = NULL;
-            rtor_reactor_post(connection_ref->reactor_ref, &postable_write_call_cb, connection_ref);
+            post_to_reactor(connection_ref, &postable_write_call_cb);
         } else {
             // write not complete schedule another try
             connection_ref->write_state = WRITE_STATE_ACTIVE;
-            rtor_reactor_post(connection_ref->reactor_ref, &postable_writer, connection_ref);
+            post_to_reactor(connection_ref, &postable_writer);
         }
     } else if (wrc == 0) {
         write_error(connection_ref, "think the fd is closed by other end");
@@ -306,7 +306,7 @@ static void write_error(DemoConnectionRef connection_ref, char* msg)
     connection_ref->write_state = WRITE_STATE_STOP;
     connection_ref->on_write_cb(connection_ref->handler_ref, DemoConnectionErrCode_io_error);
     connection_ref->on_write_cb = NULL;
-    rtor_reactor_post(connection_ref->reactor_ref, &postable_cleanup, connection_ref);
+    post_to_reactor(connection_ref, &postable_cleanup);
 }
 static void read_error(DemoConnectionRef connection_ref, char* msg)
 {
@@ -315,7 +315,7 @@ static void read_error(DemoConnectionRef connection_ref, char* msg)
     connection_ref->read_state = READ_STATE_STOP;
     connection_ref->on_read_cb(connection_ref->handler_ref, NULL, DemoConnectionErrCode_io_error);
     connection_ref->on_read_cb = NULL;
-    rtor_reactor_post(connection_ref->reactor_ref, &postable_cleanup, connection_ref);
+    post_to_reactor(connection_ref, &postable_cleanup);
 }
 /**
  * This must be the last democonnection function to run and it should only run once.

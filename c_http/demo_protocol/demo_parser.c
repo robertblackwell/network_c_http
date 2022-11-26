@@ -115,7 +115,7 @@ void DemoParser_begin(DemoParserRef this)
  *          error_code will give details of the error
  *          the buffer should NOT be presented again
  */
-DemoParserPrivateReturnValue DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_ref)
+DemoParserErrCode DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_ref)
 {
     void* buf = IOBuffer_data(iobuffer_ref);
     int length = IOBuffer_data_len(iobuffer_ref);
@@ -176,9 +176,8 @@ DemoParserPrivateReturnValue DemoParser_consume(DemoParserRef this, IOBufferRef 
                 LOG_FMT("DemmoParser_consume got a message will call new message handler \n");
                 this->on_message_complete(this->on_read_ctx, this->m_current_message_ptr, 0);
                 this->m_current_message_ptr = demo_message_new();
-                DemoParserPrivateReturnValue r = {/*.eom_flag = false, .bytes_consumed = i+1,*/ .error_code = 0};
                 IOBuffer_consume(iobuffer_ref, i+1);
-                return r;
+                return 0;
                 break;
             case STATE_EOT_WAIT:
                 break;
@@ -195,9 +194,8 @@ DemoParserPrivateReturnValue DemoParser_consume(DemoParserRef this, IOBufferRef 
                         this->on_message_complete(this->on_read_ctx, NULL, DemoParserErr_expected_stx);
                         demo_message_dispose(&(this->m_current_message_ptr));
                         this->m_current_message_ptr = demo_message_new();
-                        DemoParserPrivateReturnValue r = {/*.eom_flag = false, .bytes_consumed = i+1,*/ .error_code = DemoParserErr_expected_stx};
                         IOBuffer_consume(iobuffer_ref, i + 1);
-                        return r;
+                        return DemoParserErr_expected_stx;
 
                     }
                 }
@@ -207,8 +205,7 @@ DemoParserPrivateReturnValue DemoParser_consume(DemoParserRef this, IOBufferRef 
         }
     }
     IOBuffer_consume(iobuffer_ref, length);
-    DemoParserPrivateReturnValue r = {/*.eom_flag = false, .bytes_consumed = length,*/ .error_code = 0};
-    return r;
+    return 0;
 }
 
 int DemoParser_get_errno(DemoParserRef this)
