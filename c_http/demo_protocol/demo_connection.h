@@ -15,7 +15,11 @@
 #define DEMO_CONNECTION_SET_TAG(p) SET_TAG(DemoConnection_TAG, p)
 #undef TYPE
 
-
+enum DemoConnectionErrCode {
+    DemoConnectionErrCode_is_closed = -31,
+    DemoConnectionErrCode_io_error = -32,
+    DemoConnectionErrCode_parse_error = -33
+};
 
 typedef struct DemoConnection_s DemoConnection, *DemoConnectionRef;
 /**
@@ -44,6 +48,7 @@ typedef struct DemoConnection_s {
     DC_Read_CB      on_read_cb;
     DC_Write_CB     on_write_cb;
     DC_Close_CB     on_close_cb;
+    bool            cleanup_done_flag;
     bool            readside_posted;
     bool            writeside_posted;
     bool            post_active;
