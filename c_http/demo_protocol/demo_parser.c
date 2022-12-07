@@ -51,9 +51,10 @@ DemoParserRef DemoParser_new(
 {
     DemoParserRef this = malloc(sizeof(DemoParser));
     DEMO_PARSER_SET_TAG(this)
-    if(this == NULL)
-        return NULL;
-//    this->m_message_done = false;
+    this->parser_consume = (int(*)(ParserInterfaceRef, IOBufferRef))&DemoParser_consume;
+    this->message_factory = (void*(*)())&demo_message_new;
+    this->message_free = (void(*)(void*))&demo_message_free;
+
     this->m_current_message_ptr = NULL;
     this->on_message_complete = on_message_complete_cb;
     this->on_read_ctx = on_read_ctx;
@@ -196,7 +197,6 @@ DemoParserErrCode DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_re
                         this->m_current_message_ptr = demo_message_new();
                         IOBuffer_consume(iobuffer_ref, i + 1);
                         return DemoParserErr_expected_stx;
-
                     }
                 }
                 break;

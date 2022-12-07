@@ -10,10 +10,9 @@
 
 #undef TYPE
 #undef TYPED
-
 #define TYPE double
-#define TYPED(THING) d_ ## THING
-
+#define TYPED(THING) Double##THING
 #include "generic-stack.h"
+//#include "generic-stack.c"
 
 #endif // _DOUBLE_STACK_H_

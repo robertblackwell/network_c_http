@@ -53,6 +53,12 @@ DemoMessageRef demo_message_new_response()
     DemoMessageRef mref = demo_message_new();
     return mref;
 }
+void demo_message_free(DemoMessageRef this)
+{
+    DEMO_MESSAGE_CHECK_TAG(this)
+    BufferChain_dispose(&((this)->body));
+    eg_free(this);
+}
 void demo_message_dispose(DemoMessageRef* this_p)
 {
     DEMO_MESSAGE_CHECK_TAG(*this_p)

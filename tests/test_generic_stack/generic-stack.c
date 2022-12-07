@@ -1,77 +1,81 @@
+#include <stdlib.h>
 /**
  * The nodes in our stack.
  */
-struct TYPED(StackNode)
+struct TYPED(StackNode_s)
 {
     TYPE val;                    // The value at the top of the stack
-    struct TYPED(StackNode) *next;     // The rest of the values in the stack.
+    struct TYPED(StackNode_s) *next;     // The rest of the values in the stack.
 };
+typedef struct TYPED(StackNode_s) TYPED(StackNode);
 /**
  * The stack itself.
  */
-typedef struct TYPED(Stack)
+struct TYPED(Stack_s)
 {
     int size;                   // How many elements are in the stack?
-    struct TYPED(StackNode) *top;      // What's at the top of the stack?
-} Stack;
+    TYPED(StackNode) *top;      // What's at the top of the stack?
+};
+typedef struct TYPED(Stack_s) TYPED(Stack);
+typedef TYPED(Stack) * TYPED(StackRef);
 
-
-TYPED(Stack) *
-TYPED(stack_new) (void)
+TYPED(StackRef)
+TYPED(Stack_new) (void)
 {
-    struct TYPED(Stack) *new_stack = (struct TYPED(Stack) *) malloc (sizeof (struct TYPED(Stack)));
+    TYPED(Stack) *new_stack = (struct TYPED(Stack_s) *) malloc (sizeof (TYPED(Stack)));
     new_stack->size = 0;
     new_stack->top = NULL;
     return new_stack;
-} // stack_new
+} // Stack_new
 
 void
-TYPED(stack_free) (TYPED(Stack) *stack)
+TYPED(Stack_free) (TYPED(Stack) *stack)
 {
     // Free all the nodes in the stack
-    struct TYPED(StackNode) *tmp;
+    TYPED(StackNode) *tmp;
     while ((tmp = stack->top) != NULL)
     {
         stack->top = tmp->next;
-        TYPED(free) (tmp);
+//        TYPED(StackNode_free) (tmp);
+        free(tmp);
     } // while
     // Free the stack itself
-    TYPED(free) (stack);
-} // stack_free
+    TYPED(Stack_free) (stack);
+} // Stack_free
 
 
 int
-TYPED(stack_size) (TYPED(Stack) *stack)
+TYPED(Stack_size) (TYPED(Stack) *stack)
 {
     return stack->size;
-} // stack_size
-#if 0
-int
-stack_top (Stack *stack)
+}
+TYPE
+TYPED(Stack_top) (TYPED(Stack) *stack)
 {
     return stack->top->val;
-} // stack_top
+}
 
-int
-stack_pop (Stack *stack)
+TYPE
+TYPED(Stack_pop) (TYPED(Stack) *stack)
 {
     // Remember the top node and its value
-    struct StackNode *tmp = stack->top;
+    TYPED(StackNode) *tmp = stack->top;
     int top = tmp->val;
     // Drop that node
     stack->top = stack->top->next;
-    free (tmp);
+//    TYPED(free) (tmp);
+    free(tmp);
     --stack->size;
     // And return the saved value
     return top;
-} // stack_pop
+} // Stack_pop
 
 void
-stack_push (Stack *stack, int val) {
-    struct StackNode *new_top =
-            (struct StackNode *) malloc(sizeof(struct StackNode));
+TYPED(Stack_push) (TYPED(Stack) *stack, TYPE val) {
+    TYPED(StackNode) *new_top =
+            (TYPED(StackNode) *) malloc(sizeof(TYPED(StackNode)));
     new_top->val = val;
-    new_top->next = stack->top->next;
+    new_top->next = (stack->top) ? stack->top: NULL;
     stack->top = new_top;
+    ++stack->size;
 }
-#endif

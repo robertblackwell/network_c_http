@@ -53,7 +53,15 @@ typedef int DemoParserErrCode;
 
 typedef enum DemoParserRC DemoParserRC;
 
+typedef struct ParserInterface_s ParserInterface, *ParserInterfaceRef;
 
+struct ParserInterface_s {
+    int(*parser_consume)(ParserInterfaceRef parser_ref, IOBufferRef);
+    void*(*message_factory)();
+    void(*message_free)(void*);
+};
+
+#if 0
 /**
  * Value object return by Parser_consume()
  */
@@ -69,7 +77,7 @@ typedef struct DemoParserPrivateReturnValue_s DemoParserPrivateReturnValue;
 //    bool        error_flag;
 //    int         error_code;
 //}DemoParserReturnValue, *DemoParserReturnValueRef;
-
+#endif
 /**
  * Type holding context data for Parser functions. Allows for parsing to continue
  * over buffer and message boundaries
@@ -78,6 +86,7 @@ struct DemoParser_s;
 typedef struct DemoParser_s DemoParser, *DemoParserRef;
 typedef void(*DP_MessageComple_CB)(void* ctx, DemoMessageRef, int error_code);
 struct DemoParser_s {
+    ParserInterface;
     DEMO_PARSER_DECLARE_TAG;
     int  m_state;
     void* on_read_ctx;

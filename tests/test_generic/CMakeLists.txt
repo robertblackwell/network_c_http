@@ -3,11 +3,15 @@
 message("test_include_dirs     ${TEST_INCLUDE_DIRS}")
 message("test_link_libs        ${TEST_LINK_LIBS}")
 
-set(TARGET test_generic_stack)
+set(TARGET test_generic)
 add_executable(${TARGET}
-	double-stack.c
-	int_stack.c
-	test_generic_stack.c
+		array.c
+		array.h
+	mytype.c
+		mytype.h
+	mytype_table.c
+		mytype_table.h
+	test_list.c
 )
 
 target_include_directories(${TARGET} 

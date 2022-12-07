@@ -187,7 +187,8 @@ static void reader(DemoConnectionRef connection_ref) {
     char* errstr = strerror(errno_save);
     if(bytes_available > 0) {
         LOG_FMT("Before DemoParser_consume read_state %d\n", connection_ref->read_state);
-        int ec = DemoParser_consume(connection_ref->parser_ref, iob);
+        int ec = connection_ref->parser_ref->parser_consume((ParserInterfaceRef)connection_ref->parser_ref, iob);
+//        int ec = DemoParser_consume(connection_ref->parser_ref, iob);
         LOG_FMT("After DemoParser_consume returns error_code: %d  errno: %d read_state %d \n", rv.error_code, errno_save, connection_ref->read_state);
         if(ec == 0) {
             if(connection_ref->read_state == READ_STATE_ACTIVE) {

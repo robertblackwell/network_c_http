@@ -11,7 +11,7 @@ typedef struct DemoMessage_s DemoMessage, *DemoMessageRef, *DemoRequestRef, *Dem
 DemoMessageRef demo_message_new();
 DemoMessageRef demo_message_new_request();
 DemoMessageRef demo_message_new_response();
-
+void demo_message_free(DemoMessageRef p);
 void demo_message_dispose(DemoMessageRef* p);
 void demo_message_dealloc(void* m);
 /**

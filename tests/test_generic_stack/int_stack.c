@@ -1,11 +1,9 @@
 /**
- * double-stack.c
+ * int_stack.c
  *   A simple implementation of stacks of doubles.
  *
  * <insert MIT license>
  */
 
-#include "double-stack.h"
-#define TYPE double
-#define TYPED(THING) Double##THING
+#include "int_stack.h"
 #include "generic-stack.c"

@@ -22,7 +22,7 @@
 // | Types |
 // +-------+
 
-typedef struct TYPED(Stack) TYPED(Stack);
+typedef struct TYPED(Stack_s) TYPED(Stack);
 
 // +------------+----------------------------------------------------
 // | Procedures |
@@ -31,33 +31,33 @@ typedef struct TYPED(Stack) TYPED(Stack);
 /**
  * Create a new stack.
  */
-void TYPED(stack_new) (void);
+TYPED(Stack)* TYPED(Stack_new) (void);
 
 /**
  * Free the space allocated to a stack.
  */
-void TYPED(stack_free) (TYPED(Stack) *stack);
+void TYPED(Stack_free) (TYPED(Stack) *stack);
 
 /**
  * Determine the number of elements in the stack.
  */
-int TYPED(stack_size) (TYPED(Stack) *stack);
+int TYPED(Stack_size) (TYPED(Stack) *stack);
 
 /**
  * Look at the top element of the stack.  Requires that the
  * stack have at least one element.
  */
-TYPE TYPED(stack_top) (TYPED(Stack) *stack);
+TYPE TYPED(Stack_top) (TYPED(Stack) *stack);
 
 /**
  * Remove and return the top element of the stack.  Requires that
  * the stack have at least one element.
  */
-TYPE TYPED(stack_pop) (TYPED(Stack) *stack);
+TYPE TYPED(Stack_pop) (TYPED(Stack) *stack);
 
 /**
  * Add an element to the stack.
  */
-void TYPED(stack_push) (TYPED(Stack) *stack, TYPE val);
+void TYPED(Stack_push) (TYPED(Stack) *stack, TYPE val);
 
 #endif // TYPE
