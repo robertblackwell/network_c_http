@@ -22,11 +22,7 @@ void MyType_dealloc(void** this_ptr);
 void MyType_dispose(MyType** ptr);
 void MyType_display(MyTypeRef this);
 # 4 "mytype_wrapped_list.h" 2
-
-
-
-
-
+# 12 "mytype_wrapped_list.h"
 # 1 "list_wrapper.h" 1
 # 1 "../../c_http/common/list.h" 1
 # 10 "../../c_http/common/list.h"
@@ -113,30 +109,30 @@ void* List_itr_unpack(ListRef lref, ListIterator itr);
 
 ListIterator List_find(ListRef lref, void* needle);
 # 2 "list_wrapper.h" 2
-typedef List MyTypeWrappedList;
-typedef ListRef MyTypeWrappedListRef;
-typedef ListIter MyTypeWrappedListIter;
-typedef ListIter MyTypeWrappedListIterator;
+typedef List MyTypeWList;
+typedef ListRef MyTypeWListRef;
+typedef ListIter MyTypeWListIter;
+typedef ListIter MyTypeWListIterator;
 
 
-MyTypeWrappedListRef MyTypeWrappedList_new ();
-void MyTypeWrappedList_init(MyTypeWrappedListRef lref);
-void MyTypeWrappedList_destroy(MyTypeWrappedListRef lref);
-void MyTypeWrappedList_dispose(MyTypeWrappedListRef *lref_adr);
-void MyTypeWrappedList_display(const MyTypeWrappedListRef this);
-int MyTypeWrappedList_size(const MyTypeWrappedListRef lref);
-void MyTypeWrappedList_add_back(MyTypeWrappedListRef lref, MyType* item);
-void MyTypeWrappedList_add_front(MyTypeWrappedListRef lref, MyType* item);
-MyType* MyTypeWrappedList_first(const MyTypeWrappedListRef lref);
-MyType* MyTypeWrappedList_remove_first(MyTypeWrappedListRef lref);
-MyType* MyTypeWrappedList_last(const MyTypeWrappedListRef lref);
-MyType* MyTypeWrappedList_remove_last(MyTypeWrappedListRef lref);
-MyTypeWrappedListIterator MyTypeWrappedList_iterator(const MyTypeWrappedListRef lref);
-MyTypeWrappedListIterator MyTypeWrappedList_itr_next(const MyTypeWrappedListRef lref, const MyTypeWrappedListIterator itr);
-void MyTypeWrappedList_itr_remove (MyTypeWrappedListRef lref, MyTypeWrappedListIterator *itr_adr);
-MyType* MyTypeWrappedList_itr_unpack (MyTypeWrappedListRef lref, MyTypeWrappedListIterator itr);
-MyTypeWrappedListIterator MyTypeWrappedList_find (MyTypeWrappedListRef lref, void* needle);
-# 10 "mytype_wrapped_list.h" 2
+MyTypeWListRef MyTypeWList_new ();
+void MyTypeWList_init(MyTypeWListRef lref);
+void MyTypeWList_destroy(MyTypeWListRef lref);
+void MyTypeWList_dispose(MyTypeWListRef *lref_adr);
+void MyTypeWList_display(const MyTypeWListRef this);
+int MyTypeWList_size(const MyTypeWListRef lref);
+void MyTypeWList_add_back(MyTypeWListRef lref, MyType* item);
+void MyTypeWList_add_front(MyTypeWListRef lref, MyType* item);
+MyType* MyTypeWList_first(const MyTypeWListRef lref);
+MyType* MyTypeWList_remove_first(MyTypeWListRef lref);
+MyType* MyTypeWList_last(const MyTypeWListRef lref);
+MyType* MyTypeWList_remove_last(MyTypeWListRef lref);
+MyTypeWListIterator MyTypeWList_iterator(const MyTypeWListRef lref);
+MyTypeWListIterator MyTypeWList_itr_next(const MyTypeWListRef lref, const MyTypeWListIterator itr);
+void MyTypeWList_itr_remove (MyTypeWListRef lref, MyTypeWListIterator *itr_adr);
+MyType* MyTypeWList_itr_unpack (MyTypeWListRef lref, MyTypeWListIterator itr);
+MyTypeWListIterator MyTypeWList_find (MyTypeWListRef lref, void* needle);
+# 13 "mytype_wrapped_list.h" 2
 # 2 "mytype_wrapped_list.c" 2
 # 1 "list_wrapper.c" 1
 # 1 "../../c_http/common/utils.h" 1
@@ -1431,70 +1427,70 @@ char* make_upper(const char* src);
 
 static void dealloc(void **ptr)
 {
-    MyTypeWrapped_dispose((MyType *) ptr);
+    MyType_dispose(ptr);
 }
 
-MyTypeWrappedListRef MyTypeWrappedList_new()
+MyTypeWListRef MyTypeWList_new()
 {
-    return (MyTypeWrappedListRef) List_new(dealloc);
+    return (MyTypeWListRef) List_new(dealloc);
 }
 
-void MyTypeWrappedList_dispose(MyTypeWrappedListRef *lref_ptr)
+void MyTypeWList_dispose(MyTypeWListRef *lref_ptr)
 {
     List_dispose(lref_ptr);
 }
 
-int MyTypeWrappedList_size(MyTypeWrappedListRef lref)
+int MyTypeWList_size(MyTypeWListRef lref)
 {
     return List_size(lref);
 }
 
-MyType* MyTypeWrappedList_first(MyTypeWrappedListRef lref)
+MyType* MyTypeWList_first(MyTypeWListRef lref)
 {
     return (MyType*) List_first(lref);
 }
 
-MyType* MyTypeWrappedList_last(MyTypeWrappedListRef lref)
+MyType* MyTypeWList_last(MyTypeWListRef lref)
 {
     return (MyType*) List_last(lref);
 }
 
-MyType* MyTypeWrappedList_remove_first(MyTypeWrappedListRef lref)
+MyType* MyTypeWList_remove_first(MyTypeWListRef lref)
 {
     return (MyType*) List_remove_first(lref);
 }
 
-MyType* MyTypeWrappedList_remove_last(MyTypeWrappedListRef lref)
+MyType* MyTypeWList_remove_last(MyTypeWListRef lref)
 {
     return (MyType*) List_remove_last(lref);
 }
 
-MyType* MyTypeWrappedList_itr_unpack(MyTypeWrappedListRef lref, MyTypeWrappedListIter iter)
+MyType* MyTypeWList_itr_unpack(MyTypeWListRef lref, MyTypeWListIter iter)
 {
     return (MyType*) List_itr_unpack(lref, iter);
 }
 
-MyTypeWrappedListIter MyTypeWrappedList_iterator(MyTypeWrappedListRef lref)
+MyTypeWListIter MyTypeWList_iterator(MyTypeWListRef lref)
 {
     return List_iterator(lref);
 }
 
-MyTypeWrappedListIter MyTypeWrappedList_itr_next(MyTypeWrappedListRef lref, MyTypeWrappedListIter iter)
+MyTypeWListIter MyTypeWList_itr_next(MyTypeWListRef lref, MyTypeWListIter iter)
 {
     return List_itr_next(lref, iter);
 }
 
-void MyTypeWrappedList_itr_remove(MyTypeWrappedListRef lref, MyTypeWrappedListIter *iter)
+void MyTypeWList_itr_remove(MyTypeWListRef lref, MyTypeWListIter *iter)
 {
     List_itr_remove(lref, iter);
 }
 
-void MyTypeWrappedList_add_back(MyTypeWrappedListRef lref, MyType* item)
+void MyTypeWList_add_back(MyTypeWListRef lref, MyType* item)
 {
     List_add_back(lref, (void *) item);
 }
 
-void MyTypeWrappedList_add_front(MyTypeWrappedListRef lref, MyType* item)
+void MyTypeWList_add_front(MyTypeWListRef lref, MyType* item)
 {
     List_add_front(lref, (void *) item);
 }

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
+#include <c_http/common/list.h>
 #include <c_http/common/utils.h>
 
 struct TYPED(ListNode_s) {
@@ -84,7 +85,7 @@ void TYPED(List_destroy)(TYPED(ListRef) lref)
 void TYPED(List_dispose)(TYPED(ListRef)* lref_ptr)
 {
     ASSERT_NOT_NULL(*lref_ptr);
-    List_destroy(*lref_ptr);
+    List_destroy((ListRef)*lref_ptr);
     free((void*)*lref_ptr);
     *lref_ptr = NULL;
 }

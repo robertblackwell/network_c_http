@@ -1,25 +1,26 @@
 #include <c_http/common/list.h>
-typedef List TYPED(List);
-typedef ListRef TYPED(ListRef);
-typedef ListIter TYPED(ListIter);
-typedef ListIter TYPED(ListIterator);
+
+typedef List PREFIX();
+typedef ListRef PREFIX(Ref);
+typedef ListIter PREFIX(Iter);
+typedef ListIter PREFIX(Iterator);
 
 
-TYPED(ListRef) TYPED(List_new) ();
-void  TYPED(List_init)(TYPED(ListRef) lref);
-void  TYPED(List_destroy)(TYPED(ListRef) lref);
-void  TYPED(List_dispose)(TYPED(ListRef) *lref_adr);
-void  TYPED(List_display)(const TYPED(ListRef) this);
-int   TYPED(List_size)(const TYPED(ListRef) lref);
-void  TYPED(List_add_back)(TYPED(ListRef) lref, TYPE* item);
-void  TYPED(List_add_front)(TYPED(ListRef) lref, TYPE* item);
-TYPE* TYPED(List_first)(const TYPED(ListRef) lref);
-TYPE* TYPED(List_remove_first)(TYPED(ListRef) lref);
-TYPE* TYPED(List_last)(const TYPED(ListRef) lref);
-TYPE* TYPED(List_remove_last)(TYPED(ListRef) lref);
-TYPED(ListIterator) TYPED(List_iterator)(const TYPED(ListRef) lref);
-TYPED(ListIterator) TYPED(List_itr_next)(const TYPED(ListRef) lref, const TYPED(ListIterator) itr);
-void TYPED(List_itr_remove) (TYPED(ListRef) lref, TYPED(ListIterator) *itr_adr);
-TYPE* TYPED(List_itr_unpack) (TYPED(ListRef) lref, TYPED(ListIterator) itr);
-TYPED(ListIterator) TYPED(List_find) (TYPED(ListRef) lref, void* needle);
+PREFIX(Ref) PREFIX(_new) ();
+void  PREFIX(_init)(PREFIX(Ref) lref);
+void  PREFIX(_destroy)(PREFIX(Ref) lref);
+void  PREFIX(_dispose)(PREFIX(Ref) *lref_adr);
+void  PREFIX(_display)(const PREFIX(Ref) this);
+int   PREFIX(_size)(const PREFIX(Ref) lref);
+void  PREFIX(_add_back)(PREFIX(Ref) lref, TYPE* item);
+void  PREFIX(_add_front)(PREFIX(Ref) lref, TYPE* item);
+TYPE* PREFIX(_first)(const PREFIX(Ref) lref);
+TYPE* PREFIX(_remove_first)(PREFIX(Ref) lref);
+TYPE* PREFIX(_last)(const PREFIX(Ref) lref);
+TYPE* PREFIX(_remove_last)(PREFIX(Ref) lref);
+PREFIX(Iterator) PREFIX(_iterator)(const PREFIX(Ref) lref);
+PREFIX(Iterator) PREFIX(_itr_next)(const PREFIX(Ref) lref, const PREFIX(Iterator) itr);
+void PREFIX(_itr_remove) (PREFIX(Ref) lref, PREFIX(Iterator) *itr_adr);
+TYPE* PREFIX(_itr_unpack) (PREFIX(Ref) lref, PREFIX(Iterator) itr);
+PREFIX(Iterator) PREFIX(_find) (PREFIX(Ref) lref, void* needle);
 

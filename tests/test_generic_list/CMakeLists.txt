@@ -7,6 +7,7 @@ set(TARGET test_generic_list)
 add_executable(${TARGET}
 	mytype.c
 	mytype_list.c
+	mytype_wrapped_list.c
 	test_generic_list.c
 )
 

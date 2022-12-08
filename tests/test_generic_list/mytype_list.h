@@ -4,8 +4,9 @@
 
 #undef TYPE
 #undef TYPED
+#undef PREFIX
 #define TYPE MyType
-#define TYPED(THING) MyType##THING
+#define PREFIX(THING) MyType##THING
 #include "list_template.h"
 
 

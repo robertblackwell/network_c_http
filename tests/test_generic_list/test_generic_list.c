@@ -9,4 +9,12 @@ int main()
     MyTypeList_add_back(list, mtp);
     MyTypeList_display(list);
     MyTypeList_dispose(&list);
+
+    MyTypeWList *wlist = MyTypeWList_new();
+    MyType* mtp2 = MyType_new();
+    mtp2->a = 32;
+    MyTypeWList_add_back(wlist, mtp);
+    MyTypeWList_display(wlist);
+    MyTypeWList_dispose(&wlist);
+
 }

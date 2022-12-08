@@ -3,70 +3,74 @@
 
 static void dealloc(void **ptr)
 {
-    TYPED(_dispose)(ptr);
+    TYPED(_dispose)(*ptr);
 }
 
-TYPED(ListRef) TYPED(List_new)()
+PREFIX(Ref) PREFIX(_new)()
 {
-    return (TYPED(ListRef)) List_new(dealloc);
+    return (PREFIX(Ref)) List_new(dealloc);
 }
 
-void TYPED(List_dispose)(TYPED(ListRef) *lref_ptr)
+void PREFIX(_dispose)(PREFIX(Ref) *lref_ptr)
 {
     List_dispose(lref_ptr);
 }
 
-int TYPED(List_size)(TYPED(ListRef) lref)
+int PREFIX(_size)(PREFIX(Ref) lref)
 {
     return List_size(lref);
 }
 
-TYPE* TYPED(List_first)(TYPED(ListRef) lref)
+TYPE* PREFIX(_first)(PREFIX(Ref) lref)
 {
     return (TYPE*) List_first(lref);
 }
 
-TYPE* TYPED(List_last)(TYPED(ListRef) lref)
+TYPE* PREFIX(_last)(PREFIX(Ref) lref)
 {
     return (TYPE*) List_last(lref);
 }
 
-TYPE* TYPED(List_remove_first)(TYPED(ListRef) lref)
+TYPE* PREFIX(_remove_first)(PREFIX(Ref) lref)
 {
     return (TYPE*) List_remove_first(lref);
 }
 
-TYPE* TYPED(List_remove_last)(TYPED(ListRef) lref)
+TYPE* PREFIX(_remove_last)(PREFIX(Ref) lref)
 {
     return (TYPE*) List_remove_last(lref);
 }
 
-TYPE* TYPED(List_itr_unpack)(TYPED(ListRef) lref, TYPED(ListIter) iter)
+TYPE* PREFIX(_itr_unpack)(PREFIX(Ref) lref, PREFIX(Iter) iter)
 {
     return (TYPE*) List_itr_unpack(lref, iter);
 }
 
-TYPED(ListIter) TYPED(List_iterator)(TYPED(ListRef) lref)
+PREFIX(Iter) PREFIX(_iterator)(PREFIX(Ref) lref)
 {
     return List_iterator(lref);
 }
 
-TYPED(ListIter) TYPED(List_itr_next)(TYPED(ListRef) lref, TYPED(ListIter) iter)
+PREFIX(Iter) PREFIX(_itr_next)(PREFIX(Ref) lref, PREFIX(Iter) iter)
 {
     return List_itr_next(lref, iter);
 }
 
-void TYPED(List_itr_remove)(TYPED(ListRef) lref, TYPED(ListIter) *iter)
+void PREFIX(_itr_remove)(PREFIX(Ref) lref, PREFIX(Iter) *iter)
 {
     List_itr_remove(lref, iter);
 }
 
-void TYPED(List_add_back)(TYPED(ListRef) lref, TYPE* item)
+void PREFIX(_add_back)(PREFIX(Ref) lref, TYPE* item)
 {
     List_add_back(lref, (void *) item);
 }
 
-void TYPED(List_add_front)(TYPED(ListRef) lref, TYPE* item)
+void PREFIX(_add_front)(PREFIX(Ref) lref, TYPE* item)
 {
     List_add_front(lref, (void *) item);
+}
+void PREFIX(_display)(const PREFIX(Ref) this)
+{
+    List_display(this);
 }
