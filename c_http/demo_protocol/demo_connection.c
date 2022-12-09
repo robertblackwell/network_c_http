@@ -94,7 +94,7 @@ void democonnection_free(DemoConnectionRef this)
     free(this);
 }
 /////////////////////////////////////////////////////////////////////////////////////
-// event handler
+// event handler called from the Reactor on receiving an epoll event
 ///////////////////////////////////////////////////////////////////////////////////////
 static void event_handler(RtorStreamRef stream_ref, uint64_t event)
 {
@@ -130,7 +130,7 @@ static void write_epollout(DemoConnectionRef connection_ref)
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
-// read sequence
+// read sequence - sequence of functions called processing a read operation
 ////////////////////////////////////////////////////////////////////////////////////
 void democonnection_read(DemoConnectionRef connection_ref, void(*on_demo_read_cb)(void* href, DemoMessageRef, int statuc))
 {
@@ -187,6 +187,7 @@ static void reader(DemoConnectionRef connection_ref) {
     char* errstr = strerror(errno_save);
     if(bytes_available > 0) {
         LOG_FMT("Before DemoParser_consume read_state %d\n", connection_ref->read_state);
+        // TODO experiment with generic programming in C
         int ec = connection_ref->parser_ref->parser_consume((ParserInterfaceRef)connection_ref->parser_ref, iob);
 //        int ec = DemoParser_consume(connection_ref->parser_ref, iob);
         LOG_FMT("After DemoParser_consume returns error_code: %d  errno: %d read_state %d \n", rv.error_code, errno_save, connection_ref->read_state);
@@ -227,7 +228,7 @@ static void on_read_complete(DemoConnectionRef connection_ref, DemoMessageRef ms
 /////////////////////////////////////////////////////////////////////////////////////
 // end of read sequence
 /////////////////////////////////////////////////////////////////////////////////////
-// write sequence
+// write sequence - sequence of functions called during write operation
 ////////////////////////////////////////////////////////////////////////////////////
 void democonnection_write(
         DemoConnectionRef connection_ref,
@@ -300,6 +301,12 @@ static void postable_write_call_cb(ReactorRef reactor_ref, void* arg)
     CHTTP_ASSERT((connection_ref->on_write_cb != NULL), "write call back is NULL");
     connection_ref->on_write_cb(connection_ref->handler_ref, 0);
 }
+/////////////////////////////////////////////////////////////////////////////////////
+// end of read sequence
+/////////////////////////////////////////////////////////////////////////////////////
+// Error functions
+/////////////////////////////////////////////////////////////////////////////////////
+
 static void write_error(DemoConnectionRef connection_ref, char* msg)
 {
     DEMO_CONNECTION_CHECK_TAG(connection_ref)
@@ -318,6 +325,12 @@ static void read_error(DemoConnectionRef connection_ref, char* msg)
     connection_ref->on_read_cb = NULL;
     post_to_reactor(connection_ref, &postable_cleanup);
 }
+/////////////////////////////////////////////////////////////////////////////////////
+// end of error functions
+/////////////////////////////////////////////////////////////////////////////////////
+// cleanup sequence - functions called when connection is terminating
+/////////////////////////////////////////////////////////////////////////////////////
+
 /**
  * This must be the last democonnection function to run and it should only run once.
  */
@@ -331,6 +344,12 @@ static void postable_cleanup(ReactorRef reactor, void* cref)
     close(connection_ref->socket_stream_ref->fd);
     connection_ref->on_close_cb(connection_ref->handler_ref);
 }
+/////////////////////////////////////////////////////////////////////////////////////
+// end of cleanup
+/////////////////////////////////////////////////////////////////////////////////////
+// process request - DEPRECATED ... I think. Look in demohandler.c for
+// these functions.
+/////////////////////////////////////////////////////////////////////////////////////
 static DemoMessageRef reply_invalid_request(DemoConnectionRef connection_ref, const char* error_message)
 {
     DEMO_CONNECTION_CHECK_TAG(connection_ref)

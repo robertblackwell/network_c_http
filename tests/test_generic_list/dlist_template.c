@@ -5,31 +5,31 @@
 #include <c_http/common/list.h>
 #include <c_http/common/utils.h>
 
-struct TYPED(ListNode_s) {
-    TYPED(ListNode)* forward;
-    TYPED(ListNode)* backward;
-    void* item;
+struct PREFIX(Node_s) {
+    PREFIX(Node)* forward;
+    PREFIX(Node)* backward;
+    TYPE* item;
 };
 
-struct TYPED(List_s) {
+struct PREFIX(_s) {
     int count;
-    TYPED(ListNode)* head;
-    TYPED(ListNode)* tail;
+    PREFIX(Node)* head;
+    PREFIX(Node)* tail;
     ListItemDeallocator dealloc;
 };
 
-TYPED(ListNode)* TYPED(ListNode_new)(void* content, TYPED(ListNode)* prev, TYPED(ListNode)* next)
+PREFIX(Node)* PREFIX(Node_new)(TYPE* content, PREFIX(Node)* prev, PREFIX(Node)* next)
 {
-    TYPED(ListNode)* lnref = malloc(sizeof(TYPED(ListNode)));
+    PREFIX(Node)* lnref = malloc(sizeof(PREFIX(Node)));
     lnref->item = content;
     lnref->forward = next;
     lnref->backward = prev;
 }
-void TYPED(ListNode_dispose)(TYPED(ListRef) lref, TYPED(ListNode)** lnref_ptr)
+void PREFIX(Node_dispose)(PREFIX(Ref) lref, PREFIX(Node)** lnref_ptr)
 {
     ASSERT_NOT_NULL(lref);
     ASSERT_NOT_NULL(lnref_ptr);
-    TYPED(ListNode)* lnref = *lnref_ptr;
+    PREFIX(Node)* lnref = *lnref_ptr;
     if(lref->dealloc != NULL) {
         if(lnref->item != NULL)
             TYPED(_free)(lnref->item);
@@ -41,17 +41,17 @@ void TYPED(ListNode_dispose)(TYPED(ListRef) lref, TYPED(ListNode)** lnref_ptr)
 
 
 // create and initialize
-TYPED(ListRef) TYPED(List_new)()
+PREFIX(Ref) PREFIX(_new)()
 {
-    TYPED(ListRef) lref = malloc(sizeof(TYPED(List)));
+    PREFIX(Ref) lref = malloc(sizeof(PREFIX()));
     if(lref != NULL) {
-        TYPED(List_init)(lref);
+        PREFIX(_init)(lref);
     }
     return lref;
 }
 
 // initialize a given block of memory as empty list
-void TYPED(List_init)(TYPED(ListRef) lref)
+void PREFIX(_init)(PREFIX(Ref) lref)
 {
     ASSERT_NOT_NULL(lref);
     lref->count = 0;
@@ -64,66 +64,66 @@ void TYPED(List_init)(TYPED(ListRef) lref)
 }
 
 // destroy the content including freeing any dynamic memory leaving a functioning empty list
-void TYPED(List_destroy)(TYPED(ListRef) lref)
+void PREFIX(_destroy)(PREFIX(Ref) lref)
 {
     ASSERT_NOT_NULL(lref);
     ListItemDeallocator dealloc = lref->dealloc;
-    TYPED(ListNode)* t = lref->head;
+    PREFIX(Node)* t = lref->head;
     for(;;) {
         // how to free the contained item
         if(t == NULL) {
             break;
         }
-        TYPED(ListNode)* tnext = t->forward;
-        TYPED(ListNode_dispose)(lref, &t);
+        PREFIX(Node)* tnext = t->forward;
+        PREFIX(Node_dispose)(lref, &t);
         t = tnext;
     }
-    TYPED(List_init)(lref);
+    PREFIX(_init)(lref);
 }
 
 //free the entire list including invalidating the lref
-void TYPED(List_dispose)(TYPED(ListRef)* lref_ptr)
+void PREFIX(_dispose)(PREFIX(Ref)* lref_ptr)
 {
     ASSERT_NOT_NULL(*lref_ptr);
     List_destroy((ListRef)*lref_ptr);
     free((void*)*lref_ptr);
     *lref_ptr = NULL;
 }
-int TYPED(List_size)(const TYPED(ListRef) lref)
+int PREFIX(_size)(const PREFIX(Ref) lref)
 {
     return lref->count;
 }
-void TYPED(List_display)(const TYPED(ListRef) this)
+void PREFIX(_display)(const PREFIX(Ref) this)
 {
     printf("List[%p] count: %d head %p tail %p\n", (void*)this, this->count, (void*)this->head, (void*)this->tail);
-    TYPED(ListNode)* iter = this->head;
+    PREFIX(Node)* iter = this->head;
     while(iter != NULL) {
         printf("Node[%p] forward:%p backwards:%p  item:%p  %ld\n", (void*)iter, (void*)iter->forward, (void*)iter->backward, iter->item, (long)iter->item);
         TYPED(_display)(iter->item);
-        TYPED(ListNode)* next = iter->forward;
+        PREFIX(Node)* next = iter->forward;
         iter = next;
     }
 }
-TYPED(ListIterator) TYPED(List_find)(TYPED(ListRef) this, void* needle)
+PREFIX(Iterator) PREFIX(_find)(PREFIX(Ref) this, TYPE* needle)
 {
     printf("List[%p] count: %d head %p tail %p\n", (void*)this, this->count, (void*)this->head, (void*)this->tail);
-    TYPED(ListNode)* iter = this->head;
+    PREFIX(Node)* iter = this->head;
     while(iter != NULL) {
         if(iter->item == needle) {
             return iter;
         }
         printf("Node[%p] forward:%p backwards:%p  item:%p  %ld\n", (void*)iter, (void*)iter->forward, (void*)iter->backward, iter->item, (long)iter->item);
-        TYPED(ListNode)* next = iter->forward;
+        PREFIX(Node)* next = iter->forward;
         iter = next;
     }
     return NULL;
 }
 
 // add to the front of the list
-void TYPED(List_add_front)(TYPED(ListRef) lref, void* content)
+void PREFIX(_add_front)(PREFIX(Ref) lref, TYPE* content)
 {
     ASSERT_NOT_NULL(lref);
-    TYPED(ListNode)* lnref = TYPED(ListNode_new)(content, NULL, NULL);
+    PREFIX(Node)* lnref = PREFIX(Node_new)(content, NULL, NULL);
     if(lref->count == 0) {
         lref->head = lnref;
         lref->tail = lnref;
@@ -138,10 +138,10 @@ void TYPED(List_add_front)(TYPED(ListRef) lref, void* content)
 }
 
 // add to the back of the list
-void TYPED(List_add_back)(TYPED(ListRef) lref, void* content)
+void PREFIX(_add_back)(PREFIX(Ref) lref, TYPE* content)
 {
     ASSERT_NOT_NULL(lref);
-    TYPED(ListNode)* lnref = TYPED(ListNode_new)(content, NULL, lref->head);
+    PREFIX(Node)* lnref = PREFIX(Node_new)(content, NULL, lref->head);
     if(lref->count == 0) {
         lref->tail = lnref;
         lref->head = lnref;
@@ -156,7 +156,7 @@ void TYPED(List_add_back)(TYPED(ListRef) lref, void* content)
 }
 
 // gets the item contained in the first list item without removing from list
-void* TYPED(List_first)(const TYPED(ListRef) lref)
+TYPE* PREFIX(_first)(const PREFIX(Ref) lref)
 {
     ASSERT_NOT_NULL(lref);
     if(lref->head == NULL)
@@ -165,7 +165,7 @@ void* TYPED(List_first)(const TYPED(ListRef) lref)
 }
 
 // gets the item contained in the first list item AND removes that item
-void* TYPED(List_remove_first)(TYPED(ListRef) lref)
+TYPE* PREFIX(_remove_first)(PREFIX(Ref) lref)
 {
     ASSERT_NOT_NULL(lref);
     if(lref->count == 0)
@@ -174,24 +174,24 @@ void* TYPED(List_remove_first)(TYPED(ListRef) lref)
         lref->count--;
         void* content = lref->head->item;
         lref->head->item = NULL;
-        TYPED(ListNode_dispose)(lref, &(lref->head));
+        PREFIX(Node_dispose)(lref, &(lref->head));
         lref->head = NULL; lref->tail = NULL;
         return content;
     }
-    TYPED(ListNode)* first = lref->head;
+    PREFIX(Node)* first = lref->head;
     lref->head = first->forward;
     lref->head->backward = NULL;
     void* content = first->item;
     first->forward = NULL;
     first->backward = NULL;
     first->item = NULL;
-    TYPED(ListNode_dispose)(lref, &first);
+    PREFIX(Node_dispose)(lref, &first);
     lref->count--;
     return content;
 }
 
 // gets the item contained in the last list item without removing from list
-void* TYPED(List_last)(const TYPED(ListRef) lref)
+TYPE* PREFIX(_last)(const PREFIX(Ref) lref)
 {
     ASSERT_NOT_NULL(lref);
     if(lref->tail == NULL) return NULL;
@@ -199,7 +199,7 @@ void* TYPED(List_last)(const TYPED(ListRef) lref)
 }
 
 // gets the item contained in the last list item AND removes that item
-void* TYPED(List_remove_last)(TYPED(ListRef) lref)
+TYPE* PREFIX(_remove_last)(PREFIX(Ref) lref)
 {
     ASSERT_NOT_NULL(lref);
     if(lref->count == 0 ) {
@@ -210,11 +210,11 @@ void* TYPED(List_remove_last)(TYPED(ListRef) lref)
         void* content = lref->head->item;
         lref->head->item = NULL;
 
-        TYPED(ListNode_dispose)(lref, &(lref->head));
+        PREFIX(Node_dispose)(lref, &(lref->head));
         lref->head = NULL; lref->tail = NULL;
         return content;
     }
-    TYPED(ListNode)* last = lref->tail;
+    PREFIX(Node)* last = lref->tail;
     lref->tail = last->backward;
     lref->tail->forward = NULL;
     void* content = last->item;
@@ -222,20 +222,20 @@ void* TYPED(List_remove_last)(TYPED(ListRef) lref)
     last->backward = NULL;
     last->item = NULL;
 
-    TYPED(ListNode_dispose)(lref, &last);
+    PREFIX(Node_dispose)(lref, &last);
     lref->count--;
     return content;
 }
 
 //gets an iterator for the list which initially will be pointing at the first Node in the list
-TYPED(ListIterator) TYPED(List_iterator)(const TYPED(ListRef) lref)
+PREFIX(Iterator) PREFIX(_iterator)(const PREFIX(Ref) lref)
 {
     ASSERT_NOT_NULL(lref);
     return lref->head;
 }
 
 // moves the iterator on to the next Node on the list, returns NULL if goes off the end of the list
-TYPED(ListIterator) TYPED(List_itr_next)(const TYPED(ListRef) lref, const TYPED(ListIterator) itr)
+PREFIX(Iterator) PREFIX(_itr_next)(const PREFIX(Ref) lref, const PREFIX(Iterator) itr)
 {
     ASSERT_NOT_NULL(lref);
     ASSERT_NOT_NULL(itr);
@@ -244,11 +244,11 @@ TYPED(ListIterator) TYPED(List_itr_next)(const TYPED(ListRef) lref, const TYPED(
 
 // removes a list item pointed at by an iterator - invalidates the itr
 // and if there is a dealloc function call it on the content of the list node
-void TYPED(List_itr_remove)(TYPED(ListRef) lref, TYPED(ListIterator)* itr_ptr)
+void PREFIX(_itr_remove)(PREFIX(Ref) lref, PREFIX(Iterator)* itr_ptr)
 {
     ASSERT_NOT_NULL(lref);
     ASSERT_NOT_NULL(itr_ptr);
-    TYPED(ListNode)* itr = *itr_ptr;
+    PREFIX(Node)* itr = *itr_ptr;
     ASSERT_NOT_NULL(itr);
     if(lref->count == 0)
         return;
@@ -257,7 +257,7 @@ void TYPED(List_itr_remove)(TYPED(ListRef) lref, TYPED(ListIterator)* itr_ptr)
         lref->count = 0;
         lref->head = NULL;
         lref->tail = NULL;
-        TYPED(ListNode_dispose)(lref, itr_ptr);
+        PREFIX(Node_dispose)(lref, itr_ptr);
         return;
     }
     if(lref->head == *itr_ptr) {
@@ -272,11 +272,11 @@ void TYPED(List_itr_remove)(TYPED(ListRef) lref, TYPED(ListIterator)* itr_ptr)
     }
     lref->count--;
 
-    TYPED(ListNode_dispose)(lref, itr_ptr);
+    PREFIX(Node_dispose)(lref, itr_ptr);
 }
 
 // gets the value of the item held in the Node pointed at by this iterator
-void* TYPED(List_itr_unpack)(TYPED(ListRef) lref, TYPED(ListIterator) itr)
+TYPE* PREFIX(_itr_unpack)(PREFIX(Ref) lref, PREFIX(Iterator) itr)
 {
     ASSERT_NOT_NULL(lref);
     ASSERT_NOT_NULL(itr);

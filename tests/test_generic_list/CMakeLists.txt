@@ -5,9 +5,13 @@ message("test_link_libs        ${TEST_LINK_LIBS}")
 
 set(TARGET test_generic_list)
 add_executable(${TARGET}
-	mytype.c
-	mytype_list.c
-	mytype_wrapped_list.c
+	dlist.c
+	mytype_A.c
+	mytype_B.c
+	mytype_A_dlist.c
+	mytype_B_dlist.c
+	mytype_wrapped_dlist.c
+	mytype_circular_list.c
 	test_generic_list.c
 )
 

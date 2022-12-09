@@ -1,9 +1,9 @@
-#include <c_http/common/list.h>
+#include "dlist.h"
 
-typedef List PREFIX();
-typedef ListRef PREFIX(Ref);
-typedef ListIter PREFIX(Iter);
-typedef ListIter PREFIX(Iterator);
+typedef DList PREFIX();
+typedef DListRef PREFIX(Ref);
+typedef DListIter PREFIX(Iter);
+typedef DListIter PREFIX(Iterator);
 
 
 PREFIX(Ref) PREFIX(_new) ();
