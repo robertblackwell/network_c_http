@@ -21,6 +21,7 @@ typedef void* BufferChainIter;
  * @return BufferChainRef
  */
 BufferChainRef BufferChain_new();
+void BufferChain_free(BufferChainRef this);
 /**
  * @brief Free a BufferChain and its associated resources.
  * @note This fuunction upodates the argument to NULL.

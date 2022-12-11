@@ -50,13 +50,16 @@ void FdTable_insert(FdTableRef this, RtorWatcherRef watcher, int fd)
 	this->entries[fd] = watcher;
 	this->count++;
 }
+/**
+ *  This function does not free() the item being removed from the fdList
+ */
 void FdTable_remove(FdTableRef athis, int fd)
 {
     XR_FDTABL_CHECK_TAG(athis);
     CHECK_TAG_FIELD(FdTable_TAG, athis, end_tag)
 	assert(athis->entries[fd] != NULL);
 	RtorWatcherRef wr = (athis->entries[fd]);
-	wr->free(wr);
+//	wr->free(wr);
 	athis->entries[fd] = NULL;
 	athis->count--;
 }

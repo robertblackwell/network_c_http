@@ -1,3 +1,7 @@
+This project is out of control:
+  ☐ Too many things happening
+  ☐ Demo protocol needs to be finished - run valgrind to find memory leaks
+  ☐ parser interface needs to be uniformized - that requires Html parser looks like the DemoParser
 New list of TODOs :
   ☐ what if anything is the correct role for thread local storage
   ☐ need to find ways to reduce the malloc-ing that is taking place

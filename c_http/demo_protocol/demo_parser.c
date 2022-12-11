@@ -54,7 +54,7 @@ DemoParserRef DemoParser_new(
     this->parser_consume = (int(*)(ParserInterfaceRef, IOBufferRef))&DemoParser_consume;
     this->message_factory = (void*(*)())&demo_message_new;
     this->message_free = (void(*)(void*))&demo_message_free;
-
+    this->m_state = STATE_IDLE;
     this->m_current_message_ptr = NULL;
     this->on_message_complete = on_message_complete_cb;
     this->on_read_ctx = on_read_ctx;
@@ -64,14 +64,16 @@ void DemoParser_free(DemoParserRef this)
 {
     DEMO_PARSER_CHECK_TAG(this)
     ASSERT_NOT_NULL(this);
+    if(this->m_current_message_ptr) {
+        demo_message_dispose(&(this->m_current_message_ptr));
+    }
     free(this);
 }
 void DemoParser_dispose(DemoParserRef* this_p)
 {
     DEMO_PARSER_CHECK_TAG(*this_p)
     ASSERT_NOT_NULL(*this_p);
-    DemoParserRef this= *this_p;
-    free(this);
+    DemoParser_free(*this_p);
     *this_p = NULL;
 
 }
@@ -162,6 +164,7 @@ DemoParserErrCode DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_re
                     BufferChain_append(bc, &ch, 1);
                     IOBufferRef iobtmp = BufferChain_compact(bc);
                     const char* xx = IOBuffer_cstr(iobtmp);
+                    IOBuffer_free(iobtmp);
                 } else if (ch == CH_ETX) {
                     this->m_state = STATE_LRC;
 //                    finalize_body(this);

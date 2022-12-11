@@ -90,7 +90,17 @@ void democonnection_init(
 void democonnection_free(DemoConnectionRef this)
 {
     DEMO_CONNECTION_CHECK_TAG(this)
+    int fd = this->socket_stream_ref->fd;
+    close(fd);
     rtor_stream_free(this->socket_stream_ref);
+    this->socket_stream_ref = NULL;
+    DemoParser_dispose(&(this->parser_ref));
+    if(this->active_output_buffer_ref) {
+        IOBuffer_dispose(&(this->active_output_buffer_ref));
+    }
+    if(this->active_input_buffer_ref) {
+        IOBuffer_dispose(&(this->active_input_buffer_ref));
+    }
     free(this);
 }
 /////////////////////////////////////////////////////////////////////////////////////
@@ -253,6 +263,7 @@ static void postable_writer(ReactorRef reactor_ref, void* arg)
     DemoConnectionRef connection_ref = arg;
     DEMO_CONNECTION_CHECK_TAG(connection_ref)
     if(connection_ref->write_state == WRITE_STATE_STOP) {
+        IOBuffer_dispose(&(connection_ref->active_output_buffer_ref));
         connection_ref->on_write_cb(connection_ref->handler_ref, DemoConnectionErrCode_is_closed);
         return;
     }
@@ -341,7 +352,7 @@ static void postable_cleanup(ReactorRef reactor, void* cref)
     CHTTP_ASSERT((connection_ref->cleanup_done_flag == false), "cleanup should not run more than once");
     DEMO_CONNECTION_CHECK_TAG(connection_ref)
     rtor_stream_deregister(connection_ref->socket_stream_ref);
-    close(connection_ref->socket_stream_ref->fd);
+//    close(connection_ref->socket_stream_ref->fd);
     connection_ref->on_close_cb(connection_ref->handler_ref);
 }
 /////////////////////////////////////////////////////////////////////////////////////

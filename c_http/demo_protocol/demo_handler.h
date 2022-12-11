@@ -34,6 +34,7 @@ typedef struct DemoHandler_s {
     void*               server_ref;
     ListRef             input_list;
     ListRef             output_list; // List of DemoMessageRef - responses
+    DemoMessageRef      active_response;
 
 } DemoHandler, *DemoHandlerRef;
 
@@ -48,6 +49,6 @@ void demohandler_init(
         void(*completion_cb)(void*, DemoHandlerRef),
         void* completion_cb_arg);
 void demohandler_free(DemoHandlerRef this);
-void demohandler_amonymous_dispose(void* p);
+void demohandler_anonymous_dispose(void** p);
 
 #endif

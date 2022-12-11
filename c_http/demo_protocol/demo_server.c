@@ -19,10 +19,9 @@ static DemoHandlerRef my_only_client;
 
 static socket_handle_t create_listener_socket(int port, const char *host);
 static void set_non_blocking(socket_handle_t socket);
-static void on_post_done(void* arg);
-static void on_message(TcpConnRef conn_ref, void* arg, int status);
 void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event);
-void on_handler_completion_cb(void* void_server_ref, DemoHandlerRef handler_ref)
+
+static void on_handler_completion_cb(void* void_server_ref, DemoHandlerRef handler_ref)
 {
     printf("file: demo_server.c on_handler_completeion_cb \n");
 
@@ -37,12 +36,28 @@ DemoServerRef DemoServer_new(int port)
     DemoServerRef sref = (DemoServerRef) eg_alloc(sizeof(DemoServer));
     DEMO_SERVER_SET_TAG(sref)
     sref->port = port;
-    // NOTE: List will only displse the nodes not the item
-    sref->handler_list = List_new(NULL);
+    sref->reactor_ref = rtor_reactor_new();
+    sref->listening_socket_fd = create_listener_socket(port, "127.0.0.1");
+    set_non_blocking(sref->listening_socket_fd);
+    sref->listening_watcher_ref = rtor_listener_new(sref->reactor_ref, sref->listening_socket_fd);
+    // TODO this is a memory leak
+    // the list is the owner of handler references
+    sref->handler_list = List_new(demohandler_anonymous_dispose);
 //    sref->completion_callback = &on_handler_completion_cb;
     return sref;
 }
+void DemoServer_free(DemoServerRef this)
+{
+    DEMO_SERVER_CHECK_TAG(this)
+    ASSERT_NOT_NULL(this);
+    rtor_listener_deregister(this->listening_watcher_ref);
+    rtor_listener_free(this->listening_watcher_ref);
+    close(this->listening_socket_fd);
+    rtor_reactor_free(this->reactor_ref);
+    List_dispose(&(this->handler_list));
+    free(this);
 
+}
 void DemoServer_dispose(DemoServerRef *sref)
 {
     DEMO_SERVER_CHECK_TAG(*sref)
@@ -58,10 +73,6 @@ void DemoServer_listen(DemoServerRef sref)
     int port = sref->port;
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
-    sref->listening_socket_fd = create_listener_socket(port, "127.0.0.1");
-    set_non_blocking(sref->listening_socket_fd);
-    sref->reactor_ref = rtor_reactor_new();
-    sref->listening_watcher_ref = rtor_listener_new(sref->reactor_ref, sref->listening_socket_fd);
     RtorListenerRef lw = sref->listening_watcher_ref;
     rtor_listener_register(lw, on_event_listening, sref);
     rtor_reactor_run(sref->reactor_ref, -1);
@@ -72,6 +83,7 @@ void DemoServer_listen(DemoServerRef sref)
 void DemoServer_terminate(DemoServerRef this)
 {
     DEMO_SERVER_CHECK_TAG(this)
+
     close(this->listening_socket_fd);
 }
 
@@ -126,17 +138,6 @@ void set_non_blocking(socket_handle_t socket)
     assert(fres == 0);
 }
 
-static void on_post_done(void* arg)
-{
-    TcpConnRef conn_ref = arg;
-    LOG_FMT("conn: %p arg: %p", conn_ref, arg);
-}
-static void on_message(TcpConnRef conn_ref, void* arg, int status)
-{
-    LOG_FMT("conn: %p arg: %p status: %d", conn_ref, arg, status);
-    assert(conn_ref->handler_ref == NULL);
-    XrHandler_function(conn_ref->req_msg_ref, conn_ref, &on_post_done);
-}
 void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event)
 {
 

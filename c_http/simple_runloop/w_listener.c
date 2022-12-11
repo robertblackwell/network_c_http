@@ -77,7 +77,7 @@ void rtor_listener_register(RtorListenerRef athis, ListenerEventHandler event_ha
 void rtor_listener_deregister(RtorListenerRef athis)
 {
     XR_LISTNER_CHECK_TAG(athis)
-    rtor_reactor_delete(athis->runloop, athis->fd);
+    rtor_reactor_deregister(athis->runloop, athis->fd);
 }
 void rtor_listener_arm(RtorListenerRef athis, ListenerEventHandler fd_event_handler, void* arg)
 {

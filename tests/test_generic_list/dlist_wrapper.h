@@ -4,7 +4,13 @@ typedef DList PREFIX();
 typedef DListRef PREFIX(Ref);
 typedef DListIter PREFIX(Iter);
 typedef DListIter PREFIX(Iterator);
-
+/**
+ * This template produces a double linked list where each node holds a
+ * pointer to the type TYPE (that is TYPE*).
+ *
+ * The functions geberated by this template are thin wrappers (that mainly cast types)
+ * rounb the functions provided by the files dlist_warpper.h and dlist_warpper.c
+ */
 
 PREFIX(Ref) PREFIX(_new) ();
 void  PREFIX(_init)(PREFIX(Ref) lref);

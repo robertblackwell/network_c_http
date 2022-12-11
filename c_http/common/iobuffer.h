@@ -150,6 +150,12 @@ void IOBuffer_commit(IOBufferRef this, int bytes_used);
  */
 void IOBuffer_consume(IOBufferRef this, int byte_count);
 /**
+ * Only use when absolutely necessary.
+ * Frees the memory associated with 'this' but does not set pointer to NULL
+ * @param this
+ */
+void IOBuffer_free(IOBufferRef this);
+/**
  * @deprecated - dont use
  * @param this
  */

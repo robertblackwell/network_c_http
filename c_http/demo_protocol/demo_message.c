@@ -31,7 +31,7 @@ DemoMessageRef demo_message_new ()
     DEMO_MESSAGE_SET_TAG(mref)
     if(mref == NULL) goto error_label_1;
     mref->body = NULL;
-    mref->opcode = Cbuffer_new();
+    mref->opcode = false;
     mref->body = BufferChain_new();
     return mref;
 
@@ -56,6 +56,7 @@ DemoMessageRef demo_message_new_response()
 void demo_message_free(DemoMessageRef this)
 {
     DEMO_MESSAGE_CHECK_TAG(this)
+
     BufferChain_dispose(&((this)->body));
     eg_free(this);
 }
@@ -65,7 +66,6 @@ void demo_message_dispose(DemoMessageRef* this_p)
     DemoMessageRef this = *this_p;
     DEMO_MESSAGE_CHECK_TAG(this)
     BufferChain_dispose(&((*this_p)->body));
-
     eg_free(*this_p);
     *this_p = NULL;
 }
@@ -87,6 +87,8 @@ IOBufferRef demo_message_serialize(DemoMessageRef mref)
     char* end_str = "\03L\x04";
     BufferChain_append(bc, (void*) end_str, 3);
     IOBufferRef result = BufferChain_compact(bc);
+    BufferChain_dispose(&(bc));
+    IOBuffer_dispose(&(b));
     return result;
 }
 bool demo_message_get_is_request(DemoMessageRef this)
@@ -126,6 +128,12 @@ BufferChainRef demo_message_get_body(DemoMessageRef this)
 void demo_message_set_body(DemoMessageRef this, BufferChainRef bc)
 {
     DEMO_MESSAGE_CHECK_TAG(this);
+    if(this->body != NULL) {
+        printf("demomessage_set_body existing body being ignored bc: %p  this->body: %p\n", bc, this->body);
+        BufferChain_dispose(&(this->body));
+//        BufferChain_free(this->body);
+//        this->body = NULL;
+    }
     this->body = bc;
 }
 /**@}*/

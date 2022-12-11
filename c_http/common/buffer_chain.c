@@ -21,6 +21,21 @@ BufferChainRef BufferChain_new()
     tmp->m_chain = List_new(dealloc);
     tmp->m_size = 0;
 }
+void BufferChain_free(BufferChainRef this)
+{
+    ListIterator iter = List_iterator(this->m_chain);
+    for(;;) {
+        if(iter == NULL) {
+            break;
+        }
+        ListIterator next = List_itr_next(this->m_chain, iter);
+        List_itr_remove(this->m_chain, &iter);
+        iter = next;
+    }
+    List_dispose(&(this->m_chain));
+    free((void*)this);
+}
+
 void BufferChain_dispose(BufferChainRef* thisptr)
 {
     BufferChainRef this = *thisptr;
@@ -33,6 +48,7 @@ void BufferChain_dispose(BufferChainRef* thisptr)
         List_itr_remove(this->m_chain, &iter);
         iter = next;
     }
+    List_dispose(&(this->m_chain));
     *thisptr = NULL;
     free((void*)this);
 }

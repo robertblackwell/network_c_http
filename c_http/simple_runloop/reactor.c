@@ -96,6 +96,8 @@ void rtor_reactor_init(ReactorRef athis) {
     LOG_FMT("rtor_reactor_new epoll_fd %d", runloop->epoll_fd);
     runloop->table = FdTable_new();
     runloop->ready_list = functor_list_new(RTOR_READY_LIST_MAX);
+    runloop->interthread_queue_ref = NULL;
+    runloop->interthread_queue_watcher_ref = NULL;
 }
 void rtor_reactor_enable_interthread_queue(ReactorRef rtor_ref)
 {
@@ -126,6 +128,12 @@ void rtor_reactor_free(ReactorRef athis)
     CHECK_THREAD(athis)
     if(! athis->closed_flag) {
         rtor_reactor_close(athis);
+    }
+    if(athis->interthread_queue_ref) {
+        Evfdq_free(athis->interthread_queue_ref);
+    }
+    if(athis->interthread_queue_watcher_ref) {
+        rtor_wqueue_dispose(&(athis->interthread_queue_watcher_ref));
     }
     FdTable_free(athis->table);
     functor_list_free(athis->ready_list);

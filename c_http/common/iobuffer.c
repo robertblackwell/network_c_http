@@ -198,6 +198,11 @@ void IOBuffer_dispose(IOBufferRef* p)
     eg__free(*p);
     *p = NULL;
 }
+void IOBuffer_free(IOBufferRef this)
+{
+    eg_free(this->mem_p);
+    eg_free(this);
+}
 bool IOBuffer_empty(IOBufferRef this)
 {
     IOBUFFER_CHECK_TAG(this)

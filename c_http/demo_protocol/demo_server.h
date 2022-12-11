@@ -38,6 +38,7 @@ struct DemoServer_s {
  * \return
  */
 DemoServerRef DemoServer_new(int port);
+void DemoServer_free(DemoServerRef this);
 void DemoServer_dispose(DemoServerRef* srefptr);
 void DemoServer_listen(DemoServerRef server);
 void DemoServer_terminate(DemoServerRef this);

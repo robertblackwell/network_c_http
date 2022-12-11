@@ -72,9 +72,9 @@ void List_destroy(ListRef lref)
         if(t == NULL) {
             break;
         }
-//        if(lref->dealloc != NULL) {
-//            lref->dealloc(&(t->item));
-//        }
+        if(lref->dealloc != NULL) {
+            lref->dealloc(&(t->item));
+        }
         ListNode* tnext = t->forward;
         ListNode_dispose(lref, &t);
         t = tnext;

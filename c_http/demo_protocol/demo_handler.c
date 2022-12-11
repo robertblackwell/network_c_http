@@ -55,13 +55,24 @@ void demohandler_init(
     this->server_ref = server_ref;
     this->input_list = List_new(NULL);
     this->output_list = List_new(NULL);
+    this->active_response = NULL;
 
     democonnection_read(this->demo_connection_ref, &handle_request);
 }
 void demohandler_free(DemoHandlerRef this)
 {
     DEMO_HANDLER_CHECK_TAG(this)
+    democonnection_free(this->demo_connection_ref);
+    this->demo_connection_ref = NULL;
+    List_dispose(&(this->input_list));
+    List_dispose(&(this->output_list));
     free(this);
+}
+void demohandler_anonymous_dispose(void** p)
+{
+    DemoHandlerRef ref = *p;
+    demohandler_free(ref);
+    *p = NULL;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // main driver functon - keeps everything going
@@ -79,6 +90,7 @@ static void handle_request(void* href, DemoMessageRef msgref, int error_code)
         if (List_size(handler_ref->output_list) == 1) {
             rtor_reactor_post(handler_ref->reactor_ref, postable_write_start, href);
         }
+        demo_message_free(msgref);
         rtor_reactor_post(handler_ref->reactor_ref, handler_postable_read_start, href);
     }
 }
@@ -88,9 +100,10 @@ static DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef reques
     DemoMessageRef reply = demo_message_new();
     demo_message_set_is_request(reply, false);
     BufferChainRef request_body = demo_message_get_body(request);
-    BufferChainRef bc = BufferChain_new();
+    BufferChainRef bc =  BufferChain_new();
     BufferChain_append_bufferchain(bc, request_body);
     demo_message_set_body(reply, bc);
+    return reply;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // write sequence
@@ -98,7 +111,13 @@ static DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef reques
 static void postable_write_start(ReactorRef reactor_ref, void* href)
 {
     DemoHandlerRef handler_ref = href;
+    printf("postable_write_start active_response:%p fd:%d  write_state: %d\n", handler_ref->active_response, handler_ref->demo_connection_ref->socket_stream_ref->fd, handler_ref->demo_connection_ref->write_state);
+    if(handler_ref->active_response != NULL) {
+        return;
+    }
     DemoMessageRef response = List_remove_first(handler_ref->output_list);
+    CHTTP_ASSERT((handler_ref->active_response == NULL), "handler active response should be NULL");
+    handler_ref->active_response = response;
     if(response != NULL) {
         democonnection_write(handler_ref->demo_connection_ref, response, on_write_complete_cb);
     }
@@ -106,6 +125,8 @@ static void postable_write_start(ReactorRef reactor_ref, void* href)
 static void on_write_complete_cb(void* href, int status)
 {
     DemoHandlerRef handler_ref = href;
+    printf("on_write_complete_cb fd:%d  write_state:%d\n", handler_ref->demo_connection_ref->socket_stream_ref->fd, handler_ref->demo_connection_ref->write_state);
+    demo_message_dispose(&(handler_ref->active_response));
     if(List_size(handler_ref->output_list) == 1) {
         rtor_reactor_post(handler_ref->reactor_ref, postable_write_start, href);
     }
