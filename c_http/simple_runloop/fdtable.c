@@ -8,7 +8,7 @@
 
 
 struct FdTable_s {
-    XR_FDTABL_DECLARE_TAG;
+    DECLARE_TAG;
     uint64_t        count;
 	RtorWatcher*    entries[RTOR_FDTABLE_MAX];
     char            end_tag[TAG_LENGTH];
@@ -18,7 +18,7 @@ typedef struct FdTable_s FdTable, *FdTableRef;
 
 void FdTable_init(FdTableRef this)
 {
-    XR_FDTABL_SET_TAG(this);
+    SET_TAG(FdTable_TAG, this);
     SET_TAG_FIELD(FdTable_TAG, this, end_tag);
     this->count = 0;
 	for(int i = 0; i < RTOR_FDTABLE_MAX; i++) {
@@ -33,7 +33,7 @@ FdTableRef FdTable_new()
 }
 void FdTable_free(FdTableRef this)
 {
-    XR_FDTABL_CHECK_TAG(this);
+    CHECK_TAG(FdTable_TAG, this);
     CHECK_TAG_FIELD(FdTable_TAG, this, end_tag)
 	for(int i = 0; i < RTOR_FDTABLE_MAX; i++) {
 		if (this->entries[i] != NULL) {
@@ -44,7 +44,7 @@ void FdTable_free(FdTableRef this)
 }
 void FdTable_insert(FdTableRef this, RtorWatcherRef watcher, int fd)
 {
-    XR_FDTABL_CHECK_TAG(this);
+    CHECK_TAG(FdTable_TAG, this);
     CHECK_TAG_FIELD(FdTable_TAG, this, end_tag)
 	assert(this->entries[fd] == NULL);
 	this->entries[fd] = watcher;
@@ -55,7 +55,7 @@ void FdTable_insert(FdTableRef this, RtorWatcherRef watcher, int fd)
  */
 void FdTable_remove(FdTableRef athis, int fd)
 {
-    XR_FDTABL_CHECK_TAG(athis);
+    CHECK_TAG(FdTable_TAG, athis);
     CHECK_TAG_FIELD(FdTable_TAG, athis, end_tag)
 	assert(athis->entries[fd] != NULL);
 	RtorWatcherRef wr = (athis->entries[fd]);
@@ -65,7 +65,7 @@ void FdTable_remove(FdTableRef athis, int fd)
 }
 RtorWatcherRef FdTable_lookup(FdTableRef this, int fd)
 {
-    XR_FDTABL_CHECK_TAG(this);
+    CHECK_TAG(FdTable_TAG, this);
     CHECK_TAG_FIELD(FdTable_TAG, this, end_tag)
 	assert(this->entries[fd] != NULL);
 	return 	(this->entries[fd]);
@@ -73,7 +73,7 @@ RtorWatcherRef FdTable_lookup(FdTableRef this, int fd)
 }
 int FdTable_iterator(FdTableRef this)
 {
-    XR_FDTABL_CHECK_TAG(this);
+    CHECK_TAG(FdTable_TAG, this);
     CHECK_TAG_FIELD(FdTable_TAG, this, end_tag)
     for(int i = 0; i < RTOR_FDTABLE_MAX; i++) {
         if (this->entries[i] != NULL) {
@@ -84,7 +84,7 @@ int FdTable_iterator(FdTableRef this)
 }
 int FdTable_next_iterator(FdTableRef this, int iter)
 {
-    XR_FDTABL_CHECK_TAG(this);
+    CHECK_TAG(FdTable_TAG, this);
     CHECK_TAG_FIELD(FdTable_TAG, this, end_tag)
     assert(iter+1 < RTOR_FDTABLE_MAX);
     for(int i = iter+1; i < RTOR_FDTABLE_MAX; i++) {
@@ -96,7 +96,7 @@ int FdTable_next_iterator(FdTableRef this, int iter)
 }
 uint64_t FdTable_size(FdTableRef this)
 {
-    XR_FDTABL_CHECK_TAG(this);
+    CHECK_TAG(FdTable_TAG, this);
     CHECK_TAG_FIELD(FdTable_TAG, this, end_tag)
     return this->count;
 }

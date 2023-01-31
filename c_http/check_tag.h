@@ -33,30 +33,50 @@
  * NOTE: if you make a tag too long - you will get a runtime error NOT a compile time error
  */
 
+
+#define TYPE_CHECK_ON
 #ifdef TYPE_CHECK_ON
 #define TAG_LENGTH 10
-    #define TAG(TYPE) TYPE ## _TAG
-    #define DECLARE_TAG(TYPE) char tag[TAG_LENGTH]
-    #define CHECK_TAG(TYPE, p) \
+
+#define DECLARE_TAG_FIELD(field) char field[TAG_LENGTH]
+#define DECLARE_TAG char tag[TAG_LENGTH]
+#define DECLARE_END_TAG  DECLARE_TAG_FIELD(end_tag)
+
+#define CHECK_TAG_FIELD(TAG, p, field) \
     do { \
-        assert(strcmp((p)->tag, TAG(TYPE)) == 0); \
+        if(strcmp((p)->field, TAG) != 0) { \
+            assert(false);                  \
+        } \
     } while(0);
 
-    // used for testing only
-    #define FAIL_CHECK_TAG(TYPE, p) \
+#define CHECK_TAG(TAG, p) \
     do { \
-        assert(strcmp((p)->tag, TAG(TYPE)) != 0); \
+        if(strcmp((p)->tag, TAG) != 0) { \
+            assert(false);                  \
+        } \
     } while(0);
 
-    #define SET_TAG(TYPE, p) \
+// used for testing only
+#define FAIL_CHECK_TAG(TAG, p) \
+    do { \
+        assert(strcmp((p)->tag, TAG) != 0); \
+    } while(0);
+
+#define SET_TAG_FIELD(TAG, p, field) \
     do {                     \
-        assert(strlen(TAG(TYPE)) < TAG_LENGTH);                     \
-        sprintf((p)->tag, "%s", TAG(TYPE)); \
+        static_assert(strlen(TAG) < TAG_LENGTH, "Tag too long in SET_TAG");                     \
+        sprintf((p)->field, "%s", TAG); \
+    } while(0);
+
+
+#define SET_TAG(TAG, p) \
+    do {                     \
+        static_assert(strlen(TAG) < TAG_LENGTH, "Tag too long in SET_TAG");                     \
+        sprintf((p)->tag, "%s", TAG); \
     } while(0);
 #else
 #define DECLARE_TAG(TYPE)
-#define CHECK_TAG(TYPE, p)
-#define SET_TAG(TYPE, p)
-
+    #define CHECK_TAG(TYPE, p)
+    #define SET_TAG(TYPE, p)
 #endif
 /** @} */

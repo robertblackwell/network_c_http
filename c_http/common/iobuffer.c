@@ -7,26 +7,14 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#define TYPE IOBuffer
 #define IOBuffer_TAG "IOBUFF"
 #include <c_http/check_tag.h>
-#undef TYPE
-#define IOBUFFER_DECLARE_TAG DECLARE_TAG(IOBuffer)
-#define IOBUFFER_CHECK_TAG(p) CHECK_TAG(IOBuffer, p)
-#define IOBUFFER_SET_TAG(p) SET_TAG(IOBuffer, p)
 
-
-//#define IOB_FILL
-#ifdef IOB_FILL
-#define IOB_TERM_CHAR '?';
-#define IOB_FILL_CHAR '+'
-#else
 #define IOB_TERM_CHAR (char)0x00;
 #define IOB_FILL_CHAR '+'
-#endif
 
 typedef struct IOBuffer_s {
-    IOBUFFER_DECLARE_TAG;
+    DECLARE_TAG;
     void*  mem_p;             // always points to the start of buffer
     char*  char_p;
     int    allocated_capacity; // typically allocate a little more than requested - for a trailing 0x00
@@ -40,7 +28,7 @@ typedef struct IOBuffer_s {
 
 IOBufferRef IOBuffer_init(IOBufferRef this, int capacity )
 {
-    IOBUFFER_SET_TAG(this);
+    SET_TAG(IOBuffer_TAG, this);
     this->allocated_capacity = capacity + 1;
     this->buffer_ptr = this->mem_p = eg_alloc(this->allocated_capacity);
     if(this->mem_p == NULL) goto memerror;
@@ -94,12 +82,12 @@ IOBufferRef IOBuffer_from_cstring(char* cstr)
 }
 const char* IOBuffer_cstr(IOBufferRef this)
 {
-    IOBUFFER_CHECK_TAG(this)
+    CHECK_TAG(IOBuffer_TAG, this)
     return (const char*) this->buffer_ptr;
 }
 IOBufferRef IOBuffer_dup(IOBufferRef this)
 {
-    IOBUFFER_CHECK_TAG(this)
+    CHECK_TAG(IOBuffer_TAG, this)
     IOBufferRef new = IOBuffer_new_with_capacity(this->buffer_capacity);
     new->buffer_capacity = this->buffer_capacity;
     new->allocated_capacity = this->allocated_capacity;
@@ -112,17 +100,17 @@ IOBufferRef IOBuffer_dup(IOBufferRef this)
 
 void* IOBuffer_data(const IOBufferRef this)
 {
-    IOBUFFER_CHECK_TAG(this)
+    CHECK_TAG(IOBuffer_TAG, this)
     return this->buffer_ptr;
 }
 int IOBuffer_data_len(const IOBufferRef this)
 {
-    IOBUFFER_CHECK_TAG(this)
+    CHECK_TAG(IOBuffer_TAG, this)
     return this->buffer_remaining;
 }
 void IOBuffer_data_add(IOBufferRef this, void* p, int len)
 {
-    IOBUFFER_CHECK_TAG(this)
+    CHECK_TAG(IOBuffer_TAG, this)
     void* memp = IOBuffer_space(this);
     int mem_len = IOBuffer_space_len(this);
     assert(mem_len >= len);
@@ -132,17 +120,17 @@ void IOBuffer_data_add(IOBufferRef this, void* p, int len)
 
 void* IOBuffer_space(const IOBufferRef this)
 {
-    IOBUFFER_CHECK_TAG(this)
+    CHECK_TAG(IOBuffer_TAG, this)
     return (this->buffer_ptr + this->buffer_remaining);
 }
 int IOBuffer_space_len(const IOBufferRef this)
 {
-    IOBUFFER_CHECK_TAG(this)
+    CHECK_TAG(IOBuffer_TAG, this)
     return (this->mem_p + this->buffer_capacity) - (this->buffer_ptr + this->buffer_remaining);
 }
 void IOBuffer_commit(IOBufferRef this, int bytes_used)
 {
-    IOBUFFER_CHECK_TAG(this)
+    CHECK_TAG(IOBuffer_TAG, this)
     assert(bytes_used > 0);
     //@TODO  this looks like a bug test with two successive commits
     // TODO - what happens if the bytes_used parameter is too big
@@ -151,7 +139,7 @@ void IOBuffer_commit(IOBufferRef this, int bytes_used)
 }
 void IOBuffer_consolidate_space(IOBufferRef this)
 {
-    IOBUFFER_CHECK_TAG(this)
+    CHECK_TAG(IOBuffer_TAG, this)
     IOBufferRef tmp = IOBuffer_new_with_capacity(this->buffer_capacity);
     IOBuffer_data_add(tmp, IOBuffer_data(this), IOBuffer_data_len(this));
     void* tmp_mem_p = this->mem_p;
@@ -167,7 +155,7 @@ void IOBuffer_consolidate_space(IOBufferRef this)
 
 void IOBuffer_consume(IOBufferRef this, int byte_count)
 {
-    IOBUFFER_CHECK_TAG(this)
+    CHECK_TAG(IOBuffer_TAG, this)
     this->buffer_ptr += byte_count;
     // check no off end of buffer
     void* x = this->mem_p + this->buffer_capacity;
@@ -182,36 +170,37 @@ void IOBuffer_consume(IOBufferRef this, int byte_count)
 }
 void IOBuffer_destroy(IOBufferRef this)
 {
-    IOBUFFER_CHECK_TAG(this)
+    CHECK_TAG(IOBuffer_TAG, this)
     eg_free(this->mem_p);
 }
 void IOBuffer_reset(IOBufferRef this)
 {
-    IOBUFFER_CHECK_TAG(this)
+    CHECK_TAG(IOBuffer_TAG, this)
     this->buffer_ptr = this->mem_p;
     this->buffer_remaining = 0;
 }
 void IOBuffer_dispose(IOBufferRef* p)
 {
-    IOBUFFER_CHECK_TAG(*p)
+    CHECK_TAG(IOBuffer_TAG, *p)
     IOBuffer_destroy(*p);
     eg__free(*p);
     *p = NULL;
 }
 void IOBuffer_free(IOBufferRef this)
 {
+    CHECK_TAG(IOBuffer_TAG, this)
     eg_free(this->mem_p);
     eg_free(this);
 }
 bool IOBuffer_empty(IOBufferRef this)
 {
-    IOBUFFER_CHECK_TAG(this)
+    CHECK_TAG(IOBuffer_TAG, this)
     return this->buffer_remaining == 0;
 }
 bool IOBuffer_equal(IOBufferRef a, IOBufferRef b)
 {
-    IOBUFFER_CHECK_TAG(a)
-    IOBUFFER_CHECK_TAG(b)
+    CHECK_TAG(IOBuffer_TAG, a)
+    CHECK_TAG(IOBuffer_TAG, b)
     int lena = IOBuffer_data_len(a);
     int lenb = IOBuffer_data_len(b);
     void* a_p = IOBuffer_data(a);
@@ -223,6 +212,6 @@ bool IOBuffer_equal(IOBufferRef a, IOBufferRef b)
 }
 void* IOBuffer_memptr(IOBufferRef this)
 {
-    IOBUFFER_CHECK_TAG(this)
+    CHECK_TAG(IOBuffer_TAG, this)
     return this->mem_p;
 }

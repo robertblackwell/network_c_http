@@ -10,18 +10,13 @@
 #include <assert.h>
 #include <errno.h>
 
-#define TYPE Reader
 #define SyncReader_TAG "SYNCRDR"
 #include <c_http/check_tag.h>
-#undef TYPE
-#define READER_DECLARE_TAG DECLARE_TAG(SyncReader)
-#define READER_CHECK_TAG(p) CHECK_TAG(SyncReader, p)
-#define READER_SET_TAG(p) SET_TAG(SyncReader, p)
 
 
 struct SyncReader_s
 {
-    READER_DECLARE_TAG;
+    DECLARE_TAG;
     ParserRef           m_parser;
     IOBufferRef         m_iobuffer;
     RdSocket            m_rdsocket;
@@ -34,7 +29,7 @@ struct SyncReader_s
 void SyncReader_init(SyncReaderRef  this, RdSocket rdsock)
 {
     ASSERT_NOT_NULL(this);
-    READER_SET_TAG(this)
+    SET_TAG(SyncReader_TAG, this)
     this->m_parser = Parser_new();
 //    this->m_socket = socket;
     this->m_rdsocket = rdsock;
@@ -62,21 +57,21 @@ SyncReaderRef SyncReader_new(int rdsock_fd)
 
 void SyncReader_destroy(SyncReaderRef this)
 {
-    READER_CHECK_TAG(this)
+    CHECK_TAG(SyncReader_TAG, this)
     IOBuffer_dispose(&(this->m_iobuffer));
 
 }
 void SyncReader_dispose(SyncReaderRef* this_ptr)
 {
     SyncReaderRef this = *this_ptr;
-    READER_CHECK_TAG(this)
+    CHECK_TAG(SyncReader_TAG, this)
     SyncReader_destroy(this);
     eg_free((void*)this);
     *this_ptr = NULL;
 }
 int SyncReader_read(SyncReaderRef this, MessageRef* msgref_ptr)
 {
-    READER_CHECK_TAG(this)
+    CHECK_TAG(SyncReader_TAG, this)
     IOBufferRef iobuf = this->m_iobuffer;
     MessageRef message_ptr = Message_new();
     Parser_begin(this->m_parser, message_ptr);

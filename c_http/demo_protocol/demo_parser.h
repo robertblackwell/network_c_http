@@ -5,15 +5,8 @@
 #include <c_http/common/cbuffer.h>
 
 
-#define TYPE DemoParser
 #define DemoParser_TAG "DmPARS"
 #include <c_http/check_tag.h>
-#undef TYPE
-#define DEMO_PARSER_DECLARE_TAG DECLARE_TAG(DemoParser)
-#define DEMO_PARSER_CHECK_TAG(p) CHECK_TAG(DemoParser, p)
-#define DEMO_PARSER_SET_TAG(p) SET_TAG(DemoParser, p)
-
-
 
 /**
  * state values used in parsing http header lines
@@ -87,7 +80,7 @@ typedef struct DemoParser_s DemoParser, *DemoParserRef;
 typedef void(*DP_MessageComple_CB)(void* ctx, DemoMessageRef, int error_code);
 struct DemoParser_s {
     ParserInterface;
-    DEMO_PARSER_DECLARE_TAG;
+    DECLARE_TAG;
     int  m_state;
     void* on_read_ctx;
     DP_MessageComple_CB on_message_complete;

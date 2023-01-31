@@ -10,19 +10,14 @@
 #include <assert.h>
 #include <errno.h>
 
-#define TYPE Reader
 #define DemoSyncReader_TAG "DSYRDR"
 #include <c_http/check_tag.h>
-#undef TYPE
-#define DEMOSYNCREADER_DECLARE_TAG DECLARE_TAG(DemoSyncReader)
-#define DEMOSYNCREADER_CHECK_TAG(p) CHECK_TAG(DemoSyncReader, p)
-#define DEMOSYNCREADER_SET_TAG(p) SET_TAG(DemoSyncReader, p)
 
 
 struct DemoSyncReader_s
 {
-    DEMOSYNCREADER_DECLARE_TAG;
-    DemoParserRef           m_parser;
+    DECLARE_TAG;
+    DemoParserRef       m_parser;
     IOBufferRef         m_iobuffer;
     RdSocket            m_rdsocket;
     int                 m_io_errno;
@@ -34,7 +29,7 @@ struct DemoSyncReader_s
 void demosync_reader_init(DemoSyncReaderRef  this, RdSocket rdsock)
 {
     ASSERT_NOT_NULL(this);
-    DEMOSYNCREADER_SET_TAG(this)
+    SET_TAG(DemoSyncReader_TAG, this)
     this->m_parser = DemoParser_new();
 //    this->m_socket = socket;
     this->m_rdsocket = rdsock;
@@ -62,21 +57,21 @@ DemoSyncReaderRef demosync_reader_new(int rdsock_fd)
 
 void demosync_reader_destroy(DemoSyncReaderRef this)
 {
-    DEMOSYNCREADER_CHECK_TAG(this)
+    CHECK_TAG(DemoSyncReader_TAG,this)
     IOBuffer_dispose(&(this->m_iobuffer));
 
 }
 void demosync_reader_dispose(DemoSyncReaderRef* this_ptr)
 {
     DemoSyncReaderRef this = *this_ptr;
-    DEMOSYNCREADER_CHECK_TAG(this)
+    CHECK_TAG(DemoSyncReader_TAG,this)
     demosync_reader_destroy(this);
     eg_free((void*)this);
     *this_ptr = NULL;
 }
 int demosync_reader_read(DemoSyncReaderRef this, DemoMessageRef* msgref_ptr)
 {
-    DEMOSYNCREADER_CHECK_TAG(this)
+    CHECK_TAG(DemoSyncReader_TAG,this)
     IOBufferRef iobuf = this->m_iobuffer;
     DemoMessageRef message_ptr = demo_message_new();
     DemoParser_begin(this->m_parser, message_ptr);

@@ -15,16 +15,11 @@
 #include <netdb.h>
 #include <errno.h>
 
-#define TYPE DemoClient
 #define DemoClient_TAG "DECLNT"
 #include <c_http/check_tag.h>
-#undef TYPE
-#define DEMOCLIENT_DECLARE_TAG DECLARE_TAG(DemoClient)
-#define DEMOCLIENT_CHECK_TAG(p) CHECK_TAG(DemoClient, p)
-#define DEMOCLIENT_SET_TAG(p) SET_TAG(DemoClient, p)
 
 struct DemoClient_s {
-    DEMOCLIENT_DECLARE_TAG;
+    DECLARE_TAG;
     int       sock;
     DemoSyncWriterRef  wrtr;
     DemoSyncReaderRef  rdr;
@@ -33,14 +28,14 @@ struct DemoClient_s {
 DemoClientRef democlient_new()
 {
     DemoClientRef this = eg_alloc(sizeof(DemoClient));
-    DEMOCLIENT_SET_TAG(this)
+    SET_TAG(DemoClient_TAG, this)
     this->rdr = NULL;
     this->wrtr = NULL;
 }
 void democlient_dispose(DemoClientRef* this_ptr)
 {
     DemoClientRef this = *this_ptr;
-   DEMOCLIENT_CHECK_TAG(this)
+   CHECK_TAG(DemoClient_TAG, this)
     LOG_FMT("democlient_dispose %p  %d\n", this, this->sock);
     if(this->rdr) demosync_reader_dispose(&(this->rdr));
     if(this->wrtr) demosync_writer_dispose(&(this->wrtr));
@@ -63,7 +58,7 @@ void democlient_raw_connect(DemoClientRef this, int sockfd, struct sockaddr* soc
 void democlient_connect(DemoClientRef this, char* host, int portno)
 {
     int sockfd, n;
-   DEMOCLIENT_CHECK_TAG(this)
+   CHECK_TAG(DemoClient_TAG, this)
     struct sockaddr_in serv_addr;
     struct hostent *hostent;
 
@@ -92,7 +87,7 @@ void democlient_connect(DemoClientRef this, char* host, int portno)
 }
 void democlient_roundtrip(DemoClientRef this, const char* req_buffers[], DemoMessageRef* response_ptr)
 {
-    DEMOCLIENT_CHECK_TAG(this)
+    CHECK_TAG(DemoClient_TAG, this)
     int buf_index = 0;
     int buf_len;
     char* buf;
@@ -117,7 +112,7 @@ void democlient_roundtrip(DemoClientRef this, const char* req_buffers[], DemoMes
 }
 void democlient_request_round_trip(DemoClientRef this, DemoMessageRef request, DemoMessageRef* response_ptr)
 {
-    DEMOCLIENT_CHECK_TAG(this)
+    CHECK_TAG(DemoClient_TAG, this)
     IOBufferRef req_io_buf = demo_message_serialize(request);
     demosync_writer_write_chunk(this->wrtr, IOBuffer_data(req_io_buf), IOBuffer_data_len(req_io_buf));
 

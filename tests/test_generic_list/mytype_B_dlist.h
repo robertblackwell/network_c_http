@@ -1,5 +1,5 @@
-#ifndef mytype_b_dlist_h
-#define mytype_b_dlist_h
+#ifndef C_HTTP_MYTYPE_B_DLIST_H
+#define C_HTTP_MYTYPE_B_DLIST_H
 #include "mytype_B.h"
 
 #undef TYPE
@@ -8,7 +8,8 @@
 #define TYPE MyTypeB
 #define TYPED(THING) MyTypeB##THING
 #define PREFIX(THING) MyTypeBChain##THING
-#include "dlist_template.h"
+#include <c_http/common/generics/dlist_template.h>
+//#include "dlist_template.h"
 
 
 #endif

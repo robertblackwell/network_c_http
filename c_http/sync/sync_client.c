@@ -13,16 +13,11 @@
 #include <netdb.h>
 #include <errno.h>
 
-#define TYPE Client
-#define Client_TAG "CLIENT"
+#define Client_TAG "SYCLNT"
 #include <c_http/check_tag.h>
-#undef TYPE
-#define CLIENT_DECLARE_TAG DECLARE_TAG(Client)
-#define CLIENT_CHECK_TAG(p) CHECK_TAG(Client, p)
-#define CLIENT_SET_TAG(p) SET_TAG(Client, p)
 
 struct Client_s {
-    CLIENT_DECLARE_TAG;
+    DECLARE_TAG;
     int       sock;
     SyncWriterRef wrtr;
     SyncReaderRef  rdr;
@@ -31,14 +26,14 @@ struct Client_s {
 ClientRef Client_new()
 {
     ClientRef this = eg_alloc(sizeof(Client));
-    CLIENT_SET_TAG(this)
+    SET_TAG(Client_TAG, this)
     this->rdr = NULL;
     this->wrtr = NULL;
 }
 void Client_dispose(ClientRef* this_ptr)
 {
     ClientRef this = *this_ptr;
-    CLIENT_CHECK_TAG(this)
+    SET_TAG(Client_TAG, this)
     LOG_FMT("Client_dispose %p  %d\n", this, this->sock);
     if(this->rdr) SyncReader_dispose(&(this->rdr));
     if(this->wrtr) SyncWriter_dispose(&(this->wrtr));
@@ -48,6 +43,7 @@ void Client_dispose(ClientRef* this_ptr)
 }
 void Client_raw_connect(ClientRef this, int sockfd, struct sockaddr* sockaddr_p, int sockaddr_len)
 {
+    SET_TAG(Client_TAG, this)
     LOG_FMT("Client_raw_connect %p sockfd: %d\n", this, sockfd);
     if (connect(sockfd,sockaddr_p, sockaddr_len) < 0) {
         int errno_saved = errno;
@@ -61,7 +57,7 @@ void Client_raw_connect(ClientRef this, int sockfd, struct sockaddr* sockaddr_p,
 void Client_connect(ClientRef this, char* host, int portno)
 {
     int sockfd, n;
-    CLIENT_CHECK_TAG(this)
+    SET_TAG(Client_TAG, this)
     struct sockaddr_in serv_addr;
     struct hostent *hostent;
 
@@ -90,7 +86,7 @@ void Client_connect(ClientRef this, char* host, int portno)
 }
 void Client_roundtrip(ClientRef this, const char* req_buffers[], MessageRef* response_ptr)
 {
-    CLIENT_CHECK_TAG(this)
+    SET_TAG(Client_TAG, this)
     int buf_index = 0;
     int buf_len;
     char* buf;
@@ -109,7 +105,7 @@ void Client_roundtrip(ClientRef this, const char* req_buffers[], MessageRef* res
 }
 void Client_request_round_trip(ClientRef this, MessageRef request, MessageRef* response_ptr)
 {
-    CLIENT_CHECK_TAG(this)
+    SET_TAG(Client_TAG, this)
     IOBufferRef req_io_buf = Message_serialize(request);
     SyncWriter_write_chunk(this->wrtr, IOBuffer_data(req_io_buf), IOBuffer_data_len(req_io_buf));
 

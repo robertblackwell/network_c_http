@@ -14,19 +14,14 @@
  */
 
 
-#define TYPE Message
 #define Message_TAG "MESSAGE"
 #include <c_http/check_tag.h>
-#undef TYPE
-#define MESSAGE_DECLARE_TAG DECLARE_TAG(Message)
-#define MESSAGE_CHECK_TAG(p) CHECK_TAG(Message, p)
-#define MESSAGE_SET_TAG(p) SET_TAG(Message, p)
 
 
 
 struct Message_s
 {
-    MESSAGE_DECLARE_TAG;
+    DECLARE_TAG;
     BufferChainRef body;
     HdrListRef headers;
     int major_vers;
@@ -41,9 +36,8 @@ struct Message_s
 MessageRef Message_new ()
 {
     MessageRef mref = (MessageRef) eg_alloc(sizeof(Message));
-    MESSAGE_SET_TAG(mref)
     if(mref == NULL) goto error_label_1;
-    SET_TAG(Message, mref)
+    SET_TAG(Message_TAG, mref)
     mref->body = NULL;
     mref->headers = HdrList_new();
     if(mref->headers == NULL) goto error_label_2;
@@ -85,9 +79,8 @@ MessageRef Message_new_response()
 }
 void Message_dispose(MessageRef* this_p)
 {
-    MESSAGE_CHECK_TAG(*this_p)
     MessageRef this = *this_p;
-    MESSAGE_CHECK_TAG(this)
+    CHECK_TAG(Message_TAG, this)
     HdrList_dispose(&(this->headers));
     Cbuffer_dispose(&(this->target));
     Cbuffer_dispose(&(this->reason));
@@ -114,7 +107,7 @@ MessageRef MessageResponse(HttpStatus status, void* body)
 }
 IOBufferRef Message_serialize(MessageRef mref)
 {
-    MESSAGE_CHECK_TAG(mref)
+    CHECK_TAG(Message_TAG, mref)
     BufferChainRef bc_result = BufferChain_new();
     char* first_line;
     int first_line_len;
@@ -148,64 +141,66 @@ IOBufferRef Message_serialize(MessageRef mref)
 }
 void Message_add_header_cstring(MessageRef this, const char* key, const char* value)
 {
+    CHECK_TAG(Message_TAG, this)
     HdrListRef hdrlist = Message_get_headerlist(this);
     HdrList_add_cstr(hdrlist, key, value);
 }
 void Message_add_header_cbuf(MessageRef this, CbufferRef key, CbufferRef value)
 {
+    CHECK_TAG(Message_TAG, this)
     HdrList_add_cbuf(Message_get_headerlist(this), key, value);
 }
 HttpStatus Message_get_status(MessageRef this)
 {
-    MESSAGE_CHECK_TAG(this)
+    CHECK_TAG(Message_TAG, this)
     return this->status_code;
 }
 void Message_set_status(MessageRef this, HttpStatus status)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     this->status_code = status;
 }
 bool Message_get_is_request(MessageRef this)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     return this->is_request;
 }
 void Message_set_is_request(MessageRef this, bool yn)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     this->is_request = yn;
 }
 HttpMinorVersion Message_get_minor_version(MessageRef this)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     return this->minor_vers;
 }
 
 void Message_set_minor_version(MessageRef this, HttpMinorVersion mv)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     this->minor_vers = mv;
 }
 void Message_set_version(MessageRef this, int major_vers, int minor_vers)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     this->minor_vers = minor_vers;
 }
 void Message_set_method(MessageRef this, HttpMethod method)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     this->method = method;
 }
 HttpMethod Message_get_method(MessageRef this)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     return this->method;
 }
 
 // target
 const char* Message_get_target(MessageRef this)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     return (const char*)Cbuffer_cstr(this->target);
 }
 //void Message_move_target(MessageRef this, CbufferRef target)
@@ -217,18 +212,18 @@ const char* Message_get_target(MessageRef this)
 //}
 void Message_set_target(MessageRef this, const char* targ)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     assert((this->target != NULL) && (Cbuffer_size(this->target) == 0));
     Cbuffer_append_cstr(this->target, (const char*)targ);
 }
 CbufferRef Message_get_target_cbuffer(MessageRef this)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     return Cbuffer_from_cstring(Cbuffer_cstr(this->target));
 }
 void Message_set_target_cbuffer(MessageRef this, CbufferRef target)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     assert((this->target != NULL) && (Cbuffer_size(this->target) == 0));
     Cbuffer_append_cstr(this->target, (const char*)Cbuffer_cstr(target));
 
@@ -236,7 +231,7 @@ void Message_set_target_cbuffer(MessageRef this, CbufferRef target)
 // reason
 void Message_set_reason(MessageRef this, const char* reason_cstr)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     assert((this->reason != NULL) && (Cbuffer_size(this->reason) == 0));
     Cbuffer_append_cstr(this->reason, (const char*)reason_cstr);
 }
@@ -248,17 +243,17 @@ void Message_set_reason(MessageRef this, const char* reason_cstr)
 //}
 const char* Message_get_reason(MessageRef this)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     (const char*)Cbuffer_cstr(this->reason);
 }
 CbufferRef Message_get_reason_cbuffer(MessageRef this)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     return Cbuffer_from_cstring(Cbuffer_cstr(this->reason));
 }
 void Message_set_reason_cbuffer(MessageRef this, CbufferRef target)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     assert((this->reason != NULL) && (Cbuffer_size(this->reason) == 0));
     Cbuffer_append_cstr(this->reason, (const char*)Cbuffer_cstr(target));
 }
@@ -268,6 +263,7 @@ int Message_get_content_length(MessageRef this)
 }
 void Message_set_content_length(MessageRef this, int length)
 {
+    CHECK_TAG(Message_TAG, this)
     char buf[10];
     assert(length >= 0);
     int r = sprintf(buf, "%d", length);
@@ -283,11 +279,12 @@ void Message_set_content_length(MessageRef this, int length)
 // headers
 HdrListRef Message_get_headerlist(MessageRef this)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     return this->headers;
 }
 const char* Message_get_header_value(MessageRef mref, const char* labptr)
 {
+    CHECK_TAG(Message_TAG, mref)
     KVPairRef kvp = HdrList_find(Message_get_headerlist(mref), labptr);
     if(kvp == NULL) {
         return NULL;
@@ -297,17 +294,17 @@ const char* Message_get_header_value(MessageRef mref, const char* labptr)
 
 BufferChainRef Message_get_body(MessageRef this)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     return this->body;
 }
 void Message_set_body(MessageRef this, BufferChainRef bc)
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     this->body = bc;
 }
 void Message_set_headers_arr(MessageRef this, const char* ar[][2])
 {
-    MESSAGE_CHECK_TAG(this);
+    CHECK_TAG(Message_TAG, this)
     HdrList_add_arr(this->headers, ar);
 }
 /**@}*/

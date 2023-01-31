@@ -8,20 +8,14 @@
 #include <c_http/common/message.h>
 #include <c_http/async/handler.h>
 
-#define TYPE DemoServer
 #define DemoServer_TAG "DmSRVR"
 #include <c_http/check_tag.h>
-#define DEMO_SERVER_DECLARE_TAG DECLARE_TAG(DemoServer_TAG)
-#define DEMO_SERVER_CHECK_TAG(p) CHECK_TAG(DemoServer, p)
-#define DEMO_SERVER_SET_TAG(p) SET_TAG(DemoServer, p)
-#undef TYPE
-
 
 #define XR_NBR_WORKERS 1
 typedef struct DemoHandler_s DemoHandler, *DemoHandlerRef;
 typedef struct  DemoServer_s DemoServer, *DemoServerRef;
 struct DemoServer_s {
-    DEMO_SERVER_DECLARE_TAG;
+    DECLARE_TAG;
     int                     port;
     socket_handle_t         listening_socket_fd;
     ReactorRef              reactor_ref;

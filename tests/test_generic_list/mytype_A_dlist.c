@@ -1,2 +1,2 @@
 #include "mytype_A_dlist.h"
-#include "dlist_template.c"
+#include <c_http/common/generics/dlist_template.c>

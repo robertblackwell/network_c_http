@@ -17,12 +17,11 @@
   * \return         int number of bytes read on success,
   *                 0 generally means the socket was closed at the other end,
   *                 negative means io error
+  *                 TODO implement EAGAIN testing
   */
 static int socket_read(RdSocket* rdsock_ref, void* buffer, int len)
 {
-
     void* sock_ctx = rdsock_ref->ctx;
-
     int sock_fd = (int)(long)sock_ctx;
     int bytes_read = (int)read(sock_fd, buffer, len);
     rdsock_ref->m_errno = errno;

@@ -1,5 +1,5 @@
-#ifndef c_http_runloop_h
-#define c_http_runloop_h
+#ifndef C_HTTP_RUNLOOP_H
+#define C_HTTP_RUNLOOP_H
 
 #include <stdint.h>
 #include <time.h>
@@ -179,7 +179,7 @@ Functor Evfdq_remove(EvfdQueueRef athis);
 
 
 RtorWQueueRef rtor_wqueue_new(ReactorRef runloop, EvfdQueueRef qref);
-void rtor_wqueue_dispose(RtorWQueueRef athis);
+void rtor_wqueue_dispose(RtorWQueueRef* athis);
 void rtor_wqueue_register(RtorWQueueRef athis, QueueEventHandler cb, void* arg);
 void rtor_wqueue_change_watch(RtorWQueueRef athis, QueueEventHandler cb, void* arg, uint64_t watch_what);
 void rtor_wqueue_deregister(RtorWQueueRef athis);

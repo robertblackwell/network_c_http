@@ -13,13 +13,13 @@
 #define DemoMessage_TAG "DemMSG"
 #include <c_http/check_tag.h>
 #undef TYPE
-#define DEMO_MESSAGE_DECLARE_TAG DECLARE_TAG(DemoMessage)
-#define DEMO_MESSAGE_CHECK_TAG(p) CHECK_TAG(DemoMessage, p)
-#define DEMO_MESSAGE_SET_TAG(p) SET_TAG(DemoMessage, p)
+#define DEMO_MESSAGE_DECLARE_TAG DECLARE_TAG(DemoMessage_TAG)
+#define DEMO_MESSAGE_CHECK_TAG(p) CHECK_TAG(DemoMessage_TAG, p)
+#define DEMO_MESSAGE_SET_TAG(p) SET_TAG(DemoMessage_TAG, p)
 
 struct DemoMessage_s
 {
-    DEMO_MESSAGE_DECLARE_TAG;
+    DECLARE_TAG;
     bool            opcode; //can be either 'REQ' or 'RESP'
     uint8_t         lrc;
     BufferChainRef  body;

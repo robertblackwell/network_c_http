@@ -26,7 +26,7 @@ static void on_handler_completion_cb(void* void_server_ref, DemoHandlerRef handl
     printf("file: demo_server.c on_handler_completeion_cb \n");
 
     DemoServerRef server_ref = void_server_ref;
-    DEMO_SERVER_CHECK_TAG(server_ref)
+    CHECK_TAG(DemoServer_TAG, server_ref)
     ListIter x = List_find(server_ref->handler_list, handler_ref);
     DemoHandlerRef href = List_itr_unpack(server_ref->handler_list, x);
     List_itr_remove(server_ref->handler_list, &x);
@@ -34,7 +34,7 @@ static void on_handler_completion_cb(void* void_server_ref, DemoHandlerRef handl
 DemoServerRef DemoServer_new(int port)
 {
     DemoServerRef sref = (DemoServerRef) eg_alloc(sizeof(DemoServer));
-    DEMO_SERVER_SET_TAG(sref)
+    SET_TAG(DemoServer_TAG, sref)
     sref->port = port;
     sref->reactor_ref = rtor_reactor_new();
     sref->listening_socket_fd = create_listener_socket(port, "127.0.0.1");
@@ -48,7 +48,7 @@ DemoServerRef DemoServer_new(int port)
 }
 void DemoServer_free(DemoServerRef this)
 {
-    DEMO_SERVER_CHECK_TAG(this)
+    CHECK_TAG(DemoServer_TAG, this)
     ASSERT_NOT_NULL(this);
     rtor_listener_deregister(this->listening_watcher_ref);
     rtor_listener_free(this->listening_watcher_ref);
@@ -60,7 +60,7 @@ void DemoServer_free(DemoServerRef this)
 }
 void DemoServer_dispose(DemoServerRef *sref)
 {
-    DEMO_SERVER_CHECK_TAG(*sref)
+    CHECK_TAG(DemoServer_TAG, *sref)
     ASSERT_NOT_NULL(*sref);
     free(*sref);
     *sref = NULL;
@@ -68,7 +68,7 @@ void DemoServer_dispose(DemoServerRef *sref)
 
 void DemoServer_listen(DemoServerRef sref)
 {
-    DEMO_SERVER_CHECK_TAG(sref)
+    CHECK_TAG(DemoServer_TAG, sref)
     ASSERT_NOT_NULL(sref)
     int port = sref->port;
     struct sockaddr_in peername;
@@ -82,7 +82,7 @@ void DemoServer_listen(DemoServerRef sref)
 
 void DemoServer_terminate(DemoServerRef this)
 {
-    DEMO_SERVER_CHECK_TAG(this)
+    CHECK_TAG(DemoServer_TAG, this)
 
     close(this->listening_socket_fd);
 }
@@ -143,7 +143,7 @@ void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event)
 
     printf("listening_hander \n");
     DemoServerRef server_ref = listener_watcher_ref->listen_arg;
-    DEMO_SERVER_CHECK_TAG(server_ref)
+    CHECK_TAG(DemoServer_TAG, server_ref)
 
 //    DemoServerRef server_ref = listener_watcher_ref->listen_arg;
 

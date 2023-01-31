@@ -12,18 +12,13 @@
 #include <c_http/common/queue.h>
 #include <c_http/sync/worker.h>
 
-#define TYPE SyncServer
 #define SyncServer_TAG "SYNCSVER"
 #include <c_http/check_tag.h>
-#undef TYPE
-#define SERVER_DECLARE_TAG DECLARE_TAG(SyncServer)
-#define SERVER_CHECK_TAG(p) CHECK_TAG(SyncServer, p)
-#define SERVER_SET_TAG(p) SET_TAG(SyncServer, p)
 
 #define MAX_THREADS 100
 #define XDYN_WORKER_TAB
 struct SyncServer_s {
-    SERVER_DECLARE_TAG;
+    DECLARE_TAG;
     int                         port;
     socket_handle_t             socket_fd;
     int                         nbr_workers;
@@ -92,13 +87,13 @@ SyncServerRef SyncServer_new(int port, int nbr_threads, SyncHandlerFunction hand
 #else
     assert(nbr_threads < MAX_THREADS);
 #endif
-    SERVER_SET_TAG(sref)
+    SET_TAG(SyncServer_TAG, sref)
     return sref;
 }
 
 void SyncServer_dispose(SyncServerRef* sref)
 {
-    SERVER_CHECK_TAG(*sref)
+    CHECK_TAG(SyncServer_TAG, *sref)
     ASSERT_NOT_NULL(*sref);
     free(*sref);
     *sref = NULL;
@@ -106,7 +101,7 @@ void SyncServer_dispose(SyncServerRef* sref)
 
 void SyncServer_listen(SyncServerRef sref)
 {
-    SERVER_SET_TAG(sref)
+    SET_TAG(SyncServer_TAG, sref)
     ASSERT_NOT_NULL(sref)
     printf("SyncServer_listen\n");
     //
@@ -165,7 +160,7 @@ void SyncServer_listen(SyncServerRef sref)
 }
 void SyncServer_terminate(SyncServerRef this)
 {
-    SERVER_CHECK_TAG(this)
+    CHECK_TAG(SyncServer_TAG, this)
     for(int i = 0; i < this->nbr_workers; i++) {
         Queue_add(this->qref, -1);
     }

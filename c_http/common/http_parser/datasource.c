@@ -44,7 +44,7 @@ int DataSource_read(DataSource* this, void* buffer, int length)
         return -1;
     } else {
         this->m_block_count++;
-        int block_len = strlen(block);
+        int block_len = (int)strlen(block);
         assert(block_len < length);
         memcpy((void*)buffer, block, block_len);
         return block_len;

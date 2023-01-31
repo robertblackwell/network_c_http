@@ -16,7 +16,7 @@ static void anonymous_free(RtorWatcherRef p)
 {
     RtorWQueueRef queue_watcher_ref = (RtorWQueueRef)p;
     XR_WQUEUE_CHECK_TAG(queue_watcher_ref)
-    rtor_wqueue_dispose(queue_watcher_ref);
+    rtor_wqueue_dispose(&queue_watcher_ref);
 }
 void WQueue_init(RtorWQueueRef this, ReactorRef runloop, EvfdQueueRef qref)
 {
@@ -35,11 +35,12 @@ RtorWQueueRef rtor_wqueue_new(ReactorRef runloop, EvfdQueueRef qref)
     WQueue_init(this, runloop, qref);
     return this;
 }
-void rtor_wqueue_dispose(RtorWQueueRef athis)
+void rtor_wqueue_dispose(RtorWQueueRef* athis)
 {
-    XR_WQUEUE_CHECK_TAG(athis)
-    close(athis->fd);
-    free((void*)athis);
+    XR_WQUEUE_CHECK_TAG(*athis)
+    close((*athis)->fd);
+    free((void*)*athis);
+    *athis = NULL;
 }
 void rtor_wqueue_register(RtorWQueueRef athis, QueueEventHandler cb, void* arg)
 {

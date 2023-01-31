@@ -7,13 +7,8 @@
 //#include <c_http/demo_protocol/demo_handler.h>
 #include <c_http/demo_protocol/demo_parser.h>
 
-#define TYPE DemoConnection
 #define DemoConnection_TAG "DmCONN"
 #include <c_http/check_tag.h>
-#define DEMO_CONNECTION_DECLARE_TAG DECLARE_TAG(DemoConnection_TAG)
-#define DEMO_CONNECTION_CHECK_TAG(p) CHECK_TAG(DemoConnection_TAG, p)
-#define DEMO_CONNECTION_SET_TAG(p) SET_TAG(DemoConnection_TAG, p)
-#undef TYPE
 
 enum DemoConnectionErrCode {
     DemoConnectionErrCode_is_closed = -31,
@@ -36,7 +31,7 @@ typedef void(*DC_Write_CB)(void* href, int status);
 typedef void(*DC_Close_CB)(void* href);
 
 typedef struct DemoConnection_s {
-    DEMO_PARSER_DECLARE_TAG;
+    DECLARE_TAG;
     ReactorRef      reactor_ref;
     RtorStreamRef   socket_stream_ref;
     DemoHandlerRef  handler_ref;

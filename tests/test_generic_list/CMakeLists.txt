@@ -5,7 +5,6 @@ message("test_link_libs        ${TEST_LINK_LIBS}")
 
 set(TARGET test_generic_list)
 add_executable(${TARGET}
-	dlist.c
 	mytype_A.c
 	mytype_B.c
 	mytype_A_dlist.c

@@ -1,6 +1,6 @@
 
-#ifndef c_http_message_h
-#define c_http_message_h
+#ifndef C_HTTP_MESSAGE_H
+#define C_HTTP_MESSAGE_H
 #include <stdbool.h>
 #include <stdint.h>
 #include <c_http/common/buffer_chain.h>
@@ -10,8 +10,7 @@
  * @brief A module that implements a http/1.1 message container
  * ## Module Message
  * This is some documentation for the messages modules.
- * -    this is a list item
- * -    and this another
+ * -    not yet
  * @{
  */
 

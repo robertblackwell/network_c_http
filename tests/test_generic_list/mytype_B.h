@@ -1,5 +1,5 @@
-#ifndef mytype_B_h
-#define mytype_B_h
+#ifndef C_HTTP_MYTYPE_B_H
+#define C_HTTP_MYTYPE_B_H
 
 typedef struct MyTypeB_s {
     float b;

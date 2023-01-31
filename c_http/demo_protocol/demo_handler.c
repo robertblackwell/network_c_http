@@ -1,7 +1,10 @@
 
 #define _GNU_SOURCE
-#include <c_http/demo_protocol/demo_handler.h>
+#include <c_http/macros.h>
+#include <c_http/check_tag.h>
+#include <c_http/simple_runloop/runloop.h>
 #include <c_http/simple_runloop/rl_internal.h>
+#include <c_http/demo_protocol/demo_handler.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -9,12 +12,11 @@
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <errno.h>
-#include <c_http/macros.h>
-#include <c_http/simple_runloop/runloop.h>
 #include <c_http/demo_protocol/demo_message.h>
+#include <c_http/demo_protocol/demo_process_request.h>
 
-static DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef request);
-static void handle_request( void* href, DemoMessageRef msgref, int status);
+//static DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef request);
+static void handle_request( void* href, DemoMessageRef msgref, int error_code);
 static void postable_write_start(ReactorRef reactor_ref, void* href);
 static void on_write_complete_cb(void* href, int status);
 static void handler_postable_read_start(ReactorRef reactor_ref, void* href);
@@ -42,8 +44,8 @@ void demohandler_init(
         void(*completion_cb)(void*, DemoHandlerRef),
         void* server_ref)
 {
-    DEMO_HANDLER_SET_TAG(this)
-    DEMO_HANDLER_CHECK_TAG(this)
+    SET_TAG(DemoHandler_TAG, this)
+    CHECK_TAG(DemoHandler_TAG, this)
     this->raw_socket = socket;
     this->demo_connection_ref = democonnection_new(
             socket,
@@ -61,7 +63,7 @@ void demohandler_init(
 }
 void demohandler_free(DemoHandlerRef this)
 {
-    DEMO_HANDLER_CHECK_TAG(this)
+    CHECK_TAG(DemoHandler_TAG, this)
     democonnection_free(this->demo_connection_ref);
     this->demo_connection_ref = NULL;
     List_dispose(&(this->input_list));
@@ -94,9 +96,10 @@ static void handle_request(void* href, DemoMessageRef msgref, int error_code)
         rtor_reactor_post(handler_ref->reactor_ref, handler_postable_read_start, href);
     }
 }
+#if 0
 static DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef request)
 {
-    DEMO_HANDLER_CHECK_TAG(href)
+    CHECK_TAG(DemoHandler_TAG, href)
     DemoMessageRef reply = demo_message_new();
     demo_message_set_is_request(reply, false);
     BufferChainRef request_body = demo_message_get_body(request);
@@ -105,6 +108,7 @@ static DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef reques
     demo_message_set_body(reply, bc);
     return reply;
 }
+#endif
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // write sequence
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

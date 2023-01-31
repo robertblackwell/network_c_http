@@ -30,6 +30,8 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 		logger.h
 		unittest.h
 	#common
+		#common/generics
+			common/generics/dlist.h
 		common/alloc.h
 		common/message.h
 		common/url_parser.h
@@ -60,6 +62,7 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 	#demo_protocol
 		demo_protocol/demo_client.h
 		demo_protocol/demo_connection.h
+		demo_protocol/demo_process_request.h
 		demo_protocol/demo_handler.h
 		demo_protocol/demo_message.h
 		demo_protocol/demo_parser.h
@@ -96,6 +99,7 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 
 
 	#http/1.1 API
+			common/generics/dlist.c
 		common/alloc.c
 		common/buffer_chain.c
 		common/cbuffer.c
@@ -154,9 +158,11 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	#demo_protocol
 		demo_protocol/demo_client.c
 		demo_protocol/demo_handler.c
+		demo_protocol/demo_process_request.c
 		demo_protocol/demo_connection.c
 		demo_protocol/demo_message.c
 		demo_protocol/demo_parser.c
+		demo_protocol/demo_parser_test.c
 		demo_protocol/demo_parser_test.c
 		demo_protocol/demo_server.c
 #		demo_protocol/demo_sync_reader.c

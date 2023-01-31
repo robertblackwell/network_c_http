@@ -1,5 +1,5 @@
-#ifndef rl_internal_h
-#define rl_internal_h
+#ifndef C_HTTP_RL_INTERNAL_H
+#define C_HTTP_RL_INTERNAL_H
 #include <c_http/simple_runloop/runloop.h>
 #include <c_http/simple_runloop/rl_checktag.h>
 
@@ -102,7 +102,7 @@ bool fd_map_set(int j);
 #define REGISTER_WQUEUE_REACTOR 1
 
 struct Reactor_s {
-    XR_REACTOR_DECLARE_TAG;
+    DECLARE_TAG;
     int                     epoll_fd;
     bool                    closed_flag;
     FdTableRef              table; // (int, CallbackData)
@@ -127,7 +127,7 @@ typedef enum WatcherType {
 
 
 struct RtorWatcher_s {
-    XR_WATCHER_DECLARE_TAG;
+    DECLARE_TAG;
     WatcherType           type;
     ReactorRef            runloop;
     void*                 context;
@@ -212,7 +212,7 @@ struct RtorWQueue_s {
 typedef uint64_t XrITQueueEvent;
 typedef void(XrITQueuetWatcherCaller(void* ctx));
 struct RtorInterthreadQueue_s {
-    XR_ITQUEUE_DECLARE_TAG;
+    DECLARE_TAG;
     RtorEventfdRef                      eventfd_ref;
     ListRef                             queue;
     pthread_mutex_t                     queue_mutex;

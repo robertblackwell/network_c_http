@@ -23,5 +23,5 @@ void MyTypeB_display(MyTypeBRef this)
 }
 void MyTypeB_dispose(MyTypeB** ptr)
 {
-    MyTypeB_dealloc(ptr);
+    MyTypeB_dealloc((void**)ptr);
 }

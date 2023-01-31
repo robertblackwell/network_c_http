@@ -1,20 +1,14 @@
-#ifndef chttp_demo_handler_h
-#define chttp_demo_handler_h
-#include <c_http/simple_runloop/runloop.h>
+#ifndef C_HTTP_DEMO_HANDLER_H
+#define C_HTTP_DEMO_HANDLER_H
+#include <c_http/check_tag.h>
+#include <c_http/simple_runloop/rl_internal.h>
 #include <c_http/common/list.h>
 #include <c_http/common/iobuffer.h>
 #include <c_http/demo_protocol/demo_server.h>
 #include <c_http/demo_protocol/demo_connection.h>
 
-#define TYPE DemoHandler
 #define DemoHandler_TAG "DmHDLR"
-#include <c_http/check_tag.h>
-#define DEMO_HANDLER_DECLARE_TAG DECLARE_TAG(DemoHandler_TAG)
-#define DEMO_HANDLER_CHECK_TAG(p) CHECK_TAG(DemoHandler_TAG, p)
-#define DEMO_HANDLER_SET_TAG(p) SET_TAG(DemoHandler_TAG, p)
-#undef TYPE
-
-
+#include <c_http/simple_runloop/rl_checktag.h>
 
 typedef struct DemoHandler_s DemoHandler, *DemoHandlerRef;
 
@@ -25,7 +19,7 @@ typedef struct DemoHandler_s DemoHandler, *DemoHandlerRef;
 typedef void(*DH_Completion_CB)(void* server_ref, DemoHandlerRef href);
 
 typedef struct DemoHandler_s {
-    DEMO_PARSER_DECLARE_TAG;
+    DECLARE_TAG;
     int                 raw_socket;
     ReactorRef          reactor_ref;
     DemoConnectionRef   demo_connection_ref;

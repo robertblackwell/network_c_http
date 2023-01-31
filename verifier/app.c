@@ -11,17 +11,12 @@
 #define NBR_REQUESTS_PER_THREAD 10
 #define NBR_REQUESTS NBR_THREADS*NBR_REQUESTS_PER_THREAD
 
-#define TYPE ThreadCtx
 #define ThreadCtx_TAG "THDCTX"
 #include <c_http/check_tag.h>
-#undef TYPE
-#define THREADCTX_DECLARE_TAG DECLARE_TAG(ThreadCtx)
-#define THREADCTX_CHECK_TAG(p) CHECK_TAG(ThreadCtx, p)
-#define THREADCTX_SET_TAG(p) SET_TAG(ThreadCtx, p)
 
 #define DYN_RESP_TIMES
 typedef struct ThreadContext {
-    THREADCTX_DECLARE_TAG;
+    DECLARE_TAG;
     /**
      * the port to connect to
      */
@@ -58,7 +53,7 @@ ThreadContext* Ctx_new(int id, int port, int nbr_req_per_thread)
     ctx->howmany = nbr_req_per_thread;
     ctx->ident = id;
     ctx->counter = 0;
-    THREADCTX_SET_TAG(ctx)
+    SET_TAG(ThreadCtx_TAG, ctx)
 #ifdef DYN_RESP_TIMES
     ctx->resp_times = malloc(sizeof(double) * nbr_req_per_thread);
 #else
@@ -145,7 +140,7 @@ void dump_double_arr(char* msg, double arr[], int arr_dim)
 void* threadfn(void* data)
 {
     ThreadContext* ctx = (ThreadContext*)data;
-    THREADCTX_CHECK_TAG(ctx)
+    CHECK_TAG(ThreadCtx_TAG,  ctx)
     struct timeval start_time = get_time();
     for(int i = 0; i < ctx->howmany; i++) {
         struct timeval iter_start_time = get_time();
@@ -155,7 +150,7 @@ void* threadfn(void* data)
         Client_connect(client, "localhost", ctx->port);
         Ctx_mk_uid(ctx);
         MessageRef request = mk_request(ctx);
-        THREADCTX_CHECK_TAG(ctx)
+        CHECK_TAG(ThreadCtx_TAG,  ctx)
         Client_request_round_trip(client, request, &response);
 
         if(! verify_response(ctx, request, response)) {

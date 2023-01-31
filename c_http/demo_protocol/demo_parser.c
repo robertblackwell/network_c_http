@@ -50,7 +50,7 @@ DemoParserRef DemoParser_new(
         void* on_read_ctx)
 {
     DemoParserRef this = malloc(sizeof(DemoParser));
-    DEMO_PARSER_SET_TAG(this)
+    SET_TAG(DemoParser_TAG, this)
     this->parser_consume = (int(*)(ParserInterfaceRef, IOBufferRef))&DemoParser_consume;
     this->message_factory = (void*(*)())&demo_message_new;
     this->message_free = (void(*)(void*))&demo_message_free;
@@ -62,7 +62,7 @@ DemoParserRef DemoParser_new(
 }
 void DemoParser_free(DemoParserRef this)
 {
-    DEMO_PARSER_CHECK_TAG(this)
+    CHECK_TAG(DemoParser_TAG, this)
     ASSERT_NOT_NULL(this);
     if(this->m_current_message_ptr) {
         demo_message_dispose(&(this->m_current_message_ptr));
@@ -71,7 +71,7 @@ void DemoParser_free(DemoParserRef this)
 }
 void DemoParser_dispose(DemoParserRef* this_p)
 {
-    DEMO_PARSER_CHECK_TAG(*this_p)
+    CHECK_TAG(DemoParser_TAG, *this_p)
     ASSERT_NOT_NULL(*this_p);
     DemoParser_free(*this_p);
     *this_p = NULL;
@@ -79,23 +79,13 @@ void DemoParser_dispose(DemoParserRef* this_p)
 }
 DemoMessageRef DemoParser_current_message(DemoParserRef this)
 {
-    DEMO_PARSER_CHECK_TAG(this)
+    CHECK_TAG(DemoParser_TAG, this)
     return this->m_current_message_ptr;
 }
 int DemoParser_append_bytes(DemoParserRef this, void *buffer, unsigned length)
 {
-    DEMO_PARSER_CHECK_TAG(this)
+    CHECK_TAG(DemoParser_TAG, this)
     return 0;
-}
-void DemoParser_begin(DemoParserRef this)
-{
-    DEMO_PARSER_CHECK_TAG(this)
-    DemoParser_initialize(this);
-    if(this->m_current_message_ptr != NULL) {
-        demo_message_dispose(&(this->m_current_message_ptr));
-    }
-    this->m_current_message_ptr = demo_message_new();
-    this->m_state = STATE_IDLE;
 }
 /**
  * Comsumes some or all of the data given by buf and length and either partially or fully parses a DemoMessage.
@@ -123,11 +113,11 @@ DemoParserErrCode DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_re
     void* buf = IOBuffer_data(iobuffer_ref);
     int length = IOBuffer_data_len(iobuffer_ref);
     int error_code = 0;
-    DEMO_PARSER_CHECK_TAG(this)
+    CHECK_TAG(DemoParser_TAG, this)
 
     char* charbuf = (char*) buf;
     for(int i = 0; i < length; i++) {
-        int ch = charbuf[i];
+        int ch = (int)charbuf[i];
         switch (this->m_state) {
             case STATE_IDLE:
                 if(this->m_current_message_ptr == NULL) {
@@ -213,7 +203,7 @@ DemoParserErrCode DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_re
 
 int DemoParser_get_errno(DemoParserRef this)
 {
-    DEMO_PARSER_CHECK_TAG(this)
+    CHECK_TAG(DemoParser_TAG, this)
     return 0;
 }
 DemoParserError DemoParser_get_error(DemoParserRef this)
@@ -221,7 +211,7 @@ DemoParserError DemoParser_get_error(DemoParserRef this)
 //    llhttp_errno_t x = llhttp_get_errno(this->m_llhttp_ptr);
 //    char* n = (char*)llhttp_errno_name(x);
 //    char* d = (char*)llhttp_errno_name(x);
-    DEMO_PARSER_CHECK_TAG(this)
+    CHECK_TAG(DemoParser_TAG, this)
     DemoParserError erst;
     erst.m_err_number = 1;
     erst.m_name = "";
@@ -231,6 +221,6 @@ DemoParserError DemoParser_get_error(DemoParserRef this)
 
 void DemoParser_initialize(DemoParserRef this)
 {
-    DEMO_PARSER_CHECK_TAG(this)
+    CHECK_TAG(DemoParser_TAG, this)
     this->m_current_message_ptr = NULL;
 }
