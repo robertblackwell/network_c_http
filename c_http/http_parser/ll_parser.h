@@ -1,0 +1,119 @@
+/**
+ * @file message
+ * @brief   Module for parsing http/1.1 messages. It does this by providing a wrapper for
+ *          github.com/nodejs/llhttp which replaces github.com/joyent/http-parser
+ */
+
+
+#ifndef c_http_ll_parser_h
+#define c_http_ll_parser_h
+#include <stdint.h>
+#include <llhttp/llhttp.h>
+#include <c_http/http_parser/ll_parser_types.h>
+#include <c_http/common/message.h>
+#include <c_http/common/cbuffer.h>
+/**
+ * @addtogroup group_parser
+ * @{
+ */
+
+/**
+ * state values used in parsing http header lines
+ */
+#define kHEADER_STATE_NOTHING 10
+#define kHEADER_STATE_FIELD   11
+#define kHEADER_STATE_VALUE   12
+
+#define Parser_more_data 20
+#define Parser_io_error  21
+#define Parser_parse_error 22
+/**
+ * Holds  details of a parse failure
+ */
+struct http_parser_error_s {
+    char*               m_name;
+    char*               m_description;
+    llhttp_errno_t      m_err_number;
+};
+typedef struct http_parser_error_s http_parser_error_t;
+
+#if 0
+/**
+ * \brief  Return code used as part of the value returned by http_parser_consume() when processing data.
+ */
+enum ParserRC {
+    ParserRC_error,          /// got a parse error
+//    ParserRC_end_of_header,  /// encountered enf of header
+//    ParserRC_end_of_message, /// encountered end of message
+    ParserRC_end_of_data     /// processed all the data given
+};
+typedef enum ParserRC ParserRC;
+
+/**
+ * Value object return by http_parser_consume()
+ */
+struct ParserReturnValue {
+    ParserRC   return_code;
+    int        bytes_remaining;
+};
+
+typedef struct ParserReturnValue ParserReturnValue;
+#endif
+/**
+ * Type holding context data for http_parser_t functions. Allows for parsing to continue
+ * over buffer and message boundaries
+ */
+struct http_parser_s;
+typedef struct http_parser_s http_parser_t, *http_parser_r;
+typedef void(*OnMessageCompleteHandler)(http_parser_r parser, MessageRef msg);
+
+struct http_parser_s {
+    bool m_started;
+    llhttp_t*                m_llhttp_ptr;
+    llhttp_settings_t*       m_llhttp_settings_ptr;
+    MessageRef               current_message_ptr;
+    OnMessageCompleteHandler on_message_handler;
+    void*                    handler_context;
+    int                      m_header_state;
+    ///////////////////////////////////////////////////////////////////////////////////
+    // String buffers used to accumulate values from http-parser
+    ///////////////////////////////////////////////////////////////////////////////////
+    CbufferRef             m_url_buf;
+    CbufferRef             m_status_buf;
+    CbufferRef             m_name_buf;
+    CbufferRef             m_value_buf;
+};
+
+http_parser_r http_parser_new(OnMessageCompleteHandler handler, void* handler_context) ;
+void http_parser_dispose(http_parser_r* parser_p);
+
+/**
+ * @brief The guts of the http message parsing process.
+ *
+ * Call this function repeatedly with successive buffers of data.
+ * These successive buffers may represent one or more messages and a single buffer is permitted to hold
+ * the end of one message and the start of the successive message.
+ *
+ * When a full message is complete the parser will call the 'message_complete_handler'. This function should
+ * process the message and send the reply before returning. This will suspend the parser until the processing
+ * of the message is complete. And if necessary will continue with the next message
+ *
+ * The http_parser_consume() function will only return  if:
+ *
+ * -    it has consumed all the data. So read some more and give it to consume.
+ * -    an error was encountered.
+ *      Either a parse error, or an io error - This should be treated as fatal and the connection closed.
+ *
+ *
+ * @param parser http_parser_r
+ * @param buffer A buffer of data presumable read from a tcp connectin
+ * @param length Length of the data buffer
+ * @return llhttp_errno_t
+ */
+llhttp_errno_t http_parser_consume(http_parser_r parser, const void* buffer, int length);
+http_parser_error_t     http_parser_get_error(http_parser_r parser);
+
+#endif
+
+
+/**@}*/

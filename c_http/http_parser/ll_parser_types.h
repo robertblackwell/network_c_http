@@ -77,7 +77,7 @@ typedef llhttp_errno_t  HttpErrno;
 
 enum http_status
   {
-#define C_HTTP_XX(num, name, string) HTTP_STATUS_##name = num,
+#define C_HTTP_XX(num, name, string) Z_HTTP_STATUS_##name = num,
   C_HTTP_STATUS_MAP(C_HTTP_XX)
 #undef C_HTTP_XX
   };

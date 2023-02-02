@@ -4,7 +4,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <c_http/common/buffer_chain.h>
-#include <c_http/common/http_parser/ll_parser_types.h>
+#include <c_http/http_parser/ll_parser_types.h>
+#include <c_http/common/hdrlist.h>
 /**
  * @addtogroup group_message
  * @brief A module that implements a http/1.1 message container
@@ -109,6 +110,7 @@ void Message_add_header_cbuf(MessageRef this, CbufferRef key, CbufferRef value);
  *                              a string that is owned by the message instance. Do not free
  */
 const char* Message_get_header_value(MessageRef mref, const char* labptr);
+HdrListRef Message_get_headerlist(MessageRef this);
 
 void Message_set_headers_arr(MessageRef mref, const char* ar[][2]);
 

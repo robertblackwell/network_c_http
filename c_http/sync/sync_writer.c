@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <assert.h>
 #include <errno.h>
-#include <c_http/common/http_parser/ll_parser_types.h>
+#include <c_http/http_parser/ll_parser_types.h>
 
 #define SyncWriter_TAG "SYNCWRTR"
 #include <c_http/check_tag.h>

@@ -17,7 +17,7 @@ The runloop implementation is based on epoll and hence limited to Linux.
 I am not sure how much of the runloop part of the c version of this exercise I will seek to implement in those
 other languages, time will tell.
 
-## Http Parser
+## Http http_parser_t
 The most intricate part of the client and server is parsing http/1.X messages. Until recently I was using/planning to use
 the http-parser at [https://github.com/nodejs/http-parser](https://github.com/nodejs/http-parser) 
 as a dependency. For Rust, Swift and Zig that will require integrating those languages with
@@ -30,7 +30,7 @@ no longer being maintained and is being replaced by [https://github.com/nodejs/l
 I have completed the conversion of this repo to use [https://github.com/nodejs/llhttp](https://github.com/nodejs/llhttp),
 and integrated those changes back into the `master` branch. 
 
-## Rust Http Parser
+## Rust Http http_parser_t
 
 The Rust version is already partially implemented at [https://github.com/robertblackwell/rust_http](https://github.com/robertblackwell/rust_http) using 
 [https://github.com/nodejs/http-parser](https://github.com/nodejs/http-parser) and will be an early target for

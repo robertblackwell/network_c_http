@@ -4,7 +4,7 @@
   "source_dir_name": "c_http",
   "dependencies": [
     {
-      "name": "nodejs_llhttp", "version": "v2.2.0"
+      "name": "nodejs_llhttp", "version": "v8.1.0"
     },
     {
       "name": "nodejs_http_parser", "version": "v2.9.4"

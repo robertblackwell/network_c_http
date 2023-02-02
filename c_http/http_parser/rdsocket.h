@@ -4,7 +4,7 @@
 #include <c_http/common/message.h>
 #include <c_http/common/iobuffer.h>
 #include <c_http/socket_functions.h>
-#include <c_http/common/http_parser/datasource.h>
+#include <c_http/http_parser/datasource.h>
 
 /**
  * @addtoggroup group_rdsocket
@@ -14,9 +14,9 @@
  *  Real socket
  *      function is read()
  *      ctx is int(socket_handle_t) socket
- *  Testing DataSource
- *      function is DataSource_read()
- *      ctx is DataSource*
+ *  Testing datasource_t
+ *      function is datasource_read_some()
+ *      ctx is datasource_t*
  *
  *  RdSocket is a type that generalizes both cases and provides a uniform interface
  *  for reading data from these two sources.
@@ -39,15 +39,15 @@ typedef struct RdSocket_s {
 RdSocket RealSocket(int socket);
 
 /**
- * Creates a RdSocket from as DataSource* - which is a pointer -
- * the instance holds the DataSource* without ownership and does not free it.
+ * Creates a RdSocket from as datasource_t* - which is a pointer -
+ * the instance holds the datasource_t* without ownership and does not free it.
  *
- * WARNING: ensure the DataSource* remains valid for the duration of use of the RdSocket. Oh for a shared_ptr
+ * WARNING: ensure the datasource_t* remains valid for the duration of use of the RdSocket. Oh for a shared_ptr
  *
- * \param datasource DataSource*
+ * \param datasource datasource_t*
  * \return RdSocket By value
  */
-RdSocket DataSourceSocket(DataSource* datasource);
+RdSocket DataSourceSocket(datasource_t* datasource);
 
 /**
  * This function is the uniform interface for reading data from a RdSocket regardless of its underlying data source.
@@ -65,7 +65,7 @@ RdSocket DataSourceSocket(DataSource* datasource);
  *              0 means other end of source closed.
  *              < 0 means IO error. for real sockets the system errno value will be
  *              captured and stored in rdsock_ref->m_errno
- *              For DataSource based RdSocket a simulated errno will be derived from the DataSource instance
+ *              For datasource_t based RdSocket a simulated errno will be derived from the datasource_t instance
  */
 int RdSocket_read(RdSocket* rdsock_ref, void* buffer, int buffer_len);
 

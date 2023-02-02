@@ -1,7 +1,7 @@
 #ifndef c_c_demo_parser_test_h
 #define c_c_demo_parser_test_h
 #include <c_http/common/list.h>
-#include <c_http/common/http_parser/rdsocket.h>
+#include <c_http/http_parser/rdsocket.h>
 #include <c_http/common/message.h>
 #include <c_http//demo_protocol/demo_sync_reader.h>
 
@@ -9,7 +9,7 @@
  * A VerifyFunction is a callable that examines a MsgList to
  * check that is gives the expected result;
  */
-typedef int(*VerifyFunctionType)(ListRef msg_list)  ;
+typedef int(*verify_function_t)(ListRef msg_list)  ;
 
 /** 
  * A parser test set consists of a descriptions, array of input lines or buffers,
@@ -20,19 +20,19 @@ typedef struct DemoParserTest_s
 {
     char*               description;
     char**              lines;
-    VerifyFunctionType  verify_function;
+    verify_function_t  verify_function;
     // the next field is a NULL terminated array of char*
 } DemoParserTest, *DemoParserTestRef;
 
 /**
  * WARNING - the args to this function must stay in existence for the life time of the
- * returned ParserTestRef
+ * returned parser_test_case_r
  * @param description
  * @param lines
  * @param vf
  * @return
  */
-DemoParserTestRef DemoParserTest_new(char* description, char** lines, VerifyFunctionType vf);
+DemoParserTestRef DemoParserTest_new(char* description, char** lines, verify_function_t vf);
 
 
 typedef struct DemoReadResult_s {
@@ -45,7 +45,7 @@ void DemoReadResult_dispose(DemoReadResultRef* this_ptr);
 
 
 /**
- * This class runs an array of ParserTest to make it easier to test the Parser 
+ * This class runs an array of parser_test_case_t to make it easier to test the http_parser_t
  * implementation on different sets of test data
  * 
  * Test data may consisting of multiple back to back messages,
@@ -53,8 +53,8 @@ void DemoReadResult_dispose(DemoReadResultRef* this_ptr);
  */
 typedef struct DemoWrappedParserTest_s
 {
-    DataSource*         m_data_source;
-    VerifyFunctionType  m_verify_func;
+    datasource_t*         m_data_source;
+    verify_function_t  m_verify_func;
     ListRef             m_results;
     RdSocket            m_rdsock;
     DemoSyncReaderRef   m_rdr;
@@ -66,7 +66,7 @@ typedef struct DemoWrappedParserTest_s
 
 } DemoWrappedParserTest, *DemoWrappedParserTestRef;
     
-void DemoWPT_init(DemoWrappedParserTestRef this, DataSource* data_source, VerifyFunctionType verify_func);
+void DemoWPT_init(DemoWrappedParserTestRef this, datasource_t* data_source, verify_function_t verify_func);
 //void WPT_destroy(WrappedParserTestRef this);
 
 int DemoWPT_run(DemoWrappedParserTestRef this);

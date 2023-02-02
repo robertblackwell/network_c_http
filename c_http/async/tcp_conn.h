@@ -2,7 +2,7 @@
 #define c_http_xr_conn_h
 #include <c_http/common/iobuffer.h>
 #include <c_http/common/message.h>
-#include <c_http/common/http_parser/ll_parser.h>
+#include <c_http/http_parser/ll_parser.h>
 #include <c_http/simple_runloop/runloop.h>
 
 #include <c_http/async/types.h>
@@ -71,13 +71,13 @@ struct TcpConn_s {
     int                     read_status;
 
     // read msg variables
-    ParserRef               parser_ref;
+    http_parser_t*               parser_ref;
     IOBufferRef             io_buf_ref;  // input buffer
     MessageRef              req_msg_ref; // request message
     TcpConnReadMsgCallback   read_msg_cb;
     void*                   read_msg_arg;
     int                     errno_saved;
-    struct ParserError_s    parser_error;
+    http_parser_error_t     parser_error;
 
     // writer variables
     CbufferRef              response_buf_ref; // response as a buffer
@@ -104,7 +104,7 @@ void TcpConn_write(TcpConnRef this, IOBufferRef iobuf, TcpConnWriteCallback cb, 
  *
  * This Reader object handles the processing of
  * -    taking data from a data source (such as a socket) into a buffers
- * -    pushing the buffer it into a Parser
+ * -    pushing the buffer it into a http_parser_t
  * -    handling the action on the various parser output states,
  *      which includes handling the situation where two messages overlap in a single buffer.
  *

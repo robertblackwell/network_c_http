@@ -22,7 +22,7 @@ struct SyncServer_s {
     int                         port;
     socket_handle_t             socket_fd;
     int                         nbr_workers;
-    SyncHandlerFunction         handler;
+    SyncAppMessageHandler       app_handler;
     QueueRef                    qref;
 #ifdef DYN_WORKER_TAB
     WorkerRef                   *worker_tab;
@@ -75,12 +75,12 @@ socket_handle_t create_listener_socket(int port, const char* host)
         assert(0);
 }
 
-SyncServerRef SyncServer_new(int port, int nbr_threads, SyncHandlerFunction handler)
+SyncServerRef SyncServer_new(int port, int nbr_threads, SyncAppMessageHandler app_handler)
 {
     SyncServerRef sref = (SyncServerRef)eg_alloc(sizeof(Server));
     sref->nbr_workers = nbr_threads;
     sref->port = port;
-    sref->handler = handler;
+    sref->app_handler = app_handler;
     sref->qref = Queue_new();
 #ifdef DYN_WORKER_TAB
     sref->worker_tab = malloc(sizeof(WorkerRef) * nbr_threads);
@@ -109,7 +109,7 @@ void SyncServer_listen(SyncServerRef sref)
     //
     for(int i = 0; i < sref->nbr_workers; i++)
     {
-        WorkerRef wref = Worker_new(sref->qref, i, sref->handler);
+        WorkerRef wref = Worker_new(sref->qref, i, sref->app_handler);
         sref->worker_tab[i] = NULL;
         if(Worker_start(wref) != 0) {
             printf("Server failed starting thread - aborting\n");

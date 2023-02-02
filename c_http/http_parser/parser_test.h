@@ -1,56 +1,53 @@
 #ifndef c_c_http_parser_test_h
 #define c_c_http_parser_test_h
 #include <c_http/common/list.h>
-#include <c_http/common/http_parser/rdsocket.h>
+#include <c_http/http_parser/rdsocket.h>
 #include <c_http/common/message.h>
 #include <c_http/sync/sync_reader.h>
-#include <c_http/common/http_parser/ll_parser.h>
-/**
- * @addtogroup group_parser_test
- *  @{
- */
+#include <c_http/http_parser/ll_parser.h>
 
 /**
- * A VerifyFunction is a callable that examines a MsgList to
- * check that is gives the expected result;
+ * A verify_function_t is a callable that examines the results of a parse test
+ * to see that the results are as expected;
  */
-typedef int(*VerifyFunctionType)(ListRef msg_list)  ;
+typedef int(*verify_function_t)(ListRef msg_list)  ;
 
 /** 
  * A parser test set consists of a descriptions, array of input lines or buffers,
  * and a verify_function that can verify the correctness of the outcome
  * from parsing those input buffers
 */
-typedef struct ParserTest_s 
+typedef struct parser_test_case_s
 {
     char*               description;
     char**              lines;
-    VerifyFunctionType  verify_function;
+    verify_function_t   verify_function;
+
     // the next field is a NULL terminated array of char*
-} ParserTest, *ParserTestRef;
+} parser_test_case_t, *parser_test_case_r;
 
 /**
  * WARNING - the args to this function must stay in existence for the life time of the
- * returned ParserTestRef
+ * returned parser_test_case_r
  * @param description
  * @param lines
  * @param vf
  * @return
  */
-ParserTestRef ParserTest_new(char* description, char** lines, VerifyFunctionType vf);
+parser_test_case_r parser_test_case_new(char* description, char** lines, verify_function_t vf);
 
 
-typedef struct ReadResult_s {
+typedef struct parse_result_s {
     MessageRef  message;
     int         rc;
-} ReadResult, *ReadResultRef;
+} parse_result_t, *parse_result_r;
 
-ReadResultRef ReadResult_new(MessageRef msg, int rc);
-void ReadResult_dispose(ReadResultRef* this_ptr);
+parse_result_r parse_result_new(MessageRef msg, int rc);
+void parse_result_dispose(parse_result_r* this_ptr);
 
 
 /**
- * This class runs an array of ParserTest to make it easier to test the Parser 
+ * This class runs an array of parser_test_case_t to make it easier to test the Parser
  * implementation on different sets of test data
  * 
  * Test data may consisting of multiple back to back messages,
@@ -58,9 +55,9 @@ void ReadResult_dispose(ReadResultRef* this_ptr);
  */
 typedef struct WrappedParserTest_s
 {
-    DataSource*         m_data_source;
-    VerifyFunctionType  m_verify_func;
-    ListRef             m_results;
+    datasource_t*      m_data_source;
+    verify_function_t  m_verify_func;
+    ListRef            m_results;
     RdSocket            m_rdsock;
     SyncReaderRef              m_rdr;
 
@@ -71,7 +68,7 @@ typedef struct WrappedParserTest_s
 
 } WrappedParserTest, *WrappedParserTestRef;
     
-void WPT_init(WrappedParserTestRef this, DataSource* data_source, VerifyFunctionType verify_func);
+void WPT_init(WrappedParserTestRef this, datasource_t* data_source, verify_function_t verify_func);
 //void WPT_destroy(WrappedParserTestRef this);
 
 int WPT_run(WrappedParserTestRef this);

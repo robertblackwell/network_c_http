@@ -1,10 +1,10 @@
 #define _GNU_SOURCE
-#include <c_http/common/http_parser/rdsocket.h>
+#include <c_http/http_parser/rdsocket.h>
 #include <c_http/sync/sync_reader.h>
 #include <c_http/common/alloc.h>
 #include <c_http/common/utils.h>
 #include <c_http/common/iobuffer.h>
-#include <c_http/common/http_parser/ll_parser.h>
+#include <c_http/http_parser/ll_parser.h>
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -17,42 +17,42 @@
 struct SyncReader_s
 {
     DECLARE_TAG;
-    ParserRef           m_parser;
-    IOBufferRef         m_iobuffer;
-    RdSocket            m_rdsocket;
+    http_parser_t*              m_parser;
+    IOBufferRef                 m_iobuffer;
+    int                         m_socket;
+    RdSocket*                   m_rdsocket;
+    OnMessageCompleteHandler    handler;
+    void*                       handler_context;
     int                 m_io_errno;
     int                 m_http_errno;
     char*               m_http_err_name;
     char*               m_http_err_description;
 
 };
-void SyncReader_init(SyncReaderRef  this, RdSocket rdsock)
+void SyncReader_init(SyncReaderRef  this, RdSocket rdsock, OnMessageCompleteHandler handler, void* handler_context)
 {
     ASSERT_NOT_NULL(this);
     SET_TAG(SyncReader_TAG, this)
-    this->m_parser = Parser_new();
+    this->m_parser = http_parser_new(handler, handler_context);
 //    this->m_socket = socket;
     this->m_rdsocket = rdsock;
     this->m_iobuffer = IOBuffer_new();
+    this->handler = handler;
+    this->handler_context = handler_context;
 }
 
-SyncReaderRef SyncReader_private_new(RdSocket rdsock)
+SyncReaderRef SyncReader_private_new(RdSocket rdsock, OnMessageCompleteHandler handler, void* handler_context)
 {
     SyncReaderRef rdr = eg_alloc(sizeof(Reader));
     if(rdr == NULL)
         return NULL;
-    SyncReader_init(rdr, rdsock);
+    SyncReader_init(rdr, rdsock, handler, handler_context);
     return rdr;
 }
 
-SyncReaderRef SyncReader_new(int rdsock_fd)
+SyncReaderRef SyncReader_new(int rdsock_fd, OnMessageCompleteHandler handler, void* handler_context)
 {
-    return SyncReader_private_new(RealSocket(rdsock_fd));
-//    SyncReaderRef rdr = eg_alloc(sizeof(Reader));
-//    if(rdr == NULL)
-//        return NULL;
-//    SyncReader_init(rdr, rdsock);
-//    return rdr;
+    return SyncReader_private_new(RealSocket(rdsock_fd), handler, handler_context);
 }
 
 void SyncReader_destroy(SyncReaderRef this)
@@ -72,75 +72,24 @@ void SyncReader_dispose(SyncReaderRef* this_ptr)
 int SyncReader_read(SyncReaderRef this, MessageRef* msgref_ptr)
 {
     CHECK_TAG(SyncReader_TAG, this)
-    IOBufferRef iobuf = this->m_iobuffer;
-    MessageRef message_ptr = Message_new();
-    Parser_begin(this->m_parser, message_ptr);
-    int bytes_read;
-    for(;;) {
-        // 
-        // handle nothing left in iobuffer
-        // only read more if iobuffer is empty
-        // 
-        if(IOBuffer_data_len(iobuf) == 0 ) {
-            IOBuffer_reset(iobuf);
-            void* buf = IOBuffer_space(iobuf); 
-            int len = IOBuffer_space_len(iobuf);
-            void* c = this->m_rdsocket.ctx;
-            ReadFunc rf = (this->m_rdsocket.read_f);
-            bytes_read = RdSocket_read(&(this->m_rdsocket), buf, len);
-            if(bytes_read == 0) {
-                if (! this->m_parser->m_started) {
-                    // eof no message started - there will not be any more bytes to parse so cleanup and exit
-                    // return no error 
-                    Message_dispose(&(message_ptr));
-                    *msgref_ptr = NULL;
-                    return 0;
-                }
-                if (this->m_parser->m_started && this->m_parser->m_message_done) {
-                    // shld not get here
-                    assert(false);
-                }
-                if (this->m_parser->m_started && !this->m_parser->m_message_done) {
-                    // get here if otherend is signlaling eom with eof
-                    assert(true);
-                }
-            } else if (bytes_read > 0) {
-                IOBuffer_commit(iobuf, bytes_read);
-            } else {
-                // have an io error
-                int x = errno;
-                printf("SyncReader_read io error errno: %d \n", x);
-                Message_dispose(&(message_ptr));
-                *msgref_ptr = NULL;
-                return READER_IO_ERROR;
+    llhttp_errno_t rc;
+    http_parser_t* pref = this->m_parser;
+    while(1) {
+        char buffer[1000];
+        char* b = (char*) &buffer;
+        int length = 900;
+        int status = RdSocket_read(this->m_rdsocket, (void*)b, length);
+        if(status > 0) {
+            rc = http_parser_consume(pref, (void *) buffer, status);
+            if(rc != HPE_OK) {
+                return rc;
             }
+        } else if(status == 0) {
+            rc = http_parser_consume(pref, NULL, 0);
+            return rc;
         } else {
-            bytes_read = IOBuffer_data_len(iobuf);
-        }
-        char* tmp = IOBuffer_data(iobuf);
-        char* tmp2 = IOBuffer_memptr(iobuf);
-        ParserReturnValue ret = Parser_consume(this->m_parser, (void*) IOBuffer_data(iobuf), IOBuffer_data_len(iobuf));
-        int consumed = bytes_read - ret.bytes_remaining;
-        IOBuffer_consume(iobuf, consumed);
-        int tmp_remaining = IOBuffer_data_len(iobuf);
-        switch(ret.return_code) {
-            case ParserRC_error:
-                ///
-                /// got a parse error - need some way to signal the caller so can send reply of bad message
-                ///
-                Message_dispose(&message_ptr);
-                *msgref_ptr = NULL;
-                printf("SyncReader_read parser error \n");
-                return READER_PARSE_ERROR;
-                break;
-            case ParserRC_end_of_data:
-                break;
-            case ParserRC_end_of_header:
-                break;
-            case ParserRC_end_of_message:
-                *msgref_ptr = message_ptr;
-                // return ok
-                return READER_OK;
+            return HPE_USER;
+            break;
         }
     }
 }

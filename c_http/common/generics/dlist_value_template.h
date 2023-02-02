@@ -11,7 +11,7 @@
  * And you wish to make a list of such MyType things and you want
  * the type of that list to be called
  *  -   MySpecialChain and
- *  -   all the functions that operate n the list to be called things like
+ *  -   all the functions that operate on the list to be called things like
  *      MySpecialChain_new(), MySpecialChain_add_back(....)
  *
  * Then make two files:

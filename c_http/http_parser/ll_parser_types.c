@@ -1,4 +1,4 @@
-#include <c_http/common/http_parser/ll_parser_types.h>
+#include <c_http/http_parser/ll_parser_types.h>
 
 const char *
 http_status_str (enum http_status s)

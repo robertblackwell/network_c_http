@@ -4,18 +4,9 @@
 #include <c_http/common/message.h>
 #include <c_http/sync/sync_writer.h>
 
-/**
- * @addtogroup group_handler
- * This is the signature of a handler function. *The address) of such a function must
- * be provided to SyncServer_new() in order that the server and its worker threads
- * can call on this function to handle requests.
- *
- * The handler function is called once for each request and is passed the request message in its
- * entirety together with a Writer instance that provides functions to write the response.
- *
- * The handler function is solely responsible for constructing and sending the response.
- * @{
- */
+typedef MessageRef(*SyncAppMessageHandler(MessageRef request));
+
+
 typedef int(*SyncHandlerFunction)(MessageRef request, SyncWriterRef wrtr);
 /** @} */
 #endif

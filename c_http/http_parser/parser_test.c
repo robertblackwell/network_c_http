@@ -1,34 +1,30 @@
 #define _GNU_SOURCE
 
-#include <c_http/common/http_parser/parser_test.h>
+#include <c_http/http_parser/parser_test.h>
 #include <stdio.h>
 #include <assert.h>
 #include <c_http/common/alloc.h>
 #include <c_http/common/utils.h>
 #include <c_http/common/iobuffer.h>
-#include <c_http/common/http_parser/rdsocket.h>
-#include <c_http/sync/sync_reader.h>
-#include <c_http/test_helpers/reader_private.h>
+#include <c_http/http_parser/rdsocket.h>
 
-ParserTestRef ParserTest_new(char* description, char** lines, VerifyFunctionType vf)
+parser_test_case_r parser_test_case_new(char* description, char** lines, verify_function_t vf)
 {
-    ParserTestRef this = eg_alloc(sizeof(ParserTest));
+    parser_test_case_r this = eg_alloc(sizeof(parser_test_case_t));
     this->description = description;
     this->lines = lines;
     this->verify_function = vf;
 }
 
-
-
-ReadResultRef ReadResult_new(MessageRef msg, int rc)
+parse_result_r parse_result_new(MessageRef msg, int rc)
 {
-    ReadResultRef rdref = eg_alloc(sizeof(ReadResult));
+    parse_result_r rdref = eg_alloc(sizeof(parse_result_t));
     rdref->message = msg;
     rdref->rc = rc;
 }
-void ReadResult_dispose(ReadResultRef* this_ptr)
+void parse_result_dispose(parse_result_r* this_ptr)
 {
-    ReadResultRef this = *this_ptr;
+    parse_result_r this = *this_ptr;
     if(this->message != NULL)
         Message_dispose(&(this->message));
 }
@@ -36,24 +32,31 @@ void ReadResult_dispose(ReadResultRef* this_ptr)
 static void read_result_dealloc(void** p)
 {
     void** pp = p;
-    ReadResult_dispose((ReadResultRef*) p);
+    parse_result_dispose((parse_result_r *) p);
 }
 
 
-void WPT_init(WrappedParserTestRef this, DataSource* data_source, VerifyFunctionType verify_func)
+void WPT_init(WrappedParserTestRef this, datasource_t* data_source, verify_function_t verify_func)
 {
     ASSERT_NOT_NULL(this);
     this-> m_data_source = data_source;
     this->m_verify_func = verify_func;
     this->m_results = List_new(read_result_dealloc);
     this->m_rdsock = DataSourceSocket(this->m_data_source);
-    this->m_rdr = SyncReader_private_new(this->m_rdsock);
 }
 
 void WPT_destroy(WrappedParserTestRef this)
 {
     ASSERT_NOT_NULL(this);
 }
+void on_message_handler(ParserRef parser_ref, MessageRef msg_ref)
+{
+    WrappedParserTestRef ptest = parser_ref->handler_context;
+    parse_result_r r = parse_result_new(msg_ref, 0);
+    List_add_back(ptest->m_results, r);
+}
+
+
 #ifdef lslsl
 int WPT_read_msg(WrappedParserTestRef this, IOBufferRef ctx, MessageRef* msgref_ptr )
 {
@@ -125,13 +128,37 @@ int WPT_run(WrappedParserTestRef this)
 {
     MessageRef msgref;
     IOBufferRef iobuf_ref = IOBuffer_new_with_capacity(256);
-    int rc = 0;
+    datasource_t* ds_ptr = this->m_data_source;
+
+    ParserRef pref = Parser_new(on_message_handler, (void*) this);
     while(1) {
-        rc = SyncReader_read(this->m_rdr, &msgref);
-        ReadResultRef rr = ReadResult_new(msgref, rc);
-        List_add_back(this->m_results, (void*)rr);
-        if((rc != 0) || (msgref == NULL))
+        llhttp_errno_t rc;
+//        char*data = datasource_next(ds_ptr);
+//        int len = (data != NULL ) ? strlen(data): 0;
+        char buffer[1000];
+        char* b = &buffer;
+        int length = 900;
+        int status = datasource_read_some(ds_ptr, &buffer, length);
+        if(status > 0) {
+            rc = Parser_consume(pref, (void *) buffer, status);
+            if(rc != HPE_OK) {
+                printf("WPT_run status > 0 rc: %d\n", rc);
+                List_add_back(this->m_results, parse_result_new(NULL, rc));
+                break;
+            }
+        } else if(status == 0) {
+            int x =
+            rc = Parser_consume(pref, NULL, 0);
+            if(rc != HPE_OK) {
+                printf("WPT_run status == 0 rc: %d\n", rc);
+                List_add_back(this->m_results, parse_result_new(NULL, rc));
+            }
             break;
+        } else {
+            printf("WPT_run status < 0 io error rc: %d\n", HPE_USER);
+            List_add_back(this->m_results, parse_result_new(NULL, HPE_USER));
+            break;
+        }
     }
     int r =this->m_verify_func(this->m_results);
     printf("Return from verify %d\n", r);

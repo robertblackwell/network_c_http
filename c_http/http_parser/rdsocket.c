@@ -1,13 +1,13 @@
 #define _GNU_SOURCE
 
-#include <c_http/common/http_parser/rdsocket.h>
+#include <c_http/http_parser/rdsocket.h>
 #include <assert.h>
 #include <unistd.h>
 #include <errno.h>
 
 /**
  * These adapter functions are necessary since the read function that work on real sockets has a different calling signature than
- * the DataSource_read() function that work on DataSource*. These two wrappers uniformize the signature
+ * the datasource_read_some() function that work on datasource_t*. These two wrappers uniformize the signature
  */
  /**
   *
@@ -31,8 +31,8 @@ static int socket_read(RdSocket* rdsock_ref, void* buffer, int len)
 static int datasource_read(RdSocket* rdsock_ref, void* buffer, int len)
 {
     void* sock_ctx = rdsock_ref->ctx;
-    DataSource* dsref = (DataSource*)(sock_ctx);
-    int bytes_read = DataSource_read((DataSource*)sock_ctx, buffer, len);
+    datasource_t* dsref = (datasource_t*)(sock_ctx);
+    int bytes_read = datasource_read_some((datasource_t *) sock_ctx, buffer, len);
     rdsock_ref->m_errno = dsref->m_errno;
     return bytes_read;
 }
@@ -48,14 +48,14 @@ RdSocket RealSocket(int sock)
     rdsock.ctx = (void*)(long)sock;
     return rdsock;
 }
-RdSocket DataSourceSocket(DataSource* dsref)
+RdSocket DataSourceSocket(datasource_t* dsref)
 {
     RdSocket rdsock = {.ctx=(void*)dsref, .read_f=(ReadFunc) &datasource_read};
     return rdsock;
 }
 int RdSocket_read(RdSocket* rdsock, void* buffer, int len)
 {
-    DataSource* tmp = (DataSource*)rdsock->ctx;
+    datasource_t* tmp = (datasource_t*)rdsock->ctx;
     int bytes_read = rdsock->read_f(rdsock, buffer, len);
     return bytes_read;
 }

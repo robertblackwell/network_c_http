@@ -45,11 +45,11 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 		common/queue.h
 		common/utils.h
 		#http/1.1 parser
-		common/http_parser/ll_parser_types.h
-		common/http_parser/ll_parser.h
-		common/http_parser/parser_test.h
-		common/http_parser/rdsocket.h
-		common/http_parser/datasource.h
+		http_parser/ll_parser_types.h
+		http_parser/ll_parser.h
+#		common/http_parser/parser_test.h
+#		common/http_parser/rdsocket.h
+#		common/http_parser/datasource.h
 		${EXTSRC}/llhttp/llhttp.h
 	#sync/
 		sync/sync_client.h
@@ -113,11 +113,11 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		common/utils.c
 		common/queue.c
 		#http/1.1 details
-		common/http_parser/datasource.c
-		common/http_parser/rdsocket.c
-		common/http_parser/parser_test.c
-		common/http_parser/ll_parser_types.c
-		common/http_parser/ll_parser.c
+#		common/http_parser/datasource.c
+#		common/http_parser/rdsocket.c
+#		common/http_parser/parser_test.c
+		http_parser/ll_parser_types.c
+		http_parser/ll_parser.c
 		${EXTSRC}/llhttp/api.c
 		${EXTSRC}/llhttp/http.c
 		${EXTSRC}/llhttp/llhttp.c
@@ -145,16 +145,16 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		simple_runloop/functor.c
 		simple_runloop/functor_list.c
 	#async
-		async/async_server.c
-        async/tcp_conn.c
-		async/tcp_conn_read.c
-		async/tcp_conn_read_msg.c
-		async/tcp_conn_write.c
-        async/tcp_conn_list.c
-		async/handler.c
-		async/handler_simple.c
-		async/handler_echo.c
-		async/handler_function.c
+#		async/async_server.c
+#        async/tcp_conn.c
+#		async/tcp_conn_read.c
+#		async/tcp_conn_read_msg.c
+#		async/tcp_conn_write.c
+#        async/tcp_conn_list.c
+#		async/handler.c
+#		async/handler_simple.c
+#		async/handler_echo.c
+#		async/handler_function.c
 	#demo_protocol
 		demo_protocol/demo_client.c
 		demo_protocol/demo_handler.c

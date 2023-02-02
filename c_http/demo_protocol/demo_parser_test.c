@@ -8,7 +8,7 @@
 #include <c_http/common/iobuffer.h>
 #include <c_http/demo_protocol/demo_sync_reader_private.h>
 
-DemoParserTestRef DemoParserTest_new(char* description, char** lines, VerifyFunctionType vf)
+DemoParserTestRef DemoParserTest_new(char* description, char** lines, verify_function_t vf)
 {
     DemoParserTestRef this = eg_alloc(sizeof(DemoParserTest));
     this->description = description;
@@ -40,8 +40,8 @@ static void read_result_dealloc(void** p)
 
 void DemoWPT_init(
         DemoWrappedParserTestRef this,
-        DataSource* data_source,
-        VerifyFunctionType verify_func)
+        datasource_t* data_source,
+        verify_function_t verify_func)
 {
     ASSERT_NOT_NULL(this);
     this-> m_data_source = data_source;
@@ -104,7 +104,7 @@ int WPT_read_msg(WrappedParserTestRef this, IOBufferRef ctx, MessageRef* msgref_
                 /// got a parse error - need some way to signal the caller so can send reply of bad message
                 ///
                 printf("Got error from parser %d\n", ret.return_code);
-                ParserError pe = Parser_get_error(this->m_parser);
+                http_parser_error_t pe = Parser_get_error(this->m_parser);
                 printf("Error details %s %s \n", pe.m_name, pe.m_description);
 //                assert(false);
                 Message_dispose(&message_ptr);

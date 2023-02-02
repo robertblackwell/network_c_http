@@ -3,34 +3,43 @@
 #include <c_http/common/alloc.h>
 #include <c_http/common/utils.h>
 #include <c_http/common/queue.h>
-#include <c_http/sync/sync_reader.h>
-#include <c_http/sync/sync_writer.h>
+#include <c_http/sync/sync_connection.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <assert.h>
 #include <pthread.h>
 
-
+typedef struct Worker_s, Worker, *WorkerRef;
 struct Worker_s {
     bool                active;
     int                 active_socket;
+    sync_connection_t*  connection_ptr;
     QueueRef            qref;
     pthread_t           pthread;
     int                 id;
-    SyncHandlerFunction handler;
+    size_t              read_buffer_size;
+    SyncAppMessageHandler* app_handler;
 };
+static void worker_message_handler(MessageRef request_ref, void* context)
+{
+    WorkerRef worker_ref = context;
+    MessageRef response_ref = worker_ref->app_handler(request_ref);
+    if(response_ref != NULL)
+        int rc = sync_connection_write(worker_ref->connection_ptr, response_ref);
+}
 
-WorkerRef Worker_new(QueueRef qref, int _id, SyncHandlerFunction handler)
+WorkerRef Worker_new(QueueRef qref, int ident, size_t read_buffer_size, SyncAppMessageHandler app_handler)
 {
     WorkerRef wref = (WorkerRef)eg_alloc(sizeof(Worker));
     if(wref == NULL)
         return NULL;
     wref->active_socket = 0;
     wref->active  = false;
-    wref->id = _id;
+    wref->id = ident;
     wref->qref = qref;
-    wref->handler = handler;
+    wref->read_buffer_size = read_buffer_size;
+    wref->app_handler = app_handler;
     return wref;
 }
 void Worker_dispose(WorkerRef wref)
@@ -38,22 +47,15 @@ void Worker_dispose(WorkerRef wref)
     free((void*)wref);
 }
 
-void handle_parse_error(MessageRef requestref, SyncWriterRef wrtr)
-{
-    char* reply = "HTTP/1.1 400 BAD REQUEST \r\nContent-length: 0\r\n\r\n";
-    SyncWriter_write_chunk(wrtr, (void*)reply, strlen(reply));
-}
-
 static void* Worker_main(void* data)
 {
     ASSERT_NOT_NULL(data);
     WorkerRef wref = (WorkerRef)data;
+
     bool terminate = false;
     while(!terminate) {
         wref->active = false;
-        SyncReaderRef rdr = NULL;
-        SyncWriterRef wrtr = NULL;
-        MessageRef request_msg_ref = NULL;
+        wref->connection_ptr  = NULL;
 
         int my_socket_handle = Queue_remove(wref->qref);
         printf("Worker_main %p mySocketHandle: %d worker %d\n", wref, my_socket_handle, wref->id);
@@ -65,33 +67,15 @@ static void* Worker_main(void* data)
         } else {
             wref->active_socket = (int) my_socket_handle;
             wref->active = true;
-            if((rdr = SyncReader_new(sock)) == NULL) goto finalize;
-            if((wrtr = SyncWriter_new(sock)) == NULL) goto finalize;
+            sync_connection_t* conn = sync_connection_new(sock, wref->read_buffer_size);
+            if((wref->connection_ptr = conn) == NULL) goto finalize;
 
-            while(1) {
-                int rc = SyncReader_read(rdr, &request_msg_ref);
-                if((rc == READER_OK) && (request_msg_ref != NULL)) {
-                    if(0 == wref->handler(request_msg_ref, wrtr)) goto finalize;
-                    Message_dispose(&request_msg_ref);
-                    close(sock);
-                    sock = 0;
-                    break;
-                } else if(rc == READER_PARSE_ERROR) {
-                    // send a reply bad request
-                    handle_parse_error(request_msg_ref, wrtr);
-                    break;
-                } else {
-                    break;
-                }
-            }
+            int rc = sync_connection_read(wref->connection_ptr);
         }
 
         finalize:
             if(sock != 0) close(sock);
-            if(request_msg_ref != NULL) Message_dispose(&request_msg_ref);
-            if(wrtr != NULL) SyncWriter_dispose(&wrtr);
-            if(rdr != NULL) SyncReader_dispose(&rdr);
-            wref->active = false;
+            if(wref != NULL) Worker_dispose(&wref);
     }
     printf("Worker_main exited main loop %p, %d\n", wref, wref->id);
     return NULL;

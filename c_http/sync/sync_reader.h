@@ -7,10 +7,10 @@
  */
 
 #include <c_http/common/message.h>
-
+#include <c_http/http_parser/ll_parser.h>
 /**
  * Reader and its associated SyncReader_?? functions implement an object that can read and parse compete HTTP/1.X messages from
- * either a real TCP socket or a DataSource* for testing.
+ * either a real TCP socket or a datasource_t* for testing.
  */
 typedef struct SyncReader_s Reader, *SyncReaderRef;
 
@@ -19,7 +19,7 @@ typedef struct SyncReader_s Reader, *SyncReaderRef;
  * @param rdsock_fd int
  * @return SyncReaderRef
  */
-SyncReaderRef SyncReader_new(int rdsock_fd);
+SyncReaderRef SyncReader_new(int rdsock_fd, OnMessageCompleteHandler handler, void* handler_context);
 //void SyncReader_init(SyncReaderRef this, RdSocket rdsock);
 void SyncReader_destroy(SyncReaderRef this);
 void SyncReader_dispose(SyncReaderRef* this_ptr);
@@ -35,7 +35,7 @@ typedef enum SyncReader_ReturnCode {
  *
  * This Reader object handles the processing of
  * -    taking data from a data source (such as a socket) in buffers
- * -    pushing the buffer it into a Parser
+ * -    pushing the buffer it into a http_parser_t
  * -    handling the action on the various parser output states,
  *      which includes handling the situation where two messages overlap in a single buffer.
  *
