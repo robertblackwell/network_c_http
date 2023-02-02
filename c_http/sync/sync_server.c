@@ -1,5 +1,7 @@
 #define _GNU_SOURCE
-#include <c_http/sync/sync_server.h>
+//#include <c_http/sync/sync_server.h>
+#include <c_http/sync/sync.h>
+#include <c_http/sync/sync_internal.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -10,26 +12,26 @@
 #include <c_http/logger.h>
 #include <c_http/socket_functions.h>
 #include <c_http/common/queue.h>
-#include <c_http/sync/worker.h>
 
 #define SyncServer_TAG "SYNCSVER"
 #include <c_http/check_tag.h>
 
 #define MAX_THREADS 100
-#define XDYN_WORKER_TAB
-struct SyncServer_s {
-    DECLARE_TAG;
-    int                         port;
-    socket_handle_t             socket_fd;
-    int                         nbr_workers;
-    SyncAppMessageHandler       app_handler;
-    QueueRef                    qref;
-#ifdef DYN_WORKER_TAB
-    WorkerRef                   *worker_tab;
-#else
-    WorkerRef                   worker_tab[MAX_THREADS];
-#endif
-};
+
+//struct SyncServer_s {
+//    DECLARE_TAG;
+//    int                         port;
+//    size_t                      read_buffer_size;
+//    socket_handle_t             socket_fd;
+//    int                         nbr_workers;
+//    SyncAppMessageHandler       app_handler;
+//    QueueRef                    qref;
+//#ifdef DYN_WORKER_TAB
+//    WorkerRef                   *worker_tab;
+//#else
+//    WorkerRef                   worker_tab[MAX_THREADS];
+//#endif
+//};
 
 
 //
@@ -75,7 +77,7 @@ socket_handle_t create_listener_socket(int port, const char* host)
         assert(0);
 }
 
-SyncServerRef SyncServer_new(int port, int nbr_threads, SyncAppMessageHandler app_handler)
+SyncServerRef SyncServer_new(int port, size_t read_buffer_size, int nbr_threads, SyncAppMessageHandler app_handler)
 {
     SyncServerRef sref = (SyncServerRef)eg_alloc(sizeof(Server));
     sref->nbr_workers = nbr_threads;
@@ -109,7 +111,7 @@ void SyncServer_listen(SyncServerRef sref)
     //
     for(int i = 0; i < sref->nbr_workers; i++)
     {
-        WorkerRef wref = Worker_new(sref->qref, i, sref->app_handler);
+        WorkerRef wref = Worker_new(sref->qref, i, sref->read_buffer_size, sref->app_handler);
         sref->worker_tab[i] = NULL;
         if(Worker_start(wref) != 0) {
             printf("Server failed starting thread - aborting\n");

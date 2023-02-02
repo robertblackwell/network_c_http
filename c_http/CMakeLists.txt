@@ -52,13 +52,11 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 #		common/http_parser/datasource.h
 		${EXTSRC}/llhttp/llhttp.h
 	#sync/
-		sync/sync_client.h
-		sync/sync_server.h
-		sync/sync_writer.h
-		sync/sync_reader.h
-		sync/sync_handler.h
-		sync/sync_handler_example.h
-		sync/worker.h
+		sync/sync.h
+		sync/sync_internal.h
+#		sync/sync_handler.h
+#		sync/sync_handler_example.h
+#		sync/worker.h
 	#demo_protocol
 		demo_protocol/demo_client.h
 		demo_protocol/demo_connection.h
@@ -122,9 +120,8 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		${EXTSRC}/llhttp/http.c
 		${EXTSRC}/llhttp/llhttp.c
 	#sync
-		sync/sync_client.c
-		sync/sync_writer.c
-		sync/sync_reader.c
+#		sync/sync_client.c
+		sync/sync_connection.c
 		sync/sync_server.c
 		sync/sync_handler_example.c
 		sync/worker.c

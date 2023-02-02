@@ -1,15 +1,15 @@
 #define _GNU_SOURCE
 #include <c_http/sync/sync_handler_example.h>
+#include <c_http/sync/sync.h>
 #include <c_http/common/alloc.h>
 #include <c_http/socket_functions.h>
-#include <c_http/sync/sync_writer.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include <pthread.h>
 
-BufferChainRef simple_response_body(char* message, socket_handle_t socket, int pthread_self_value)
+static BufferChainRef simple_response_body(char* message, socket_handle_t socket, int pthread_self_value)
 {
     time_t t = time(NULL);
     struct tm *tm = localtime(&t);
@@ -38,21 +38,22 @@ BufferChainRef simple_response_body(char* message, socket_handle_t socket, int p
  * \param request
  * \return char* ownership, and responsibility to free, transfers to the caller
  */
-char* echo_body(MessageRef request)
+static char* echo_body(MessageRef request)
 {
     IOBufferRef iob_body = Message_serialize(request);
     char* body = malloc(IOBuffer_data_len(iob_body) + 1);
     memcpy(body, IOBuffer_data(iob_body), IOBuffer_data_len(iob_body)+1);
     return body;
 }
-BufferChainRef echo_body_buffer_chain(MessageRef request)
+
+static BufferChainRef echo_body_buffer_chain(MessageRef request)
 {
     IOBufferRef iob_body = Message_serialize(request);
     BufferChainRef bufchain = BufferChain_new();
     BufferChain_append_IOBuffer(bufchain, iob_body);
     return bufchain;
 }
-int handler_example(MessageRef request, SyncWriterRef wrtr)
+MessageRef app_handler_example(MessageRef request, WorkerRef wref)
 {
     MessageRef response = Message_new_response();
     char* msg = "<h2>this is a message</h2>";
@@ -73,7 +74,7 @@ int handler_example(MessageRef request, SyncWriterRef wrtr)
         }
         body_chain = echo_body_buffer_chain(request);
     } else {
-        body_chain = simple_response_body(msg, SyncWriter_sock_fd(wrtr), pthread_self());
+        body_chain = simple_response_body(msg, Worker_socketfd(wref), Worker_pthread(wref));
     }
 
     Message_add_header_cstring(response, HEADER_CONTENT_TYPE, "text/html; charset=UTF-8");
@@ -81,18 +82,7 @@ int handler_example(MessageRef request, SyncWriterRef wrtr)
     /**
      * simulate io to build the page
      */
-//    usleep(1000);
     Message_set_body(response, body_chain);
     Message_set_content_length(response, BufferChain_size(body_chain));
-    SyncWriter_write(wrtr, response);
-
-    return_value = 1;
-
-    finalize:
-    if(body != NULL) free(body);
-    if(body_len_str != NULL) free(body_len_str);
-    return return_value;
+    return response;
 }
- int handler_dispatch(MessageRef request, SyncWriterRef wrtr)
- {
- }

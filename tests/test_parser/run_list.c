@@ -8,7 +8,7 @@
 #include <c_http/common/kvpair.h>
 #include <c_http/common/message.h>
 #include <c_http/test_helpers/message_private.h>
-#include <c_http/sync/sync_reader.h>
+#include <c_http/saved/sync_reader.h>
 #include "test_harness.h"
 int run_list (ListRef tests)
 {

@@ -2,8 +2,8 @@
 #include <c_http/common/alloc.h>
 #include <c_http/common/cbuffer.h>
 #include <c_http/common/message.h>
-#include <c_http/sync/sync_reader.h>
-#include <c_http/sync/sync_writer.h>
+#include <c_http/saved/sync_reader.h>
+#include <c_http/saved/sync_writer.h>
 #include <c_http/logger.h>
 #include <assert.h>
 #include <stdio.h>

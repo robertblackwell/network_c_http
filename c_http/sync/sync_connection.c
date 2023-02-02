@@ -1,7 +1,6 @@
 #define _GNU_SOURCE
-#include <c_http/sync/sync_connection.h>
-#include <c_http/http_parser/rdsocket.h>
-#include <c_http/sync/sync_reader.h>
+#include <c_http/sync/sync.h>
+#include <c_http/sync/sync_internal.h>
 #include <c_http/common/alloc.h>
 #include <c_http/common/utils.h>
 #include <c_http/common/iobuffer.h>
@@ -14,30 +13,29 @@
 #define sync_connection_TAG "SYNCCONN"
 #include <c_http/check_tag.h>
 
-struct sync_connection_s
-{
-    DECLARE_TAG;
-    http_parser_t*              m_parser;
-    IOBufferRef                 m_iobuffer;
-    int                         socketfd;
-    size_t                      read_buffer_size;
-    OnMessageCompleteHandler    handler;
-    void*                       handler_context;
-    int                 m_io_errno;
-    int                 m_http_errno;
-    char*               m_http_err_name;
-    char*               m_http_err_description;
-
-};
+//struct sync_connection_s
+//{
+//    DECLARE_TAG;
+//    http_parser_t*              m_parser;
+//    IOBufferRef                 m_iobuffer;
+//    int                         socketfd;
+//    size_t                      read_buffer_size;
+//    SyncConnectionMessageHandler    handler;
+//    void*                       handler_context;
+//    int                 m_io_errno;
+//    int                 m_http_errno;
+//    char*               m_http_err_name;
+//    char*               m_http_err_description;
+//
+//};
 
 static void parser_on_message_handler(http_parser_t* context, MessageRef input_message_ref)
 {
     sync_connection_t* connptr = context->handler_context;
-    connptr->handler();
+    connptr->handler(input_message_ref, connptr);
 }
-sync_connection_t* sync_connection_new(int rdsock_fd, size_t read_buffer_size, OnMessageCompleteHandler handler, void* handler_context);
 
-void sync_connection_init(sync_connection_t* this, int socketfd, size_t read_buffer_size, OnMessageCompleteHandler handler, void* handler_context)
+void sync_connection_init(sync_connection_t* this, int socketfd, size_t read_buffer_size, SyncConnectionMessageHandler handler, void* handler_context)
 {
     ASSERT_NOT_NULL(this);
     SET_TAG(sync_connection_TAG, this)
@@ -50,7 +48,7 @@ void sync_connection_init(sync_connection_t* this, int socketfd, size_t read_buf
     this->handler_context = handler_context;
 }
 
-sync_connection_t* sync_connection_new(int socketfd, size_t read_buffer_size, OnMessageCompleteHandler handler, void* handler_context)
+sync_connection_t* sync_connection_new(int socketfd, size_t read_buffer_size, SyncConnectionMessageHandler handler, void* handler_context)
 {
     sync_connection_t* rdr = malloc(sizeof(sync_connection_t));
     if(rdr == NULL)

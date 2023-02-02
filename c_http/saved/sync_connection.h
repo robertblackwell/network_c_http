@@ -2,12 +2,16 @@
 #define c_http_sync_sync_connection_h
 #include <c_http/common/message.h>
 #include <c_http/http_parser/ll_parser.h>
+#include <c_http/saved/sync_handler.h>
 #define sync_connection_TAG "SYNCCONN"
 #include <c_http/check_tag.h>
 
 typedef struct sync_connection_s sync_connection_t, *sync_connection_p;
-sync_connection_t* sync_connection_new(int socketfd, size_t read_buffer_size, OnMessageCompleteHandler handler, void* handler_context);
-void sync_connection_init(sync_connection_t* this, int socketfd, size_t read_buffer_size, OnMessageCompleteHandler handler, void* handler_context);
+
+
+
+sync_connection_t* sync_connection_new(int socketfd, size_t read_buffer_size, SyncConnectionMessageHandler handler, void* handler_context);
+void sync_connection_init(sync_connection_t* this, int socketfd, size_t read_buffer_size, SyncConnectionMessageHandler handler, void* handler_context);
 void sync_connection_destroy(sync_connection_t* this);
 void sync_connection_dispose(sync_connection_t** this_ptr);
 

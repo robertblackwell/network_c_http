@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-#include <c_http/sync/sync_writer.h>
+#include <c_http/saved/sync_writer.h>
 #include <c_http/common/alloc.h>
 #include <c_http/test_helpers/message_private.h>
 #include <stdio.h>

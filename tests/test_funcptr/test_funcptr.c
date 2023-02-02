@@ -8,7 +8,7 @@
 #include <c_http/logger.h>
 #include <c_http/common/list.h>
 #include <c_http/common/http_parser/rdsocket.h>
-#include <c_http/sync/sync_server.h>
+#include <c_http/saved/sync_server.h>
 #include <c_http/common/hdrlist.h>
 #include <c_http/common/message.h>
 
