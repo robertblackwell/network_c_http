@@ -23,7 +23,7 @@
 static void handler(RtorWatcherRef fdevent_ref, uint64_t event)
 {
     RtorEventfdRef fdev = (RtorEventfdRef)fdevent_ref;
-    XR_FDEV_CHECK_TAG(fdev)
+    FDEV_CHECK_TAG(fdev)
     uint64_t buf;
     int nread = read(fdev->fd, &buf, sizeof(buf));
     if(nread == sizeof(buf)) {
@@ -35,14 +35,14 @@ static void handler(RtorWatcherRef fdevent_ref, uint64_t event)
 static void anonymous_free(RtorWatcherRef p)
 {
     RtorEventfdRef fdevp = (RtorEventfdRef)p;
-    XR_FDEV_CHECK_TAG(fdevp)
+    FDEV_CHECK_TAG(fdevp)
     rtor_eventfd_free(fdevp);
 }
 void rtor_eventfd_init(RtorEventfdRef this, ReactorRef runloop)
 {
     this->type = XR_WATCHER_FDEVENT;
-    XR_FDEV_SET_TAG(this);
-    XR_FDEV_CHECK_TAG(this)
+    FDEV_SET_TAG(this);
+    FDEV_CHECK_TAG(this)
 #ifdef TWO_PIPE_TRICK
     int pipefds[2];
     pipe(pipefds);
@@ -67,13 +67,13 @@ RtorEventfdRef rtor_eventfd_new(ReactorRef runloop)
 }
 void rtor_eventfd_free(RtorEventfdRef athis)
 {
-    XR_FDEV_CHECK_TAG(athis)
+    FDEV_CHECK_TAG(athis)
     close(athis->fd);
     free((void*)athis);
 }
 void rtor_eventfd_register(RtorEventfdRef athis)
 {
-    XR_FDEV_CHECK_TAG(athis)
+    FDEV_CHECK_TAG(athis)
 
     uint32_t interest = 0L;
     athis->fd_event_handler = NULL;
@@ -83,7 +83,7 @@ void rtor_eventfd_register(RtorEventfdRef athis)
 }
 void rtor_eventfd_change_watch(RtorEventfdRef athis, FdEventHandler evhandler, void* arg, uint64_t watch_what)
 {
-    XR_FDEV_CHECK_TAG(athis)
+    FDEV_CHECK_TAG(athis)
     uint32_t interest = watch_what;
     if( evhandler != NULL) {
         athis->fd_event_handler = evhandler;
@@ -96,13 +96,13 @@ void rtor_eventfd_change_watch(RtorEventfdRef athis, FdEventHandler evhandler, v
 }
 void rtor_eventfd_deregister(RtorEventfdRef athis)
 {
-    XR_FDEV_CHECK_TAG(athis)
+    FDEV_CHECK_TAG(athis)
     int res = rtor_reactor_deregister(athis->runloop, athis->fd);
     assert(res == 0);
 }
 void rtor_eventfd_arm(RtorEventfdRef athis, FdEventHandler evhandler, void* arg)
 {
-    XR_FDEV_CHECK_TAG(athis)
+    FDEV_CHECK_TAG(athis)
     uint32_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP;
     if( evhandler != NULL) {
         athis->fd_event_handler = evhandler;
@@ -115,12 +115,12 @@ void rtor_eventfd_arm(RtorEventfdRef athis, FdEventHandler evhandler, void* arg)
 }
 void rtor_eventfd_disarm(RtorEventfdRef athis)
 {
-    XR_FDEV_CHECK_TAG(athis)
+    FDEV_CHECK_TAG(athis)
     int res = rtor_reactor_reregister(athis->runloop, athis->fd, 0, (RtorWatcherRef) athis);
 }
 void rtor_eventfd_fire(RtorEventfdRef athis)
 {
-    XR_FDEV_CHECK_TAG(athis)
+    FDEV_CHECK_TAG(athis)
 #ifdef TWO_PIPE_TRICK
     uint64_t buf = 1;
     write(athis->write_fd, &buf, sizeof(buf));
@@ -156,6 +156,6 @@ int rtor_eventfd_get_fd(RtorEventfdRef this)
 
 void rtor_eventfd_verify(RtorEventfdRef r)
 {
-    XR_FDEV_CHECK_TAG(r)
+    FDEV_CHECK_TAG(r)
 
 }

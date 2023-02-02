@@ -54,6 +54,7 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 	#sync/
 		sync/sync.h
 		sync/sync_internal.h
+		sync/tags.h
 #		sync/sync_handler.h
 #		sync/sync_handler_example.h
 #		sync/worker.h
@@ -72,9 +73,9 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 		demo_protocol/demo_sync_reader_private.h
 
 
-		#sync simple_server app
+		#sync simple_server sync_app
 
-	#sync verifier app
+	#sync verifier sync_app
 
 	#aio simple_runloop and aio_http/1.1 details
 		simple_runloop/runloop.h

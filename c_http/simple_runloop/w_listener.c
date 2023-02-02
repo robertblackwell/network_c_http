@@ -29,7 +29,7 @@ static void anonymous_free(RtorWatcherRef p)
 }
 void rtor_listener_init(RtorListenerRef athis, ReactorRef runloop, int fd)
 {
-    XR_LISTNER_SET_TAG(athis);
+    LISTNER_SET_TAG(athis);
     athis->type = XR_WATCHER_LISTENER;
     athis->fd = fd;
     athis->runloop = runloop;
@@ -76,12 +76,12 @@ void rtor_listener_register(RtorListenerRef athis, ListenerEventHandler event_ha
 }
 void rtor_listener_deregister(RtorListenerRef athis)
 {
-    XR_LISTNER_CHECK_TAG(athis)
+    LISTNER_CHECK_TAG(athis)
     rtor_reactor_deregister(athis->runloop, athis->fd);
 }
 void rtor_listener_arm(RtorListenerRef athis, ListenerEventHandler fd_event_handler, void* arg)
 {
-    XR_LISTNER_CHECK_TAG(athis)
+    LISTNER_CHECK_TAG(athis)
     if(fd_event_handler != NULL) {
         athis->listen_evhandler = fd_event_handler;
     }
@@ -98,7 +98,7 @@ void rtor_listener_arm(RtorListenerRef athis, ListenerEventHandler fd_event_hand
 }
 void WListenerFd_disarm(RtorListenerRef athis)
 {
-    XR_LISTNER_CHECK_TAG(athis)
+    LISTNER_CHECK_TAG(athis)
     int res = rtor_reactor_reregister(athis->runloop, athis->fd, 0L, (RtorWatcherRef) athis);
     assert(res == 0);
 }
@@ -113,6 +113,6 @@ int rtor_listener_get_fd(RtorListenerRef this)
 
 void rtor_listener_verify(RtorListenerRef r)
 {
-    XR_LISTNER_CHECK_TAG(r)
+    LISTNER_CHECK_TAG(r)
 
 }

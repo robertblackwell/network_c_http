@@ -1,5 +1,4 @@
 #define _GNU_SOURCE
-//#include <c_http/sync/sync_server.h>
 #include <c_http/sync/sync.h>
 #include <c_http/sync/sync_internal.h>
 #include <stdlib.h>
@@ -13,25 +12,9 @@
 #include <c_http/socket_functions.h>
 #include <c_http/common/queue.h>
 
-#define SyncServer_TAG "SYNCSVER"
 #include <c_http/check_tag.h>
 
 #define MAX_THREADS 100
-
-//struct SyncServer_s {
-//    DECLARE_TAG;
-//    int                         port;
-//    size_t                      read_buffer_size;
-//    socket_handle_t             socket_fd;
-//    int                         nbr_workers;
-//    SyncAppMessageHandler       app_handler;
-//    QueueRef                    qref;
-//#ifdef DYN_WORKER_TAB
-//    WorkerRef                   *worker_tab;
-//#else
-//    WorkerRef                   worker_tab[MAX_THREADS];
-//#endif
-//};
 
 
 //
@@ -77,47 +60,47 @@ socket_handle_t create_listener_socket(int port, const char* host)
         assert(0);
 }
 
-SyncServerRef SyncServer_new(int port, size_t read_buffer_size, int nbr_threads, SyncAppMessageHandler app_handler)
+sync_server_r sync_server_new(int port, size_t read_buffer_size, int nbr_threads, SyncAppMessageHandler app_handler)
 {
-    SyncServerRef sref = (SyncServerRef)eg_alloc(sizeof(Server));
+    sync_server_r sref = (sync_server_r)eg_alloc(sizeof(sync_server_t));
     sref->nbr_workers = nbr_threads;
     sref->port = port;
     sref->app_handler = app_handler;
     sref->qref = Queue_new();
 #ifdef DYN_WORKER_TAB
-    sref->worker_tab = malloc(sizeof(WorkerRef) * nbr_threads);
+    sref->worker_tab = malloc(sizeof(sync_worker_r) * nbr_threads);
 #else
     assert(nbr_threads < MAX_THREADS);
 #endif
-    SET_TAG(SyncServer_TAG, sref)
+    SET_TAG(SYNC_SERVER_TAG, sref)
     return sref;
 }
 
-void SyncServer_dispose(SyncServerRef* sref)
+void sync_server_dispose(sync_server_r* srefptr)
 {
-    CHECK_TAG(SyncServer_TAG, *sref)
-    ASSERT_NOT_NULL(*sref);
-    free(*sref);
-    *sref = NULL;
+    ASSERT_NOT_NULL(*srefptr);
+    CHECK_TAG(SYNC_SERVER_TAG, *srefptr)
+    free(*srefptr);
+    *srefptr = NULL;
 }
 
-void SyncServer_listen(SyncServerRef sref)
+void sync_server_listen(sync_server_r server)
 {
-    SET_TAG(SyncServer_TAG, sref)
-    ASSERT_NOT_NULL(sref)
-    printf("SyncServer_listen\n");
+    ASSERT_NOT_NULL(server)
+    SET_TAG(SYNC_SERVER_TAG, server)
+    printf("sync_server_listen\n");
     //
     // Start the worker threads
     //
-    for(int i = 0; i < sref->nbr_workers; i++)
+    for(int i = 0; i < server->nbr_workers; i++)
     {
-        WorkerRef wref = Worker_new(sref->qref, i, sref->read_buffer_size, sref->app_handler);
-        sref->worker_tab[i] = NULL;
-        if(Worker_start(wref) != 0) {
-            printf("Server failed starting thread - aborting\n");
+        sync_worker_r wref = sync_worker_new(server->qref, i, server->read_buffer_size, server->app_handler);
+        server->worker_tab[i] = NULL;
+        if(sync_worker_start(wref) != 0) {
+            printf("sync_server_t failed starting thread - aborting\n");
             return;
         }
-        sref->worker_tab[i] = wref;
+        server->worker_tab[i] = wref;
     }
     LOG_FMT("workers started\n");
     //
@@ -128,41 +111,42 @@ void SyncServer_listen(SyncServerRef sref)
 
     // now listen  for incoming connections
     {
-        int port = sref->port;
+        int port = server->port;
         struct sockaddr_in peername;
         unsigned int addr_length = (unsigned int)sizeof(peername);
-        sref->socket_fd = create_listener_socket(port, "127.0.0.1");
+        server->socket_fd = create_listener_socket(port, "127.0.0.1");
         for(;;)
         {
-            int sock2 = accept(sref->socket_fd, (struct sockaddr*)&peername, &addr_length);
+            int sock2 = accept(server->socket_fd, (struct sockaddr*)&peername, &addr_length);
             if( sock2 <= 0 )
             {
                 LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
                 break;
             }
             LOG_FMT("SyncServer_listener adding socket to qref %d \n", sock2);
-            Queue_add(sref->qref, sock2);
+            Queue_add(server->qref, sock2);
         }
     }
     LOG_FMT("About to join all threads\n");
     //
     // wait for the workers to complete
     //
-    for(int i = 0; i < sref->nbr_workers; i++) {
-        WorkerRef wref = sref->worker_tab[i];
+    for(int i = 0; i < server->nbr_workers; i++) {
+        sync_worker_r wref = server->worker_tab[i];
         if(wref != NULL) {
             LOG_FMT("About to joined worker %d\n", i);
-            Worker_join(wref);
-            Worker_dispose(wref);
+            sync_worker_join(wref);
+            sync_worker_dispose(wref);
         }
     }
-    Queue_dispose(&(sref->qref));
+    Queue_dispose(&(server->qref));
     // also wait for the monitor  to complete
     
 }
-void SyncServer_terminate(SyncServerRef this)
+void sync_server_terminate(sync_server_r this)
 {
-    CHECK_TAG(SyncServer_TAG, this)
+    ASSERT_NOT_NULL(this)
+    CHECK_TAG(SYNC_SERVER_TAG, this)
     for(int i = 0; i < this->nbr_workers; i++) {
         Queue_add(this->qref, -1);
     }

@@ -1,5 +1,5 @@
 add_executable(simple_server
-	app.c
+		sync_app.c
 )
 
 target_include_directories(simple_server

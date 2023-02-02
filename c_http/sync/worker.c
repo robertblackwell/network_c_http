@@ -10,29 +10,20 @@
 #include <unistd.h>
 #include <assert.h>
 #include <pthread.h>
-
-//struct Worker_s {
-//    bool                active;
-//    int                 active_socket;
-//    sync_connection_t*  connection_ptr;
-//    QueueRef            qref;
-//    pthread_t           pthread;
-//    int                 id;
-//    size_t              read_buffer_size;
-//    SyncAppMessageHandler app_handler;
-//};
-static void connection_message_handler(MessageRef request_ref, WorkerRef context)
+#include <c_http/check_tag.h>
+static void connection_message_handler(MessageRef request_ref, sync_worker_r context)
 {
-    WorkerRef worker_ref = context;
+    sync_worker_r worker_ref = context;
     MessageRef response_ref = worker_ref->app_handler(request_ref, worker_ref);
     if(response_ref != NULL) {
         int rc = sync_connection_write(worker_ref->connection_ptr, response_ref);
     }
 }
 
-WorkerRef Worker_new(QueueRef qref, int ident, size_t read_buffer_size, SyncAppMessageHandler app_handler)
+sync_worker_r sync_worker_new(QueueRef qref, int ident, size_t read_buffer_size, SyncAppMessageHandler app_handler)
 {
-    WorkerRef wref = (WorkerRef)eg_alloc(sizeof(Worker));
+    sync_worker_r wref = (sync_worker_r)eg_alloc(sizeof(sync_worker_t));
+    SET_TAG(SYNC_WORKER_TAG, wref)
     if(wref == NULL)
         return NULL;
     wref->active_socket = 0;
@@ -43,7 +34,7 @@ WorkerRef Worker_new(QueueRef qref, int ident, size_t read_buffer_size, SyncAppM
     wref->app_handler = app_handler;
     return wref;
 }
-void Worker_dispose(WorkerRef wref)
+void sync_worker_dispose(sync_worker_r wref)
 {
     free((void*)wref);
 }
@@ -51,8 +42,8 @@ void Worker_dispose(WorkerRef wref)
 static void* Worker_main(void* data)
 {
     ASSERT_NOT_NULL(data);
-    WorkerRef wref = (WorkerRef)data;
-
+    sync_worker_r wref = (sync_worker_r)data;
+    CHECK_TAG(SYNC_WORKER_TAG, wref)
     bool terminate = false;
     while(!terminate) {
         wref->active = false;
@@ -70,21 +61,20 @@ static void* Worker_main(void* data)
             wref->active = true;
             sync_connection_t* conn = sync_connection_new(sock, wref->read_buffer_size, connection_message_handler, wref);
             if((wref->connection_ptr = conn) == NULL) goto finalize;
-
             int rc = sync_connection_read(wref->connection_ptr);
         }
-
         finalize:
             if(sock != 0) close(sock);
-            if(wref != NULL) Worker_dispose(wref);
+            if(wref != NULL) sync_worker_dispose(wref);
     }
     printf("Worker_main exited main loop %p, %d\n", wref, wref->id);
     return NULL;
 }
 // start a pthread - returns 0 on success errno on fila
-int Worker_start(WorkerRef wref)
+int sync_worker_start(sync_worker_r wref)
 {
     ASSERT_NOT_NULL(wref);
+    CHECK_TAG(SYNC_WORKER_TAG, wref)
 
     int rc = pthread_create(&(wref->pthread), NULL, &(Worker_main), (void*) wref);
     if(rc) {
@@ -93,13 +83,22 @@ int Worker_start(WorkerRef wref)
         return rc;
     }
 }
-pthread_t Worker_pthread(WorkerRef wref)
+int sync_worker_socketfd(sync_worker_r wref)
 {
     ASSERT_NOT_NULL(wref);
+    CHECK_TAG(SYNC_WORKER_TAG, wref)
+    return wref->active_socket;
+}
+pthread_t sync_worker_pthread(sync_worker_r wref)
+{
+    ASSERT_NOT_NULL(wref);
+    CHECK_TAG(SYNC_WORKER_TAG, wref)
     return wref->pthread;
 }
-void Worker_join(WorkerRef wref)
+void sync_worker_join(sync_worker_r wref)
 {
+    ASSERT_NOT_NULL(wref);
+    CHECK_TAG(SYNC_WORKER_TAG, wref)
     int retvalue;
     pthread_join(wref->pthread, NULL);
 }

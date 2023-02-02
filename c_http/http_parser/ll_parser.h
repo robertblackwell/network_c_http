@@ -37,28 +37,6 @@ struct http_parser_error_s {
 };
 typedef struct http_parser_error_s http_parser_error_t;
 
-#if 0
-/**
- * \brief  Return code used as part of the value returned by http_parser_consume() when processing data.
- */
-enum ParserRC {
-    ParserRC_error,          /// got a parse error
-//    ParserRC_end_of_header,  /// encountered enf of header
-//    ParserRC_end_of_message, /// encountered end of message
-    ParserRC_end_of_data     /// processed all the data given
-};
-typedef enum ParserRC ParserRC;
-
-/**
- * Value object return by http_parser_consume()
- */
-struct ParserReturnValue {
-    ParserRC   return_code;
-    int        bytes_remaining;
-};
-
-typedef struct ParserReturnValue ParserReturnValue;
-#endif
 /**
  * Type holding context data for http_parser_t functions. Allows for parsing to continue
  * over buffer and message boundaries

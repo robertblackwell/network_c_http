@@ -53,7 +53,7 @@ static BufferChainRef echo_body_buffer_chain(MessageRef request)
     BufferChain_append_IOBuffer(bufchain, iob_body);
     return bufchain;
 }
-MessageRef app_handler_example(MessageRef request, WorkerRef wref)
+MessageRef app_handler_example(MessageRef request, sync_worker_r wref)
 {
     MessageRef response = Message_new_response();
     char* msg = "<h2>this is a message</h2>";
@@ -74,9 +74,11 @@ MessageRef app_handler_example(MessageRef request, WorkerRef wref)
         }
         body_chain = echo_body_buffer_chain(request);
     } else {
-        body_chain = simple_response_body(msg, Worker_socketfd(wref), Worker_pthread(wref));
-    }
 
+        body_chain = simple_response_body(msg, sync_worker_socketfd(wref), sync_worker_pthread(wref));
+    }
+    Message_set_status(response, HTTP_STATUS_OK);
+    Message_set_reason(response, "OK");
     Message_add_header_cstring(response, HEADER_CONTENT_TYPE, "text/html; charset=UTF-8");
     Message_add_header_cstring(response, "Connection", "close");
     /**

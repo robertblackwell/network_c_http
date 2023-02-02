@@ -6,14 +6,11 @@
 #include <c_http/http_parser/ll_parser.h>
 
 #include <c_http/sync/sync.h>
-
-#define SyncServer_TAG "SYNCSVER"
-#include <c_http/check_tag.h>
+#include <c_http/sync/tags.h>
 
 
 #define MAX_THREADS 100
-#define XDYN_WORKER_TAB
-struct SyncServer_s {
+struct sync_server_s {
     DECLARE_TAG;
     int                         port;
     size_t                      read_buffer_size;
@@ -21,16 +18,10 @@ struct SyncServer_s {
     int                         nbr_workers;
     SyncAppMessageHandler       app_handler;
     QueueRef                    qref;
-#ifdef DYN_WORKER_TAB
-    WorkerRef                   *worker_tab;
-#else
-    WorkerRef                   worker_tab[MAX_THREADS];
-#endif
+    sync_worker_r                   worker_tab[MAX_THREADS];
 };
-#define Worker_TAG "SYNCWRKR"
-#include <c_http/check_tag.h>
 
-struct Worker_s {
+struct sync_worker_s {
     DECLARE_TAG;
     bool                active;
     int                 active_socket;
@@ -41,8 +32,6 @@ struct Worker_s {
     size_t              read_buffer_size;
     SyncAppMessageHandler app_handler;
 };
-#define sync_connection_TAG "SYNCCONN"
-#include <c_http/check_tag.h>
 
 struct sync_connection_s
 {
@@ -52,7 +41,7 @@ struct sync_connection_s
     int                         socketfd;
     size_t                      read_buffer_size;
     SyncConnectionMessageHandler    handler;
-    void*                       handler_context;
+    sync_worker_r                   worker_ref;
     int                 m_io_errno;
     int                 m_http_errno;
     char*               m_http_err_name;

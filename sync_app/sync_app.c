@@ -1,4 +1,5 @@
-#include <c_http/saved/sync_server.h>
+#define _GNU_SOURCE
+#include <c_http/sync/sync.h>
 #include <c_http/sync/sync_handler_example.h>
 #include <stdio.h>
 #include <mcheck.h>
@@ -8,21 +9,21 @@
 #define ENABLE_LOG
 #include <c_http/logger.h>
 
-SyncServerRef g_sref;
+sync_server_r g_sref;
 
 void sig_handler(int signo)
 {
-    printf("app.c signal handler \n");
+    printf("sync_app.c signal handler \n");
     if (signo == SIGINT) {
         printf("received SIGINT\n");
-        SyncServer_terminate( g_sref);
+        sync_server_terminate(g_sref);
     }
 }
 
 int main(int argc, char* argv[])
 {
     if (signal(SIGINT, sig_handler) == SIG_ERR) {
-        printf("app.c main signal() failed");
+        printf("sync_app.c main signal() failed");
     }
     int c;
     int port_number = 9001;
@@ -43,10 +44,10 @@ int main(int argc, char* argv[])
     }
 
     printf("Hello this is main \n");
-    SyncServerRef sref = SyncServer_new(port_number, nbr_threads, handler_example);
+    sync_server_r sref = sync_server_new(port_number, 1000, nbr_threads, app_handler_example);
     g_sref = sref;
-    SyncServer_listen(sref);
-    SyncServer_dispose(&sref);
+    sync_server_listen(sref);
+    sync_server_dispose(&sref);
 
 }
 

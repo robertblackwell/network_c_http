@@ -9,18 +9,18 @@
 static void handler(RtorWatcherRef watcher, uint64_t event)
 {
     RtorWQueueRef queue_watcher_ref = (RtorWQueueRef)watcher;
-    XR_WQUEUE_CHECK_TAG(queue_watcher_ref)
+    WQUEUE_CHECK_TAG(queue_watcher_ref)
     queue_watcher_ref->queue_event_handler(queue_watcher_ref, event);
 }
 static void anonymous_free(RtorWatcherRef p)
 {
     RtorWQueueRef queue_watcher_ref = (RtorWQueueRef)p;
-    XR_WQUEUE_CHECK_TAG(queue_watcher_ref)
+    WQUEUE_CHECK_TAG(queue_watcher_ref)
     rtor_wqueue_dispose(&queue_watcher_ref);
 }
 void WQueue_init(RtorWQueueRef this, ReactorRef runloop, EvfdQueueRef qref)
 {
-    XR_WQUEUE_SET_TAG(this);
+    WQUEUE_SET_TAG(this);
     this->type = XR_WATCHER_QUEUE;
     this->queue = qref;
     this->fd = Evfdq_readfd(qref);
@@ -37,14 +37,14 @@ RtorWQueueRef rtor_wqueue_new(ReactorRef runloop, EvfdQueueRef qref)
 }
 void rtor_wqueue_dispose(RtorWQueueRef* athis)
 {
-    XR_WQUEUE_CHECK_TAG(*athis)
+    WQUEUE_CHECK_TAG(*athis)
     close((*athis)->fd);
     free((void*)*athis);
     *athis = NULL;
 }
 void rtor_wqueue_register(RtorWQueueRef athis, QueueEventHandler cb, void* arg)
 {
-//    XR_WQUEUE_CHECK_TAG(this)
+//    WQUEUE_CHECK_TAG(this)
     uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
 
 //    uint32_t interest = watch_what;
@@ -55,7 +55,7 @@ void rtor_wqueue_register(RtorWQueueRef athis, QueueEventHandler cb, void* arg)
 }
 void rtor_wqueue_change_watch(RtorWQueueRef athis, QueueEventHandler cb, void* arg, uint64_t watch_what)
 {
-    XR_WQUEUE_CHECK_TAG(athis)
+    WQUEUE_CHECK_TAG(athis)
     uint32_t interest = watch_what;
     if(cb != NULL) {
         athis->queue_event_handler = cb;
@@ -68,7 +68,7 @@ void rtor_wqueue_change_watch(RtorWQueueRef athis, QueueEventHandler cb, void* a
 }
 void rtor_wqueue_deregister(RtorWQueueRef athis)
 {
-    XR_WQUEUE_CHECK_TAG(athis)
+    WQUEUE_CHECK_TAG(athis)
 
     int res = rtor_reactor_deregister(athis->runloop, athis->fd);
     assert(res == 0);
@@ -84,6 +84,6 @@ int rtor_wqueue_get_fd(RtorWQueueRef this)
 
 void rtor_wqueue_verify(RtorWQueueRef r)
 {
-    XR_WQUEUE_CHECK_TAG(r)
+    WQUEUE_CHECK_TAG(r)
 
 }

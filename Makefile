@@ -48,7 +48,7 @@ $(LIBOBJS): $(BUILD_DIR)/%.o: %.c | mkdirs
 	gcc -pthread -std=c11 -I./ -I./vendor/src -c $< -o $@
 
 # 
-# build build/app/simple_server
+# build build/sync_app/simple_server
 # 
 main: $(LIBOBJS) $(STATIC)
 	@echo main

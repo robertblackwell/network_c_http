@@ -13,67 +13,51 @@
 #define sync_connection_TAG "SYNCCONN"
 #include <c_http/check_tag.h>
 
-//struct sync_connection_s
-//{
-//    DECLARE_TAG;
-//    http_parser_t*              m_parser;
-//    IOBufferRef                 m_iobuffer;
-//    int                         socketfd;
-//    size_t                      read_buffer_size;
-//    SyncConnectionMessageHandler    handler;
-//    void*                       handler_context;
-//    int                 m_io_errno;
-//    int                 m_http_errno;
-//    char*               m_http_err_name;
-//    char*               m_http_err_description;
-//
-//};
-
-static void parser_on_message_handler(http_parser_t* context, MessageRef input_message_ref)
+static void parser_on_message_handler(http_parser_t* parser_ptr, MessageRef input_message_ref)
 {
-    sync_connection_t* connptr = context->handler_context;
-    connptr->handler(input_message_ref, connptr);
+    sync_connection_t* connptr = parser_ptr->handler_context;
+    connptr->handler(input_message_ref, connptr->worker_ref);
 }
 
-void sync_connection_init(sync_connection_t* this, int socketfd, size_t read_buffer_size, SyncConnectionMessageHandler handler, void* handler_context)
+void sync_connection_init(sync_connection_t* this, int socketfd, size_t read_buffer_size, SyncConnectionMessageHandler handler, sync_worker_r worker_ref)
 {
     ASSERT_NOT_NULL(this);
-    SET_TAG(sync_connection_TAG, this)
+    SET_TAG(SYNC_CONNECTION_TAG, this)
     this->m_parser = http_parser_new(&parser_on_message_handler, this);
     this->socketfd = socketfd;
 //    this->m_rdsocket = rdsock;
     this->m_iobuffer = IOBuffer_new();
     this->read_buffer_size = read_buffer_size;
     this->handler = handler;
-    this->handler_context = handler_context;
+    this->worker_ref = worker_ref;
 }
 
-sync_connection_t* sync_connection_new(int socketfd, size_t read_buffer_size, SyncConnectionMessageHandler handler, void* handler_context)
+sync_connection_t* sync_connection_new(int socketfd, size_t read_buffer_size, SyncConnectionMessageHandler handler, sync_worker_r worker_ref)
 {
     sync_connection_t* rdr = malloc(sizeof(sync_connection_t));
     if(rdr == NULL)
         return NULL;
-    sync_connection_init(rdr, socketfd, read_buffer_size, handler, handler_context);
+    sync_connection_init(rdr, socketfd, read_buffer_size, handler, worker_ref);
     return rdr;
 }
 
 void sync_connection_destroy(sync_connection_t* this)
 {
-    CHECK_TAG(sync_connection_TAG, this)
+    CHECK_TAG(SYNC_CONNECTION_TAG, this)
     IOBuffer_dispose(&(this->m_iobuffer));
 
 }
 void sync_connection_dispose(sync_connection_t** this_ptr)
 {
     sync_connection_t* this = *this_ptr;
-    CHECK_TAG(sync_connection_TAG, this)
+    CHECK_TAG(SYNC_CONNECTION_TAG, this)
     sync_connection_destroy(this);
     eg_free((void*)this);
     *this_ptr = NULL;
 }
 int sync_connection_read(sync_connection_t* this)
 {
-    CHECK_TAG(sync_connection_TAG, this)
+    CHECK_TAG(SYNC_CONNECTION_TAG, this)
     llhttp_errno_t rc;
     http_parser_t* pref = this->m_parser;
     while(1) {
@@ -94,4 +78,15 @@ int sync_connection_read(sync_connection_t* this)
             break;
         }
     }
+}
+int sync_connection_socketfd(sync_connection_t* this)
+{
+    return this->socketfd;
+}
+int sync_connection_write(sync_connection_t* this, MessageRef msg_ref)
+{
+    IOBufferRef serialized = Message_serialize(msg_ref);
+    int len = IOBuffer_data_len(serialized);
+    int rc = write(this->socketfd, IOBuffer_data(serialized), IOBuffer_data_len(serialized));
+    return rc;
 }

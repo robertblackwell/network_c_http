@@ -39,7 +39,7 @@ static void handler(RtorWatcherRef watcher, uint64_t event)
     uint64_t tns = ts.tv_sec * 1000000 + ts.tv_nsec;
     LOG_FMT("XtWatcher::caller current time secs: %ld ns: %ld \n", ts.tv_sec, ts.tv_nsec);
     RtorTimerRef timer_watcher = (RtorTimerRef)watcher;
-    XR_WTIMER_CHECK_TAG(timer_watcher)
+    WTIMER_CHECK_TAG(timer_watcher)
 
     int r2 = timerfd_gettime(timer_watcher->fd, &its_old);
     /**
@@ -63,7 +63,7 @@ static void anonymous_free(RtorWatcherRef p)
 void rtor_timer_init(RtorTimerRef this, ReactorRef runloop)
 {
     this->type = XR_WATCHER_TIMER;
-    XR_WTIMER_SET_TAG(this)
+    WTIMER_SET_TAG(this)
     this->runloop = runloop;
     this->free = &anonymous_free;
     this->context = NULL;
@@ -83,13 +83,13 @@ RtorTimerRef rtor_timer_new(ReactorRef rtor_ref)
 }
 void rtor_timer_free(RtorTimerRef athis)
 {
-    XR_WTIMER_CHECK_TAG(athis)
+    WTIMER_CHECK_TAG(athis)
     close(athis->fd);
     free((void*)athis);
 }
 struct itimerspec WTimerFd_update_interval(RtorTimerRef this, uint64_t interval_ms, bool repeating)
 {
-    XR_WTIMER_CHECK_TAG(this)
+    WTIMER_CHECK_TAG(this)
     this->repeating = repeating;
     struct timespec ts;
     struct itimerspec its;
@@ -120,7 +120,7 @@ struct itimerspec WTimerFd_update_interval(RtorTimerRef this, uint64_t interval_
 }
 void rtor_timer_register(RtorTimerRef athis, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating)
 {
-    XR_WTIMER_CHECK_TAG(athis)
+    WTIMER_CHECK_TAG(athis)
     athis->interval = interval_ms;
     athis->repeating = repeating;
     // interpose our own handler to do repeating stuff
@@ -142,7 +142,7 @@ void rtor_timer_register(RtorTimerRef athis, TimerEventHandler cb, void* ctx, ui
 }
 void rtor_timer_update(RtorTimerRef athis, uint64_t interval_ms, bool repeating)
 {
-    XR_WTIMER_CHECK_TAG(athis)
+    WTIMER_CHECK_TAG(athis)
     uint32_t interest = 0;
     struct itimerspec its = WTimerFd_update_interval(athis, interval_ms, repeating);
     int flags = 0;
@@ -153,7 +153,7 @@ void rtor_timer_update(RtorTimerRef athis, uint64_t interval_ms, bool repeating)
 }
 void rtor_timer_disarm(RtorTimerRef athis)
 {
-    XR_WTIMER_CHECK_TAG(athis)
+    WTIMER_CHECK_TAG(athis)
     struct itimerspec its = WTimerFd_update_interval(athis, athis->interval, athis->repeating);
     int flags = 0;
     int rc = timerfd_settime(athis->fd, flags, &its, NULL);
@@ -161,7 +161,7 @@ void rtor_timer_disarm(RtorTimerRef athis)
 }
 void rtor_timer_rearm_old(RtorTimerRef athis, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating)
 {
-    XR_WTIMER_CHECK_TAG(athis)
+    WTIMER_CHECK_TAG(athis)
     athis->repeating = repeating;
     athis->timer_handler = cb;
     athis->timer_handler_arg = ctx;
@@ -172,7 +172,7 @@ void rtor_timer_rearm_old(RtorTimerRef athis, TimerEventHandler cb, void* ctx, u
 }
 void rtor_timer_rearm(RtorTimerRef athis)
 {
-    XR_WTIMER_CHECK_TAG(athis)
+    WTIMER_CHECK_TAG(athis)
     uint64_t interval_ms = athis->interval;
     bool repeating = athis->repeating;
     struct itimerspec its = WTimerFd_update_interval(athis, interval_ms, repeating);
@@ -183,7 +183,7 @@ void rtor_timer_rearm(RtorTimerRef athis)
 
 void rtor_timer_deregister(RtorTimerRef athis)
 {
-    XR_WTIMER_CHECK_TAG(athis)
+    WTIMER_CHECK_TAG(athis)
     LOG_FMT("rtor_timer_deregister this->fd : %d\n", athis->fd);
     int res = rtor_reactor_deregister(athis->runloop, athis->fd);
     if(res != 0) {
@@ -202,6 +202,6 @@ int rtor_timer_get_fd(RtorTimerRef this)
 }
 void WTimerFd_verify(RtorTimerRef this)
 {
-    XR_WTIMER_CHECK_TAG(this)
+    WTIMER_CHECK_TAG(this)
 
 }

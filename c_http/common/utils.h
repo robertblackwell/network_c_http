@@ -9,7 +9,10 @@
  */
 
 #define ASSERT_NOT_NULL(ptr) assert(ptr != NULL);
-
+//
+// Makes a dynamically allocated new string where all letters are convered to upper case.
+// The caller is responsible for deallocting the memory
+//
 char* make_upper(const char* src);
 
 /** @} */

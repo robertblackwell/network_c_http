@@ -54,7 +54,7 @@ static int *int_in_heap(int key) {
  */
 static void rtor_epoll_ctl(ReactorRef athis, int op, int fd, uint64_t interest)
 {
-    XR_REACTOR_CHECK_TAG(athis)
+    REACTOR_CHECK_TAG(athis)
     struct epoll_event epev = {
         .events = interest,
         .data = {
@@ -89,7 +89,7 @@ void rtor_reactor_init(ReactorRef athis) {
     my_reactor_ptr = athis;
     ReactorRef runloop = athis;
 
-    XR_REACTOR_SET_TAG(runloop)
+    REACTOR_SET_TAG(runloop)
     runloop->epoll_fd = epoll_create1(0);
     runloop->closed_flag = false;
     CHTTP_ASSERT((runloop->epoll_fd != -1), "epoll_create failed");
@@ -109,7 +109,7 @@ void rtor_reactor_enable_interthread_queue(ReactorRef rtor_ref)
 }
 void rtor_reactor_close(ReactorRef athis)
 {
-    XR_REACTOR_CHECK_TAG(athis)
+    REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
     athis->closed_flag = true;
     int status = close(athis->epoll_fd);
@@ -124,7 +124,7 @@ void rtor_reactor_close(ReactorRef athis)
 
 void rtor_reactor_free(ReactorRef athis)
 {
-    XR_REACTOR_CHECK_TAG(athis)
+    REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
     if(! athis->closed_flag) {
         rtor_reactor_close(athis);
@@ -146,7 +146,7 @@ void rtor_reactor_free(ReactorRef athis)
  */
 int rtor_reactor_register(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref)
 {
-    XR_REACTOR_CHECK_TAG(athis)
+    REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
     LOG_FMT("fd : %d  for events %d", fd, interest);
     rtor_epoll_ctl(athis, EPOLL_CTL_ADD, fd, interest);
@@ -155,7 +155,7 @@ int rtor_reactor_register(ReactorRef athis, int fd, uint32_t interest, RtorWatch
 }
 int rtor_reactor_deregister(ReactorRef athis, int fd)
 {
-    XR_REACTOR_CHECK_TAG(athis)
+    REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
     CHTTP_ASSERT((FdTable_lookup(athis->table, fd) != NULL),"fd not in FdTable");
     rtor_epoll_ctl(athis, EPOLL_CTL_DEL, fd, EPOLLEXCLUSIVE | EPOLLIN);
@@ -164,7 +164,7 @@ int rtor_reactor_deregister(ReactorRef athis, int fd)
 }
 
 int rtor_reactor_reregister(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref) {
-    XR_REACTOR_CHECK_TAG(athis)
+    REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
     CHTTP_ASSERT((FdTable_lookup(athis->table, fd) != NULL),"fd not in FdTable");
     rtor_epoll_ctl(athis, EPOLL_CTL_MOD, fd, interest);
@@ -174,7 +174,7 @@ int rtor_reactor_reregister(ReactorRef athis, int fd, uint32_t interest, RtorWat
 }
 void rtor_reactor_delete(ReactorRef athis, int fd)
 {
-    XR_REACTOR_CHECK_TAG(athis)
+    REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
     CHTTP_ASSERT((FdTable_lookup(athis->table, fd) != NULL),"fd not in FdTable");
     FdTable_remove(athis->table, fd);
@@ -187,7 +187,7 @@ void print_events(struct epoll_event events[], int count)
     }
 }
 int rtor_reactor_run(ReactorRef athis, time_t timeout) {
-    XR_REACTOR_CHECK_TAG(athis)
+    REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
     int result;
     struct epoll_event events[RTOR_MAX_EPOLL_FDS];
@@ -195,7 +195,7 @@ int rtor_reactor_run(ReactorRef athis, time_t timeout) {
     time_t start = time(NULL);
 
     while (true) {
-        XR_REACTOR_CHECK_TAG(athis)
+        REACTOR_CHECK_TAG(athis)
         time_t passed = time(NULL) - start;
         if(FdTable_size(athis->table) == 0) {
             goto cleanup;
@@ -231,7 +231,7 @@ int rtor_reactor_run(ReactorRef athis, time_t timeout) {
                 goto cleanup;
             default: {
                 for (int i = 0; i < nfds; i++) {
-                    XR_REACTOR_CHECK_TAG(athis)
+                    REACTOR_CHECK_TAG(athis)
                     int fd = events[i].data.fd;
                     int mask = events[i].events;
                     LOG_FMT("rtor_reactor_run loop fd: %d events: %x", fd, mask);
@@ -239,16 +239,16 @@ int rtor_reactor_run(ReactorRef athis, time_t timeout) {
                     wref->handler(wref, events[i].events);
                     LOG_FMT("fd: %d", fd);
                     // call handler
-                    XR_REACTOR_CHECK_TAG(athis)
+                    REACTOR_CHECK_TAG(athis)
                 }
             }
         }
         FunctorRef fnc;
         while(functor_list_size(athis->ready_list) != 0) {
-            XR_REACTOR_CHECK_TAG(athis)
+            REACTOR_CHECK_TAG(athis)
             Functor func = functor_list_remove(athis->ready_list);
             func.f(athis, func.arg);
-            XR_REACTOR_CHECK_TAG(athis)
+            REACTOR_CHECK_TAG(athis)
         }
 //        while(fnc = RunList_remove_first(athis->ready_list)) {
 //
@@ -263,14 +263,14 @@ cleanup:
 
 int rtor_reactor_post(ReactorRef athis, PostableFunction cb, void* arg)
 {
-    XR_REACTOR_CHECK_TAG(athis)
+    REACTOR_CHECK_TAG(athis)
     Functor func = {.f = cb, .arg = arg};
     functor_list_add(athis->ready_list, func);
 }
 
 void rtor_reactor_interthread_post(ReactorRef athis, PostableFunction cb, void* arg)
 {
-    XR_REACTOR_CHECK_TAG(athis)
+    REACTOR_CHECK_TAG(athis)
     Functor func = {.f = cb, .arg = arg};
     Evfdq_add(athis->interthread_queue_ref, func);
 #if 1

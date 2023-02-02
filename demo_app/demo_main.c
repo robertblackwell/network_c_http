@@ -20,10 +20,10 @@ void sig_handler(int signo)
 int main()
 {
     if (signal(SIGINT, sig_handler) == SIG_ERR) {
-        printf("app.c main signal() failed");
+        printf("sync_app.c main signal() failed");
     }
     if (signal(SIGABRT, sig_handler) == SIG_ERR) {
-        printf("app.c main signal() failed");
+        printf("sync_app.c main signal() failed");
     }
     printf("Hello this is xr-junk main \n");
     DemoServerRef sref = DemoServer_new(9011);
