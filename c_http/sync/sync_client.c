@@ -74,6 +74,9 @@ static struct hostent* _gethostname(char* host)
 #endif
 static void connection_helper(sync_client_t* this, char* host, int portno)
 //https://linux.die.net/man/3/getaddrinfo
+// this function exists as a hackish way to replace the code that resolves host names
+// and connects. The original code to do this (see #ifdef'd out) was using gethostbyname()
+// which is not safe in a multi-thread environment and in any case is deprecated
 {
 #define NC_BUF_SIZE 500
     struct addrinfo hints;
