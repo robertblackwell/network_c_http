@@ -19,7 +19,7 @@ typedef struct SyncReader_s Reader, *SyncReaderRef;
  * @param rdsock_fd int
  * @return SyncReaderRef
  */
-SyncReaderRef SyncReader_new(int rdsock_fd, OnMessageCompleteHandler handler, void* handler_context);
+SyncReaderRef SyncReader_new(int rdsock_fd, ParserOnMessageCompleteHandler handler, void* handler_context);
 //void SyncReader_init(SyncReaderRef this, RdSocket rdsock);
 void SyncReader_destroy(SyncReaderRef this);
 void SyncReader_dispose(SyncReaderRef* this_ptr);

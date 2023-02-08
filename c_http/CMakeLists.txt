@@ -55,6 +55,7 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 		sync/sync.h
 		sync/sync_internal.h
 		sync/tags.h
+		sync/sync_client.h
 #		sync/sync_handler.h
 #		sync/sync_handler_example.h
 #		sync/worker.h
@@ -121,7 +122,7 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		${EXTSRC}/llhttp/http.c
 		${EXTSRC}/llhttp/llhttp.c
 	#sync
-#		sync/sync_client.c
+		sync/sync_client.c
 		sync/sync_connection.c
 		sync/sync_server.c
 		sync/sync_handler_example.c

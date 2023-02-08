@@ -38,7 +38,7 @@ QReaderRef qreader_new(int expected_count)
     this->expected_count = expected_count;
     this->count = 0;
     this->_reactor_ref = rtor_reactor_new();
-    XR_REACTOR_CHECK_TAG(this->_reactor_ref)
+    REACTOR_CHECK_TAG(this->_reactor_ref)
     rtor_reactor_enable_interthread_queue(this->_reactor_ref);
     return this;
 }
@@ -100,15 +100,15 @@ void* reader_thread_func(void* arg)
     QReaderRef q_rdr_ctx = (QReaderRef)arg;
     CHECK_TAG(QReader_TAG, q_rdr_ctx)
     ReactorRef rtor_ref = qreader_get_reactor(q_rdr_ctx);
-    XR_REACTOR_CHECK_TAG(rtor_ref)
+    REACTOR_CHECK_TAG(rtor_ref)
     RtorWQueueRef qw = qreader_get_queue_watcher(q_rdr_ctx);
-    XR_WQUEUE_CHECK_TAG(qw)
+    WQUEUE_CHECK_TAG(qw)
     rtor_reactor_run(rtor_ref, -1);
 }
 void writers_postable_func(ReactorRef rtor_ref, void* arg)
 {
     RtorWQueueRef wqref = (RtorWQueueRef)arg;
-    XR_WQUEUE_CHECK_TAG(wqref)
+    WQUEUE_CHECK_TAG(wqref)
     QWriterRef wrtref = (QWriterRef)wqref->queue_event_handler_arg;
     CHECK_TAG(QWriter_TAG, wrtref);
     printf("writers postable func arg: %p rdrref:%p count:%d max_count:%d\n", arg, wrtref, wrtref->count, wrtref->count_max);

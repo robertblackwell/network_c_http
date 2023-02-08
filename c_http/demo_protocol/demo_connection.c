@@ -200,7 +200,7 @@ static void reader(DemoConnectionRef connection_ref) {
         // TODO experiment with generic programming in C
         int ec = connection_ref->parser_ref->parser_consume((ParserInterfaceRef)connection_ref->parser_ref, iob);
 //        int ec = DemoParser_consume(connection_ref->parser_ref, iob);
-        LOG_FMT("After DemoParser_consume returns error_code: %d  errno: %d read_state %d \n", rv.error_code, errno_save, connection_ref->read_state);
+        LOG_FMT("After DemoParser_consume returns  errno: %d read_state %d \n", errno_save, connection_ref->read_state);
         if(ec == 0) {
             if(connection_ref->read_state == READ_STATE_ACTIVE) {
                 LOG_FMT("reader post postable_reader connection_ref->read_state: %d\n", connection_ref->read_state);

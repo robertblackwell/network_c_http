@@ -1,9 +1,13 @@
-#include <c_http/sync/sync_client.h>
+
+#define _GNU_SOURCE
+#define _BSD_SOURCE
+#include <netdb.h>
+#include <pthread.h>
+#include <c_http/sync/sync.h>
+#include <c_http/sync/sync_internal.h>
 #include <c_http/common/alloc.h>
 #include <c_http/common/cbuffer.h>
 #include <c_http/common/message.h>
-#include <c_http/saved/sync_reader.h>
-#include <c_http/saved/sync_writer.h>
 #include <c_http/logger.h>
 #include <assert.h>
 #include <stdio.h>
@@ -13,106 +17,169 @@
 #include <netdb.h>
 #include <errno.h>
 
-#define Client_TAG "SYCLNT"
+#define sync_client_TAG "SYCLNT"
 #include <c_http/check_tag.h>
+#include <pthread.h>
 
-struct Client_s {
-    DECLARE_TAG;
-    int       sock;
-    SyncWriterRef wrtr;
-    SyncReaderRef  rdr;
-};
-
-ClientRef Client_new()
+sync_client_t* sync_client_new(size_t read_buffer_size)
 {
-    ClientRef this = eg_alloc(sizeof(Client));
-    SET_TAG(Client_TAG, this)
-    this->rdr = NULL;
-    this->wrtr = NULL;
+    sync_client_t* this = eg_alloc(sizeof(sync_client_t));
+    SET_TAG(sync_client_TAG, this)
+    this->connection_ptr = NULL;
+    this->user_ptr = NULL;
 }
-void Client_dispose(ClientRef* this_ptr)
+void sync_client_init(sync_client_t* this, size_t read_buffer_size)
 {
-    ClientRef this = *this_ptr;
-    SET_TAG(Client_TAG, this)
-    LOG_FMT("Client_dispose %p  %d\n", this, this->sock);
-    if(this->rdr) SyncReader_dispose(&(this->rdr));
-    if(this->wrtr) SyncWriter_dispose(&(this->wrtr));
-    close(this->sock);
+    this->connection_ptr = NULL;
+    this->user_ptr = NULL;
+    this->read_buffer_size = read_buffer_size;
+    if(pthread_mutex_init(&this->mutex, NULL) != 0) {
+        printf("sync_client_init mutex init failed\n");
+        exit(-1);
+    };
+}
+void sync_client_dispose(sync_client_t** this_ptr)
+{
+    sync_client_t* this = *this_ptr;
+    CHECK_TAG(sync_client_TAG, this)
+    LOG_FMT("sync_client_dispose %p  %d\n", this, this->socketfd);
+    if(this->connection_ptr) sync_connection_dispose(&(this->connection_ptr));
     eg_free(*this_ptr);
     *this_ptr = NULL;
 }
-void Client_raw_connect(ClientRef this, int sockfd, struct sockaddr* sockaddr_p, int sockaddr_len)
+#if 0
+static struct hostent* _gethostname(char* host)
 {
-    SET_TAG(Client_TAG, this)
-    LOG_FMT("Client_raw_connect %p sockfd: %d\n", this, sockfd);
-    if (connect(sockfd,sockaddr_p, sockaddr_len) < 0) {
-        int errno_saved = errno;
-        LOG_ERROR("Client_raw_connect ERROR client %p connecting sockfd: % derrno: %d\n", this, sockfd, errno_saved);
+    struct hostent *hostbuf, *hp;
+    size_t hostbuflen;
+    char *tmphostbuf;
+    int res;
+    int herr;
+
+    hostbuf = malloc(sizeof(struct hostent));
+    hostbuflen = 1024;
+    tmphostbuf = malloc(hostbuflen);
+
+    while((res = gethostbyname_r(host, tmphostbuf, hostbuflen, &hp, &herr)) == ERANGE)
+    {
+        /* Enlarge the buffer */
+        tmphostbuf = reallocarray(tmphostbuf, hostbuflen, 2);
+        hostbuflen *= 2;
     }
-    this->sock = sockfd;
-    this->wrtr = SyncWriter_new(sockfd);
-    this->rdr = SyncReader_new(sockfd);
-
+    free(tmphostbuf);
+    if(res || hp == NULL)
+        return NULL;
+    return hp;
 }
-void Client_connect(ClientRef this, char* host, int portno)
+#endif
+static void connection_helper(sync_client_t* this, char* host, int portno)
+//https://linux.die.net/man/3/getaddrinfo
 {
+#define NC_BUF_SIZE 500
+    struct addrinfo hints;
+    struct addrinfo *result, *rp;
+    int sfd, s;
+    struct sockaddr_storage peer_addr;
+    socklen_t peer_addr_len;
+    size_t nread;
+    char buf[NC_BUF_SIZE];
+    char portstr[100];
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
+    hints.ai_protocol = 0;
+    hints.ai_canonname = NULL;
+    hints.ai_addr = NULL;
+    hints.ai_next = NULL;
+    sprintf(portstr, "%d", portno);
+
+    s = getaddrinfo(host, portstr, &hints, &result);
+    if(s != 0) {
+        printf("getaddrinfo : %s\n", gai_strerror(s));
+        exit(-1);
+    }
+    for(rp = result; rp != NULL; rp->ai_next) {
+        sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+        if(sfd == -1) {
+            continue;
+        }
+        if(connect(sfd, rp->ai_addr, rp->ai_addrlen) == 0) {
+            this->connection_ptr = sync_connection_new(sfd, this->read_buffer_size);
+            break; // success
+        }
+        close(sfd);
+    }
+    if(rp == NULL) {
+        printf("Could not bind\n");
+        exit(-1);
+    }
+    freeaddrinfo(result);
+}
+void sync_client_connect(sync_client_t* this, char* host, int portno)//, SyncAppMessageHandler handler)
+{
+    CHECK_TAG(sync_client_TAG, this)
+    connection_helper(this, host, portno);
+    return;
+#if 0
     int sockfd, n;
-    SET_TAG(Client_TAG, this)
+    SET_TAG(sync_client_TAG, this)
     struct sockaddr_in serv_addr;
-    struct hostent *hostent;
+    struct hostent *hostent_ptr;
 
+    pthread_mutex_lock(&this->mutex);
+    printf("sync_client connect - this: %p host: %s port: %d\n", this, host, portno);
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0)
+    printf("sync_client socketfd: %d\n", sockfd);
+    if (sockfd < 0) {
+        printf("socket call failed ");
         LOG_ERROR("ERROR opening socket");
-
-    hostent = gethostbyname(host);
-    if (hostent == NULL) {
-        fprintf(stderr,"ERROR, no such host\n");
-        exit(0);
+        exit(-1);
+    }
+    hostent_ptr = gethostbyname(host);
+    printf("sync_client hostent %p\n", hostent_ptr);
+    if (hostent_ptr == NULL) {
+        printf("sync_client connect ERROR, no such host: %s \n", host);
+        exit(-1);
     }
     bzero((char *) &serv_addr, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    bcopy((char *)hostent->h_addr, (char *)&serv_addr.sin_addr.s_addr, hostent->h_length);
+    bcopy((char *)hostent_ptr->h_addr, (char *)&serv_addr.sin_addr.s_addr, hostent_ptr->h_length);
     serv_addr.sin_port = htons(portno);
-    LOG_FMT("Client_connect %p sockfd: %d\n", this, sockfd);
-    if (connect(sockfd,(struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+    LOG_FMT("sync_client_connect %p sockfd: %d\n", this, sockfd);
+    int cstatus;
+    cstatus = connect(sockfd,(struct sockaddr *)&serv_addr, sizeof(serv_addr));
+    if (cstatus  < 0) {
         int errno_saved = errno;
+        printf("connect failed socket: %d cstatus: %d errno_saved %d %s\n", sockfd, cstatus, errno_saved, strerror(errno_saved));
         LOG_ERROR("ERROR client %p connecting sockfd: % derrno: %d\n", this, sockfd, errno_saved);
+        exit(-1);
     }
-    this->sock = sockfd;
-    this->wrtr = SyncWriter_new(sockfd);
-    this->rdr = SyncReader_new(sockfd);
+    pthread_mutex_unlock(&this->mutex);
+    this->connection_ptr = sync_connection_new(sockfd, this->read_buffer_size);
+#endif
 
 }
-void Client_roundtrip(ClientRef this, const char* req_buffers[], MessageRef* response_ptr)
+void sync_client_request_round_trip(sync_client_t* this, MessageRef request_ref, SyncConnectionClientMessageHandler handler)
 {
-    SET_TAG(Client_TAG, this)
-    int buf_index = 0;
-    int buf_len;
-    char* buf;
-    while(req_buffers[buf_index] != NULL) {
-        buf = (char*)req_buffers[buf_index];
-        buf_len = strlen(buf);
-        int bytes_written = write(this->sock, buf, buf_len);
-        buf_index++;
-    }
-    int rc = SyncReader_read(this->rdr, response_ptr);
-    if(rc != READER_OK) {
-        int errno_saved = errno;
-        LOG_ERROR("bad rc from SyncReader_read rc: errno %d\n", errno_saved);
-        assert(false);
-    }
-}
-void Client_request_round_trip(ClientRef this, MessageRef request, MessageRef* response_ptr)
-{
-    SET_TAG(Client_TAG, this)
-    IOBufferRef req_io_buf = Message_serialize(request);
-    SyncWriter_write_chunk(this->wrtr, IOBuffer_data(req_io_buf), IOBuffer_data_len(req_io_buf));
+    CHECK_TAG(sync_client_TAG, this)
+    sync_connection_write(this->connection_ptr, request_ref);
 
-    int rc = SyncReader_read(this->rdr, response_ptr);
-    if(rc != READER_OK) {
-        int errno_saved = errno;
-        LOG_ERROR("bad rc from SyncReader_read rc: errno %d\n", errno_saved);
-        assert(false);
-    }
+    int rc = sync_connection_read_response(this->connection_ptr, handler, this);
+    llhttp_errno_t en = rc;
+    return;
+}
+void sync_client_close(sync_client_t* this)
+{
+    sync_connection_close(this->connection_ptr);
+}
+void* sync_client_get_userptr(sync_client_t* this)
+{
+    CHECK_TAG(sync_client_TAG, this)
+    return this->user_ptr;
+}
+void sync_client_set_userptr(sync_client_t* this, void* userptr)
+{
+    CHECK_TAG(sync_client_TAG, this)
+    this->user_ptr = userptr;
 }

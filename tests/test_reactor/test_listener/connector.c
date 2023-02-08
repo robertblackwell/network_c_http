@@ -22,10 +22,10 @@ void* connector_thread_func(void* arg)
     for(int i = 0; i < tc->max_count; i++) {
 //        sleep(1);
         printf("Client about to connect %d \n", i);
-        ClientRef client_ref = Client_new();
-        Client_connect(client_ref, "localhost", 9001);
+        sync_client_t* client_ptr = sync_client_new(10000);
+        sync_client_connect(client_ptr, "localhost", 9001);
         usleep(200000);
-        Client_dispose(&client_ref);
+        sync_client_dispose(&client_ptr);
     }
     printf("Connector loop ended \n");
     // now wait here for all connections to be processed

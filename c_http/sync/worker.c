@@ -11,13 +11,14 @@
 #include <assert.h>
 #include <pthread.h>
 #include <c_http/check_tag.h>
-static void connection_message_handler(MessageRef request_ref, sync_worker_r context)
+static int connection_message_handler(MessageRef request_ref, sync_worker_r context)
 {
     sync_worker_r worker_ref = context;
     MessageRef response_ref = worker_ref->app_handler(request_ref, worker_ref);
     if(response_ref != NULL) {
         int rc = sync_connection_write(worker_ref->connection_ptr, response_ref);
     }
+    return HPE_OK;
 }
 
 sync_worker_r sync_worker_new(QueueRef qref, int ident, size_t read_buffer_size, SyncAppMessageHandler app_handler)
@@ -59,9 +60,9 @@ static void* Worker_main(void* data)
         } else {
             wref->active_socket = (int) my_socket_handle;
             wref->active = true;
-            sync_connection_t* conn = sync_connection_new(sock, wref->read_buffer_size, connection_message_handler, wref);
+            sync_connection_t* conn = sync_connection_new(sock, wref->read_buffer_size);//, connection_message_handler, wref);
             if((wref->connection_ptr = conn) == NULL) goto finalize;
-            int rc = sync_connection_read(wref->connection_ptr);
+            int rc = sync_connection_read_request(wref->connection_ptr, connection_message_handler, wref);
         }
         finalize:
             if(sock != 0) close(sock);

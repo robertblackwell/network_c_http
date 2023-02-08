@@ -86,19 +86,19 @@ static void wrtr_cb(RtorStreamRef sock_watch, uint64_t event)
     // disarm writeable events on this fd
     rtor_stream_disarm_write(sock_watch);
     WR_CTX_CHECK_TAG(ctx)
-    XR_SOCKW_CHECK_TAG(ctx->swatcher)
-    XR_WTIMER_CHECK_TAG(ctx->twatcher)
+    SOCKW_CHECK_TAG(ctx->swatcher)
+    WTIMER_CHECK_TAG(ctx->twatcher)
     // rearm the timer
     rtor_timer_rearm(ctx->twatcher);
 }
 static void wrtr_wait(RtorTimerRef watch, uint64_t event)
 {
-    XR_WTIMER_CHECK_TAG(watch)
+    WTIMER_CHECK_TAG(watch)
     LOG_FMT("test_io: Socket watcher wrtr_wait\n");
     WriteCtx* ctx = (WriteCtx*)(watch->timer_handler_arg);
     WR_CTX_CHECK_TAG(ctx)
-    XR_SOCKW_CHECK_TAG(ctx->swatcher)
-    XR_WTIMER_CHECK_TAG(ctx->twatcher)
+    SOCKW_CHECK_TAG(ctx->swatcher)
+    WTIMER_CHECK_TAG(ctx->twatcher)
     LOG_FMT("test_io: Socket watcher wrtr_wait fd: %d event : %lx errno: %d\n", watch->fd,  event, errno);
 
     int write_here = 0;
@@ -126,8 +126,8 @@ void* writer_thread_func(void* arg)
         rtor_timer_register(wrtr->ctx_table[i].twatcher, &wrtr_wait, (void *) ctx, ctx->interval_ms, true);
 
         WR_CTX_CHECK_TAG(ctx)
-        XR_WTIMER_CHECK_TAG(ctx->twatcher);
-        XR_SOCKW_CHECK_TAG(ctx->swatcher);
+        WTIMER_CHECK_TAG(ctx->twatcher);
+        SOCKW_CHECK_TAG(ctx->swatcher);
 
         RtorStreamRef sw = wrtr->ctx_table[i].swatcher;
 

@@ -80,7 +80,6 @@ void Evfdq_add(EvfdQueueRef athis, Functor item)
     EvfQueuePtr me = (EvfQueuePtr)athis;
     pthread_mutex_lock(&(me->queue_mutex));
     functor_list_add(me->list, item);
-    LOG_FMT("Queue_add: %d\n", List_size(me->list));
     uint64_t buf = 1;
     write(me->writefd, &buf, sizeof(buf));
     pthread_mutex_unlock(&(me->queue_mutex));
@@ -94,7 +93,6 @@ Functor Evfdq_remove(EvfdQueueRef athis)
     uint64_t buf;
     int nread = read(me->readfd, &buf, sizeof(buf));
     pthread_mutex_unlock(&(me->queue_mutex));
-    LOG_FMT("Queue_pop: socket is %ld nread: %d buf : %ld\n", (long)op, nread, buf);
     // remember to read from the pipe to clear the event
     return op;
 }

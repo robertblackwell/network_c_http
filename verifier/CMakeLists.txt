@@ -1,5 +1,5 @@
 add_executable(verifier_client
-	app.c
+        verify_app.c
 )
 
 target_include_directories(verifier_client

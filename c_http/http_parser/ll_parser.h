@@ -43,14 +43,14 @@ typedef struct http_parser_error_s http_parser_error_t;
  */
 struct http_parser_s;
 typedef struct http_parser_s http_parser_t, *http_parser_r;
-typedef void(*OnMessageCompleteHandler)(http_parser_r parser, MessageRef msg);
+typedef llhttp_errno_t (*ParserOnMessageCompleteHandler)(http_parser_r parser, MessageRef msg);
 
 struct http_parser_s {
     bool m_started;
     llhttp_t*                m_llhttp_ptr;
     llhttp_settings_t*       m_llhttp_settings_ptr;
     MessageRef               current_message_ptr;
-    OnMessageCompleteHandler on_message_handler;
+    ParserOnMessageCompleteHandler on_message_handler;
     void*                    handler_context;
     int                      m_header_state;
     ///////////////////////////////////////////////////////////////////////////////////
@@ -61,8 +61,8 @@ struct http_parser_s {
     CbufferRef             m_name_buf;
     CbufferRef             m_value_buf;
 };
-
-http_parser_r http_parser_new(OnMessageCompleteHandler handler, void* handler_context) ;
+void http_parser_reset(http_parser_t*);
+http_parser_r http_parser_new(ParserOnMessageCompleteHandler handler, void* handler_context) ;
 void http_parser_dispose(http_parser_r* parser_p);
 
 /**
@@ -88,10 +88,9 @@ void http_parser_dispose(http_parser_r* parser_p);
  * @param length Length of the data buffer
  * @return llhttp_errno_t
  */
-llhttp_errno_t http_parser_consume(http_parser_r parser, const void* buffer, int length);
-http_parser_error_t     http_parser_get_error(http_parser_r parser);
+llhttp_errno_t          http_parser_consume(http_parser_t* parser, const void* buffer, int length);
+llhttp_errno_t          http_parser_get_errno(http_parser_t* parser);
+http_parser_error_t     http_parser_get_error(http_parser_t* parser);
+const void*             http_parser_last_byte_parsed(http_parser_t* this);
 
 #endif
-
-
-/**@}*/

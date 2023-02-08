@@ -18,7 +18,7 @@ struct sync_server_s {
     int                         nbr_workers;
     SyncAppMessageHandler       app_handler;
     QueueRef                    qref;
-    sync_worker_r                   worker_tab[MAX_THREADS];
+    sync_worker_r               worker_tab[MAX_THREADS];
 };
 
 struct sync_worker_s {
@@ -33,19 +33,33 @@ struct sync_worker_s {
     SyncAppMessageHandler app_handler;
 };
 
+
 struct sync_connection_s
 {
     DECLARE_TAG;
-    http_parser_t*              m_parser;
-    IOBufferRef                 m_iobuffer;
-    int                         socketfd;
-    size_t                      read_buffer_size;
-    SyncConnectionMessageHandler    handler;
-    sync_worker_r                   worker_ref;
-    int                 m_io_errno;
-    int                 m_http_errno;
-    char*               m_http_err_name;
-    char*               m_http_err_description;
+    http_parser_t*               m_parser;
+    IOBufferRef                  m_iobuffer;
+    int                          socketfd;
+    size_t                       read_buffer_size;
+    bool is_server_callback;  // boolean tag to discriminate the callback union
+    union callback {
+        struct {
+            SyncConnectionServerMessageHandler server_handler;
+            sync_worker_t* worker_ptr; // a connection being used by a sync_server/sync_worker
+        } server_cb;
+        struct {
+            SyncConnectionClientMessageHandler client_handler;
+            sync_client_t* client_ptr; // a connection being used by a sync_client
+        } client_cb;
+    } callback;
+};
+
+struct sync_client_s {
+    DECLARE_TAG;
+    void*   user_ptr;
+    size_t read_buffer_size;
+    sync_connection_t* connection_ptr;
+    pthread_mutex_t mutex;
 };
 
 
