@@ -1,10 +1,10 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <string.h>
-#include <c_http/unittest.h>
-#include <c_http/common/cbuffer.h>
-#include <c_http/common/buffer_chain.h>
-#include <c_http/common/iobuffer.h>
+#include <http_in_c/unittest.h>
+#include <http_in_c/common/cbuffer.h>
+#include <http_in_c/common/buffer_chain.h>
+#include <http_in_c/common/iobuffer.h>
 
 //#define IOB_FILL
 #ifdef IOB_FILL

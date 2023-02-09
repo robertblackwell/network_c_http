@@ -1,11 +1,11 @@
 #include <string.h>
 #include <stdlib.h>
-#include <c_http/unittest.h>
+#include <http_in_c/unittest.h>
 
 
 
 #define TypeA_TAG "TYPEA"
-#include <c_http/check_tag.h>
+#include <http_in_c/check_tag.h>
 
 typedef struct TypeA_s {
     DECLARE_TAG;
@@ -21,7 +21,7 @@ TypeARef TypeA_new()
 
 #define TYPE TypeB
 #define TypeB_TAG "TYPEB"
-#include <c_http/check_tag.h>
+#include <http_in_c/check_tag.h>
 #undef TYPE
 #define CHECK_B(p) CHECK_TAG(TypeB_TAG, p)
 #define FAIL_CHECK_B(p) FAIL_CHECK_TAG(TypeB_TAG, p)

@@ -14,8 +14,8 @@
 
 #include <sys/epoll.h>
 #include <math.h>
-#include <c_http/common/utils.h>
-#include <c_http/simple_runloop/runloop.h>
+#include <http_in_c/common/utils.h>
+#include <http_in_c/runloop/runloop.h>
 
 typedef struct ReadCtx_s {
     int                 ctx_tag;

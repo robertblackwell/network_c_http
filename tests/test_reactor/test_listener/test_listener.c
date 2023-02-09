@@ -4,8 +4,8 @@
 #include <pthread.h>
 #define _GNU_SOURCE             /* See feature_test_macros(7) */
 #include <string.h>
-#include <c_http/unittest.h>
-#include <c_http/common/utils.h>
+#include <http_in_c/unittest.h>
+#include <http_in_c/common/utils.h>
 #include "listener.h"
 #include "connector.h"
 

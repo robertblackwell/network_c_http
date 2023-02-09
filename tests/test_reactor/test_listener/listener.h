@@ -3,7 +3,7 @@
 
 #define _GNU_SOURCE
 #define XR_TRACE_ENABLE
-#include <c_http/async/types.h>
+#include <http_in_c/async-old/types.h>
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -13,11 +13,11 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
-#include <c_http/unittest.h>
-#include <c_http/common/utils.h>
-#include <c_http/socket_functions.h>
-#include <c_http/sync/sync_client.h>
-#include <c_http/simple_runloop/runloop.h>
+#include <http_in_c/unittest.h>
+#include <http_in_c/common/utils.h>
+#include <http_in_c/socket_functions.h>
+#include <http_in_c/sync/sync_client.h>
+#include <http_in_c/runloop/runloop.h>
 
 typedef int socket_handle_t;
 
@@ -33,10 +33,10 @@ typedef int socket_handle_t;
 struct Listener_s {
     socket_handle_t         listening_socket_fd;
     XrHandlerFunction       handler;
-    ReactorRef            reactor_ref;
-    RtorListenerRef            listening_watcher_ref;
-    RtorTimerRef               timer_ref;
-    TcpConnListRef           conn_list_ref;
+    ReactorRef              reactor_ref;
+    RtorListenerRef         listening_watcher_ref;
+    RtorTimerRef            timer_ref;
+    TcpConnListRef          conn_list_ref;
     int                     listen_counter;
     int                     accept_count;
 };

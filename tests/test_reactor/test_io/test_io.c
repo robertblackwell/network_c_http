@@ -1,14 +1,14 @@
 #define _GNU_SOURCE
-#define ENABLE_LOG
+#define CHLOG_ON
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
 #define _GNU_SOURCE             /* See feature_test_macros(7) */
 #include <string.h>
-#include <c_http/unittest.h>
-#include <c_http/simple_runloop/runloop.h>
-#include <c_http/logger.h>
+#include <http_in_c/unittest.h>
+#include <http_in_c/runloop/runloop.h>
+#include <http_in_c/logger.h>
 #include "io_read.h"
 #include "io_write.h"
 /**

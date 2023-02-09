@@ -8,7 +8,7 @@
 #define TYPE MyTypeA
 #define TYPED(THING) MyTypeA##THING
 #define PREFIX(THING) MyTypeA_Circular##THING
-#include <c_http/common/generics/circular_template.h>
+#include <http_in_c/common/generics/circular_template.h>
 //#include "circular_template.h"
 
 

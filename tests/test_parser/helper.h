@@ -3,12 +3,12 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <c_http/unittest.h>
-#include <c_http/logger.h>
-#include <c_http/common/list.h>
-#include <c_http/common/kvpair.h>
-#include <c_http/common/hdrlist.h>
-#include <c_http/common/message.h>
+#include <http_in_c/unittest.h>
+#include <http_in_c/logger.h>
+#include <http_in_c/common/list.h>
+#include <http_in_c/http/kvpair.h>
+#include <http_in_c/http/header_list.h>
+#include <http_in_c/http/message.h>
 
 int run_list (ListRef tests);
 

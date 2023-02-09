@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-#define ENABLE_LOG
+#define CHLOG_ON
 #include "io_write.h"
 #include <assert.h>
 #include <stdio.h>
@@ -8,10 +8,10 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/epoll.h>
-#include <c_http/logger.h>
-#include <c_http/common/utils.h>
-#include <c_http/simple_runloop/runloop.h>
-#include <c_http//simple_runloop/rl_internal.h>
+#include <http_in_c/logger.h>
+#include <http_in_c/common/utils.h>
+#include <http_in_c/runloop/runloop.h>
+#include <http_in_c//runloop/rl_internal.h>
 
 /**
  * The writer does the following

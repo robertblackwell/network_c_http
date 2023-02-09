@@ -1,15 +1,15 @@
 #define _GNU_SOURCE
 #include <assert.h>
 #include <stdio.h>
-#include <c_http/common/url_parser.h>
-#include <c_http/common/alloc.h>
-#include <c_http/unittest.h>
-#include <c_http/common/cbuffer.h>
-#include <c_http/logger.h>
-#include <c_http/common/list.h>
-#include <c_http/saved/sync_server.h>
-#include <c_http/common/hdrlist.h>
-#include <c_http/common/message.h>
+#include <http_in_c/common/url_parser.h>
+#include <http_in_c/common/alloc.h>
+#include <http_in_c/unittest.h>
+#include <http_in_c/common/cbuffer.h>
+#include <http_in_c/logger.h>
+#include <http_in_c/common/list.h>
+#include <http_in_c/saved/sync_server.h>
+#include <http_in_c/http/header_list.h>
+#include <http_in_c/http/message.h>
 
 //https://github.com/uriparser/uriparser
 

@@ -2,9 +2,9 @@
 #define c_http_queue_watcher_h
 #include <time.h>
 #include <stdint.h>
-#include <c_http/simple_runloop/watcher.h>
-#include <c_http/simple_runloop/reactor.h>
-#include <c_http/simple_runloop/evfd_queue.h>
+#include <http_in_c/runloop/watcher.h>
+#include <http_in_c/runloop/reactor.h>
+#include <http_in_c/runloop/evfd_queue.h>
 
 /**
  * NOT tested yet - also not used
@@ -21,7 +21,7 @@
 
 #define TYPE WQueue
 #define WQueue_TAG "XRLST"
-#include <c_http/check_tag.h>
+#include <http_in_c/check_tag.h>
 #undef TYPE
 #define XR_WQUEUE_DECLARE_TAG DECLARE_TAG(WQueue)
 #define XR_WQUEUE_CHECK_TAG(p) CHECK_TAG(WQueue, p)

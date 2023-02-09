@@ -1,7 +1,7 @@
 #define _GNU_SOURCE
 #define XR_TRACE_ENABLE
 #include "connector.h"
-#include <c_http/async/types.h>
+//#include <http_in_c/async/types.h>
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -11,10 +11,10 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
-#include <c_http/unittest.h>
-#include <c_http/common/utils.h>
-#include <c_http/socket_functions.h>
-#include <c_http/sync/sync_client.h>
+#include <http_in_c/unittest.h>
+#include <http_in_c/common/utils.h>
+#include <http_in_c/socket_functions.h>
+#include <http_in_c/sync/sync_client.h>
 
 void* connector_thread_func(void* arg)
 {

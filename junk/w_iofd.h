@@ -4,14 +4,14 @@
 #include <time.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include <c_http/simple_runloop/types.h>
-#include <c_http/simple_runloop/watcher.h>
-#include <c_http/simple_runloop/reactor.h>
+#include <http_in_c/runloop/types.h>
+#include <http_in_c/runloop/watcher.h>
+#include <http_in_c/runloop/reactor.h>
 
 
 #define TYPE WIoFd
 #define WIoFd_TAG "XRWS"
-#include <c_http/check_tag.h>
+#include <http_in_c/check_tag.h>
 #undef TYPE
 #define XR_SOCKW_DECLARE_TAG DECLARE_TAG(WIoFd)
 #define XR_SOCKW_CHECK_TAG(p) CHECK_TAG(WIoFd, p)

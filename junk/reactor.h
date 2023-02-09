@@ -5,11 +5,11 @@
 #include <stdint.h>
 #include <time.h>
 #include <sys/epoll.h>
-#include <c_http/simple_runloop/types.h>
+#include <http_in_c/runloop/types.h>
 
 #define TYPE Reactor
 #define Reactor_TAG "XRLRTOT"
-#include <c_http/check_tag.h>
+#include <http_in_c/check_tag.h>
 #undef TYPE
 #define XR_REACTOR_DECLARE_TAG DECLARE_TAG(Reactor)
 #define XR_REACTOR_CHECK_TAG(p) CHECK_TAG(Reactor, p)
@@ -20,7 +20,7 @@
  * An opaque struct that represents a reactor. 
  *
  *  A reactor is an object that waits for events associated with fds(file descriptors)
- *  and also manages a simple_runloop so that eveant handling code can "yield" the processor
+ *  and also manages a runloop so that eveant handling code can "yield" the processor
  *  but post a callback function (function pointer and void* context pointer)
  *  to continue their processing after others have had a go.
  *  

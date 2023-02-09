@@ -14,9 +14,9 @@
 
 #include <sys/epoll.h>
 #include <math.h>
-#include <c_http/common/utils.h>
-#include <c_http/simple_runloop/runloop.h>
-#include <c_http/simple_runloop/rl_internal.h>
+#include <http_in_c/common/utils.h>
+#include <http_in_c/runloop/runloop.h>
+#include <http_in_c/runloop/rl_internal.h>
 
 #define WRTR_TAG 123456789
 #define WCTX_TAG 918273645

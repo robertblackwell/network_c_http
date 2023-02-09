@@ -88,7 +88,7 @@ static int test_ROK001_vfunc (ListRef results)
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 11Reason Phrase");
 
     CHECK_HEADER(h, HEADER_HOST, "ahost");
-    CHECK_HEADER(h, HEADER_CONNECTION, "keep-alive");
+    CHECK_HEADER(h, HEADER_CONNECTION_KEY, "keep-alive");
     CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
     CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "11");
     BufferChainRef body = Message_get_body (m1);
@@ -121,7 +121,7 @@ static int test_ROK002_vfunc (ListRef results)
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 22Reason Phrase");
 
     CHECK_HEADER(h, HEADER_HOST, "ahost");
-    CHECK_HEADER(h, HEADER_CONNECTION, "keep-alive");
+    CHECK_HEADER(h, HEADER_CONNECTION_KEY, "keep-alive");
     CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
     CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "10");
     CHECK_BODY(m1, "ABCDEFGHIJ");
@@ -153,7 +153,7 @@ static int test_ROK003_vfunc (ListRef results)
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK 22Reason Phrase");
 
     CHECK_HEADER(h, HEADER_HOST, "ahost");
-    CHECK_HEADER(h, HEADER_CONNECTION, "keep-alive");
+    CHECK_HEADER(h, HEADER_CONNECTION_KEY, "keep-alive");
     CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
     CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "10");
     CHECK_BODY(m1, "ABCDEFGHIJ");
@@ -162,8 +162,8 @@ static int test_ROK003_vfunc (ListRef results)
     UT_EQUAL_CSTR(KVPair_label (hlref_host), HEADER_HOST);
     UT_EQUAL_CSTR(KVPair_value (hlref_host), "ahost");
 
-    KVPairRef hlref_connection = HdrList_find (h, HEADER_CONNECTION);
-    UT_EQUAL_CSTR(KVPair_label (hlref_connection), HEADER_CONNECTION);
+    KVPairRef hlref_connection = HdrList_find (h, HEADER_CONNECTION_KEY);
+    UT_EQUAL_CSTR(KVPair_label (hlref_connection), HEADER_CONNECTION_KEY);
     UT_EQUAL_CSTR(KVPair_value (hlref_connection), "keep-alive");
 
     KVPairRef hlref_proxy_connection = HdrList_find (h, HEADER_PROXYCONNECTION);
@@ -200,7 +200,7 @@ static int test_ROK004_vfunc (ListRef results) {
     UT_EQUAL_CSTR(Message_get_reason(m1), "OK Reason Phrase");
 
     CHECK_HEADER(h, HEADER_HOST, "ahost");
-    CHECK_HEADER(h, HEADER_CONNECTION, "keep-alive");
+    CHECK_HEADER(h, HEADER_CONNECTION_KEY, "keep-alive");
     CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
     CHECK_HEADER(h, HEADER_TRANSFERENCODING, "chunked");
     CHECK_BODY(m1, "12345678901234567890XXXXX12345678901234567890HGHGH1234567890");
@@ -257,7 +257,7 @@ static int test_ROK005_vfunc (ListRef results)
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK Reason Phrase");
 
     CHECK_HEADER(h, HEADER_HOST, "ahost");
-    CHECK_HEADER(h, HEADER_CONNECTION, "keep-alive");
+    CHECK_HEADER(h, HEADER_CONNECTION_KEY, "keep-alive");
     CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
     CHECK_HEADER(h, HEADER_TRANSFERENCODING, "chunked");
     CHECK_BODY(m1, "12345678901234567890XXXXX12345678901234567890HGHGH1234567890");
@@ -298,7 +298,7 @@ int test_ROK006_vfunc (ListRef results)
     UT_EQUAL_CSTR(Message_get_reason (m1), "OK Reason Phrase");
 
     CHECK_HEADER(h, HEADER_HOST, "ahost");
-    CHECK_HEADER(h, HEADER_CONNECTION, "keep-alive");
+    CHECK_HEADER(h, HEADER_CONNECTION_KEY, "keep-alive");
     CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
     CHECK_HEADER(h, HEADER_TRANSFERENCODING, "chunked");
     CHECK_BODY(m1, "12345678901234567890XXXXX12345678901234567890HGHGH1234567890");
@@ -353,7 +353,7 @@ static int test_ROK007_vfunc (ListRef results)
         UT_EQUAL_CSTR(Message_get_reason (m1), "OK 11Reason Phrase");
 
         CHECK_HEADER(h, HEADER_HOST, "ahost");
-        CHECK_HEADER(h, HEADER_CONNECTION, "keep-alive");
+        CHECK_HEADER(h, HEADER_CONNECTION_KEY, "keep-alive");
         CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
         CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "10");
         BufferChainRef bcref = Message_get_body (m1);
@@ -365,7 +365,7 @@ static int test_ROK007_vfunc (ListRef results)
         UT_EQUAL_CSTR(Message_get_reason (m2), "OK 22Reason Phrase");
 
         CHECK_HEADER(h, HEADER_HOST, "ahost");
-        CHECK_HEADER(h, HEADER_CONNECTION, "keep-alive");
+        CHECK_HEADER(h, HEADER_CONNECTION_KEY, "keep-alive");
         CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
         CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "11");
 
@@ -408,7 +408,7 @@ int test_ROK008_vfunc (ListRef results)
 
     KVPairRef hlr = HdrList_find (h, HEADER_HOST);
     CHECK_HEADER(h, HEADER_HOST, "ahost");
-    CHECK_HEADER(h, HEADER_CONNECTION, "keep-alive");
+    CHECK_HEADER(h, HEADER_CONNECTION_KEY, "keep-alive");
     CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
     CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "10");
     CHECK_BODY(m1, "1234567890");
@@ -443,7 +443,7 @@ static int test_ROK009_vfunc (ListRef results)
 
     KVPairRef hlr = HdrList_find (h, HEADER_HOST);
     CHECK_HEADER(h, HEADER_HOST, "ahost");
-    CHECK_HEADER(h, HEADER_CONNECTION, "keep-alive");
+    CHECK_HEADER(h, HEADER_CONNECTION_KEY, "keep-alive");
     CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
     CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "10");
     CHECK_BODY(m1, "1234567890");

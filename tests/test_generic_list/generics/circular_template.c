@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <c_http/macros.h>
+#include <http_in_c/macros.h>
 #include "tagcheck.h"
 
 #undef CIRCULAR_LIST_TAG_LENGTH

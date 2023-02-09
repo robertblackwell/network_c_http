@@ -1,6 +1,6 @@
-#include <c_http/unittest.h>
-#include <c_http/common/hdrlist.h>
-#include <c_http/common/message.h>
+#include <http_in_c/unittest.h>
+#include <http_in_c/http/header_list.h>
+#include <http_in_c/http/message.h>
 
 #undef A_ON
 // A001

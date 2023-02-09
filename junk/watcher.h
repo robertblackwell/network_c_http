@@ -1,6 +1,6 @@
 #ifndef c_http_watcher_h
 #define c_http_watcher_h
-#include <c_http/simple_runloop/reactor.h>
+#include <http_in_c/runloop/reactor.h>
 #include <stdint.h>
 #if 0
 /**
@@ -72,7 +72,7 @@
  */
 #define TYPE Watcher
 #define Watcher_TAG "XRWCHR"
-#include <c_http/check_tag.h>
+#include <http_in_c/check_tag.h>
 #undef TYPE
 #define XR_WATCHER_DECLARE_TAG DECLARE_TAG(Watcher)
 

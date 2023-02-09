@@ -1,4 +1,4 @@
-#include <c_http/demo_protocol/demo_client.h>
+#include <http_in_c/demo_protocol/demo_client.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>

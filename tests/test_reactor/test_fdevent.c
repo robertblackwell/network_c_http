@@ -1,16 +1,16 @@
 #define _GNU_SOURCE
 #define ENABLE_LOGx
-#include <c_http/async/types.h>
+#include <http_in_c/async-old/types.h>
 #include <stdio.h>
 #define _GNU_SOURCE             /* See feature_test_macros(7) */
 #include <fcntl.h>
 #include <stdint.h>
 #include <sys/epoll.h>
-#include <c_http/logger.h>
-#include <c_http/unittest.h>
-#include <c_http/common/utils.h>
-#include <c_http/simple_runloop/runloop.h>
-#include <c_http/simple_runloop/rl_internal.h>
+#include <http_in_c/logger.h>
+#include <http_in_c/unittest.h>
+#include <http_in_c/common/utils.h>
+#include <http_in_c/runloop/runloop.h>
+#include <http_in_c/runloop/rl_internal.h>
 //
 // Tests fdevent
 // start two threads

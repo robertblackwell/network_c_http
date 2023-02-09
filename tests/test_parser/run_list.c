@@ -2,13 +2,13 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-//#include <c_http/common/http_parser/ll_parser_types.h>
-#include <c_http/unittest.h>
-#include <c_http/logger.h>
-#include <c_http/common/kvpair.h>
-#include <c_http/common/message.h>
-#include <c_http/test_helpers/message_private.h>
-#include <c_http/saved/sync_reader.h>
+//#include <http_in_c/common/http_parser/ll_parser_types.h>
+#include <http_in_c/unittest.h>
+#include <http_in_c/logger.h>
+#include <http_in_c/http/kvpair.h>
+#include <http_in_c/http/message.h>
+#include <http_in_c/test_helpers/message_private.h>
+#include <http_in_c/saved/sync_reader.h>
 #include "test_harness.h"
 int run_list (ListRef tests)
 {

@@ -1,14 +1,14 @@
 #define _GNU_SOURCE
-#define ENABLE_LOGX
-#include <c_http/sync/sync.h>
-#include <c_http/sync/sync_internal.h>
+#define CHLOG_ON
+#include <http_in_c/sync/sync.h>
+#include <http_in_c/sync/sync_internal.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <pthread.h>
 #include <sys/time.h>
 #include <math.h>
-#include <c_http/macros.h>
-#include <c_http/logger.h>
+#include <http_in_c/macros.h>
+#include <http_in_c/logger.h>
 
 #define VERIFY_URL_MAXSIZE 100
 #define VERIFY_UID_MAXSIZE 100
@@ -25,7 +25,7 @@
 #define VERIFY_DEFAULT_NBR_REQUESTS VERIFY_DEFAULT_NBR_THREADS * VERIFY_DEFAULT_NBR_CONNECTIONS_PER_THREAD * VERIFY_DEFAULT_NBR_REQUESTS_PER_CONNECTIONS
 
 #define THREAD_CONTEXT_TAG "THDCTX"
-#include <c_http/check_tag.h>
+#include <http_in_c/check_tag.h>
 
 
 #define DYN_RESP_TIMES
@@ -213,6 +213,8 @@ int verify_handler(MessageRef response_ptr, sync_client_t* client_ptr)
 {
     thread_context_t* ctx = sync_client_get_userptr(client_ptr);
     LOG_FMT("verify handler cycle:%d connection: %d\n",ctx->cycle_index, ctx->connection_index );
+    LOG_FMT("verify handler howmany_requests_per_connection: %d\n",ctx->howmany_requests_per_connection);
+    LOG_FMT("verify handler howmany_connections: %d\n",ctx->howmany_connections);
     ctx->response_ptr = response_ptr;
     MessageRef request_ptr = ctx->request_ptr;
     if(! verify_response(ctx, request_ptr, response_ptr)) {
@@ -229,7 +231,7 @@ int verify_handler(MessageRef response_ptr, sync_client_t* client_ptr)
     ctx->resp_times[i] =  tmp;
     LOG_FMT("time index : %d this interval: %f", i, ctx->resp_times[i])
     int return_value = HPE_OK;
-    if(ctx->cycle_index > ctx->howmany_requests_per_connection - 1) {
+    if(ctx->cycle_index >= ctx->howmany_requests_per_connection - 1) {
         ctx->cycle_index = 0;
         return_value = HPE_USER; // This will force sync_client_round_trip() to return rather than wait for server to timeout
     } else {
@@ -238,6 +240,7 @@ int verify_handler(MessageRef response_ptr, sync_client_t* client_ptr)
          */
         ctx->cycle_index++;
         bool connection_close_flag = ctx_is_last_request_for_connection(ctx);
+        make_uid(ctx);
         ctx->request_ptr = make_request(ctx, connection_close_flag);
         ctx->iter_start_time = get_time();
         sync_connection_write(client_ptr->connection_ptr, ctx->request_ptr);
@@ -308,9 +311,9 @@ static MessageRef make_request(thread_context_t* ctx, bool keep_alive_flag)
     Message_add_header_cstring(request, HEADER_HOST, "ahost");
     Message_add_header_cstring(request, "User-agent", "x15:x15-soundtrip client");
     if(keep_alive_flag) {
-        Message_add_header_cstring(request, HEADER_CONNECTION, "Keep-Alive");
+        Message_add_header_cstring(request, HEADER_CONNECTION_KEY, "Keep-Alive");
     } else {
-        Message_add_header_cstring(request, HEADER_CONNECTION, "close");
+        Message_add_header_cstring(request, HEADER_CONNECTION_KEY, "close");
     }
     Message_add_header_cstring(request, HEADER_CONTENT_LENGTH, content_length);
     Message_add_header_cstring(request, HEADER_ECHO_ID, ctx->uid);
@@ -320,6 +323,7 @@ static MessageRef make_request(thread_context_t* ctx, bool keep_alive_flag)
 
 static void make_uid(thread_context_t* ctx)
 {
+    ctx->counter++;
     sprintf(ctx->uid, "%d:%d", ctx->ident, ctx->counter);
 }
 
@@ -340,7 +344,7 @@ bool verify_response(thread_context_t* ctx, MessageRef request, MessageRef respo
     if(body == NULL) {
         body = BufferChain_new();
     }
-    return true;
+//    return true;
 #define VERIFY_DISABLED
 #ifdef VERIFY_DISABLED
     IOBufferRef iob = Message_serialize(request);

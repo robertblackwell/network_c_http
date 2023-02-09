@@ -3,14 +3,14 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <c_http/unittest.h>
-#include <c_http/logger.h>
-#include <c_http/common/kvpair.h>
-#include <c_http/common/http_parser/datasource.h>
-#include <c_http/demo_protocol/demo_parser_test.h>
-#include <c_http/demo_protocol/demo_message.h>
-#include <c_http/demo_protocol/demo_sync_reader_private.h>
-#include <c_http/demo_protocol/demo_sync_reader.h>
+#include <http_in_c/unittest.h>
+#include <http_in_c/logger.h>
+#include <http_in_c/http/kvpair.h>
+#include <http_in_c/common/http_parser/datasource.h>
+#include <http_in_c/demo_protocol/demo_parser_test.h>
+#include <http_in_c/demo_protocol/demo_message.h>
+#include <http_in_c/demo_protocol/demo_sync_reader_private.h>
+#include <http_in_c/demo_protocol/demo_sync_reader.h>
 
 
 // B001

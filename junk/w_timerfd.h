@@ -3,13 +3,13 @@
 #if 0
 #include <stdint.h>
 #include <stdbool.h>
-#include <c_http/simple_runloop/types.h>
-#include <c_http/simple_runloop/reactor.h>
-#include <c_http/simple_runloop/watcher.h>
+#include <http_in_c/runloop/types.h>
+#include <http_in_c/runloop/reactor.h>
+#include <http_in_c/runloop/watcher.h>
 
 #define TYPE WTimerFd
 #define WTimerFd_TAG "XRTW"
-#include <c_http/check_tag.h>
+#include <http_in_c/check_tag.h>
 #undef TYPE
 #define XRTW_DECLARE_TAG DECLARE_TAG(WTimerFd)
 #define XR_WTIMER_CHECK_TAG(p) CHECK_TAG(WTimerFd, p)

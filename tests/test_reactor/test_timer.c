@@ -1,6 +1,6 @@
 #define _GNU_SOURCE
 #define ENABLE_LOGx
-#include <c_http/async/types.h>
+#include <http_in_c/async-old/types.h>
 #include <stdio.h>
 #include <pthread.h>
 #define _GNU_SOURCE             /* See feature_test_macros(7) */
@@ -8,11 +8,11 @@
 #include <stdint.h>
 #include <sys/epoll.h>
 #include <math.h>
-#include <c_http/logger.h>
-#include <c_http/unittest.h>
-#include <c_http/common/utils.h>
-#include <c_http/simple_runloop/runloop.h>
-#include <c_http/simple_runloop/rl_internal.h>
+#include <http_in_c/logger.h>
+#include <http_in_c/unittest.h>
+#include <http_in_c/common/utils.h>
+#include <http_in_c/runloop/runloop.h>
+#include <http_in_c/runloop/rl_internal.h>
 //
 // A) These tests deomstrate that
 // -    a timer is called the expected number of times,
@@ -59,8 +59,8 @@ static void callback_non_repeating(RtorTimerRef watcher, XrTimerEvent event)
  * A timer is initiated and the callback increments a counter on each call.
  * After a set number of calls to the callback
  * The timer is cancelled by the callback
- * Cancellation of the timer causes the simple_runloop to end
- * After end of the simple_runloop the TestCtx->counter is verified to be equal to the
+ * Cancellation of the timer causes the runloop to end
+ * After end of the runloop the TestCtx->counter is verified to be equal to the
  * required number of invocations
  */
 int test_timer_non_repeating()
@@ -75,7 +75,7 @@ int test_timer_non_repeating()
     rtor_timer_register(tw_1, &callback_non_repeating, test_ctx_p_1, 100, false);
 
     rtor_reactor_run(rtor_ref, 10000);
-    /*We should only get here when there are no more timers or other events pending in the simple_runloop*/
+    /*We should only get here when there are no more timers or other events pending in the runloop*/
     rtor_reactor_free(rtor_ref);
     /* prove callback_non_repeating was called exactly once */
     UT_EQUAL_INT(test_ctx_p_1->counter, 1);
@@ -87,8 +87,8 @@ int test_timer_non_repeating()
 * A timer is initiated and the callback increments a counter on each call.
 * After a set number of calls to the callback
 * The timer is cancelled by the callback
-* Cancellation of the timer causes the simple_runloop to end
-* After end of the simple_runloop the TestCtx->counter is verified to be equal to the
+* Cancellation of the timer causes the runloop to end
+* After end of the runloop the TestCtx->counter is verified to be equal to the
 * required number of invocations
 */
 static void callback_repeating(RtorTimerRef watcher, XrTimerEvent event)

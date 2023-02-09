@@ -1,6 +1,6 @@
 #ifndef c_http_listener_watcher_h
 #define c_http_listener_watcher_h
-#include <c_http/simple_runloop/rl_internal.h>
+#include <http_in_c/runloop/rl_internal.h>
 #include <time.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -8,7 +8,7 @@
 
 #define TYPE WListenerFd
 #define WListenerFd_TAG "XRLSTNR"
-#include <c_http/check_tag.h>
+#include <http_in_c/check_tag.h>
 #undef TYPE
 #define XR_LISTNER_DECLARE_TAG DECLARE_TAG(WListenerFd)
 #define XR_LISTNER_CHECK_TAG(p) CHECK_TAG(WListenerFd, p)

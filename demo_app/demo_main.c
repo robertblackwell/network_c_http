@@ -1,5 +1,5 @@
-#include <c_http/demo_protocol/demo_server.h>
-#include <c_http/common/message.h>
+#include <http_in_c/demo_protocol/demo_server.h>
+#include <http_in_c/http/message.h>
 
 #include <stdio.h>
 #include <mcheck.h>

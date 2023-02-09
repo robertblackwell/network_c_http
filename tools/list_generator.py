@@ -44,9 +44,9 @@ def c_source(name_parameter, node_parameter, item_parameter):
         #include <stdlib.h>
         #include <assert.h>
         #include <stdio.h>
-        #include <c_http/alloc.h>
-        #include <c_http/list.h>
-        #include <c_http/utils.h>
+        #include <http_in_c/alloc.h>
+        #include <http_in_c/list.h>
+        #include <http_in_c/utils.h>
         //Internal - type used to build list
 
         struct {node}_s {

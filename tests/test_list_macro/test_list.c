@@ -3,7 +3,7 @@
 
 int main()
 {
-    struct MyTypeRef_vector *v = MyTypeRef_vector_new();
-    MyTypeRef_vector_init(&v);
+    struct MyTypeRef_vector* v = MyTypeRef_vector_new();
+    MyTypeRef_vector_init(v);
 
 }

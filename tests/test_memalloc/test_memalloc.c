@@ -4,9 +4,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include <c_http/unittest.h>
-#include <c_http//simple_runloop/runloop.h>
-#include <c_http/simple_runloop/rl_internal.h>
+#include <http_in_c/unittest.h>
+#include <http_in_c//runloop/runloop.h>
+#include <http_in_c/runloop/rl_internal.h>
 /**
  * This module tests a new memory allocation scheme that uses a static cache of objects
  * of a given type and a free list to manage allocation

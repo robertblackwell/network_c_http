@@ -2,12 +2,12 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <c_http/unittest.h>
-#include <c_http/common/cbuffer.h>
-#include <c_http/logger.h>
-#include <c_http/common/list.h>
-#include <c_http//simple_runloop/runloop.h>
-#include <c_http/simple_runloop/rl_internal.h>
+#include <http_in_c/unittest.h>
+#include <http_in_c/common/cbuffer.h>
+#include <http_in_c/logger.h>
+#include <http_in_c/common/list.h>
+#include <http_in_c//runloop/runloop.h>
+#include <http_in_c/runloop/rl_internal.h>
 
 //typedef struct DummyObj_s {
 //    long value;

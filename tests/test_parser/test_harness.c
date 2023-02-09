@@ -4,9 +4,9 @@
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>
-#include <c_http/common/alloc.h>
-#include <c_http/common/utils.h>
-#include <c_http/common/iobuffer.h>
+#include <http_in_c/common/alloc.h>
+#include <http_in_c/common/utils.h>
+#include <http_in_c/common/iobuffer.h>
 
 /* Test input - is a list of blocks of text and some context so that these blocks can be
  * "read" and "processed" one at a time*/
