@@ -131,7 +131,8 @@ void sync_server_listen(sync_server_r server)
                 LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
                 break;
             }
-            LOG_FMT("SyncServer_listener adding socket to qref %d", sock2);
+            LOG_FMT("SyncServer_listener adding socket to qref %d queue size: %ld queue capacity %ld ", sock2, Queue_size(server->qref),
+                    Queue_capacity(server->qref));
             Queue_add(server->qref, sock2);
         }
     }

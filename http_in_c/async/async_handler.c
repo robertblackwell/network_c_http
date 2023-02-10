@@ -81,18 +81,25 @@ void async_handler_anonymous_dispose(void** p)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // main driver functon - keeps everything going
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-static void handle_request(AsyncHandlerRef href, MessageRef msgref)
+static void handle_request(AsyncHandlerRef href, MessageRef request_ptr)
 {
     CHECK_TAG(AsyncHandler_TAG, href)
     LOG_FMT("handler handle_request");
     AsyncHandlerRef handler_ref = href;
-    MessageRef response = NULL;
-    response = process_request(handler_ref, msgref);
-    List_add_back(handler_ref->output_list, response);
+    MessageRef response_ptr = NULL;
+    response_ptr = handler_ref->server_ref->process_request(handler_ref, request_ptr);
+    int cmp_tmp = Message_cmp_header(request_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
+    if(cmp_tmp == 1) {
+        Message_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
+    } else {
+        Message_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_CLOSE);
+    }
+
+    List_add_back(handler_ref->output_list, response_ptr);
     if (List_size(handler_ref->output_list) == 1) {
         rtor_reactor_post(handler_ref->async_connection_ref->reactor_ref, postable_write_start, href);
     }
-    MessageRef m = msgref;
+    MessageRef m = request_ptr;
     Message_dispose(&m);
     rtor_reactor_post(handler_ref->async_connection_ref->reactor_ref, handler_postable_read_start, href);
 }

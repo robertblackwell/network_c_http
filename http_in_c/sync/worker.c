@@ -80,6 +80,7 @@ static void* Worker_main(void* data)
         wref->connection_ptr  = NULL;
 #if SYNC_WORKER_QUEUE
         int my_socket_handle = Queue_remove(wref->qref);
+        wref->working = true;
 #else
         struct sockaddr peername;
         socklen_t addr_length;
@@ -104,6 +105,7 @@ static void* Worker_main(void* data)
             wref->connection_ptr = conn;
             int rc = sync_connection_read_request(wref->connection_ptr, connection_message_handler, wref);
             LOG_FMT("worker_main after sync_connection_read_request worker_id: %d#########################################################%d END", wref->id, wref->id);
+            wref->working = false;
         }
     }
     LOG_FMT("Worker_main exited main loop %p, %d", wref, wref->id);

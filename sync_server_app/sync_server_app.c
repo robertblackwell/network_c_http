@@ -28,7 +28,7 @@ int main(int argc, char* argv[])
     }
     int c;
     int port_number = 9001;
-    int nbr_threads = 5;
+    int nbr_threads = 25;
     int read_buffer_size = 1000;
 
     opterr = 0;

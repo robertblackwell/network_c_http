@@ -14,20 +14,18 @@
 
 #include <http_in_c/check_tag.h>
 
-enum AsyncConnectionErrCode {
-    AsyncConnectionErrCode_is_closed = -31,
-    AsyncConnectionErrCode_io_error = -32,
-    AsyncConnectionErrCode_parse_error = -33
-};
-
 typedef struct AsyncConnection_s AsyncConnection, *AsyncConnectionRef;
 typedef struct AsyncHandler_s AsyncHandler, *AsyncHandlerRef;
 typedef struct  AsyncServer_s AsyncServer, *AsyncServerRef;
 
 /**
  * This is where the servers web application is implemented.
+ * A function with this signature must be linked into the
+ * async_server_app to complete it.
+ * For this example this function is found in async_process_request
  */
-MessageRef process_request(AsyncHandlerRef href, MessageRef request);
+typedef MessageRef(*AsyncProcessRequestFunction)(AsyncHandlerRef handler_ref, MessageRef request);
+//MessageRef process_request(AsyncHandlerRef href, MessageRef request);
 
 /**
  * In the following void* href is an anonymous reference
@@ -54,6 +52,7 @@ typedef void(*DH_Completion_CB)(void* server_ref, AsyncHandlerRef href);
 struct AsyncServer_s {
     DECLARE_TAG;
     void(*handler_complete)(AsyncServerRef, AsyncHandlerRef);
+    AsyncProcessRequestFunction process_request;
     int                     port;
     int                     listening_socket_fd;
     ReactorRef              reactor_ref;
@@ -68,8 +67,8 @@ do {\
     (sref->handler_complete)(sref, href);\
 } while (false);
 
-AsyncServerRef AsyncServer_new(int port);
-void AsyncServer_init(AsyncServerRef sref, int port);
+AsyncServerRef AsyncServer_new(int port, AsyncProcessRequestFunction process_request);
+void AsyncServer_init(AsyncServerRef sref, int port, AsyncProcessRequestFunction process_request);
 void AsyncServer_free(AsyncServerRef this);
 void AsyncServer_dispose(AsyncServerRef* srefptr);
 void AsyncServer_listen(AsyncServerRef server);

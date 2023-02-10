@@ -41,6 +41,9 @@ static void writer(AsyncConnectionRef connection_ref);
 static void write_error(AsyncConnectionRef connection_ref, char* msg);
 
 static void postable_cleanup(ReactorRef reactor, void* cref);
+const char* read_state_str(int state);
+const char* write_state_str(int state);
+
 /**
  * Utility function that wraps all rtor_reactor_post() calls so this module can
  * keep track of outstanding pending function calls
@@ -84,13 +87,15 @@ void async_connection_init(
     rtor_stream_register(this->socket_stream_ref);
     this->socket_stream_ref->both_arg = this;
     rtor_stream_arm_both(this->socket_stream_ref, &event_handler, this);
-    this->read_buffer_size = 1000;
+    this->read_buffer_size = 1000000;
 }
 void async_connection_free(AsyncConnectionRef this)
 {
     CHECK_TAG(AsyncConnection_TAG, this)
     int fd = this->socket_stream_ref->fd;
+    this->socket = -1;
     LOG_FMT("async_connection_free close socket: %d", fd)
+    SET_TAG("xxxxxxx", this) // corrupt the tag
     close(fd);
     rtor_stream_free(this->socket_stream_ref);
     this->socket_stream_ref = NULL;
@@ -117,13 +122,15 @@ static void event_handler(RtorStreamRef stream_ref, uint64_t event)
     }
     if(event & EPOLLIN) {
         read_epollin(connection_ref);
-    } else {
-
+    }
+    if(!((event & EPOLLIN) || (event & EPOLLOUT))){
+        LOG_FMT("not EPOLLIN and not EPOLLOUT")
     }
 }
 static void read_epollin(AsyncConnectionRef connection_ref)
 {
     CHECK_TAG(AsyncConnection_TAG, connection_ref)
+    LOG_FMT("read_epollin read_state: %s", read_state_str(connection_ref->read_state))
     if(connection_ref->read_state == READ_STATE_EAGAINED) {
         connection_ref->read_state = READ_STATE_ACTIVE;
         read_start(connection_ref);
@@ -132,6 +139,7 @@ static void read_epollin(AsyncConnectionRef connection_ref)
 static void write_epollout(AsyncConnectionRef connection_ref)
 {
     CHECK_TAG(AsyncConnection_TAG, connection_ref)
+    LOG_FMT("write_epollout")
     if(connection_ref->write_state == WRITE_STATE_EAGAINED) {
         connection_ref->write_state = WRITE_STATE_ACTIVE;
         connection_ref->writeside_posted = true;
@@ -144,8 +152,9 @@ static void write_epollout(AsyncConnectionRef connection_ref)
 ////////////////////////////////////////////////////////////////////////////////////
 void async_connection_read(AsyncConnectionRef connection_ref) //, void(*on_read_message_cb)(void* href, MessageRef, int status))
 {
-    LOG_FMT("async_connection_read");
-    CHTTP_ASSERT((connection_ref->read_state != READ_STATE_ACTIVE), "a read is already active");
+    CHECK_TAG(AsyncConnection_TAG, connection_ref)
+    LOG_FMT("async_connection_read read_state: %d %s", connection_ref->read_state, read_state_str(connection_ref->read_state));
+//    CHTTP_ASSERT((connection_ref->read_state != READ_STATE_ACTIVE), "a read is already active");
     if(connection_ref->read_state == READ_STATE_IDLE) {
         connection_ref->read_state = READ_STATE_ACTIVE;
         read_start(connection_ref);
@@ -164,7 +173,7 @@ static void read_start(AsyncConnectionRef connection_ref)
 static void postable_reader(ReactorRef reactor_ref, void* arg)
 {
     AsyncConnectionRef connection_ref = arg;
-    LOG_FMT("postable_reader read_state: %d", connection_ref->read_state);
+    LOG_FMT("postable_reader read_state: %d %s", connection_ref->read_state, read_state_str(connection_ref->read_state));
     if(connection_ref->read_state == READ_STATE_STOP) {
         connection_ref->handler_ref->handle_reader_stopped(connection_ref->handler_ref);//, NULL, AsyncConnectionErrCode_is_closed);
         return;
@@ -173,6 +182,7 @@ static void postable_reader(ReactorRef reactor_ref, void* arg)
 }
 static void reader(AsyncConnectionRef connection_ref) {
     CHECK_TAG(AsyncConnection_TAG, connection_ref)
+    LOG_FMT("reader read_state: %d %s", connection_ref->read_state, read_state_str(connection_ref->read_state));
     if(connection_ref->read_state == READ_STATE_STOP) {
         connection_ref->handler_ref->handle_reader_stopped(connection_ref->handler_ref); //, NULL, AsyncConnectionErrCode_is_closed);
     }
@@ -191,36 +201,49 @@ static void reader(AsyncConnectionRef connection_ref) {
     if(bytes_available > 0)
         IOBuffer_commit(iob, bytes_available);
     int errno_save = errno;
+    LOG_FMT("bytes_available %d errno: %d %s", bytes_available, errno_save, strerror(errno_save));
     int eagain = EAGAIN;
     char* errstr = strerror(errno_save);
     if(bytes_available > 0) {
-        LOG_FMT("Before AsyncParser_consume read_state %d", connection_ref->read_state);
+        LOG_FMT("Before AsyncParser_consume read_state %s", read_state_str(connection_ref->read_state));
         int ec = http_parser_consume(connection_ref->http_parser_ptr, IOBuffer_data(iob), IOBuffer_data_len(iob));
         llhttp_errno_t llhttp_ec = ec;
-        LOG_FMT("After AsyncParser_consume returns  errno: %d read_state %d ", errno_save, connection_ref->read_state);
+        LOG_FMT("After AsyncParser_consume returns  errno: %d errno_str: %s  read_state %s ", errno_save, strerror(errno_save), read_state_str(connection_ref->read_state));
+        if(errno_save == EAGAIN) {
+            bool x = llhttp_message_needs_eof(connection_ref->http_parser_ptr->m_llhttp_ptr);
+            printf("test this result message_needs_eof %d\n", (int)x);
+            read_eagain(connection_ref);
+            return;
+        }
         if(ec == HPE_OK) {
             // out of data start another read
-            CHTTP_ASSERT((connection_ref->read_state == READ_STATE_ACTIVE), "something is wrong");
+//            CHTTP_ASSERT((connection_ref->read_state == READ_STATE_ACTIVE), "something is wrong");
             read_need_data(connection_ref);
         } else {
         }
     } else if(bytes_available == 0) {
+        LOG_FMT("bytes_available == 0 errno: %d %s", errno_save, strerror(errno_save))
         read_error(connection_ref, "reader zero bytes - peer closed connection");
     } else if (errno_save == eagain) {
+        LOG_FMT("bytes_available < 0 eagain errno: %d %s", errno_save, strerror(errno_save))
         read_eagain(connection_ref);
     } else {
+        LOG_FMT("bytes_available < 0 io-error errno: %d %s", errno_save, strerror(errno_save))
         read_error(connection_ref, "reader - io error close and move on");
     }
     LOG_FMT("reader return");
 }
 static void read_eagain(AsyncConnectionRef cref)
 {
+    CHECK_TAG(AsyncConnection_TAG, cref)
+    LOG_FMT("read_eagain connection_ref->read_state: %s", read_state_str(cref->read_state));
     cref->read_state = READ_STATE_EAGAINED;
 }
 static void read_need_data(AsyncConnectionRef cref)
 {
+    CHECK_TAG(AsyncConnection_TAG, cref)
     cref->read_state = READ_STATE_IDLE;
-    LOG_FMT("read_need_data connection_ref->read_state: %d", cref->read_state);
+    LOG_FMT("read_need_data connection_ref->read_state: %s", read_state_str(cref->read_state));
     post_to_reactor(cref, &postable_reader);
 }
 #if 0
@@ -283,7 +306,7 @@ static llhttp_errno_t on_read_message_complete(http_parser_t* parser_ptr, Messag
     CHECK_TAG(AsyncHandler_TAG, handler_ref)
     CHTTP_ASSERT((msg != NULL), "msg should not be NULL");
     connection_ref->handler_ref->handle_request(handler_ref, msg);
-    LOG_FMT("read_message_handler - on_write_cb  read_state: %d", connection_ref->read_state);
+    LOG_FMT("read_message_handler - on_write_cb  read_state: %s", read_state_str(connection_ref->read_state));
     return HPE_OK;
 }
 /////////////////////////////////////////////////////////////////////////////////////
@@ -432,3 +455,38 @@ static MessageRef process_request(AsyncHandlerRef handler_ref, MessageRef reques
     Message_set_body(reply, bc);
 }
 #endif
+
+const char* read_state_str(int state)
+{
+    switch(state) {
+        case READ_STATE_IDLE:
+            return "READ_STATE_IDLE";
+        case READ_STATE_ACTIVE:
+            return "READ_STATE_ACTIVE";
+        case READ_STATE_EAGAINED:
+            return "READ_STATE_EAGAINED";
+        case READ_STATE_STOP:
+            return "READ_STATE_STOP";
+        default:
+            CHTTP_ASSERT(false, "Invalid read state");
+    }
+}
+const char* write_state_str(int state)
+{
+    switch(state) {
+        case WRITE_STATE_IDLE:
+            return "WRITE_STATE_IDLE";
+        case WRITE_STATE_ACTIVE:
+            return "WRITE_STATE_ACTIVE";
+        case WRITE_STATE_EAGAINED:
+            return "WRITE_STATE_EAGAINED";
+        case WRITE_STATE_STOP:
+            return "WRITE_STATE_STOP";
+        default:
+            CHTTP_ASSERT(false, "Invalid read state");
+    }
+}
+const char* epoll_event_str(int event)
+{
+    return "";
+}

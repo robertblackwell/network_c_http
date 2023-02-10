@@ -7,9 +7,7 @@
 //
 
 #include "socket_functions.h"
-#include <string>
-#include <iostream>
-#include <sstream>
+#include <string.h>
 #include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -29,10 +27,6 @@ void socket_throw_error(socket_handle_t socket, int errorno, const char* message
     fprintf(stderr, " SocketError[%s ], errno:%d (%s)  socket_fd: %d", m, eno, strerror(errorno), socket_fd );
     assert(0);
     //throw std::runtime_error(msg);
-}
-
-void socket_send_error(int code, std::string title, std::string extra_header, const char* msg)
-{
 }
 
 void socket_report_error(const char* format, ...)
@@ -310,21 +304,21 @@ void socket_set_reuse_addr(socket_handle_t socket)
     }
 }
 
-void socket_set_timeout(socket_handle_t socket, int time_interval_seconds)
+void socket_set_recvtimeout(socket_handle_t socket, int time_interval_seconds)
 {
     struct timeval timeout;
-    timeout.tv_sec = 5;
+    timeout.tv_sec = time_interval_seconds;
     timeout.tv_usec = 0;
-    if( socket ){
-        timeout.tv_sec = 2;
-        timeout.tv_usec = 0;
-    } else {
-        timeout.tv_sec = 15;
-        timeout.tv_usec = 0;
+    int errno_saved = 0;
+    int fd = (int)socket;
+    char* msg;
+    int status = setsockopt (fd, SOL_SOCKET, SO_RCVTIMEO, (void *)&timeout, sizeof(timeout));
+    if(status < 0) {
+        errno_saved = errno;
+        msg = strerror(errno_saved);
+        printf("socket_set_recvto failed socket: %d errno: %d %s\n", socket, errno_saved, strerror(errno_saved));
+        assert(false);
     }
-    if (setsockopt (socket, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
-        socket_throw_error(socket, errno, "setsockopt in set timeout failed");
-    
 }
 
 void socket_wait_for_write_flush(socket_handle_t socket)

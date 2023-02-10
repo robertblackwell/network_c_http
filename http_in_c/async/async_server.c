@@ -29,10 +29,11 @@ static void on_handler_completion_cb(AsyncServerRef sref, AsyncHandlerRef handle
     AsyncHandlerRef href = List_itr_unpack(server_ref->handler_list, x);
     List_itr_remove(server_ref->handler_list, &x);
 }
-void AsyncServer_init(AsyncServerRef sref, int port)
+void AsyncServer_init(AsyncServerRef sref, int port, AsyncProcessRequestFunction process_request)
 {
     SET_TAG(AsyncServer_TAG, sref)
     sref->handler_complete = &on_handler_completion_cb;
+    sref->process_request = process_request;
     sref->port = port;
     sref->reactor_ref = rtor_reactor_new();
     sref->listening_socket_fd = create_listener_socket(port, "127.0.0.1");
@@ -43,10 +44,10 @@ void AsyncServer_init(AsyncServerRef sref, int port)
     sref->handler_list = List_new(async_handler_anonymous_dispose);
 
 }
-AsyncServerRef AsyncServer_new(int port)
+AsyncServerRef AsyncServer_new(int port ,AsyncProcessRequestFunction process_request)
 {
     AsyncServerRef sref = (AsyncServerRef) malloc(sizeof(AsyncServer));
-    AsyncServer_init(sref, port);
+    AsyncServer_init(sref, port, process_request);
     return sref;
 }
 void AsyncServer_free(AsyncServerRef this)

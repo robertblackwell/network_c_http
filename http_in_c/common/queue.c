@@ -9,7 +9,7 @@
 #define ENABLE_LOGX
 #include <http_in_c/logger.h>
 
-#define QUEUE_DEFAULT_SIZE 10
+#define QUEUE_DEFAULT_SIZE 10000
 #define QUEUE_CIRCULAR
 #define QUEUE_DYN_CAPACITY
 

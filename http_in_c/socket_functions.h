@@ -53,7 +53,7 @@ void socket_set_option(socket_handle_t socket);
 
 void socket_set_reuse_addr(socket_handle_t socket);
 
-void socket_set_timeout(socket_handle_t socket, int time_interval_seconds);
+void socket_set_recvtimeout(socket_handle_t socket, int time_interval_seconds);
 
 void socket_shutdown_read(socket_handle_t socket);
 

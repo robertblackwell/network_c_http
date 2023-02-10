@@ -29,6 +29,7 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 	#misc
 		logger.h
 		unittest.h
+		socket_functions.h
 	#common
 		#common/generics
 		common/generics/dlist.h
@@ -89,6 +90,7 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	#misc
 		unittest.c
 		logger.c
+		socket_functions.c
 
 
 	#http/1.1 API
@@ -136,7 +138,7 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		async/async_server.c
         async/async_connection.c
 		async/async_handler.c
-		async/async_process_request.c
+#		async/async_process_request.c
 	#demo_protocol
 #		demo_protocol/demo_client.c
 #		demo_protocol/demo_handler.c

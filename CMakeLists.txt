@@ -56,7 +56,7 @@ option(C_HTTP_BuildDocs "Build doxygen documentation" ON)
 # this is a fix for a problem with boost libraries see https://github.com/Microsoft/vcpkg/issues/4497
 # also a hack and breaks "best practices" as per Damiel Pfeiffer's presentation https://www.youtube.com/watch?v=rLopVhns4Zs&feature=youtu.be
 set(other_flags "${other_flags} -frtti -fvisibility-inlines-hidden")
-set(other_flags "${other_flags} -fvisibility=hidden -D_GNU_SOURCE -DTYPE_CHECK_ON -D_GNU_SOURCE -DSYNC_WORKER_QUEUE")
+set(other_flags "${other_flags} -fvisibility=hidden -D_GNU_SOURCE -DTYPE_CHECK_ON -D_GNU_SOURCE")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${other_flags} -pthread")
 #set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11") # this caused a problem with time.h
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fms-extensions -DTYPE_CHECK_ON -DSYNC_WORKER_QUEUE")

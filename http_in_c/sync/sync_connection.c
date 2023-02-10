@@ -2,6 +2,7 @@
 #define CHLOG_ON
 #include <http_in_c/macros.h>
 #include <http_in_c/sync/sync.h>
+#include <http_in_c/socket_functions.h>
 #include <http_in_c/sync/sync_internal.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/utils.h>
@@ -77,11 +78,17 @@ int sync_connection_read(sync_connection_t* this)
         char buffer[1000000];
         char* b = (char*) &buffer;
         int length = 999000;
-        LOG_FMT("sync_connection_read before read socket: %d", this->socketfd);
+        LOG_FMT("sync_connection_read %p before read socket: %d", this, this->socketfd);
+        socket_set_recvtimeout(this->socketfd, 5);
         int nread = read(this->socketfd, (void*)b, length);
         LOG_FMT("sync_connection_read after read from socket: %d nread: %d", this->socketfd, nread);
         if(nread > 0) {
             rc = http_parser_consume(pref, (void *) buffer, nread);
+            if(this->socketfd == -1) {
+                // the message handler function closed the socket
+                return HPE_USER;
+            }
+            CHTTP_ASSERT((this->socketfd != -1), "fd closed under neath me");
             if(rc != HPE_OK) {
                 if(rc == HPE_PAUSED) {
                     void* last_ptr = (void*)http_parser_last_byte_parsed(this->m_parser);
@@ -138,6 +145,7 @@ int sync_connection_write(sync_connection_t* this, MessageRef msg_ref)
 void sync_connection_close(sync_connection_t* this)
 {
     CHECK_TAG(SYNC_CONNECTION_TAG, this)
-    LOG_FMT("sync_connection_close socketfd: %d", this->socketfd);
+    LOG_FMT("sync_connection_close %p socketfd: %d", this, this->socketfd);
     close(this->socketfd);
+    this->socketfd = -1;
 }

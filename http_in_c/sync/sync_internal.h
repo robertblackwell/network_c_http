@@ -35,6 +35,7 @@ struct sync_worker_s {
     int                 id;
     size_t              read_buffer_size;
     SyncAppMessageHandler app_handler;
+    bool working;
 };
 
 
