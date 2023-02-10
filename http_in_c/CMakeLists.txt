@@ -30,6 +30,7 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 		logger.h
 		unittest.h
 		socket_functions.h
+		check_tag.h
 	#common
 		#common/generics
 		common/generics/dlist.h

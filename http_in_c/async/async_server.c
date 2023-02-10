@@ -21,7 +21,7 @@ void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event);
 
 static void on_handler_completion_cb(AsyncServerRef sref, AsyncHandlerRef handler_ref)
 {
-    printf("file: demo_server.c on_handler_completeion_cb \n");
+    LOG_FMT("file: async_server.c on_handler_completion_cb");
 
     AsyncServerRef server_ref = sref;
     CHECK_TAG(AsyncServer_TAG, server_ref)
@@ -50,7 +50,7 @@ AsyncServerRef AsyncServer_new(int port ,AsyncProcessRequestFunction process_req
     AsyncServer_init(sref, port, process_request);
     return sref;
 }
-void AsyncServer_free(AsyncServerRef this)
+void AsyncServer_destroy(AsyncServerRef this)
 {
     CHECK_TAG(AsyncServer_TAG, this)
     ASSERT_NOT_NULL(this);
@@ -59,6 +59,19 @@ void AsyncServer_free(AsyncServerRef this)
     close(this->listening_socket_fd);
     rtor_reactor_free(this->reactor_ref);
     List_dispose(&(this->handler_list));
+    INVALIDATE_TAG(this)
+    // INVALIDATE_STRUCT(this, AsyncServer)
+}
+void AsyncServer_free(AsyncServerRef this)
+{
+    CHECK_TAG(AsyncServer_TAG, this)
+    ASSERT_NOT_NULL(this);
+    AsyncServer_destroy(this);
+//    rtor_listener_deregister(this->listening_watcher_ref);
+//    rtor_listener_free(this->listening_watcher_ref);
+//    close(this->listening_socket_fd);
+//    rtor_reactor_free(this->reactor_ref);
+//    List_dispose(&(this->handler_list));
     free(this);
 
 }
@@ -145,7 +158,7 @@ void set_non_blocking(socket_handle_t socket)
 void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event)
 {
 
-    printf("listening_hander \n");
+    LOG_FMT("listening_hander");
     AsyncServerRef server_ref = listener_watcher_ref->listen_arg;
     CHECK_TAG(AsyncServer_TAG, server_ref)
 
@@ -156,7 +169,7 @@ void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event)
 
     int sock2 = accept(server_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
     if(sock2 <= 0) {
-        printf("accpt failed errno %d  sttrerror: %s\n", errno, strerror(errno));
+        LOG_ERROR("accpt failed errno %d  sttrerror: %s", errno, strerror(errno));
         LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
     }
     LOG_FMT("Listerner accepted sock fd: %d", sock2);

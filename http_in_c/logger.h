@@ -5,7 +5,7 @@
 extern void log_function(char* level, const char* funcname, const char* filename, int line, char* message);
 
 // CHLOG_GLOBAL - is a global switch to turn logging off globally
-#define CHLOG_GLOBAL
+#define CHLOG_GLOBALX
 
 // CHLOG_ON - each c/c++ file can turn logging on by defining CHLOG_ON before including logger.h
 // this only turns logging on if the global switch is defined

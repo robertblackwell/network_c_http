@@ -37,13 +37,21 @@ void sync_client_init(sync_client_t* this, size_t read_buffer_size)
         exit(-1);
     };
 }
+void sync_client_destroy(sync_client_t* this)
+{
+    CHECK_TAG(sync_client_TAG, this)
+    LOG_FMT("sync_client_dispose %p  %d\n", this, this->socketfd);
+    if(this->connection_ptr) sync_connection_dispose(&(this->connection_ptr));
+    INVALIDATE_TAG(this)
+    // INVALIDATE_STRUCT(this, sync_client_t)
+}
 void sync_client_dispose(sync_client_t** this_ptr)
 {
     sync_client_t* this = *this_ptr;
     CHECK_TAG(sync_client_TAG, this)
-    LOG_FMT("sync_client_dispose %p  %d\n", this, this->socketfd);
-    if(this->connection_ptr) sync_connection_dispose(&(this->connection_ptr));
+    sync_client_destroy(this);
     eg_free(*this_ptr);
+    // in here add code to obliterate the structure
     *this_ptr = NULL;
 }
 #if 0

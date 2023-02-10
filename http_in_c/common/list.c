@@ -106,13 +106,13 @@ void List_display(const ListRef this)
 }
 ListIterator List_find(ListRef this, void* needle)
 {
-    printf("List[%p] count: %d head %p tail %p\n", (void*)this, this->count, (void*)this->head, (void*)this->tail);
+//    printf("List[%p] count: %d head %p tail %p\n", (void*)this, this->count, (void*)this->head, (void*)this->tail);
     ListNode* iter = this->head;
     while(iter != NULL) {
         if(iter->item == needle) {
             return iter;
         }
-        printf("Node[%p] forward:%p backwards:%p  item:%p  %ld\n", (void*)iter, (void*)iter->forward, (void*)iter->backward, iter->item, (long)iter->item);
+//        printf("Node[%p] forward:%p backwards:%p  item:%p  %ld\n", (void*)iter, (void*)iter->forward, (void*)iter->backward, iter->item, (long)iter->item);
         ListNode* next = iter->forward;
         iter = next;
     }

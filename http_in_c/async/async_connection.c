@@ -89,7 +89,7 @@ void async_connection_init(
     rtor_stream_arm_both(this->socket_stream_ref, &event_handler, this);
     this->read_buffer_size = 1000000;
 }
-void async_connection_free(AsyncConnectionRef this)
+void async_connection_destroy(AsyncConnectionRef this)
 {
     CHECK_TAG(AsyncConnection_TAG, this)
     int fd = this->socket_stream_ref->fd;
@@ -106,6 +106,13 @@ void async_connection_free(AsyncConnectionRef this)
     if(this->active_input_buffer_ref) {
         IOBuffer_dispose(&(this->active_input_buffer_ref));
     }
+    INVALIDATE_TAG(this)
+    // INVALIDATE_STRUCT(this, AsyncConnection)
+}
+void async_connection_free(AsyncConnectionRef this)
+{
+    CHECK_TAG(AsyncConnection_TAG, this)
+    async_connection_destroy(this);
     free(this);
 }
 /////////////////////////////////////////////////////////////////////////////////////
@@ -211,7 +218,7 @@ static void reader(AsyncConnectionRef connection_ref) {
         LOG_FMT("After AsyncParser_consume returns  errno: %d errno_str: %s  read_state %s ", errno_save, strerror(errno_save), read_state_str(connection_ref->read_state));
         if(errno_save == EAGAIN) {
             bool x = llhttp_message_needs_eof(connection_ref->http_parser_ptr->m_llhttp_ptr);
-            printf("test this result message_needs_eof %d\n", (int)x);
+            LOG_FMT("test this result message_needs_eof %d", (int)x);
             read_eagain(connection_ref);
             return;
         }
@@ -220,6 +227,7 @@ static void reader(AsyncConnectionRef connection_ref) {
 //            CHTTP_ASSERT((connection_ref->read_state == READ_STATE_ACTIVE), "something is wrong");
             read_need_data(connection_ref);
         } else {
+            read_error(connection_ref, "parser error");
         }
     } else if(bytes_available == 0) {
         LOG_FMT("bytes_available == 0 errno: %d %s", errno_save, strerror(errno_save))
@@ -391,7 +399,7 @@ static void postable_write_call_cb(ReactorRef reactor_ref, void* arg)
 static void write_error(AsyncConnectionRef connection_ref, char* msg)
 {
     CHECK_TAG(AsyncConnection_TAG, connection_ref)
-    printf("Write_error got an error this is the message: %s  fd: %d\n", msg, connection_ref->socket_stream_ref->fd);
+    LOG_FMT("Write_error got an error this is the message: %s  fd: %d", msg, connection_ref->socket_stream_ref->fd);
     connection_ref->write_state = WRITE_STATE_STOP;
     connection_ref->handler_ref->handle_write_failed(connection_ref->handler_ref);
     post_to_reactor(connection_ref, &postable_cleanup);
@@ -399,7 +407,7 @@ static void write_error(AsyncConnectionRef connection_ref, char* msg)
 static void read_error(AsyncConnectionRef connection_ref, char* msg)
 {
     CHECK_TAG(AsyncConnection_TAG, connection_ref)
-    printf("Read_error got an error this is the message: %s  fd: %d\n", msg, connection_ref->socket_stream_ref->fd);
+    LOG_FMT("Read_error got an error this is the message: %s  fd: %d", msg, connection_ref->socket_stream_ref->fd);
     connection_ref->read_state = READ_STATE_STOP;
     connection_ref->handler_ref->handle_reader_stopped(connection_ref->handler_ref);
     post_to_reactor(connection_ref, &postable_cleanup);
@@ -416,7 +424,7 @@ static void read_error(AsyncConnectionRef connection_ref, char* msg)
 static void postable_cleanup(ReactorRef reactor, void* cref)
 {
     AsyncConnectionRef connection_ref = cref;
-    printf("postable_cleanup entered\n");
+    LOG_FMT("postable_cleanup entered");
     CHTTP_ASSERT((connection_ref->cleanup_done_flag == false), "cleanup should not run more than once");
     CHECK_TAG(AsyncConnection_TAG, connection_ref)
     rtor_stream_deregister(connection_ref->socket_stream_ref);

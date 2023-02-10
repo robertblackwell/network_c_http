@@ -98,8 +98,6 @@ MessageRef app_handler_example(AsyncHandlerRef handler_ref, MessageRef request)
 
     IOBufferRef request_serialized = Message_serialize(request);
     IOBufferRef response_serialized = Message_serialize(response);
-//    printf("app_handler_example request : %s\n", IOBuffer_cstr(request_serialized));
-//    printf("app_handler_example response : %s\n", IOBuffer_cstr(response_serialized));
     IOBuffer_free(request_serialized);
     IOBuffer_free(response_serialized);
     return response;

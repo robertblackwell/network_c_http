@@ -63,13 +63,20 @@ void async_handler_init(
 
     async_connection_read(this->async_connection_ref);//, &handle_request);
 }
-void async_handler_free(AsyncHandlerRef this)
+void async_handler_destroy(AsyncHandlerRef this)
 {
     CHECK_TAG(AsyncHandler_TAG, this)
     async_connection_free(this->async_connection_ref);
     this->async_connection_ref = NULL;
     List_dispose(&(this->input_list));
     List_dispose(&(this->output_list));
+    INVALIDATE_TAG(this)
+    // INVALIDATE_STRUCT(this, AsyncHandler)
+}
+void async_handler_free(AsyncHandlerRef this)
+{
+    CHECK_TAG(AsyncHandler_TAG, this)
+    async_handler_destroy(this);
     free(this);
 }
 void async_handler_anonymous_dispose(void** p)
@@ -152,28 +159,28 @@ static void handle_write_done(AsyncHandlerRef href)
 static void handle_connection_done(AsyncHandlerRef href)
 {
     CHECK_TAG(AsyncHandler_TAG, href)
-    printf("file demo_handler.c connection_completion_cb\n");
+    LOG_FMT("file async_handler.c connection_completion_cb");
     AsyncHandlerRef handler_ref = href;
     handler_ref->server_ref->handler_complete(handler_ref->server_ref, href);
 }
 static void handle_io_error(AsyncHandlerRef  href)
 {
     CHECK_TAG(AsyncHandler_TAG, href)
-    printf("handle_io_error\n");
+    LOG_FMT("handle_io_error");
     return;
     CHTTP_ASSERT(false, "not implemented");
 }
 static void handle_reader_stopped(AsyncHandlerRef  href)
 {
     CHECK_TAG(AsyncHandler_TAG, href)
-    printf("handle_reader_stopped\n");
+    LOG_FMT("handle_reader_stopped");
     return;
     CHTTP_ASSERT(false, "not implemented");
 }
 static void handle_write_failed(AsyncHandler* href)
 {
     CHECK_TAG(AsyncHandler_TAG, href)
-    printf("handle_write_failed\n");
+    LOG_FMT("handle_write_failed");
     return;
     CHTTP_ASSERT(false, "not implemented");
 }

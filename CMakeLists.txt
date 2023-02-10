@@ -48,7 +48,16 @@ option(C_HTTP_DebugBuild "Perform build as type Debug" ON)
 option(C_HTTP_BuildDocs "Build doxygen documentation" ON)
 
 
-
+# project build options
+#_GNU_SOURCE
+#	because we use asprintf()
+#CH_TYPE_CHECK_ON
+#CH_SYNC_WORKER_QUEUE
+#	the work threads in the sync_server uses an interthread queue for getting accept()'d sockets
+#CH_TAG_CHECK_ON
+#	puts a validation tag at the start of every struct and checks it on every access
+#CH_SCRIBBLE_ONFREE
+#		WRITES A PATTERN
 ## ============================================================================
 ## The stuff below - I am not sure about ======================================
 ##
@@ -59,7 +68,7 @@ set(other_flags "${other_flags} -frtti -fvisibility-inlines-hidden")
 set(other_flags "${other_flags} -fvisibility=hidden -D_GNU_SOURCE -DTYPE_CHECK_ON -D_GNU_SOURCE")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${other_flags} -pthread")
 #set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11") # this caused a problem with time.h
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fms-extensions -DTYPE_CHECK_ON -DSYNC_WORKER_QUEUE")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fms-extensions -D_GNU_SOURCE -DTYPE_CHECK_ON -DSYNC_WORKER_QUEUE -DCH_TAG_CHECK_ON")
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 set(CTEST_CUSTOM_PRE_TEST "echo THIS IS PRE TEST")
@@ -141,6 +150,9 @@ set(C_HTTP_LINK_LIBRARIES
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY XCODE_GENERATE_SCHEME ON)
 
+set(CHLOG_GLOBAL On)
+
+
 if (C_HTTP_Verbose)
 	message("Project Name                      ${CMAKE_PROJECT_NAME}")
 	message("C Compiler                        ${CMAKE_C_COMPILER}")
@@ -148,25 +160,25 @@ if (C_HTTP_Verbose)
 	message("CMAKE_CXX_STANDARD                ${CMAKE_CXX_STANDARD}")
 	message("CMAKE_CXX_FLAGS                   ${CMAKE_CXX_FLAGS}")
 	message("CMAKE_DL_LIBS                     ${CMAKE_DL_LIBS}")
-	message("C_HTTP_PROJECT_DIR                  ${C_HTTP_PROJECT_DIR}")
-	message("C_HTTP_SOURCE_DIR                   ${C_HTTP_SOURCE_DIR}")
-	message("C_HTTP_INCLUDE_DIR                  ${C_HTTP_INCLUDE_DIR}")
-	message("C_HTTP_VENDOR_NAME                  ${C_HTTP_VENDOR_NAME}")
-	message("C_HTTP_VENOR_DIR                    ${C_HTTP_VENDOR_DIR}")
-	message("C_HTTP_VENDOR_INCLUDEDIR            ${C_HTTP_VENDOR_INCLUDEDIR}")
-	message("C_HTTP_VENDOR_LIBDIR                ${C_HTTP_VENDOR_LIBDIR}")
-	message("C_HTTP_VENDOR_SRCDIR                ${C_HTTP_VENDOR_SRCDIR}")
-	message("C_HTTP_VENDOR_SRCDIR                ${C_HTTP_VENDOR_SRCDIR}")
-	message("C_HTTP_DL_LIB_SO                    ${C_HTTP_DL_LIB_SO}")
-	message("C_HTTP_INCLUDE_PATHS                ${C_HTTP_INCLUDE_PATHS}")
-	message("C_HTTP_LINK_LIBRARIES               ${C_HTTP_LINK_LIBRARIES}")
-	message("C_HTTP_BuildDocsS                   ${C_HTTP_BuildDocs}")
+	message("C_HTTP_PROJECT_DIR                ${C_HTTP_PROJECT_DIR}")
+	message("C_HTTP_SOURCE_DIR                 ${C_HTTP_SOURCE_DIR}")
+	message("C_HTTP_INCLUDE_DIR                ${C_HTTP_INCLUDE_DIR}")
+	message("C_HTTP_VENDOR_NAME                ${C_HTTP_VENDOR_NAME}")
+	message("C_HTTP_VENOR_DIR                  ${C_HTTP_VENDOR_DIR}")
+	message("C_HTTP_VENDOR_INCLUDEDIR          ${C_HTTP_VENDOR_INCLUDEDIR}")
+	message("C_HTTP_VENDOR_LIBDIR              ${C_HTTP_VENDOR_LIBDIR}")
+	message("C_HTTP_VENDOR_SRCDIR              ${C_HTTP_VENDOR_SRCDIR}")
+	message("C_HTTP_VENDOR_SRCDIR              ${C_HTTP_VENDOR_SRCDIR}")
+	message("C_HTTP_DL_LIB_SO                  ${C_HTTP_DL_LIB_SO}")
+	message("C_HTTP_INCLUDE_PATHS              ${C_HTTP_INCLUDE_PATHS}")
+	message("C_HTTP_LINK_LIBRARIES             ${C_HTTP_LINK_LIBRARIES}")
+	message("C_HTTP_BuildDocsS                 ${C_HTTP_BuildDocs}")
 	message("DOXYGEN_FOUND                     ${DOXYGEN_FOUND}")
-	message("C_HTTP_BUILD_DOCS                   ${C_HTTP_BUILD_DOCS}")
+	message("C_HTTP_BUILD_DOCS                 ${C_HTTP_BUILD_DOCS}")
 	message("CMAKE_INSTALL_PREFIX              ${CMAKE_INSTALL_PREFIX}")
 	message("CMAKE_INSTALL_FULL_INCLUDEDIR     ${CMAKE_INSTALL_FULL_INCLUDEDIR}")
 	message("CMAKE_INSTALL_INCLUDEDIR          ${CMAKE_INSTALL_INCLUDEDIR}")
-	message("C_HTTP_LIB_NAME                     ${C_HTTP_LIB_NAME}")
+	message("C_HTTP_LIB_NAME                   ${C_HTTP_LIB_NAME}")
 endif()
 
 include(CTest) 

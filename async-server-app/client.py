@@ -5,6 +5,7 @@ import sys
 import getopt
 
 import statistics
+import urllib3
 
 
 class ThreadContext:
@@ -29,6 +30,7 @@ def test_client(port, nbr_connections: int, nbr_requests_per_connection: int, ct
     for c in range(nbr_connections):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         rc = s.connect_ex(('localhost', port))
+
         if rc != 0:
             raise RuntimeError("connect failed")
         for r in range(nbr_requests_per_connection):
@@ -38,13 +40,37 @@ def test_client(port, nbr_connections: int, nbr_requests_per_connection: int, ct
             start = datetime.datetime.now()
             buffer1 = "GET /echo HTTP/1.1\r\nCONNECTION: {}\r\nJUNK: {}.{}\r\n\r\n".format(connection_type, c,
                                                                                            r).encode()
+            s.sendall(buffer1)
+            data1 = socket_recv(s)
             end_time = datetime.datetime.now()
             elapsed = (end_time - start).microseconds
             ctx.intervals.append(elapsed)
-            s.sendall(buffer1)
-
-            data1 = socket_recv(s)
         s.close()
+
+
+def http_test_client(port, nbr_connections: int, nbr_requests_per_connection: int, ctx: ThreadContext):
+    import http
+    headers = {
+    }
+    for c in range(nbr_connections):
+        connection = http.client.HTTPConnection("localhost", port)
+        connection.connect()
+        for r in range(nbr_requests_per_connection):
+            connection_type = "keep-alive"
+            if r == nbr_requests_per_connection - 1:
+                connection_type = "close"
+            headers["CONNECTION"] = connection_type
+            headers["JUNK"] = "{}-{}".format(c, r)
+            start = datetime.datetime.now()
+            buffer1 = "GET /echo HTTP/1.1\r\nCONNECTION: {}\r\nJUNK: {}.{}\r\n\r\n".format(connection_type, c,
+                                                                                           r).encode()
+            connection.request("GET", "/echo", None, headers=headers)
+            data1 = connection.getresponse()
+            chunk = data1.read(20000)
+            end_time = datetime.datetime.now()
+            elapsed = (end_time - start).microseconds
+            ctx.intervals.append(elapsed)
+        connection.close()
 
 
 def run_threads(port, nbr_threads, nbr_connections_per_thread, nbr_requests_per_connection):

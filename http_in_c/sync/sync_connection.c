@@ -58,7 +58,8 @@ void sync_connection_destroy(sync_connection_t* this)
 {
     CHECK_TAG(SYNC_CONNECTION_TAG, this)
     IOBuffer_dispose(&(this->m_iobuffer));
-
+    INVALIDATE_TAG(this)
+    // INVALIDATE_STRUCT(this, sync_connection_t)
 }
 void sync_connection_dispose(sync_connection_t** this_ptr)
 {

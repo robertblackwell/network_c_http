@@ -34,8 +34,7 @@
  */
 
 
-#define TYPE_CHECK_ON
-#ifdef TYPE_CHECK_ON
+#ifdef CH_TAG_CHECK_ON
 #define TAG_LENGTH 10
 
 #define DECLARE_TAG_FIELD(field) char field[TAG_LENGTH]
@@ -74,9 +73,19 @@
         static_assert(strlen(TAG) < TAG_LENGTH, "Tag too long in SET_TAG");                     \
         sprintf((p)->tag, "%s", TAG); \
     } while(0);
+#define INVALID_TAG "invalid"
+#define INVALIDATE_TAG(p) \
+    do {                     \
+        static_assert(strlen(INVALID_TAG) < TAG_LENGTH, "Tag too long in SET_TAG");                     \
+        sprintf((p)->tag, "%s", INVALID_TAG); \
+    } while(0);
+#define INVALIDATE_STRUCT(p, TYPE) \
+    memset((void*)p, 0x00, sizeof(TYPE))
 #else
 #define DECLARE_TAG(TYPE)
     #define CHECK_TAG(TYPE, p)
     #define SET_TAG(TYPE, p)
+    #define INVALIDATE_TAG(p)
+    #define INVALIDATE_STRUCT(p, TYPE)
 #endif
 /** @} */
