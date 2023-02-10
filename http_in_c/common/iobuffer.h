@@ -1,7 +1,7 @@
 #ifndef c_c_http_buffer_iobuffer_h
 #define c_c_http_buffer_iobuffer_h
 
-#define _GNU_SOURCE
+
 
 #include <stdio.h>
 #include <string.h>

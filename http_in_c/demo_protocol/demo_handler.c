@@ -1,5 +1,5 @@
 
-#define _GNU_SOURCE
+
 #include <http_in_c/macros.h>
 #include <http_in_c/check_tag.h>
 #include <http_in_c/runloop/runloop.h>

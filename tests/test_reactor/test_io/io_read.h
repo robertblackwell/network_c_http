@@ -1,7 +1,7 @@
 #ifndef c_http_tests_reactor_io_read_h
 #define c_http_tests_reactor_io_read_h
 
-#define _GNU_SOURCE
+
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>

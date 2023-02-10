@@ -137,7 +137,12 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		runloop/functor_list.c
 	#async
 		async/async_server.c
-        async/async_connection.c
+        async/connection_api.c
+		async/connection_cleanup.c
+		async/connection_event.c
+		async/connection_helpers.c
+		async/connection_read.c
+		async/connection_write.c
 		async/async_handler.c
 #		async/async_process_request.c
 	#demo_protocol

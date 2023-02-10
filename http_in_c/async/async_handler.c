@@ -1,5 +1,5 @@
 
-#define _GNU_SOURCE
+
 #define CHLOG_ON
 #include <http_in_c/async/async.h>
 #include <http_in_c/macros.h>

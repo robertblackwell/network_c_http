@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 #include <http_in_c/common/url.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/url_parser.h>

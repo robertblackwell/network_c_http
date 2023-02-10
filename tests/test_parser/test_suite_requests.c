@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 #include "helper.h"
 /**
  * This file contains a number of parsing tests for request messages

@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 #include <http_in_c/saved/sync_writer.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/test_helpers/message_private.h>

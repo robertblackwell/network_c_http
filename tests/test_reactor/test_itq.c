@@ -1,9 +1,9 @@
-#define _GNU_SOURCE
+
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
-#define _GNU_SOURCE             /* See feature_test_macros(7) */
+             /* See feature_test_macros(7) */
 #include <string.h>
 
 #include <http_in_c/unittest.h>

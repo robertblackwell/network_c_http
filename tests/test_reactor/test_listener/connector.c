@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 #define XR_TRACE_ENABLE
 #include "connector.h"
 //#include <http_in_c/async/types.h>
@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
-#define _GNU_SOURCE             /* See feature_test_macros(7) */
+             /* See feature_test_macros(7) */
 #include <fcntl.h>
 #include <stdint.h>
 #include <string.h>

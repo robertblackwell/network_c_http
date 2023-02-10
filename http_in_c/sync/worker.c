@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 #define CHLOG_ON
 #include <http_in_c/sync/sync.h>
 #include <http_in_c/sync/sync_internal.h>

@@ -1,6 +1,6 @@
 #ifndef iracoon_unittest_h
 #define iracoon_unittest_h
-#define _GNU_SOURCE
+
 #include <assert.h>
 #include <stdio.h>
 #include <libgen.h>

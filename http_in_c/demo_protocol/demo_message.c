@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 #include <http_in_c/demo_protocol/demo_message.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/http/header_list.h>

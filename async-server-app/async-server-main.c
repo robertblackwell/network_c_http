@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 #include <http_in_c/async/async.h>
 #include <http_in_c/logger.h>
 #include <stdio.h>

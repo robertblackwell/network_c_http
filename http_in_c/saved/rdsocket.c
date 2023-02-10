@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 
 #include <http_in_c/saved/rdsocket.h>
 #include <assert.h>

@@ -1,5 +1,5 @@
 
-#define _GNU_SOURCE
+
 #include <netdb.h>
 #include <pthread.h>
 #include <http_in_c/sync/sync.h>

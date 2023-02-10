@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 #define CHLOG_ON
 #include "io_write.h"
 #include <assert.h>

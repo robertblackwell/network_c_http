@@ -1,6 +1,6 @@
 #ifndef c_http_api_sync_client_h
 #define c_http_api_sync_client_h
-#define _GNU_SOURCE
+
 #include <http_in_c/http/message.h>
 #include <http_in_c/sync/sync.h>
 #include <assert.h>

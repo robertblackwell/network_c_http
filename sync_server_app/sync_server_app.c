@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 #include <http_in_c/sync/sync.h>
 #include <http_in_c/sync/sync_handler_example.h>
 #include <stdio.h>

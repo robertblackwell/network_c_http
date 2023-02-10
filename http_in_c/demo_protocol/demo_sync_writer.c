@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 #include <http_in_c/demo_protocol/demo_sync_writer.h>
 #include <http_in_c/common/alloc.h>
 #include <stdio.h>

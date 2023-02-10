@@ -1,6 +1,6 @@
 #ifndef c_http_logger_h
 #define c_http_logger_h
-#define _GNU_SOURCE
+
 #include <stdio.h>
 extern void log_function(char* level, const char* funcname, const char* filename, int line, char* message);
 

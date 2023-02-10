@@ -1,5 +1,5 @@
 
-#define _GNU_SOURCE
+
 #include <http_in_c/demo_protocol/demo_handler.h>
 #include <http_in_c/demo_protocol/demo_process_request.h>
 

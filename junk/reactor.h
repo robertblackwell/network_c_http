@@ -1,7 +1,7 @@
 #ifndef c_http_xr_runloop_h
 #define c_http_xr_runloop_h
 #if 0
-#define _GNU_SOURCE
+
 #include <stdint.h>
 #include <time.h>
 #include <sys/epoll.h>

@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 #include <http_in_c/http/message.h>
 #include <http_in_c/test_helpers/message_private.h>
 #include <http_in_c/common/alloc.h>

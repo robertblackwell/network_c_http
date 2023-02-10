@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 #include <http_in_c/common/http_parser/rdsocket.h>
 #include <http_in_c/demo_protocol/demo_sync_reader.h>
 #include <http_in_c/common/alloc.h>

@@ -1,7 +1,7 @@
 #ifndef c_http_operation_h
 #define c_http_operation_h
 
-#define _GNU_SOURCE
+
 #include <assert.h>
 #include <stdio.h>
 

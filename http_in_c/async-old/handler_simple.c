@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 #include <http_in_c/async/handler.h>
 #include <http_in_c/logger.h>
 #include <http_in_c/common/alloc.h>

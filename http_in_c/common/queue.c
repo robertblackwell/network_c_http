@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 #include <http_in_c/common/queue.h>
 #include <stdint.h>
 #include <stdlib.h>

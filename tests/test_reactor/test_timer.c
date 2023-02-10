@@ -1,9 +1,9 @@
-#define _GNU_SOURCE
+
 #define ENABLE_LOGx
 #include <http_in_c/async-old/types.h>
 #include <stdio.h>
 #include <pthread.h>
-#define _GNU_SOURCE             /* See feature_test_macros(7) */
+             /* See feature_test_macros(7) */
 #include <fcntl.h>
 #include <stdint.h>
 #include <sys/epoll.h>

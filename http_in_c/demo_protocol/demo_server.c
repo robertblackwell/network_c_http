@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 #define CHLOG_ON
 #include <http_in_c/runloop/rl_internal.h>
 #include <http_in_c/demo_protocol/demo_server.h>

@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 #define XR_TRACE_ENABLE
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
-#define _GNU_SOURCE             /* See feature_test_macros(7) */
+             /* See feature_test_macros(7) */
 #include <fcntl.h>
 #include <stdint.h>
 #include <string.h>

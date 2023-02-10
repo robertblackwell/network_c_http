@@ -1,6 +1,6 @@
 #ifndef c_http_sync_worker_h
 #define c_http_sync_worker_h
-//#define _GNU_SOURCE
+//
 #include <http_in_c/common/queue.h>
 #include <http_in_c/saved/sync_handler.h>
 #include <pthread.h>

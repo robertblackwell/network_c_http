@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
 #include <unistd.h>

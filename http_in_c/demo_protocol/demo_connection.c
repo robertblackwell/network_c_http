@@ -1,5 +1,5 @@
 
-#define _GNU_SOURCE
+
 #include <http_in_c/demo_protocol/demo_connection.h>
 #include <http_in_c/runloop/rl_internal.h>
 #include <stdlib.h>

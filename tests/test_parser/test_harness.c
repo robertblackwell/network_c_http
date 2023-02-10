@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 
 #include "test_harness.h"
 #include <string.h>

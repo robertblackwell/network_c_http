@@ -1,6 +1,6 @@
 #ifndef c_http_demo_client_h
 #define c_http_demo_client_h
-#define _GNU_SOURCE
+
 #include <http_in_c/demo_protocol/demo_message.h>
 
 #include <assert.h>

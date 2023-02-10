@@ -2,7 +2,7 @@
  * @file KVPair.c
  * @Brief Implementation file for key/value pair
  */
-#define _GNU_SOURCE
+
 #include <http_in_c/http/kvpair.h>
 #include <stdlib.h>
 #include <string.h>

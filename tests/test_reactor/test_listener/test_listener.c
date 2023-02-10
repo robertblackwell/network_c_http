@@ -1,8 +1,8 @@
-#define _GNU_SOURCE
+
 #define XR_TRACE_ENABLE
 #include <stdio.h>
 #include <pthread.h>
-#define _GNU_SOURCE             /* See feature_test_macros(7) */
+             /* See feature_test_macros(7) */
 #include <string.h>
 #include <http_in_c/unittest.h>
 #include <http_in_c/common/utils.h>

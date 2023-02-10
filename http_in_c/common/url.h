@@ -1,4 +1,4 @@
-#define _GNU_SOURCE
+
 #include <assert.h>
 #include <stdio.h>
 #include <http_in_c/common/cbuffer.h>
