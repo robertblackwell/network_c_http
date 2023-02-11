@@ -19,6 +19,13 @@ extern void log_function(char* level, const char* funcname, const char* filename
 		free(s); \
 	} while(0);
 
+#define LOGFMT(f_, ...) do {\
+		char* s; \
+		int c  = asprintf(&s, f_, ##__VA_ARGS__); \
+		log_function("LOG", __FUNCTION__, __FILE__, __LINE__, s); \
+		free(s); \
+	} while(0);
+
 
 #if defined(CHLOG_ON) && defined(CHLOG_GLOBAL)
 	#define LOG_PRINTF(f_, ...) printf((f_), ##__VA_ARGS__)

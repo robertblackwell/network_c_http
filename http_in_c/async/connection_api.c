@@ -34,11 +34,11 @@ void async_connection_init(
     this->readside_posted = false;
     this->writeside_posted = false;
     this->cleanup_done_flag = false;
-    ParserOnMessageCompleteHandler h = on_read_message_complete;
+    ParserOnMessageCompleteHandler h = async_on_read_message_complete;
     this->http_parser_ptr = http_parser_new(h, this);
     rtor_stream_register(this->socket_stream_ref);
     this->socket_stream_ref->both_arg = this;
-    rtor_stream_arm_both(this->socket_stream_ref, &event_handler, this);
+    rtor_stream_arm_both(this->socket_stream_ref, &async_event_handler, this);
     this->read_buffer_size = 1000000;
 }
 void async_connection_destroy(AsyncConnectionRef this)
@@ -74,7 +74,7 @@ void async_connection_read(AsyncConnectionRef connection_ref) //, void(*on_read_
 //    CHTTP_ASSERT((connection_ref->read_state != READ_STATE_ACTIVE), "a read is already active");
     if(connection_ref->read_state == READ_STATE_IDLE) {
         connection_ref->read_state = READ_STATE_ACTIVE;
-        read_start(connection_ref);
+        async_read_start(connection_ref);
     } else if(connection_ref->read_state == READ_STATE_EAGAINED) {
 //        connection_ref->on_read_message_cb = on_read_message_cb;
     } else if(connection_ref->read_state == READ_STATE_STOP) {
@@ -92,5 +92,5 @@ void async_connection_write(AsyncConnectionRef connection_ref, MessageRef respon
         connection_ref->handler_ref->handle_write_failed(connection_ref->handler_ref);
         return;
     }
-    post_to_reactor(connection_ref, &postable_writer);
+    async_post_to_reactor(connection_ref, &async_postable_writer);
 }

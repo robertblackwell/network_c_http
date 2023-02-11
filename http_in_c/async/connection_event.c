@@ -8,7 +8,7 @@ static void read_epollin(AsyncConnectionRef connection_ref);
 /////////////////////////////////////////////////////////////////////////////////////
 // event handler called from the Reactor on receiving an epoll event
 ///////////////////////////////////////////////////////////////////////////////////////
-void event_handler(RtorStreamRef stream_ref, uint64_t event)
+void async_event_handler(RtorStreamRef stream_ref, uint64_t event)
 {
     LOG_FMT("event_handler %lx", event);
     AsyncConnectionRef connection_ref = stream_ref->context;
@@ -27,10 +27,10 @@ void event_handler(RtorStreamRef stream_ref, uint64_t event)
 static void read_epollin(AsyncConnectionRef connection_ref)
 {
     CHECK_TAG(AsyncConnection_TAG, connection_ref)
-    LOG_FMT("read_epollin read_state: %s", read_state_str(connection_ref->read_state))
+    LOGFMT("read_epollin read_state: %s", async_read_state_str(connection_ref->read_state))
     if(connection_ref->read_state == READ_STATE_EAGAINED) {
-        connection_ref->read_state = READ_STATE_ACTIVE;
-        read_start(connection_ref);
+//        connection_ref->read_state = READ_STATE_ACTIVE;
+        async_read_start(connection_ref);
     }
 }
 static void write_epollout(AsyncConnectionRef connection_ref)
@@ -40,6 +40,6 @@ static void write_epollout(AsyncConnectionRef connection_ref)
     if(connection_ref->write_state == WRITE_STATE_EAGAINED) {
         connection_ref->write_state = WRITE_STATE_ACTIVE;
         connection_ref->writeside_posted = true;
-        post_to_reactor(connection_ref,&postable_writer);
+        async_post_to_reactor(connection_ref, &async_postable_writer);
     }
 }

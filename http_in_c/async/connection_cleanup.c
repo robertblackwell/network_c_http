@@ -8,7 +8,7 @@
 /**
  * This must be the last async connection function to run and it should only run once.
  */
-void postable_cleanup(ReactorRef reactor, void* cref)
+void async_postable_cleanup(ReactorRef reactor, void* cref)
 {
     AsyncConnectionRef connection_ref = cref;
     LOG_FMT("postable_cleanup entered");

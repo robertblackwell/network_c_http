@@ -91,6 +91,8 @@ typedef struct AsyncConnection_s {
     IOBufferRef     active_output_buffer_ref;
     http_parser_t*  http_parser_ptr;
     int             read_state;
+    MessageRef      input_message_ptr;
+    MessageRef      outout_message_ptr;
     int             write_state;
     DC_Close_CB     on_close_cb;
     bool            cleanup_done_flag;

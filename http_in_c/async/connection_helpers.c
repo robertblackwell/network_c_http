@@ -24,12 +24,12 @@
 //const char* read_state_str(int state);
 //const char* write_state_str(int state);
 
-void post_to_reactor(AsyncConnectionRef connection_ref, void(*postable_function)(ReactorRef, void*))
+void async_post_to_reactor(AsyncConnectionRef connection_ref, void(*postable_function)(ReactorRef, void*))
 {
     rtor_reactor_post(connection_ref->reactor_ref, postable_function, connection_ref);
 }
 
-const char* read_state_str(int state)
+const char* async_read_state_str(int state)
 {
     switch(state) {
         case READ_STATE_IDLE:
@@ -40,11 +40,13 @@ const char* read_state_str(int state)
             return "READ_STATE_EAGAINED";
         case READ_STATE_STOP:
             return "READ_STATE_STOP";
+        case READ_STATE_POSTED_READER:
+            return "READ_STATE_POSTED_READER";
         default:
             CHTTP_ASSERT(false, "Invalid read state");
     }
 }
-const char* write_state_str(int state)
+const char* async_write_state_str(int state)
 {
     switch(state) {
         case WRITE_STATE_IDLE:
@@ -59,7 +61,7 @@ const char* write_state_str(int state)
             CHTTP_ASSERT(false, "Invalid read state");
     }
 }
-const char* epoll_event_str(int event)
+const char* async_epoll_event_str(int event)
 {
     return "";
 }
