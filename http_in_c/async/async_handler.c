@@ -15,12 +15,13 @@
 
 //static AsyncMessageRef process_request(AsyncHandlerRef href, AsyncMessageRef request);
 static void handle_request(AsyncHandlerRef href, MessageRef msgref);
-static void handle_write_done(AsyncHandlerRef href);
-static void handle_connection_done(AsyncHandlerRef href);
+void async_handler_handle_response(AsyncHandlerRef href, MessageRef request_ptr, MessageRef response_ptr);
+static void handle_write_complete(AsyncHandlerRef href);
 
-static void handle_io_error(AsyncHandlerRef  href);
-static void handle_reader_stopped(AsyncHandlerRef  href);
-static void handle_write_failed(AsyncHandler* href);
+//static void handle_io_error(AsyncHandlerRef  href);
+//static void handle_reader_stopped(AsyncHandlerRef  href);
+static void handle_close_connection(AsyncHandlerRef  href);
+//static void handle_write_failed(AsyncHandler* href);
 
 static void postable_write_start(ReactorRef reactor_ref, void* href);
 static void on_write_complete_cb(void* href, int status);
@@ -43,14 +44,12 @@ void async_handler_init(
 {
     SET_TAG(AsyncHandler_TAG, this)
     CHECK_TAG(AsyncHandler_TAG, this)
-    // setup the delegate function
+    // set up the delegate function
     this->handle_request = &handle_request;
-    this->handle_write_done = handle_write_done;
-    this->handle_connection_done = handle_connection_done;
+    this->handle_response = &async_handler_handle_response;
+    this->handle_write_complete = handle_write_complete;
+    this->handle_close_connection = handle_close_connection;
 
-    this->handle_reader_stopped = &handle_reader_stopped;
-    this->handle_io_error = &handle_io_error;
-    this->handle_write_failed = handle_write_failed;
     this->async_connection_ref = async_connection_new(
             socket,
             reactor_ref,
@@ -59,9 +58,8 @@ void async_handler_init(
     this->server_ref = server_ref;
     this->input_list = List_new(NULL);
     this->output_list = List_new(NULL);
-    this->active_response = NULL;
 
-    async_connection_read(this->async_connection_ref);//, &handle_request);
+    async_connection_read(this->async_connection_ref);
 }
 void async_handler_destroy(AsyncHandlerRef this)
 {
@@ -85,16 +83,22 @@ void async_handler_anonymous_dispose(void** p)
     async_handler_free(ref);
     *p = NULL;
 }
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// main driver functon - keeps everything going
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/**
+ * Called by async_connection when a new message arrives
+ */
 static void handle_request(AsyncHandlerRef href, MessageRef request_ptr)
 {
     CHECK_TAG(AsyncHandler_TAG, href)
     LOG_FMT("handler handle_request");
     AsyncHandlerRef handler_ref = href;
-    MessageRef response_ptr = NULL;
-    response_ptr = handler_ref->server_ref->process_request(handler_ref, request_ptr);
+    handler_ref->server_ref->process_request(handler_ref, request_ptr);
+}
+/**
+ * Called by process_request() after it has constructed the response message
+ * to have the response sent to the client
+ */
+void async_handler_handle_response(AsyncHandlerRef href, MessageRef request_ptr, MessageRef response_ptr)
+{
     int cmp_tmp = Message_cmp_header(request_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
     if(cmp_tmp == 1) {
         Message_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
@@ -102,98 +106,55 @@ static void handle_request(AsyncHandlerRef href, MessageRef request_ptr)
         Message_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_CLOSE);
     }
 
-    List_add_back(handler_ref->output_list, response_ptr);
-    if (List_size(handler_ref->output_list) == 1) {
-        rtor_reactor_post(handler_ref->async_connection_ref->reactor_ref, postable_write_start, href);
-    }
-    MessageRef m = request_ptr;
-    Message_dispose(&m);
-    rtor_reactor_post(handler_ref->async_connection_ref->reactor_ref, handler_postable_read_start, href);
+    async_connection_write(href->async_connection_ref, response_ptr);
+}
+/**
+ * Called by async_connection when writing of the response is complete
+ */
+static void handle_write_complete(AsyncHandlerRef href)
+{
+    CHECK_TAG(AsyncHandler_TAG, href)
+    async_connection_read(href->async_connection_ref);
+}
+/**
+ * Called by async_connection when the connection is ready to be closed and
+ * no more activity will take place. Such as after an io error or peer closed connection
+ *
+ * Handler should call the server_ref->handler_complete() which will async_handler_dispose() the handler
+ * which will async_connection_dipose() the connection which will close() the connection.
+ *
+ * After this chain of disposes no activity should take place with the connection, handler or runloop.
+ *
+ * NOTE: this function should be called directly from the runloop (ie posted) so that when it returns
+ * no other async_connection or async_handler code is executed for this socket.
+ */
+static void handle_close_connection(AsyncHandlerRef href)
+{
+    CHECK_TAG(AsyncHandler_TAG, href)
+    CHTTP_ASSERT((href->async_connection_ref->socket_stream_ref > 0),"sockets fd must be still owned at this point");
+    LOG_FMT("file async_handler.c handle_close_connection");
+    href->server_ref->handler_complete(href->server_ref, href);
 }
 #if 0
-static AsyncMessageRef process_request(DemoHandlerRef href, DemoMessageRef request)
-{
-    CHECK_TAG(DemoHandler_TAG, href)
-    DemoMessageRef reply = demo_message_new();
-    demo_message_set_is_request(reply, false);
-    BufferChainRef request_body = demo_message_get_body(request);
-    BufferChainRef bc =  BufferChain_new();
-    BufferChain_append_bufferchain(bc, request_body);
-    demo_message_set_body(reply, bc);
-    return reply;
-}
-#endif
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// write sequence
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-static void postable_write_start(ReactorRef reactor_ref, void* href)
-{
-    AsyncHandlerRef handler_ref = href;
-    LOG_FMT("postable_write_start active_response:%p fd:%d  write_state: %d", handler_ref->active_response, handler_ref->async_connection_ref->socket_stream_ref->fd, handler_ref->async_connection_ref->write_state);
-    if(handler_ref->active_response != NULL) {
-        LOG_FMT("active_response is not NULL")
-        return;
-    }
-    MessageRef response = List_remove_first(handler_ref->output_list);
-    CHTTP_ASSERT((handler_ref->active_response == NULL), "handler active response should be NULL");
-    handler_ref->active_response = response;
-    CHTTP_ASSERT((handler_ref->active_response != NULL), "handler active response should be NULL");
-    if(response != NULL) {
-        async_connection_write(handler_ref->async_connection_ref, response); //, on_write_complete_cb);
-    }
-}
-static void handle_write_done(AsyncHandlerRef href)
-{
-    CHECK_TAG(AsyncHandler_TAG, href)
-    AsyncHandlerRef handler_ref = href;
-    LOG_FMT("handle_write_done fd:%d  write_state:%d  list size: %d",
-            handler_ref->async_connection_ref->socket_stream_ref->fd,
-            handler_ref->async_connection_ref->write_state,
-            List_size(handler_ref->output_list)
-            );
-    Message_dispose(&(handler_ref->active_response));
-    if(List_size(handler_ref->output_list) == 1) {
-        rtor_reactor_post(handler_ref->async_connection_ref->reactor_ref, postable_write_start, href);
-    }
-}
-static void handle_connection_done(AsyncHandlerRef href)
-{
-    CHECK_TAG(AsyncHandler_TAG, href)
-    LOG_FMT("file async_handler.c connection_completion_cb");
-    AsyncHandlerRef handler_ref = href;
-    handler_ref->server_ref->handler_complete(handler_ref->server_ref, href);
-}
+// Deprecated
 static void handle_io_error(AsyncHandlerRef  href)
 {
     CHECK_TAG(AsyncHandler_TAG, href)
     LOG_FMT("handle_io_error");
-    return;
-    CHTTP_ASSERT(false, "not implemented");
 }
+// deprecated
 static void handle_reader_stopped(AsyncHandlerRef  href)
 {
     CHECK_TAG(AsyncHandler_TAG, href)
     LOG_FMT("handle_reader_stopped");
-    return;
-    CHTTP_ASSERT(false, "not implemented");
 }
+// deprecated
 static void handle_write_failed(AsyncHandler* href)
 {
     CHECK_TAG(AsyncHandler_TAG, href)
     LOG_FMT("handle_write_failed");
-    return;
-    CHTTP_ASSERT(false, "not implemented");
 }
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// read sequence
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-static void handler_postable_read_start(ReactorRef reactor_ref, void* href)
-{
-    AsyncHandlerRef handler_ref = href;
-    CHECK_TAG(AsyncHandler_TAG, handler_ref);
-    async_connection_read(handler_ref->async_connection_ref);//, &handle_request);
-}
+#endif
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // misc functions
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

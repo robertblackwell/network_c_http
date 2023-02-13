@@ -8,16 +8,18 @@ static char* echo_body(MessageRef request);
 static BufferChainRef echo_body_buffer_chain(MessageRef request);
 MessageRef app_handler_example(AsyncHandlerRef handler_ref, MessageRef request);
 
-MessageRef process_request(AsyncHandlerRef href, MessageRef request)
+void process_request(AsyncHandlerRef href, MessageRef request)
 {
     CHECK_TAG(AsyncHandler_TAG, href)
     LOG_FMT("request %p", request)
     IOBufferRef iob = Message_dump(request);
     MessageRef reply = app_handler_example(href, request);
     IOBufferRef iobreply = Message_dump(reply);
+
     IOBuffer_free(iobreply);
     IOBuffer_free(iob);
-    return reply;
+    href->handle_response(href, request, reply);
+    return;
 }
 
 static BufferChainRef simple_response_body(char* message, int socket, int pthread_self_value)

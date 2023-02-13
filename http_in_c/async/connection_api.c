@@ -2,6 +2,7 @@
 
 #define CHLOG_ON
 #include <http_in_c/async/connection_internal.h>
+static void async_connection_close(AsyncConnectionRef cref);
 
 AsyncConnectionRef async_connection_new(
         int socket,
@@ -25,32 +26,36 @@ void async_connection_init(
     LOG_FMT("AsyncConnection socket: %d", socket)
     this->reactor_ref = reactor_ref;
     this->handler_ref = handler_ref;
+    this->socket = socket;
     this->socket_stream_ref = rtor_stream_new(reactor_ref, socket);
     this->socket_stream_ref->context = this;
+    this->socket_stream_ref->both_arg = this;
     this->active_input_buffer_ref = NULL;
     this->active_output_buffer_ref = NULL;
+    ParserOnMessageCompleteHandler h = async_on_read_message_complete;
+    this->http_parser_ptr = http_parser_new(h, this);
+    this->input_message_ptr = NULL;
+    this->output_message_ptr = NULL;
     this->read_state = READ_STATE_IDLE;
     this->write_state = WRITE_STATE_IDLE;
+    this->read_buffer_size = 1000000;
     this->readside_posted = false;
     this->writeside_posted = false;
     this->cleanup_done_flag = false;
-    ParserOnMessageCompleteHandler h = async_on_read_message_complete;
-    this->http_parser_ptr = http_parser_new(h, this);
     rtor_stream_register(this->socket_stream_ref);
-    this->socket_stream_ref->both_arg = this;
     rtor_stream_arm_both(this->socket_stream_ref, &async_event_handler, this);
-    this->read_buffer_size = 1000000;
 }
 void async_connection_destroy(AsyncConnectionRef this)
 {
     CHECK_TAG(AsyncConnection_TAG, this)
     int fd = this->socket_stream_ref->fd;
-    this->socket = -1;
-    LOG_FMT("async_connection_free close socket: %d", fd)
-    SET_TAG("xxxxxxx", this) // corrupt the tag
-    close(fd);
+    rtor_stream_deregister(this->socket_stream_ref);
     rtor_stream_free(this->socket_stream_ref);
     this->socket_stream_ref = NULL;
+    LOG_FMT("async_connection_free close socket: %d", fd)
+    if(this->socket > 0) {
+        async_connection_close(this);
+    }
     http_parser_dispose(&(this->http_parser_ptr));
     if(this->active_output_buffer_ref) {
         IOBuffer_dispose(&(this->active_output_buffer_ref));
@@ -58,8 +63,16 @@ void async_connection_destroy(AsyncConnectionRef this)
     if(this->active_input_buffer_ref) {
         IOBuffer_dispose(&(this->active_input_buffer_ref));
     }
+    SET_TAG("xxxxxxx", this) // corrupt the tag
     INVALIDATE_TAG(this)
     // INVALIDATE_STRUCT(this, AsyncConnection)
+}
+void async_connection_close(AsyncConnectionRef cref)
+{
+    CHECK_TAG(AsyncConnection_TAG, cref)
+    CHTTP_ASSERT((cref->socket > 0), "socket should be positive");
+    close(cref->socket);
+    cref->socket = -1;
 }
 void async_connection_free(AsyncConnectionRef this)
 {
@@ -70,16 +83,10 @@ void async_connection_free(AsyncConnectionRef this)
 void async_connection_read(AsyncConnectionRef connection_ref) //, void(*on_read_message_cb)(void* href, MessageRef, int status))
 {
     CHECK_TAG(AsyncConnection_TAG, connection_ref)
-    LOG_FMT("async_connection_read read_state: %d %s", connection_ref->read_state, read_state_str(connection_ref->read_state));
-//    CHTTP_ASSERT((connection_ref->read_state != READ_STATE_ACTIVE), "a read is already active");
-    if(connection_ref->read_state == READ_STATE_IDLE) {
-        connection_ref->read_state = READ_STATE_ACTIVE;
-        async_read_start(connection_ref);
-    } else if(connection_ref->read_state == READ_STATE_EAGAINED) {
-//        connection_ref->on_read_message_cb = on_read_message_cb;
-    } else if(connection_ref->read_state == READ_STATE_STOP) {
-        connection_ref->handler_ref->handle_reader_stopped(connection_ref->handler_ref); //, NULL, AsyncConnectionErrCode_is_closed);
-    }
+    CHTTP_ASSERT((connection_ref->read_state == READ_STATE_IDLE), "can only call async_connection_read once");
+    CHTTP_ASSERT((connection_ref->input_message_ptr == NULL), "already a message waiting");
+    connection_ref->read_state = READ_STATE_ACTIVE;
+    async_read_start(connection_ref);
 }
 void async_connection_write(AsyncConnectionRef connection_ref, MessageRef response_ref)
 {
@@ -88,9 +95,6 @@ void async_connection_write(AsyncConnectionRef connection_ref, MessageRef respon
     CHTTP_ASSERT((connection_ref->write_state == WRITE_STATE_IDLE), "a write is already active");
     LOG_FMT("response_ref %p", response_ref)
     connection_ref->active_output_buffer_ref = Message_serialize(response_ref);
-    if(connection_ref->write_state == WRITE_STATE_STOP) {
-        connection_ref->handler_ref->handle_write_failed(connection_ref->handler_ref);
-        return;
-    }
+    connection_ref->write_state = WRITE_STATE_ACTIVE;
     async_post_to_reactor(connection_ref, &async_postable_writer);
 }

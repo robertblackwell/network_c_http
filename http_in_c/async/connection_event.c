@@ -27,9 +27,9 @@ void async_event_handler(RtorStreamRef stream_ref, uint64_t event)
 static void read_epollin(AsyncConnectionRef connection_ref)
 {
     CHECK_TAG(AsyncConnection_TAG, connection_ref)
-    LOGFMT("read_epollin read_state: %s", async_read_state_str(connection_ref->read_state))
+    LOG_FMT("read_epollin read_state: %s", async_read_state_str(connection_ref->read_state))
     if(connection_ref->read_state == READ_STATE_EAGAINED) {
-//        connection_ref->read_state = READ_STATE_ACTIVE;
+        connection_ref->read_state = READ_STATE_ACTIVE;
         async_read_start(connection_ref);
     }
 }

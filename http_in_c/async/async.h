@@ -18,13 +18,26 @@ typedef struct AsyncConnection_s AsyncConnection, *AsyncConnectionRef;
 typedef struct AsyncHandler_s AsyncHandler, *AsyncHandlerRef;
 typedef struct  AsyncServer_s AsyncServer, *AsyncServerRef;
 
+typedef void(*AsyncProcessRequestCompletionFunction)(AsyncHandlerRef handler_ref, MessageRef request_ptr, MessageRef response_ptr);
 /**
  * This is where the servers web application is implemented.
  * A function with this signature must be linked into the
  * async_server_app to complete it.
  * For this example this function is found in async_process_request
+ *
+ * Create a MessageRef response_ptr from the request and other considerations.
+ * When done call:
+ *
+ *      handler_ref->handle_response(handler_ref, request, response)
+ *
+ * The handler will send the response to the client after maybe adding or modifying
+ * some headers.
+ *
+ * handler_ref->handle_response() is of type AsyncProcessRequestCompletionFunction.
+ *
+ * Could also call async_handler_handle_response() which is the same function.
  */
-typedef MessageRef(*AsyncProcessRequestFunction)(AsyncHandlerRef handler_ref, MessageRef request);
+typedef void(*AsyncProcessRequestFunction)(AsyncHandlerRef handler_ref, MessageRef request);
 //MessageRef process_request(AsyncHandlerRef href, MessageRef request);
 
 /**
@@ -84,22 +97,21 @@ void AsyncServer_terminate(AsyncServerRef this);
 typedef struct AsyncConnection_s {
     DECLARE_TAG;
     ReactorRef      reactor_ref;
+    AsyncHandlerRef handler_ref;
     int             socket;
     RtorStreamRef   socket_stream_ref;
-    AsyncHandlerRef handler_ref;
     IOBufferRef     active_input_buffer_ref;
     IOBufferRef     active_output_buffer_ref;
     http_parser_t*  http_parser_ptr;
-    int             read_state;
     MessageRef      input_message_ptr;
-    MessageRef      outout_message_ptr;
+    MessageRef      scratch_request;
+    MessageRef      output_message_ptr;
+    int             read_state;
     int             write_state;
-    DC_Close_CB     on_close_cb;
+    int             read_buffer_size;
     bool            cleanup_done_flag;
     bool            readside_posted;
     bool            writeside_posted;
-    bool            post_active;
-    int             read_buffer_size;
 
 } AsyncConnection, *AsyncConnectionRef;
 
@@ -116,6 +128,7 @@ void async_connection_init(
 );
 
 void async_connection_free(AsyncConnectionRef this);
+void async_connection_destroy(AsyncConnectionRef cref);
 void async_connection_amonymous_dispose(void* p);
 void async_connection_read(AsyncConnectionRef connection_ref); //, void(*on_read_message_cb)(void* href, MessageRef, int status));
 void async_connection_write(AsyncConnectionRef connection_ref, MessageRef); //, void(*on_write_message_cb)(void* href, int status));
@@ -131,18 +144,19 @@ typedef struct AsyncHandler_s {
     DECLARE_TAG;
 
     void(*handle_request)(AsyncHandlerRef, MessageRef);
-    void(*handle_write_done)(AsyncHandlerRef);
-    void(*handle_connection_done)(AsyncHandlerRef);
+    void(*handle_response)(AsyncHandlerRef, MessageRef request, MessageRef response);
+    void(*handle_write_complete)(AsyncHandlerRef);
+    void(*handle_close_connection)(AsyncHandlerRef);
 
-    void(*handle_reader_stopped)(AsyncHandlerRef);
-    void(*handle_io_error)(AsyncHandlerRef);
-    void(*handle_write_failed)(AsyncHandlerRef);
+//    void(*handle_reader_stopped)(AsyncHandlerRef);
+//    void(*handle_io_error)(AsyncHandlerRef);
+//    void(*handle_write_failed)(AsyncHandlerRef);
 
     AsyncConnectionRef  async_connection_ref;
     AsyncServerRef      server_ref;
     ListRef             input_list; // List of MessageRef - requests
     ListRef             output_list; // List of MessageRef - responses
-    MessageRef          active_response;
+//    MessageRef          active_response;
 
 } AsyncHandler, *AsyncHandlerRef;
 
@@ -156,6 +170,7 @@ void async_handler_init(
         ReactorRef reactor_ref,
         AsyncServerRef sref
 );
+void async_handler_handle_response(AsyncHandlerRef href, MessageRef request_ptr, MessageRef response_ptr);
 void async_handler_free(AsyncHandlerRef this);
 void async_handler_anonymous_dispose(void** p);
 inline ReactorRef async_handler_reactor_ref(AsyncHandlerRef handler_ref)
