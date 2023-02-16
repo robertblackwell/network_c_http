@@ -7,11 +7,11 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-static void static_handler(RtorEventfdRef watcher, void* arg, uint64_t event)
+static void static_handler(RtorEventfdRef watcher, uint64_t event)
 {
     RtorEventfdRef eventfd_ref = watcher;
     RtorInterthreadQueueRef itq_ref = (RtorInterthreadQueueRef) eventfd_ref->fd_event_handler_arg;
-    XR_ITQUEUE_CHECK_TAG(itq_ref)
+    ITQUEUE_CHECK_TAG(itq_ref)
     assert(eventfd_ref == itq_ref->eventfd_ref);
     assert(itq_ref->queue_event_handler != NULL);
     itq_ref->queue_event_handler(itq_ref->queue_event_handler_arg);
@@ -19,12 +19,12 @@ static void static_handler(RtorEventfdRef watcher, void* arg, uint64_t event)
 static void anonymous_free(RtorWatcherRef p)
 {
     RtorInterthreadQueueRef queue_watcher_ref = (RtorInterthreadQueueRef)p;
-    XR_ITQUEUE_CHECK_TAG(queue_watcher_ref)
+    ITQUEUE_CHECK_TAG(queue_watcher_ref)
     rtor_interthread_queue_dispose(queue_watcher_ref);
 }
 void rtor_interthread_queue_init(RtorInterthreadQueueRef this, ReactorRef runloop)
 {
-    XR_ITQUEUE_SET_TAG(this);
+    ITQUEUE_SET_TAG(this);
     this->eventfd_ref = rtor_eventfd_new(runloop);
     this->queue = RunList_new();
 //    this->queue_event_handler = NULL;
@@ -38,12 +38,13 @@ RtorInterthreadQueueRef rtor_interthread_queue_new(ReactorRef rtor_ref)
 }
 void rtor_interthread_queue_dispose(RtorInterthreadQueueRef this)
 {
-    XR_ITQUEUE_CHECK_TAG(this)
+    ITQUEUE_CHECK_TAG(this)
     close(this->eventfd_ref->fd);
     free((void*)this);
 }
 void rtor_interthread_queue_add(RtorInterthreadQueueRef this, void* item)
 {
+    ITQUEUE_CHECK_TAG(this)
     pthread_mutex_lock(&(this->queue_mutex));
     List_add_back(this->queue, item);
     LOG_FMT("Queue_add: %d\n", List_size(me->list));
@@ -57,6 +58,7 @@ void rtor_interthread_queue_add(RtorInterthreadQueueRef this, void* item)
 }
 void rtor_interthread_queue_drain(RtorInterthreadQueueRef this, void(*draincb)(void*))
 {
+    ITQUEUE_CHECK_TAG(this)
     ReactorRef rx = this->eventfd_ref->runloop;
     pthread_mutex_lock(&(this->queue_mutex));
     for(void* op = List_remove_first(this->queue); op != NULL;) {
@@ -69,10 +71,10 @@ void rtor_interthread_queue_drain(RtorInterthreadQueueRef this, void(*draincb)(v
 }
 void rtor_interthread_queue_register(RtorInterthreadQueueRef this, InterthreadQueueEventHandler evhandler, void* arg, uint64_t watch_what)
 {
-//    XR_ITQUEUE_CHECK_TAG(this)
+    ITQUEUE_CHECK_TAG(this)
 
     uint32_t interest = watch_what;
-    char* tagptr = &(this->eventfd_ref->tag);
+    char* tagptr = (this->eventfd_ref->tag);
     void* eventfd_ptr = this->eventfd_ref;
     void* queue_handler_ptr = &(this->queue_event_handler);
     void* queue_handler_arg = &(this->queue_event_handler_arg);
@@ -86,20 +88,22 @@ void rtor_interthread_queue_register(RtorInterthreadQueueRef this, InterthreadQu
 }
 void rtor_interthreaD_queue_deregister(RtorInterthreadQueueRef this)
 {
-    XR_ITQUEUE_CHECK_TAG(this)
-    int res = rtor_deregister(this->eventfd_ref->runloop, this->eventfd_ref->fd);
+    ITQUEUE_CHECK_TAG(this)
+    int res = rtor_reactor_deregister(this->eventfd_ref->runloop, this->eventfd_ref->fd);
     assert(res == 0);
 }
-ReactorRef rtor_interthread_queue_get_reactor(RtorInterthreadQueueRef athis)
+ReactorRef rtor_interthread_queue_get_reactor(RtorInterthreadQueueRef this)
 {
-    return athis->eventfd_ref->runloop;
+    ITQUEUE_CHECK_TAG(this)
+    return this->eventfd_ref->runloop;
 }
-int rtor_interthread_queue_get_fd(RtorInterthreadQueueRef athis)
+int rtor_interthread_queue_get_fd(RtorInterthreadQueueRef this)
 {
-    return athis->eventfd_ref->fd;
+    ITQUEUE_CHECK_TAG(this)
+    return this->eventfd_ref->fd;
 }
 
 void rtor_interthread_queue_verify(RtorInterthreadQueueRef this)
 {
-    XR_ITQUEUE_CHECK_TAG(this)
+    ITQUEUE_CHECK_TAG(this)
 }

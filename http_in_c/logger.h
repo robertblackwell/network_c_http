@@ -19,7 +19,7 @@ extern void log_function(char* level, const char* funcname, const char* filename
 		free(s); \
 	} while(0);
 
-#define LOG_FMT(f_, ...) do {\
+#define LOGFMT(f_, ...) do {\
 		char* s; \
 		int c  = asprintf(&s, f_, ##__VA_ARGS__); \
 		log_function("LOG", __FUNCTION__, __FILE__, __LINE__, s); \

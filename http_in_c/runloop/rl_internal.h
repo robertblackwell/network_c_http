@@ -105,6 +105,7 @@ struct Reactor_s {
     DECLARE_TAG;
     int                     epoll_fd;
     bool                    closed_flag;
+    bool                    runloop_executing;
     FdTableRef              table; // (int, CallbackData)
     FunctorListRef          ready_list;
 #if 1

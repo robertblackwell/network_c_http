@@ -88,7 +88,7 @@ void rtor_listener_arm(RtorListenerRef athis, ListenerEventHandler fd_event_hand
     if (arg != NULL) {
         athis->listen_arg = arg;
     }
-    uint32_t interest = EPOLLIN | EPOLLEXCLUSIVE ;
+    uint32_t interest = EPOLLIN; // | EPOLLEXCLUSIVE ;
 
     int res = rtor_reactor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
     if(res != 0) {

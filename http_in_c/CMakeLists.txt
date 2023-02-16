@@ -129,7 +129,7 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		runloop/w_timerfd.c
         runloop/w_stream.c
 		runloop/w_queue.c
-#		runloop/interthread_queue.c
+		runloop/interthread_queue.c
 		runloop/watcher.c
 		runloop/evfd_queue.c
 		runloop/run_list.c

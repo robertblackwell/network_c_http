@@ -11,9 +11,10 @@ static void process_request(AsyncHandlerRef href, MessageRef request);
 AsyncServerRef g_sref;
 void sig_handler(int signo)
 {
-    printf("demo_app.c signal handler \n");
+    printf("async_server_main.c signal handler \n");
     if ((signo == SIGINT) || (signo == SIGABRT)) {
         printf("received SIGINT or SIGABRT\n");
+        return;
         AsyncServer_free(g_sref);
         g_sref = NULL;
         exit(0);

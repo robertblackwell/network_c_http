@@ -9,6 +9,7 @@
 #include <fcntl.h>
 #include <sys/epoll.h>
 #include <http_in_c/logger.h>
+#include <http_in_c/macros.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/socket_functions.h>
@@ -169,10 +170,16 @@ void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event)
 
     int sock2 = accept(server_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
     if(sock2 <= 0) {
-        LOG_ERROR("accpt failed errno %d  sttrerror: %s", errno, strerror(errno));
+        LOG_ERROR("accpt failed errno %d  strerror: %s", errno, strerror(errno));
         LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
     }
     LOG_FMT("Listerner accepted sock fd: %d", sock2);
+    printf("async on listening new socket %d\n", sock2);
+    int result = listen(server_ref->listening_socket_fd, SOMAXCONN);
+    if(result != 0) {
+        CHTTP_ASSERT((result != 0), "listen faield");
+    }
+    socket_set_non_blocking(sock2);
     AsyncHandlerRef handler = async_handler_new(
             sock2,
             rtor_listener_get_reactor(listener_watcher_ref),

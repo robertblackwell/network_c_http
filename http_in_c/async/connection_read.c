@@ -3,20 +3,19 @@
 #include <http_in_c/async/connection_internal.h>
 
 static void postable_reader(ReactorRef reactor_ref, void* arg);
-static void reader(AsyncConnectionRef connection_ref);
 static void read_new_message(AsyncConnectionRef cref);
 static void read_error(AsyncConnectionRef connection_ref, char* msg);
 static void read_eagain(AsyncConnectionRef cref);
 static void read_need_data(AsyncConnectionRef cref);
 static void post_read_start(AsyncConnectionRef cref);
-
+static void reader(AsyncConnectionRef cref);
 static void post_delegate_handle_request(AsyncHandlerRef href, MessageRef request);
 static void post_delegate_handle_connection_closed(AsyncHandlerRef href);
 
 void async_read_start(AsyncConnectionRef connection_ref)
 {
     CHECK_TAG(AsyncConnection_TAG, connection_ref)
-    LOG_FMT("async_read_start read_state: %d %s", connection_ref->read_state, async_read_state_str(connection_ref->read_state));
+    LOGFMT("async_read_start read_state: %d %s", connection_ref->read_state, async_read_state_str(connection_ref->read_state));
     CHTTP_ASSERT((connection_ref->read_state == READ_STATE_ACTIVE), "invalid state");
     CHTTP_ASSERT((! connection_ref->readside_posted), "read_side posted should be false");
     connection_ref->readside_posted = true;
@@ -33,7 +32,7 @@ static void postable_reader(ReactorRef reactor_ref, void* arg)
 {
     AsyncConnectionRef connection_ref = arg;
     CHECK_TAG(AsyncConnection_TAG, connection_ref)
-    LOG_FMT("postable_reader read_state: %d %s", connection_ref->read_state, async_read_state_str(connection_ref->read_state));
+    LOGFMT("postable_reader read_state: %d %s", connection_ref->read_state, async_read_state_str(connection_ref->read_state));
     CHTTP_ASSERT((connection_ref->read_state == READ_STATE_ACTIVE), "invalid state");
     CHTTP_ASSERT((connection_ref->readside_posted), "read_side posted should be true");
     connection_ref->readside_posted = false;
@@ -44,7 +43,7 @@ static void reader(AsyncConnectionRef connection_ref) {
     CHTTP_ASSERT((connection_ref->read_state == READ_STATE_ACTIVE), "invalid state");
     CHTTP_ASSERT((connection_ref->input_message_ptr  == NULL), "input_message_ptr not null - invalid state");
     AsyncHandlerRef href = connection_ref->handler_ref;
-    LOG_FMT("reader read_state: %d %s", connection_ref->read_state, async_read_state_str(connection_ref->read_state));
+    LOGFMT("reader read_state: %d %s", connection_ref->read_state, async_read_state_str(connection_ref->read_state));
     int buffer_size = connection_ref->read_buffer_size;
     if (connection_ref->active_input_buffer_ref == NULL) {
         connection_ref->active_input_buffer_ref = IOBuffer_new_with_capacity(buffer_size);
@@ -123,8 +122,8 @@ static void read_need_data(AsyncConnectionRef cref)
     CHTTP_ASSERT((cref->input_message_ptr  == NULL), "input_message_ptr NOT null on incomplete read");
     CHTTP_ASSERT((!cref->readside_posted), "nothing should be posted on readside at this point");
     LOG_FMT("read_need_data connection_ref->read_state: %s", async_read_state_str(cref->read_state));
-    async_post_to_reactor(cref, &postable_reader);
-    cref->readside_posted = true;
+//    async_post_to_reactor(cref, &postable_reader);
+//    cref->readside_posted = true;
     post_read_start(cref);
 }
 static void postable_close_connection(ReactorRef reactor_ref, void* arg)

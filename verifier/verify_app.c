@@ -1,5 +1,5 @@
 
-#define CHLOG_ON
+#define CHLOG_ONX
 #include <http_in_c/sync/sync.h>
 #include <http_in_c/sync/sync_internal.h>
 #include <stdio.h>
@@ -91,6 +91,7 @@ static void make_uid(thread_context_t* ctx);
 bool verify_response(thread_context_t* ctx, MessageRef request, MessageRef response);
 struct timeval get_time();
 double time_diff_ms(struct timeval t1, struct timeval t2);
+double time_diff_musecs(struct timeval t1, struct timeval t2);
 void* threadfn(void* data);
 void combine_response_times(double all[], int all_size, double rt[], int rt_size, int thrd_ix);
 void stat_analyse(double all[], int all_size, double* average, double* stdev);
@@ -194,7 +195,7 @@ int main(int argc, char* argv[])
     double avg_time_ms = main_elapsed_ms / (nbr_requests * 1.0);
     printf("Total elapsed time in ms %f. Nbr threads: %d conn per thread: %d requests per connection: %d total number of request/response cycles %d\n",
            main_elapsed_ms, nbr_threads , nbr_connections_per_thread,nbr_requests_per_connection, nbr_requests);
-    printf("Response times in ms mean: %f stddev: %f\n", avg_time_ms, stddev);
+    printf("Response times in mu secs mean: %f stddev: %f\n", avg, stddev);
 
 }
 void dump_double_arr(char* msg, double arr[], int arr_dim)
@@ -212,7 +213,7 @@ void dump_double_arr(char* msg, double arr[], int arr_dim)
 int verify_handler(MessageRef response_ptr, sync_client_t* client_ptr)
 {
     thread_context_t* ctx = sync_client_get_userptr(client_ptr);
-    LOG_FMT("verify handler cycle:%d connection: %d\n",ctx->cycle_index, ctx->connection_index );
+    LOGFMT("verify handler ident: % dcycle:%d connection: %d\n",ctx->ident, ctx->cycle_index, ctx->connection_index );
     LOG_FMT("verify handler howmany_requests_per_connection: %d\n",ctx->howmany_requests_per_connection);
     LOG_FMT("verify handler howmany_connections: %d\n",ctx->howmany_connections);
     ctx->response_ptr = response_ptr;
@@ -227,23 +228,27 @@ int verify_handler(MessageRef response_ptr, sync_client_t* client_ptr)
     ctx->response_ptr = NULL;
     struct timeval iter_end_time = get_time();
     int i = ctx_time_array_index(ctx);
-    double tmp = time_diff_ms(iter_end_time, ctx->iter_start_time);
+    double tmp = time_diff_musecs(iter_end_time, ctx->iter_start_time);
     ctx->resp_times[i] =  tmp;
     LOG_FMT("time index : %d this interval: %f", i, ctx->resp_times[i])
     int return_value = HPE_OK;
     if(ctx->cycle_index >= ctx->howmany_requests_per_connection - 1) {
         ctx->cycle_index = 0;
+        printf("no request ident: %d\n", ctx->ident);
         return_value = HPE_USER; // This will force sync_client_round_trip() to return rather than wait for server to timeout
     } else {
         /**
          * Make the last message on a connection CONNECTION: close
          */
-        ctx->cycle_index++;
-        bool connection_close_flag = ctx_is_last_request_for_connection(ctx);
+        bool connection_close_flag = (ctx->cycle_index >= ctx->howmany_requests_per_connection - 2);//ctx_is_last_request_for_connection(ctx);
+        printf("verify_handler ident: %d how many connections: %d how manh requests: %d \n", ctx->ident, ctx->howmany_connections, ctx->howmany_requests_per_connection);
+        printf("verify_handler ident: %d cycle_index: %d connection_index: %d connection_close_flag: %d\n", ctx->ident, ctx->cycle_index, ctx->connection_index, (int)connection_close_flag);
         make_uid(ctx);
         ctx->request_ptr = make_request(ctx, connection_close_flag);
+        ctx->cycle_index++;
         ctx->iter_start_time = get_time();
         sync_connection_write(client_ptr->connection_ptr, ctx->request_ptr);
+        printf("write response ident: %d cycle_index: %d connection_index: %d connection_close_flag: %d\n", ctx->ident, ctx->cycle_index, ctx->connection_index, (int)connection_close_flag);
     }
     LOG_FMT("verify_handler return_value %d n=======================================================================\n", return_value);
     return return_value;
@@ -252,18 +257,19 @@ void* threadfn(void* data)
 {
     thread_context_t* ctx = (thread_context_t*)data;
     CHECK_TAG(THREAD_CONTEXT_TAG, ctx)
+    ctx->cycle_index = 0;
 //    printf("threadfn ctx: %p data: %p \n", ctx, data);
     struct timeval start_time = get_time();
     for(int iconn = 0; iconn < ctx->howmany_connections; iconn++) {
         struct timeval iter_start_time = get_time();
         ctx->connection_index = iconn;
-        ctx->cycle_index = 0;
         LOG_FMT("start of loop thread id %d iteration %d", ctx->ident, iconn)
         /**
          * setup client and connect to server
          */
         sync_client_t* client_ptr = sync_client_new(ctx->read_buffer_size);
         sync_client_set_userptr(client_ptr, ctx);
+        printf("client connext ident: %d\n", ctx->ident);
         sync_client_connect(client_ptr, "localhost", ctx->port);
 
         /**
@@ -284,10 +290,11 @@ void* threadfn(void* data)
          */
         ctx->iter_start_time = get_time();
         sync_client_request_round_trip(client_ptr, request, verify_handler);
-        LOG_FMT("end of loop thread id %d connection: %d cycle %d", ctx->ident, iconn, ctx->cycle_index)
+        LOGFMT("roundtrip return ident id %d connection: %d cycle %d", ctx->ident, iconn, ctx->cycle_index)
         sync_client_close(client_ptr);
         sync_client_dispose(&client_ptr);
-//        printf("Completed round-trip loop\n");
+        printf("Completed round-trip loop ident: %d counter: %d connection_index: %d cycle_index: %d\n",
+               ctx->ident, ctx->counter, ctx->connection_index, ctx->cycle_index);
     }
     struct timeval end_time = get_time();
     ctx->total_time =  time_diff_ms(end_time, start_time);
@@ -323,8 +330,15 @@ static MessageRef make_request(thread_context_t* ctx, bool keep_alive_flag)
 
 static void make_uid(thread_context_t* ctx)
 {
+    printf("make_uid ident: %d counter: %d cycle_index:%d connection_index:%d nbr connections: %d requests per connection %d\n",
+           ctx->ident,
+           ctx->counter,
+           ctx->cycle_index,
+           ctx->connection_index,
+           ctx->howmany_connections,
+           ctx->howmany_requests_per_connection);
+    sprintf(ctx->uid, "%d:%d:%d", ctx->ident, ctx->connection_index, ctx->cycle_index);
     ctx->counter++;
-    sprintf(ctx->uid, "%d:%d", ctx->ident, ctx->counter);
 }
 
 /**
@@ -350,9 +364,9 @@ bool verify_response(thread_context_t* ctx, MessageRef request, MessageRef respo
     IOBufferRef iob = Message_serialize(request);
     IOBufferRef iobresp = Message_serialize(response);
     printf("Request \n");
-    printf("%s\n", IOBuffer_cstr(iob));
+//    printf("%s\n", IOBuffer_cstr(iob));
     printf("Response \n");
-    printf("%s\n", IOBuffer_cstr(iobresp));
+//    printf("%s\n", IOBuffer_cstr(iobresp));
     return true;
 #else
     IOBufferRef body_iob = BufferChain_compact(body);
@@ -377,6 +391,11 @@ struct timeval get_time()
 double time_diff_ms(struct timeval t1, struct timeval t2)
 {
     double dif = (t1.tv_sec - t2.tv_sec) * 1e3 + (t1.tv_usec - t2.tv_usec) * 1e-3;
+    return dif;
+}
+double time_diff_musecs(struct timeval t1, struct timeval t2)
+{
+    double dif = (t1.tv_sec - t2.tv_sec) * 1e6 + (t1.tv_usec - t2.tv_usec);
     return dif;
 }
 

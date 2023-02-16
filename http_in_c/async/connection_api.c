@@ -85,6 +85,8 @@ void async_connection_read(AsyncConnectionRef connection_ref) //, void(*on_read_
     CHECK_TAG(AsyncConnection_TAG, connection_ref)
     CHTTP_ASSERT((connection_ref->read_state == READ_STATE_IDLE), "can only call async_connection_read once");
     CHTTP_ASSERT((connection_ref->input_message_ptr == NULL), "already a message waiting");
+    LOGFMT("href: %p socket: %d read state: %s readside_posted: %d", connection_ref->handler_ref, connection_ref->socket,
+           async_read_state_str(connection_ref->read_state),(int)connection_ref->readside_posted)
     connection_ref->read_state = READ_STATE_ACTIVE;
     async_read_start(connection_ref);
 }

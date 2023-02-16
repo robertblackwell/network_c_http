@@ -89,7 +89,7 @@ void async_handler_anonymous_dispose(void** p)
 static void handle_request(AsyncHandlerRef href, MessageRef request_ptr)
 {
     CHECK_TAG(AsyncHandler_TAG, href)
-    LOG_FMT("handler handle_request");
+    LOGFMT("href: %p socket:%d", href, href->async_connection_ref->socket);
     AsyncHandlerRef handler_ref = href;
     handler_ref->server_ref->process_request(handler_ref, request_ptr);
 }
@@ -99,6 +99,8 @@ static void handle_request(AsyncHandlerRef href, MessageRef request_ptr)
  */
 void async_handler_handle_response(AsyncHandlerRef href, MessageRef request_ptr, MessageRef response_ptr)
 {
+    CHECK_TAG(AsyncHandler_TAG, href)
+    LOGFMT("href: %p socket:%d", href, href->async_connection_ref->socket);
     int cmp_tmp = Message_cmp_header(request_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
     if(cmp_tmp == 1) {
         Message_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
@@ -114,6 +116,7 @@ void async_handler_handle_response(AsyncHandlerRef href, MessageRef request_ptr,
 static void handle_write_complete(AsyncHandlerRef href)
 {
     CHECK_TAG(AsyncHandler_TAG, href)
+    LOGFMT("href: %p socket:%d", href, href->async_connection_ref->socket);
     async_connection_read(href->async_connection_ref);
 }
 /**
@@ -132,7 +135,7 @@ static void handle_close_connection(AsyncHandlerRef href)
 {
     CHECK_TAG(AsyncHandler_TAG, href)
     CHTTP_ASSERT((href->async_connection_ref->socket_stream_ref > 0),"sockets fd must be still owned at this point");
-    LOG_FMT("file async_handler.c handle_close_connection");
+    LOGFMT("file async_handler.c handle_close_connection socket %d", href->async_connection_ref->socket);
     href->server_ref->handler_complete(href->server_ref, href);
 }
 #if 0
