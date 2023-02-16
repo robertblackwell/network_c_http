@@ -52,7 +52,7 @@ void async_connection_destroy(AsyncConnectionRef this)
     rtor_stream_deregister(this->socket_stream_ref);
     rtor_stream_free(this->socket_stream_ref);
     this->socket_stream_ref = NULL;
-    LOG_FMT("async_connection_free close socket: %d", fd)
+    LOGFMT("async_connection_free close socket: %d", fd)
     if(this->socket > 0) {
         async_connection_close(this);
     }
@@ -71,6 +71,7 @@ void async_connection_close(AsyncConnectionRef cref)
 {
     CHECK_TAG(AsyncConnection_TAG, cref)
     CHTTP_ASSERT((cref->socket > 0), "socket should be positive");
+
     close(cref->socket);
     cref->socket = -1;
 }
@@ -85,10 +86,13 @@ void async_connection_read(AsyncConnectionRef connection_ref) //, void(*on_read_
     CHECK_TAG(AsyncConnection_TAG, connection_ref)
     CHTTP_ASSERT((connection_ref->read_state == READ_STATE_IDLE), "can only call async_connection_read once");
     CHTTP_ASSERT((connection_ref->input_message_ptr == NULL), "already a message waiting");
-    LOGFMT("href: %p socket: %d read state: %s readside_posted: %d", connection_ref->handler_ref, connection_ref->socket,
+    LOG_FMT("href: %p socket: %d read state: %s readside_posted: %d", connection_ref->handler_ref, connection_ref->socket,
            async_read_state_str(connection_ref->read_state),(int)connection_ref->readside_posted)
     connection_ref->read_state = READ_STATE_ACTIVE;
-    async_read_start(connection_ref);
+    if(!connection_ref->readside_posted) {
+        reader(connection_ref);
+    }
+//    async_read_start(connection_ref);
 }
 void async_connection_write(AsyncConnectionRef connection_ref, MessageRef response_ref)
 {

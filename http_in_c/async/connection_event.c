@@ -13,11 +13,13 @@ void async_event_handler(RtorStreamRef stream_ref, uint64_t event)
     LOG_FMT("event_handler %lx", event);
     AsyncConnectionRef connection_ref = stream_ref->context;
     CHECK_TAG(AsyncConnection_TAG, connection_ref)
-    LOG_FMT("async_handler handler");
+    LOG_FMT("async_handler handler socket: %d", connection_ref->socket);
     if(event & EPOLLOUT) {
+        LOG_FMT("EPOLLOUT")
         write_epollout(connection_ref);
     }
     if(event & EPOLLIN) {
+        LOG_FMT("EPOLLIN")
         read_epollin(connection_ref);
     }
     if(!((event & EPOLLIN) || (event & EPOLLOUT))){

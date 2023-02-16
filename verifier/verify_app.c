@@ -27,7 +27,6 @@
 #define THREAD_CONTEXT_TAG "THDCTX"
 #include <http_in_c/check_tag.h>
 
-
 #define DYN_RESP_TIMES
 typedef struct thread_context_s {
     DECLARE_TAG;
@@ -36,6 +35,7 @@ typedef struct thread_context_s {
     char url[VERIFY_URL_MAXSIZE];
     int howmany_connections;
     int howmany_requests_per_connection;
+    sync_client_t* client_ptr;
     int ident;
     MessageRef request_ptr;
     MessageRef response_ptr;
@@ -55,6 +55,17 @@ typedef struct thread_context_s {
 #endif
 
 }thread_context_t;
+
+int ctx_socket(thread_context_t* ctx)
+{
+    if(ctx && ctx->client_ptr && ctx->client_ptr->connection_ptr) {
+        return ctx->client_ptr->connection_ptr->socketfd;
+    }
+    return -1;
+}
+
+#define CTX_SOCKET(ctx) (ctx_socket(ctx))
+
 
 void thread_context_init(thread_context_t* ctx, int id, int port, int nbr_connections_per_thread,int nbr_requests_per_connection, char* url_cstr, size_t read_buffer_size)
 {
@@ -213,7 +224,7 @@ void dump_double_arr(char* msg, double arr[], int arr_dim)
 int verify_handler(MessageRef response_ptr, sync_client_t* client_ptr)
 {
     thread_context_t* ctx = sync_client_get_userptr(client_ptr);
-    LOGFMT("verify handler ident: % dcycle:%d connection: %d\n",ctx->ident, ctx->cycle_index, ctx->connection_index );
+    LOGFMT("verify handler ident: % d socket: %d cycle:%d connection: %d\n",ctx->ident, CTX_SOCKET(ctx),ctx->cycle_index, ctx->connection_index );
     LOG_FMT("verify handler howmany_requests_per_connection: %d\n",ctx->howmany_requests_per_connection);
     LOG_FMT("verify handler howmany_connections: %d\n",ctx->howmany_connections);
     ctx->response_ptr = response_ptr;
@@ -222,7 +233,7 @@ int verify_handler(MessageRef response_ptr, sync_client_t* client_ptr)
         LOG_ERROR("Verify response failed")
         printf("Verify response failed\n");
     }
-    LOG_FMT("end of loop thread id %d cycle_index %d", ctx->ident, ctx->cycle_index)
+    LOG_FMT("end of loop thread id %d socket:%d cycle_index %d", ctx->ident, CTX_SOCKET(ctx), ctx->cycle_index)
     Message_dispose(&(ctx->request_ptr));
     Message_dispose(&response_ptr);
     ctx->response_ptr = NULL;
@@ -230,25 +241,25 @@ int verify_handler(MessageRef response_ptr, sync_client_t* client_ptr)
     int i = ctx_time_array_index(ctx);
     double tmp = time_diff_musecs(iter_end_time, ctx->iter_start_time);
     ctx->resp_times[i] =  tmp;
-    LOG_FMT("time index : %d this interval: %f", i, ctx->resp_times[i])
+    LOG_FMT("time index : %d socket:%d this interval: %f", i, CTX_SOCKET(ctx),ctx->resp_times[i])
     int return_value = HPE_OK;
     if(ctx->cycle_index >= ctx->howmany_requests_per_connection - 1) {
         ctx->cycle_index = 0;
-        printf("no request ident: %d\n", ctx->ident);
+        LOGFMT("no request ident: %d socket:%d ", ctx->ident, CTX_SOCKET(ctx));
         return_value = HPE_USER; // This will force sync_client_round_trip() to return rather than wait for server to timeout
     } else {
         /**
          * Make the last message on a connection CONNECTION: close
          */
         bool connection_close_flag = (ctx->cycle_index >= ctx->howmany_requests_per_connection - 2);//ctx_is_last_request_for_connection(ctx);
-        printf("verify_handler ident: %d how many connections: %d how manh requests: %d \n", ctx->ident, ctx->howmany_connections, ctx->howmany_requests_per_connection);
-        printf("verify_handler ident: %d cycle_index: %d connection_index: %d connection_close_flag: %d\n", ctx->ident, ctx->cycle_index, ctx->connection_index, (int)connection_close_flag);
+        LOGFMT("verify_handler ident: %d socket:%d how many connections: %d how manh requests: %d", ctx->ident, CTX_SOCKET(ctx), ctx->howmany_connections, ctx->howmany_requests_per_connection);
+        LOGFMT("verify_handler ident: %d socket:%d cycle_index: %d connection_index: %d connection_close_flag: %d", ctx->ident, CTX_SOCKET(ctx), ctx->cycle_index, ctx->connection_index, (int)connection_close_flag);
         make_uid(ctx);
         ctx->request_ptr = make_request(ctx, connection_close_flag);
         ctx->cycle_index++;
         ctx->iter_start_time = get_time();
         sync_connection_write(client_ptr->connection_ptr, ctx->request_ptr);
-        printf("write response ident: %d cycle_index: %d connection_index: %d connection_close_flag: %d\n", ctx->ident, ctx->cycle_index, ctx->connection_index, (int)connection_close_flag);
+        LOGFMT("write response ident: %d socket:%d cycle_index: %d connection_index: %d connection_close_flag: %d", ctx->ident, CTX_SOCKET(ctx), ctx->cycle_index, ctx->connection_index, (int)connection_close_flag);
     }
     LOG_FMT("verify_handler return_value %d n=======================================================================\n", return_value);
     return return_value;
@@ -258,18 +269,18 @@ void* threadfn(void* data)
     thread_context_t* ctx = (thread_context_t*)data;
     CHECK_TAG(THREAD_CONTEXT_TAG, ctx)
     ctx->cycle_index = 0;
-//    printf("threadfn ctx: %p data: %p \n", ctx, data);
     struct timeval start_time = get_time();
     for(int iconn = 0; iconn < ctx->howmany_connections; iconn++) {
         struct timeval iter_start_time = get_time();
         ctx->connection_index = iconn;
-        LOG_FMT("start of loop thread id %d iteration %d", ctx->ident, iconn)
+        LOG_FMT("start of loop thread ident %d socket: %d iteration %d", ctx->ident, CTX_SOCKET(ctx), iconn)
         /**
          * setup client and connect to server
          */
         sync_client_t* client_ptr = sync_client_new(ctx->read_buffer_size);
         sync_client_set_userptr(client_ptr, ctx);
-        printf("client connext ident: %d\n", ctx->ident);
+        ctx->client_ptr = client_ptr;
+        LOGFMT("client connext ident: %d socket:%d ", ctx->ident, CTX_SOCKET(ctx));
         sync_client_connect(client_ptr, "localhost", ctx->port);
 
         /**
@@ -290,11 +301,12 @@ void* threadfn(void* data)
          */
         ctx->iter_start_time = get_time();
         sync_client_request_round_trip(client_ptr, request, verify_handler);
-        LOGFMT("roundtrip return ident id %d connection: %d cycle %d", ctx->ident, iconn, ctx->cycle_index)
+        LOGFMT("roundtrip return ident id %d socket:%d connection: %d cycle %d", ctx->ident, CTX_SOCKET(ctx), iconn, ctx->cycle_index)
         sync_client_close(client_ptr);
         sync_client_dispose(&client_ptr);
-        printf("Completed round-trip loop ident: %d counter: %d connection_index: %d cycle_index: %d\n",
-               ctx->ident, ctx->counter, ctx->connection_index, ctx->cycle_index);
+        ctx->client_ptr = NULL;
+        LOGFMT("Completed round-trip loop ident: %d socket: %d counter: %d connection_index: %d cycle_index: %d",
+               ctx->ident, CTX_SOCKET(ctx), ctx->counter, ctx->connection_index, ctx->cycle_index);
     }
     struct timeval end_time = get_time();
     ctx->total_time =  time_diff_ms(end_time, start_time);
@@ -330,8 +342,8 @@ static MessageRef make_request(thread_context_t* ctx, bool keep_alive_flag)
 
 static void make_uid(thread_context_t* ctx)
 {
-    printf("make_uid ident: %d counter: %d cycle_index:%d connection_index:%d nbr connections: %d requests per connection %d\n",
-           ctx->ident,
+    LOGFMT("make_uid ident: %d socket:%d counter: %d cycle_index:%d connection_index:%d nbr connections: %d requests per connection %d",
+           ctx->ident,CTX_SOCKET(ctx),
            ctx->counter,
            ctx->cycle_index,
            ctx->connection_index,
@@ -363,9 +375,9 @@ bool verify_response(thread_context_t* ctx, MessageRef request, MessageRef respo
 #ifdef VERIFY_DISABLED
     IOBufferRef iob = Message_serialize(request);
     IOBufferRef iobresp = Message_serialize(response);
-    printf("Request \n");
+    LOGFMT("Request ident:%d socket: %d", ctx->ident, CTX_SOCKET(ctx));
 //    printf("%s\n", IOBuffer_cstr(iob));
-    printf("Response \n");
+    LOGFMT("Response ident:%d socket: %d", ctx->ident, CTX_SOCKET(ctx));
 //    printf("%s\n", IOBuffer_cstr(iobresp));
     return true;
 #else

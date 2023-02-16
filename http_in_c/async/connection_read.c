@@ -8,14 +8,14 @@ static void read_error(AsyncConnectionRef connection_ref, char* msg);
 static void read_eagain(AsyncConnectionRef cref);
 static void read_need_data(AsyncConnectionRef cref);
 static void post_read_start(AsyncConnectionRef cref);
-static void reader(AsyncConnectionRef cref);
+//static void reader(AsyncConnectionRef cref);
 static void post_delegate_handle_request(AsyncHandlerRef href, MessageRef request);
 static void post_delegate_handle_connection_closed(AsyncHandlerRef href);
 
 void async_read_start(AsyncConnectionRef connection_ref)
 {
     CHECK_TAG(AsyncConnection_TAG, connection_ref)
-    LOGFMT("async_read_start read_state: %d %s", connection_ref->read_state, async_read_state_str(connection_ref->read_state));
+    LOG_FMT("async_read_start socket: %d read_state: %d %s", connection_ref->socket, connection_ref->read_state, async_read_state_str(connection_ref->read_state));
     CHTTP_ASSERT((connection_ref->read_state == READ_STATE_ACTIVE), "invalid state");
     CHTTP_ASSERT((! connection_ref->readside_posted), "read_side posted should be false");
     connection_ref->readside_posted = true;
@@ -32,18 +32,18 @@ static void postable_reader(ReactorRef reactor_ref, void* arg)
 {
     AsyncConnectionRef connection_ref = arg;
     CHECK_TAG(AsyncConnection_TAG, connection_ref)
-    LOGFMT("postable_reader read_state: %d %s", connection_ref->read_state, async_read_state_str(connection_ref->read_state));
+    LOG_FMT("postable_reader socket: %d read_state: %d %s", connection_ref->socket, connection_ref->read_state, async_read_state_str(connection_ref->read_state));
     CHTTP_ASSERT((connection_ref->read_state == READ_STATE_ACTIVE), "invalid state");
     CHTTP_ASSERT((connection_ref->readside_posted), "read_side posted should be true");
     connection_ref->readside_posted = false;
     reader(connection_ref);
 }
-static void reader(AsyncConnectionRef connection_ref) {
+void reader(AsyncConnectionRef connection_ref) {
     CHECK_TAG(AsyncConnection_TAG, connection_ref)
     CHTTP_ASSERT((connection_ref->read_state == READ_STATE_ACTIVE), "invalid state");
     CHTTP_ASSERT((connection_ref->input_message_ptr  == NULL), "input_message_ptr not null - invalid state");
     AsyncHandlerRef href = connection_ref->handler_ref;
-    LOGFMT("reader read_state: %d %s", connection_ref->read_state, async_read_state_str(connection_ref->read_state));
+    LOG_FMT("reader socket: %d read_state: %d %s", connection_ref->socket, connection_ref->read_state, async_read_state_str(connection_ref->read_state));
     int buffer_size = connection_ref->read_buffer_size;
     if (connection_ref->active_input_buffer_ref == NULL) {
         connection_ref->active_input_buffer_ref = IOBuffer_new_with_capacity(buffer_size);
@@ -99,6 +99,7 @@ static void read_new_message(AsyncConnectionRef cref)
     CHTTP_ASSERT((cref->read_state == READ_STATE_ACTIVE), "invalid state");
     CHTTP_ASSERT((cref->input_message_ptr  != NULL), "input_message_ptr null on new message");
     CHTTP_ASSERT((!cref->readside_posted), "nothing should be posted on readside at this point");
+    LOG_FMT("socket: %d", cref->socket)
     AsyncHandlerRef href = cref->handler_ref;
     CHECK_TAG(AsyncHandler_TAG, href);
     MessageRef msg = cref->input_message_ptr;
@@ -112,7 +113,7 @@ static void read_eagain(AsyncConnectionRef cref)
     CHTTP_ASSERT((cref->read_state == READ_STATE_ACTIVE), "invalid state");
     CHTTP_ASSERT((cref->input_message_ptr  == NULL), "input_message_ptr NOT null should be handled by read_new_message");
     CHTTP_ASSERT((!cref->readside_posted), "nothing should be posted on readside at this point");
-    LOG_FMT("read_eagain connection_ref->read_state: %s", async_read_state_str(cref->read_state));
+    LOG_FMT("read_eagain socket: %d connection_ref->read_state: %s", cref->socket, async_read_state_str(cref->read_state));
     cref->read_state = READ_STATE_EAGAINED;
 }
 static void read_need_data(AsyncConnectionRef cref)
@@ -121,7 +122,7 @@ static void read_need_data(AsyncConnectionRef cref)
     CHTTP_ASSERT((cref->read_state == READ_STATE_ACTIVE), "invalid state");
     CHTTP_ASSERT((cref->input_message_ptr  == NULL), "input_message_ptr NOT null on incomplete read");
     CHTTP_ASSERT((!cref->readside_posted), "nothing should be posted on readside at this point");
-    LOG_FMT("read_need_data connection_ref->read_state: %s", async_read_state_str(cref->read_state));
+    LOG_FMT("read_need_data socket:%d connection_ref->read_state: %s", cref->socket, async_read_state_str(cref->read_state));
 //    async_post_to_reactor(cref, &postable_reader);
 //    cref->readside_posted = true;
     post_read_start(cref);
@@ -131,6 +132,7 @@ static void postable_close_connection(ReactorRef reactor_ref, void* arg)
     AsyncHandlerRef href = arg;
     CHECK_TAG(AsyncHandler_TAG, href);
     AsyncConnectionRef cref = href->async_connection_ref;
+    LOG_FMT("socket: %d", cref->socket)
     href->handle_close_connection(href);
 }
 static void read_error(AsyncConnectionRef cref, char* msg)
@@ -139,6 +141,7 @@ static void read_error(AsyncConnectionRef cref, char* msg)
     CHTTP_ASSERT((cref->read_state == READ_STATE_ACTIVE), "invalid state");
     CHTTP_ASSERT((cref->input_message_ptr  == NULL), "input_message_ptr NOT null should not happen on read error");
     CHTTP_ASSERT((!cref->readside_posted), "nothing should be posted on readside at this point");
+    LOG_FMT("socket: %d", cref->socket)
     LOG_FMT("Read_error got an error this is the message: %s  fd: %d", msg, cref->socket);
     AsyncHandlerRef href = cref->handler_ref;
     CHECK_TAG(AsyncHandler_TAG, href);
@@ -156,6 +159,7 @@ llhttp_errno_t async_on_read_message_complete(http_parser_t* parser_ptr, Message
     CHECK_TAG(AsyncHandler_TAG, handler_ref)
     CHTTP_ASSERT((msg != NULL), "msg should not be NULL");
     CHTTP_ASSERT((connection_ref->read_state == READ_STATE_ACTIVE), "must be read_state ACTIVE");
+    LOG_FMT("socket: %d", connection_ref->socket)
     connection_ref->input_message_ptr = msg;
     LOG_FMT("read_message_handler - on_write_cb  read_state: %s", async_read_state_str(connection_ref->read_state));
     return HPE_OK;

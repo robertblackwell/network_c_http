@@ -81,8 +81,9 @@ int sync_connection_read(sync_connection_t* this)
         int length = 999000;
         LOG_FMT("sync_connection_read %p before read socket: %d", this, this->socketfd);
         socket_set_recvtimeout(this->socketfd, 5);
+        LOGFMT("sync_connection_read before read from socket: %d ", this->socketfd);
         int nread = read(this->socketfd, (void*)b, length);
-        LOG_FMT("sync_connection_read after read from socket: %d nread: %d", this->socketfd, nread);
+        LOGFMT("sync_connection_read after read from socket: %d nread: %d", this->socketfd, nread);
         if(nread > 0) {
             rc = http_parser_consume(pref, (void *) buffer, nread);
             if(this->socketfd == -1) {

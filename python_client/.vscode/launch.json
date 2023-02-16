@@ -10,7 +10,7 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-            "args": ["-p9001","-t1", "-c1", "-r4"],
+            "args": ["-p9001","-t3", "-c3", "-r4"],
             "console": "integratedTerminal",
             "justMyCode": true
         }

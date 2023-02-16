@@ -208,8 +208,12 @@ int rtor_reactor_run(ReactorRef athis, time_t timeout) {
          * All entries on the ready should be executed before we look for more fd events
          */
         assert(functor_list_size(athis->ready_list) == 0);
+        LOG_FMT("reactor epoll_wait before active fd : %ld ready_list_size: %d",
+               FdTable_size(athis->table), functor_list_size(athis->ready_list));
         int nfds = epoll_wait(athis->epoll_fd, events, max_events, -1);
-        printf("reactor epoll_wait returned fds active: %ld  ready_list_size:%d\n", FdTable_size(athis->table), functor_list_size(athis->ready_list));
+        LOG_FMT("reactor epoll_wait returned nfds: %d fd[0]: %d fds active: %ld  ready_list_size:%d",
+               nfds, events[0].data.fd,
+               FdTable_size(athis->table), functor_list_size(athis->ready_list));
         time_t currtime = time(NULL);
         switch (nfds) {
             case -1:
@@ -255,7 +259,7 @@ int rtor_reactor_run(ReactorRef athis, time_t timeout) {
             athis->runloop_executing = false;
             REACTOR_CHECK_TAG(athis)
             if(functor_list_size(athis->ready_list) == 0) {
-                printf("reactor runlist loop  break functor_list_size: %d func: %p arg: %p\n", functor_list_size(athis->ready_list), func.f, func.arg);
+                LOG_FMT("reactor runlist loop  break functor_list_size: %d func: %p arg: %p", functor_list_size(athis->ready_list), func.f, func.arg);
                 break;
             }
         }
@@ -274,10 +278,10 @@ cleanup:
 int rtor_reactor_post(ReactorRef athis, PostableFunction cb, void* arg)
 {
     REACTOR_CHECK_TAG(athis)
-    printf("rtor_reactor_post entered functor_list_size: %d funct: %p arg: %p runloop_executing: %d\n", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
+    LOG_FMT("rtor_reactor_post entered functor_list_size: %d funct: %p arg: %p runloop_executing: %d\n", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
     Functor func = {.f = cb, .arg = arg};
     functor_list_add(athis->ready_list, func);
-    printf("rtor_reactor_post exited functor_list_size: %d func: %p arg: %p runloop_executing: %d\n", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
+    LOG_FMT("rtor_reactor_post exited functor_list_size: %d func: %p arg: %p runloop_executing: %d\n", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
 }
 
 void rtor_reactor_interthread_post(ReactorRef athis, PostableFunction cb, void* arg)

@@ -125,6 +125,9 @@ static socket_handle_t create_listener_socket(int port, const char *host)
     if((result = setsockopt(tmp_socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes))) != 0) {
         goto error_02;
     }
+    if((result = setsockopt(tmp_socket, SOL_SOCKET, SO_REUSEPORT, &yes, sizeof(yes))) != 0) {
+        goto error_021;
+    }
     if((result = bind(tmp_socket, (struct sockaddr *) &sin, sizeof(sin))) != 0) {
         int x = errno;
         goto error_03;
@@ -135,16 +138,19 @@ static socket_handle_t create_listener_socket(int port, const char *host)
     return tmp_socket;
 
     error_01:
-    printf("socket call failed with errno %d %s\n", errno, strerror(errno));
+    LOG_ERROR("socket call failed with errno %d %s\n", errno, strerror(errno));
     assert(0);
     error_02:
-    printf("setsockopt call failed with errno %d %s\n", errno, strerror(errno));
+    LOG_ERROR("setsockopt call failed with errno %d %s\n", errno, strerror(errno));
+    assert(0);
+    error_021:
+    LOG_ERROR("setsockopt call failed with errno %d %s\n", errno, strerror(errno));
     assert(0);
     error_03:
-    printf("bind call failed with errno %d %s\n", errno, strerror(errno));
+    LOG_ERROR("bind call failed with errno %d %s\n", errno, strerror(errno));
     assert(0);
     error_04:
-    printf("listen call failed with errno %d %s\n", errno, strerror(errno));
+    LOG_ERROR("listen call failed with errno %d %s\n", errno, strerror(errno));
     assert(0);
 }
 
@@ -169,16 +175,19 @@ void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event)
     unsigned int addr_length = (unsigned int) sizeof(peername);
 
     int sock2 = accept(server_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
+    LOGFMT("new socket %d", sock2);
     if(sock2 <= 0) {
         LOG_ERROR("accpt failed errno %d  strerror: %s", errno, strerror(errno));
         LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
     }
     LOG_FMT("Listerner accepted sock fd: %d", sock2);
     printf("async on listening new socket %d\n", sock2);
+#if 0
     int result = listen(server_ref->listening_socket_fd, SOMAXCONN);
     if(result != 0) {
         CHTTP_ASSERT((result != 0), "listen faield");
     }
+#endif
     socket_set_non_blocking(sock2);
     AsyncHandlerRef handler = async_handler_new(
             sock2,

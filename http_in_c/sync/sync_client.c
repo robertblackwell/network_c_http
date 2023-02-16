@@ -33,7 +33,7 @@ void sync_client_init(sync_client_t* this, size_t read_buffer_size)
     this->user_ptr = NULL;
     this->read_buffer_size = read_buffer_size;
     if(pthread_mutex_init(&this->mutex, NULL) != 0) {
-        printf("sync_client_init mutex init failed\n");
+        LOGFMT("sync_client_init mutex init failed");
         exit(-1);
     };
 }
@@ -104,9 +104,9 @@ static void connection_helper(sync_client_t* this, char* host, int portno)
     hints.ai_next = NULL;
     sprintf(portstr, "%d", portno);
 
-    s = getaddrinfo(host, portstr, &hints, &result);
-    if(s != 0) {
-        printf("getaddrinfo : %s\n", gai_strerror(s));
+    int errc = getaddrinfo(host, portstr, &hints, &result);
+    if(errc != 0) {
+        LOG_ERROR("getaddrinfo : %s", gai_strerror(errc));
         exit(-1);
     }
     for(rp = result; rp != NULL; rp->ai_next) {
@@ -121,7 +121,7 @@ static void connection_helper(sync_client_t* this, char* host, int portno)
         close(sfd);
     }
     if(rp == NULL) {
-        printf("Could not bind\n");
+        LOGFMT("Could not bind");
         exit(-1);
     }
     freeaddrinfo(result);

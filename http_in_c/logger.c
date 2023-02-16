@@ -9,13 +9,18 @@ static pthread_mutex_t lock;
 
 void log_function(char* level, const char* funcname, const char* filename, int line, char* message)
 {
+    time_t rawtime;
+    struct tm *timeinfo;
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+
 	if (needs_initialization) {
 		needs_initialization = false;
 		pthread_mutex_init(&lock, NULL);
 	}
 	pthread_mutex_lock(&lock);
 	// here put in locking for multi threaded applications
-	printf("%s %s %s[%d] %s\n", level, funcname, filename, line, message);
+	printf("%2d:%2d:%2d %s %s %s[%d] %s\n", timeinfo->tm_hour, timeinfo->tm_min, timeinfo->tm_sec, level, funcname, filename, line, message);
 	pthread_mutex_unlock(&lock);
 
 }

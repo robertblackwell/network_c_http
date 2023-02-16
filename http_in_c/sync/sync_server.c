@@ -39,6 +39,8 @@ socket_handle_t create_listener_socket(int port, const char* host)
     // sin.sin_len = sizeof(sin);
     if( (result = setsockopt(tmp_socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes))) != 0 )
         goto error_02;
+    if( (result = setsockopt(tmp_socket, SOL_SOCKET, SO_REUSEPORT, &yes, sizeof(yes))) != 0 )
+        goto error_02;
 
     if( (result = bind(tmp_socket, (struct sockaddr *)&sin, sizeof(sin))) != 0)
         goto error_03;
@@ -106,10 +108,10 @@ void sync_server_listen(sync_server_r server)
     for(int i = 0; i < server->nbr_workers; i++)
     {
 #ifdef SYNC_WORKER_QUEUE
-        printf("sync_server_listen SYNC_WORKER_QUEUE is defined \n");
+        LOGFMT("sync_server_listen SYNC_WORKER_QUEUE is defined");
         sync_worker_r wref = sync_worker_new(server->qref, i, server->read_buffer_size, server->app_handler);
 #else
-        printf("sync_server_listen SYNC_WORKER_QUEUE is NOT defined \n");
+        LOGFMT("sync_server_listen SYNC_WORKER_QUEUE is NOT defined \n");
         sync_worker_r wref = sync_worker_new(server->socket_fd, i, server->read_buffer_size, server->app_handler);
 #endif
         server->worker_tab[i] = NULL;

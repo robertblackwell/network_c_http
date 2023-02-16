@@ -26,6 +26,7 @@ def socket_recv(s):
     return data
 
 
+
 def test_client(port, nbr_connections: int, nbr_requests_per_connection: int, ctx: ThreadContext):
     for c in range(nbr_connections):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -49,29 +50,70 @@ def test_client(port, nbr_connections: int, nbr_requests_per_connection: int, ct
         
 
 
-# def http_test_client(port, nbr_connections: int, nbr_requests_per_connection: int, ctx: ThreadContext):
-#     import http
-#     headers = {
-#     }
-#     for c in range(nbr_connections):
-#         connection = http.client.HTTPConnection("localhost", port)
-#         connection.connect()
-#         for r in range(nbr_requests_per_connection):
-#             connection_type = "keep-alive"
-#             if r == nbr_requests_per_connection - 1:
-#                 connection_type = "close"
-#             headers["CONNECTION"] = connection_type
-#             headers["JUNK"] = "{}-{}".format(c, r)
-#             start = datetime.datetime.now()
-#             buffer1 = "GET /echo HTTP/1.1\r\nCONNECTION: {}\r\nJUNK: {}.{}\r\n\r\n".format(connection_type, c,
-#                                                                                            r).encode()
-#             connection.request("GET", "/echo", None, headers=headers)
-#             data1 = connection.getresponse()
-#             chunk = data1.read(20000)
-#             end_time = datetime.datetime.now()
-#             elapsed = (end_time - start).microseconds
-#             ctx.intervals.append(elapsed)
-#         connection.close()
+def http_test_client(port, nbr_connections: int, nbr_requests_per_connection: int, ctx: ThreadContext):
+    import http
+    headers = {
+    }
+    for c in range(nbr_connections):
+        connection = http.client.HTTPConnection("localhost", port)
+        # connection.connect()
+        for r in range(nbr_requests_per_connection):
+            connection_type = "keep-alive"
+            if r == nbr_requests_per_connection - 1:
+                connection_type = "close"
+            headers["CONNECTION"] = connection_type
+            headers["JUNK"] = "{}-{}".format(c, r)
+            start = datetime.datetime.now()
+            buffer1 = "GET /echo HTTP/1.1\r\nCONNECTION: {}\r\nJUNK: {}.{}\r\n\r\n".format(connection_type, c,
+                                                                                           r).encode()
+            connection.request("GET", "/echo", None, headers=headers)
+            data1 = connection.getresponse()
+            chunk = data1.read(20000)
+            end_time = datetime.datetime.now()
+            elapsed = (end_time - start).microseconds
+            ctx.intervals.append(elapsed)
+        connection.close()
+
+def requests_test_client(port, nbr_connections: int, nbr_requests_per_connection: int, ctx: ThreadContext):
+    import requests
+    headers = {
+    }
+    for c in range(nbr_connections):
+        # connection = http.client.HTTPConnection("localhost", port)
+        # connection.connect()
+        for r in range(nbr_requests_per_connection):
+            connection_type = "keep-alive"
+            if r == nbr_requests_per_connection - 1:
+                connection_type = "close"
+            headers["CONNECTION"] = connection_type
+            headers["JUNK"] = "{}-{}".format(c, r)
+            start = datetime.datetime.now()
+            buffer1 = "GET /echo HTTP/1.1\r\nCONNECTION: {}\r\nJUNK: {}.{}\r\n\r\n".format(connection_type, c,
+                                                                                           r).encode()
+            response = requests.request("GET", "http://localhost:9001/echo", headers=headers)
+            end_time = datetime.datetime.now()
+            elapsed = (end_time - start).microseconds
+            ctx.intervals.append(elapsed)
+
+def urllib3_test_client(port, nbr_connections: int, nbr_requests_per_connection: int, ctx: ThreadContext):
+    import urllib3
+    headers = {
+    }
+    for c in range(nbr_connections):
+        connection_pool = urllib3.HTTPConnectionPool("localhost", port, maxsize=1)
+        for r in range(nbr_requests_per_connection):
+            connection_type = "keep-alive"
+            if r == nbr_requests_per_connection - 1:
+                connection_type = "close"
+            headers["CONNECTION"] = connection_type
+            headers["JUNK"] = "{}-{}".format(c, r)
+            start = datetime.datetime.now()
+            buffer1 = "GET /echo HTTP/1.1\r\nCONNECTION: {}\r\nJUNK: {}.{}\r\n\r\n".format(connection_type, c,
+                                                                                           r).encode()
+            response = connection_pool.urlopen("GET", "http://localhost:9001/echo", headers=headers, body=None, release_conn=(connection_type=="close"))
+            end_time = datetime.datetime.now()
+            elapsed = (end_time - start).microseconds
+            ctx.intervals.append(elapsed)
 
 
 def run_threads(port, nbr_threads, nbr_connections_per_thread, nbr_requests_per_connection):
@@ -82,7 +124,7 @@ def run_threads(port, nbr_threads, nbr_connections_per_thread, nbr_requests_per_
     for t in range(nbr_threads):
         ctx = ThreadContext()
         contexts.append(ctx)
-        thread = threading.Thread(None, test_client, None,
+        thread = threading.Thread(None, urllib3_test_client, None,
                                   [port, nbr_connections_per_thread, nbr_requests_per_connection, ctx])
         threads.append(thread)
 

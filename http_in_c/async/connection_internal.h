@@ -103,6 +103,7 @@ void async_event_handler(RtorStreamRef stream_ref, uint64_t event);
 void async_post_to_reactor(AsyncConnectionRef connection_ref, void(*postable_function)(ReactorRef, void*));
 
 void async_read_start(AsyncConnectionRef connection_ref);
+void reader(AsyncConnectionRef cref);
 llhttp_errno_t async_on_read_message_complete(http_parser_t* parser_ptr, MessageRef msg);
 
 void async_postable_writer(ReactorRef reactor_ref, void* arg);
