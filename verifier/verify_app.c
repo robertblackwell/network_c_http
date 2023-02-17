@@ -13,8 +13,8 @@
 #define VERIFY_URL_MAXSIZE 100
 #define VERIFY_UID_MAXSIZE 100
 #define VERIFY_MAX_THREADS 100
-#define VERIFY_MAX_CONNECTIONS_PER_THREAD 10
-#define VERIFY_MAX_REQUESTS_PER_CONNECTION 10
+#define VERIFY_MAX_CONNECTIONS_PER_THREAD 20
+#define VERIFY_MAX_REQUESTS_PER_CONNECTION 20
 
 #define VERIFY_DEFAULT_READBUFFER_SIZE 1000000
 
@@ -105,6 +105,8 @@ double time_diff_ms(struct timeval t1, struct timeval t2);
 double time_diff_musecs(struct timeval t1, struct timeval t2);
 void* threadfn(void* data);
 void combine_response_times(double all[], int all_size, double rt[], int rt_size, int thrd_ix);
+int combine_elapsed_times(double output_array[], int output_max_size, thread_context_t ctx_table[], int nbr_threads);
+
 void stat_analyse(double all[], int all_size, double* average, double* stdev);
 void analyse_response_times(double all[], int all_size, double buckets[10]);
 void dump_double_arr(char* msg, double arr[], int arr_dim);
@@ -191,6 +193,9 @@ int main(int argc, char* argv[])
     for(int t = 0; t < nbr_threads; t++) {
         pthread_join(workers[t], NULL);
     }
+
+    int nbr_samples = combine_elapsed_times(all, nbr_requests, ctx_table, nbr_threads);
+
     struct timeval main_end_time = get_time();
 
     double tot_time = 0;
@@ -216,7 +221,7 @@ void dump_double_arr(char* msg, double arr[], int arr_dim)
     }
 
 }
-
+#if 0
 // this must be a function of type SyncConnectionClientMessageHandler
 // This callback gets the response message. Passes it to mainline by:
 // -    return HPE_PAUSED which will stop parsing incoming data
@@ -264,6 +269,16 @@ int verify_handler(MessageRef response_ptr, sync_client_t* client_ptr)
     LOG_FMT("verify_handler return_value %d n=======================================================================\n", return_value);
     return return_value;
 }
+int verify_handler_2(MessageRef response_ptr, sync_client_t* client_ptr)
+{
+    thread_context_t* ctx = sync_client_get_userptr(client_ptr);
+    LOGFMT("verify handler ident: % d socket: %d cycle:%d connection: %d\n",ctx->ident, CTX_SOCKET(ctx),ctx->cycle_index, ctx->connection_index );
+    LOG_FMT("verify handler howmany_requests_per_connection: %d\n",ctx->howmany_requests_per_connection);
+    LOG_FMT("verify handler howmany_connections: %d\n",ctx->howmany_connections);
+    ctx->response_ptr = response_ptr;
+    return HPE_OK;
+}
+#endif
 void* threadfn(void* data)
 {
     thread_context_t* ctx = (thread_context_t*)data;
@@ -284,13 +299,6 @@ void* threadfn(void* data)
         sync_client_connect(client_ptr, "localhost", ctx->port);
 
         /**
-         * make the request
-         */
-        make_uid(ctx);
-        MessageRef request = make_request(ctx, true);
-        ctx->request_ptr = request;
-        CHTTP_ASSERT((ctx->response_ptr == NULL), "Verifier response_ptr not null");
-        /**
          * Paranoia check
          */
         CHECK_TAG(THREAD_CONTEXT_TAG, ctx)
@@ -299,8 +307,36 @@ void* threadfn(void* data)
          * This function is a bit tricky. It only returns when the connection closes
          * either because the other end closed it or an I/O error.
          */
-        ctx->iter_start_time = get_time();
-        sync_client_request_round_trip(client_ptr, request, verify_handler);
+        for(int ireq = 0; ireq < ctx->howmany_requests_per_connection; ireq++) {
+            ctx->connection_index = iconn;
+            ctx->cycle_index = ireq;
+            make_uid(ctx);
+            if(ireq == ctx->howmany_requests_per_connection) {
+                printf("here we are");
+            }
+            ctx->request_ptr = make_request(ctx, (ireq < ctx->howmany_requests_per_connection - 1));
+            CHTTP_ASSERT((ctx->response_ptr == NULL), "Verifier response_ptr not null");
+
+            ctx->iter_start_time = get_time();
+
+            sync_connection_write(client_ptr->connection_ptr, ctx->request_ptr);
+            int gotone = sync_connection_read_message(client_ptr->connection_ptr, &ctx->response_ptr);
+            if(gotone) {
+                struct timeval iter_end_time = get_time();
+                int i = ctx->time_index;
+                ctx->time_index++;
+                double tmp = time_diff_musecs(iter_end_time, ctx->iter_start_time);
+                ctx->resp_times[i] =  tmp;
+                CHTTP_ASSERT((ctx->response_ptr != NULL), "");
+                verify_response(ctx, ctx->request_ptr, ctx->response_ptr);
+                Message_dispose(&(ctx->request_ptr));
+                Message_dispose(&(ctx->response_ptr));
+            } else {
+                Message_dispose(&(ctx->request_ptr));
+                break;
+            }
+        }
+
         LOGFMT("roundtrip return ident id %d socket:%d connection: %d cycle %d", ctx->ident, CTX_SOCKET(ctx), iconn, ctx->cycle_index)
         sync_client_close(client_ptr);
         sync_client_dispose(&client_ptr);
@@ -411,12 +447,25 @@ double time_diff_musecs(struct timeval t1, struct timeval t2)
     return dif;
 }
 
-void combine_response_times(double all[], int all_size, double rt[], int rt_size, int thrd_ix)
+void combine_response_times(double output_array[], int all_size, double rt[], int rt_size, int thrd_ix)
 {
     for(int i = 0; i < rt_size; i++) {
         double v = rt[i];
-        all[thrd_ix * rt_size + i] = rt[i];
+        output_array[thrd_ix * rt_size + i] = rt[i];
     }
+}
+int combine_elapsed_times(double output_array[], int output_max_size, thread_context_t ctx_table[], int nbr_threads)
+{
+    int output_index = 0;
+    for(int thread_index = 0; thread_index < nbr_threads; thread_index++) {
+        thread_context_t* ctx = &ctx_table[thread_index];
+        for(int i = 0; i < ctx->time_index; i++) {
+            CHTTP_ASSERT((output_index < output_max_size), "output array not bigenough");
+            output_array[output_index] = ctx->resp_times[i];
+            output_index++;
+        }
+    }
+    return output_index;
 }
 /**
  *

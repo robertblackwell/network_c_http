@@ -61,7 +61,7 @@ sync_client_t* sync_client_new(size_t read_buffer_size);
 void sync_client_init(sync_client_t* this, size_t read_buffer_size);
 void sync_client_dispose(sync_client_t** this_ptr);
 void sync_client_connect(sync_client_t* this, char* host, int port);
-void sync_client_request_round_trip(sync_client_t* this, MessageRef request, SyncConnectionClientMessageHandler handler);
+//void sync_client_request_round_trip(sync_client_t* this, MessageRef request, SyncConnectionClientMessageHandler handler);
 void* sync_client_get_userptr(sync_client_t* this);
 void sync_client_set_userptr(sync_client_t* this, void* userptr);
 void sync_client_close(sync_client_t* this);
@@ -70,14 +70,18 @@ sync_connection_t* sync_connection_new(int socketfd, size_t read_buffer_size); /
 void sync_connection_init(sync_connection_t* this, int socketfd, size_t read_buffer_size); //, SyncConnectionServerMessageHandler handler, sync_worker_r worker_ref);
 void sync_connection_destroy(sync_connection_t* this);
 void sync_connection_dispose(sync_connection_t** this_ptr);
-
+/**
+ * Gets a message into msg_ptr and returns 1, or
+ * Puts NULL in msg_ptr and returns 0 - io error or parse error - you should close the connection
+ */
+int sync_connection_read_message(sync_connection_t* this, MessageRef *msg_ptr);
 // To be used by sync_server/sync_worker.
 // These next 2 functions will return when is=t has consumed all input data or hit a parse error
 // Not when a message is complete.
 // When a message is complete the handler will be called
-int sync_connection_read_request(sync_connection_t* this, SyncConnectionServerMessageHandler handler, sync_worker_t* worker_ptr);
+//int sync_connection_read_request(sync_connection_t* this, SyncConnectionServerMessageHandler handler, sync_worker_t* worker_ptr);
 // to be used by sync_client
-int sync_connection_read_response(sync_connection_t* this, SyncConnectionClientMessageHandler handler, sync_client_t* client_ptr);
+//int sync_connection_read_response(sync_connection_t* this, SyncConnectionClientMessageHandler handler, sync_client_t* client_ptr);
 void sync_connection_close(sync_connection_t* this);
 /**
  *  Writes a complete http message to the associated socket and returns

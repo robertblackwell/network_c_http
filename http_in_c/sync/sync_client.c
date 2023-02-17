@@ -170,15 +170,15 @@ void sync_client_connect(sync_client_t* this, char* host, int portno)//, SyncApp
 #endif
 
 }
-void sync_client_request_round_trip(sync_client_t* this, MessageRef request_ref, SyncConnectionClientMessageHandler handler)
-{
-    CHECK_TAG(sync_client_TAG, this)
-    sync_connection_write(this->connection_ptr, request_ref);
-
-    int rc = sync_connection_read_response(this->connection_ptr, handler, this);
-    llhttp_errno_t en = rc;
-    return;
-}
+//void sync_client_request_round_trip(sync_client_t* this, MessageRef request_ref, SyncConnectionClientMessageHandler handler)
+//{
+//    CHECK_TAG(sync_client_TAG, this)
+//    sync_connection_write(this->connection_ptr, request_ref);
+//
+//    int rc = sync_connection_read_response(this->connection_ptr, handler, this);
+//    llhttp_errno_t en = rc;
+//    return;
+//}
 void sync_client_close(sync_client_t* this)
 {
     sync_connection_close(this->connection_ptr);

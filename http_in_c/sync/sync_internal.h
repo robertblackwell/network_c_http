@@ -46,6 +46,21 @@ struct sync_connection_s
     IOBufferRef                  m_iobuffer;
     int                          socketfd;
     size_t                       read_buffer_size;
+    /**
+     * Next two fields are used for the on_message_callback to signal to the
+     * read() function that a message has/has not been received.
+     */
+    //MessageRef                   input_message_ref; //NULL when no messages received
+    ListRef                      input_list;
+    int                          reader_status;     // 1 indicates message received 0 otherwise
+
+    /**
+     * The next fields are the on_message_callback and its context pointer
+     * There are only two cases in this application so rather than use
+     * void* to annonymize things I decided to use a union to
+     * overlay the two choices
+     */
+#if 0
     bool is_server_callback;  // boolean tag to discriminate the callback union
     union callback {
         struct {
@@ -57,6 +72,7 @@ struct sync_connection_s
             sync_client_t* client_ptr; // a connection being used by a sync_client
         } client_cb;
     } callback;
+#endif
 };
 
 struct sync_client_s {

@@ -15,6 +15,16 @@
 #include <http_in_c/macros.h>
 #include <http_in_c/logger.h>
 #include <http_in_c/check_tag.h>
+static int on_message_handler_2(MessageRef response_ptr, sync_worker_t* context)
+{
+    sync_worker_t* worker_ptr = context;
+    LOGFMT("verify on_message_handler socket: %d\n", worker_ptr->connection_ptr->socketfd);
+    LOG_FMT("verify handler howmany_requests_per_connection: %d\n",ctx->howmany_requests_per_connection);
+    LOG_FMT("verify handler howmany_connections: %d\n",ctx->howmany_connections);
+//    worker_ptr->reqsponse_ptr = response_ptr;
+    return HPE_OK;
+}
+
 static int connection_message_handler(MessageRef request_ptr, sync_worker_r context)
 {
     sync_worker_t* worker_ptr = context;
@@ -100,10 +110,41 @@ static void* Worker_main(void* data)
             sock = 0;
         } else {
             wref->active_socket = (int) my_socket_handle;
+            MessageRef request_ptr = NULL;
             wref->active = true;
             sync_connection_t* conn = sync_connection_new(sock, wref->read_buffer_size);//, connection_message_handler, wref);
             wref->connection_ptr = conn;
-            int rc = sync_connection_read_request(wref->connection_ptr, connection_message_handler, wref);
+            while(1) {
+                int gotone = sync_connection_read_message(wref->connection_ptr, &request_ptr);
+                if (gotone) {
+                    CHTTP_ASSERT((request_ptr != NULL), "request should not be NULL");
+                    sync_worker_t *worker_ptr = wref;
+                    MessageRef response_ptr = worker_ptr->app_handler(request_ptr, worker_ptr);
+                    int cmp_tmp = Message_cmp_header(request_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
+                    if (cmp_tmp == 1) {
+                        Message_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
+                    } else {
+                        Message_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_CLOSE);
+                    }
+                    CHTTP_ASSERT((response_ptr != NULL), "response is not permitted to be NULL");
+                    IOBufferRef request_serialized = Message_dump(request_ptr);
+                    IOBufferRef response_serialized = Message_dump(response_ptr);
+                    LOG_FMT("app_handler_example request  ====================================================================");
+                    LOG_FMT("%s", IOBuffer_cstr(request_serialized));
+                    LOG_FMT("app_handler_example response ====================================================================");
+                    LOG_FMT("%s", IOBuffer_cstr(response_serialized));
+                    LOG_FMT("app_handler_example end ====================================================================");
+                    IOBuffer_free(request_serialized);
+                    IOBuffer_free(response_serialized);
+                    int rc = sync_connection_write(worker_ptr->connection_ptr, response_ptr);
+                    if (cmp_tmp != 1) {
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+            sync_connection_dispose(&wref->connection_ptr);
             LOG_FMT("worker_main after sync_connection_read_request worker_id: %d#########################################################%d END", wref->id, wref->id);
             wref->working = false;
         }

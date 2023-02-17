@@ -20,17 +20,32 @@
 static llhttp_errno_t parser_on_message_handler(http_parser_t* parser_ptr, MessageRef input_message_ref)
 {
     sync_connection_t* connptr = parser_ptr->handler_context;
-    if(connptr->is_server_callback) {
-        sync_worker_t* workert_ptr = connptr->callback.server_cb.worker_ptr;
-        llhttp_errno_t r = connptr->callback.server_cb.server_handler(input_message_ref, workert_ptr);
-        return r;
-    } else {
-        sync_client_t* client_ptr = connptr->callback.client_cb.client_ptr;
-        llhttp_errno_t  r = connptr->callback.client_cb.client_handler(input_message_ref, client_ptr);
-        return r;
-    }
+    CHTTP_ASSERT((input_message_ref != NULL),"obvious");
+    List_add_back(connptr->input_list, input_message_ref);
+    connptr->reader_status = 1;
+    return HPE_OK;
+//    if(connptr->is_server_callback) {
+//        connptr->input_message_ref = input_message_ref;
+//        List_add_back(connptr->input_list, input_message_ref);
+//        connptr->reader_status = 1;
+//        sync_worker_t* workert_ptr = connptr->callback.server_cb.worker_ptr;
+//        llhttp_errno_t r = connptr->callback.server_cb.server_handler(input_message_ref, workert_ptr);
+//        return r;
+//    } else {
+//        connptr->input_message_ref = input_message_ref;
+//        connptr->reader_status = 1;
+//        List_add_back(connptr->input_list, input_message_ref);
+//        sync_client_t* client_ptr = connptr->callback.client_cb.client_ptr;
+//        llhttp_errno_t  r = connptr->callback.client_cb.client_handler(input_message_ref, client_ptr);
+//        return r;
+//    }
 }
-
+static void message_dealloc(void** p)
+{
+    void* mref = *p;
+    Message_dispose(*p);
+    *p = NULL;
+}
 void sync_connection_init(sync_connection_t* this, int socketfd, size_t read_buffer_size) //, SyncConnectionServerMessageHandler handler, sync_worker_r worker_ref)
 {
     ASSERT_NOT_NULL(this);
@@ -40,9 +55,11 @@ void sync_connection_init(sync_connection_t* this, int socketfd, size_t read_buf
     this->socketfd = socketfd;
 //    this->m_rdsocket = rdsock;
     this->m_iobuffer = IOBuffer_new();
+    this->input_list = List_new(message_dealloc);
+    this->reader_status = 0;
     this->read_buffer_size = read_buffer_size;
-    this->callback.server_cb.server_handler = NULL;
-    this->callback.server_cb.worker_ptr = NULL;
+//    this->callback.server_cb.server_handler = NULL;
+//    this->callback.server_cb.worker_ptr = NULL;
 }
 
 sync_connection_t* sync_connection_new(int socketfd, size_t read_buffer_size) //, SyncConnectionServerMessageHandler handler, sync_worker_r worker_ref)
@@ -69,7 +86,22 @@ void sync_connection_dispose(sync_connection_t** this_ptr)
     eg_free((void*)this);
     *this_ptr = NULL;
 }
-// this function is private
+/**
+ * this function is private
+ * Reads until -
+ * -    the on_message_callback signals one or more messages have arrived
+ *      Its signals this by setting this->status == 1 and this->input_message_ref != NULL.
+ *      and
+ *      The buffer that completed the input message has been consumed by the parser
+ *
+ *      In this situation the function returns HPE_OK
+ *
+ * -    some kind of io error or parse error. In which case the function returns
+ *      HPE_?? but not HPE_OK
+ *
+ * To the reader - I am sorry this is really arcane
+ *
+ */
 int sync_connection_read(sync_connection_t* this)
 {
     CHECK_TAG(SYNC_CONNECTION_TAG, this)
@@ -83,6 +115,7 @@ int sync_connection_read(sync_connection_t* this)
         socket_set_recvtimeout(this->socketfd, 5);
         LOGFMT("sync_connection_read before read from socket: %d ", this->socketfd);
         int nread = read(this->socketfd, (void*)b, length);
+        int errno_saved = errno;
         LOGFMT("sync_connection_read after read from socket: %d nread: %d", this->socketfd, nread);
         if(nread > 0) {
             rc = http_parser_consume(pref, (void *) buffer, nread);
@@ -102,9 +135,18 @@ int sync_connection_read(sync_connection_t* this)
                     }
                 }
                 return rc;
+            } else {
+                if(this->reader_status) {
+                    CHTTP_ASSERT((List_size(this->input_list) > 0),"checking");
+                    return HPE_OK;
+                } else {
+                    // go back around the while loop
+                    printf("hello dolly");
+                }
+
             }
         } else if(nread == 0) {
-            rc = http_parser_consume(pref, NULL, 0);
+//            rc = http_parser_consume(pref, NULL, 0);
             return HPE_USER;
         } else {
             return HPE_USER;
@@ -112,30 +154,42 @@ int sync_connection_read(sync_connection_t* this)
         }
     }
 }
+int sync_connection_read_message(sync_connection_t* this, MessageRef *msg_ptr)
+{
+    CHECK_TAG(SYNC_CONNECTION_TAG, this)
+    if(List_size(this->input_list) <= 0) {
+        this->reader_status = 0;
+        llhttp_errno_t rc = sync_connection_read(this);
+        /**
+         * connection_read() should have only two possible outcomes:
+         * 1. got one or more input messages and consumed the most recent buffer without error
+         * 2. hit an io error or parse error
+         */
+        bool invariant_gotone = ((rc == HPE_OK) && (this->reader_status == 1) && (List_size(this->input_list) > 0));
+        bool invariant_goterror = ((rc!= HPE_OK) && (this->reader_status == 0) && (List_size(this->input_list) <= 0));
+        CHTTP_ASSERT(invariant_gotone || invariant_goterror, "invariants failed");
+
+        if(invariant_goterror) {
+            *msg_ptr = NULL;
+            return -1;
+        }
+    }
+    CHTTP_ASSERT((List_size(this->input_list) > 0),"");
+    MessageRef mref = List_remove_first(this->input_list);
+    *msg_ptr = mref;
+    return 1;
+}
+
 int sync_connection_read_request(sync_connection_t* this, SyncConnectionServerMessageHandler handler, sync_worker_r worker_ptr)
 {
     CHECK_TAG(SYNC_CONNECTION_TAG, this)
-    this->is_server_callback = true;
-    this->callback.server_cb.server_handler = handler;
-    this->callback.server_cb.worker_ptr = worker_ptr;
-    llhttp_errno_t r = sync_connection_read(this);
-    LOG_FMT("sync_connection_read_request r: %d", r);
-    return (int)r;
+//    this->is_server_callback = false;
+//    this->callback.client_cb.client_handler = handler;
+//    this->callback.client_cb.client_ptr = client_ptr;
+//    llhttp_errno_t r = sync_connection_read(this);
+    return (int)0;
 }
-int sync_connection_read_response(sync_connection_t* this, SyncConnectionClientMessageHandler handler, sync_client_t* client_ptr)
-{
-    CHECK_TAG(SYNC_CONNECTION_TAG, this)
-    this->is_server_callback = false;
-    this->callback.client_cb.client_handler = handler;
-    this->callback.client_cb.client_ptr = client_ptr;
-    llhttp_errno_t r = sync_connection_read(this);
-    return (int)r;
-}
-int sync_connection_socketfd(sync_connection_t* this)
-{
-    CHECK_TAG(SYNC_CONNECTION_TAG, this)
-    return this->socketfd;
-}
+
 int sync_connection_write(sync_connection_t* this, MessageRef msg_ref)
 {
     CHECK_TAG(SYNC_CONNECTION_TAG, this)
