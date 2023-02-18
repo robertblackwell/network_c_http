@@ -144,6 +144,7 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		async/connection_read.c
 		async/connection_write.c
 		async/async_handler.c
+		async/async_socket.c
 #		async/async_process_request.c
 	#demo_protocol
 #		demo_protocol/demo_client.c

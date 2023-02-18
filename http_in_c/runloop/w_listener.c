@@ -29,7 +29,7 @@ static void anonymous_free(RtorWatcherRef p)
 }
 void rtor_listener_init(RtorListenerRef athis, ReactorRef runloop, int fd)
 {
-    LISTNER_SET_TAG(athis);
+    SET_TAG(WListenerFd_TAG, athis);
     athis->type = XR_WATCHER_LISTENER;
     athis->fd = fd;
     athis->runloop = runloop;

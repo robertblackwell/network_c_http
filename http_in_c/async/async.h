@@ -7,6 +7,10 @@
 #include <http_in_c/common/iobuffer.h>
 #include <http_in_c/http/message.h>
 #include <http_in_c/http/parser.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+#include <netinet/tcp.h>
+
 
 #define AsyncConnection_TAG "ASYCONN"
 #define AsyncHandler_TAG "ASYDLR"
@@ -16,7 +20,7 @@
 
 typedef struct AsyncConnection_s AsyncConnection, *AsyncConnectionRef;
 typedef struct AsyncHandler_s AsyncHandler, *AsyncHandlerRef;
-typedef struct  AsyncServer_s AsyncServer, *AsyncServerRef;
+typedef struct AsyncServer_s AsyncServer, *AsyncServerRef;
 
 typedef void(*AsyncProcessRequestCompletionFunction)(AsyncHandlerRef handler_ref, MessageRef request_ptr, MessageRef response_ptr);
 /**
@@ -57,6 +61,7 @@ typedef void(*DC_Close_CB)(void* href);
  */
 typedef void(*DH_Completion_CB)(void* server_ref, AsyncHandlerRef href);
 
+
 /**=============================================================================
  * AsyncServer api
  * There is one AsyncServer instance for each thread in a async server app
@@ -66,6 +71,7 @@ struct AsyncServer_s {
     DECLARE_TAG;
     void(*handler_complete)(AsyncServerRef, AsyncHandlerRef);
     AsyncProcessRequestFunction process_request;
+    const char*             host;
     int                     port;
     int                     listening_socket_fd;
     ReactorRef              reactor_ref;
@@ -80,11 +86,15 @@ do {\
     (sref->handler_complete)(sref, href);\
 } while (false);
 
-AsyncServerRef AsyncServer_new(int port, AsyncProcessRequestFunction process_request);
-void AsyncServer_init(AsyncServerRef sref, int port, AsyncProcessRequestFunction process_request);
+int async_create_shareable_socket();
+
+AsyncServerRef AsyncServer_new(int port, const char* host, AsyncProcessRequestFunction process_request);
+AsyncServerRef AsyncServer_new_with_socket(int port, const char* host, int listen_socket, AsyncProcessRequestFunction process_request);
+void AsyncServer_init(AsyncServerRef sref, int port, const char* host, AsyncProcessRequestFunction process_request);
+void AsyncServer_init_with_socket(AsyncServerRef sref, int port, const char* host, int listen_socket, AsyncProcessRequestFunction process_request);
 void AsyncServer_free(AsyncServerRef this);
 void AsyncServer_dispose(AsyncServerRef* srefptr);
-void AsyncServer_listen(AsyncServerRef server);
+void AsyncServer_start(AsyncServerRef sref);
 void AsyncServer_terminate(AsyncServerRef this);
 
 

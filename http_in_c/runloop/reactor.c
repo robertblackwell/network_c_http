@@ -61,7 +61,8 @@ static void rtor_epoll_ctl(ReactorRef athis, int op, int fd, uint64_t interest)
     };
     int status = epoll_ctl(athis->epoll_fd, op, fd, &(epev));
     if (status != 0) {
-        LOG_FMT("rtor_epoll_ctl epoll_fd: %d status : %d errno : %d", athis->epoll_fd, status, errno);
+        int errno_saved = errno;
+        LOG_ERROR("rtor_epoll_ctl epoll_fd: %d fd: %d status : %d errno : %d %s", athis->epoll_fd, fd, status, errno_saved, strerror(errno_saved));
     }
     LOG_FMT("rtor_epoll_ctl epoll_fd: %d status : %d errno : %d", athis->epoll_fd, status, errno);
     CHTTP_ASSERT((status == 0), "epoll ctl call failed");

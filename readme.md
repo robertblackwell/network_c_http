@@ -5,33 +5,14 @@
 This project is an experiment in __'C'__. 
 
 Specifically the intent is to implement two simple __http servers__
-in the 'C' language without the use of external ibraries (see below for the one exception to this goal).
+in the 'C' language without the use of external libraries (see below for the one exception to this goal)
+in order to understand what is required at the socket and epoll level, and to get more experience with
+structuring code and data structures in 'C'.
 
-There are two implementations of a simple Http server.
+## the library exception
 
--   `http_in_c/sync_app/sync_app.c` contains the `main()` function for a traditional 
-    multi-threaded server that performs all I/O in synchronous mode. 
-
--   `http_in_c/async_app/async_app.c` contains the `main()` function for an event based
-multi-threaded server that performs all I/O in async or no-wait mode. This server uses `e-poll` to
-handle events via a home grown event loop.
-
-Both servers respond to `GET` requests only and only for a small number of `targets`.
-
-Those `targets` are 
-
-- '/', 
-- '/echo', 
-- '/file'
-
-The first two respond with html pages that are constructed on the fly (using 'C' code in the server) while
-the last reads an entirely static page from a file.
-
-There are a number of limitations and design choices for each implementation. I will discuss those below.
-
-## Parsing HTTP/1.1 messages
-
-This turned out to be the most technically demanding individual task in the project.
+As it turns out one of the more complicated aspects of http servers is the parsing of http messages
+(requests and responses).
 
 While the http1.1 format seems superficially simple the details quickly become onerous and the task large.
 
@@ -45,91 +26,66 @@ More recently this projects has been abandoned in favor of [https://github.com/n
 In many regards this is the same project with the important distinction that the parser 'C' code is generated from 
 rules rather than hand-crafted.
 
-## The parsers callback models
+As a user of these libraries I found the former library [https://github.com/nodejs/http-parser](https://github.com/nodejs/http-parser)
+easier to deal with where as I find the more recent versions of [https://github.com/nodejs/llhttp](https://github.com/nodejs/llhttp)
+less amenable to my use case.
 
-Both the parser libraries used a callback model for notifying a caller about important events. 
+## sync_server_app
 
-So for example when enough data has been read to constitute a complete request/response this fact is notified to
-your code by calling a callback you provided before the parsing started. 
+The executable `sync_server_app` implements a multithreaded http server that uses synchronous or blocking IO.
 
-The various elements of the completed message, such a method, target path, header fields and body data
-must be pulled from the parsers data structures before parsing any more data.
+It only responds to a small set of __GET__ requests and at the time of writing does not perform
+any disk IO to make responses messages.
 
-This is a very natural approach for event driven async code but a little unusual for 
-the more traditional synchronous I/O approach. 
+This is the classic way of implementing a server before the days of event loops similar technologies.
 
-## Threading strategies.
+There are two versions of this server selected by the build options __SYNC_WORKER_QUEUE__.
 
-Both the servers run multiple threads.
+When this option is added to the CCFLAGS as -DSYNC_WORKER_QUEUE in the top level CmakeList.txt
+only the the main performs `accept()` calls and the client connections/sockets from such calls
+are fed to worker threads by a queue.
 
-### Threading in the Synchronous server
-- The synchronous server runs a thread pool of a fixed number of threads. 
-- Each thread serves a single client connection at a time.
-- A thread can server a number of requests on a connection for a single client before the connection is closed
-and a new client is served.
-- Once a request has been read from a connection, that request is processed and a response sent before the next request
-will be read on that same connection.
-- The main thread (which is not part of the thread pool) runs a loop, blocking on an `accept` call waiting for connection 
-attempts from potential clients. The `accept` call returns when a new connection is established. That new connection 
-is passed to the thread pool via a queue that is protected with a mutex and condition variable.
+When this option is absent each worker thread issues accept() calls on a common listening socket created by the main
+thread before creating the worker threads. The Linux operating system allocates new incoming connections between the
+different `accept()` callers in a manner that only wakes one `accept()` caller for each new connection.
 
-### Threading in the event server
+## async_server_app
 
-- The event server runs a number of threads (the number is set at startup time).
-- Each thread when idle is waiting on an e-poll call to signal an event of interest
-- Each thread is always watching for an `accept` event to signal the arrival of a new client connection.  The linux
-operating system guarentees to wake only one thread for each new connection. This is how work is allocated 
-between the threads. This also allows a single thread to serve multiple client connections at the same time.
-- Once a thread has a client connection it is always watching for incoming data from the client, assembling that
-data into complete http messages, initiating processing of that complete message, writing the response but also 
-waiting for and reading additional incoming data.
-- Each thread is typically serving multiple client connections at the same time.
-- The total number of client connections that can be served st the same time is not restricted by the number of threds.
+The executable `async_server_ap` implements an event based single threaded server that performs all IO
+in a non blocking or async manner.
 
-## Pipelining, to pipeline or not to pipeline ?
+It uses a home grown event mechanism based on linux `epoll` which can be found in the directory `<project>/http_in_c/runloop`.
 
-The result of the above threading strategy is that:
+At the time of writing the event mechanism has no thread pool or other mechanism for the server to perform
+disk IO efficiently. 
 
--   the synchronous server will not read a second request until the first request has been processed and
-the response has delivered to the OS for transmission.
+Thats a future enhancement.
 
-- whereas the async server could possibly be parsing data for a 2nd request for the same client before the response 
-to the first request has been completely delivered to the OS for transmission. 
+This server has two modes of operating that are selected by a build options __ASYNC_SINGLE_THREAD:
 
-## Reading files
+When this option is set the server runs as a single thread.
 
+When this option is not set the server will try to start multiple threads, sharing a common listening sockets
+and having a run loop for each thread. 
 
+WE WARNED - there is a bug that causes crashes in the multi-threaded version.
 
+### Multi processes
 
-I had planned on using this as a model and re-implementating both the server and client in Rust, Swift and Zig 
-as a means of learning those languages.
+The `async_server_app` sets its listening socket to __SO_REUSEADDR__ and __SO_REUSEPORT__.
 
-However somewhere along the way my ambitions grew and I have expanded the goal to include creating my 
-own __runloop__ implementation as a basis for also implementing a multi-thread async io http server.
+As a result one can start any number of instances of `async_server_app` simultaniously to get the benefit
+of multiple servers without having to solve the problem caused by the multi-thread bug mentioned above.
 
-The runloop implementation is based on epoll and hence limited to Linux.
+The only downside of this is how to kill all the processes that are started.
 
-I am not sure how much of the runloop part of the c version of this exercise I will seek to implement in those
-other languages, time will tell.
+## verifier app and python_client
 
-## Http http_parser_t
-The most intricate part of the client and server is parsing http/1.X messages. Until recently I was using/planning to use
-the http-parser at [https://github.com/nodejs/http-parser](https://github.com/nodejs/http-parser) 
-as a dependency. For Rust, Swift and Zig that will require integrating those languages with
-a C dependency.
+The `verifier_app` is a __C__ client app that can be used to exercise both of the server apps described above.
 
+There is also a `python_client/client.py` app that is a second way to exercise the servers.
 
-However I recently (Nov 2020) noticed that [https://github.com/nodejs/http-parser](https://github.com/nodejs/http-parser) is 
-no longer being maintained and is being replaced by [https://github.com/nodejs/llhttp](https://github.com/nodejs/llhttp) 
-
-I have completed the conversion of this repo to use [https://github.com/nodejs/llhttp](https://github.com/nodejs/llhttp),
-and integrated those changes back into the `master` branch. 
-
-## Rust Http http_parser_t
-
-The Rust version is already partially implemented at [https://github.com/robertblackwell/rust_http](https://github.com/robertblackwell/rust_http) using 
-[https://github.com/nodejs/http-parser](https://github.com/nodejs/http-parser) and will be an early target for
-conversion to [https://github.com/nodejs/llhttp](https://github.com/nodejs/llhttp).
+In the directory
 
 ## Installation
 
@@ -143,33 +99,47 @@ cmake ..
 make
 ctest
 ```
-## Usage
+## Building
 
-There is a simple server app operating (by default on port 9001) that responds to all request with a simple page,
-or responds to a "GET /echo" request by returning the entire request message as the response body. 
-
-Run it on port 9001 with 10 threads as follows:
+The following commands will clone the repo and build all project deliverables:
 
 ```bash
-./cmake-build-debug/sync_app/simple_server -p 9001 -t 10
+git clone git@github:robertblackwell/c_http.git
+cd c_http
+mkdir cmake_debug_build
+cd cmake_debug_build
+cmake ..
+make
 ```
+## Dependencies
 
-There is also a benchmark app called `verifier_client` which can be run in conjunction with the simple_server app.
+The only dependencies are the two http parsing libraries discussed above.
 
-The following command will run the `verify_client` on port 9001, will run 60 threads and 300 request/response 
-per thread for a toal of 18000 request/response cycles.
+For simplicity I have included those in source form in the repo. They are in the __vendor__
+directory.
 
-```bash
-./cmake-build-debug/verifier/verifier_client -p 9001 -t 60 -r 300
+## Build deliverables
+
+The project uses CMake for building. The build outputs are:
+
+-   a static library    __cmake_debug_build/c_http/libc_http_library.a__ 
+-   a binary executable __cmake_debug_build/sync-server-app/c_http/sync-server-app__ 
+-   a binary executable __cmake_debug_build/async_server_appc_http/async-server-app__ 
+-   a binary executable __cmake_debug_build/verifier/verifier_client__ 
+-   a python3 script    __python_client/client.py__ 
+
+## Usage 
+
+By default the servers run on port 9001.
+
+All executables have a simplistic getopts interface, so when in doubt try:
+
+```
+    <program> -h
 ```
 
 The `verify_client` app will track response times and print a brief report. 
 
-On my desktop maching those 18000 request/response cycles take 338 ms total elapsed time, 
-the average response time for a request/response cycle is 1.1ms with a 
-stddev of 1.0.
-
-Of course there is no real network overhead in those numbers as both processes are on the same machine.
 
 ## Contributing
 Pull requests are welcome.

@@ -111,12 +111,12 @@ void sync_server_listen(sync_server_r server)
         LOGFMT("sync_server_listen SYNC_WORKER_QUEUE is defined");
         sync_worker_r wref = sync_worker_new(server->qref, i, server->read_buffer_size, server->app_handler);
 #else
-        LOGFMT("sync_server_listen SYNC_WORKER_QUEUE is NOT defined \n");
+        LOGFMT("sync_server_listen SYNC_WORKER_QUEUE is NOT defined");
         sync_worker_r wref = sync_worker_new(server->socket_fd, i, server->read_buffer_size, server->app_handler);
 #endif
         server->worker_tab[i] = NULL;
         if(sync_worker_start(wref) != 0) {
-            LOG_ERROR("sync_server_t failed starting thread - aborting\n");
+            LOG_ERROR("sync_server_t failed starting thread - aborting");
             return;
         }
         server->worker_tab[i] = wref;

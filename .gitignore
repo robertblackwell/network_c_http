@@ -4,7 +4,7 @@ deps_old/include/
 deps_old/include
 deps_old/lib/
 deps_old/lib
-vendor/
+#vendor/
 vendor_saved/
 vendor-saved/
 vendor-**/

@@ -46,18 +46,52 @@ option(C_HTTP_Package "Install as a CMake package - not implemented" OFF)
 option(C_HTTP_Verbose "Print a lot of diagnostic stuff" ON)
 option(C_HTTP_DebugBuild "Perform build as type Debug" ON)
 option(C_HTTP_BuildDocs "Build doxygen documentation" ON)
+option(C_HTTP_SyncServerUseQueue, "Determines whether the sync_server app uses a queue or shares a listening sockets between threads")
 
+##=============================================================================
+# project C compile options
+##=============================================================================
 
-# project build options
+# -fms-extensions enables a Microsoft extension that allows merging anonymous struct into a struct
+# used extensively in the runloop type definitions. Its a form of inheritence
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -fms-extensions")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -pthread -fvisibility=hidden")
+
 #_GNU_SOURCE
 #	because we use asprintf()
+set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -D_GNU_SOURCE")
+set (CHTTP_CXX_FLAGS "${CHTTP_CXX_FLAGS} -D_GNU_SOURCE")
+
 #CH_TYPE_CHECK_ON
-#CH_SYNC_WORKER_QUEUE
-#	the work threads in the sync_server uses an interthread queue for getting accept()'d sockets
+set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DTYPE_CHECK_ON")
+set (CHTTP_CXX_FLAGS "${CHTTP_CXX_FLAGS} -DTYPE_CHECK_ON")
+
 #CH_TAG_CHECK_ON
 #	puts a validation tag at the start of every struct and checks it on every access
+set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DCH_TAG_CHECK_ON")
+set (CHTTP_CXX_FLAGS "${CHTTP_CXX_FLAGS} -DCH_TAG_CHECK_ON")
+
+#CH_SYNC_WORKER_QUEUE
+#	the work threads in the sync_server uses an interthread queue for getting accept()'d sockets
+#   to the worker threads.
+#   When disabled uses a connom listener socket for all threads and each thread does its own accept
+
+#set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS}  -DSYNC_WORKER_QUEUEX")
+#set (CHTTP_CXX_FLAGS "${CHTTP_CXX_FLAGS}  -DSYNC_WORKER_QUEUEX")
+
 #CH_SCRIBBLE_ONFREE
-#		WRITES A PATTERN
+#		Writes a pattern over the memory occupied by a struct when free'd
+#		paranoid - trying to provoke errors
+set (CHTTP_C_FLAGS "${CHTTP_CXX_FLAGS} -DCH_SCRIBBLE")
+set (CHTTP_C_FLAGS "${CHTTP_CXX_FLAGS} -DCH_SCRIBBLE")
+
+#CH_ASYNC_SINGLE_THREAD
+# Forces the async server to run as a single threaded server. Hopefully a temporary
+# restriction while I figure out shared listening sockets
+# If disabled async_server will be multi threaded using a shared listening socket
+set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DCH_ASYNC_SINGLE_THREAD")
+
+message("CHTTP_C_FLAGS ${CHTTP_C_FLAGS}")
 ## ============================================================================
 ## The stuff below - I am not sure about ======================================
 ##
@@ -68,7 +102,9 @@ set(other_flags "${other_flags} -frtti -fvisibility-inlines-hidden")
 set(other_flags "${other_flags} -fvisibility=hidden -D_GNU_SOURCE -DTYPE_CHECK_ON -D_GNU_SOURCE")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${other_flags} -pthread")
 #set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11") # this caused a problem with time.h
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fms-extensions -D_GNU_SOURCE -DTYPE_CHECK_ON -DSYNC_WORKER_QUEUE -DCH_TAG_CHECK_ON")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fms-extensions")
+# -D_GNU_SOURCE -DTYPE_CHECK_ON -DSYNC_WORKER_QUEUEX -DCH_TAG_CHECK_ON")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CHTTP_C_FLAGS}")
 
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}")
 set(CTEST_CUSTOM_PRE_TEST "echo THIS IS PRE TEST")
@@ -158,6 +194,7 @@ if (C_HTTP_Verbose)
 	message("C Compiler                        ${CMAKE_C_COMPILER}")
 	message("Build Type                        ${CMAKE_BUILD_TYPE}")
 	message("CMAKE_CXX_STANDARD                ${CMAKE_CXX_STANDARD}")
+	message("CMAKE_C_FLAGS                     ${CMAKE_C_FLAGS}")
 	message("CMAKE_CXX_FLAGS                   ${CMAKE_CXX_FLAGS}")
 	message("CMAKE_DL_LIBS                     ${CMAKE_DL_LIBS}")
 	message("C_HTTP_PROJECT_DIR                ${C_HTTP_PROJECT_DIR}")

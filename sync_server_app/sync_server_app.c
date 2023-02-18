@@ -73,4 +73,10 @@ static void usage()
     printf("\twill respect the 'CONNECTION: close/keep-alive header\n");
     printf("\twhen given a CONNECTION: keep-alive will hold the connection open forever\n");
     printf("\tit is up to the requester to either send CONNECTION: close or close the connection.\n");
+    printf("\nOptions\n");
+
+    printf("\t-h\tPrints this usage message. Does not take an argument\n");
+    printf("\t-p\tRequired - Port number to use\n");
+    printf("\t-t\tRequired - Number of simultaneous threads\n");
+
 }
