@@ -238,7 +238,7 @@ static void reader(AsyncConnectionRef connection_ref) {
     } else {
         LOG_FMT("bytes_available < 0 io-error errno: %d %s", errno_save, strerror(errno_save))
         read_error(connection_ref, "reader - io error close and move on");
-    }
+    }// @TODO should never get here - put in ASSERT
     LOG_FMT("reader return");
 }
 static void read_eagain(AsyncConnectionRef cref)
