@@ -79,5 +79,6 @@
         "hash_map": "cpp",
         "hash_set": "cpp"
     },
-    "workbench.tree.indent": 24
+    "workbench.tree.indent": 24,
+    "makefile.configureOnOpen": false
 }

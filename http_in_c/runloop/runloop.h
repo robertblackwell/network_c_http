@@ -58,24 +58,37 @@ typedef void (*InterthreadQueueEventHandler)   (RtorInterthreadQueueRef qref);
 typedef void (*ListenerEventHandler)(RtorListenerRef listener_ref, uint64_t events);
 
 /**
- * A reactor is a device that uses Linux epoll to allow client code to watch for events on file descriptors.
- * The key significance of the device is that many file descriptors can be monitored simultaiously.
+ * A reactor is a device that uses Linux epoll to allow client code to watch for events related to file descriptors
+ * and have a callback function called when an event of interest happens. The implemented here can watch multiple 
+ * file descriptors simultaeously.
+ * The events that can be watched are:
+ * -    file descriptor is ready for read (EPOLLIN)
+ * -    file descriptor is ready for write (EPOLLOUT)
+ * -    file descriptor in listen mode is ready for an accept call (EPOLLIN)
+ * -    a special file descriptor dedicated to timer intervals has fired (EPOLLIN)
+ * -    a special file descriptor openned as an `fdevent` has been fired (EPOLLIN)
+ *  
+ * To watch or observe a file descriptor for events an object of type RtorWatcher 
+ * (or one of its variants or an object derived from RtorWatcher)
+ * must be created and passed to the reactor.
  *
- * To watch or observe a file descriptor for events an object of type RtorWatcher (or derived from RtorWatcher)
- * and passed to the reactor.
- *
- * The RtorWatcher holds at least 2 pieces of information:
+ * The RtorWatcher object holds at least the following pieces of information:
+ * -    a bit mask that indicates what events are of interest
  * -    a function to be called when an event of interest happens
  * -    optionally a context pointer for the callback function
  *
  * in this sense the various watchers are generalizations of a callback closure
  *
- * For convenience a number of special purposes watchers/observers have been provided.
+ * A reactor is supposed to be a thread specific mechanism, that is we can have multiple threads
+ * each with its own reactor. At present that does not work; so a process should only have 
+ * one thread with a reactor.
  */
 ReactorRef rtor_reactor_get_threads_reactor();
+
 ReactorRef rtor_reactor_new(void);
-void       rtor_reactor_close(ReactorRef athis);
 void       rtor_reactor_init(ReactorRef athis);
+
+void       rtor_reactor_close(ReactorRef athis);
 void       rtor_reactor_free(ReactorRef athis);
 int        rtor_reactor_register(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref);
 int        rtor_reactor_deregister(ReactorRef athis, int fd);

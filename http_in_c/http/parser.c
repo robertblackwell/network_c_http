@@ -244,7 +244,8 @@ int status_data_cb(llhttp_t* parser, const char* at, size_t length)
     CHECK_TAG(HTTP_PARSER_TAG, this)
     Message_set_is_request(this->current_message_ptr, false);
     Message_set_status(this->current_message_ptr, this->m_llhttp_ptr->status_code);
-
+    
+    //@todo why not append directly into the this->current_message_ptr->reason
     Cbuffer_append(this->m_status_buf, (char*)at, length);  /*NEEDS ALLO TEST*/
     Message_set_reason_cbuffer(this->current_message_ptr, this->m_status_buf);  /*NEEDS ALLO TEST*/
     return 0;

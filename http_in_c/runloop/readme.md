@@ -58,9 +58,11 @@ This is a somewhat rigid way of providing closures and is one of the "features" 
 code C a bit tedious. 
 
 Typically, callbacks should be short and fast, should not perform long calculations and should not perform 
-any synchronous I/O (like calling `printf()` or reading from a file). The whole point of the runloop is that
+any synchronous I/O (like calling `printf()` or reading from a file). 
 
 However, some operations cannot be made short and/or fast, and one runloop solution to this is a thread pool.
+I have not implemented a threadpool but have provided the key mechanism for doing this, a means of a second thread
+adding callbacks to a runloop. This is the purpose of the `eventfd` event and the `inter thread queue`.
 
 I have implemented a simple thread associated with the runloop in this directory.
 

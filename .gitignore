@@ -9,6 +9,9 @@ vendor_saved/
 vendor-saved/
 vendor-**/
 
+docs/
+cmake/
+
 external_code/cloned_repos
 external_code/**/log
 externa_code/stage**/

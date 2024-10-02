@@ -109,9 +109,10 @@ void Message_add_header_cbuf(MessageRef this, CbufferRef key, CbufferRef value);
  * If not found return NULL
  * @param mref   MessageRef
  * @param labptr The key or label for the header line being sought
- * @return const char* or NULL  The return value(when not NULL) is a weak reference
+ * @return const char* or NULL  The return value(when not NULL) is a weak reference to
  *                              a string that is owned by the message instance. Do not free
- *                              value is always lower case
+ *                              value is always lower case. The weak ref becomes invalid
+ *                              when the message is freed/disposed
  */
 const char* Message_get_header_value(MessageRef mref, const char* labptr);
 HdrListRef Message_get_headerlist(MessageRef this);

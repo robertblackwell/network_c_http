@@ -29,6 +29,29 @@ message("Doxygen                  ${DOXYGEN_FOUND}")
 message("Doxygen Executable       ${DOXYGEN_EXECUTABLE}")
 message("Doxygen Working dir      ${CMAKE_CURRENT_SOURCE_DIR}/docs")
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+message("CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}")
+include(helpers)
+set(RESULT "YYYYYYY")
+set_variable(RESULT "12345")
+message("RESULT ${RESULT}")
+
+# function(setVariable varName value)
+#     set(${varName} ${value})
+#     set(${varName} ${${varName}} PARENT_SCOPE)
+#     message("setVariable: ${varName} = ${${varName}}")
+# endfunction()
+
+set(FooBar "previous value")
+setVariable(Foobar "Assign this value to Foobar")
+message("Foobar = ${Foobar}")
+
+setVariable(RESULT "Assign this value to RESULT")
+message("RESULT = ${RESULT}")
+
+set_var_value(RESULT )
+message("RESULT = ${RESULT}")
+
 ## not sure any of these work for the moment so turn them OFF
 if(OFF)
 find_package(boost)
@@ -220,8 +243,16 @@ endif()
 
 include(CTest) 
 enable_testing()
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
+set(CHLIB_SOURCES)
+set(CHLIB_HEADERS)
+# These variables will be filled in by http_in_c
 add_subdirectory(http_in_c)
+get_target_property(CH_TMP ${C_HTTP_LIB_NAME} SOURCES)
+message("Library Target source -------- ${CH_TMP}")
+
+add_subdirectory(docs)
 add_subdirectory(tests)
 add_subdirectory(sync_server_app)
 add_subdirectory(verifier)
@@ -232,7 +263,7 @@ add_subdirectory(async-server-app)
 # look for Doxygen package
 find_package(Doxygen)
 
-if (DOXYGEN_FOUND)
+if (OFF) #(DOXYGEN_FOUND)
 	# set input and output files
 	set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/docs_doxygen/Doxyfile.in)
 	set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.out)
@@ -247,6 +278,6 @@ if (DOXYGEN_FOUND)
 			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 			COMMENT "Generating API documentation with Doxygen"
 			VERBATIM )
-else (DOXYGEN_FOUND)
+else ()
 	message("Doxygen need to be installed to generate the doxygen documentation")
-endif (DOXYGEN_FOUND)
+endif ()
