@@ -4,7 +4,7 @@
 #include <pthread.h>
              /* See feature_test_macros(7) */
 #include <string.h>
-#include <http_in_c/unittest.h>
+#include <rbl/unittest.h>
 #include <http_in_c/common/utils.h>
 #include "listener.h"
 #include "connector.h"

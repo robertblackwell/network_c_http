@@ -14,8 +14,8 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/epoll.h>
-#include <http_in_c/unittest.h>
-#include <http_in_c/logger.h>
+#include <rbl/unittest.h>
+#include <rbl/logger.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/socket_functions.h>
 #include <http_in_c/sync/sync_client.h>
@@ -75,7 +75,7 @@ static void on_timer(RtorTimerRef watcher, EventMask event)
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
     ListenerRef listener_ref = (ListenerRef) watcher->timer_handler_arg;
-    LOG_FMT("event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", event, epollin, error);
+    RBL_LOG_FMT("event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", event, epollin, error);
     rtor_reactor_close(listener_ref->reactor_ref);
 //    rtor_reactor_free(listener_ref->reactor_ref);
 }
@@ -90,7 +90,7 @@ static void on_event_listening(RtorListenerRef listener_ref, uint64_t event)
     int sock2 = accept(server_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
     if(sock2 <= 0) {
         int errno_saved = errno;
-        LOG_FMT("%s %d %d %s", "Listener thread :: accept failed terminating sock2 : ", sock2, errno, strerror(errno_saved));
+        RBL_LOG_FMT("%s %d %d %s", "Listener thread :: accept failed terminating sock2 : ", sock2, errno, strerror(errno_saved));
     } else {
         printf("Sock2 successfull sock: %d server_ref %p listen_ref: %p  listen_count: %d\n", sock2, server_ref, listener_ref, server_ref->listen_counter);
         if(server_ref->listen_counter == 0) {

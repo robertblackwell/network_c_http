@@ -11,7 +11,7 @@
 
 #define TYPE DemoMessage
 #define DemoMessage_TAG "DemMSG"
-#include <http_in_c/check_tag.h>
+#include <rbl/check_tag.h>
 #undef TYPE
 #define DEMO_MESSAGE_DECLARE_TAG DECLARE_TAG(DemoMessage_TAG)
 #define DEMO_MESSAGE_CHECK_TAG(p) CHECK_TAG(DemoMessage_TAG, p)

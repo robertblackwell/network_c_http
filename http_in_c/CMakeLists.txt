@@ -27,10 +27,10 @@ set(EXTSRC ${C_HTTP_VENDOR_SRCDIR})
 set(C_HTTP_LIBRARY_HEADER_FILES
 	#basic data structures
 	#misc
-		logger.h
-		unittest.h
+        ../rbl/logger.h
+		../rbl/unittest.h
 		socket_functions.h
-		check_tag.h
+		../rbl/check_tag.h
 	#common
 		#common/generics
 		common/generics/dlist.h
@@ -89,8 +89,8 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	# basic
 
 	#misc
-		unittest.c
-		logger.c
+		../rbl/unittest.c
+        ../rbl/logger.c
 		socket_functions.c
 
 

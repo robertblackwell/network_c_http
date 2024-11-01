@@ -6,7 +6,7 @@
              /* See feature_test_macros(7) */
 #include <string.h>
 
-#include <http_in_c/unittest.h>
+#include <rbl/unittest.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
@@ -24,7 +24,7 @@
 #define QWriter_TAG     "ITQ_QWRT"
 
 typedef struct QReader_s {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
     ReactorRef   _reactor_ref;
     int count;
     int expected_count;
@@ -34,7 +34,7 @@ typedef struct QReader_s {
 QReaderRef qreader_new(int expected_count)
 {
     QReaderRef this = malloc(sizeof(QReader));
-    SET_TAG(QReader_TAG, this);
+    RBL_SET_TAG(QReader_TAG, this);
     this->expected_count = expected_count;
     this->count = 0;
     this->_reactor_ref = rtor_reactor_new();
@@ -45,23 +45,23 @@ QReaderRef qreader_new(int expected_count)
 
 void qreader_free(QReaderRef rdrref)
 {
-    CHECK_TAG(QReader_TAG, rdrref);
+    RBL_CHECK_TAG(QReader_TAG, rdrref);
     rtor_reactor_free(rdrref->_reactor_ref);
     free(rdrref);
 }
 ReactorRef qreader_get_reactor(QReaderRef qr)
 {
-    CHECK_TAG(QReader_TAG, qr);
+    RBL_CHECK_TAG(QReader_TAG, qr);
     return qr->_reactor_ref;
 }
 EvfdQueueRef  qreader_get_evqueue(QReaderRef qr)
 {
-    CHECK_TAG(QReader_TAG, qr);
+    RBL_CHECK_TAG(QReader_TAG, qr);
     return qr->_reactor_ref->interthread_queue_ref;
 }
 RtorWQueueRef qreader_get_queue_watcher(QReaderRef qr)
 {
-    CHECK_TAG(QReader_TAG, qr);
+    RBL_CHECK_TAG(QReader_TAG, qr);
     return qr->_reactor_ref->interthread_queue_watcher_ref;
 }
 
@@ -72,7 +72,7 @@ void qreader_post(QReaderRef rdrref, PostableFunction f, void* arg)
 }
 
 typedef struct QWriter_s {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
     QReaderRef   qrdr_ref;
     EvfdQueueRef queue;
     int count_max;
@@ -82,7 +82,7 @@ typedef struct QWriter_s {
 QWriterRef QWriter_new(QReaderRef qrdr, int max)
 {
     QWriterRef this = malloc(sizeof(QWriter));
-    SET_TAG(QWriter_TAG, this);
+    RBL_SET_TAG(QWriter_TAG, this);
     this->qrdr_ref = qrdr;
     this->queue = qreader_get_evqueue(this->qrdr_ref);
     this->count_max = max;
@@ -98,7 +98,7 @@ void QWriter_free(QWriterRef this)
 void* reader_thread_func(void* arg)
 {
     QReaderRef q_rdr_ctx = (QReaderRef)arg;
-    CHECK_TAG(QReader_TAG, q_rdr_ctx)
+    RBL_CHECK_TAG(QReader_TAG, q_rdr_ctx)
     ReactorRef rtor_ref = qreader_get_reactor(q_rdr_ctx);
     REACTOR_CHECK_TAG(rtor_ref)
     RtorWQueueRef qw = qreader_get_queue_watcher(q_rdr_ctx);
@@ -110,7 +110,7 @@ void writers_postable_func(ReactorRef rtor_ref, void* arg)
     RtorWQueueRef wqref = (RtorWQueueRef)arg;
     WQUEUE_CHECK_TAG(wqref)
     QWriterRef wrtref = (QWriterRef)wqref->queue_event_handler_arg;
-    CHECK_TAG(QWriter_TAG, wrtref);
+    RBL_CHECK_TAG(QWriter_TAG, wrtref);
     printf("writers postable func arg: %p rdrref:%p count:%d max_count:%d\n", arg, wrtref, wrtref->count, wrtref->count_max);
     if (wrtref->count >= wrtref->count_max) {
         printf("writer is done\n");
@@ -121,7 +121,7 @@ void* writer_thread_func(void* arg)
 {
     QWriterRef wrtr = (QWriterRef)arg;
     ReactorRef rtor_ref = qreader_get_reactor(wrtr->qrdr_ref);
-    CHECK_TAG(QWriter_TAG, wrtr)
+    RBL_CHECK_TAG(QWriter_TAG, wrtr)
     for(long i = 0; i <= wrtr->count_max; i++) {
         usleep(500000);
         wrtr->count = i;
@@ -146,7 +146,7 @@ int test_itq()
 
     pthread_join(rdr_thread, NULL);
     pthread_join(wrtr_thread, NULL);
-    UT_TRUE(wrtr->count == wrtr->count_max);
+    UT_TRUE((wrtr->count == wrtr->count_max));
     return 0;
 }
 

@@ -10,7 +10,7 @@
 #include <http_in_c/http/parser_types.h>
 
 #define SyncWriter_TAG "SYNCWRTR"
-#include <http_in_c/check_tag.h>
+#include <rbl/check_tag.h>
 
 
 struct SyncWriter_s {

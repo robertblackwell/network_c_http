@@ -1,10 +1,10 @@
 
 
-#define CHLOG_ON
+#define RBL_LOG_ENABLE
 #include <http_in_c/async/async.h>
-#include <http_in_c/macros.h>
-#include <http_in_c/check_tag.h>
-#include <http_in_c/logger.h>
+#include <rbl/macros.h>
+#include <rbl/check_tag.h>
+#include <rbl/logger.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -42,8 +42,8 @@ void async_handler_init(
         ReactorRef reactor_ref,
         AsyncServerRef server_ref)
 {
-    SET_TAG(AsyncHandler_TAG, this)
-    CHECK_TAG(AsyncHandler_TAG, this)
+    RBL_SET_TAG(AsyncHandler_TAG, this)
+    RBL_CHECK_TAG(AsyncHandler_TAG, this)
     // set up the delegate function
     this->handle_request = &handle_request;
     this->handle_response = &async_handler_handle_response;
@@ -59,22 +59,22 @@ void async_handler_init(
     this->input_list = List_new(NULL);
     this->output_list = List_new(NULL);
 
-    LOG_FMT("socket: %d", socket);
+    RBL_LOG_FMT("socket: %d", socket);
     async_connection_read(this->async_connection_ref);
 }
 void async_handler_destroy(AsyncHandlerRef this)
 {
-    CHECK_TAG(AsyncHandler_TAG, this)
+    RBL_CHECK_TAG(AsyncHandler_TAG, this)
     async_connection_free(this->async_connection_ref);
     this->async_connection_ref = NULL;
     List_dispose(&(this->input_list));
     List_dispose(&(this->output_list));
-    INVALIDATE_TAG(this)
-    // INVALIDATE_STRUCT(this, AsyncHandler)
+    RBL_INVALIDATE_TAG(this)
+    // RBL_INVALIDATE_STRUCT(this, AsyncHandler)
 }
 void async_handler_free(AsyncHandlerRef this)
 {
-    CHECK_TAG(AsyncHandler_TAG, this)
+    RBL_CHECK_TAG(AsyncHandler_TAG, this)
     async_handler_destroy(this);
     free(this);
 }
@@ -89,8 +89,8 @@ void async_handler_anonymous_dispose(void** p)
  */
 static void handle_request(AsyncHandlerRef href, MessageRef request_ptr)
 {
-    CHECK_TAG(AsyncHandler_TAG, href)
-    LOGFMT("href: %p socket:%d", href, href->async_connection_ref->socket);
+    RBL_CHECK_TAG(AsyncHandler_TAG, href)
+    RBL_LOGFMT("href: %p socket:%d", href, href->async_connection_ref->socket);
     AsyncHandlerRef handler_ref = href;
     handler_ref->server_ref->process_request(handler_ref, request_ptr);
 }
@@ -100,9 +100,9 @@ static void handle_request(AsyncHandlerRef href, MessageRef request_ptr)
  */
 void async_handler_handle_response(AsyncHandlerRef href, MessageRef request_ptr, MessageRef response_ptr)
 {
-    CHECK_TAG(AsyncHandler_TAG, href)
+    RBL_CHECK_TAG(AsyncHandler_TAG, href)
     int cmp_tmp = Message_cmp_header(request_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
-    LOG_FMT("href: %p socket:%d keep alive: %d", href, href->async_connection_ref->socket, cmp_tmp);
+    RBL_LOG_FMT("href: %p socket:%d keep alive: %d", href, href->async_connection_ref->socket, cmp_tmp);
     if(cmp_tmp == 1) {
         Message_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
     } else {
@@ -116,8 +116,8 @@ void async_handler_handle_response(AsyncHandlerRef href, MessageRef request_ptr,
  */
 static void handle_write_complete(AsyncHandlerRef href)
 {
-    CHECK_TAG(AsyncHandler_TAG, href)
-    LOGFMT("href: %p socket:%d", href, href->async_connection_ref->socket);
+    RBL_CHECK_TAG(AsyncHandler_TAG, href)
+    RBL_LOGFMT("href: %p socket:%d", href, href->async_connection_ref->socket);
     async_connection_read(href->async_connection_ref);
 }
 /**
@@ -134,9 +134,9 @@ static void handle_write_complete(AsyncHandlerRef href)
  */
 static void handle_close_connection(AsyncHandlerRef href)
 {
-    CHECK_TAG(AsyncHandler_TAG, href)
-    CHTTP_ASSERT((href->async_connection_ref->socket_stream_ref > 0),"sockets fd must be still owned at this point");
-    LOGFMT("file async_handler.c handle_close_connection socket %d", href->async_connection_ref->socket);
+    RBL_CHECK_TAG(AsyncHandler_TAG, href)
+    RBL_ASSERT((href->async_connection_ref->socket_stream_ref > 0), "sockets fd must be still owned at this point");
+    RBL_LOGFMT("file async_handler.c handle_close_connection socket %d", href->async_connection_ref->socket);
     href->server_ref->handler_complete(href->server_ref, href);
 }
 #if 0
@@ -144,19 +144,19 @@ static void handle_close_connection(AsyncHandlerRef href)
 static void handle_io_error(AsyncHandlerRef  href)
 {
     CHECK_TAG(AsyncHandler_TAG, href)
-    LOG_FMT("handle_io_error");
+    RBL_LOG_FMT("handle_io_error");
 }
 // deprecated
 static void handle_reader_stopped(AsyncHandlerRef  href)
 {
     CHECK_TAG(AsyncHandler_TAG, href)
-    LOG_FMT("handle_reader_stopped");
+    RBL_LOG_FMT("handle_reader_stopped");
 }
 // deprecated
 static void handle_write_failed(AsyncHandler* href)
 {
     CHECK_TAG(AsyncHandler_TAG, href)
-    LOG_FMT("handle_write_failed");
+    RBL_LOG_FMT("handle_write_failed");
 }
 #endif
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -164,7 +164,7 @@ static void handle_write_failed(AsyncHandler* href)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 int async_handler_threadid(AsyncHandlerRef handler_ref)
 {
-    CHECK_TAG(AsyncHandler_TAG, handler_ref)
+    RBL_CHECK_TAG(AsyncHandler_TAG, handler_ref)
     AsyncServerRef s = handler_ref->server_ref;
     return s->listening_socket_fd;
 }

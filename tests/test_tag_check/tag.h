@@ -30,22 +30,3 @@
  *
  */
 
-#ifdef TYPE_CHECK_ON
-    #define TAG_LENGTH 8
-    #define TAG(TYPE) TYPE ## _TAG
-    #define DECLARE_TAG(TYPE) char tag[TAG_LENGTH]
-    #define CHECK_TAG(TYPE, p) \
-    do { \
-        assert(strcmp((p)->tag, TAG(TYPE)) == 0); \
-    } while(0);
-
-    #define SET_TAG(TYPE, p) \
-    do { \
-        sprintf((p)->tag, "%s", TAG(TYPE)); \
-    } while(0);
-#else
-    #define DECLARE_TAG(TYPE)
-    #define CHECK_TAG(TYPE, p)
-    #define SET_TAG(TYPE, p)
-
-#endif

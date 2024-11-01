@@ -4,7 +4,7 @@
  */
 #ifndef C_HTTP_KVPAIR_H
 #define C_HTTP_KVPAIR_H
-
+#include <stddef.h>
 /**
  * @addtogroup group_kvp
  * @brief Abstract type for a key/value pair with both elements strings
@@ -24,14 +24,14 @@ typedef struct CStrPair {
  * @param labptr char*  pointer to start of string that is to be label or key.
  *                      does not assume null terminated. This string will be copied.
  *                      So caller retains responsibility for memory
- * @param lablen int    len of the string to be label/key
+ * @param lablen size_t len of the string to be label/key
  * @param valptr        pointer to start of memory holding string value.
  *                      does not assume null terminated. This string is copied
  *                      So caller retains responsibility for memory.
  * @param valsize       Length of value str
  * @return KVPairRef or NULL on failure
  */
-KVPairRef KVPair_new(const char* labptr, int lablen, const char* valptr, int valsize);
+KVPairRef KVPair_new(const char* labptr, int lablen, const char* valptr, size_t valsize);
 /**
  * @brief Create a new KVPair from two c-strings
  * \param key char*         c string null terminated. Function copies the string so
@@ -57,7 +57,7 @@ void KVPair_dealloc(void* ptr);
  *                  not null terminated. The value is copied.
  * \param vallen    length of value string
  */
-void KVPair_set_value(KVPairRef hlref, const char* valptr, int vallen);
+void KVPair_set_value(KVPairRef hlref, const char* valptr, size_t vallen);
 /**
  * @brief Returns the key or label value for an existing KVPair.
  * \param hlref KVPairRef

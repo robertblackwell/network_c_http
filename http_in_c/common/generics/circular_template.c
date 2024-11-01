@@ -2,8 +2,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <http_in_c/macros.h>
-#include <http_in_c/check_tag.h>
+#include <rbl/macros.h>
+#include <rbl/check_tag.h>
 
 #undef CIRCULAR_LIST_TAG_LENGTH
 #define CIRCULAR_LIST_TAG_LENGTH TAG_LENGTH
@@ -12,31 +12,31 @@
 #ifndef CIRCULAR_TEMPLATE_TAG
     #error CIRCULAR_TEMPLATE_TAG not defined
 #endif
-#ifndef SET_TAG_FIELD
+#ifndef RBL_SET_TAG
     #error SET_TAG_FIELD macro not found
 #endif
-#ifndef CHECK_TAG_FIELD
+#ifndef RBL_CHECK_TAG
     #error CHECK_TAG_FIELD macro not found
 #endif
 
 struct PREFIX(_s) {
-        char       tag[CIRCULAR_LIST_TAG_LENGTH];
-        int        capacity;
-        int        head;
-        int        tail_plus;
-        TYPE       *list; // points to first element of an array of TYPED() objects
-        char       end_tag[CIRCULAR_LIST_TAG_LENGTH];
+    RBL_DECLARE_TAG
+    int        capacity;
+    int        head;
+    int        tail_plus;
+    TYPE       *list; // points to first element of an array of TYPED() objects
+    RBL_DECLARE_END_TAG;
 };
 
 static void PREFIX(_set_tag)(PREFIX(Ref) this)
 {
-    SET_TAG_FIELD(CIRCULAR_TEMPLATE_TAG, this, tag)
-    SET_TAG_FIELD(CIRCULAR_TEMPLATE_TAG, this, end_tag)
+    RBL_SET_TAG(CIRCULAR_TEMPLATE_TAG, this)
+    RBL_SET_END_TAG(CIRCULAR_TEMPLATE_TAG, this)
 }
 static void PREFIX(_check_tag)(PREFIX(Ref) this)
 {
-    CHECK_TAG_FIELD(CIRCULAR_TEMPLATE_TAG, this, tag)
-    CHECK_TAG_FIELD(CIRCULAR_TEMPLATE_TAG, this, end_tag)
+    RBL_SET_TAG(CIRCULAR_TEMPLATE_TAG, this)
+    RBL_SET_END_TAG(CIRCULAR_TEMPLATE_TAG, this)
 }
 #undef CIRCULAR_LIST_TAG_LENGTH
 
@@ -74,7 +74,7 @@ void PREFIX(_add)(PREFIX(Ref) lstref, TYPED() func)
     PREFIX(_check_tag)(lstref);
     int tmp = (lstref->head + 1) % lstref->capacity;
     if(tmp == lstref->tail_plus) {
-        CHTTP_ASSERT(false, "functor list is full cannot add another element");
+        RBL_ASSERT(false, "functor list is full cannot add another element");
     }
     lstref->head = tmp;
     PREFIX(_set_entry)(lstref, (lstref->head), func);
@@ -88,7 +88,7 @@ TYPED() PREFIX(_remove)(PREFIX(Ref) lstref)
 {
     PREFIX(_check_tag)(lstref);
     if(PREFIX(_size)(lstref) == 0) {
-        CHTTP_ASSERT(false, "cannot remove an element from an empty list");
+        RBL_ASSERT(false, "cannot remove an element from an empty list");
     }
     int tmpix = (lstref->tail_plus + 1) % lstref->capacity;
     lstref->tail_plus = tmpix;

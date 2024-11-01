@@ -1,4 +1,4 @@
-#include <http_in_c/macros.h>
+#include <rbl/macros.h>
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
 #include <time.h>
@@ -9,7 +9,7 @@
 #include <assert.h>
 #include <sys/epoll.h>
 #include <errno.h>
-#include <http_in_c/logger.h>
+#include <rbl/logger.h>
 
 static struct timespec current_time()
 {
@@ -20,7 +20,7 @@ static struct timespec current_time()
 static void print_current_tme(char* prefix)
 {
     struct timespec ts = current_time();
-    LOG_FMT("%s current time secs: %ld ns: %ld \n", prefix, ts.tv_sec, ts.tv_nsec);
+    RBL_LOG_FMT("%s current time secs: %ld ns: %ld \n", prefix, ts.tv_sec, ts.tv_nsec);
 }
 /**
  * First level fd event handler - provided in the base/common part of an event source
@@ -37,7 +37,7 @@ static void handler(RtorWatcherRef watcher, uint64_t event)
 
     int r = clock_gettime(CLOCK_REALTIME, &ts);
     uint64_t tns = ts.tv_sec * 1000000 + ts.tv_nsec;
-    LOG_FMT("XtWatcher::caller current time secs: %ld ns: %ld \n", ts.tv_sec, ts.tv_nsec);
+    RBL_LOG_FMT("XtWatcher::caller current time secs: %ld ns: %ld \n", ts.tv_sec, ts.tv_nsec);
     RtorTimerRef timer_watcher = (RtorTimerRef)watcher;
     WTIMER_CHECK_TAG(timer_watcher)
 
@@ -47,12 +47,12 @@ static void handler(RtorWatcherRef watcher, uint64_t event)
      */
     uint64_t ret;
     int nread = read(timer_watcher->fd, &ret, sizeof(ret));
-    LOG_FMT("read() returned %d, res=%lx n", nread, ret);
+    RBL_LOG_FMT("read() returned %d, res=%lx n", nread, ret);
 
     if(!timer_watcher->repeating) {
         rtor_timer_deregister(timer_watcher);
     }
-    CHTTP_ASSERT((timer_watcher->timer_handler != NULL), "timer_handler should not be NULL");
+    RBL_ASSERT((timer_watcher->timer_handler != NULL), "timer_handler should not be NULL");
     timer_watcher->timer_handler(timer_watcher, event);
 }
 static void anonymous_free(RtorWatcherRef p)
@@ -73,7 +73,7 @@ void rtor_timer_init(RtorTimerRef this, ReactorRef runloop)
     this->interval = 0;
     this->repeating = false;
     this->fd = timerfd_create(CLOCK_REALTIME, TFD_CLOEXEC | TFD_NONBLOCK);
-    LOG_FMT("rtor_timer_init fd: %d \n", this->fd);
+    RBL_LOG_FMT("rtor_timer_init fd: %d \n", this->fd);
 }
 RtorTimerRef rtor_timer_new(ReactorRef rtor_ref)
 {
@@ -135,8 +135,8 @@ void rtor_timer_register(RtorTimerRef athis, TimerEventHandler cb, void* ctx, ui
     assert(rc == 0);
     uint32_t interest = EPOLLIN | EPOLLERR;
     print_current_tme("rtor_timer_register");
-    LOG_FMT("rtor_timer_register its.it_value secs %ld nsecs: %ld \n", its.it_value.tv_sec, its.it_value.tv_nsec);
-    LOG_FMT("rtor_timer_register its.it_interval secs %ld nsecs: %ld\n", its.it_interval.tv_sec, its.it_interval.tv_nsec);
+    RBL_LOG_FMT("rtor_timer_register its.it_value secs %ld nsecs: %ld \n", its.it_value.tv_sec, its.it_value.tv_nsec);
+    RBL_LOG_FMT("rtor_timer_register its.it_interval secs %ld nsecs: %ld\n", its.it_interval.tv_sec, its.it_interval.tv_nsec);
     int res = rtor_reactor_register(athis->runloop, athis->fd, interest, (RtorWatcherRef) (athis));
     assert(res ==0);
 }
@@ -184,12 +184,12 @@ void rtor_timer_rearm(RtorTimerRef athis)
 void rtor_timer_deregister(RtorTimerRef athis)
 {
     WTIMER_CHECK_TAG(athis)
-    LOG_FMT("rtor_timer_deregister this->fd : %d\n", athis->fd);
+    RBL_LOG_FMT("rtor_timer_deregister this->fd : %d\n", athis->fd);
     int res = rtor_reactor_deregister(athis->runloop, athis->fd);
     if(res != 0) {
-        LOG_FMT("rtor_timer_deregister res: %d errno: %d \n", res, errno);
+        RBL_LOG_FMT("rtor_timer_deregister res: %d errno: %d \n", res, errno);
     }
-    LOG_FMT("rtor_timer_deregister res: %d errno: %d \n", res, errno);
+    RBL_LOG_FMT("rtor_timer_deregister res: %d errno: %d \n", res, errno);
     assert(res == 0);
 }
 ReactorRef rtor_timer_get_reactor(RtorTimerRef athis)

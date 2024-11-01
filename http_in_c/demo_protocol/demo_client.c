@@ -6,7 +6,7 @@
 #include <http_in_c/http/message.h>
 #include <http_in_c/demo_protocol/demo_sync_reader.h>
 #include <http_in_c/demo_protocol/demo_sync_writer.h>
-#include <http_in_c/logger.h>
+#include <rbl/logger.h>
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -16,7 +16,7 @@
 #include <errno.h>
 
 #define DemoClient_TAG "DECLNT"
-#include <http_in_c/check_tag.h>
+#include <rbl/check_tag.h>
 
 struct DemoClient_s {
     DECLARE_TAG;

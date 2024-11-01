@@ -3,8 +3,8 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <http_in_c/unittest.h>
-#include <http_in_c/logger.h>
+#include <rbl/unittest.h>
+#include <rbl/logger.h>
 #include <http_in_c/common/list.h>
 #include <http_in_c/http/kvpair.h>
 #include <http_in_c/http/header_list.h>

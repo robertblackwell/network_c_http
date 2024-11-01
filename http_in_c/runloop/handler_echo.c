@@ -1,6 +1,6 @@
 
 #include <http_in_c/async/handler.h>
-#include <http_in_c/logger.h>
+#include <rbl/logger.h>
 #include <http_in_c/constants.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/utils.h>

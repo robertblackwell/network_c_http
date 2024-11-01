@@ -8,18 +8,18 @@
 
 
 struct FdTable_s {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
     uint64_t        count;
 	RtorWatcher*    entries[RTOR_FDTABLE_MAX];
-    char            end_tag[TAG_LENGTH];
+    RBL_DECLARE_END_TAG;
 };
 
 typedef struct FdTable_s FdTable, *FdTableRef;
 
 void FdTable_init(FdTableRef this)
 {
-    SET_TAG(FdTable_TAG, this);
-    SET_TAG_FIELD(FdTable_TAG, this, end_tag);
+    RBL_SET_TAG(FdTable_TAG, this);
+    RBL_SET_END_TAG(FdTable_TAG, this);
     this->count = 0;
 	for(int i = 0; i < RTOR_FDTABLE_MAX; i++) {
 		this->entries[i] = NULL;
@@ -33,8 +33,8 @@ FdTableRef FdTable_new()
 }
 void FdTable_free(FdTableRef this)
 {
-    CHECK_TAG(FdTable_TAG, this);
-    CHECK_TAG_FIELD(FdTable_TAG, this, end_tag)
+    RBL_CHECK_TAG(FdTable_TAG, this);
+    RBL_CHECK_END_TAG(FdTable_TAG, this)
 	for(int i = 0; i < RTOR_FDTABLE_MAX; i++) {
 		if (this->entries[i] != NULL) {
 		    FdTable_remove(this, i);
@@ -44,8 +44,8 @@ void FdTable_free(FdTableRef this)
 }
 void FdTable_insert(FdTableRef this, RtorWatcherRef watcher, int fd)
 {
-    CHECK_TAG(FdTable_TAG, this);
-    CHECK_TAG_FIELD(FdTable_TAG, this, end_tag)
+    RBL_CHECK_TAG(FdTable_TAG, this);
+    RBL_CHECK_END_TAG(FdTable_TAG, this)
 	assert(this->entries[fd] == NULL);
 	this->entries[fd] = watcher;
 	this->count++;
@@ -55,8 +55,8 @@ void FdTable_insert(FdTableRef this, RtorWatcherRef watcher, int fd)
  */
 void FdTable_remove(FdTableRef athis, int fd)
 {
-    CHECK_TAG(FdTable_TAG, athis);
-    CHECK_TAG_FIELD(FdTable_TAG, athis, end_tag)
+    RBL_CHECK_TAG(FdTable_TAG, athis);
+    RBL_CHECK_END_TAG(FdTable_TAG, athis)
 	assert(athis->entries[fd] != NULL);
 	RtorWatcherRef wr = (athis->entries[fd]);
 //	wr->free(wr);
@@ -65,16 +65,16 @@ void FdTable_remove(FdTableRef athis, int fd)
 }
 RtorWatcherRef FdTable_lookup(FdTableRef this, int fd)
 {
-    CHECK_TAG(FdTable_TAG, this);
-    CHECK_TAG_FIELD(FdTable_TAG, this, end_tag)
+    RBL_CHECK_TAG(FdTable_TAG, this);
+    RBL_CHECK_END_TAG(FdTable_TAG, this)
 	assert(this->entries[fd] != NULL);
 	return 	(this->entries[fd]);
 
 }
 int FdTable_iterator(FdTableRef this)
 {
-    CHECK_TAG(FdTable_TAG, this);
-    CHECK_TAG_FIELD(FdTable_TAG, this, end_tag)
+    RBL_CHECK_TAG(FdTable_TAG, this);
+    RBL_CHECK_END_TAG(FdTable_TAG, this)
     for(int i = 0; i < RTOR_FDTABLE_MAX; i++) {
         if (this->entries[i] != NULL) {
             return i;
@@ -84,8 +84,8 @@ int FdTable_iterator(FdTableRef this)
 }
 int FdTable_next_iterator(FdTableRef this, int iter)
 {
-    CHECK_TAG(FdTable_TAG, this);
-    CHECK_TAG_FIELD(FdTable_TAG, this, end_tag)
+    RBL_CHECK_TAG(FdTable_TAG, this);
+    RBL_CHECK_END_TAG(FdTable_TAG, this)
     assert(iter+1 < RTOR_FDTABLE_MAX);
     for(int i = iter+1; i < RTOR_FDTABLE_MAX; i++) {
         if (this->entries[i] != NULL) {
@@ -96,7 +96,7 @@ int FdTable_next_iterator(FdTableRef this, int iter)
 }
 uint64_t FdTable_size(FdTableRef this)
 {
-    CHECK_TAG(FdTable_TAG, this);
-    CHECK_TAG_FIELD(FdTable_TAG, this, end_tag)
+    RBL_CHECK_TAG(FdTable_TAG, this);
+    RBL_CHECK_END_TAG(FdTable_TAG, this)
     return this->count;
 }

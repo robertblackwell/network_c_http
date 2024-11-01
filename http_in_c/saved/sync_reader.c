@@ -11,7 +11,7 @@
 #include <errno.h>
 
 #define SyncReader_TAG "SYNCRDR"
-#include <http_in_c/check_tag.h>
+#include <rbl/check_tag.h>
 
 
 struct SyncReader_s

@@ -8,7 +8,7 @@
 #include <string.h>
 
 #include <sys/epoll.h>
-#include <http_in_c/unittest.h>
+#include <rbl/unittest.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>

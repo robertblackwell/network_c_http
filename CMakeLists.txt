@@ -66,7 +66,7 @@ set (CHTTP_CXX_FLAGS "${CHTTP_CXX_FLAGS} -D_GNU_SOURCE")
 set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DTYPE_CHECK_ON")
 set (CHTTP_CXX_FLAGS "${CHTTP_CXX_FLAGS} -DTYPE_CHECK_ON")
 
-#CH_TAG_CHECK_ON
+#RBL_TAG_CHECK_ON
 #	puts a validation tag at the start of every struct and checks it on every access
 set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DCH_TAG_CHECK_ON")
 set (CHTTP_CXX_FLAGS "${CHTTP_CXX_FLAGS} -DCH_TAG_CHECK_ON")

@@ -4,7 +4,7 @@
 #include <http_in_c/http/parser.h>
 #include <http_in_c/saved/sync_handler.h>
 #define sync_connection_TAG "SYNCCONN"
-#include <http_in_c/check_tag.h>
+#include <rbl/check_tag.h>
 
 typedef struct sync_connection_s sync_connection_t, *sync_connection_p;
 

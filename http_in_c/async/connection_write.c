@@ -1,6 +1,6 @@
 
 
-#define CHLOG_ON
+#define RBL_LOG_ENABLE
 #include <http_in_c/async/connection_internal.h>
 
 static void writer(AsyncConnectionRef connection_ref);
@@ -24,16 +24,16 @@ void post_postable_writer(AsyncConnectionRef cref)
 void async_postable_writer(ReactorRef reactor_ref, void* arg)
 {
     AsyncConnectionRef connection_ref = arg;
-    CHECK_TAG(AsyncConnection_TAG, connection_ref)
-    CHTTP_ASSERT((connection_ref->active_output_buffer_ref != NULL), "post_write_handler");
-    CHTTP_ASSERT((connection_ref->write_state == WRITE_STATE_ACTIVE), "expect write_state to be active");
+    RBL_CHECK_TAG(AsyncConnection_TAG, connection_ref)
+    RBL_ASSERT((connection_ref->active_output_buffer_ref != NULL), "post_write_handler");
+    RBL_ASSERT((connection_ref->write_state == WRITE_STATE_ACTIVE), "expect write_state to be active");
     writer(connection_ref);
 }
 
 static void writer(AsyncConnectionRef cref)
 {
-    CHECK_TAG(AsyncConnection_TAG, cref)
-    CHTTP_ASSERT((cref->active_output_buffer_ref != NULL), "writer");
+    RBL_CHECK_TAG(AsyncConnection_TAG, cref)
+    RBL_ASSERT((cref->active_output_buffer_ref != NULL), "writer");
     IOBufferRef iob = cref->active_output_buffer_ref;
     int buflen = IOBuffer_data_len(iob);
     long nsend = send(cref->socket_stream_ref->fd, IOBuffer_data(iob), IOBuffer_data_len(iob), MSG_DONTWAIT);
@@ -65,8 +65,8 @@ static void writer(AsyncConnectionRef cref)
 static void write_incomplete(AsyncConnectionRef cref)
 {
     AsyncHandlerRef href = cref->handler_ref;
-    CHECK_TAG(AsyncConnection_TAG, cref)
-    CHECK_TAG(AsyncHandler_TAG, href);
+    RBL_CHECK_TAG(AsyncConnection_TAG, cref)
+    RBL_CHECK_TAG(AsyncHandler_TAG, href);
     post_postable_writer(cref);
 }
 //////////////////////////////////////////////////////////////////////////
@@ -74,26 +74,26 @@ void postable_write_complete(ReactorRef reactor_ref, void* arg);
 static void write_complete(AsyncConnectionRef cref)
 {
     AsyncHandlerRef href = cref->handler_ref;
-    CHECK_TAG(AsyncConnection_TAG, cref)
-    CHECK_TAG(AsyncHandler_TAG, href);
+    RBL_CHECK_TAG(AsyncConnection_TAG, cref)
+    RBL_CHECK_TAG(AsyncHandler_TAG, href);
     rtor_reactor_post(cref->reactor_ref, &postable_write_complete, cref);
 }
 void postable_write_complete(ReactorRef reactor_ref, void* arg)
 {
     AsyncConnectionRef connection_ref = arg;
     AsyncHandlerRef href = connection_ref->handler_ref;
-    CHECK_TAG(AsyncConnection_TAG, connection_ref)
-    CHECK_TAG(AsyncHandler_TAG, href);
+    RBL_CHECK_TAG(AsyncConnection_TAG, connection_ref)
+    RBL_CHECK_TAG(AsyncHandler_TAG, href);
     href->handle_write_complete(href);
 }
 ////////////////////////////////////////////////////////////
 static void postable_close_connection(ReactorRef reactor_ref, void* arg);
 static void write_error(AsyncConnectionRef cref, char* msg)
 {
-    CHECK_TAG(AsyncConnection_TAG, cref)
+    RBL_CHECK_TAG(AsyncConnection_TAG, cref)
     AsyncHandlerRef href = cref->handler_ref;
-    CHECK_TAG(AsyncHandler_TAG, href)
-    LOG_FMT("Write_error got an error this is the message: %s  fd: %d", msg, cref->socket_stream_ref->fd);
+    RBL_CHECK_TAG(AsyncHandler_TAG, href)
+    RBL_LOG_FMT("Write_error got an error this is the message: %s  fd: %d", msg, cref->socket_stream_ref->fd);
     cref->read_state = READ_STATE_STOP;
     cref->write_state = WRITE_STATE_STOP;
     rtor_reactor_post(cref->reactor_ref, &postable_close_connection, href);
@@ -101,7 +101,7 @@ static void write_error(AsyncConnectionRef cref, char* msg)
 static void postable_close_connection(ReactorRef reactor_ref, void* arg)
 {
     AsyncHandlerRef href = arg;
-    CHECK_TAG(AsyncHandler_TAG, href);
+    RBL_CHECK_TAG(AsyncHandler_TAG, href);
     AsyncConnectionRef cref = href->async_connection_ref;
     href->handle_close_connection(href);
 }

@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 //#include <http_in_c/common/http_parser/ll_parser_types.h>
-#include <http_in_c/unittest.h>
-#include <http_in_c/logger.h>
+#include <rbl/unittest.h>
+#include <rbl/logger.h>
 #include <http_in_c/http/kvpair.h>
 #include <http_in_c/http/message.h>
 #include <http_in_c/test_helpers/message_private.h>

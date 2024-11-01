@@ -8,7 +8,7 @@
 #include <http_in_c/demo_protocol/demo_parser.h>
 
 #define DemoConnection_TAG "DmCONN"
-#include <http_in_c/check_tag.h>
+#include <rbl/check_tag.h>
 
 enum DemoConnectionErrCode {
     DemoConnectionErrCode_is_closed = -31,

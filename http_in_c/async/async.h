@@ -16,7 +16,7 @@
 #define AsyncHandler_TAG "ASYDLR"
 #define AsyncServer_TAG "SYNSRVR"
 
-#include <http_in_c/check_tag.h>
+#include <rbl/check_tag.h>
 
 typedef struct AsyncConnection_s AsyncConnection, *AsyncConnectionRef;
 typedef struct AsyncHandler_s AsyncHandler, *AsyncHandlerRef;
@@ -68,7 +68,7 @@ typedef void(*DH_Completion_CB)(void* server_ref, AsyncHandlerRef href);
  * Each AsyncServer can manage more than one connection
 =============================================================================*/
 struct AsyncServer_s {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
     void(*handler_complete)(AsyncServerRef, AsyncHandlerRef);
     AsyncProcessRequestFunction process_request;
     const char*             host;
@@ -105,7 +105,7 @@ void AsyncServer_terminate(AsyncServerRef this);
  * from the handler.
 =============================================================================*/
 typedef struct AsyncConnection_s {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
     ReactorRef      reactor_ref;
     AsyncHandlerRef handler_ref;
     int             socket;
@@ -151,7 +151,7 @@ void async_connection_write(AsyncConnectionRef connection_ref, MessageRef); //, 
  * destroyed when a connection closes.
 =============================================================================*/
 typedef struct AsyncHandler_s {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
 
     void(*handle_request)(AsyncHandlerRef, MessageRef);
     void(*handle_response)(AsyncHandlerRef, MessageRef request, MessageRef response);

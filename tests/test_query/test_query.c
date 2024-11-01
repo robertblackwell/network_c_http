@@ -1,6 +1,6 @@
 
 #include <http_in_c/common/alloc.h>
-#include <http_in_c/unittest.h>
+#include <rbl/unittest.h>
 
 #include <assert.h>
 #include <stdio.h>

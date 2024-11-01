@@ -13,11 +13,11 @@
  */
 struct KVPair_s {
     // this string is always null terminated
-    char* label_ptr;
-    int   label_len;
+    char*  label_ptr;
+    size_t label_len;
     // this string is always null terminated
-    char* value_ptr;
-    int   value_len;
+    char*  value_ptr;
+    size_t value_len;
 };
 
 //char* make_upper(char* src)
@@ -33,7 +33,7 @@ struct KVPair_s {
 //    return dest;
 //}
 // creates and initializes a new KVPair obj. Returns NULL on allocation failure
-KVPairRef KVPair_new(const char* labptr, int lablen, const char* valptr, int vallen)
+KVPairRef KVPair_new(const char* labptr, int lablen, const char* valptr, size_t vallen)
 {
     // store {label}: {value}\r\n\0
     KVPairRef hlref = eg_alloc(sizeof(KVPair));
@@ -47,7 +47,7 @@ KVPairRef KVPair_new(const char* labptr, int lablen, const char* valptr, int val
         // Convert to upper case
     char* p = hlref->label_ptr;
     for(int i = 0; i < lablen; i++) {
-        p[i] = toupper((unsigned char) labptr[i]);
+        p[i] = (char)toupper((unsigned char) labptr[i]);
     }
     /**
      * Note NULL termination
@@ -103,7 +103,7 @@ char* KVPair_value(const KVPairRef hlref)
 {
     return hlref->value_ptr;
 }
-void KVPair_set_value(KVPairRef hlref, const char* valptr, int vallen)
+void KVPair_set_value(KVPairRef hlref, const char* valptr, size_t vallen)
 {
     char* oldvalptr = hlref->value_ptr;
     hlref->value_ptr = eg_alloc(vallen+1);

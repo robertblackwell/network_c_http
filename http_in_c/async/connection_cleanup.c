@@ -11,9 +11,9 @@
 void async_postable_cleanup(ReactorRef reactor, void* cref)
 {
     AsyncConnectionRef connection_ref = cref;
-    LOG_FMT("postable_cleanup entered");
-    CHTTP_ASSERT((connection_ref->cleanup_done_flag == false), "cleanup should not run more than once");
-    CHECK_TAG(AsyncConnection_TAG, connection_ref)
+    RBL_LOG_FMT("postable_cleanup entered");
+    RBL_ASSERT((connection_ref->cleanup_done_flag == false), "cleanup should not run more than once");
+    RBL_CHECK_TAG(AsyncConnection_TAG, connection_ref)
     rtor_stream_deregister(connection_ref->socket_stream_ref);
     connection_ref->handler_ref->handle_close_connection(connection_ref->handler_ref);
 }

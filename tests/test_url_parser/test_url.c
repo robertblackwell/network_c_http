@@ -3,9 +3,9 @@
 #include <stdio.h>
 #include <http_in_c/common/url_parser.h>
 #include <http_in_c/common/alloc.h>
-#include <http_in_c/unittest.h>
+#include <rbl/unittest.h>
 #include <http_in_c/common/cbuffer.h>
-#include <http_in_c/logger.h>
+#include <rbl/logger.h>
 #include <http_in_c/common/list.h>
 #include <http_in_c/saved/sync_server.h>
 #include <http_in_c/http/header_list.h>

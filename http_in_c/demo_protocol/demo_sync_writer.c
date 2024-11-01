@@ -12,7 +12,7 @@
 
 #define TYPE DemoSyncWriter
 #define DemoSyncWriter_TAG "SYNCWRTR"
-#include <http_in_c/check_tag.h>
+#include <rbl/check_tag.h>
 #undef TYPE
 #define DEMOSYNCWRITER_DECLARE_TAG DECLARE_TAG(DemoSyncWriter)
 #define DEMOSYNCWRITER_CHECK_TAG(p) CHECK_TAG(DemoSyncWriter, p)

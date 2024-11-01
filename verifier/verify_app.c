@@ -7,8 +7,8 @@
 #include <pthread.h>
 #include <sys/time.h>
 #include <math.h>
-#include <http_in_c/macros.h>
-#include <http_in_c/logger.h>
+#include <rbl/macros.h>
+#include <rbl/logger.h>
 
 #define VERIFY_URL_MAXSIZE 100
 #define VERIFY_UID_MAXSIZE 100
@@ -25,11 +25,11 @@
 #define VERIFY_DEFAULT_NBR_REQUESTS VERIFY_DEFAULT_NBR_THREADS * VERIFY_DEFAULT_NBR_CONNECTIONS_PER_THREAD * VERIFY_DEFAULT_NBR_REQUESTS_PER_CONNECTIONS
 
 #define THREAD_CONTEXT_TAG "THDCTX"
-#include <http_in_c/check_tag.h>
+#include <rbl/check_tag.h>
 
 #define DYN_RESP_TIMES
 typedef struct thread_context_s {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
     int port;
     size_t read_buffer_size;
     char url[VERIFY_URL_MAXSIZE];
@@ -82,7 +82,7 @@ void thread_context_init(thread_context_t* ctx, int id, int port, int nbr_connec
     ctx->request_ptr = NULL;
     ctx->response_ptr = NULL;
 
-    SET_TAG(THREAD_CONTEXT_TAG, ctx)
+    RBL_SET_TAG(THREAD_CONTEXT_TAG, ctx)
 #ifdef DYN_RESP_TIMES
     ctx->resp_times = malloc(sizeof(double) * nbr_connections_per_thread * nbr_requests_per_connection);
 #else
@@ -132,29 +132,29 @@ int main(int argc, char* argv[])
     {
         switch(c) {
             case 'p':
-                LOG_FMT("-p options %s", optarg);
+                RBL_LOG_FMT("-p options %s", optarg);
                 port_number = atoi(optarg);
                 break;
             case 'c':
-                LOG_FMT("-c options %s", optarg);
+                RBL_LOG_FMT("-c options %s", optarg);
                 nbr_connections_per_thread = atoi(optarg);
                 break;
             case 'r':
-                LOG_FMT("-r options %s", optarg);
+                RBL_LOG_FMT("-r options %s", optarg);
                 nbr_requests_per_connection = atoi(optarg);
                 break;
             case 't':
-                LOG_FMT("-t options %s", optarg);
+                RBL_LOG_FMT("-t options %s", optarg);
                 nbr_threads = atoi(optarg);
                 break;
             case 'u':
-                LOG_FMT("-u options %s", optarg);
+                RBL_LOG_FMT("-u options %s", optarg);
                 strcpy(url, optarg);
                 break;
             case '?':
                 printf("\nThere is an Error in the options input\n");
             case 'h':
-                LOG_FMT("-t options %s", optarg);
+                RBL_LOG_FMT("-t options %s", optarg);
                 usage();
                 exit(0);
         }
@@ -229,16 +229,16 @@ void dump_double_arr(char* msg, double arr[], int arr_dim)
 int verify_handler(MessageRef response_ptr, sync_client_t* client_ptr)
 {
     thread_context_t* ctx = sync_client_get_userptr(client_ptr);
-    LOGFMT("verify handler ident: % d socket: %d cycle:%d connection: %d\n",ctx->ident, CTX_SOCKET(ctx),ctx->cycle_index, ctx->connection_index );
-    LOG_FMT("verify handler howmany_requests_per_connection: %d\n",ctx->howmany_requests_per_connection);
-    LOG_FMT("verify handler howmany_connections: %d\n",ctx->howmany_connections);
+    RBL_LOGFMT("verify handler ident: % d socket: %d cycle:%d connection: %d\n",ctx->ident, CTX_SOCKET(ctx),ctx->cycle_index, ctx->connection_index );
+    RBL_LOG_FMT("verify handler howmany_requests_per_connection: %d\n",ctx->howmany_requests_per_connection);
+    RBL_LOG_FMT("verify handler howmany_connections: %d\n",ctx->howmany_connections);
     ctx->response_ptr = response_ptr;
     MessageRef request_ptr = ctx->request_ptr;
     if(! verify_response(ctx, request_ptr, response_ptr)) {
-        LOG_ERROR("Verify response failed")
+        RBL_LOG_ERROR("Verify response failed")
         printf("Verify response failed\n");
     }
-    LOG_FMT("end of loop thread id %d socket:%d cycle_index %d", ctx->ident, CTX_SOCKET(ctx), ctx->cycle_index)
+    RBL_LOG_FMT("end of loop thread id %d socket:%d cycle_index %d", ctx->ident, CTX_SOCKET(ctx), ctx->cycle_index)
     Message_dispose(&(ctx->request_ptr));
     Message_dispose(&response_ptr);
     ctx->response_ptr = NULL;
@@ -246,35 +246,35 @@ int verify_handler(MessageRef response_ptr, sync_client_t* client_ptr)
     int i = ctx_time_array_index(ctx);
     double tmp = time_diff_musecs(iter_end_time, ctx->iter_start_time);
     ctx->resp_times[i] =  tmp;
-    LOG_FMT("time index : %d socket:%d this interval: %f", i, CTX_SOCKET(ctx),ctx->resp_times[i])
+    RBL_LOG_FMT("time index : %d socket:%d this interval: %f", i, CTX_SOCKET(ctx),ctx->resp_times[i])
     int return_value = HPE_OK;
     if(ctx->cycle_index >= ctx->howmany_requests_per_connection - 1) {
         ctx->cycle_index = 0;
-        LOGFMT("no request ident: %d socket:%d ", ctx->ident, CTX_SOCKET(ctx));
+        RBL_LOGFMT("no request ident: %d socket:%d ", ctx->ident, CTX_SOCKET(ctx));
         return_value = HPE_USER; // This will force sync_client_round_trip() to return rather than wait for server to timeout
     } else {
         /**
          * Make the last message on a connection CONNECTION: close
          */
         bool connection_close_flag = (ctx->cycle_index >= ctx->howmany_requests_per_connection - 2);//ctx_is_last_request_for_connection(ctx);
-        LOGFMT("verify_handler ident: %d socket:%d how many connections: %d how manh requests: %d", ctx->ident, CTX_SOCKET(ctx), ctx->howmany_connections, ctx->howmany_requests_per_connection);
-        LOGFMT("verify_handler ident: %d socket:%d cycle_index: %d connection_index: %d connection_close_flag: %d", ctx->ident, CTX_SOCKET(ctx), ctx->cycle_index, ctx->connection_index, (int)connection_close_flag);
+        RBL_LOGFMT("verify_handler ident: %d socket:%d how many connections: %d how manh requests: %d", ctx->ident, CTX_SOCKET(ctx), ctx->howmany_connections, ctx->howmany_requests_per_connection);
+        RBL_LOGFMT("verify_handler ident: %d socket:%d cycle_index: %d connection_index: %d connection_close_flag: %d", ctx->ident, CTX_SOCKET(ctx), ctx->cycle_index, ctx->connection_index, (int)connection_close_flag);
         make_uid(ctx);
         ctx->request_ptr = make_request(ctx, connection_close_flag);
         ctx->cycle_index++;
         ctx->iter_start_time = get_time();
         sync_connection_write(client_ptr->connection_ptr, ctx->request_ptr);
-        LOGFMT("write response ident: %d socket:%d cycle_index: %d connection_index: %d connection_close_flag: %d", ctx->ident, CTX_SOCKET(ctx), ctx->cycle_index, ctx->connection_index, (int)connection_close_flag);
+        RBL_LOGFMT("write response ident: %d socket:%d cycle_index: %d connection_index: %d connection_close_flag: %d", ctx->ident, CTX_SOCKET(ctx), ctx->cycle_index, ctx->connection_index, (int)connection_close_flag);
     }
-    LOG_FMT("verify_handler return_value %d n=======================================================================\n", return_value);
+    RBL_LOG_FMT("verify_handler return_value %d n=======================================================================\n", return_value);
     return return_value;
 }
 int verify_handler_2(MessageRef response_ptr, sync_client_t* client_ptr)
 {
     thread_context_t* ctx = sync_client_get_userptr(client_ptr);
-    LOGFMT("verify handler ident: % d socket: %d cycle:%d connection: %d\n",ctx->ident, CTX_SOCKET(ctx),ctx->cycle_index, ctx->connection_index );
-    LOG_FMT("verify handler howmany_requests_per_connection: %d\n",ctx->howmany_requests_per_connection);
-    LOG_FMT("verify handler howmany_connections: %d\n",ctx->howmany_connections);
+    RBL_LOGFMT("verify handler ident: % d socket: %d cycle:%d connection: %d\n",ctx->ident, CTX_SOCKET(ctx),ctx->cycle_index, ctx->connection_index );
+    RBL_LOG_FMT("verify handler howmany_requests_per_connection: %d\n",ctx->howmany_requests_per_connection);
+    RBL_LOG_FMT("verify handler howmany_connections: %d\n",ctx->howmany_connections);
     ctx->response_ptr = response_ptr;
     return HPE_OK;
 }
@@ -282,26 +282,26 @@ int verify_handler_2(MessageRef response_ptr, sync_client_t* client_ptr)
 void* threadfn(void* data)
 {
     thread_context_t* ctx = (thread_context_t*)data;
-    CHECK_TAG(THREAD_CONTEXT_TAG, ctx)
+    RBL_CHECK_TAG(THREAD_CONTEXT_TAG, ctx)
     ctx->cycle_index = 0;
     struct timeval start_time = get_time();
     for(int iconn = 0; iconn < ctx->howmany_connections; iconn++) {
         struct timeval iter_start_time = get_time();
         ctx->connection_index = iconn;
-        LOG_FMT("start of loop thread ident %d socket: %d iteration %d", ctx->ident, CTX_SOCKET(ctx), iconn)
+        RBL_LOG_FMT("start of loop thread ident %d socket: %d iteration %d", ctx->ident, CTX_SOCKET(ctx), iconn)
         /**
          * setup client and connect to server
          */
         sync_client_t* client_ptr = sync_client_new(ctx->read_buffer_size);
         sync_client_set_userptr(client_ptr, ctx);
         ctx->client_ptr = client_ptr;
-        LOGFMT("client connext ident: %d socket:%d ", ctx->ident, CTX_SOCKET(ctx));
+        RBL_LOGFMT("client connext ident: %d socket:%d ", ctx->ident, CTX_SOCKET(ctx));
         sync_client_connect(client_ptr, "localhost", ctx->port);
 
         /**
          * Paranoia check
          */
-        CHECK_TAG(THREAD_CONTEXT_TAG, ctx)
+        RBL_CHECK_TAG(THREAD_CONTEXT_TAG, ctx)
 
         /**
          * This function is a bit tricky. It only returns when the connection closes
@@ -315,7 +315,7 @@ void* threadfn(void* data)
                 printf("here we are");
             }
             ctx->request_ptr = make_request(ctx, (ireq < ctx->howmany_requests_per_connection - 1));
-            CHTTP_ASSERT((ctx->response_ptr == NULL), "Verifier response_ptr not null");
+            RBL_ASSERT((ctx->response_ptr == NULL), "Verifier response_ptr not null");
 
             ctx->iter_start_time = get_time();
 
@@ -327,7 +327,7 @@ void* threadfn(void* data)
                 ctx->time_index++;
                 double tmp = time_diff_musecs(iter_end_time, ctx->iter_start_time);
                 ctx->resp_times[i] =  tmp;
-                CHTTP_ASSERT((ctx->response_ptr != NULL), "");
+                RBL_ASSERT((ctx->response_ptr != NULL), "");
                 verify_response(ctx, ctx->request_ptr, ctx->response_ptr);
                 Message_dispose(&(ctx->request_ptr));
                 Message_dispose(&(ctx->response_ptr));
@@ -337,12 +337,12 @@ void* threadfn(void* data)
             }
         }
 
-        LOGFMT("roundtrip return ident id %d socket:%d connection: %d cycle %d", ctx->ident, CTX_SOCKET(ctx), iconn, ctx->cycle_index)
+        RBL_LOGFMT("roundtrip return ident id %d socket:%d connection: %d cycle %d", ctx->ident, CTX_SOCKET(ctx), iconn, ctx->cycle_index)
         sync_client_close(client_ptr);
         sync_client_dispose(&client_ptr);
         ctx->client_ptr = NULL;
-        LOGFMT("Completed round-trip loop ident: %d socket: %d counter: %d connection_index: %d cycle_index: %d",
-               ctx->ident, CTX_SOCKET(ctx), ctx->counter, ctx->connection_index, ctx->cycle_index);
+        RBL_LOGFMT("Completed round-trip loop ident: %d socket: %d counter: %d connection_index: %d cycle_index: %d",
+                   ctx->ident, CTX_SOCKET(ctx), ctx->counter, ctx->connection_index, ctx->cycle_index);
     }
     struct timeval end_time = get_time();
     ctx->total_time =  time_diff_ms(end_time, start_time);
@@ -378,13 +378,13 @@ static MessageRef make_request(thread_context_t* ctx, bool keep_alive_flag)
 
 static void make_uid(thread_context_t* ctx)
 {
-    LOGFMT("make_uid ident: %d socket:%d counter: %d cycle_index:%d connection_index:%d nbr connections: %d requests per connection %d",
-           ctx->ident,CTX_SOCKET(ctx),
-           ctx->counter,
-           ctx->cycle_index,
-           ctx->connection_index,
-           ctx->howmany_connections,
-           ctx->howmany_requests_per_connection);
+    RBL_LOGFMT("make_uid ident: %d socket:%d counter: %d cycle_index:%d connection_index:%d nbr connections: %d requests per connection %d",
+               ctx->ident, CTX_SOCKET(ctx),
+               ctx->counter,
+               ctx->cycle_index,
+               ctx->connection_index,
+               ctx->howmany_connections,
+               ctx->howmany_requests_per_connection);
     sprintf(ctx->uid, "%d:%d:%d", ctx->ident, ctx->connection_index, ctx->cycle_index);
     ctx->counter++;
 }
@@ -411,9 +411,9 @@ bool verify_response(thread_context_t* ctx, MessageRef request, MessageRef respo
 #ifdef VERIFY_DISABLED
     IOBufferRef iob = Message_serialize(request);
     IOBufferRef iobresp = Message_serialize(response);
-    LOGFMT("Request ident:%d socket: %d", ctx->ident, CTX_SOCKET(ctx));
+    RBL_LOGFMT("Request ident:%d socket: %d", ctx->ident, CTX_SOCKET(ctx));
 //    printf("%s\n", IOBuffer_cstr(iob));
-    LOGFMT("Response ident:%d socket: %d", ctx->ident, CTX_SOCKET(ctx));
+    RBL_LOGFMT("Response ident:%d socket: %d", ctx->ident, CTX_SOCKET(ctx));
 //    printf("%s\n", IOBuffer_cstr(iobresp));
     return true;
 #else
@@ -460,7 +460,7 @@ int combine_elapsed_times(double output_array[], int output_max_size, thread_con
     for(int thread_index = 0; thread_index < nbr_threads; thread_index++) {
         thread_context_t* ctx = &ctx_table[thread_index];
         for(int i = 0; i < ctx->time_index; i++) {
-            CHTTP_ASSERT((output_index < output_max_size), "output array not bigenough");
+            RBL_ASSERT((output_index < output_max_size), "output array not bigenough");
             output_array[output_index] = ctx->resp_times[i];
             output_index++;
         }
@@ -538,13 +538,25 @@ static void usage()
     printf("\tThis program sends a number of simultaneous html GET requests to 'localhost:<port><url>'\n");
     printf("\tverifies that the responses are as expected.\n");
     printf("\tmeasures and reports response times for those requests\n");
+    printf("\t \n");
+    printf("\tIn more detail this is the logic \n");
+    printf("\t \n");
+    printf("\tCreates a number of threads (-t value)\n");
+    printf("\tEach thread:\n");
+    printf("\t-   for 1 to (-c value),\n");
+    printf("\t-     open a connection to a server \n");
+    printf("\t-     for i = 1 to (-r value) \n");
+    printf("\t          send request and wait for response.\n");
+    printf("\t          verify response is what was expected.\n");
+    printf("\t \n");
+
     printf("\nOptions\n");
 
     printf("\t-h\tPrints this usage message. Does not take an argument\n");
-    printf("\t-p\tRequired - Port number to use\n");
+    printf("\t-p\tRequired - Port number to use for connection to server\n");
     printf("\t-t\tRequired - Number of simultaneous threads\n");
-    printf("\t-c\tRequired - Number of consecutive connections to be openned by each thread\n");
     printf("\t-r\tRequired - Number of consecutive requests to be sent on each connection\n");
+    printf("\t-c\tRequired - Number of consecutive connections to be openned by each thread\n");
     printf("\t-u\tRequired - The target or url to be sent to the server. Of the form '/echo'\n");
     printf("\t\tNo host or domain is to be provided\n");
 }

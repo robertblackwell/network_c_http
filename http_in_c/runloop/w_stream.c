@@ -35,8 +35,7 @@ static void anonymous_free(RtorWatcherRef p)
 }
 void rtor_stream_init(RtorStreamRef this, ReactorRef runloop, int fd)
 {
-    this->type = XR_WATCHER_SOCKET;
-    sprintf(this->tag, "XRSW");
+    RBL_SET_TAG(TYPE, this)
     SOCKW_SET_TAG(this);
     this->fd = fd;
     this->runloop = runloop;
@@ -63,7 +62,6 @@ void rtor_stream_free(RtorStreamRef athis)
 void rtor_stream_register(RtorStreamRef athis)
 {
     SOCKW_CHECK_TAG(athis)
-
     uint32_t interest = 0;
     int res = rtor_reactor_register(athis->runloop, athis->fd, 0L, (RtorWatcherRef) (athis));
     assert(res ==0);
@@ -84,7 +82,6 @@ void rtor_stream_register(RtorStreamRef athis)
 void rtor_stream_deregister(RtorStreamRef athis)
 {
     SOCKW_CHECK_TAG(athis)
-
     int res = rtor_reactor_deregister(athis->runloop, athis->fd);
     assert(res == 0);
 }

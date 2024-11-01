@@ -2,12 +2,12 @@
 #include <stdbool.h>
 #include <pthread.h>
 
-#include <http_in_c/logger.h>
+#include <rbl/logger.h>
 // needed for multi threading
 static bool needs_initialization = true;
 static pthread_mutex_t lock;
 
-void log_function(char* level, const char* funcname, const char* filename, int line, char* message)
+void rbl_log_function(char* level, const char* funcname, const char* filename, int line, char* message)
 {
     time_t rawtime;
     struct tm *timeinfo;

@@ -8,7 +8,7 @@
 #include <string.h>
 #include <errno.h>
 #include <sys/epoll.h>
-#include <http_in_c/logger.h>
+#include <rbl/logger.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c//runloop/rl_internal.h>
@@ -68,7 +68,7 @@ static void wrtr_cb(RtorStreamRef sock_watch, uint64_t event)
     ReactorRef reactor = sock_watch->runloop;
     rtor_stream_verify(sock_watch);
     WriteCtx* ctx = (WriteCtx*)(sock_watch->write_arg);
-    LOG_FMT("test_io: Socket watcher wrtr_callback");
+    RBL_LOG_FMT("test_io: Socket watcher wrtr_callback");
 
     char* wbuf = malloc(100);
     sprintf(wbuf, "this is a line from writer - %d\n", ctx->write_count);
@@ -77,7 +77,7 @@ static void wrtr_cb(RtorStreamRef sock_watch, uint64_t event)
     int nwrite = write(sock_watch->fd, wbuf, strlen(wbuf));
     free(wbuf);
     ctx->write_count++;
-    LOG_FMT("test_io: Socket watcher wrtr_callback fd: %d event : %lx nread: %d errno: %d write_count %d\n", sock_watch->fd,  event, nwrite, errno, ctx->write_count);
+    RBL_LOG_FMT("test_io: Socket watcher wrtr_callback fd: %d event : %lx nread: %d errno: %d write_count %d\n", sock_watch->fd, event, nwrite, errno, ctx->write_count);
     if(ctx->write_count > ctx->max_write_count) {
         rtor_reactor_deregister(reactor, ctx->swatcher->fd);
         rtor_reactor_deregister(reactor, ctx->twatcher->fd);
@@ -94,12 +94,12 @@ static void wrtr_cb(RtorStreamRef sock_watch, uint64_t event)
 static void wrtr_wait(RtorTimerRef watch, uint64_t event)
 {
     WTIMER_CHECK_TAG(watch)
-    LOG_FMT("test_io: Socket watcher wrtr_wait\n");
+    RBL_LOG_FMT("test_io: Socket watcher wrtr_wait\n");
     WriteCtx* ctx = (WriteCtx*)(watch->timer_handler_arg);
     WR_CTX_CHECK_TAG(ctx)
     SOCKW_CHECK_TAG(ctx->swatcher)
     WTIMER_CHECK_TAG(ctx->twatcher)
-    LOG_FMT("test_io: Socket watcher wrtr_wait fd: %d event : %lx errno: %d\n", watch->fd,  event, errno);
+    RBL_LOG_FMT("test_io: Socket watcher wrtr_wait fd: %d event : %lx errno: %d\n", watch->fd, event, errno);
 
     int write_here = 0;
     if(write_here) {

@@ -1,6 +1,6 @@
 
 
-#define CHLOG_ON
+#define RBL_LOG_ENABLE
 #include <http_in_c/async/connection_internal.h>
 
 //static void event_handler(RtorStreamRef stream_ref, uint64_t event);
@@ -43,7 +43,7 @@ const char* async_read_state_str(int state)
         case READ_STATE_POSTED_READER:
             return "READ_STATE_POSTED_READER";
         default:
-            CHTTP_ASSERT(false, "Invalid read state");
+            RBL_ASSERT(false, "Invalid read state");
     }
 }
 const char* async_write_state_str(int state)
@@ -58,7 +58,7 @@ const char* async_write_state_str(int state)
         case WRITE_STATE_STOP:
             return "WRITE_STATE_STOP";
         default:
-            CHTTP_ASSERT(false, "Invalid read state");
+            RBL_ASSERT(false, "Invalid read state");
     }
 }
 const char* async_epoll_event_str(int event)

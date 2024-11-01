@@ -58,16 +58,20 @@ typedef void (*InterthreadQueueEventHandler)   (RtorInterthreadQueueRef qref);
 typedef void (*ListenerEventHandler)(RtorListenerRef listener_ref, uint64_t events);
 
 /**
- * A reactor is a device that uses Linux epoll to allow client code to watch for events on file descriptors.
- * The key significance of the device is that many file descriptors can be monitored simultaiously.
+ * A reactor is a device that:
+ * -    uses Linux epoll to allow client code to watch for events on file descriptors, and
+ * -    to schedule callback functions (via rtor_reactor_post())  to be run at some point in the future
+ *
+ * The key feature of the device is that many file descriptors can be monitored simultaiously,
+ * and many callbacks can be waiting for execution. In this regard a reactor is like
+ * a lightweight task scheduler
  *
  * To watch or observe a file descriptor for events an object of type RtorWatcher (or derived from RtorWatcher)
- * and passed to the reactor.
+ * must be created and passed to the reactor.
  *
  * The RtorWatcher holds at least 2 pieces of information:
  * -    a function to be called when an event of interest happens
  * -    optionally a context pointer for the callback function
- *
  * in this sense the various watchers are generalizations of a callback closure
  *
  * For convenience a number of special purposes watchers/observers have been provided.

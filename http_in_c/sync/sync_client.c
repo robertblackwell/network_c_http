@@ -7,7 +7,7 @@
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/cbuffer.h>
 #include <http_in_c/http/message.h>
-#include <http_in_c/logger.h>
+#include <rbl/logger.h>
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -17,13 +17,13 @@
 #include <errno.h>
 
 #define sync_client_TAG "SYCLNT"
-#include <http_in_c/check_tag.h>
+#include <rbl/check_tag.h>
 #include <pthread.h>
 
 sync_client_t* sync_client_new(size_t read_buffer_size)
 {
     sync_client_t* this = eg_alloc(sizeof(sync_client_t));
-    SET_TAG(sync_client_TAG, this)
+    RBL_SET_TAG(sync_client_TAG, this)
     this->connection_ptr = NULL;
     this->user_ptr = NULL;
 }
@@ -33,22 +33,22 @@ void sync_client_init(sync_client_t* this, size_t read_buffer_size)
     this->user_ptr = NULL;
     this->read_buffer_size = read_buffer_size;
     if(pthread_mutex_init(&this->mutex, NULL) != 0) {
-        LOGFMT("sync_client_init mutex init failed");
+        RBL_LOGFMT("sync_client_init mutex init failed");
         exit(-1);
     };
 }
 void sync_client_destroy(sync_client_t* this)
 {
-    CHECK_TAG(sync_client_TAG, this)
-    LOG_FMT("sync_client_dispose %p  %d\n", this, this->socketfd);
+    RBL_CHECK_TAG(sync_client_TAG, this)
+    RBL_LOG_FMT("sync_client_dispose %p  %d\n", this, this->socketfd);
     if(this->connection_ptr) sync_connection_dispose(&(this->connection_ptr));
-    INVALIDATE_TAG(this)
-    // INVALIDATE_STRUCT(this, sync_client_t)
+    RBL_INVALIDATE_TAG(this)
+    // RBL_INVALIDATE_STRUCT(this, sync_client_t)
 }
 void sync_client_dispose(sync_client_t** this_ptr)
 {
     sync_client_t* this = *this_ptr;
-    CHECK_TAG(sync_client_TAG, this)
+    RBL_CHECK_TAG(sync_client_TAG, this)
     sync_client_destroy(this);
     eg_free(*this_ptr);
     // in here add code to obliterate the structure
@@ -106,7 +106,7 @@ static void connection_helper(sync_client_t* this, char* host, int portno)
 
     int errc = getaddrinfo(host, portstr, &hints, &result);
     if(errc != 0) {
-        LOG_ERROR("getaddrinfo : %s", gai_strerror(errc));
+        RBL_LOG_ERROR("getaddrinfo : %s", gai_strerror(errc));
         exit(-1);
     }
     for(rp = result; rp != NULL; rp->ai_next) {
@@ -121,19 +121,19 @@ static void connection_helper(sync_client_t* this, char* host, int portno)
         close(sfd);
     }
     if(rp == NULL) {
-        LOGFMT("Could not bind");
+        RBL_LOGFMT("Could not bind");
         exit(-1);
     }
     freeaddrinfo(result);
 }
 void sync_client_connect(sync_client_t* this, char* host, int portno)//, SyncAppMessageHandler handler)
 {
-    CHECK_TAG(sync_client_TAG, this)
+    RBL_CHECK_TAG(sync_client_TAG, this)
     connection_helper(this, host, portno);
     return;
 #if 0
     int sockfd, n;
-    SET_TAG(sync_client_TAG, this)
+    RBL_SET_TAG(sync_client_TAG, this)
     struct sockaddr_in serv_addr;
     struct hostent *hostent_ptr;
 
@@ -143,7 +143,7 @@ void sync_client_connect(sync_client_t* this, char* host, int portno)//, SyncApp
     printf("sync_client socketfd: %d\n", sockfd);
     if (sockfd < 0) {
         printf("socket call failed ");
-        LOG_ERROR("ERROR opening socket");
+        RBL_LOG_ERROR("ERROR opening socket");
         exit(-1);
     }
     hostent_ptr = gethostbyname(host);
@@ -156,13 +156,13 @@ void sync_client_connect(sync_client_t* this, char* host, int portno)//, SyncApp
     serv_addr.sin_family = AF_INET;
     bcopy((char *)hostent_ptr->h_addr, (char *)&serv_addr.sin_addr.s_addr, hostent_ptr->h_length);
     serv_addr.sin_port = htons(portno);
-    LOG_FMT("sync_client_connect %p sockfd: %d\n", this, sockfd);
+    RBL_LOG_FMT("sync_client_connect %p sockfd: %d\n", this, sockfd);
     int cstatus;
     cstatus = connect(sockfd,(struct sockaddr *)&serv_addr, sizeof(serv_addr));
     if (cstatus  < 0) {
         int errno_saved = errno;
         printf("connect failed socket: %d cstatus: %d errno_saved %d %s\n", sockfd, cstatus, errno_saved, strerror(errno_saved));
-        LOG_ERROR("ERROR client %p connecting sockfd: % derrno: %d\n", this, sockfd, errno_saved);
+        RBL_LOG_ERROR("ERROR client %p connecting sockfd: % derrno: %d\n", this, sockfd, errno_saved);
         exit(-1);
     }
     pthread_mutex_unlock(&this->mutex);
@@ -185,11 +185,11 @@ void sync_client_close(sync_client_t* this)
 }
 void* sync_client_get_userptr(sync_client_t* this)
 {
-    CHECK_TAG(sync_client_TAG, this)
+    RBL_CHECK_TAG(sync_client_TAG, this)
     return this->user_ptr;
 }
 void sync_client_set_userptr(sync_client_t* this, void* userptr)
 {
-    CHECK_TAG(sync_client_TAG, this)
+    RBL_CHECK_TAG(sync_client_TAG, this)
     this->user_ptr = userptr;
 }

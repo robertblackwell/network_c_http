@@ -10,7 +10,7 @@
 #include <errno.h>
 
 #include <sys/epoll.h>
-#include <http_in_c/logger.h>
+#include <rbl/logger.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
@@ -65,8 +65,8 @@ void rd_callback(RtorStreamRef io_watcher_ref, uint64_t event)
     } else {
         s = "badread";
     }
-    LOG_FMT("test_io: Socket watcher rd_callback read_count: %d fd: %d event %lx nread: %d buf: %s errno: %d\n", ctx->read_count,
-            rtor_stream_get_fd(io_watcher_ref), event, nread, s, errno);
+    RBL_LOG_FMT("test_io: Socket watcher rd_callback read_count: %d fd: %d event %lx nread: %d buf: %s errno: %d\n", ctx->read_count,
+                rtor_stream_get_fd(io_watcher_ref), event, nread, s, errno);
     ctx->read_count++;
     if(ctx->read_count > ctx->max_read_count) {
         rtor_reactor_deregister(reactor, rtor_stream_get_fd(io_watcher_ref));

@@ -9,7 +9,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/epoll.h>
-#include <http_in_c/logger.h>
+#include <rbl/logger.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/socket_functions.h>

@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
-#include <http_in_c/unittest.h>
+#include <rbl/unittest.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/socket_functions.h>
 #include <http_in_c/sync/sync_client.h>

@@ -1,6 +1,6 @@
 
 #include <http_in_c/async/async.h>
-#include <http_in_c/logger.h>
+#include <rbl/logger.h>
 #include <stdio.h>
 #include <mcheck.h>
 #include<signal.h>
@@ -48,13 +48,13 @@ int main(int argc, char* argv[]) {
     while ((c = getopt(argc, argv, "p:t:")) != -1) {
         switch (c) {
             case 'p':
-                LOG_FMT("-p options %s", optarg);
+                RBL_LOG_FMT("-p options %s", optarg);
                 port_number = atoi(optarg);
                 break;
 #ifdef CH_ASYNC_SINGLE_THREAD
 #else
             case 't':
-                LOG_FMT("-t options %s", optarg);
+                RBL_LOG_FMT("-t options %s", optarg);
                 nbr_threads = atoi(optarg);
                 break;
 #endif
@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
 void* thread_function(void* arg)
 {
     thread_context_t* ctx = arg;
-    LOGFMT("thread function ident: %d pthread_t: %p listening_socket: %d", ctx->ident, ctx->thread, ctx->listening_socket)
+    RBL_LOGFMT("thread function ident: %d pthread_t: %lu listening_socket: %d", ctx->ident, ctx->thread, ctx->listening_socket)
     ctx->server_ptr = AsyncServer_new_with_socket(ctx->port, ctx->host, ctx->listening_socket, process_request);
     g_sref = ctx->server_ptr;
     AsyncServer_start(ctx->server_ptr);
@@ -138,8 +138,8 @@ static MessageRef app_handler_example(AsyncHandlerRef handler_ref, MessageRef re
 
 static void process_request(AsyncHandlerRef href, MessageRef request)
 {
-    CHECK_TAG(AsyncHandler_TAG, href)
-    LOG_FMT("request %p", request)
+    RBL_CHECK_TAG(AsyncHandler_TAG, href)
+    RBL_LOG_FMT("request %p", request)
     IOBufferRef iob = Message_dump(request);
     MessageRef reply = app_handler_example(href, request);
     IOBufferRef iobreply = Message_dump(reply);

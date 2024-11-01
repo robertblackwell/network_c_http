@@ -1,6 +1,6 @@
 #ifndef c_http_sync_sync_internal_h
 #define c_http_sync_sync_internal_h
-#include <http_in_c/logger.h>
+#include <rbl/logger.h>
 #include <http_in_c/socket_functions.h>
 #include <http_in_c/common/queue.h>
 #include <http_in_c/http/parser.h>
@@ -11,7 +11,7 @@
 
 #define MAX_THREADS 100
 struct sync_server_s {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
     int                         port;
     size_t                      read_buffer_size;
     socket_handle_t             socket_fd;
@@ -22,7 +22,7 @@ struct sync_server_s {
 };
 
 struct sync_worker_s {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
     bool                active;
     int                 active_socket;
     sync_connection_t*  connection_ptr;
@@ -41,7 +41,7 @@ struct sync_worker_s {
 
 struct sync_connection_s
 {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
     http_parser_t*               m_parser;
     IOBufferRef                  m_iobuffer;
     int                          socketfd;
@@ -76,7 +76,7 @@ struct sync_connection_s
 };
 
 struct sync_client_s {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
     void*   user_ptr;
     size_t read_buffer_size;
     sync_connection_t* connection_ptr;

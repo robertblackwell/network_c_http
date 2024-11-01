@@ -10,7 +10,7 @@
 #include <stdint.h>
 #include <errno.h>
 #include <sys/eventfd.h>
-#include <http_in_c/logger.h>
+#include <rbl/logger.h>
 #include <http_in_c/common/list.h>
 
 typedef EvfdQueue* EvfQueuePtr;

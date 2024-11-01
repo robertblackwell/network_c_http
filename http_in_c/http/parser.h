@@ -9,7 +9,7 @@
 #define c_http_ll_parser_h
 #include <stdint.h>
 #include <llhttp/llhttp.h>
-#include <http_in_c/check_tag.h>
+#include <rbl/check_tag.h>
 #include <http_in_c/http/parser_types.h>
 #include <http_in_c/http/message.h>
 #include <http_in_c/common/cbuffer.h>
@@ -45,7 +45,7 @@ typedef struct http_parser_s http_parser_t, *http_parser_r;
 typedef llhttp_errno_t (*ParserOnMessageCompleteHandler)(http_parser_r parser, MessageRef msg);
 
 struct http_parser_s {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
     bool m_started;
 
     llhttp_t*                m_llhttp_ptr;

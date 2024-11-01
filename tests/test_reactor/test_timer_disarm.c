@@ -8,8 +8,8 @@
 #include <fcntl.h>
 #include <stdint.h>
 #include <sys/epoll.h>
-#include <http_in_c/logger.h>
-#include <http_in_c/unittest.h>
+#include <rbl/logger.h>
+#include <rbl/unittest.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
@@ -71,15 +71,15 @@ static void callback_disarm_clear(RtorTimerRef watcher, XrTimerEvent event)
     DisarmTestCtx* ctx_p = (DisarmTestCtx*) watcher->timer_handler_arg;
 
     // if first call disarm
-    LOG_FMT(" counter %d\n", ctx_p->counter);
+    RBL_LOG_FMT(" counter %d\n", ctx_p->counter);
     if(ctx_p->counter <= 0) {
-        LOG_MSG(" disarm self");
+        RBL_LOG_MSG(" disarm self");
         rtor_timer_disarm(watcher);
         ctx_p->was_disarmed = true;
         ctx_p->counter++;
     } else {
         if(ctx_p->counter >= ctx_p->max_count) {
-            LOG_MSG("disarm_cb clear other and self");
+            RBL_LOG_MSG("disarm_cb clear other and self");
             rtor_timer_deregister(ctx_p->other_tw);
             rtor_timer_deregister(watcher);
             return;
@@ -97,17 +97,17 @@ static void callback_rearm_other(RtorTimerRef watcher, XrTimerEvent event)
 
     int x = (ctx_p->counter >= ctx_p->max_count);
     int x2 = ((ctx_p->other_ctx->was_disarmed) && (ctx_p->counter >= ctx_p->max_count));
-    LOG_FMT(" %d counter %d max %d \n", (int)ctx_p->other_ctx->was_disarmed, ctx_p->counter, ctx_p->max_count);
-    LOG_FMT(" x %d x2 %d \n", x, x2);
+    RBL_LOG_FMT(" %d counter %d max %d \n", (int)ctx_p->other_ctx->was_disarmed, ctx_p->counter, ctx_p->max_count);
+    RBL_LOG_FMT(" x %d x2 %d \n", x, x2);
     if((ctx_p->other_ctx->was_disarmed) && (ctx_p->counter == ctx_p->max_count)) {
         // other should be disarmed by now
         assert(ctx_p->other_ctx->was_disarmed);
-        LOG_MSG("rearming other");
+        RBL_LOG_MSG("rearming other");
         rtor_timer_rearm(ctx_p->other_tw);
     }
     // keep counting until we are stopped by the other
     ctx_p->counter++;
-    LOG_FMT(" counter %d\n", ctx_p->counter);
+    RBL_LOG_FMT(" counter %d\n", ctx_p->counter);
 }
 //
 // timer 2 - disarms itself on the first event.

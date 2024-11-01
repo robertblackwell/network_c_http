@@ -39,8 +39,14 @@ uint64_t   FdTable_size(FdTableRef athis);
 typedef ListRef RunListRef;
 typedef ListIter RunListIter;
 
-// A Functor is a generic callable - a function pointer (of type PostableFunction) and single anonymous argument
-struct Functor_s;
+/**
+ * A Functor is a generic callback - a function pointer (of type PostableFunction) and single anonymous argument.
+ *
+ * The significant thing is that the function pointer, points to a function that has the correct
+ * signature for the RunList
+ *
+*/
+ struct Functor_s;
 typedef struct Functor_s Functor, *FunctorRef;
 FunctorRef Functor_new(PostableFunction f, void* arg);
 void Functor_init(FunctorRef funref, PostableFunction f, void* arg);
@@ -55,8 +61,8 @@ struct Functor_s
 };
 
 /**
- * runlist - is a list of Functors - these are functions that are ready to run.
- * Use should be confined to a single thread - no synchronization.
+ * runlist - is a list of Functors - these are functors that are ready to run.
+ * Use should be confined to a single thread as there is no synchronization.
  * Intended to be used within a Reactor or Runloop
  */
 RunListRef RunList_new();
@@ -78,16 +84,17 @@ void RunList_itr_remove (RunListRef rl_ref, RunListIter *iter);
 typedef struct InterthreadRunList_s InterthreadRunList, *InterthreadRunListRef;
 
 typedef struct FunctorList_s {
-    char       tag[TAG_LENGTH];
+//    char       tag[RBL_TAG_LENGTH];
+    RBL_DECLARE_TAG;
     int        capacity;
     int        head;
     int        tail_plus;
     FunctorRef list; // points to an array of Functor objects
-    char       end_tag[TAG_LENGTH];
+    RBL_DECLARE_END_TAG;
 } FunctorList, *FunctorListRef;
 
 /**
- * NOTE: FunctionList acceptt and return values of a Functor NOT a pointer
+ * NOTE: FunctionList acceptS and returnS values of a Functor NOT a pointer
  */
 FunctorListRef functor_list_new(int capacity);
 void functor_list_free(FunctorListRef this);
@@ -102,7 +109,7 @@ bool fd_map_set(int j);
 #define REGISTER_WQUEUE_REACTOR 1
 
 struct Reactor_s {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
     int                     epoll_fd;
     bool                    closed_flag;
     bool                    runloop_executing;
@@ -114,6 +121,7 @@ struct Reactor_s {
 #else
     RtorInterthreadQueueRef interthread_queue;
 #endif
+    RBL_DECLARE_END_TAG;
 };
 /**
  * RtorWatcher - a generic observer object
@@ -128,7 +136,7 @@ typedef enum WatcherType {
 
 
 struct RtorWatcher_s {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
     WatcherType           type;
     ReactorRef            runloop;
     void*                 context;
@@ -148,6 +156,7 @@ struct RtorWatcher_s {
      * This handler will be calledd directly from the epoll_wait code inside reactor.c
     */
     void(*handler)(RtorWatcherRef watcher_ref, uint64_t event);
+    RBL_DECLARE_END_TAG;
 };
 
 
@@ -213,7 +222,7 @@ struct RtorWQueue_s {
 typedef uint64_t XrITQueueEvent;
 typedef void(XrITQueuetWatcherCaller(void* ctx));
 struct RtorInterthreadQueue_s {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
     RtorEventfdRef                      eventfd_ref;
     ListRef                             queue;
     pthread_mutex_t                     queue_mutex;

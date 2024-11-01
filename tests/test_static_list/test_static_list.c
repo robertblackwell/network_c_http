@@ -2,9 +2,9 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <http_in_c/unittest.h>
+#include <rbl/unittest.h>
 #include <http_in_c/common/cbuffer.h>
-#include <http_in_c/logger.h>
+#include <rbl/logger.h>
 #include <http_in_c/common/list.h>
 #include <http_in_c//runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>

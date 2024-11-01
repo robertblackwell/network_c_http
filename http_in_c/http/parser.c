@@ -35,7 +35,7 @@ http_parser_r http_parser_new(ParserOnMessageCompleteHandler handler, void* hand
     http_parser_r this = eg_alloc(sizeof(http_parser_t));
     if(this == NULL)
         return NULL;
-    SET_TAG(HTTP_PARSER_TAG, this)
+    RBL_SET_TAG(HTTP_PARSER_TAG, this)
     this->m_llhttp_ptr = NULL;
     this->m_llhttp_settings_ptr = NULL;
     this->m_header_state = kHEADER_STATE_NOTHING;
@@ -55,7 +55,7 @@ void http_parser_reset(http_parser_t* this)
 void http_parser_dispose(http_parser_r* parser_p)
 {
     ASSERT_NOT_NULL(*parser_p);
-    CHECK_TAG(HTTP_PARSER_TAG, *parser_p)
+    RBL_CHECK_TAG(HTTP_PARSER_TAG, *parser_p)
     http_parser_r this= *parser_p;
     if (this->m_llhttp_ptr != NULL) {
         free(this->m_llhttp_ptr);
@@ -78,7 +78,7 @@ void http_parser_dispose(http_parser_r* parser_p)
 int Parser_append_bytes(http_parser_r this, void *buffer, unsigned length)
 {
     // @TODO - need to handle error
-    CHECK_TAG(HTTP_PARSER_TAG, this)
+    RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
     llhttp_errno_t errno  = llhttp_execute(this->m_llhttp_ptr, (const char*)buffer, (int)length);
     size_t nparsed = (unsigned long)llhttp_get_error_pos(this->m_llhttp_ptr) - (unsigned long)buffer;
     return (int)nparsed;
@@ -91,7 +91,7 @@ int Parser_append_bytes(http_parser_r this, void *buffer, unsigned length)
 
 llhttp_errno_t http_parser_consume(http_parser_r parser, const void* buffer, int length)
 {
-    CHECK_TAG(HTTP_PARSER_TAG, parser)
+    RBL_CHECK_TAG(HTTP_PARSER_TAG, parser)
     char* b = (char*) buffer;
     int need_eof = llhttp_message_needs_eof(parser->m_llhttp_ptr);
     llhttp_errno_t x = http_parser_get_errno(parser);
@@ -109,20 +109,20 @@ llhttp_errno_t http_parser_consume(http_parser_r parser, const void* buffer, int
 }
 llhttp_errno_t http_parser_get_errno(http_parser_t* this)
 {
-    CHECK_TAG(HTTP_PARSER_TAG, this)
+    RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
 
     llhttp_errno_t x = llhttp_get_errno(this->m_llhttp_ptr);
     return x;
 }
 const void* http_parser_last_byte_parsed(http_parser_t* this)
 {
-    CHECK_TAG(HTTP_PARSER_TAG, this)
+    RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
     const void* x = llhttp_get_error_pos(this->m_llhttp_ptr);
     return x;
 }
 http_parser_error_t http_parser_get_error(http_parser_r parser)
 {
-    CHECK_TAG(HTTP_PARSER_TAG, parser)
+    RBL_CHECK_TAG(HTTP_PARSER_TAG, parser)
     llhttp_errno_t x = llhttp_get_errno(parser->m_llhttp_ptr);
     char* n = (char*)llhttp_errno_name(x);
     char* d = (char*)llhttp_errno_name(x);
@@ -136,7 +136,7 @@ http_parser_error_t http_parser_get_error(http_parser_r parser)
 
 void http_parser_initialize(http_parser_t* this)
 {
-    CHECK_TAG(HTTP_PARSER_TAG, this)
+    RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
 
     this->m_header_state = kHEADER_STATE_NOTHING;
     this->m_started = false;
@@ -196,7 +196,7 @@ static
 int message_begin_cb(llhttp_t* parser)
 {
     http_parser_r this =  (http_parser_r)(parser->data);
-    CHECK_TAG(HTTP_PARSER_TAG, this)
+    RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
 
     if(this->current_message_ptr != NULL) {
         Message_dispose(&(this->current_message_ptr));
@@ -231,7 +231,7 @@ static
 int url_data_cb(llhttp_t* parser, const char* at, size_t length)
 {
     http_parser_r this =  (http_parser_r)(parser->data);
-    CHECK_TAG(HTTP_PARSER_TAG, this)
+    RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
     Message_set_is_request(this->current_message_ptr, true);
     Cbuffer_append(this->m_url_buf, (char*)at, length); /*NEEDS ALLO TEST*/
     return 0;
@@ -241,7 +241,7 @@ static
 int status_data_cb(llhttp_t* parser, const char* at, size_t length)
 {
     http_parser_r this =  (http_parser_r)(parser->data);
-    CHECK_TAG(HTTP_PARSER_TAG, this)
+    RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
     Message_set_is_request(this->current_message_ptr, false);
     Message_set_status(this->current_message_ptr, this->m_llhttp_ptr->status_code);
 
@@ -278,7 +278,7 @@ static
 int header_field_data_cb(llhttp_t* parser, const char* at, size_t length)
 {
     http_parser_r this =  (http_parser_r)(parser->data);
-    CHECK_TAG(HTTP_PARSER_TAG, this)
+    RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
     int state = this->m_header_state;
     if( (state == 0) || (state == kHEADER_STATE_NOTHING) || (state == kHEADER_STATE_VALUE)) {
         if(Cbuffer_size(this->m_name_buf) != 0) {
@@ -299,7 +299,7 @@ static
 int header_value_data_cb(llhttp_t* parser, const char* at, size_t length)
 {
     http_parser_r this =  (http_parser_r)(parser->data);
-    CHECK_TAG(HTTP_PARSER_TAG, this)
+    RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
     int state = this->m_header_state;
     if( state == kHEADER_STATE_FIELD ) {
         Cbuffer_clear(this->m_value_buf);
@@ -352,7 +352,7 @@ static
 int headers_complete_cb(llhttp_t* parser) //, const char* aptr, size_t remainder)
 {
     http_parser_r this =  (http_parser_r)(parser->data);
-    CHECK_TAG(HTTP_PARSER_TAG, this)
+    RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
     if( Cbuffer_size(this->m_name_buf) != 0 ) {
         Message_add_header_cbuf(this->current_message_ptr, this->m_name_buf, this->m_value_buf);
         Cbuffer_clear(this->m_name_buf);
@@ -375,7 +375,7 @@ static
 int body_data_cb(llhttp_t* parser, const char* at, size_t length)
 {
     http_parser_r this =  (http_parser_r)(parser->data);
-    CHECK_TAG(HTTP_PARSER_TAG, this)
+    RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
     BufferChainRef chain_ptr = Message_get_body(this->current_message_ptr);
     if (chain_ptr == NULL) {
         chain_ptr = BufferChain_new();  /*NEEDS ALLO TEST*/
@@ -389,7 +389,7 @@ static
 int message_complete_cb(llhttp_t* parser)
 {
     http_parser_r this =  (http_parser_r)(parser->data);
-    CHECK_TAG(HTTP_PARSER_TAG, this)
+    RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
     MessageRef tmp = this->current_message_ptr;
     this->current_message_ptr = Message_new();
     llhttp_errno_t retval = this->on_message_handler(this, tmp);

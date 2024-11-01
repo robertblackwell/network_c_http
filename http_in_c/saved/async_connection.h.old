@@ -9,7 +9,7 @@
 #include <http_in_c/http/parser.h>
 
 #define AsyncConnection_TAG "ASYCONN"
-#include <http_in_c/check_tag.h>
+#include <rbl/check_tag.h>
 
 enum AsyncConnectionErrCode {
     AsyncConnectionErrCode_is_closed = -31,

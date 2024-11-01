@@ -9,8 +9,8 @@
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <errno.h>
-#include <http_in_c/macros.h>
-#include <http_in_c/logger.h>
+#include <rbl/macros.h>
+#include <rbl/logger.h>
 #include <http_in_c/http/message.h>
 
 #define READ_STATE_IDLE     11

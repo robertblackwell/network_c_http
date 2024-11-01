@@ -1,6 +1,6 @@
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c//runloop/rl_internal.h>
-#include <http_in_c/logger.h>
+#include <rbl/logger.h>
 
 #include <assert.h>
 #include <stdio.h>
@@ -47,7 +47,7 @@ void rtor_interthread_queue_add(RtorInterthreadQueueRef this, void* item)
     ITQUEUE_CHECK_TAG(this)
     pthread_mutex_lock(&(this->queue_mutex));
     List_add_back(this->queue, item);
-    LOG_FMT("Queue_add: %d\n", List_size(me->list));
+    RBL_LOG_FMT("Queue_add: %d\n", List_size(me->list));
 //    rtor_eventfd_fire(this->eventfd_ref);
     uint64_t buf = 1;
     int x = write(this->eventfd_ref->write_fd, &buf, sizeof(buf));
@@ -66,7 +66,7 @@ void rtor_interthread_queue_drain(RtorInterthreadQueueRef this, void(*draincb)(v
     }
     rtor_eventfd_clear_all_events(this->eventfd_ref);
     pthread_mutex_unlock(&(this->queue_mutex));
-    LOG_FMT("Queue_pop: socket is %ld nread: %d buf : %ld\n", (long)op, nread, buf);
+    RBL_LOG_FMT("Queue_pop: socket is %ld nread: %d buf : %ld\n", (long)op, nread, buf);
     // remember to read from the pipe to clear the event
 }
 void rtor_interthread_queue_register(RtorInterthreadQueueRef this, InterthreadQueueEventHandler evhandler, void* arg, uint64_t watch_what)
@@ -74,7 +74,6 @@ void rtor_interthread_queue_register(RtorInterthreadQueueRef this, InterthreadQu
     ITQUEUE_CHECK_TAG(this)
 
     uint32_t interest = watch_what;
-    char* tagptr = (this->eventfd_ref->tag);
     void* eventfd_ptr = this->eventfd_ref;
     void* queue_handler_ptr = &(this->queue_event_handler);
     void* queue_handler_arg = &(this->queue_event_handler_arg);

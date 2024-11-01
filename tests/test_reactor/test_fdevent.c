@@ -6,8 +6,8 @@
 #include <fcntl.h>
 #include <stdint.h>
 #include <sys/epoll.h>
-#include <http_in_c/logger.h>
-#include <http_in_c/unittest.h>
+#include <rbl/logger.h>
+#include <rbl/unittest.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
@@ -110,9 +110,9 @@ static void callback_1(RtorTimerRef watcher, XrTimerEvent event)
     void* ctx = watcher->timer_handler_arg;
     TestCtx* ctx_p = (TestCtx*) ctx;
     RtorEventfdRef fdev = ctx_p->fdevent;
-    LOG_FMT("callback1_counter %d counter: %d event is : %lx  ", ctx_p->callback1_counter, ctx_p->counter, event);
+    RBL_LOG_FMT("callback1_counter %d counter: %d event is : %lx  ", ctx_p->callback1_counter, ctx_p->counter, event);
     if(ctx_p->counter >= ctx_p->max_count) {
-        LOG_MSG(" clear timer");
+        RBL_LOG_MSG(" clear timer");
         rtor_reactor_close(ctx_p->reactor);
 //        rtor_timer_deregister(watcher);
 //        rtor_eventfd_deregister(fdev);
@@ -130,7 +130,7 @@ void fdevent_handler(RtorEventfdRef fdev_ref, uint64_t ev_mask)
     void* arg = fdev_ref->fd_event_handler_arg;
     TestCtx* t = (TestCtx*)arg;
     t->fdevent_counter++;
-    LOG_FMT("w: %p arg: %p ev mask: %ld fdevent_counter % d", fdev_ref , arg, ev_mask, t->fdevent_counter);
+    RBL_LOG_FMT("w: %p arg: %p ev mask: %ld fdevent_counter % d", fdev_ref , arg, ev_mask, t->fdevent_counter);
 }
 
 TestCtx* TestCtx_new(int counter_init, int counter_max)

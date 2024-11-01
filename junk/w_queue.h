@@ -21,7 +21,7 @@
 
 #define TYPE WQueue
 #define WQueue_TAG "XRLST"
-#include <http_in_c/check_tag.h>
+#include <rbl/check_tag.h>
 #undef TYPE
 #define XR_WQUEUE_DECLARE_TAG DECLARE_TAG(WQueue)
 #define XR_WQUEUE_CHECK_TAG(p) CHECK_TAG(WQueue, p)

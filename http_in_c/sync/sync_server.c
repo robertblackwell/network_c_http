@@ -9,11 +9,11 @@
 #include <errno.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/utils.h>
-#include <http_in_c/logger.h>
+#include <rbl/logger.h>
 #include <http_in_c/socket_functions.h>
 #include <http_in_c/common/queue.h>
 
-#include <http_in_c/check_tag.h>
+#include <rbl/check_tag.h>
 
 #define MAX_THREADS 100
 
@@ -50,16 +50,16 @@ socket_handle_t create_listener_socket(int port, const char* host)
     return tmp_socket;
 
     error_01:
-        LOG_ERROR("socket call failed with errno %d \n", errno);
+        RBL_LOG_ERROR("socket call failed with errno %d \n", errno);
         assert(0);
     error_02:
-        LOG_ERROR("setsockopt call failed with errno %d \n", errno);
+        RBL_LOG_ERROR("setsockopt call failed with errno %d \n", errno);
         assert(0);
     error_03:
-        LOG_ERROR("bind call failed with errno %d \n", errno);
+        RBL_LOG_ERROR("bind call failed with errno %d \n", errno);
         assert(0);
     error_04:
-        LOG_ERROR("listen call failed with errno %d \n", errno);
+        RBL_LOG_ERROR("listen call failed with errno %d \n", errno);
         assert(0);
 }
 
@@ -78,14 +78,14 @@ sync_server_r sync_server_new(int port, size_t read_buffer_size, int nbr_threads
 #else
     assert(nbr_threads < MAX_THREADS);
 #endif
-    SET_TAG(SYNC_SERVER_TAG, sref)
+    RBL_SET_TAG(SYNC_SERVER_TAG, sref)
     return sref;
 }
 
 void sync_server_dispose(sync_server_r* srefptr)
 {
     ASSERT_NOT_NULL(*srefptr);
-    CHECK_TAG(SYNC_SERVER_TAG, *srefptr)
+    RBL_CHECK_TAG(SYNC_SERVER_TAG, *srefptr)
     free(*srefptr);
     *srefptr = NULL;
 }
@@ -93,8 +93,8 @@ void sync_server_dispose(sync_server_r* srefptr)
 void sync_server_listen(sync_server_r server)
 {
     ASSERT_NOT_NULL(server)
-    SET_TAG(SYNC_SERVER_TAG, server)
-    LOG_FMT("sync_server_listen");
+    RBL_SET_TAG(SYNC_SERVER_TAG, server)
+    RBL_LOG_FMT("sync_server_listen");
     /**
      * Create the listening socket and bind it to localhost:port
      */
@@ -108,15 +108,15 @@ void sync_server_listen(sync_server_r server)
     for(int i = 0; i < server->nbr_workers; i++)
     {
 #ifdef SYNC_WORKER_QUEUE
-        LOGFMT("sync_server_listen SYNC_WORKER_QUEUE is defined");
+        RBL_LOGFMT("sync_server_listen SYNC_WORKER_QUEUE is defined");
         sync_worker_r wref = sync_worker_new(server->qref, i, server->read_buffer_size, server->app_handler);
 #else
-        LOGFMT("sync_server_listen SYNC_WORKER_QUEUE is NOT defined");
+        RBL_LOGFMT("sync_server_listen SYNC_WORKER_QUEUE is NOT defined");
         sync_worker_r wref = sync_worker_new(server->socket_fd, i, server->read_buffer_size, server->app_handler);
 #endif
         server->worker_tab[i] = NULL;
         if(sync_worker_start(wref) != 0) {
-            LOG_ERROR("sync_server_t failed starting thread - aborting");
+            RBL_LOG_ERROR("sync_server_t failed starting thread - aborting");
             return;
         }
         server->worker_tab[i] = wref;
@@ -130,23 +130,23 @@ void sync_server_listen(sync_server_r server)
             int sock2 = accept(server->socket_fd, (struct sockaddr*)&peername, &addr_length);
             if( sock2 <= 0 )
             {
-                LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
+                RBL_LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
                 break;
             }
-            LOG_FMT("SyncServer_listener adding socket to qref %d queue size: %ld queue capacity %ld ", sock2, Queue_size(server->qref),
+            RBL_LOG_FMT("SyncServer_listener adding socket to qref %d queue size: %ld queue capacity %ld ", sock2, Queue_size(server->qref),
                     Queue_capacity(server->qref));
             Queue_add(server->qref, sock2);
         }
     }
 #endif
-    LOG_FMT("About to join all threads\n");
+    RBL_LOG_FMT("About to join all threads\n");
     //
     // wait for the workers to complete
     //
     for(int i = 0; i < server->nbr_workers; i++) {
         sync_worker_r wref = server->worker_tab[i];
         if(wref != NULL) {
-            LOG_FMT("About to joined worker %d\n", i);
+            RBL_LOG_FMT("About to joined worker %d\n", i);
             sync_worker_join(wref);
             sync_worker_dispose(wref);
         }
@@ -158,7 +158,7 @@ void sync_server_listen(sync_server_r server)
 void sync_server_terminate(sync_server_r this)
 {
     ASSERT_NOT_NULL(this)
-    CHECK_TAG(SYNC_SERVER_TAG, this)
+    RBL_CHECK_TAG(SYNC_SERVER_TAG, this)
     for(int i = 0; i < this->nbr_workers; i++) {
         Queue_add(this->qref, -1);
     }

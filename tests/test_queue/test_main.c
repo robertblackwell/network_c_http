@@ -5,8 +5,8 @@
 #include <unistd.h>
 #include <assert.h>
 #include <http_in_c/common/cbuffer.h>
-#include <http_in_c/logger.h>
-#include <http_in_c/unittest.h>
+#include <rbl/logger.h>
+#include <rbl/unittest.h>
 #include <http_in_c/common/queue.h>
 
 typedef struct Params_s {

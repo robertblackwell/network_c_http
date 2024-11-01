@@ -21,9 +21,9 @@ void async_connection_init(
         AsyncHandlerRef handler_ref
 )
 {
-    SET_TAG(AsyncConnection_TAG, this)
-    CHECK_TAG(AsyncConnection_TAG, this)
-    LOG_FMT("AsyncConnection socket: %d", socket)
+    RBL_SET_TAG(AsyncConnection_TAG, this)
+    RBL_CHECK_TAG(AsyncConnection_TAG, this)
+    RBL_LOG_FMT("AsyncConnection socket: %d", socket)
     this->reactor_ref = reactor_ref;
     this->handler_ref = handler_ref;
     this->socket = socket;
@@ -47,12 +47,12 @@ void async_connection_init(
 }
 void async_connection_destroy(AsyncConnectionRef this)
 {
-    CHECK_TAG(AsyncConnection_TAG, this)
+    RBL_CHECK_TAG(AsyncConnection_TAG, this)
     int fd = this->socket_stream_ref->fd;
     rtor_stream_deregister(this->socket_stream_ref);
     rtor_stream_free(this->socket_stream_ref);
     this->socket_stream_ref = NULL;
-    LOGFMT("async_connection_free close socket: %d", fd)
+    RBL_LOGFMT("async_connection_free close socket: %d", fd)
     if(this->socket > 0) {
         async_connection_close(this);
     }
@@ -63,31 +63,31 @@ void async_connection_destroy(AsyncConnectionRef this)
     if(this->active_input_buffer_ref) {
         IOBuffer_dispose(&(this->active_input_buffer_ref));
     }
-    SET_TAG("xxxxxxx", this) // corrupt the tag
-    INVALIDATE_TAG(this)
-    // INVALIDATE_STRUCT(this, AsyncConnection)
+    RBL_SET_TAG("xxxxxxx", this) // corrupt the tag
+    RBL_INVALIDATE_TAG(this)
+    // RBL_INVALIDATE_STRUCT(this, AsyncConnection)
 }
 void async_connection_close(AsyncConnectionRef cref)
 {
-    CHECK_TAG(AsyncConnection_TAG, cref)
-    CHTTP_ASSERT((cref->socket > 0), "socket should be positive");
+    RBL_CHECK_TAG(AsyncConnection_TAG, cref)
+    RBL_ASSERT((cref->socket > 0), "socket should be positive");
 
     close(cref->socket);
     cref->socket = -1;
 }
 void async_connection_free(AsyncConnectionRef this)
 {
-    CHECK_TAG(AsyncConnection_TAG, this)
+    RBL_CHECK_TAG(AsyncConnection_TAG, this)
     async_connection_destroy(this);
     free(this);
 }
 void async_connection_read(AsyncConnectionRef connection_ref) //, void(*on_read_message_cb)(void* href, MessageRef, int status))
 {
-    CHECK_TAG(AsyncConnection_TAG, connection_ref)
-    CHTTP_ASSERT((connection_ref->read_state == READ_STATE_IDLE), "can only call async_connection_read once");
-    CHTTP_ASSERT((connection_ref->input_message_ptr == NULL), "already a message waiting");
-    LOG_FMT("href: %p socket: %d read state: %s readside_posted: %d", connection_ref->handler_ref, connection_ref->socket,
-           async_read_state_str(connection_ref->read_state),(int)connection_ref->readside_posted)
+    RBL_CHECK_TAG(AsyncConnection_TAG, connection_ref)
+    RBL_ASSERT((connection_ref->read_state == READ_STATE_IDLE), "can only call async_connection_read once");
+    RBL_ASSERT((connection_ref->input_message_ptr == NULL), "already a message waiting");
+    RBL_LOG_FMT("href: %p socket: %d read state: %s readside_posted: %d", connection_ref->handler_ref, connection_ref->socket,
+                async_read_state_str(connection_ref->read_state), (int)connection_ref->readside_posted)
     connection_ref->read_state = READ_STATE_ACTIVE;
     if(!connection_ref->readside_posted) {
         reader(connection_ref);
@@ -96,10 +96,10 @@ void async_connection_read(AsyncConnectionRef connection_ref) //, void(*on_read_
 }
 void async_connection_write(AsyncConnectionRef connection_ref, MessageRef response_ref)
 {
-    CHECK_TAG(AsyncConnection_TAG, connection_ref)
-    CHTTP_ASSERT((response_ref != NULL), "got NULL instead of a response_ref");
-    CHTTP_ASSERT((connection_ref->write_state == WRITE_STATE_IDLE), "a write is already active");
-    LOG_FMT("response_ref %p", response_ref)
+    RBL_CHECK_TAG(AsyncConnection_TAG, connection_ref)
+    RBL_ASSERT((response_ref != NULL), "got NULL instead of a response_ref");
+    RBL_ASSERT((connection_ref->write_state == WRITE_STATE_IDLE), "a write is already active");
+    RBL_LOG_FMT("response_ref %p", response_ref)
     connection_ref->active_output_buffer_ref = Message_serialize(response_ref);
     connection_ref->write_state = WRITE_STATE_ACTIVE;
     async_post_to_reactor(connection_ref, &async_postable_writer);

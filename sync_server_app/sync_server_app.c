@@ -7,7 +7,7 @@
 #include <unistd.h>
 
 #define ENABLE_LOGX
-#include <http_in_c/logger.h>
+#include <rbl/logger.h>
 static void usage();
 sync_server_r g_sref;
 
@@ -36,11 +36,11 @@ int main(int argc, char* argv[])
     {
         switch(c) {
             case 'p':
-                LOG_FMT("-p options %s", optarg);
+                RBL_LOG_FMT("-p options %s", optarg);
                 port_number = atoi(optarg);
                 break;
             case 't':
-                LOG_FMT("-t options %s", optarg);
+                RBL_LOG_FMT("-t options %s", optarg);
                 nbr_threads = atoi(optarg);
                 break;
             case '?':
@@ -57,7 +57,6 @@ int main(int argc, char* argv[])
     g_sref = sref;
     sync_server_listen(sref);
     sync_server_dispose(&sref);
-
 }
 
 static void usage()
@@ -69,8 +68,10 @@ static void usage()
     printf("\t-\t'/echo'\tthe response body contains a serialized versions of the request.\n");
     printf("\t-\t'/file'\treads a static html file from disk and sends it as a reply\n");
     printf("\t-\t'else' \teverything else is an error and gets a 404-page\n\n");
+    printf("\tThe server can serve a single connection at a time on each thread.\n");
     printf("\tThe server can serve multiple requests on the same connection.\n");
-    printf("\twill respect the 'CONNECTION: close/keep-alive header\n");
+    printf("\tbut will reply to one before reading a following request. That is no pipelining.\n");
+    printf("\tWill respect the 'CONNECTION: close/keep-alive header\n");
     printf("\twhen given a CONNECTION: keep-alive will hold the connection open forever\n");
     printf("\tit is up to the requester to either send CONNECTION: close or close the connection.\n");
     printf("\nOptions\n");

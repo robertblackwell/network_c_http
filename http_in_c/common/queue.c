@@ -7,7 +7,7 @@
 #include <assert.h>
 #include <http_in_c/common/alloc.h>
 #define ENABLE_LOGX
-#include <http_in_c/logger.h>
+#include <rbl/logger.h>
 
 #define QUEUE_DEFAULT_SIZE 10000
 #define QUEUE_CIRCULAR
@@ -119,7 +119,7 @@ SocketFD Queue_remove(QueueRef qref)
     SocketFD r = qref->q[qref->first];
     advance_first_pointer(qref);
     qref->size--;
-    LOG_FMT("qref->size: %d qref->max_size %d\n", qref->size, qref->max_size);
+    RBL_LOG_FMT("qref->size: %d qref->max_size %d\n", qref->size, qref->max_size);
     if (qref->size < qref->max_size) {
         pthread_cond_broadcast(&(qref->not_full_cv));
     }
@@ -148,7 +148,7 @@ void Queue_add(QueueRef qref, SocketFD sock)
 #ifdef QUEUE_CIRCULAR
     while(qref->size == qref->max_size) {
         pthread_cond_wait(&(qref->not_full_cv), &(qref->queue_mutex));
-        LOG_FMT("Queue_add:wait not_full qref->size: %d qref->max_size %d\n", qref->size, qref->max_size);
+        RBL_LOG_FMT("Queue_add:wait not_full qref->size: %d qref->max_size %d\n", qref->size, qref->max_size);
     }
     qref->q[qref->next] = sock;
     advance_next_pointer(qref);
@@ -166,7 +166,7 @@ void Queue_add(QueueRef qref, SocketFD sock)
         pthread_cond_broadcast(&(qref->not_empty_cv));
     }
 #endif
-    LOG_FMT("Queue_add: %d\n", qref->size);
+    RBL_LOG_FMT("Queue_add: %d\n", qref->size);
     pthread_mutex_unlock(&(qref->queue_mutex));
 }
 size_t Queue_size(QueueRef this)

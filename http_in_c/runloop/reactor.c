@@ -12,8 +12,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
-#include <http_in_c/logger.h>
-#include <http_in_c/macros.h>
+#include <rbl/logger.h>
+#include <rbl/macros.h>
 #include <http_in_c/common/list.h>
 
 __thread ReactorRef my_reactor_ptr = NULL;
@@ -62,10 +62,10 @@ static void rtor_epoll_ctl(ReactorRef athis, int op, int fd, uint64_t interest)
     int status = epoll_ctl(athis->epoll_fd, op, fd, &(epev));
     if (status != 0) {
         int errno_saved = errno;
-        LOG_ERROR("rtor_epoll_ctl epoll_fd: %d fd: %d status : %d errno : %d %s", athis->epoll_fd, fd, status, errno_saved, strerror(errno_saved));
+        RBL_LOG_ERROR("rtor_epoll_ctl epoll_fd: %d fd: %d status : %d errno : %d %s", athis->epoll_fd, fd, status, errno_saved, strerror(errno_saved));
     }
-    LOG_FMT("rtor_epoll_ctl epoll_fd: %d status : %d errno : %d", athis->epoll_fd, status, errno);
-    CHTTP_ASSERT((status == 0), "epoll ctl call failed");
+    RBL_LOG_FMT("rtor_epoll_ctl epoll_fd: %d status : %d errno : %d", athis->epoll_fd, status, errno);
+    RBL_ASSERT((status == 0), "epoll ctl call failed");
 }
 
 ReactorRef rtor_reactor_get_threads_reactor()
@@ -79,7 +79,7 @@ ReactorRef rtor_reactor_get_threads_reactor()
  */
 ReactorRef rtor_reactor_new(void) {
     ReactorRef runloop = malloc(sizeof(Reactor));
-    CHTTP_ASSERT((runloop != NULL), "malloc failed new runloop");
+    RBL_ASSERT((runloop != NULL), "malloc failed new runloop");
     rtor_reactor_init(runloop);
     return (ReactorRef)runloop;
 }
@@ -92,8 +92,8 @@ void rtor_reactor_init(ReactorRef athis) {
     runloop->epoll_fd = epoll_create1(0);
     runloop->closed_flag = false;
     runloop->runloop_executing = false;
-    CHTTP_ASSERT((runloop->epoll_fd != -1), "epoll_create failed");
-    LOG_FMT("rtor_reactor_new epoll_fd %d", runloop->epoll_fd);
+    RBL_ASSERT((runloop->epoll_fd != -1), "epoll_create failed");
+    RBL_LOG_FMT("rtor_reactor_new epoll_fd %d", runloop->epoll_fd);
     runloop->table = FdTable_new();
     runloop->ready_list = functor_list_new(RTOR_READY_LIST_MAX);
     runloop->interthread_queue_ref = NULL;
@@ -113,8 +113,8 @@ void rtor_reactor_close(ReactorRef athis)
     CHECK_THREAD(athis)
     athis->closed_flag = true;
     int status = close(athis->epoll_fd);
-    LOG_FMT("rtor_reactor_close status: %d errno: %d", status, errno);
-    CHTTP_ASSERT((status != -1), "close epoll_fd failed");
+    RBL_LOG_FMT("rtor_reactor_close status: %d errno: %d", status, errno);
+    RBL_ASSERT((status != -1), "close epoll_fd failed");
     int next_fd = FdTable_iterator(athis->table);
     while (next_fd  != -1) {
         close(next_fd);
@@ -148,7 +148,7 @@ int rtor_reactor_register(ReactorRef athis, int fd, uint32_t interest, RtorWatch
 {
     REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
-    LOG_FMT("fd : %d  for events %d", fd, interest);
+    RBL_LOG_FMT("fd : %d  for events %d", fd, interest);
     rtor_epoll_ctl(athis, EPOLL_CTL_ADD, fd, interest);
     FdTable_insert(athis->table, wref, fd);
     return 0;
@@ -157,7 +157,7 @@ int rtor_reactor_deregister(ReactorRef athis, int fd)
 {
     REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
-    CHTTP_ASSERT((FdTable_lookup(athis->table, fd) != NULL),"fd not in FdTable");
+    RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
     rtor_epoll_ctl(athis, EPOLL_CTL_DEL, fd, EPOLLEXCLUSIVE | EPOLLIN);
     FdTable_remove(athis->table, fd);
     return 0;
@@ -166,7 +166,7 @@ int rtor_reactor_deregister(ReactorRef athis, int fd)
 int rtor_reactor_reregister(ReactorRef athis, int fd, uint32_t interest, RtorWatcherRef wref) {
     REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
-    CHTTP_ASSERT((FdTable_lookup(athis->table, fd) != NULL),"fd not in FdTable");
+    RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
     rtor_epoll_ctl(athis, EPOLL_CTL_MOD, fd, interest);
     RtorWatcherRef wref_tmp = FdTable_lookup(athis->table, fd);
     assert(wref == wref_tmp);
@@ -176,7 +176,7 @@ void rtor_reactor_delete(ReactorRef athis, int fd)
 {
     REACTOR_CHECK_TAG(athis)
     CHECK_THREAD(athis)
-    CHTTP_ASSERT((FdTable_lookup(athis->table, fd) != NULL),"fd not in FdTable");
+    RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
     FdTable_remove(athis->table, fd);
 }
 void print_events(struct epoll_event events[], int count)
@@ -209,12 +209,12 @@ int rtor_reactor_run(ReactorRef athis, time_t timeout) {
          * All entries on the ready should be executed before we look for more fd events
          */
         assert(functor_list_size(athis->ready_list) == 0);
-        LOG_FMT("reactor epoll_wait before active fd : %ld ready_list_size: %d",
-               FdTable_size(athis->table), functor_list_size(athis->ready_list));
+        RBL_LOG_FMT("reactor epoll_wait before active fd : %ld ready_list_size: %d",
+                    FdTable_size(athis->table), functor_list_size(athis->ready_list));
         int nfds = epoll_wait(athis->epoll_fd, events, max_events, -1);
-        LOG_FMT("reactor epoll_wait returned nfds: %d fd[0]: %d fds active: %ld  ready_list_size:%d",
-               nfds, events[0].data.fd,
-               FdTable_size(athis->table), functor_list_size(athis->ready_list));
+        RBL_LOG_FMT("reactor epoll_wait returned nfds: %d fd[0]: %d fds active: %ld  ready_list_size:%d",
+                    nfds, events[0].data.fd,
+                    FdTable_size(athis->table), functor_list_size(athis->ready_list));
         time_t currtime = time(NULL);
         switch (nfds) {
             case -1:
@@ -239,10 +239,10 @@ int rtor_reactor_run(ReactorRef athis, time_t timeout) {
                     REACTOR_CHECK_TAG(athis)
                     int fd = events[i].data.fd;
                     int mask = events[i].events;
-                    LOG_FMT("rtor_reactor_run loop fd: %d events: %x", fd, mask);
+                    RBL_LOG_FMT("rtor_reactor_run loop fd: %d events: %x", fd, mask);
                     RtorWatcherRef wref = FdTable_lookup(athis->table, fd);
                     wref->handler(wref, events[i].events);
-                    LOG_FMT("fd: %d", fd);
+                    RBL_LOG_FMT("fd: %d", fd);
                     // call handler
                     REACTOR_CHECK_TAG(athis)
                 }
@@ -260,7 +260,7 @@ int rtor_reactor_run(ReactorRef athis, time_t timeout) {
             athis->runloop_executing = false;
             REACTOR_CHECK_TAG(athis)
             if(functor_list_size(athis->ready_list) == 0) {
-                LOG_FMT("reactor runlist loop  break functor_list_size: %d func: %p arg: %p", functor_list_size(athis->ready_list), func.f, func.arg);
+                RBL_LOG_FMT("reactor runlist loop  break functor_list_size: %d func: %p arg: %p", functor_list_size(athis->ready_list), func.f, func.arg);
                 break;
             }
         }
@@ -279,10 +279,10 @@ cleanup:
 int rtor_reactor_post(ReactorRef athis, PostableFunction cb, void* arg)
 {
     REACTOR_CHECK_TAG(athis)
-    LOG_FMT("rtor_reactor_post entered functor_list_size: %d funct: %p arg: %p runloop_executing: %d\n", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
+    RBL_LOG_FMT("rtor_reactor_post entered functor_list_size: %d funct: %p arg: %p runloop_executing: %d\n", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
     Functor func = {.f = cb, .arg = arg};
     functor_list_add(athis->ready_list, func);
-    LOG_FMT("rtor_reactor_post exited functor_list_size: %d func: %p arg: %p runloop_executing: %d\n", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
+    RBL_LOG_FMT("rtor_reactor_post exited functor_list_size: %d func: %p arg: %p runloop_executing: %d\n", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
 }
 
 void rtor_reactor_interthread_post(ReactorRef athis, PostableFunction cb, void* arg)
