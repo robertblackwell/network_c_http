@@ -23,7 +23,7 @@
  *  rearm the timer
  *
  */
-void WriteCtx_init(WriteCtx* this, int fd, RtorStreamRef swatcher, RtorTimerRef twatcher, int max)
+void WriteCtx_init(WriteCtx* this, int fd, RunloopStreamRef swatcher, RunloopTimerRef twatcher, int max)
 {
     this->id = "WRITE";
     this->writefd = fd;
@@ -62,11 +62,11 @@ void Writer_add_fd(Writer* this, int fd, int max, int interval_ms)
     this->ctx_table[this->count].writefd = fd;
     this->count++;
 }
-static void wrtr_wait(RtorTimerRef watch, uint64_t event);
-static void wrtr_cb(RtorStreamRef sock_watch, uint64_t event)
+static void wrtr_wait(RunloopTimerRef watch, uint64_t event);
+static void wrtr_cb(RunloopStreamRef sock_watch, uint64_t event)
 {
-    ReactorRef reactor = sock_watch->runloop;
-    rtor_stream_verify(sock_watch);
+    RunloopRef reactor = sock_watch->runloop;
+    runloop_stream_verify(sock_watch);
     WriteCtx* ctx = (WriteCtx*)(sock_watch->write_arg);
     RBL_LOG_FMT("test_io: Socket watcher wrtr_callback");
 
@@ -79,19 +79,19 @@ static void wrtr_cb(RtorStreamRef sock_watch, uint64_t event)
     ctx->write_count++;
     RBL_LOG_FMT("test_io: Socket watcher wrtr_callback fd: %d event : %lx nread: %d errno: %d write_count %d\n", sock_watch->fd, event, nwrite, errno, ctx->write_count);
     if(ctx->write_count > ctx->max_write_count) {
-        rtor_reactor_deregister(reactor, ctx->swatcher->fd);
-        rtor_reactor_deregister(reactor, ctx->twatcher->fd);
+        runloop_deregister(reactor, ctx->swatcher->fd);
+        runloop_deregister(reactor, ctx->twatcher->fd);
         return;
     }
     // disarm writeable events on this fd
-    rtor_stream_disarm_write(sock_watch);
+    runloop_stream_disarm_write(sock_watch);
     WR_CTX_CHECK_TAG(ctx)
     SOCKW_CHECK_TAG(ctx->swatcher)
     WTIMER_CHECK_TAG(ctx->twatcher)
     // rearm the timer
-    rtor_timer_rearm(ctx->twatcher);
+    runloop_timer_rearm(ctx->twatcher);
 }
-static void wrtr_wait(RtorTimerRef watch, uint64_t event)
+static void wrtr_wait(RunloopTimerRef watch, uint64_t event)
 {
     WTIMER_CHECK_TAG(watch)
     RBL_LOG_FMT("test_io: Socket watcher wrtr_wait\n");
@@ -108,42 +108,42 @@ static void wrtr_wait(RtorTimerRef watch, uint64_t event)
         int nwrite = write(ctx->writefd, wbuf, strlen(wbuf));
         free(wbuf);
     } else {
-        rtor_timer_disarm(watch);
+        runloop_timer_disarm(watch);
         uint64_t interest = EPOLLERR | EPOLLOUT;
-        rtor_stream_arm_write(ctx->swatcher, &wrtr_cb, (void *) ctx);
+        runloop_stream_arm_write(ctx->swatcher, &wrtr_cb, (void *) ctx);
     }
 }
 void* writer_thread_func(void* arg)
 {
     int wait_first = 1;
-    ReactorRef rtor_ref = rtor_reactor_new();
+    RunloopRef runloop_ref = runloop_new();
     Writer* wrtr = (Writer*)arg;
     for(int i = 0; i < wrtr->count; i++) {
         WriteCtx* ctx = &(wrtr->ctx_table[i]);
 
-        wrtr->ctx_table[i].swatcher = rtor_stream_new(rtor_ref, ctx->writefd);
-        wrtr->ctx_table[i].twatcher = rtor_timer_new(rtor_ref);
-        rtor_timer_register(wrtr->ctx_table[i].twatcher, &wrtr_wait, (void *) ctx, ctx->interval_ms, true);
+        wrtr->ctx_table[i].swatcher = runloop_stream_new(runloop_ref, ctx->writefd);
+        wrtr->ctx_table[i].twatcher = runloop_timer_new(runloop_ref);
+        runloop_timer_register(wrtr->ctx_table[i].twatcher, &wrtr_wait, (void *) ctx, ctx->interval_ms, true);
 
         WR_CTX_CHECK_TAG(ctx)
         WTIMER_CHECK_TAG(ctx->twatcher);
         SOCKW_CHECK_TAG(ctx->swatcher);
 
-        RtorStreamRef sw = wrtr->ctx_table[i].swatcher;
+        RunloopStreamRef sw = wrtr->ctx_table[i].swatcher;
 
         if(wait_first) {
             // register armed - wait 2 seconds
             // register disarmed - timer cb will arm it
-            rtor_stream_register(ctx->swatcher);
-            rtor_stream_arm_write(ctx->swatcher, &wrtr_cb, (void *) ctx);
+            runloop_stream_register(ctx->swatcher);
+            runloop_stream_arm_write(ctx->swatcher, &wrtr_cb, (void *) ctx);
         } else {
 
             uint64_t interest = EPOLLERR | EPOLLOUT;
-            rtor_stream_register(sw);
-            rtor_stream_arm_write(sw, &wrtr_cb, (void *) ctx);
+            runloop_stream_register(sw);
+            runloop_stream_arm_write(sw, &wrtr_cb, (void *) ctx);
         }
     }
 
-    rtor_reactor_run(rtor_ref, 10000000);
+    runloop_run(runloop_ref, 10000000);
     return NULL;
 }

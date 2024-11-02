@@ -76,7 +76,7 @@ void callback(void* arg)
 {
     uintptr_t x = (uintptr_t)arg;
     long lg = (long)x;
-    printf("callback id: %ld   thread reactor: %p \n", lg, rtor_get_threads_reactor());
+    printf("callback id: %ld   thread reactor: %p \n", lg, runloop_get_threads_reactor());
 }
 
 void* worker_thread_function(void* arg)
@@ -87,7 +87,7 @@ void* worker_thread_function(void* arg)
         sleep(2);
         uintptr_t u = (uintptr_t)i;
         void* vstar = (void*)u;
-        rtor_interthread_post(rx, callback, vstar);
+        runloop_interthread_post(rx, callback, vstar);
     }
     sleep(120);
 }
@@ -97,13 +97,13 @@ static void timer_callback(RtorTimerRef watcher, void* ctx, XrTimerEvent event)
 }
 void* reader_thread_func(void* arg)
 {
-    ReactorRef rtor_ref = rtor_new();
-    RtorTimerRef tw_2 = rtor_timer_new(rtor_ref, &timer_callback, NULL, 50000, true);
+    ReactorRef runloop_ref = runloop_new();
+    RtorTimerRef tw_2 = runloop_timer_new(runloop_ref, &timer_callback, NULL, 50000, true);
 
     pthread_t worker;
-    int res = pthread_create(&worker, NULL, worker_thread_function, (void*)rtor_ref);
+    int res = pthread_create(&worker, NULL, worker_thread_function, (void*)runloop_ref);
 
-    rtor_run(rtor_ref, 10000);
+    runloop_run(runloop_ref, 10000);
     printf("reactor has completed\n");
 }
 

@@ -123,7 +123,7 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	#aio runloop and aio_http/1.1 details
 		runloop/fdtable.c
 		runloop/fd_map.c
-		runloop/reactor.c
+        runloop/runloop.c
 		runloop/w_listener.c
 		runloop/w_eventfd.c
 		runloop/w_timerfd.c
@@ -131,7 +131,7 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		runloop/w_queue.c
 		runloop/interthread_queue.c
 		runloop/watcher.c
-		runloop/evfd_queue.c
+        runloop/eventfd_queue.c
 		runloop/run_list.c
 		runloop/functor.c
 		runloop/functor_list.c

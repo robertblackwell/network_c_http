@@ -1,5 +1,6 @@
 
-#define ENABLE_LOGx
+#define RBL_LOG_ENABLE 1
+#define RBL_LOG_ALLOW_GLOBAL 1
 #include <http_in_c/async-old/types.h>
 #include <stdio.h>
 #include <pthread.h>
@@ -25,12 +26,14 @@ static struct timespec current_time();
 static double time_diff(struct timespec a, struct timespec b);
 
 typedef struct TestCtx_s  {
+    int                 selector; // selects which test to run in each thread
+    pthread_t           thread;
     int                 counter;    //  How many times a callback received this instance as a void* argument
     int                 max_count;  //  The expected maximum tnumber of times a callback should be called with this
                                     //  instance
     struct timespec     start_time; //  the time at which the timer was first scheduled
     RunloopRef          reactor;    //  the reactor being used for the timer
-    RunloopTimerRef         watcher;    //  the timer being used for this experiment
+    RunloopTimerRef     watcher;    //  the timer being used for this experiment
 } TestCtx;
 
 TestCtx* TestCtx_new(int counter_init, int counter_max);
@@ -102,7 +105,7 @@ static void callback_repeating(RunloopTimerRef watcher, RunloopTimerEvent event)
     double percent_error = fabs(100.0*(((double)(watcher->interval) - gap)/((double)(watcher->interval))));
     gap = percent_error;
 
-    RBL_LOG_FMT("counter: %d %%error: %f   event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", ctx_p->counter, gap, event, epollin, error);
+    RBL_LOG_FMT("counter: %d %%error: %f   ", ctx_p->counter, gap);
     if(ctx_p->counter >= ctx_p->max_count) {
         RBL_LOG_MSG(" clear timer");
         runloop_timer_deregister(watcher);
@@ -255,15 +258,52 @@ TestCtx* TestCtx_new(int counter_init, int counter_max)
     tmp->counter = counter_init;
     tmp->max_count = counter_max;
     tmp->start_time = current_time();
+    tmp->selector = 1;
     return tmp;
 }
+void testCtx_dispose(TestCtx* this)
+{
+    free(this);
+}
+void* threadfn(void* arg)
+{
+    TestCtx* ctx = (TestCtx*)arg;
+    if(ctx->selector == 1)
+        test_timer_single_repeating();
+    else
+        test_timer_multiple_repeating();
+    return NULL;
+}
+int make_multiple_threads(int selector)
+{
+    printf("test_timer_multithread\n");
+    int nbr_threads = 5;
+    TestCtx* contexts[nbr_threads];
+    for(int ix = 0; ix < 5; ix++) {
+        contexts[ix] = TestCtx_new(0, 10);
+        contexts[ix]->selector = selector;
+        int r = pthread_create(&(contexts[ix]->thread), NULL, &threadfn, (void*)&(contexts[ix]));
 
+    }
+    for(int ix = 0; ix < 5; ix++) {
+        pthread_join(contexts[ix]->thread, NULL);
+    }
+    for(int ix = 0; ix < 5; ix++) {
+        free(contexts[ix]);
+    }
+    return 0;
+}
+int test_multiple_threads_single_repeaters() {
+    make_multiple_threads(1);
+}
+int test_multiple_threads_multiple_repeaters() {
+    make_multiple_threads(2);
+}
 int main()
 {
-    UT_ADD(test_timer_single_repeating);
-    UT_ADD(test_timer_multiple_repeating);
-    UT_ADD(test_timer_non_repeating);
-    UT_ADD(test_timer_post);
+    printf("Testing multithreading wth runloop\n");
+    UT_ADD(test_multiple_threads_single_repeaters);
+    UT_ADD(test_multiple_threads_multiple_repeaters);
     int rc = UT_RUN();
     return rc;
 }

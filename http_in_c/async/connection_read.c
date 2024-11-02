@@ -2,7 +2,7 @@
 #define CHLOG_ON
 #include <http_in_c/async/connection_internal.h>
 
-static void postable_reader(ReactorRef reactor_ref, void* arg);
+static void postable_reader(RunloopRef reactor_ref, void* arg);
 static void read_new_message(AsyncConnectionRef cref);
 static void read_error(AsyncConnectionRef connection_ref, char* msg);
 static void read_eagain(AsyncConnectionRef cref);
@@ -19,16 +19,16 @@ void async_read_start(AsyncConnectionRef connection_ref)
     RBL_ASSERT((connection_ref->read_state == READ_STATE_ACTIVE), "invalid state");
     RBL_ASSERT((! connection_ref->readside_posted), "read_side posted should be false");
     connection_ref->readside_posted = true;
-    rtor_reactor_post(connection_ref->reactor_ref, &postable_reader, connection_ref);
+    runloop_post(connection_ref->reactor_ref, &postable_reader, connection_ref);
 }
 static void post_read_start(AsyncConnectionRef cref)
 {
     RBL_CHECK_TAG(AsyncConnection_TAG, cref);
     RBL_ASSERT((! cref->readside_posted), "read_side posted should be false");
     cref->readside_posted = true;
-    rtor_reactor_post(cref->reactor_ref, &postable_reader, cref);
+    runloop_post(cref->reactor_ref, &postable_reader, cref);
 }
-static void postable_reader(ReactorRef reactor_ref, void* arg)
+static void postable_reader(RunloopRef reactor_ref, void* arg)
 {
     AsyncConnectionRef connection_ref = arg;
     RBL_CHECK_TAG(AsyncConnection_TAG, connection_ref)
@@ -127,7 +127,7 @@ static void read_need_data(AsyncConnectionRef cref)
 //    cref->readside_posted = true;
     post_read_start(cref);
 }
-static void postable_close_connection(ReactorRef reactor_ref, void* arg)
+static void postable_close_connection(RunloopRef reactor_ref, void* arg)
 {
     AsyncHandlerRef href = arg;
     RBL_CHECK_TAG(AsyncHandler_TAG, href);
@@ -147,7 +147,7 @@ static void read_error(AsyncConnectionRef cref, char* msg)
     RBL_CHECK_TAG(AsyncHandler_TAG, href);
     cref->read_state = READ_STATE_STOP;
     cref->write_state = WRITE_STATE_STOP;
-    rtor_reactor_post(cref->reactor_ref, &postable_close_connection, href);
+    runloop_post(cref->reactor_ref, &postable_close_connection, href);
 }
 
 llhttp_errno_t async_on_read_message_complete(http_parser_t* parser_ptr, MessageRef msg)
@@ -164,7 +164,7 @@ llhttp_errno_t async_on_read_message_complete(http_parser_t* parser_ptr, Message
     RBL_LOG_FMT("read_message_handler - on_write_cb  read_state: %s", async_read_state_str(connection_ref->read_state));
     return HPE_OK;
 }
-static void postable_handle_request(ReactorRef reactor_ref, void* arg)
+static void postable_handle_request(RunloopRef reactor_ref, void* arg)
 {
     AsyncHandlerRef href = arg;
     RBL_CHECK_TAG(AsyncHandler_TAG, href);
@@ -175,7 +175,7 @@ static void postable_handle_request(ReactorRef reactor_ref, void* arg)
     cref->scratch_request = NULL;
     href->handle_request(href, tmp);
 }
-static void postable_handle_close_connection(ReactorRef reactor_ref, void* arg)
+static void postable_handle_close_connection(RunloopRef reactor_ref, void* arg)
 {
     AsyncHandlerRef href = arg;
     RBL_CHECK_TAG(AsyncHandler_TAG, href);
@@ -186,5 +186,5 @@ static void post_delegate_handle_request(AsyncHandlerRef href, MessageRef reques
 {
     RBL_ASSERT((href->handle_request != NULL), "handle_request should not be null");
     href->async_connection_ref->scratch_request = request;
-    rtor_reactor_post(href->async_connection_ref->reactor_ref, postable_handle_request, href);
+    runloop_post(href->async_connection_ref->reactor_ref, postable_handle_request, href);
 }

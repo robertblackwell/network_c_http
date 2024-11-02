@@ -1,3 +1,8 @@
+New set of priorities Nov 2024:
+    make logger multi-threaded
+
+
+
 This project is out of control:
   ☐ Too many things happening
   ☐ Demo protocol needs to be finished - run valgrind to find memory leaks
@@ -67,7 +72,7 @@ AIO API:
 ☐ probably need a Connector object
 ☐ this about having a SockReader and SockWriter as derived types of Conn rather than loading everything (all the read/write functions) into Conn
 
-Reactor Interface:
+Runloop Interface:
 ☐ rethink the reactor interface - multiple watchers per socket fd, more fine grained arm/disarm - actually more convenient arming/disarming. 
 ☐ The interface should not require knowledge of such things as epollin epollout  
 Other:

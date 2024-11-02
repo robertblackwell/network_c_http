@@ -128,9 +128,9 @@ void UTRecordAssertResult(const char* fn, const char* file, int line, const char
 
 
 #define UT_TRUE(a) do{\
-	if(!a)  {\
+	if(!(a))  {\
 	    char* msg; \
-		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") BRIGHT_CYAN("line:") BLUE("%d \n"), __FUNCTION__, __FILE__, __LINE__,a);\
+		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") BRIGHT_CYAN("line:") BLUE("%d \n"), __FUNCTION__, __FILE__, __LINE__,(int)(a));\
         UTRecordAssertResult(__FUNCTION__, __FILE__, __LINE__, msg);   \
         free(msg); \
 		return 1; \

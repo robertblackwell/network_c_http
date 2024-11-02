@@ -12,7 +12,7 @@
  * of a given type and a free list to manage allocation
  * @return
  */
-#define RTOR_MAX_TIMER 4096
+#define runloop_MAX_TIMER 4096
 typedef struct RtorTimerAllocUnit_s RtorTimerAllocUnit, *RtorTimerAllocUnitPtr;
 struct RtorTimerAllocUnit_s {
     RtorTimerAllocUnitPtr  next_ptr;
@@ -27,32 +27,32 @@ typedef struct RtorTimerMemPool_s RtorTimerMemPool, *RtorTimerMemPoolRef;
 struct RtorTimerMemPool_s {
     RtorTimerAllocUnitPtr   first_free_ref;
     int                     count;
-    RtorTimerAllocUnit      mem[RTOR_MAX_TIMER];
+    RtorTimerAllocUnit      mem[runloop_MAX_TIMER];
 };
 
-RtorTimerMemPool rtor_timer_pool = {.first_free_ref = NULL, .count = RTOR_MAX_TIMER};
+RtorTimerMemPool runloop_timer_pool = {.first_free_ref = NULL, .count = runloop_MAX_TIMER};
 
-void mem_rtor_timer_init()
+void mem_runloop_timer_init()
 {
-    for(int i = 0; i < rtor_timer_pool.count; i++) {
-        rtor_timer_pool.mem[i].index = i;
-        rtor_timer_pool.mem[i].next_ptr = rtor_timer_pool.first_free_ref;
-        rtor_timer_pool.first_free_ref = &(rtor_timer_pool.mem[i]);
-        rtor_timer_pool.mem[i].is_allocated = false;
+    for(int i = 0; i < runloop_timer_pool.count; i++) {
+        runloop_timer_pool.mem[i].index = i;
+        runloop_timer_pool.mem[i].next_ptr = runloop_timer_pool.first_free_ref;
+        runloop_timer_pool.first_free_ref = &(runloop_timer_pool.mem[i]);
+        runloop_timer_pool.mem[i].is_allocated = false;
     }
 }
-RtorTimerRef memalloc_rtor_timer()
+RtorTimerRef memalloc_runloop_timer()
 {
-    if(rtor_timer_pool.first_free_ref == NULL) {
+    if(runloop_timer_pool.first_free_ref == NULL) {
         return NULL;
     }
-    RtorTimerAllocUnitPtr tmp = rtor_timer_pool.first_free_ref;
-    rtor_timer_pool.first_free_ref = tmp->next_ptr;
+    RtorTimerAllocUnitPtr tmp = runloop_timer_pool.first_free_ref;
+    runloop_timer_pool.first_free_ref = tmp->next_ptr;
     tmp->is_allocated = true;
     return &(tmp->data);
 }
 
-void memfree_rtor_timer(RtorTimerRef timer_ref)
+void memfree_runloop_timer(RtorTimerRef timer_ref)
 {
     void* p = (void*) timer_ref;
     void* zero_ptr = 0;
@@ -60,16 +60,16 @@ void memfree_rtor_timer(RtorTimerRef timer_ref)
     long offset = (long)&(allounit_ptr->data);
     void* start_ptr = p - offset;
     RtorTimerAllocUnitPtr tau_ptr = (RtorTimerAllocUnitPtr)start_ptr;
-    RtorTimerAllocUnitPtr tmp = rtor_timer_pool.first_free_ref;
-    rtor_timer_pool.first_free_ref = tau_ptr;
+    RtorTimerAllocUnitPtr tmp = runloop_timer_pool.first_free_ref;
+    runloop_timer_pool.first_free_ref = tau_ptr;
     tau_ptr->next_ptr = tmp;
     tau_ptr->is_allocated = false;
     printf("hello there\n");
 }
-bool mem_rtor_timer_allfree()
+bool mem_runloop_timer_allfree()
 {
-    for(int i = 0; i < rtor_timer_pool.count; i++) {
-        if(rtor_timer_pool.mem[i].is_allocated) {
+    for(int i = 0; i < runloop_timer_pool.count; i++) {
+        if(runloop_timer_pool.mem[i].is_allocated) {
             return false;
         }
     }
@@ -153,21 +153,21 @@ int test_1()
     int sz1 = sizeof(RtorTimer);
     int sz2 = sizeof(RtorTimerAllocUnit);
     int sz3 = sizeof(RtorTimerMemPool);
-    RtorTimerMemPool* pool = &(rtor_timer_pool);
-    mem_rtor_timer_init();
-    UT_TRUE(mem_rtor_timer_allfree());
+    RtorTimerMemPool* pool = &(runloop_timer_pool);
+    mem_runloop_timer_init();
+    UT_TRUE(mem_runloop_timer_allfree());
     RtorTimerAllocUnitPtr f1 = (pool->first_free_ref);
-    RtorTimerRef tref = memalloc_rtor_timer();
+    RtorTimerRef tref = memalloc_runloop_timer();
     UT_EQUAL_PTR(&(f1->data), tref)
-    UT_TRUE(!mem_rtor_timer_allfree());
-    RtorTimerAllocUnitPtr x1 = &rtor_timer_pool.mem[RTOR_MAX_TIMER - 1];
-    RtorTimerAllocUnitPtr x2 = &rtor_timer_pool.mem[RTOR_MAX_TIMER - 2];
-    RtorTimerRef y1 = &(rtor_timer_pool.mem[RTOR_MAX_TIMER - 1].data);
+    UT_TRUE(!mem_runloop_timer_allfree());
+    RtorTimerAllocUnitPtr x1 = &runloop_timer_pool.mem[runloop_MAX_TIMER - 1];
+    RtorTimerAllocUnitPtr x2 = &runloop_timer_pool.mem[runloop_MAX_TIMER - 2];
+    RtorTimerRef y1 = &(runloop_timer_pool.mem[runloop_MAX_TIMER - 1].data);
     UT_EQUAL_PTR(x2, pool->first_free_ref);
-    ReactorRef rx = rtor_reactor_new();
-    rtor_timer_init(tref, rx);
-    memfree_rtor_timer(tref);
-    UT_TRUE(mem_rtor_timer_allfree());
+    ReactorRef rx = runloop_new();
+    runloop_timer_init(tref, rx);
+    memfree_runloop_timer(tref);
+    UT_TRUE(mem_runloop_timer_allfree());
     return 0;
 }
 int main()

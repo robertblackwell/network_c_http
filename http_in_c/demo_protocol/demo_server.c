@@ -36,10 +36,10 @@ DemoServerRef DemoServer_new(int port)
     DemoServerRef sref = (DemoServerRef) eg_alloc(sizeof(DemoServer));
     SET_TAG(DemoServer_TAG, sref)
     sref->port = port;
-    sref->reactor_ref = rtor_reactor_new();
+    sref->reactor_ref = runloop_new();
     sref->listening_socket_fd = create_listener_socket(port, "127.0.0.1");
     set_non_blocking(sref->listening_socket_fd);
-    sref->listening_watcher_ref = rtor_listener_new(sref->reactor_ref, sref->listening_socket_fd);
+    sref->listening_watcher_ref = runloop_listener_new(sref->reactor_ref, sref->listening_socket_fd);
     // TODO this is a memory leak
     // the list is the owner of handler references
     sref->handler_list = List_new(demohandler_anonymous_dispose);
@@ -50,10 +50,10 @@ void DemoServer_free(DemoServerRef this)
 {
     CHECK_TAG(DemoServer_TAG, this)
     ASSERT_NOT_NULL(this);
-    rtor_listener_deregister(this->listening_watcher_ref);
-    rtor_listener_free(this->listening_watcher_ref);
+    runloop_listener_deregister(this->listening_watcher_ref);
+    runloop_listener_free(this->listening_watcher_ref);
     close(this->listening_socket_fd);
-    rtor_reactor_free(this->reactor_ref);
+    runloop_free(this->reactor_ref);
     List_dispose(&(this->handler_list));
     free(this);
 
@@ -74,8 +74,8 @@ void DemoServer_listen(DemoServerRef sref)
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
     RtorListenerRef lw = sref->listening_watcher_ref;
-    rtor_listener_register(lw, on_event_listening, sref);
-    rtor_reactor_run(sref->reactor_ref, -1);
+    runloop_listener_register(lw, on_event_listening, sref);
+    runloop_run(sref->reactor_ref, -1);
     LOG_FMT("DemoServer finishing");
 
 }
@@ -158,7 +158,7 @@ void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event)
     LOG_FMT("Listerner accepted sock fd: %d\n", sock2);
     DemoHandlerRef handler = demohandler_new(
             sock2,
-            rtor_listener_get_reactor(listener_watcher_ref),
+            runloop_listener_get_reactor(listener_watcher_ref),
             on_handler_completion_cb,
             server_ref);
 

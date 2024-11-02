@@ -6,7 +6,7 @@ static void async_connection_close(AsyncConnectionRef cref);
 
 AsyncConnectionRef async_connection_new(
         int socket,
-        ReactorRef reactor_ref,
+        RunloopRef reactor_ref,
         AsyncHandlerRef handler_ref
 )
 {
@@ -17,7 +17,7 @@ AsyncConnectionRef async_connection_new(
 void async_connection_init(
         AsyncConnectionRef this,
         int socket,
-        ReactorRef reactor_ref,
+        RunloopRef reactor_ref,
         AsyncHandlerRef handler_ref
 )
 {
@@ -27,7 +27,7 @@ void async_connection_init(
     this->reactor_ref = reactor_ref;
     this->handler_ref = handler_ref;
     this->socket = socket;
-    this->socket_stream_ref = rtor_stream_new(reactor_ref, socket);
+    this->socket_stream_ref = runloop_stream_new(reactor_ref, socket);
     this->socket_stream_ref->context = this;
     this->socket_stream_ref->both_arg = this;
     this->active_input_buffer_ref = NULL;
@@ -42,15 +42,15 @@ void async_connection_init(
     this->readside_posted = false;
     this->writeside_posted = false;
     this->cleanup_done_flag = false;
-    rtor_stream_register(this->socket_stream_ref);
-    rtor_stream_arm_both(this->socket_stream_ref, &async_event_handler, this);
+    runloop_stream_register(this->socket_stream_ref);
+    runloop_stream_arm_both(this->socket_stream_ref, &async_event_handler, this);
 }
 void async_connection_destroy(AsyncConnectionRef this)
 {
     RBL_CHECK_TAG(AsyncConnection_TAG, this)
     int fd = this->socket_stream_ref->fd;
-    rtor_stream_deregister(this->socket_stream_ref);
-    rtor_stream_free(this->socket_stream_ref);
+    runloop_stream_deregister(this->socket_stream_ref);
+    runloop_stream_free(this->socket_stream_ref);
     this->socket_stream_ref = NULL;
     RBL_LOGFMT("async_connection_free close socket: %d", fd)
     if(this->socket > 0) {

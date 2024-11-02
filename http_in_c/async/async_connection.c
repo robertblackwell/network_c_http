@@ -45,7 +45,7 @@ const char* read_state_str(int state);
 const char* write_state_str(int state);
 
 /**
- * Utility function that wraps all rtor_reactor_post() calls so this module can
+ * Utility function that wraps all runloop_post() calls so this module can
  * keep track of outstanding pending function calls
  */
 static void post_to_reactor(AsyncConnectionRef connection_ref, void(*postable_function)(ReactorRef, void*));
@@ -73,7 +73,7 @@ void async_connection_init(
     LOG_FMT("AsyncConnection socket: %d", socket)
     this->reactor_ref = reactor_ref;
     this->handler_ref = handler_ref;
-    this->socket_stream_ref = rtor_stream_new(reactor_ref, socket);
+    this->socket_stream_ref = runloop_stream_new(reactor_ref, socket);
     this->socket_stream_ref->context = this;
     this->active_input_buffer_ref = NULL;
     this->active_output_buffer_ref = NULL;
@@ -84,9 +84,9 @@ void async_connection_init(
     this->cleanup_done_flag = false;
     ParserOnMessageCompleteHandler h = on_read_message_complete;
     this->http_parser_ptr = http_parser_new(h, this);
-    rtor_stream_register(this->socket_stream_ref);
+    runloop_stream_register(this->socket_stream_ref);
     this->socket_stream_ref->both_arg = this;
-    rtor_stream_arm_both(this->socket_stream_ref, &event_handler, this);
+    runloop_stream_arm_both(this->socket_stream_ref, &event_handler, this);
     this->read_buffer_size = 1000000;
 }
 void async_connection_destroy(AsyncConnectionRef this)
@@ -97,7 +97,7 @@ void async_connection_destroy(AsyncConnectionRef this)
     LOG_FMT("async_connection_free close socket: %d", fd)
     SET_TAG("xxxxxxx", this) // corrupt the tag
     close(fd);
-    rtor_stream_free(this->socket_stream_ref);
+    runloop_stream_free(this->socket_stream_ref);
     this->socket_stream_ref = NULL;
     http_parser_dispose(&(this->http_parser_ptr));
     if(this->active_output_buffer_ref) {
@@ -381,7 +381,7 @@ static void writer(AsyncConnectionRef connection_ref)
 }
 static void post_to_reactor(AsyncConnectionRef connection_ref, void(*postable_function)(ReactorRef, void*))
 {
-    rtor_reactor_post(connection_ref->reactor_ref, postable_function, connection_ref);
+    runloop_post(connection_ref->reactor_ref, postable_function, connection_ref);
 }
 static void postable_write_call_cb(ReactorRef reactor_ref, void* arg)
 {
@@ -427,7 +427,7 @@ static void postable_cleanup(ReactorRef reactor, void* cref)
     LOG_FMT("postable_cleanup entered");
     CHTTP_ASSERT((connection_ref->cleanup_done_flag == false), "cleanup should not run more than once");
     CHECK_TAG(AsyncConnection_TAG, connection_ref)
-    rtor_stream_deregister(connection_ref->socket_stream_ref);
+    runloop_stream_deregister(connection_ref->socket_stream_ref);
     connection_ref->handler_ref->handle_connection_done(connection_ref->handler_ref);
 }
 /////////////////////////////////////////////////////////////////////////////////////

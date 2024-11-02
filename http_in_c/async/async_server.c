@@ -28,7 +28,7 @@ void async_socket_bind(int socket, int port, const char* host);
 int async_bind_and_listen_socket(int socket, int port, const char *host);
 #endif
 
-void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event);
+void on_event_listening(RunloopListenerRef listener_watcher_ref, uint64_t event);
 static void on_handler_completion_cb(AsyncServerRef sref, AsyncHandlerRef handler_ref)
 {
     RBL_LOG_FMT("file: async_server.c on_handler_completion_cb");
@@ -55,9 +55,9 @@ void AsyncServer_init_with_socket(AsyncServerRef sref, int port, const char* hos
     sref->handler_complete = &on_handler_completion_cb;
     sref->process_request = process_request;
     sref->port = port;
-    sref->reactor_ref = rtor_reactor_new();
+    sref->reactor_ref = runloop_new();
     sref->listening_socket_fd = listen_socket;
-    sref->listening_watcher_ref = rtor_listener_new(sref->reactor_ref, sref->listening_socket_fd);
+    sref->listening_watcher_ref = runloop_listener_new(sref->reactor_ref, sref->listening_socket_fd);
     // TODO this is a memory leak
     // the list is the owner of handler references
     sref->handler_list = List_new(async_handler_anonymous_dispose);
@@ -88,10 +88,10 @@ void AsyncServer_destroy(AsyncServerRef this)
 {
     RBL_CHECK_TAG(AsyncServer_TAG, this)
     ASSERT_NOT_NULL(this);
-    rtor_listener_deregister(this->listening_watcher_ref);
-    rtor_listener_free(this->listening_watcher_ref);
+    runloop_listener_deregister(this->listening_watcher_ref);
+    runloop_listener_free(this->listening_watcher_ref);
     close(this->listening_socket_fd);
-    rtor_reactor_free(this->reactor_ref);
+    runloop_free(this->reactor_ref);
     List_dispose(&(this->handler_list));
     RBL_INVALIDATE_TAG(this)
     // RBL_INVALIDATE_STRUCT(this, AsyncServer)
@@ -101,10 +101,10 @@ void AsyncServer_free(AsyncServerRef this)
     RBL_CHECK_TAG(AsyncServer_TAG, this)
     ASSERT_NOT_NULL(this);
     AsyncServer_destroy(this);
-//    rtor_listener_deregister(this->listening_watcher_ref);
-//    rtor_listener_free(this->listening_watcher_ref);
+//    runloop_listener_deregister(this->listening_watcher_ref);
+//    runloop_listener_free(this->listening_watcher_ref);
 //    close(this->listening_socket_fd);
-//    rtor_reactor_free(this->reactor_ref);
+//    runloop_free(this->reactor_ref);
 //    List_dispose(&(this->handler_list));
     free(this);
 
@@ -123,8 +123,8 @@ void AsyncServer_start(AsyncServerRef sref)
     int port = sref->port;
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
-    RtorListenerRef lw = sref->listening_watcher_ref;
-    rtor_listener_register(lw, on_event_listening, sref);
+    RunloopListenerRef lw = sref->listening_watcher_ref;
+    runloop_listener_register(lw, on_event_listening, sref);
     RBL_LOG_FMT("DemoServer finishing");
 }
 void DemoServer_terminate(AsyncServerRef this)
@@ -189,7 +189,7 @@ void async_socket_bind(int socket, int port, const char* host)
 }
 #endif
 
-void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event)
+void on_event_listening(RunloopListenerRef listener_watcher_ref, uint64_t event)
 {
     RBL_LOG_FMT("listening_hander");
     AsyncServerRef server_ref = listener_watcher_ref->listen_arg;
@@ -213,7 +213,7 @@ void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event)
     async_socket_set_nonblocking(sock2);
     AsyncHandlerRef handler = async_handler_new(
             sock2,
-            rtor_listener_get_reactor(listener_watcher_ref),
+            runloop_listener_get_reactor(listener_watcher_ref),
             server_ref);
 
     List_add_back(server_ref->handler_list, handler);

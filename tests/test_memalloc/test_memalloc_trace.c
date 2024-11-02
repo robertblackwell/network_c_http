@@ -31,7 +31,7 @@ typedef struct TraceMemPool_s {
 } TraceMemPool;
 
 
-TraceMemPool* rtor_tracemem_pool_init(int how_many, int size_of_item)
+TraceMemPool* runloop_tracemem_pool_init(int how_many, int size_of_item)
 {
     // calc size to allocate for each item
     int sz1 = sizeof(TraceAllocUnit);
@@ -52,7 +52,7 @@ TraceMemPool* rtor_tracemem_pool_init(int how_many, int size_of_item)
     pool->count = how_many;
 }
 
-void* rtor_tracemem_alloc(int size, char* file, int line)
+void* runloop_tracemem_alloc(int size, char* file, int line)
 {
     // calculate the size of the allocation unit to allocate
     int sz1 = sizeof(TraceAllocUnit);

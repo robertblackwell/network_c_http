@@ -8,18 +8,18 @@
 #include <string.h>
 #include <http_in_c/common/list.h>
 
-#define RTOR_MAX_FDS            1024
-#define RTOR_MAX_RUNLIST        1024
-#define RTOR_MAX_ITQ            256
-#define RTOR_MAX_WATCHERS       RTOR_MAX_FDS
-#define RTOR_FUNCTOR_LIST_MAX   RTOR_MAX_ITQ
-#define RTOR_MAX_EPOLL_FDS      RTOR_MAX_FDS
-#define CBTABLE_MAX             RTOR_MAX_FDS
-#define RTOR_FDTABLE_MAX        RTOR_MAX_FDS
-#define RTOR_READY_LIST_MAX     (2 * RTOR_MAX_FDS)
+#define runloop_MAX_FDS            1024
+#define runloop_MAX_RUNLIST        1024
+#define runloop_MAX_ITQ            256
+#define runloop_MAX_WATCHERS       runloop_MAX_FDS
+#define runloop_FUNCTOR_LIST_MAX   runloop_MAX_ITQ
+#define runloop_MAX_EPOLL_FDS      runloop_MAX_FDS
+#define CBTABLE_MAX             runloop_MAX_FDS
+#define runloop_FDTABLE_MAX        runloop_MAX_FDS
+#define runloop_READY_LIST_MAX     (2 * runloop_MAX_FDS)
 
 // enables use of eventfd rather than two pipe trick
-#define  RTOR_EVENTFD_ENABLE
+#define  runloop_eventfd_ENABLE
 
 
 struct FdTable_s;
@@ -29,9 +29,9 @@ struct FdTable_s;
 typedef struct FdTable_s FdTable, *FdTableRef;
 FdTableRef FdTable_new();
 void       FdTable_free(FdTableRef athis);
-void       FdTable_insert(FdTableRef athis, RtorWatcherRef wref, int fd);
+void       FdTable_insert(FdTableRef athis, RunloopWatcherRef wref, int fd);
 void       FdTable_remove(FdTableRef athis, int fd);
-RtorWatcherRef FdTable_lookup(FdTableRef athis, int fd);
+RunloopWatcherRef FdTable_lookup(FdTableRef athis, int fd);
 int        FdTable_iterator(FdTableRef athis);
 int        FdTable_next_iterator(FdTableRef athis, int iter);
 uint64_t   FdTable_size(FdTableRef athis);
@@ -51,11 +51,11 @@ typedef struct Functor_s Functor, *FunctorRef;
 FunctorRef Functor_new(PostableFunction f, void* arg);
 void Functor_init(FunctorRef funref, PostableFunction f, void* arg);
 void Functor_free(FunctorRef athis);
-void Functor_call(FunctorRef athis, ReactorRef rtor_ref);
+void Functor_call(FunctorRef athis, RunloopRef runloop_ref);
 void Functor_dealloc(void **p);
 struct Functor_s
 {
-//    RtorWatcherRef wref; // this is borrowed do not free
+//    RunloopWatcherRef wref; // this is borrowed do not free
     PostableFunction f;
     void *arg;
 };
@@ -63,7 +63,7 @@ struct Functor_s
 /**
  * runlist - is a list of Functors - these are functors that are ready to run.
  * Use should be confined to a single thread as there is no synchronization.
- * Intended to be used within a Reactor or Runloop
+ * Intended to be used within a Runloop or Runloop
  */
 RunListRef RunList_new();
 //======================
@@ -108,7 +108,7 @@ bool fd_map_set(int j);
 
 #define REGISTER_WQUEUE_REACTOR 1
 
-struct Reactor_s {
+struct Runloop_s {
     RBL_DECLARE_TAG;
     int                     epoll_fd;
     bool                    closed_flag;
@@ -116,29 +116,29 @@ struct Reactor_s {
     FdTableRef              table; // (int, CallbackData)
     FunctorListRef          ready_list;
 #if 1
-    EvfdQueueRef            interthread_queue_ref;
-    RtorWQueueRef           interthread_queue_watcher_ref;
+    EventfdQueueRef         interthread_queue_ref;
+    RunloopQueueWatcherRef  interthread_queue_watcher_ref;
 #else
-    RtorInterthreadQueueRef interthread_queue;
+    RunloopInterthreadQueueRef interthread_queue;
 #endif
     RBL_DECLARE_END_TAG;
 };
 /**
- * RtorWatcher - a generic observer object
+ * RunloopWatcher - a generic observer object
  */
 typedef enum WatcherType {
-    XR_WATCHER_SOCKET = 11,
-    XR_WATCHER_TIMER = 12,
-    XR_WATCHER_QUEUE = 13,
-    XR_WATCHER_FDEVENT = 14,
-    XR_WATCHER_LISTENER = 15,
+    RUNLOOP_WATCHER_SOCKET = 11,
+    RUNLOOP_WATCHER_TIMER = 12,
+    RUNLOOP_WATCHER_QUEUE = 13,
+    RUNLOOP_WATCHER_FDEVENT = 14,
+    RUNLOOP_WATCHER_LISTENER = 15,
 } WatcherType;
 
 
-struct RtorWatcher_s {
+struct RunloopWatcher_s {
     RBL_DECLARE_TAG;
     WatcherType           type;
-    ReactorRef            runloop;
+    RunloopRef            runloop;
     void*                 context;
     int                   fd;
     /**
@@ -146,7 +146,7 @@ struct RtorWatcher_s {
      * each derived type must provide this function when an instance is created or initializez.
      * In the case of timerfd and event fd watchers must also close the fd
      */
-    void(*free)(RtorWatcherRef);
+    void(*free)(RunloopWatcherRef);
     /**
      * first level handler function
      * each derived type provides thier own type specific handler when an instance is created
@@ -155,12 +155,12 @@ struct RtorWatcher_s {
      * 
      * This handler will be calledd directly from the epoll_wait code inside reactor.c
     */
-    void(*handler)(RtorWatcherRef watcher_ref, uint64_t event);
+    void(*handler)(RunloopWatcherRef watcher_ref, uint64_t event);
     RBL_DECLARE_END_TAG;
 };
 
 
-typedef struct EvfdQueue_s {
+typedef struct EventfdQueue_s {
     FunctorListRef      list;
     pthread_mutex_t     queue_mutex;
 #ifdef C_HTTP_EFD_QUEUE
@@ -170,21 +170,21 @@ typedef struct EvfdQueue_s {
     int                 readfd;
     int                 writefd;
     int                 id;
-} EvfdQueue;
+} EventfdQueue;
 
 typedef uint64_t WEventFdMask;
-struct RtorEventfd_s {
-    struct RtorWatcher_s;
+struct RunloopEventfd_s {
+    struct RunloopWatcher_s;
     FdEventHandler      fd_event_handler;
     void*               fd_event_handler_arg;
     int                 write_fd;
 };
 
 /**
- * RtorStream
+ * RunloopStream
  */
-struct RtorStream_s {
-    struct RtorWatcher_s;
+struct RunloopStream_s {
+    struct RunloopWatcher_s;
     uint64_t                 event_mask;
     SocketEventHandler       both_handler;
     void*                    both_arg;
@@ -197,20 +197,20 @@ struct RtorStream_s {
 /**
  * WListener
  */
-typedef struct RtorListener_s {
-    struct RtorWatcher_s;
+typedef struct RunloopListener_s {
+    struct RunloopWatcher_s;
     ListenerEventHandler     listen_evhandler;
     void*                    listen_arg;
-} RtorListener;
+} RunloopListener;
 
 /**
- * RtorWQueue
+ * RunloopQueueWatcher
  */
-typedef uint64_t XrQueueEvent;
-typedef void(XrQueuetWatcherCaller(void* ctx));
-struct RtorWQueue_s {
-    struct RtorWatcher_s;
-    EvfdQueueRef            queue;
+typedef uint64_t RunloopQueueEvent;
+typedef void(RunloopQueuetWatcherCallerback(void* ctx));
+struct RunloopQueueWatcher_s {
+    struct RunloopWatcher_s;
+    EventfdQueueRef            queue;
     // reactor cb and arg
     QueueEventHandler       queue_event_handler;
     void*                   queue_event_handler_arg;
@@ -219,11 +219,11 @@ struct RtorWQueue_s {
 /**
  * InterThreadQueue
  */
-typedef uint64_t XrITQueueEvent;
-typedef void(XrITQueuetWatcherCaller(void* ctx));
-struct RtorInterthreadQueue_s {
+typedef uint64_t RunloopInterthreadQueueEvent;
+typedef void(RunloopInterthreadQueuetWatcherCallerback(void* ctx));
+struct RunloopInterthreadQueue_s {
     RBL_DECLARE_TAG;
-    RtorEventfdRef                      eventfd_ref;
+    RunloopEventfdRef                      eventfd_ref;
     ListRef                             queue;
     pthread_mutex_t                     queue_mutex;
     InterthreadQueueEventHandler        queue_event_handler;
@@ -232,11 +232,11 @@ struct RtorInterthreadQueue_s {
 
 
 /**
- * RtorTimer
+ * RunloopTimer
  */
-typedef uint64_t XrTimerEvent;
-struct RtorTimer_s {
-    struct RtorWatcher_s;
+typedef uint64_t RunloopTimerEvent;
+struct RunloopTimer_s {
+    struct RunloopWatcher_s;
     time_t                  expiry_time;
     uint64_t                interval;
     bool                    repeating;

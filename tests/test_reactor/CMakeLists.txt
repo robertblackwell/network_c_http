@@ -93,5 +93,24 @@ target_link_libraries(${TARGET_ITQ}
 add_test(${TARGET_ITQ} ${TARGET_ITQ})
 
 
+#
+# test multithread
+#
+
+set(TARGET_MT test_timer_multithread)
+add_executable(${TARGET_MT}
+		test_timer_multithread.c
+)
+
+target_include_directories(${TARGET_MT}
+		PUBLIC
+		${TEST_INCLUDE_dirS})
+
+target_link_libraries(${TARGET_MT}
+		PUBLIC ${TEST_LINK_LIBS})
+
+add_test(${TARGET_MT} ${TARGET_MT})
+
+
 add_subdirectory(test_io)
 add_subdirectory(test_listener)

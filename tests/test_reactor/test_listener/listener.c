@@ -21,8 +21,8 @@
 #include <http_in_c/sync/sync_client.h>
 
 
-static void on_event_listening(RtorListenerRef listener_ref, uint64_t event);
-static void on_timer(RtorTimerRef watcher, EventMask event);
+static void on_event_listening(RunloopListenerRef listener_ref, uint64_t event);
+static void on_timer(RunloopTimerRef watcher, EventMask event);
 
 
 ListenerRef Listener_new(int listen_fd)
@@ -54,33 +54,33 @@ void Listener_listen(ListenerRef sref)
     ASSERT_NOT_NULL(sref)
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
-    sref->reactor_ref = rtor_reactor_new();
-    sref->listening_watcher_ref = rtor_listener_new(sref->reactor_ref, sref->listening_socket_fd);
-    RtorListenerRef lw = sref->listening_watcher_ref;
+    sref->reactor_ref = runloop_new();
+    sref->listening_watcher_ref = runloop_listener_new(sref->reactor_ref, sref->listening_socket_fd);
+    RunloopListenerRef lw = sref->listening_watcher_ref;
 
-    rtor_listener_register(lw, on_event_listening, sref);
+    runloop_listener_register(lw, on_event_listening, sref);
     printf("Listener_listen reactor: %p listen sock: %d  lw: %p\n", sref->reactor_ref, sref->listening_socket_fd, lw);
-    sref->timer_ref = rtor_timer_new(sref->reactor_ref);
-    rtor_timer_register(sref->timer_ref, &on_timer, (void *) sref, 5000, false);
-    rtor_reactor_run(sref->reactor_ref, -1);
+    sref->timer_ref = runloop_timer_new(sref->reactor_ref);
+    runloop_timer_register(sref->timer_ref, &on_timer, (void *) sref, 5000, false);
+    runloop_run(sref->reactor_ref, -1);
     printf("Listener reactor ended \n");
-    rtor_reactor_free(sref->reactor_ref);
+    runloop_free(sref->reactor_ref);
 }
 /**
  * When the timer fires it is time to kill the listener.
  */
-static void on_timer(RtorTimerRef watcher, EventMask event)
+static void on_timer(RunloopTimerRef watcher, EventMask event)
 {
     printf("on_timer entered \n");
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
     ListenerRef listener_ref = (ListenerRef) watcher->timer_handler_arg;
     RBL_LOG_FMT("event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", event, epollin, error);
-    rtor_reactor_close(listener_ref->reactor_ref);
-//    rtor_reactor_free(listener_ref->reactor_ref);
+    runloop_close(listener_ref->reactor_ref);
+//    runloop_free(listener_ref->reactor_ref);
 }
 
-static void on_event_listening(RtorListenerRef listener_ref, uint64_t event)
+static void on_event_listening(RunloopListenerRef listener_ref, uint64_t event)
 {
     printf("listening_hander \n");
     struct sockaddr_in peername;

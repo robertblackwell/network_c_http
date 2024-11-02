@@ -37,14 +37,14 @@ struct WTimerFd_s {
  * and register it with the provided XrReactor. In order that the timer is completely
  * specified an event handler, void* arg, interval_ms and bool repeating must be provided.
  * 
- * @param rtor_ref       ReactorRef
+ * @param runloop_ref       ReactorRef
  * @param cb             TimerEventHandler      an event handler function
  * @param ctx            void*                  argument for the event handler
  * @param interval_ms    uint64_t               timer interval in ms
  * @param repeating      bool                   Whether repeating or not
  * @return WTimerFdRef
  */
-WTimerFdRef WTimerFd_new(ReactorRef rtor_ref, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
+WTimerFdRef WTimerFd_new(ReactorRef runloop_ref, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
 
 /**
  * Release all attached resources, deregister the timer from the Reactor and free memory.

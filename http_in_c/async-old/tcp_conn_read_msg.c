@@ -38,7 +38,7 @@
 //        IOBuffer_dispose(&(this->io_buf_ref));
 //    }
 //    this->io_buf_ref = iobuf;
-//    rtor_stream_arm_read(this->sock_watcher_ref, &read_some_handler, (void*) this);
+//    runloop_stream_arm_read(this->sock_watcher_ref, &read_some_handler, (void*) this);
 //}
 ///*
 // * read_some_handler - called every time fd becomes writeable until the entire IOBuffer is written
@@ -73,7 +73,7 @@
 //            // @TODO - fix next 2 lines
 ////            WIoFd_change_watch(sw, &read_some_post_cb, arg, 0);
 ////            WIoFd_disarm(sw, XR_READ);
-//            rtor_reactor_post(reactor_ref, &read_some_post_func, conn_ref);
+//            runloop_post(reactor_ref, &read_some_post_func, conn_ref);
 //            return;
 //        } else if (bytes_read < 0) {
 //            if (errno_saved == EAGAIN) {
@@ -86,7 +86,7 @@
 //            // @TODO - fix next 2 lines
 ////            WIoFd_change_watch(sw, &read_some_post_cb, arg, 0);
 ////            WIoFd_disarm(sw, XR_READ);
-//            rtor_reactor_post(reactor_ref, &read_some_post_func, conn_ref);
+//            runloop_post(reactor_ref, &read_some_post_func, conn_ref);
 //            return;
 //        } else /* (bytes_read > 0) */{
 //            IOBuffer_commit(iobuf, bytes_read);
@@ -111,10 +111,10 @@ void TcpConn_read_msg(TcpConnRef this, MessageRef msg, TcpConnReadMsgCallback cb
     this->req_msg_ref = msg;
     TcpConn_prepare_read(this);
     RtorStreamRef sw = this->sock_watcher_ref;
-    ReactorRef reactor_ref = rtor_stream_get_reactor(sw);
+    ReactorRef reactor_ref = runloop_stream_get_reactor(sw);
     uint64_t interest = EPOLLERR | EPOLLIN;
-    rtor_stream_register(sw);
-    rtor_stream_arm_read(sw, read_msg_handler, arg);
+    runloop_stream_register(sw);
+    runloop_stream_arm_read(sw, read_msg_handler, arg);
 }
 
 // TcpConn_read Reads a message with repeated calls and returns status after each call
@@ -143,18 +143,18 @@ void TcpConn_prepare_read(TcpConnRef this)
     Parser_begin(this->parser_ref, this->req_msg_ref);
 }
 /**
- * A function that can be rtor_reactor_post()'d that will call the read_msg_cb
+ * A function that can be runloop_post()'d that will call the read_msg_cb
  * with the correct parameters
  * \param wp    RtorWatcherRef
  * \param arg   void*
  * \param event uint64_t
  */
-static void on_post_read_msg(ReactorRef rtor_ref, void *arg)
+static void on_post_read_msg(ReactorRef runloop_ref, void *arg)
 {
     TcpConnRef conn_ref = arg;
     RtorStreamRef sw = conn_ref->sock_watcher_ref;
     TCP_CONN_CHECK_TAG(conn_ref)
-    ReactorRef reactor_ref = rtor_stream_get_reactor(sw);
+    ReactorRef reactor_ref = runloop_stream_get_reactor(sw);
     conn_ref->read_msg_cb(conn_ref, arg, conn_ref->read_status);
 }
 /**
@@ -170,7 +170,7 @@ static void read_msg_handler(RtorStreamRef socket_watcher_ref, uint64_t event)
     RtorStreamRef sw = socket_watcher_ref;
     TcpConnRef conn_ref = arg;
     TCP_CONN_CHECK_TAG(conn_ref)
-    ReactorRef reactor_ref = rtor_stream_get_reactor(sw);
+    ReactorRef reactor_ref = runloop_stream_get_reactor(sw);
 
     printf("XrWorker::wrkr_state_machine fd: %d\n", conn_ref->fd);
     uint64_t e1 = EPOLLIN;
@@ -211,8 +211,8 @@ static void read_msg_handler(RtorStreamRef socket_watcher_ref, uint64_t event)
         }
         // @TODO fix next 2 lines
 //        WIoFd_change_watch(sw, &read_msg_handler, arg, 0);
-        rtor_stream_disarm_read(sw);
-        rtor_reactor_post(reactor_ref, &on_post_read_msg, conn_ref);
+        runloop_stream_disarm_read(sw);
+        runloop_post(reactor_ref, &on_post_read_msg, conn_ref);
         return;
     }
 }
@@ -222,7 +222,7 @@ static void read_msg_handler(RtorStreamRef socket_watcher_ref, uint64_t event)
 //    TcpConnRef conn_ref = arg;
 //    ReactorRef reactor_ref = sw->runloop;
 //    uint64_t interest = EPOLLERR | EPOLLIN;
-//    rtor_stream_register(sw, &read_msg_handler, conn_ref, interest);
+//    runloop_stream_register(sw, &read_msg_handler, conn_ref, interest);
 //}
 int TcpConn_read(TcpConnRef this)
 {

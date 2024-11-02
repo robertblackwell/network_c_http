@@ -6,43 +6,43 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 
-static void handler(RtorWatcherRef watcher, uint64_t event)
+static void handler(RunloopWatcherRef watcher, uint64_t event)
 {
-    RtorWQueueRef queue_watcher_ref = (RtorWQueueRef)watcher;
+    RunloopQueueWatcherRef queue_watcher_ref = (RunloopQueueWatcherRef)watcher;
     WQUEUE_CHECK_TAG(queue_watcher_ref)
     queue_watcher_ref->queue_event_handler(queue_watcher_ref, event);
 }
-static void anonymous_free(RtorWatcherRef p)
+static void anonymous_free(RunloopWatcherRef p)
 {
-    RtorWQueueRef queue_watcher_ref = (RtorWQueueRef)p;
+    RunloopQueueWatcherRef queue_watcher_ref = (RunloopQueueWatcherRef)p;
     WQUEUE_CHECK_TAG(queue_watcher_ref)
-    rtor_wqueue_dispose(&queue_watcher_ref);
+    runloop_queue_watcher_dispose(&queue_watcher_ref);
 }
-void WQueue_init(RtorWQueueRef this, ReactorRef runloop, EvfdQueueRef qref)
+void WQueue_init(RunloopQueueWatcherRef this, RunloopRef runloop, EventfdQueueRef qref)
 {
     WQUEUE_SET_TAG(this);
-    this->type = XR_WATCHER_QUEUE;
+    this->type = RUNLOOP_WATCHER_QUEUE;
     this->queue = qref;
-    this->fd = Evfdq_readfd(qref);
+    this->fd = runloop_eventfd_queue_readfd(qref);
     this->runloop = runloop;
     this->free = &anonymous_free;
     this->handler = &handler;
     this->context = this;
 }
-RtorWQueueRef rtor_wqueue_new(ReactorRef runloop, EvfdQueueRef qref)
+RunloopQueueWatcherRef runloop_queue_watcher_new(RunloopRef runloop, EventfdQueueRef qref)
 {
-    RtorWQueueRef this = malloc(sizeof(RtorWQueue));
+    RunloopQueueWatcherRef this = malloc(sizeof(RunloopQueueWatcher));
     WQueue_init(this, runloop, qref);
     return this;
 }
-void rtor_wqueue_dispose(RtorWQueueRef* athis)
+void runloop_queue_watcher_dispose(RunloopQueueWatcherRef* athis)
 {
     WQUEUE_CHECK_TAG(*athis)
     close((*athis)->fd);
     free((void*)*athis);
     *athis = NULL;
 }
-void rtor_wqueue_register(RtorWQueueRef athis, QueueEventHandler cb, void* arg)
+void runloop_queue_watcher_register(RunloopQueueWatcherRef athis, QueueEventHandler cb, void* arg)
 {
 //    WQUEUE_CHECK_TAG(this)
     uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
@@ -50,10 +50,10 @@ void rtor_wqueue_register(RtorWQueueRef athis, QueueEventHandler cb, void* arg)
 //    uint32_t interest = watch_what;
     athis->queue_event_handler = cb;
     athis->queue_event_handler_arg = arg;
-    int res = rtor_reactor_register(athis->runloop, athis->fd, interest, (RtorWatcherRef) (athis));
+    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherRef) (athis));
     assert(res ==0);
 }
-void rtor_wqueue_change_watch(RtorWQueueRef athis, QueueEventHandler cb, void* arg, uint64_t watch_what)
+void runloop_queue_watcher_change_watch(RunloopQueueWatcherRef athis, QueueEventHandler cb, void* arg, uint64_t watch_what)
 {
     WQUEUE_CHECK_TAG(athis)
     uint32_t interest = watch_what;
@@ -63,26 +63,26 @@ void rtor_wqueue_change_watch(RtorWQueueRef athis, QueueEventHandler cb, void* a
     if (arg != NULL) {
         athis->queue_event_handler_arg = arg;
     }
-    int res = rtor_reactor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherRef) athis);
     assert(res == 0);
 }
-void rtor_wqueue_deregister(RtorWQueueRef athis)
+void runloop_queue_watcher_deregister(RunloopQueueWatcherRef athis)
 {
     WQUEUE_CHECK_TAG(athis)
 
-    int res = rtor_reactor_deregister(athis->runloop, athis->fd);
+    int res = runloop_deregister(athis->runloop, athis->fd);
     assert(res == 0);
 }
-ReactorRef rtor_wqueue_get_reactor(RtorWQueueRef athis)
+RunloopRef runloop_queue_watcher_get_reactor(RunloopQueueWatcherRef athis)
 {
     return athis->runloop;
 }
-int rtor_wqueue_get_fd(RtorWQueueRef this)
+int runloop_queue_watcher_get_fd(RunloopQueueWatcherRef this)
 {
     return this->fd;
 }
 
-void rtor_wqueue_verify(RtorWQueueRef r)
+void runloop_queue_watcher_verify(RunloopQueueWatcherRef r)
 {
     WQUEUE_CHECK_TAG(r)
 

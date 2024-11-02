@@ -14,9 +14,9 @@
  * @param fd        int
  * @param event     uint64_t
  */
-static void handler(RtorWatcherRef watcher, uint64_t event)
+static void handler(RunloopWatcherRef watcher, uint64_t event)
 {
-    RtorStreamRef sw = (RtorStreamRef)watcher;
+    RunloopStreamRef sw = (RunloopStreamRef)watcher;
     if(sw->both_handler) {
         sw->both_handler(sw, event);
     }
@@ -28,12 +28,12 @@ static void handler(RtorWatcherRef watcher, uint64_t event)
     }
 }
 
-static void anonymous_free(RtorWatcherRef p)
+static void anonymous_free(RunloopWatcherRef p)
 {
-    RtorStreamRef twp = (RtorStreamRef)p;
-    rtor_stream_free(twp);
+    RunloopStreamRef twp = (RunloopStreamRef)p;
+    runloop_stream_free(twp);
 }
-void rtor_stream_init(RtorStreamRef this, ReactorRef runloop, int fd)
+void runloop_stream_init(RunloopStreamRef this, RunloopRef runloop, int fd)
 {
     RBL_SET_TAG(TYPE, this)
     SOCKW_SET_TAG(this);
@@ -47,26 +47,26 @@ void rtor_stream_init(RtorStreamRef this, ReactorRef runloop, int fd)
     this->write_arg = NULL;
     this->write_evhandler = NULL;
 }
-RtorStreamRef rtor_stream_new(ReactorRef runloop, int fd)
+RunloopStreamRef runloop_stream_new(RunloopRef runloop, int fd)
 {
-    RtorStreamRef this = malloc(sizeof(RtorStream));
-    rtor_stream_init(this, runloop, fd);
+    RunloopStreamRef this = malloc(sizeof(RunloopStream));
+    runloop_stream_init(this, runloop, fd);
     return this;
 }
-void rtor_stream_free(RtorStreamRef athis)
+void runloop_stream_free(RunloopStreamRef athis)
 {
     SOCKW_CHECK_TAG(athis)
     close(athis->fd);
     free((void*)athis);
 }
-void rtor_stream_register(RtorStreamRef athis)
+void runloop_stream_register(RunloopStreamRef athis)
 {
     SOCKW_CHECK_TAG(athis)
     uint32_t interest = 0;
-    int res = rtor_reactor_register(athis->runloop, athis->fd, 0L, (RtorWatcherRef) (athis));
+    int res = runloop_register(athis->runloop, athis->fd, 0L, (RunloopWatcherRef) (athis));
     assert(res ==0);
 }
-//void WIoFd_change_watch(RtorStreamRef this, SocketEventHandler cb, void* arg, uint64_t watch_what)
+//void WIoFd_change_watch(RunloopStreamRef this, SocketEventHandler cb, void* arg, uint64_t watch_what)
 //{
 //    SOCKW_CHECK_TAG(this)
 //    uint32_t interest = watch_what;
@@ -76,16 +76,16 @@ void rtor_stream_register(RtorStreamRef athis)
 //    if (arg != NULL) {
 //        this->cb_ctx = arg;
 //    }
-//    int res = rtor_reactor_reregister(this->runloop, this->fd, interest, (RtorWatcherRef)this);
+//    int res = runloop_reregister(this->runloop, this->fd, interest, (RunloopWatcherRef)this);
 //    assert(res == 0);
 //}
-void rtor_stream_deregister(RtorStreamRef athis)
+void runloop_stream_deregister(RunloopStreamRef athis)
 {
     SOCKW_CHECK_TAG(athis)
-    int res = rtor_reactor_deregister(athis->runloop, athis->fd);
+    int res = runloop_deregister(athis->runloop, athis->fd);
     assert(res == 0);
 }
-void rtor_stream_arm_both(RtorStreamRef athis, SocketEventHandler event_handler, void* arg)
+void runloop_stream_arm_both(RunloopStreamRef athis, SocketEventHandler event_handler, void* arg)
 {
     uint64_t interest = EPOLLET | EPOLLOUT | EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | athis->event_mask;
     athis->event_mask = interest;
@@ -96,11 +96,11 @@ void rtor_stream_arm_both(RtorStreamRef athis, SocketEventHandler event_handler,
     if (arg != NULL) {
         athis->both_arg = arg;
     }
-    int res = rtor_reactor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherRef) athis);
     assert(res == 0);
 }
 
-void rtor_stream_arm_read(RtorStreamRef athis, SocketEventHandler event_handler, void* arg)
+void runloop_stream_arm_read(RunloopStreamRef athis, SocketEventHandler event_handler, void* arg)
 {
     uint64_t interest = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | athis->event_mask;
     athis->event_mask = interest;
@@ -111,10 +111,10 @@ void rtor_stream_arm_read(RtorStreamRef athis, SocketEventHandler event_handler,
     if (arg != NULL) {
         athis->read_arg = arg;
     }
-    int res = rtor_reactor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherRef) athis);
     assert(res == 0);
 }
-void rtor_stream_arm_write(RtorStreamRef athis, SocketEventHandler event_handler, void* arg)
+void runloop_stream_arm_write(RunloopStreamRef athis, SocketEventHandler event_handler, void* arg)
 {
     uint64_t interest = EPOLLOUT | EPOLLERR | EPOLLHUP | EPOLLRDHUP | athis->event_mask;
     athis->event_mask = interest;
@@ -125,35 +125,35 @@ void rtor_stream_arm_write(RtorStreamRef athis, SocketEventHandler event_handler
     if (arg != NULL) {
         athis->write_arg = arg;
     }
-    int res = rtor_reactor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherRef) athis);
     assert(res == 0);
 }
-void rtor_stream_disarm_read(RtorStreamRef athis)
+void runloop_stream_disarm_read(RunloopStreamRef athis)
 {
     athis->event_mask &= ~EPOLLIN;
     SOCKW_CHECK_TAG(athis)
     athis->read_evhandler = NULL;
     athis->read_arg = NULL;
-    int res = rtor_reactor_reregister(athis->runloop, athis->fd, athis->event_mask, (RtorWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, athis->event_mask, (RunloopWatcherRef) athis);
     assert(res == 0);
 }
-void rtor_stream_disarm_write(RtorStreamRef athis)
+void runloop_stream_disarm_write(RunloopStreamRef athis)
 {
     athis->event_mask = ~EPOLLOUT & athis->event_mask;
     SOCKW_CHECK_TAG(athis)
-    int res = rtor_reactor_reregister(athis->runloop, athis->fd, athis->event_mask, (RtorWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, athis->event_mask, (RunloopWatcherRef) athis);
     assert(res == 0);
 }
-ReactorRef rtor_stream_get_reactor(RtorStreamRef athis)
+RunloopRef runloop_stream_get_reactor(RunloopStreamRef athis)
 {
     return athis->runloop;
 }
-int rtor_stream_get_fd(RtorStreamRef this)
+int runloop_stream_get_fd(RunloopStreamRef this)
 {
     return this->fd;
 }
 
-void rtor_stream_verify(RtorStreamRef r)
+void runloop_stream_verify(RunloopStreamRef r)
 {
     SOCKW_CHECK_TAG(r)
 

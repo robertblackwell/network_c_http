@@ -41,7 +41,7 @@ static void write_error(DemoConnectionRef connection_ref, char* msg);
 
 static void postable_cleanup(ReactorRef reactor, void* cref);
 /**
- * Utility function that wraps all rtor_reactor_post() calls so this module can
+ * Utility function that wraps all runloop_post() calls so this module can
  * keep track of outstanding pending function calls
  */
 static void post_to_reactor(DemoConnectionRef connection_ref, void(*postable_function)(ReactorRef, void*));
@@ -68,7 +68,7 @@ void democonnection_init(
     CHECK_TAG(DemoConnection_TAG, this)
     this->reactor_ref = reactor_ref;
     this->handler_ref = handler_ref;
-    this->socket_stream_ref = rtor_stream_new(reactor_ref, socket);
+    this->socket_stream_ref = runloop_stream_new(reactor_ref, socket);
     this->socket_stream_ref->context = this;
     this->active_input_buffer_ref = NULL;
     this->active_output_buffer_ref = NULL;
@@ -83,16 +83,16 @@ void democonnection_init(
     this->parser_ref = DemoParser_new(
             (void*)&on_read_complete,
             this);
-    rtor_stream_register(this->socket_stream_ref);
+    runloop_stream_register(this->socket_stream_ref);
     this->socket_stream_ref->both_arg = this;
-    rtor_stream_arm_both(this->socket_stream_ref, &event_handler, this);
+    runloop_stream_arm_both(this->socket_stream_ref, &event_handler, this);
 }
 void democonnection_free(DemoConnectionRef this)
 {
     CHECK_TAG(DemoConnection_TAG, this)
     int fd = this->socket_stream_ref->fd;
     close(fd);
-    rtor_stream_free(this->socket_stream_ref);
+    runloop_stream_free(this->socket_stream_ref);
     this->socket_stream_ref = NULL;
     DemoParser_dispose(&(this->parser_ref));
     if(this->active_output_buffer_ref) {
@@ -303,7 +303,7 @@ static void writer(DemoConnectionRef connection_ref)
 }
 static void post_to_reactor(DemoConnectionRef connection_ref, void(*postable_function)(ReactorRef, void*))
 {
-    rtor_reactor_post(connection_ref->reactor_ref, postable_function, connection_ref);
+    runloop_post(connection_ref->reactor_ref, postable_function, connection_ref);
 }
 static void postable_write_call_cb(ReactorRef reactor_ref, void* arg)
 {
@@ -351,7 +351,7 @@ static void postable_cleanup(ReactorRef reactor, void* cref)
     printf("postable_cleanup entered\n");
     CHTTP_ASSERT((connection_ref->cleanup_done_flag == false), "cleanup should not run more than once");
     CHECK_TAG(DemoConnection_TAG, connection_ref)
-    rtor_stream_deregister(connection_ref->socket_stream_ref);
+    runloop_stream_deregister(connection_ref->socket_stream_ref);
 //    close(connection_ref->socket_stream_ref->fd);
     connection_ref->on_close_cb(connection_ref->handler_ref);
 }

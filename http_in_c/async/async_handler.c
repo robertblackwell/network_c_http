@@ -23,13 +23,13 @@ static void handle_write_complete(AsyncHandlerRef href);
 static void handle_close_connection(AsyncHandlerRef  href);
 //static void handle_write_failed(AsyncHandler* href);
 
-static void postable_write_start(ReactorRef reactor_ref, void* href);
+static void postable_write_start(RunloopRef reactor_ref, void* href);
 static void on_write_complete_cb(void* href, int status);
-static void handler_postable_read_start(ReactorRef reactor_ref, void* href);
+static void handler_postable_read_start(RunloopRef reactor_ref, void* href);
 
 AsyncHandlerRef async_handler_new(
         int socket,
-        ReactorRef reactor_ref,
+        RunloopRef reactor_ref,
         AsyncServerRef server_ref)
 {
     AsyncHandlerRef this = malloc(sizeof(AsyncHandler));
@@ -39,7 +39,7 @@ AsyncHandlerRef async_handler_new(
 void async_handler_init(
         AsyncHandlerRef this,
         int socket,
-        ReactorRef reactor_ref,
+        RunloopRef reactor_ref,
         AsyncServerRef server_ref)
 {
     RBL_SET_TAG(AsyncHandler_TAG, this)

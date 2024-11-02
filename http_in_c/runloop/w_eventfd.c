@@ -20,9 +20,9 @@
  * @param fd
  * @param event
  */
-static void handler(RtorWatcherRef fdevent_ref, uint64_t event)
+static void handler(RunloopWatcherRef fdevent_ref, uint64_t event)
 {
-    RtorEventfdRef fdev = (RtorEventfdRef)fdevent_ref;
+    RunloopEventfdRef fdev = (RunloopEventfdRef)fdevent_ref;
     FDEV_CHECK_TAG(fdev)
     uint64_t buf;
     int nread = read(fdev->fd, &buf, sizeof(buf));
@@ -32,15 +32,15 @@ static void handler(RtorWatcherRef fdevent_ref, uint64_t event)
 
     }
 }
-static void anonymous_free(RtorWatcherRef p)
+static void anonymous_free(RunloopWatcherRef p)
 {
-    RtorEventfdRef fdevp = (RtorEventfdRef)p;
+    RunloopEventfdRef fdevp = (RunloopEventfdRef)p;
     FDEV_CHECK_TAG(fdevp)
-    rtor_eventfd_free(fdevp);
+    runloop_eventfd_free(fdevp);
 }
-void rtor_eventfd_init(RtorEventfdRef this, ReactorRef runloop)
+void runloop_eventfd_init(RunloopEventfdRef this, RunloopRef runloop)
 {
-    this->type = XR_WATCHER_FDEVENT;
+    this->type = RUNLOOP_WATCHER_FDEVENT;
     FDEV_SET_TAG(this);
     FDEV_CHECK_TAG(this)
 #ifdef TWO_PIPE_TRICK
@@ -59,29 +59,29 @@ void rtor_eventfd_init(RtorEventfdRef this, ReactorRef runloop)
     this->free = &anonymous_free;
     this->handler = &handler;
 }
-RtorEventfdRef rtor_eventfd_new(ReactorRef runloop)
+RunloopEventfdRef runloop_eventfd_new(RunloopRef runloop)
 {
-    RtorEventfdRef this = malloc(sizeof(RtorEventfd));
-    rtor_eventfd_init(this, runloop);
+    RunloopEventfdRef this = malloc(sizeof(RunloopEventfd));
+    runloop_eventfd_init(this, runloop);
     return this;
 }
-void rtor_eventfd_free(RtorEventfdRef athis)
+void runloop_eventfd_free(RunloopEventfdRef athis)
 {
     FDEV_CHECK_TAG(athis)
     close(athis->fd);
     free((void*)athis);
 }
-void rtor_eventfd_register(RtorEventfdRef athis)
+void runloop_eventfd_register(RunloopEventfdRef athis)
 {
     FDEV_CHECK_TAG(athis)
 
     uint32_t interest = 0L;
     athis->fd_event_handler = NULL;
     athis->fd_event_handler_arg = NULL;
-    int res = rtor_reactor_register(athis->runloop, athis->fd, interest, (RtorWatcherRef) (athis));
+    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherRef) (athis));
     assert(res ==0);
 }
-void rtor_eventfd_change_watch(RtorEventfdRef athis, FdEventHandler evhandler, void* arg, uint64_t watch_what)
+void runloop_eventfd_change_watch(RunloopEventfdRef athis, FdEventHandler evhandler, void* arg, uint64_t watch_what)
 {
     FDEV_CHECK_TAG(athis)
     uint32_t interest = watch_what;
@@ -91,16 +91,16 @@ void rtor_eventfd_change_watch(RtorEventfdRef athis, FdEventHandler evhandler, v
     if (arg != NULL) {
         athis->fd_event_handler_arg = arg;
     }
-    int res = rtor_reactor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherRef) athis);
     assert(res == 0);
 }
-void rtor_eventfd_deregister(RtorEventfdRef athis)
+void runloop_eventfd_deregister(RunloopEventfdRef athis)
 {
     FDEV_CHECK_TAG(athis)
-    int res = rtor_reactor_deregister(athis->runloop, athis->fd);
+    int res = runloop_deregister(athis->runloop, athis->fd);
     assert(res == 0);
 }
-void rtor_eventfd_arm(RtorEventfdRef athis, FdEventHandler evhandler, void* arg)
+void runloop_eventfd_arm(RunloopEventfdRef athis, FdEventHandler evhandler, void* arg)
 {
     FDEV_CHECK_TAG(athis)
     uint32_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP;
@@ -110,15 +110,15 @@ void rtor_eventfd_arm(RtorEventfdRef athis, FdEventHandler evhandler, void* arg)
     if (arg != NULL) {
         athis->fd_event_handler_arg = arg;
     }
-    int res = rtor_reactor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherRef) athis);
     assert(res == 0);
 }
-void rtor_eventfd_disarm(RtorEventfdRef athis)
+void runloop_eventfd_disarm(RunloopEventfdRef athis)
 {
     FDEV_CHECK_TAG(athis)
-    int res = rtor_reactor_reregister(athis->runloop, athis->fd, 0, (RtorWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, 0, (RunloopWatcherRef) athis);
 }
-void rtor_eventfd_fire(RtorEventfdRef athis)
+void runloop_eventfd_fire(RunloopEventfdRef athis)
 {
     FDEV_CHECK_TAG(athis)
 #ifdef TWO_PIPE_TRICK
@@ -130,12 +130,12 @@ void rtor_eventfd_fire(RtorEventfdRef athis)
     assert(x == sizeof(buf));
 #endif
 }
-void rtor_eventfd_clear_one_event(RtorEventfdRef athis)
+void runloop_eventfd_clear_one_event(RunloopEventfdRef athis)
 {
     uint64_t buf;
     int nread = read(athis->fd, &buf, sizeof(buf));
 }
-void rtor_eventfd_clear_all_events(RtorEventfdRef athis)
+void runloop_eventfd_clear_all_events(RunloopEventfdRef athis)
 {
     uint64_t buf;
     while(1) {
@@ -145,16 +145,16 @@ void rtor_eventfd_clear_all_events(RtorEventfdRef athis)
     assert(errno == EAGAIN);
 }
 
-ReactorRef rtor_eventfd_get_reactor(RtorEventfdRef athis)
+RunloopRef runloop_eventfd_get_reactor(RunloopEventfdRef athis)
 {
     return athis->runloop;
 }
-int rtor_eventfd_get_fd(RtorEventfdRef this)
+int runloop_eventfd_get_fd(RunloopEventfdRef this)
 {
     return this->fd;
 }
 
-void rtor_eventfd_verify(RtorEventfdRef r)
+void runloop_eventfd_verify(RunloopEventfdRef r)
 {
     FDEV_CHECK_TAG(r)
 

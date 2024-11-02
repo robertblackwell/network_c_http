@@ -46,11 +46,11 @@ void AsyncServer_listen(AsyncServerRef sref)
     unsigned int addr_length = (unsigned int) sizeof(peername);
     sref->listening_socket_fd = create_listener_socket(port, "127.0.0.1");
     set_non_blocking(sref->listening_socket_fd);
-    sref->reactor_ref = rtor_reactor_new();
-    sref->listening_watcher_ref = rtor_listener_new(sref->reactor_ref, sref->listening_socket_fd);
+    sref->reactor_ref = runloop_new();
+    sref->listening_watcher_ref = runloop_listener_new(sref->reactor_ref, sref->listening_socket_fd);
     RtorListenerRef lw = sref->listening_watcher_ref;
-    rtor_listener_register(lw, on_event_listening, sref);
-    rtor_reactor_run(sref->reactor_ref, -1);
+    runloop_listener_register(lw, on_event_listening, sref);
+    runloop_run(sref->reactor_ref, -1);
     LOG_FMT("AsyncServer finishing");
 
 }
@@ -133,7 +133,7 @@ void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event)
     if(sock2 <= 0) {
         LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
     }
-    RtorStreamRef sw_ref = rtor_stream_new(server_ref->reactor_ref, sock2);
+    RtorStreamRef sw_ref = runloop_stream_new(server_ref->reactor_ref, sock2);
     TcpConnRef conn = TcpConn_new(sock2, sw_ref, server_ref);
     MessageRef inmsg = Message_new();
     TcpConn_read_msg(conn, inmsg, on_message, conn);

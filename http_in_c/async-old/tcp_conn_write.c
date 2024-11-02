@@ -17,7 +17,7 @@
  * call completion function .. this function gets posted to the fun list
  * Its job is to call the completion cb
  */
-static void write_complete_post_func(ReactorRef rtor_ref, void* arg)
+static void write_complete_post_func(ReactorRef runloop_ref, void* arg)
 {
     TcpConnRef conn_ref = arg;
     TCP_CONN_CHECK_TAG(conn_ref)
@@ -31,7 +31,7 @@ static void write_event_handler(RtorWatcherRef wp, uint64_t event)
     void* arg = sw->write_arg;
     TcpConnRef conn_ref = arg;
     TCP_CONN_CHECK_TAG(conn_ref)
-    ReactorRef reactor_ref = rtor_stream_get_reactor(sw);
+    ReactorRef reactor_ref = runloop_stream_get_reactor(sw);
     LOG_FMT("conn_ref: %p", conn_ref);
     void* p = IOBuffer_data(conn_ref->write_buffer_ref);
     int len = IOBuffer_data_len(conn_ref->write_buffer_ref);
@@ -47,8 +47,8 @@ static void write_event_handler(RtorWatcherRef wp, uint64_t event)
     assert(conn_ref->handler_ref != NULL);
     // @TODO fix next 2 lines
 //    WIoFd_change_watch(sw, &write_event_handler, arg, 0);
-    rtor_stream_disarm_write(sw);
-    rtor_reactor_post(reactor_ref, write_complete_post_func, conn_ref);
+    runloop_stream_disarm_write(sw);
+    runloop_post(reactor_ref, write_complete_post_func, conn_ref);
 
 }
 void write_machine(RtorStreamRef socket_watcher_ref, uint64_t event);
@@ -61,7 +61,7 @@ void TcpConn_write(TcpConnRef this, IOBufferRef iobuf, TcpConnWriteCallback cb, 
     this->write_cb = cb;
 //    this->write_completion_handler = &write_complete_post_func;
     RtorStreamRef sw = this->sock_watcher_ref;
-    rtor_stream_arm_write(sw, &write_machine, this);
+    runloop_stream_arm_write(sw, &write_machine, this);
 }
 
 void TcpConn_prepare_write_2(TcpConnRef this, IOBufferRef buf, SocketEventHandler completion_handler)
@@ -85,8 +85,8 @@ void write_machine(RtorStreamRef socket_watcher_ref, uint64_t event)
     LOG_FMT("watcher: %p arg: %p event %lx", socket_watcher_ref, arg, event);
     TcpConnRef conn_ref = (TcpConnRef)arg;
     TCP_CONN_CHECK_TAG(conn_ref)
-    rtor_stream_verify(socket_watcher_ref);
-    ReactorRef reactor_ref = rtor_stream_get_reactor(socket_watcher_ref);
+    runloop_stream_verify(socket_watcher_ref);
+    ReactorRef reactor_ref = runloop_stream_get_reactor(socket_watcher_ref);
     // dont accept empty buffers
     assert(IOBuffer_data_len(conn_ref->write_buffer_ref) != 0);
 
@@ -108,8 +108,8 @@ void write_machine(RtorStreamRef socket_watcher_ref, uint64_t event)
                 // @TODO fix the next two lines
 //                WIoFd_change_watch(sw, conn_ref->write_completion_handler, arg, 0);
                 LOG_FMT("write buffer complete %d", blen);
-                rtor_stream_disarm_write(socket_watcher_ref);
-                rtor_reactor_post(reactor_ref, &write_complete_post_func, arg);
+                runloop_stream_disarm_write(socket_watcher_ref);
+                runloop_post(reactor_ref, &write_complete_post_func, arg);
                 break;
             }
         } else {
@@ -121,8 +121,8 @@ void write_machine(RtorStreamRef socket_watcher_ref, uint64_t event)
                 conn_ref->write_rc = XRW_ERROR;
                 // @TODO fix the next two lines
 //                WIoFd_change_watch(sw, conn_ref->write_completion_handler, arg, 0);
-                rtor_stream_disarm_write(socket_watcher_ref);
-                rtor_reactor_post(reactor_ref, &write_complete_post_func, arg);
+                runloop_stream_disarm_write(socket_watcher_ref);
+                runloop_post(reactor_ref, &write_complete_post_func, arg);
                 break;
             }
         }
@@ -134,5 +134,5 @@ void TcpConn_write_2(TcpConnRef this, IOBufferRef buf, SocketEventHandler comple
     this->write_buffer_ref = buf;
 //    this->write_completion_handler = completion_handler;
     RtorStreamRef sw = this->sock_watcher_ref;
-    rtor_stream_arm_write(sw, &write_machine, (void *) this);
+    runloop_stream_arm_write(sw, &write_machine, (void *) this);
 }

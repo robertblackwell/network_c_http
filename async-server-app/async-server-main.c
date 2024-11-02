@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
     AsyncServerRef server_ref = AsyncServer_new(port_number, "127.0.0.1", &process_request);
     AsyncServer_start(server_ref);
     async_socket_listen(server_ref->listening_socket_fd);
-    rtor_reactor_run(server_ref->reactor_ref, -1 /*infinite */);
+    runloop_run(server_ref->reactor_ref, -1 /*infinite */);
     AsyncServer_dispose(&server_ref);
 #else
     if (nbr_threads > MAX_NBR_THREADS) {
@@ -112,7 +112,7 @@ void* thread_function(void* arg)
     g_sref = ctx->server_ptr;
     AsyncServer_start(ctx->server_ptr);
     async_socket_listen(ctx->server_ptr->listening_socket_fd);
-    rtor_reactor_run(ctx->server_ptr->reactor_ref, -1 /* infinite*/);
+    runloop_run(ctx->server_ptr->reactor_ref, -1 /* infinite*/);
     AsyncServer_dispose(&ctx->server_ptr);
 }
 void sig_handler(int signo)

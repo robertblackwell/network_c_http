@@ -24,7 +24,7 @@ void interthread_post_cb(WQueueRef qw, void* ctx, uint64_t event)
 {
     ReactorRef rx = WQueue_get_reactor(qw);
     printf("interthread_post_cb ctx: %p  reactor: %p\n", ctx, WQueue_get_reactor(qw));
-    rtor_post(rx, &post_cb, NULL);
+    runloop_post(rx, &post_cb, NULL);
 }
 
 typedef struct QReader_s {
@@ -96,15 +96,15 @@ void* reader_thread_func(void* arg)
 {
 
     QSyncReaderRef q_rdr_ctx = (QSyncReaderRef)arg;
-    ReactorRef rtor_ref = rtor_new();
-    RtorTimerRef tw_2 = rtor_timer_new(rtor_ref, &timer_callback, NULL, 50000, true);
+    ReactorRef runloop_ref = runloop_new();
+    RtorTimerRef tw_2 = runloop_timer_new(runloop_ref, &timer_callback, NULL, 50000, true);
 
-    global_reactor_ref = rtor_ref;
+    global_reactor_ref = runloop_ref;
 
     WQueueRef qw = q_rdr_ctx->queue_watcher_ref;
     uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
     WQueue_register(qw,  &QReaderHandler, arg, interest);
-    rtor_run(rtor_ref, -1);
+    runloop_run(runloop_ref, -1);
     printf("reader complete \n");
 }
 void postable_function(void* arg)
@@ -121,13 +121,13 @@ void* writer_thread_func(void* arg)
         sleep(2);
         printf("writer %ld  rx: %p\n", i, rx);
         Evfdq_add(wrtqueue, (void*)i);
-//        rtor_interthread_post(wrtr->reactor_ref, postable_function, (void*)i);
+//        runloop_interthread_post(wrtr->reactor_ref, postable_function, (void*)i);
     }
 }
 
 int test_itq()
 {
-    ReactorRef react1 = rtor_new();
+    ReactorRef react1 = runloop_new();
     EvfdQueueRef q = Evfdq_new();
     QSyncReaderRef rdr = QReader_new(react1,  q, 10);
     QSyncWriterRef wrtr = QWriter_new(react1, q, 10);

@@ -23,7 +23,7 @@ TcpConnRef TcpConn_new(int fd, RtorStreamRef socket_w, AsyncServerRef server_ref
 void TcpConn_free(TcpConnRef this)
 {
     TCP_CONN_CHECK_TAG(this)
-    rtor_stream_free(this->sock_watcher_ref);
+    runloop_stream_free(this->sock_watcher_ref);
     free(this);
 }
 #ifdef YES_READ
@@ -100,7 +100,7 @@ static void read_some_handler(RtorWatcherRef wp, void* arg, uint64_t event)
                 conn_ref->read_status = errno_saved;
             }
             WIoFd_change_watch(sw, &read_some_post_cb, arg, 0);
-            rtor_post(reactor_ref, wp, &read_some_post_cb, arg);
+            runloop_post(reactor_ref, wp, &read_some_post_cb, arg);
             return;
         } else /* (bytes_read > 0) */{
             IOBuffer_commit(iobuf, bytes_read);
@@ -131,7 +131,7 @@ static void write_event_handler(RtorWatcherRef wp, void* arg, uint64_t event)
     }
     assert(conn_ref->handler_ref != NULL);
     WIoFd_change_watch(sw, &write_event_handler, arg, 0);
-    rtor_post(reactor_ref, wp, conn_ref->write_cb, conn_ref);
+    runloop_post(reactor_ref, wp, conn_ref->write_cb, conn_ref);
 
 }
 void TcpConn_write(TcpConnRef this, IOBufferRef iobuf, TcpConnWriteCallback cb, void* arg)
@@ -259,7 +259,7 @@ static void read_msg_handler(RtorWatcherRef wp, void *arg, uint64_t event)
             conn_ref->read_status = XRD_PERROR;
         }
         WIoFd_change_watch(sw, &read_msg_handler, arg, 0);
-        rtor_post(reactor_ref, wp, &read_msg_cb_wrapper, arg);
+        runloop_post(reactor_ref, wp, &read_msg_cb_wrapper, arg);
         return;
     }
 }
@@ -391,7 +391,7 @@ void write_state_machine(RtorWatcherRef wp, void* arg, uint64_t event)
             } else {
                 conn_ref->write_rc = XRW_ERROR;
                 WIoFd_change_watch(sw, conn_ref->write_completion_handler, arg, 0);
-                rtor_post(reactor_ref, wp, conn_ref->write_completion_handler, arg);
+                runloop_post(reactor_ref, wp, conn_ref->write_completion_handler, arg);
                 break;
             }
         }

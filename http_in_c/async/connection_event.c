@@ -1,14 +1,14 @@
 
 #define RBL_LOG_ENABLE
 #include <http_in_c/async/connection_internal.h>
-//static void event_handler(RtorStreamRef stream_ref, uint64_t event);
+//static void event_handler(RunloopStreamRef stream_ref, uint64_t event);
 static void write_epollout(AsyncConnectionRef connection_ref);
 static void read_epollin(AsyncConnectionRef connection_ref);
 
 /////////////////////////////////////////////////////////////////////////////////////
-// event handler called from the Reactor on receiving an epoll event
+// event handler called from the Runloop on receiving an epoll event
 ///////////////////////////////////////////////////////////////////////////////////////
-void async_event_handler(RtorStreamRef stream_ref, uint64_t event)
+void async_event_handler(RunloopStreamRef stream_ref, uint64_t event)
 {
     RBL_LOG_FMT("event_handler %lx", event);
     AsyncConnectionRef connection_ref = stream_ref->context;

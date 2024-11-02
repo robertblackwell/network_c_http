@@ -18,7 +18,7 @@
 ==1719414==    by 0x11077D: DemoParser_consume (demo_parser.c:166)
 ==1719414==    by 0x10EEB9: reader (demo_connection.c:201)
 ==1719414==    by 0x10ED5B: postable_reader (demo_connection.c:174)
-==1719414==    by 0x10CDB3: rtor_reactor_run (reactor.c:244)
+==1719414==    by 0x10CDB3: runloop_run (reactor.c:244)
 ==1719414==    by 0x10AAE0: DemoServer_listen (demo_server.c:73)
 ==1719414==    by 0x10A754: main (demo_main.c:31)
 ==1719414==
@@ -30,7 +30,7 @@
 ==1719414==    by 0x11077D: DemoParser_consume (demo_parser.c:166)
 ==1719414==    by 0x10EEB9: reader (demo_connection.c:201)
 ==1719414==    by 0x10ED5B: postable_reader (demo_connection.c:174)
-==1719414==    by 0x10CDB3: rtor_reactor_run (reactor.c:244)
+==1719414==    by 0x10CDB3: runloop_run (reactor.c:244)
 ==1719414==    by 0x10AAE0: DemoServer_listen (demo_server.c:73)
 ==1719414==    by 0x10A754: main (demo_main.c:31)
 ==1719414==

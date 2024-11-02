@@ -16,21 +16,21 @@
  * @param fd        int
  * @param event     uint64_t
  */
-static void handler(RtorWatcherRef watcher, uint64_t event)
+static void handler(RunloopWatcherRef watcher, uint64_t event)
 {
-    RtorListenerRef listener_ref = (RtorListenerRef)watcher;
+    RunloopListenerRef listener_ref = (RunloopListenerRef)watcher;
     if(listener_ref->listen_evhandler) {
         listener_ref->listen_evhandler(listener_ref,  event);
     }
 }
-static void anonymous_free(RtorWatcherRef p)
+static void anonymous_free(RunloopWatcherRef p)
 {
-    rtor_listener_free((RtorListenerRef) p);
+    runloop_listener_free((RunloopListenerRef) p);
 }
-void rtor_listener_init(RtorListenerRef athis, ReactorRef runloop, int fd)
+void runloop_listener_init(RunloopListenerRef athis, RunloopRef runloop, int fd)
 {
     RBL_SET_TAG(WListenerFd_TAG, athis);
-    athis->type = XR_WATCHER_LISTENER;
+    athis->type = RUNLOOP_WATCHER_LISTENER;
     athis->fd = fd;
     athis->runloop = runloop;
     athis->free = &anonymous_free;
@@ -39,21 +39,21 @@ void rtor_listener_init(RtorListenerRef athis, ReactorRef runloop, int fd)
     athis->listen_arg = NULL;
     athis->listen_evhandler = NULL;
 }
-RtorListenerRef rtor_listener_new(ReactorRef runloop, int fd)
+RunloopListenerRef runloop_listener_new(RunloopRef runloop, int fd)
 {
-    RtorListenerRef this = malloc(sizeof(RtorListener));
-    rtor_listener_init(this, runloop, fd);
+    RunloopListenerRef this = malloc(sizeof(RunloopListener));
+    runloop_listener_init(this, runloop, fd);
     return this;
 }
-void rtor_listener_free(RtorListenerRef athis)
+void runloop_listener_free(RunloopListenerRef athis)
 {
-    rtor_listener_verify(athis);
+    runloop_listener_verify(athis);
     close(athis->fd);
     free((void*)athis);
 }
-void rtor_listener_register(RtorListenerRef athis, ListenerEventHandler event_handler, void* arg)
+void runloop_listener_register(RunloopListenerRef athis, ListenerEventHandler event_handler, void* arg)
 {
-    rtor_listener_verify(athis);
+    runloop_listener_verify(athis);
     athis->handler = &handler;
     athis->context = athis;
     if( event_handler != NULL) {
@@ -67,19 +67,19 @@ void rtor_listener_register(RtorListenerRef athis, ListenerEventHandler event_ha
      * NOTE the EPOLLEXCLUSIVE - prevents the thundering herd problem. Defaults to level triggered
      */
     uint32_t interest =  EPOLLIN | EPOLLEXCLUSIVE;
-    int res = rtor_reactor_register(athis->runloop, athis->fd, interest, (RtorWatcherRef) (athis));
+    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherRef) (athis));
 
     if(res != 0) {
         printf("register status : %d errno: %d \n", res, errno);
     }
     assert(res == 0);
 }
-void rtor_listener_deregister(RtorListenerRef athis)
+void runloop_listener_deregister(RunloopListenerRef athis)
 {
     LISTNER_CHECK_TAG(athis)
-    rtor_reactor_deregister(athis->runloop, athis->fd);
+    runloop_deregister(athis->runloop, athis->fd);
 }
-void rtor_listener_arm(RtorListenerRef athis, ListenerEventHandler fd_event_handler, void* arg)
+void runloop_listener_arm(RunloopListenerRef athis, ListenerEventHandler fd_event_handler, void* arg)
 {
     LISTNER_CHECK_TAG(athis)
     if(fd_event_handler != NULL) {
@@ -90,28 +90,28 @@ void rtor_listener_arm(RtorListenerRef athis, ListenerEventHandler fd_event_hand
     }
     uint32_t interest = EPOLLIN; // | EPOLLEXCLUSIVE ;
 
-    int res = rtor_reactor_reregister(athis->runloop, athis->fd, interest, (RtorWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherRef) athis);
     if(res != 0) {
         printf("arm status : %d errno: %d \n", res, errno);
     }
     assert(res == 0);
 }
-void WListenerFd_disarm(RtorListenerRef athis)
+void WListenerFd_disarm(RunloopListenerRef athis)
 {
     LISTNER_CHECK_TAG(athis)
-    int res = rtor_reactor_reregister(athis->runloop, athis->fd, 0L, (RtorWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, 0L, (RunloopWatcherRef) athis);
     assert(res == 0);
 }
-ReactorRef rtor_listener_get_reactor(RtorListenerRef athis)
+RunloopRef runloop_listener_get_reactor(RunloopListenerRef athis)
 {
     return athis->runloop;
 }
-int rtor_listener_get_fd(RtorListenerRef this)
+int runloop_listener_get_fd(RunloopListenerRef this)
 {
     return this->fd;
 }
 
-void rtor_listener_verify(RtorListenerRef r)
+void runloop_listener_verify(RunloopListenerRef r)
 {
     LISTNER_CHECK_TAG(r)
 

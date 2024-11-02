@@ -39,7 +39,7 @@
 #define FDEV_SET_END_TAG(p) RBL_SET_END_TAG(WEventFd_TAG, p)
 
 /**
- * RtorStream
+ * RunloopStream
  */
 #define SOCKW_DECLARE_TAG RBL_DECLARE_TAG(WIoFd_TAG)
 #define SOCKW_CHECK_TAG(p) RBL_CHECK_TAG(WIoFd_TAG, p)
@@ -61,7 +61,7 @@
 #define LISTNER_SET_END_TAG(p) RBL_SET_END_TAG(WListenerFd_TAG, p)
 
 /**
- * RtorWQueue
+ * RunloopQueueWatcher
  */
 #define WQUEUE_DECLARE_TAG RBL_DECLARE_TAG(WQueue_TAG)
 #define WQUEUE_CHECK_TAG(p) RBL_CHECK_TAG(WQueue_TAG, p)
@@ -83,7 +83,7 @@
 #define ITQUEUE_SET_END_TAG(p) RBL_SET_END_TAG(ITQueue_TAG, p)
 
 /**
- * RtorTimer
+ * RunloopTimer
  */
 #define WTIMER_DECLARE_TAG RBL_DECLARE_TAG(WTimerFd_TAG)
 #define WTIMER_CHECK_TAG(p) RBL_CHECK_TAG(WTimerFd_TAG, p)

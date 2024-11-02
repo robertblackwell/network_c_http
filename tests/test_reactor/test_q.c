@@ -14,18 +14,18 @@
 #include <http_in_c/runloop/rl_internal.h>
 
 typedef struct QReader_s {
-    EvfdQueueRef queue;
+    EventfdQueueRef queue;
     int count;
     int expected_count;
 } QReader, *QSyncReaderRef;
 
 
-QSyncReaderRef QReader_new(EvfdQueueRef queue, int expected_count)
+QSyncReaderRef QReader_new(EventfdQueueRef queue, int expected_count)
 {
     QSyncReaderRef this = malloc(sizeof(QReader));
     this->queue = queue;
     this->expected_count = expected_count;
-    this->count = 0;
+    this->count = 1;
 }
 void QReader_dispose(QSyncReaderRef this)
 {
@@ -33,11 +33,15 @@ void QReader_dispose(QSyncReaderRef this)
 }
 
 typedef struct QWriter_s {
-    EvfdQueueRef queue;
+    EventfdQueueRef queue;
     int count_max;
 } QWriter, *QSyncWriterRef;
 
-QSyncWriterRef QWriter_new(EvfdQueueRef queue, int max)
+typedef struct WriterArg {
+    int count;
+} WriterArg, *WriterArgRef;
+
+QSyncWriterRef QWriter_new(EventfdQueueRef queue, int max)
 {
     QSyncWriterRef this = malloc(sizeof(QReader));
     this->queue = queue;
@@ -49,21 +53,23 @@ void QWriter_dispose(QSyncReaderRef this)
     free(this);
 }
 
-void QReaderHandler(RtorWQueueRef qw, uint64_t event)
+void QReaderHandler(RunloopQueueWatcherRef qw, uint64_t event)
 {
     void* ctx = qw->queue_event_handler_arg;
     QSyncReaderRef rdr = (QSyncReaderRef)ctx;
-
-    EvfdQueueRef queue = rdr->queue;
-    Functor queue_data = Evfdq_remove(queue);
+    RunloopRef rl = runloop_queue_watcher_get_reactor(qw);
+    EventfdQueueRef queue = rdr->queue;
+    Functor queue_data = runloop_eventfd_queue_remove(queue);
+    PostableFunction pf = queue_data.f;
+    void* postable_arg = queue_data.arg;
+    runloop_post(rl, pf, postable_arg);
 
     printf("Q Handler received %p count: %d\n", &queue_data, rdr->count);
     bool x = (long)queue_data.arg == (long)rdr->count;
     assert(x);
-
     rdr->count++;
     if (rdr->count >= rdr->expected_count) {
-        rtor_wqueue_deregister(qw);
+        runloop_queue_watcher_deregister(qw);
     }
 
 }
@@ -71,25 +77,60 @@ void QReaderHandler(RtorWQueueRef qw, uint64_t event)
 void* reader_thread_func(void* arg)
 {
     QSyncReaderRef q_rdr_ctx = (QSyncReaderRef)arg;
-    ReactorRef rtor_ref = rtor_reactor_new();
-    RtorWQueueRef qw = rtor_wqueue_new(rtor_ref, q_rdr_ctx->queue);
+    RunloopRef runloop_ref = runloop_new();
+    pid_t tid = gettid();
+    RunloopQueueWatcherRef qw = runloop_queue_watcher_new(runloop_ref, q_rdr_ctx->queue);
 //    uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
-    rtor_wqueue_register(qw, QReaderHandler, arg);
-    rtor_reactor_run(rtor_ref, -1);
+    runloop_queue_watcher_register(qw, QReaderHandler, arg);
+    printf("reader thread rl: %p tid: %ld\n", runloop_ref, (long)tid);
+    runloop_run(runloop_ref, -1);
+    return NULL;
+}
+/**
+ *  The writer thread wants this function run on the reader thread
+ */
+void writer_post_function(RunloopRef rl, void* arg)
+{
+    pthread_t mytid = pthread_self();
+    pid_t tid = gettid();
+    printf("writer post function thread: %ld  rl: %p arg: %p\n", (long)tid, rl, arg);
 }
 void* writer_thread_func(void* arg)
 {
     QSyncWriterRef wrtr = (QSyncWriterRef)arg;
-    for(long i = 0; i < 10; i++) {
+    pid_t tid = gettid();
+    printf("writer thread tid: %ld \n", (long)tid);
+    for(long i = 1; i <= 10; i++) {
         usleep(500000);
-        Functor func = {.f = (void*)i, .arg = (void*) i};
-        Evfdq_add(wrtr->queue, func);
+        Functor func = {.f = (void*)&writer_post_function, .arg = (void*) i};
+        runloop_eventfd_queue_add(wrtr->queue, func);
     }
+    return NULL;
 }
-
+/**
+ * Test EventFdQueue using a reader and write thread.
+ * Writer thread loops a number of times writing data to an instance of EventFdQueue
+ * Reader thread has a runloop and a RunloopQueueWatcher waiting for data on the
+ * same EventFdQueue.
+ * The queue watcher counts the number of times it receives data on the queue
+ * and terminates when it has the expected number.
+ *
+ * IN addition the data from the queue is a postable function and an arg value.
+ *
+ * The queue watcher function posts that function to the readers runloop.
+ * TODO - need a way of counting the number of calls to the writer_post_function.
+ * TODO current can only verify writer_post_function is called by debugging
+ *
+ * test passes if both reader and write counted the same number of time data
+ * was transmitted via the queue.
+ *
+ * Success demonstrate how another thread can post a function to a runloop
+ *
+ * @return
+ */
 int test_q()
 {
-    EvfdQueueRef queue = Evfdq_new();
+    EventfdQueueRef queue = runloop_eventfd_queue_new();
     QSyncReaderRef rdr = QReader_new(queue, 10);
     QSyncWriterRef wrtr = QWriter_new(queue, 10);
 

@@ -74,8 +74,8 @@ struct AsyncServer_s {
     const char*             host;
     int                     port;
     int                     listening_socket_fd;
-    ReactorRef              reactor_ref;
-    RtorListenerRef         listening_watcher_ref;
+    RunloopRef              reactor_ref;
+    RunloopListenerRef         listening_watcher_ref;
     /**
      * List of handler servicing client connections
      */
@@ -106,10 +106,10 @@ void AsyncServer_terminate(AsyncServerRef this);
 =============================================================================*/
 typedef struct AsyncConnection_s {
     RBL_DECLARE_TAG;
-    ReactorRef      reactor_ref;
+    RunloopRef      reactor_ref;
     AsyncHandlerRef handler_ref;
     int             socket;
-    RtorStreamRef   socket_stream_ref;
+    RunloopStreamRef   socket_stream_ref;
     IOBufferRef     active_input_buffer_ref;
     IOBufferRef     active_output_buffer_ref;
     http_parser_t*  http_parser_ptr;
@@ -127,13 +127,13 @@ typedef struct AsyncConnection_s {
 
 AsyncConnectionRef async_connection_new(
         int                 socket,
-        ReactorRef          reactor_ref,
+        RunloopRef          reactor_ref,
         AsyncHandlerRef     handler_ref
 );
 void async_connection_init(
         AsyncConnectionRef this,
         int                 socket,
-        ReactorRef          reactor_ref,
+        RunloopRef          reactor_ref,
         AsyncHandlerRef      handler_ref
 );
 
@@ -172,18 +172,18 @@ typedef struct AsyncHandler_s {
 
 AsyncHandlerRef async_handler_new(
         int socket,
-        ReactorRef reactor_ref,
+        RunloopRef reactor_ref,
         AsyncServerRef sref
 );
 void async_handler_init(
         AsyncHandlerRef this, int socket,
-        ReactorRef reactor_ref,
+        RunloopRef reactor_ref,
         AsyncServerRef sref
 );
 void async_handler_handle_response(AsyncHandlerRef href, MessageRef request_ptr, MessageRef response_ptr);
 void async_handler_free(AsyncHandlerRef this);
 void async_handler_anonymous_dispose(void** p);
-inline ReactorRef async_handler_reactor_ref(AsyncHandlerRef handler_ref)
+inline RunloopRef async_handler_reactor_ref(AsyncHandlerRef handler_ref)
 {
     return handler_ref->async_connection_ref->reactor_ref;
 }

@@ -10,7 +10,7 @@ static void write_complete(AsyncConnectionRef cref);
 static void write_incomplete(AsyncConnectionRef cref);
 
 /**
- * Utility function that wraps all rtor_reactor_post() calls so this module can
+ * Utility function that wraps all runloop_post() calls so this module can
  * keep track of outstanding pending function calls
  */
 
@@ -19,9 +19,9 @@ static void write_incomplete(AsyncConnectionRef cref);
 ////////////////////////////////////////////////////////////////////////////////////
 void post_postable_writer(AsyncConnectionRef cref)
 {
-    rtor_reactor_post(cref->reactor_ref, &async_postable_writer, cref);
+    runloop_post(cref->reactor_ref, &async_postable_writer, cref);
 }
-void async_postable_writer(ReactorRef reactor_ref, void* arg)
+void async_postable_writer(RunloopRef reactor_ref, void* arg)
 {
     AsyncConnectionRef connection_ref = arg;
     RBL_CHECK_TAG(AsyncConnection_TAG, connection_ref)
@@ -70,15 +70,15 @@ static void write_incomplete(AsyncConnectionRef cref)
     post_postable_writer(cref);
 }
 //////////////////////////////////////////////////////////////////////////
-void postable_write_complete(ReactorRef reactor_ref, void* arg);
+void postable_write_complete(RunloopRef reactor_ref, void* arg);
 static void write_complete(AsyncConnectionRef cref)
 {
     AsyncHandlerRef href = cref->handler_ref;
     RBL_CHECK_TAG(AsyncConnection_TAG, cref)
     RBL_CHECK_TAG(AsyncHandler_TAG, href);
-    rtor_reactor_post(cref->reactor_ref, &postable_write_complete, cref);
+    runloop_post(cref->reactor_ref, &postable_write_complete, cref);
 }
-void postable_write_complete(ReactorRef reactor_ref, void* arg)
+void postable_write_complete(RunloopRef reactor_ref, void* arg)
 {
     AsyncConnectionRef connection_ref = arg;
     AsyncHandlerRef href = connection_ref->handler_ref;
@@ -87,7 +87,7 @@ void postable_write_complete(ReactorRef reactor_ref, void* arg)
     href->handle_write_complete(href);
 }
 ////////////////////////////////////////////////////////////
-static void postable_close_connection(ReactorRef reactor_ref, void* arg);
+static void postable_close_connection(RunloopRef reactor_ref, void* arg);
 static void write_error(AsyncConnectionRef cref, char* msg)
 {
     RBL_CHECK_TAG(AsyncConnection_TAG, cref)
@@ -96,9 +96,9 @@ static void write_error(AsyncConnectionRef cref, char* msg)
     RBL_LOG_FMT("Write_error got an error this is the message: %s  fd: %d", msg, cref->socket_stream_ref->fd);
     cref->read_state = READ_STATE_STOP;
     cref->write_state = WRITE_STATE_STOP;
-    rtor_reactor_post(cref->reactor_ref, &postable_close_connection, href);
+    runloop_post(cref->reactor_ref, &postable_close_connection, href);
 }
-static void postable_close_connection(ReactorRef reactor_ref, void* arg)
+static void postable_close_connection(RunloopRef reactor_ref, void* arg)
 {
     AsyncHandlerRef href = arg;
     RBL_CHECK_TAG(AsyncHandler_TAG, href);

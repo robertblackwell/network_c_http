@@ -27,9 +27,9 @@
 //    free(this);
 //}
 //
-//void Functor_call(FunctorRef this, ReactorRef rtor_ref)
+//void Functor_call(FunctorRef this, RunloopRef runloop_ref)
 //{
-//    this->f(rtor_ref, this->arg);
+//    this->f(runloop_ref, this->arg);
 //}
 ///**
 // * The runlist - is a list of Functor - these are functions that are ready to run.

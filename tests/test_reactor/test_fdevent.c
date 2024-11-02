@@ -23,9 +23,9 @@ typedef struct TestCtx_s  {
     int                 counter;
     int                 max_count;
     struct timespec     start_time;
-    ReactorRef          reactor;
-    RtorTimerRef         timer;
-    RtorEventfdRef         fdevent;
+    RunloopRef          reactor;
+    RunloopTimerRef         timer;
+    RunloopEventfdRef         fdevent;
     int                 fdevent_counter;
 } TestCtx;
 
@@ -37,8 +37,8 @@ TestCtx* TestCtx_new(int counter_init, int counter_max);
 
 int test_fdevent_multiple();
 int test_fdevent_1();
-static void callback_1(RtorTimerRef watcher, XrTimerEvent event);
-void fdevent_handler(RtorEventfdRef fdev_ref, uint64_t ev_mask);
+static void callback_1(RunloopTimerRef watcher, RunloopTimerEvent event);
+void fdevent_handler(RunloopEventfdRef fdev_ref, uint64_t ev_mask);
 
 
 int main()
@@ -58,27 +58,27 @@ int test_fdevent_1()
 {
     TestCtx* test_ctx_p = TestCtx_new(0, NBR_TIMES_FIRE);
 
-    ReactorRef rtor_ref = rtor_reactor_new();
-    test_ctx_p->reactor = rtor_ref;
-    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref);
-    rtor_timer_register(tw_1, &callback_1, (void *) test_ctx_p, 1000, true);
-    rtor_timer_disarm(tw_1);
-    RtorEventfdRef fdev = rtor_eventfd_new(rtor_ref);
+    RunloopRef runloop_ref = runloop_new();
+    test_ctx_p->reactor = runloop_ref;
+    RunloopTimerRef tw_1 = runloop_timer_new(runloop_ref);
+    runloop_timer_register(tw_1, &callback_1, (void *) test_ctx_p, 1000, true);
+    runloop_timer_disarm(tw_1);
+    RunloopEventfdRef fdev = runloop_eventfd_new(runloop_ref);
 
     test_ctx_p->fdevent = fdev;
     test_ctx_p->timer = tw_1;
 
 
-    rtor_eventfd_register(fdev);
-    rtor_eventfd_arm(fdev, &fdevent_handler, test_ctx_p);
-    rtor_timer_rearm(tw_1);
-    rtor_reactor_run(rtor_ref, 10000);
+    runloop_eventfd_register(fdev);
+    runloop_eventfd_arm(fdev, &fdevent_handler, test_ctx_p);
+    runloop_timer_rearm(tw_1);
+    runloop_run(runloop_ref, 10000);
 
     // assert counter was increment correct number of times
     UT_EQUAL_INT(test_ctx_p->counter, test_ctx_p->max_count);
     UT_EQUAL_INT(test_ctx_p->fdevent_counter, test_ctx_p->max_count);
     free(test_ctx_p);
-    rtor_reactor_free(rtor_ref);
+    runloop_free(runloop_ref);
     return 0;
 }
 
@@ -87,45 +87,45 @@ int test_fdevent_multiple()
     TestCtx* test_ctx_p_1 = TestCtx_new(0, 5);
     TestCtx* test_ctx_p_2 = TestCtx_new(0, 6);
 
-    ReactorRef rtor_ref = rtor_reactor_new();
+    RunloopRef runloop_ref = runloop_new();
 
-    RtorTimerRef tw_1 = rtor_timer_new(rtor_ref);
-    rtor_timer_register(tw_1, &callback_1, test_ctx_p_1, 100, true);
+    RunloopTimerRef tw_1 = runloop_timer_new(runloop_ref);
+    runloop_timer_register(tw_1, &callback_1, test_ctx_p_1, 100, true);
 
-    RtorTimerRef tw_2 = rtor_timer_new(rtor_ref);
-    rtor_timer_register(tw_2, &callback_1, test_ctx_p_2, 100, true);
+    RunloopTimerRef tw_2 = runloop_timer_new(runloop_ref);
+    runloop_timer_register(tw_2, &callback_1, test_ctx_p_2, 100, true);
 
-    rtor_reactor_run(rtor_ref, 10000);
+    runloop_run(runloop_ref, 10000);
     UT_EQUAL_INT(test_ctx_p_1->counter, test_ctx_p_1->max_count);
     UT_EQUAL_INT(test_ctx_p_2->counter, test_ctx_p_2->max_count);
     free(test_ctx_p_1);
     free(test_ctx_p_2);
-    rtor_reactor_free(rtor_ref);
+    runloop_free(runloop_ref);
     return 0;
 }
-static void callback_1(RtorTimerRef watcher, XrTimerEvent event)
+static void callback_1(RunloopTimerRef watcher, RunloopTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
     void* ctx = watcher->timer_handler_arg;
     TestCtx* ctx_p = (TestCtx*) ctx;
-    RtorEventfdRef fdev = ctx_p->fdevent;
+    RunloopEventfdRef fdev = ctx_p->fdevent;
     RBL_LOG_FMT("callback1_counter %d counter: %d event is : %lx  ", ctx_p->callback1_counter, ctx_p->counter, event);
     if(ctx_p->counter >= ctx_p->max_count) {
         RBL_LOG_MSG(" clear timer");
-        rtor_reactor_close(ctx_p->reactor);
-//        rtor_timer_deregister(watcher);
-//        rtor_eventfd_deregister(fdev);
+        runloop_close(ctx_p->reactor);
+//        runloop_timer_deregister(watcher);
+//        runloop_eventfd_deregister(fdev);
     } else {
-        rtor_eventfd_fire(fdev);
+        runloop_eventfd_fire(fdev);
         ctx_p->counter++;
-        rtor_eventfd_fire(fdev);
+        runloop_eventfd_fire(fdev);
         ctx_p->counter++;
 
     }
     ctx_p->callback1_counter++;
 }
-void fdevent_handler(RtorEventfdRef fdev_ref, uint64_t ev_mask)
+void fdevent_handler(RunloopEventfdRef fdev_ref, uint64_t ev_mask)
 {
     void* arg = fdev_ref->fd_event_handler_arg;
     TestCtx* t = (TestCtx*)arg;

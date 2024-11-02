@@ -13,15 +13,15 @@
 #include <rbl/logger.h>
 #include <http_in_c/common/list.h>
 
-typedef EvfdQueue* EvfQueuePtr;
+typedef EventfdQueue* EvfQueuePtr;
 
 static void dealloc(void** p)
 {
 }
-static void mk_fds(EvfdQueueRef athis)
+static void mk_fds(EventfdQueueRef athis)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
-#ifdef RTOR_EVENTFD_ENABLE
+#ifdef runloop_eventfd_ENABLE
     int fd = eventfd(0, O_NONBLOCK | O_CLOEXEC);
     me->readfd = fd;
     me->writefd = fd;
@@ -38,29 +38,29 @@ static void mk_fds(EvfdQueueRef athis)
     assert(errno == EAGAIN);
 
 }
-void Evfdq_init(EvfdQueueRef athis)
+void Evfdq_init(EventfdQueueRef athis)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
-    me->list = functor_list_new(RTOR_MAX_FDS);
+    me->list = functor_list_new(runloop_MAX_FDS);
     pthread_mutex_init(&(me->queue_mutex), NULL);
     mk_fds(me);
 }
-EvfdQueueRef Evfdq_new()
+EventfdQueueRef runloop_eventfd_queue_new()
 {
-    EvfdQueueRef tmp = malloc(sizeof(EvfdQueue));
+    EventfdQueueRef tmp = malloc(sizeof(EventfdQueue));
     Evfdq_init(tmp);
     return tmp;
 }
-void Evfdq_free(EvfdQueueRef this)
+void runloop_eventfd_queue_free(EventfdQueueRef athis)
 {
-    free(this);
+    free(athis);
 }
-int Evfdq_readfd(EvfdQueueRef athis)
+int runloop_eventfd_queue_readfd(EventfdQueueRef athis)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
     return me->readfd;
 }
-void Evfdq_add(EvfdQueueRef athis, Functor item)
+void runloop_eventfd_queue_add(EventfdQueueRef athis, Functor item)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
     pthread_mutex_lock(&(me->queue_mutex));
@@ -70,7 +70,7 @@ void Evfdq_add(EvfdQueueRef athis, Functor item)
     pthread_mutex_unlock(&(me->queue_mutex));
 
 }
-Functor Evfdq_remove(EvfdQueueRef athis)
+Functor runloop_eventfd_queue_remove(EventfdQueueRef athis)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
     pthread_mutex_lock(&(me->queue_mutex));

@@ -90,10 +90,10 @@ static void handle_request(void* href, DemoMessageRef msgref, int error_code)
         response = process_request(handler_ref, msgref);
         List_add_back(handler_ref->output_list, response);
         if (List_size(handler_ref->output_list) == 1) {
-            rtor_reactor_post(handler_ref->reactor_ref, postable_write_start, href);
+            runloop_post(handler_ref->reactor_ref, postable_write_start, href);
         }
         demo_message_free(msgref);
-        rtor_reactor_post(handler_ref->reactor_ref, handler_postable_read_start, href);
+        runloop_post(handler_ref->reactor_ref, handler_postable_read_start, href);
     }
 }
 #if 0
@@ -132,7 +132,7 @@ static void on_write_complete_cb(void* href, int status)
     printf("on_write_complete_cb fd:%d  write_state:%d\n", handler_ref->demo_connection_ref->socket_stream_ref->fd, handler_ref->demo_connection_ref->write_state);
     demo_message_dispose(&(handler_ref->active_response));
     if(List_size(handler_ref->output_list) == 1) {
-        rtor_reactor_post(handler_ref->reactor_ref, postable_write_start, href);
+        runloop_post(handler_ref->reactor_ref, postable_write_start, href);
     }
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////

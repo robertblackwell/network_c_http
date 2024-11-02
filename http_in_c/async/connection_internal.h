@@ -98,18 +98,18 @@
 #define WRITE_STATE_STOP     24
 
 
-void async_event_handler(RtorStreamRef stream_ref, uint64_t event);
+void async_event_handler(RunloopStreamRef stream_ref, uint64_t event);
 
-void async_post_to_reactor(AsyncConnectionRef connection_ref, void(*postable_function)(ReactorRef, void*));
+void async_post_to_reactor(AsyncConnectionRef connection_ref, void(*postable_function)(RunloopRef, void*));
 
 void async_read_start(AsyncConnectionRef connection_ref);
 void reader(AsyncConnectionRef cref);
 llhttp_errno_t async_on_read_message_complete(http_parser_t* parser_ptr, MessageRef msg);
 
-void async_postable_writer(ReactorRef reactor_ref, void* arg);
-void async_postable_write_call_cb(ReactorRef reactor_ref, void* arg);
+void async_postable_writer(RunloopRef reactor_ref, void* arg);
+void async_postable_write_call_cb(RunloopRef reactor_ref, void* arg);
 
-void async_postable_cleanup(ReactorRef reactor, void* cref);
+void async_postable_cleanup(RunloopRef reactor, void* cref);
 const char* async_read_state_str(int state);
 const char* async_write_state_str(int state);
 const char* async_epoll_event_str(int event);

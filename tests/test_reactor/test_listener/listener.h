@@ -33,9 +33,9 @@ typedef int socket_handle_t;
 struct Listener_s {
     socket_handle_t         listening_socket_fd;
     XrHandlerFunction       handler;
-    ReactorRef              reactor_ref;
-    RtorListenerRef         listening_watcher_ref;
-    RtorTimerRef            timer_ref;
+    RunloopRef              reactor_ref;
+    RunloopListenerRef         listening_watcher_ref;
+    RunloopTimerRef            timer_ref;
     TcpConnListRef          conn_list_ref;
     int                     listen_counter;
     int                     accept_count;

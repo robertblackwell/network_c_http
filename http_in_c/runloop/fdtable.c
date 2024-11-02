@@ -10,7 +10,7 @@
 struct FdTable_s {
     RBL_DECLARE_TAG;
     uint64_t        count;
-	RtorWatcher*    entries[RTOR_FDTABLE_MAX];
+	RunloopWatcher*    entries[runloop_FDTABLE_MAX];
     RBL_DECLARE_END_TAG;
 };
 
@@ -21,7 +21,7 @@ void FdTable_init(FdTableRef this)
     RBL_SET_TAG(FdTable_TAG, this);
     RBL_SET_END_TAG(FdTable_TAG, this);
     this->count = 0;
-	for(int i = 0; i < RTOR_FDTABLE_MAX; i++) {
+	for(int i = 0; i < runloop_FDTABLE_MAX; i++) {
 		this->entries[i] = NULL;
 	}
 }
@@ -35,14 +35,14 @@ void FdTable_free(FdTableRef this)
 {
     RBL_CHECK_TAG(FdTable_TAG, this);
     RBL_CHECK_END_TAG(FdTable_TAG, this)
-	for(int i = 0; i < RTOR_FDTABLE_MAX; i++) {
+	for(int i = 0; i < runloop_FDTABLE_MAX; i++) {
 		if (this->entries[i] != NULL) {
 		    FdTable_remove(this, i);
 		}
 	}
 	free((void*)this);
 }
-void FdTable_insert(FdTableRef this, RtorWatcherRef watcher, int fd)
+void FdTable_insert(FdTableRef this, RunloopWatcherRef watcher, int fd)
 {
     RBL_CHECK_TAG(FdTable_TAG, this);
     RBL_CHECK_END_TAG(FdTable_TAG, this)
@@ -58,12 +58,12 @@ void FdTable_remove(FdTableRef athis, int fd)
     RBL_CHECK_TAG(FdTable_TAG, athis);
     RBL_CHECK_END_TAG(FdTable_TAG, athis)
 	assert(athis->entries[fd] != NULL);
-	RtorWatcherRef wr = (athis->entries[fd]);
+	RunloopWatcherRef wr = (athis->entries[fd]);
 //	wr->free(wr);
 	athis->entries[fd] = NULL;
 	athis->count--;
 }
-RtorWatcherRef FdTable_lookup(FdTableRef this, int fd)
+RunloopWatcherRef FdTable_lookup(FdTableRef this, int fd)
 {
     RBL_CHECK_TAG(FdTable_TAG, this);
     RBL_CHECK_END_TAG(FdTable_TAG, this)
@@ -75,7 +75,7 @@ int FdTable_iterator(FdTableRef this)
 {
     RBL_CHECK_TAG(FdTable_TAG, this);
     RBL_CHECK_END_TAG(FdTable_TAG, this)
-    for(int i = 0; i < RTOR_FDTABLE_MAX; i++) {
+    for(int i = 0; i < runloop_FDTABLE_MAX; i++) {
         if (this->entries[i] != NULL) {
             return i;
         }
@@ -86,8 +86,8 @@ int FdTable_next_iterator(FdTableRef this, int iter)
 {
     RBL_CHECK_TAG(FdTable_TAG, this);
     RBL_CHECK_END_TAG(FdTable_TAG, this)
-    assert(iter+1 < RTOR_FDTABLE_MAX);
-    for(int i = iter+1; i < RTOR_FDTABLE_MAX; i++) {
+    assert(iter+1 < runloop_FDTABLE_MAX);
+    for(int i = iter+1; i < runloop_FDTABLE_MAX; i++) {
         if (this->entries[i] != NULL) {
             return i;
         }
