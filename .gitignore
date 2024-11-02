@@ -44,6 +44,7 @@ build/DerivedData
 build/
 cmake-debug-build/
 cmake-build-debug/
+cmake-build-debug-event-trace/
 xcode-build/
 xcode-build
 obj/

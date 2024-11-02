@@ -170,7 +170,7 @@ add_library(${C_HTTP_LIB_NAME}
 		${C_HTTP_LIBRARY_SOURCE_FILES} 
 		${C_HTTP_LIBRARY_HEADER_FILES}
 )
-
+target_compile_definitions(${C_HTTP_LIB_NAME} PUBLIC RBL_TAG_CHECK_ON=1)
 target_include_directories(${C_HTTP_LIB_NAME} 
 	SYSTEM PUBLIC 
 	${C_HTTP_INCLUDE_PATHS}

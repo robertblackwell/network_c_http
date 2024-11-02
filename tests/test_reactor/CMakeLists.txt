@@ -64,7 +64,7 @@ set(TARGET_Q test_q)
 add_executable(${TARGET_Q}
 		test_q.c
 		)
-
+#target_compile_definitions(${TARGET_Q} PUBLIC RBL_TAG_CHECK_ON=1)
 target_include_directories(${TARGET_Q}
 		PUBLIC
 		${TEST_INCLUDE_dirS})

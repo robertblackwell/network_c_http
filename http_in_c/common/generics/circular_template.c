@@ -20,7 +20,7 @@
 #endif
 
 struct PREFIX(_s) {
-    RBL_DECLARE_TAG
+    RBL_DECLARE_TAG;
     int        capacity;
     int        head;
     int        tail_plus;

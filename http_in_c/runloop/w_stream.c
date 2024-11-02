@@ -35,7 +35,6 @@ static void anonymous_free(RunloopWatcherRef p)
 }
 void runloop_stream_init(RunloopStreamRef this, RunloopRef runloop, int fd)
 {
-    RBL_SET_TAG(TYPE, this)
     SOCKW_SET_TAG(this);
     this->fd = fd;
     this->runloop = runloop;
