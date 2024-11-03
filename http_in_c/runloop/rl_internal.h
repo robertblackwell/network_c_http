@@ -154,7 +154,7 @@ struct RunloopWatcher_s {
      * or initialized and must cast the first parameter to their own specific type of watcher
      * inside the handler.
      * 
-     * This handler will be calledd directly from the epoll_wait code inside reactor.c
+     * This handler will be calledd directly from the epoll_wait code inside runloop.c
     */
     void(*handler)(RunloopWatcherRef watcher_ref, uint64_t event);
     RBL_DECLARE_END_TAG;
@@ -249,8 +249,8 @@ struct RunloopTimer_s {
     time_t                  expiry_time;
     uint64_t                interval;
     bool                    repeating;
-    TimerEventHandler       timer_handler;
-    void*                   timer_handler_arg;
+    PostableFunction        timer_postable;
+    void*                   timer_postable_arg;
 };
 
 #endif

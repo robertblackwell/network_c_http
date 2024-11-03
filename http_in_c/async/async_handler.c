@@ -90,7 +90,7 @@ void async_handler_anonymous_dispose(void** p)
 static void handle_request(AsyncHandlerRef href, MessageRef request_ptr)
 {
     RBL_CHECK_TAG(AsyncHandler_TAG, href)
-    RBL_LOGFMT("href: %p socket:%d", href, href->async_connection_ref->socket);
+    RBL_LOG_FMT("href: %p socket:%d", href, href->async_connection_ref->socket);
     AsyncHandlerRef handler_ref = href;
     handler_ref->server_ref->process_request(handler_ref, request_ptr);
 }
@@ -117,7 +117,7 @@ void async_handler_handle_response(AsyncHandlerRef href, MessageRef request_ptr,
 static void handle_write_complete(AsyncHandlerRef href)
 {
     RBL_CHECK_TAG(AsyncHandler_TAG, href)
-    RBL_LOGFMT("href: %p socket:%d", href, href->async_connection_ref->socket);
+    RBL_LOG_FMT("href: %p socket:%d", href, href->async_connection_ref->socket);
     async_connection_read(href->async_connection_ref);
 }
 /**
@@ -136,7 +136,7 @@ static void handle_close_connection(AsyncHandlerRef href)
 {
     RBL_CHECK_TAG(AsyncHandler_TAG, href)
     RBL_ASSERT((href->async_connection_ref->socket_stream_ref > 0), "sockets fd must be still owned at this point");
-    RBL_LOGFMT("file async_handler.c handle_close_connection socket %d", href->async_connection_ref->socket);
+    RBL_LOG_FMT("file async_handler.c handle_close_connection socket %d", href->async_connection_ref->socket);
     href->server_ref->handler_complete(href->server_ref, href);
 }
 #if 0

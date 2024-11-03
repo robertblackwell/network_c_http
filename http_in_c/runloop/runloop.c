@@ -288,10 +288,10 @@ cleanup:
 int runloop_post(RunloopRef athis, PostableFunction cb, void* arg)
 {
     REACTOR_CHECK_TAG(athis)
-    RBL_LOG_FMT("runloop_post entered functor_list_size: %d funct: %p arg: %p runloop_executing: %d\n", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
+    RBL_LOG_FMT("runloop_post entered functor_list_size: %d funct: %p arg: %p runloop_executing: %d", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
     Functor func = {.f = cb, .arg = arg};
     functor_list_add(athis->ready_list, func);
-    RBL_LOG_FMT("runloop_post exited functor_list_size: %d func: %p arg: %p runloop_executing: %d\n", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
+    RBL_LOG_FMT("runloop_post exited functor_list_size: %d func: %p arg: %p runloop_executing: %d", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
 }
 
 void runloop_interthread_post(RunloopRef athis, PostableFunction cb, void* arg)

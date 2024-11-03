@@ -12,7 +12,7 @@ void XrEchoHandler(XrHandlerRef this);
 void XrHandler_function(MessageRef request, TcpConnRef conn_ref, HandlerDoneFunction done)
 {
     XrHandlerRef hdlr;
-    LOG_FMT("XrHandler_function\n");
+    LOG_FMT("XrHandler_function");
     IOBufferRef ser = Message_serialize(conn_ref->req_msg_ref);
     BufferChainRef body = Message_get_body(conn_ref->req_msg_ref);
     if(body != NULL) {

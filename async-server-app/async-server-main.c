@@ -107,7 +107,7 @@ int main(int argc, char* argv[]) {
 void* thread_function(void* arg)
 {
     thread_context_t* ctx = arg;
-    RBL_LOGFMT("thread function ident: %d pthread_t: %lu listening_socket: %d", ctx->ident, ctx->thread, ctx->listening_socket)
+    RBL_LOG_FMT("thread function ident: %d pthread_t: %lu listening_socket: %d", ctx->ident, ctx->thread, ctx->listening_socket)
     ctx->server_ptr = AsyncServer_new_with_socket(ctx->port, ctx->host, ctx->listening_socket, process_request);
     g_sref = ctx->server_ptr;
     AsyncServer_start(ctx->server_ptr);

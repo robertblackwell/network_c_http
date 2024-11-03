@@ -89,7 +89,9 @@ set (CHTTP_C_FLAGS "${CHTTP_CXX_FLAGS} -DCH_SCRIBBLE")
 # Forces the async server to run as a single threaded server. Hopefully a temporary
 # restriction while I figure out shared listening sockets
 # If disabled async_server will be multi threaded using a shared listening socket
-set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DCH_ASYNC_SINGLE_THREAD")
+set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DCH_ASYNC_SINGLE_THREAD -DRBL_TAG_CHECK_ENABLED")
+set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DRBL_TAG_CHECK_ENABLED")
+set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DRBL_LOG_ENABLED -DRBL_LOG_ALLOW_GLOBAL")
 
 message("CHTTP_C_FLAGS ${CHTTP_C_FLAGS}")
 ## ============================================================================

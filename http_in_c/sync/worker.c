@@ -18,9 +18,9 @@
 static int on_message_handler_2(MessageRef response_ptr, sync_worker_t* context)
 {
     sync_worker_t* worker_ptr = context;
-    RBL_LOGFMT("verify on_message_handler socket: %d\n", worker_ptr->connection_ptr->socketfd);
-    RBL_LOG_FMT("verify handler howmany_requests_per_connection: %d\n", ctx->howmany_requests_per_connection);
-    RBL_LOG_FMT("verify handler howmany_connections: %d\n", ctx->howmany_connections);
+    RBL_LOG_FMT("verify on_message_handler socket: %d", worker_ptr->connection_ptr->socketfd);
+//    RBL_LOG_FMT("verify handler howmany_requests_per_connection: %d", ctx->howmany_requests_per_connection);
+//    RBL_LOG_FMT("verify handler howmany_connections: %d", ctx->howmany_connections);
 //    worker_ptr->reqsponse_ptr = response_ptr;
     return HPE_OK;
 }

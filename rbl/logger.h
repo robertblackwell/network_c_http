@@ -1,13 +1,13 @@
 #ifndef rbl_logger_h
 #define rbl_logger_h
-
+#define RBL_LOG_ENABLED
+#define RBL_LOG_ALLOW_GLOBAL
 #include <stdio.h>
 extern void rbl_log_function(char* level, const char* funcname, const char* filename, int line, char* message);
 
 // RBL_LOG_ALLOW_GLOBAL - is a global switch to turn logging off globally
-#define CHLOG_GLOBALX
 
-// CHLOG_ON - each c/c++ file can turn logging on by defining CHLOG_ON before including logger.h
+// RBL_LOG_ENABLED - each c/c++ file can turn logging on by defining CHLOG_ON before including logger.h
 // this only turns logging on if the global switch is defined
 //
 // RBL_LOG_ERROR - error logging is always on
@@ -19,7 +19,7 @@ extern void rbl_log_function(char* level, const char* funcname, const char* file
 		free(s); \
 	} while(0);
 
-#define RBL_LOGFMT(f_, ...) do {\
+#define RBL_LOG_FMT(f_, ...) do {\
 		char* s; \
 		int c  = asprintf(&s, f_, ##__VA_ARGS__); \
 		rbl_log_function("LOG", __FUNCTION__, __FILE__, __LINE__, s); \
@@ -27,7 +27,7 @@ extern void rbl_log_function(char* level, const char* funcname, const char* file
 	} while(0);
 
 
-#if defined(RBL_LOG_ENABLE) && defined(RBL_LOG_ALLOW_GLOBAL)
+#if defined(RBL_LOG_ENABLED) && defined(RBL_LOG_ALLOW_GLOBAL)
 	#define RBL_LOG_PRINTF(f_, ...) printf((f_), ##__VA_ARGS__)
 	#define RBL_LOG_FMT(f_, ...) do {\
 		char* s; \

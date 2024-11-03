@@ -50,16 +50,16 @@ socket_handle_t create_listener_socket(int port, const char* host)
     return tmp_socket;
 
     error_01:
-        RBL_LOG_ERROR("socket call failed with errno %d \n", errno);
+        RBL_LOG_ERROR("socket call failed with errno %d ", errno);
         assert(0);
     error_02:
-        RBL_LOG_ERROR("setsockopt call failed with errno %d \n", errno);
+        RBL_LOG_ERROR("setsockopt call failed with errno %d ", errno);
         assert(0);
     error_03:
-        RBL_LOG_ERROR("bind call failed with errno %d \n", errno);
+        RBL_LOG_ERROR("bind call failed with errno %d ", errno);
         assert(0);
     error_04:
-        RBL_LOG_ERROR("listen call failed with errno %d \n", errno);
+        RBL_LOG_ERROR("listen call failed with errno %d ", errno);
         assert(0);
 }
 
@@ -108,10 +108,10 @@ void sync_server_listen(sync_server_r server)
     for(int i = 0; i < server->nbr_workers; i++)
     {
 #ifdef SYNC_WORKER_QUEUE
-        RBL_LOGFMT("sync_server_listen SYNC_WORKER_QUEUE is defined");
+        RBL_LOG_FMT("sync_server_listen SYNC_WORKER_QUEUE is defined");
         sync_worker_r wref = sync_worker_new(server->qref, i, server->read_buffer_size, server->app_handler);
 #else
-        RBL_LOGFMT("sync_server_listen SYNC_WORKER_QUEUE is NOT defined");
+        RBL_LOG_FMT("sync_server_listen SYNC_WORKER_QUEUE is NOT defined");
         sync_worker_r wref = sync_worker_new(server->socket_fd, i, server->read_buffer_size, server->app_handler);
 #endif
         server->worker_tab[i] = NULL;

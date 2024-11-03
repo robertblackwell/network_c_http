@@ -108,10 +108,10 @@ void democonnection_free(DemoConnectionRef this)
 ///////////////////////////////////////////////////////////////////////////////////////
 static void event_handler(RtorStreamRef stream_ref, uint64_t event)
 {
-    LOG_FMT("event_handler %lx\n", event);
+    LOG_FMT("event_handler %lx", event);
     DemoConnectionRef connection_ref = stream_ref->context;
     CHECK_TAG(DemoConnection_TAG, connection_ref)
-    LOG_FMT("demohandler handler \n");
+    LOG_FMT("demohandler handler ");
     if(event & EPOLLOUT) {
         write_epollout(connection_ref);
     }
@@ -144,7 +144,7 @@ static void write_epollout(DemoConnectionRef connection_ref)
 ////////////////////////////////////////////////////////////////////////////////////
 void democonnection_read(DemoConnectionRef connection_ref, void(*on_demo_read_cb)(void* href, DemoMessageRef, int statuc))
 {
-    LOG_FMT("democonnect_read\n");
+    LOG_FMT("democonnect_read");
     CHTTP_ASSERT((connection_ref->read_state != READ_STATE_ACTIVE), "a read is already active");
     if(connection_ref->read_state == READ_STATE_IDLE) {
         connection_ref->read_state = READ_STATE_ACTIVE;
@@ -166,7 +166,7 @@ static void read_start(DemoConnectionRef connection_ref)
 static void postable_reader(ReactorRef reactor_ref, void* arg)
 {
     DemoConnectionRef connection_ref = arg;
-    LOG_FMT("postable_reader read_state: %d\n", connection_ref->read_state);
+    LOG_FMT("postable_reader read_state: %d", connection_ref->read_state);
     if(connection_ref->read_state == READ_STATE_STOP) {
         connection_ref->on_read_cb(connection_ref->handler_ref, NULL, DemoConnectionErrCode_is_closed);
         return;
@@ -196,11 +196,11 @@ static void reader(DemoConnectionRef connection_ref) {
     int eagain = EAGAIN;
     char* errstr = strerror(errno_save);
     if(bytes_available > 0) {
-        LOG_FMT("Before DemoParser_consume read_state %d\n", connection_ref->read_state);
+        LOG_FMT("Before DemoParser_consume read_state %d", connection_ref->read_state);
         // TODO experiment with generic programming in C
         int ec = connection_ref->parser_ref->parser_consume((ParserInterfaceRef)connection_ref->parser_ref, iob);
 //        int ec = DemoParser_consume(connection_ref->parser_ref, iob);
-        LOG_FMT("After DemoParser_consume returns  errno: %d read_state %d \n", errno_save, connection_ref->read_state);
+        LOG_FMT("After DemoParser_consume returns  errno: %d read_state %d ", errno_save, connection_ref->read_state);
         if(ec == 0) {
             if(connection_ref->read_state == READ_STATE_ACTIVE) {
                 LOG_FMT("reader post postable_reader connection_ref->read_state: %d\n", connection_ref->read_state);

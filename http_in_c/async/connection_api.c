@@ -52,7 +52,7 @@ void async_connection_destroy(AsyncConnectionRef this)
     runloop_stream_deregister(this->socket_stream_ref);
     runloop_stream_free(this->socket_stream_ref);
     this->socket_stream_ref = NULL;
-    RBL_LOGFMT("async_connection_free close socket: %d", fd)
+    RBL_LOG_FMT("async_connection_free close socket: %d", fd)
     if(this->socket > 0) {
         async_connection_close(this);
     }

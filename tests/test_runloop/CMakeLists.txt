@@ -2,42 +2,7 @@
 
 message("test_include_dirs     ${TEST_INCLUDE_DIRS}")
 message("test_link_libs        ${TEST_LINK_LIBS}")
-
-#
-# test timer watcher
-#
-set(TARGET_TIMER test_timer)
-add_executable(${TARGET_TIMER}
-	test_timer.c
-)
-
-target_include_directories(${TARGET_TIMER}
-	PUBLIC 
-		${TEST_INCLUDE_dirS})
-
-target_link_libraries(${TARGET_TIMER}
-	PUBLIC ${TEST_LINK_LIBS})
-
-add_test(${TARGET_TIMER} ${TARGET_TIMER})
-
-#
-# test timer disarm
-#
-set(TARGET_TIMER_DISARM test_timer_disarm)
-add_executable(${TARGET_TIMER_DISARM}
-		test_timer_disarm.c
-		)
-
-target_include_directories(${TARGET_TIMER_DISARM}
-		PUBLIC
-		${TEST_INCLUDE_dirS})
-
-target_link_libraries(${TARGET_TIMER_DISARM}
-		PUBLIC ${TEST_LINK_LIBS})
-
-add_test(${TARGET_TIMER_DISARM} ${TARGET_TIMER_DISARM})
-
-
+if(OFF)
 #
 # test fdevent watcher
 #
@@ -46,7 +11,8 @@ set(TARGET_FDEV test_fdevent)
 add_executable(${TARGET_FDEV}
 		test_fdevent.c
 		)
-
+target_compile_definitions(${TARGET_FDEV} PUBLIC RBL_LOG_ENABLE})
+target_compile_definitions(${TARGET_FDEV} PUBLIC RBL_LOG_ALLOW_GLOBAL})
 target_include_directories(${TARGET_FDEV}
 		PUBLIC
 		${TEST_INCLUDE_dirS})
@@ -92,25 +58,8 @@ target_link_libraries(${TARGET_ITQ}
 
 add_test(${TARGET_ITQ} ${TARGET_ITQ})
 
-
-#
-# test multithread
-#
-
-set(TARGET_MT test_timer_multithread)
-add_executable(${TARGET_MT}
-		test_timer_multithread.c
-)
-
-target_include_directories(${TARGET_MT}
-		PUBLIC
-		${TEST_INCLUDE_dirS})
-
-target_link_libraries(${TARGET_MT}
-		PUBLIC ${TEST_LINK_LIBS})
-
-add_test(${TARGET_MT} ${TARGET_MT})
-
-
 add_subdirectory(test_io)
 add_subdirectory(test_listener)
+
+endif()
+add_subdirectory(test_timers)

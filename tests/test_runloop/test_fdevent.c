@@ -8,6 +8,8 @@
 #include <sys/epoll.h>
 #include <rbl/logger.h>
 #include <rbl/unittest.h>
+#include <rbl/check_tag.h>
+#include <rbl/macros.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
@@ -17,8 +19,9 @@
 //  thread A waits on a fdevent object
 //  thread B is a repeating timer, each timer tick it fires the fdevent object and after 5 ticks it terminates both event sources
 //
-
+#define TestCtx_TYPE "Tcxtx"
 typedef struct TestCtx_s  {
+    RBL_DECLARE_TAG;
     int                 callback1_counter;
     int                 counter;
     int                 max_count;
@@ -27,6 +30,7 @@ typedef struct TestCtx_s  {
     RunloopTimerRef         timer;
     RunloopEventfdRef         fdevent;
     int                 fdevent_counter;
+    RBL_DECLARE_END_TAG;
 } TestCtx;
 
 TestCtx* TestCtx_new(int counter_init, int counter_max);
@@ -109,7 +113,8 @@ static void callback_1(RunloopTimerRef watcher, RunloopTimerEvent event)
     uint64_t error = EPOLLERR & event;
     void* ctx = watcher->timer_handler_arg;
     TestCtx* ctx_p = (TestCtx*) ctx;
-    RunloopEventfdRef fdev = ctx_p->fdevent;
+    RunloopEventfdRef fdevent_ref = ctx_p->fdevent;
+    RBL_ASSERT((fdevent_ref != NULL), "callback1 fdevent_ref == NULL");
     RBL_LOG_FMT("callback1_counter %d counter: %d event is : %lx  ", ctx_p->callback1_counter, ctx_p->counter, event);
     if(ctx_p->counter >= ctx_p->max_count) {
         RBL_LOG_MSG(" clear timer");
@@ -117,9 +122,9 @@ static void callback_1(RunloopTimerRef watcher, RunloopTimerEvent event)
 //        runloop_timer_deregister(watcher);
 //        runloop_eventfd_deregister(fdev);
     } else {
-        runloop_eventfd_fire(fdev);
+        runloop_eventfd_fire(fdevent_ref);
         ctx_p->counter++;
-        runloop_eventfd_fire(fdev);
+        runloop_eventfd_fire(fdevent_ref);
         ctx_p->counter++;
 
     }
@@ -136,6 +141,8 @@ void fdevent_handler(RunloopEventfdRef fdev_ref, uint64_t ev_mask)
 TestCtx* TestCtx_new(int counter_init, int counter_max)
 {
     TestCtx* tmp = malloc(sizeof(TestCtx));
+    RBL_SET_TAG(TestCtx_TYPE, tmp)
+    RBL_SET_END_TAG(TestCtx_TYPE, tmp)
     tmp->counter = counter_init;
     tmp->callback1_counter = 0;
     tmp->max_count = counter_max;

@@ -113,10 +113,10 @@ int        Watcher_get_fd(RunloopWatcherRef this);
 RunloopTimerRef runloop_timer_new(RunloopRef runloop_ref);
 void runloop_timer_init(RunloopTimerRef this, RunloopRef runloop);
 void runloop_timer_free(RunloopTimerRef athis);
-void runloop_timer_register(RunloopTimerRef athis, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
+void runloop_timer_register(RunloopTimerRef athis, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
 void runloop_timer_update(RunloopTimerRef athis, uint64_t interval_ms, bool repeating);
 void runloop_timer_disarm(RunloopTimerRef athis);
-void runloop_timer_rearm_old(RunloopTimerRef athis, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
+void runloop_timer_rearm_old(RunloopTimerRef athis, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
 void runloop_timer_rearm(RunloopTimerRef athis);
 void runloop_timer_deregister(RunloopTimerRef athis);
 void WTimerFd_verify(RunloopTimerRef r);
@@ -126,7 +126,7 @@ int runloop_timer_get_fd(RunloopTimerRef this);
 /**
  * Convenience intrface for timers
  */
-RunloopTimerRef runloop_timer_set(RunloopRef rl, TimerEventHandler cb, void* ctx, uint64_t interval_ms, bool repeating);
+RunloopTimerRef runloop_timer_set(RunloopRef rl, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
 /**
  * After the call to runloop_timer_clear the timerref is invalid and muts not be ised
  */

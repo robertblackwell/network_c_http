@@ -1,5 +1,6 @@
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
+#include <rbl/macros.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -25,7 +26,7 @@ static void handler(RunloopWatcherRef fdevent_ref, uint64_t event)
     RunloopEventfdRef fdev = (RunloopEventfdRef)fdevent_ref;
     FDEV_CHECK_TAG(fdev)
     uint64_t buf;
-    int nread = read(fdev->fd, &buf, sizeof(buf));
+    long nread = read(fdev->fd, &buf, sizeof(buf));
     if(nread == sizeof(buf)) {
         fdev->fd_event_handler(fdev, event);
     } else {
@@ -40,16 +41,17 @@ static void anonymous_free(RunloopWatcherRef p)
 }
 void runloop_eventfd_init(RunloopEventfdRef this, RunloopRef runloop)
 {
+    RBL_ASSERT((this!=NULL), "this is NULL");
     this->type = RUNLOOP_WATCHER_FDEVENT;
     FDEV_SET_TAG(this);
     FDEV_CHECK_TAG(this)
-#ifdef TWO_PIPE_TRICK
+#ifdef RUNLOOP_EVENFD_TWO_PIPE_TRICK
     int pipefds[2];
     pipe(pipefds);
     this->fd = pipefds[0];
     this->write_fd = pipefds[1];
 #else
-    #ifdef SEMAPHORE
+    #ifdef RUNLOOP_EVENTFD_SEMAPHORE
         this->fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC | EFD_SEMAPHORE);
     #else
         this->fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);

@@ -214,7 +214,7 @@ void async_socket_bind(int socket, int port, const char* host)
 //    unsigned int addr_length = (unsigned int) sizeof(peername);
 //
 //    int sock2 = accept(server_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
-//    RBL_LOGFMT("new socket %d", sock2);
+//    RBL_LOG_FMT("new socket %d", sock2);
 //    if(sock2 <= 0) {
 //        RBL_LOG_ERROR("accpt failed errno %d  strerror: %s", errno, strerror(errno));
 //        RBL_LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);

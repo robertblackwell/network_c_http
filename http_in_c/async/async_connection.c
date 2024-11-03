@@ -278,14 +278,14 @@ static void reader_old(AsyncConnectionRef connection_ref) {
     int eagain = EAGAIN;
     char* errstr = strerror(errno_save);
     if(bytes_available > 0) {
-        LOG_FMT("Before AsyncParser_consume read_state %d\n", connection_ref->read_state);
+        LOG_FMT("Before AsyncParser_consume read_state %d", connection_ref->read_state);
         // TODO experiment with generic programming in C
 //        int ec = connection_ref->http_parser_ptr->parser_consume((ParserInterfaceRef)connection_ref->parser_ref, iob);
         int ec = http_parser_consume(connection_ref->http_parser_ptr, IOBuffer_data(iob), IOBuffer_data_len(iob));
-        LOG_FMT("After AsyncParser_consume returns  errno: %d read_state %d \n", errno_save, connection_ref->read_state);
+        LOG_FMT("After AsyncParser_consume returns  errno: %d read_state %d ", errno_save, connection_ref->read_state);
         if(ec == 0) {
             if(connection_ref->read_state == READ_STATE_ACTIVE) {
-                LOG_FMT("reader post postable_reader connection_ref->read_state: %d\n", connection_ref->read_state);
+                LOG_FMT("reader post postable_reader connection_ref->read_state: %d", connection_ref->read_state);
                 post_to_reactor(connection_ref, &postable_reader);
             }
         } else {
@@ -297,7 +297,7 @@ static void reader_old(AsyncConnectionRef connection_ref) {
     } else {
         read_error(connection_ref, "reader - io error close and move on");
     }
-    LOG_FMT("reader return\n");
+    LOG_FMT("reader return");
 }
 #endif
 static void postable_read_cb(ReactorRef reactor_ref, void* arg)

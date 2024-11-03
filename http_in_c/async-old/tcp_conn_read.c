@@ -194,13 +194,13 @@ static void read_some_handler(RtorStreamRef socket_watcher_ref, uint64_t event)
 //    assert(conn_ref->parser_ref != NULL);
 //    XrReadRC rc = TcpConn_read(conn_ref);
 //    // have to decide what next
-//    LOG_FMT("AsyncServer::state_machine after read rc :%d \n", rc);
+//    LOG_FMT("AsyncServer::state_machine after read rc :%d ", rc);
 //    if (rc == XRD_EAGAIN) {
-//        LOG_FMT("AsyncServer::state_machine EAGAIN\n");
+//        LOG_FMT("AsyncServer::state_machine EAGAIN");
 //        return;
 //    } else {
 //        if(rc == XRD_EOM) {
-//            LOG_FMT("AsyncServer::state_machine EOM\n");
+//            LOG_FMT("AsyncServer::state_machine EOM");
 //            assert(conn_ref->parser_ref->m_message_done);
 //            assert(conn_ref->req_msg_ref != NULL);
 //            assert(conn_ref->req_msg_ref == conn_ref->parser_ref->m_current_message_ptr);

@@ -155,7 +155,7 @@ void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event)
         printf("accpt failed errno %d  sttrerror: %s\n", errno, strerror(errno));
         LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
     }
-    LOG_FMT("Listerner accepted sock fd: %d\n", sock2);
+    LOG_FMT("Listerner accepted sock fd: %d", sock2);
     DemoHandlerRef handler = demohandler_new(
             sock2,
             runloop_listener_get_reactor(listener_watcher_ref),

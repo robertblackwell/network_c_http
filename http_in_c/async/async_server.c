@@ -198,7 +198,7 @@ void on_event_listening(RunloopListenerRef listener_watcher_ref, uint64_t event)
     unsigned int addr_length = (unsigned int) sizeof(peername);
 
     int sock2 = accept(server_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
-    RBL_LOGFMT("new socket %d", sock2);
+    RBL_LOG_FMT("new socket %d", sock2);
     if(sock2 <= 0) {
         int errno_saved = errno;
         if(errno_saved == EAGAIN || errno_saved == EWOULDBLOCK) {

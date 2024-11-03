@@ -109,7 +109,7 @@ static BufferChainRef make_simple_body(XrHandlerRef this, int fd)
  */
 static void on_done(TcpConnRef conn, XrHandlerRef hdlr)
 {
-    LOG_FMT("on_done\n");
+    LOG_FMT("on_done");
 }
 static void on_error(TcpConnRef conn, XrHandlerRef hdlr, int status)
 {

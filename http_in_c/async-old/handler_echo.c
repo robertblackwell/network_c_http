@@ -73,7 +73,7 @@ static void on_write_cb_echo(TcpConnRef conn_ref, void* arg, int status)
 
 static void on_done(TcpConnRef conn, XrHandlerRef hdlr)
 {
-    LOG_FMT("on_done\n");
+    LOG_FMT("on_done");
     hdlr->done_function(conn);
 }
 static void on_error(TcpConnRef conn, XrHandlerRef hdlr, int status)

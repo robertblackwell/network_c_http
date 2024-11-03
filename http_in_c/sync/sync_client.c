@@ -33,14 +33,14 @@ void sync_client_init(sync_client_t* this, size_t read_buffer_size)
     this->user_ptr = NULL;
     this->read_buffer_size = read_buffer_size;
     if(pthread_mutex_init(&this->mutex, NULL) != 0) {
-        RBL_LOGFMT("sync_client_init mutex init failed");
+        RBL_LOG_FMT("sync_client_init mutex init failed");
         exit(-1);
     };
 }
 void sync_client_destroy(sync_client_t* this)
 {
     RBL_CHECK_TAG(sync_client_TAG, this)
-    RBL_LOG_FMT("sync_client_dispose %p  %d\n", this, this->socketfd);
+    RBL_LOG_FMT("sync_client_dispose %p  %d\n", this, this->connection_ptr->socketfd);
     if(this->connection_ptr) sync_connection_dispose(&(this->connection_ptr));
     RBL_INVALIDATE_TAG(this)
     // RBL_INVALIDATE_STRUCT(this, sync_client_t)
@@ -121,7 +121,7 @@ static void connection_helper(sync_client_t* this, char* host, int portno)
         close(sfd);
     }
     if(rp == NULL) {
-        RBL_LOGFMT("Could not bind");
+        RBL_LOG_FMT("Could not bind");
         exit(-1);
     }
     freeaddrinfo(result);

@@ -229,7 +229,7 @@ void dump_double_arr(char* msg, double arr[], int arr_dim)
 int verify_handler(MessageRef response_ptr, sync_client_t* client_ptr)
 {
     thread_context_t* ctx = sync_client_get_userptr(client_ptr);
-    RBL_LOGFMT("verify handler ident: % d socket: %d cycle:%d connection: %d\n",ctx->ident, CTX_SOCKET(ctx),ctx->cycle_index, ctx->connection_index );
+    RBL_LOG_FMT("verify handler ident: % d socket: %d cycle:%d connection: %d\n",ctx->ident, CTX_SOCKET(ctx),ctx->cycle_index, ctx->connection_index );
     RBL_LOG_FMT("verify handler howmany_requests_per_connection: %d\n",ctx->howmany_requests_per_connection);
     RBL_LOG_FMT("verify handler howmany_connections: %d\n",ctx->howmany_connections);
     ctx->response_ptr = response_ptr;
@@ -250,21 +250,21 @@ int verify_handler(MessageRef response_ptr, sync_client_t* client_ptr)
     int return_value = HPE_OK;
     if(ctx->cycle_index >= ctx->howmany_requests_per_connection - 1) {
         ctx->cycle_index = 0;
-        RBL_LOGFMT("no request ident: %d socket:%d ", ctx->ident, CTX_SOCKET(ctx));
+        RBL_LOG_FMT("no request ident: %d socket:%d ", ctx->ident, CTX_SOCKET(ctx));
         return_value = HPE_USER; // This will force sync_client_round_trip() to return rather than wait for server to timeout
     } else {
         /**
          * Make the last message on a connection CONNECTION: close
          */
         bool connection_close_flag = (ctx->cycle_index >= ctx->howmany_requests_per_connection - 2);//ctx_is_last_request_for_connection(ctx);
-        RBL_LOGFMT("verify_handler ident: %d socket:%d how many connections: %d how manh requests: %d", ctx->ident, CTX_SOCKET(ctx), ctx->howmany_connections, ctx->howmany_requests_per_connection);
-        RBL_LOGFMT("verify_handler ident: %d socket:%d cycle_index: %d connection_index: %d connection_close_flag: %d", ctx->ident, CTX_SOCKET(ctx), ctx->cycle_index, ctx->connection_index, (int)connection_close_flag);
+        RBL_LOG_FMT("verify_handler ident: %d socket:%d how many connections: %d how manh requests: %d", ctx->ident, CTX_SOCKET(ctx), ctx->howmany_connections, ctx->howmany_requests_per_connection);
+        RBL_LOG_FMT("verify_handler ident: %d socket:%d cycle_index: %d connection_index: %d connection_close_flag: %d", ctx->ident, CTX_SOCKET(ctx), ctx->cycle_index, ctx->connection_index, (int)connection_close_flag);
         make_uid(ctx);
         ctx->request_ptr = make_request(ctx, connection_close_flag);
         ctx->cycle_index++;
         ctx->iter_start_time = get_time();
         sync_connection_write(client_ptr->connection_ptr, ctx->request_ptr);
-        RBL_LOGFMT("write response ident: %d socket:%d cycle_index: %d connection_index: %d connection_close_flag: %d", ctx->ident, CTX_SOCKET(ctx), ctx->cycle_index, ctx->connection_index, (int)connection_close_flag);
+        RBL_LOG_FMT("write response ident: %d socket:%d cycle_index: %d connection_index: %d connection_close_flag: %d", ctx->ident, CTX_SOCKET(ctx), ctx->cycle_index, ctx->connection_index, (int)connection_close_flag);
     }
     RBL_LOG_FMT("verify_handler return_value %d n=======================================================================\n", return_value);
     return return_value;
@@ -272,7 +272,7 @@ int verify_handler(MessageRef response_ptr, sync_client_t* client_ptr)
 int verify_handler_2(MessageRef response_ptr, sync_client_t* client_ptr)
 {
     thread_context_t* ctx = sync_client_get_userptr(client_ptr);
-    RBL_LOGFMT("verify handler ident: % d socket: %d cycle:%d connection: %d\n",ctx->ident, CTX_SOCKET(ctx),ctx->cycle_index, ctx->connection_index );
+    RBL_LOG_FMT("verify handler ident: % d socket: %d cycle:%d connection: %d\n",ctx->ident, CTX_SOCKET(ctx),ctx->cycle_index, ctx->connection_index );
     RBL_LOG_FMT("verify handler howmany_requests_per_connection: %d\n",ctx->howmany_requests_per_connection);
     RBL_LOG_FMT("verify handler howmany_connections: %d\n",ctx->howmany_connections);
     ctx->response_ptr = response_ptr;
@@ -295,7 +295,7 @@ void* threadfn(void* data)
         sync_client_t* client_ptr = sync_client_new(ctx->read_buffer_size);
         sync_client_set_userptr(client_ptr, ctx);
         ctx->client_ptr = client_ptr;
-        RBL_LOGFMT("client connext ident: %d socket:%d ", ctx->ident, CTX_SOCKET(ctx));
+        RBL_LOG_FMT("client connext ident: %d socket:%d ", ctx->ident, CTX_SOCKET(ctx));
         sync_client_connect(client_ptr, "localhost", ctx->port);
 
         /**
@@ -337,11 +337,11 @@ void* threadfn(void* data)
             }
         }
 
-        RBL_LOGFMT("roundtrip return ident id %d socket:%d connection: %d cycle %d", ctx->ident, CTX_SOCKET(ctx), iconn, ctx->cycle_index)
+        RBL_LOG_FMT("roundtrip return ident id %d socket:%d connection: %d cycle %d", ctx->ident, CTX_SOCKET(ctx), iconn, ctx->cycle_index)
         sync_client_close(client_ptr);
         sync_client_dispose(&client_ptr);
         ctx->client_ptr = NULL;
-        RBL_LOGFMT("Completed round-trip loop ident: %d socket: %d counter: %d connection_index: %d cycle_index: %d",
+        RBL_LOG_FMT("Completed round-trip loop ident: %d socket: %d counter: %d connection_index: %d cycle_index: %d",
                    ctx->ident, CTX_SOCKET(ctx), ctx->counter, ctx->connection_index, ctx->cycle_index);
     }
     struct timeval end_time = get_time();
@@ -378,7 +378,7 @@ static MessageRef make_request(thread_context_t* ctx, bool keep_alive_flag)
 
 static void make_uid(thread_context_t* ctx)
 {
-    RBL_LOGFMT("make_uid ident: %d socket:%d counter: %d cycle_index:%d connection_index:%d nbr connections: %d requests per connection %d",
+    RBL_LOG_FMT("make_uid ident: %d socket:%d counter: %d cycle_index:%d connection_index:%d nbr connections: %d requests per connection %d",
                ctx->ident, CTX_SOCKET(ctx),
                ctx->counter,
                ctx->cycle_index,
@@ -411,9 +411,9 @@ bool verify_response(thread_context_t* ctx, MessageRef request, MessageRef respo
 #ifdef VERIFY_DISABLED
     IOBufferRef iob = Message_serialize(request);
     IOBufferRef iobresp = Message_serialize(response);
-    RBL_LOGFMT("Request ident:%d socket: %d", ctx->ident, CTX_SOCKET(ctx));
+    RBL_LOG_FMT("Request ident:%d socket: %d", ctx->ident, CTX_SOCKET(ctx));
 //    printf("%s\n", IOBuffer_cstr(iob));
-    RBL_LOGFMT("Response ident:%d socket: %d", ctx->ident, CTX_SOCKET(ctx));
+    RBL_LOG_FMT("Response ident:%d socket: %d", ctx->ident, CTX_SOCKET(ctx));
 //    printf("%s\n", IOBuffer_cstr(iobresp));
     return true;
 #else
