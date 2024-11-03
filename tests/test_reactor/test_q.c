@@ -9,6 +9,7 @@
 
 #include <sys/epoll.h>
 #include <rbl/unittest.h>
+#include <rbl/macros.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
@@ -36,10 +37,12 @@ void queue_reader_dispose(QReaderRef this)
 typedef struct QWriter_s {
     EventfdQueueRef queue;
     int count_max;
+    long post_count;
 } QWriter, *QWriterRef;
 
 typedef struct WriterArg {
     long count;
+    long post_count;
     QWriterRef qwriter_ref;
 } WriterArg, *WriterArgRef;
 
@@ -48,6 +51,7 @@ QWriterRef queue_writer_new(EventfdQueueRef queue, int max)
     QWriterRef this = malloc(sizeof(QReader));
     this->queue = queue;
     this->count_max = max;
+    this->post_count = 0;
     return this;
 }
 void queue_writer_dispose(QReaderRef this)
@@ -58,6 +62,7 @@ WriterArgRef writer_arg_new(QWriterRef qwrtr_ref, long count)
 {
     WriterArgRef waref = malloc(sizeof(WriterArg));
     waref->count = count;
+    waref->post_count = 1;
     waref->qwriter_ref = qwrtr_ref;
     return waref;
 }
@@ -68,20 +73,27 @@ void queue_event_handler(RunloopQueueWatcherRef qw, uint64_t event)
     RunloopRef rl = runloop_queue_watcher_get_reactor(qw);
     EventfdQueueRef queue = rdr->queue;
     Functor queue_data = runloop_eventfd_queue_remove(queue);
+
+    WriterArgRef writer_arg_ref = (WriterArgRef)queue_data.arg;
+
+    printf("Q Handler received %p count: %d\n", &queue_data, rdr->count);
+    bool x = (long)writer_arg_ref->count == (long)rdr->count;
+    RBL_ASSERT(x, "count check failed in queue_event_handler");
+    rdr->count++;
+    // now call the postable function passed by the writer
+
     PostableFunction pf = queue_data.f;
     void* postable_arg = queue_data.arg;
     runloop_post(rl, pf, postable_arg);
 
-    printf("Q Handler received %p count: %d\n", &queue_data, rdr->count);
-    bool x = (long)queue_data.arg == (long)rdr->count;
-    assert(x);
-    rdr->count++;
     if (rdr->count >= rdr->expected_count) {
         runloop_queue_watcher_deregister(qw);
     }
 
 }
-
+/**
+ * arg is QReaderRef
+ */
 void* reader_thread_func(void* arg)
 {
     QReaderRef q_rdr_ctx = (QReaderRef)arg;
@@ -99,10 +111,19 @@ void* reader_thread_func(void* arg)
  */
 void writer_post_function(RunloopRef rl, void* arg)
 {
+    WriterArgRef wref = (WriterArgRef)arg;
+    QWriterRef qwrtr_ref = wref->qwriter_ref;
+    qwrtr_ref->post_count++;
+    long pcount = qwrtr_ref->post_count;
+    long count = wref->count;
     pthread_t mytid = pthread_self();
     pid_t tid = gettid();
-    printf("writer post function thread: %ld  rl: %p arg: %p\n", (long)tid, rl, arg);
+    printf("writer post function thread: %ld  rl: %p arg: %p arg->count: %ld post_count: %ld\n",
+           (long)tid, rl, arg, count, pcount);
 }
+/**
+ *  arg is a QWriterRef
+ */
 void* writer_thread_func(void* arg)
 {
     QWriterRef wrtr = (QWriterRef)arg;
@@ -110,7 +131,8 @@ void* writer_thread_func(void* arg)
     printf("writer thread tid: %ld \n", (long)tid);
     for(long i = 1; i <= 10; i++) {
         usleep(500000);
-        Functor func = {.f = (void*)&writer_post_function, .arg = (void*) i};
+        WriterArgRef writer_arg_ref = writer_arg_new(wrtr, i);
+        Functor func = {.f = (void*)&writer_post_function, .arg = (void*) writer_arg_ref};
         runloop_eventfd_queue_add(wrtr->queue, func);
     }
     return NULL;
@@ -150,8 +172,9 @@ int test_q()
 
     pthread_join(rdr_thread, NULL);
     pthread_join(wrtr_thread, NULL);
-    UT_TRUE(rdr->expected_count == rdr->count);
-    UT_TRUE(rdr->count == wrtr->count_max);
+    UT_TRUE((rdr->expected_count == rdr->count));
+    UT_TRUE((rdr->count == wrtr->count_max));
+    UT_TRUE((wrtr->post_count+1 == wrtr->count_max));
     return 0;
 }
 

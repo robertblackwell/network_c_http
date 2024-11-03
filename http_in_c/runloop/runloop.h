@@ -44,11 +44,15 @@ typedef struct RunloopEventfd_s RunloopEventfd, *RunloopEventfdRef;      // Wait
 struct EventfdQueue_s;
 typedef struct EventfdQueue_s EventfdQueue, * EventfdQueueRef;
 
-struct RunloopInterthreadQueue_s;
-typedef struct RunloopInterthreadQueue_s RunloopInterthreadQueue, *RunloopInterthreadQueueRef;        // Wait for a inter thread queue event
+//struct RunloopInterthreadQueue_s;
+//typedef struct RunloopInterthreadQueue_s RunloopInterthreadQueue, *RunloopInterthreadQueueRef;        // Wait for a inter thread queue event
 
 struct Functor_s;
 typedef struct Functor_s Functor;
+
+struct InterthreadQueue_s;
+typedef struct InterthreadQueue_s InterthreadQueue, *InterthreadQueueRef;
+
 
 typedef uint64_t EventMask, RunloopTimerEvent;
 
@@ -62,7 +66,7 @@ typedef void (*TimerEventHandler)   (RunloopTimerRef timer_watcher_ref, uint64_t
 typedef void (*SocketEventHandler)  (RunloopStreamRef socket_watcher_ref, uint64_t events);
 typedef void (*FdEventHandler)      (RunloopEventfdRef fd_event_ref, uint64_t events);
 typedef void (*QueueEventHandler)   (RunloopQueueWatcherRef qref, uint64_t events);
-typedef void (*InterthreadQueueEventHandler)   (RunloopInterthreadQueueRef qref);
+//typedef void (*InterthreadQueueEventHandler)   (RunloopInterthreadQueueRef qref);
 typedef void (*ListenerEventHandler)(RunloopListenerRef listener_ref, uint64_t events);
 
 /**
@@ -225,16 +229,20 @@ int runloop_queue_watcher_get_fd(RunloopQueueWatcherRef this);
  *  runloop_interthread_post()
  *
  */
-RunloopInterthreadQueueRef runloop_interthread_queue_new(RunloopRef runloop_ref);
-void runloop_interthread_queue_init(RunloopInterthreadQueueRef this, RunloopRef runloop);
-void runloop_interthread_queue_dispose(RunloopInterthreadQueueRef this);
-void runloop_interthread_queue_add(RunloopInterthreadQueueRef this, void* item);
-void runloop_interthread_queue_drain(RunloopInterthreadQueueRef this, void(*draincb)(void*));
-void runloop_interthread_queue_register(RunloopInterthreadQueueRef this, InterthreadQueueEventHandler evhandler, void* arg, uint64_t watch_what);
-void runloop_interthreaD_queue_deregister(RunloopInterthreadQueueRef this);
-RunloopRef runloop_interthread_queue_get_reactor(RunloopInterthreadQueueRef athis);
-int runloop_interthread_queue_get_fd(RunloopInterthreadQueueRef athis);
-void runloop_interthread_queue_verify(RunloopInterthreadQueueRef this);
+InterthreadQueueRef itqueue_new(RunloopRef rl);
+void itqueue_add(InterthreadQueueRef qref, Functor func);
+Functor itqueue_remove(InterthreadQueueRef qref);
+
+//RunloopInterthreadQueueRef runloop_interthread_queue_new(RunloopRef runloop_ref);
+//void runloop_interthread_queue_init(RunloopInterthreadQueueRef this, RunloopRef runloop);
+//void runloop_interthread_queue_dispose(RunloopInterthreadQueueRef this);
+//void runloop_interthread_queue_add(RunloopInterthreadQueueRef this, void* item);
+//void runloop_interthread_queue_drain(RunloopInterthreadQueueRef this, void(*draincb)(void*));
+//void runloop_interthread_queue_register(RunloopInterthreadQueueRef this, InterthreadQueueEventHandler evhandler, void* arg, uint64_t watch_what);
+//void runloop_interthreaD_queue_deregister(RunloopInterthreadQueueRef this);
+//RunloopRef runloop_interthread_queue_get_reactor(RunloopInterthreadQueueRef athis);
+//int runloop_interthread_queue_get_fd(RunloopInterthreadQueueRef athis);
+//void runloop_interthread_queue_verify(RunloopInterthreadQueueRef this);
 
 
 #endif

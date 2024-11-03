@@ -14,13 +14,13 @@
 #include <http_in_c/runloop/rl_internal.h>
 
 typedef struct ITQReader_s {
-    EvfdQueueRef queue;
+    EvenfdQueueRef queue;
     int count;
     int expected_count;
 } ITQReader, *QSyncReaderRef;
 
 
-QSyncReaderRef ITQReader_new(EvfdQueueRef queue, int expected_count)
+QSyncReaderRef ITQReader_new(EventfdQueueRef queue, int expected_count)
 {
     QSyncReaderRef this = malloc(sizeof(ITQReader));
     this->queue = queue;

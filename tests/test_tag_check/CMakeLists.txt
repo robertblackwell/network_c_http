@@ -8,6 +8,7 @@ add_executable(${TARGET}
 	test_tag.c
 )
 
+target_compile_definitions(${TARGET} PUBLIC RBL_TAG_CHECK_ON)
 target_include_directories(${TARGET} 
 	PUBLIC 
 		${TEST_INCLUDE_dirS})

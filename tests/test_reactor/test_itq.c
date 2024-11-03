@@ -3,186 +3,261 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
-             /* See feature_test_macros(7) */
+/* See feature_test_macros(7) */
+#include <stdint.h>
 #include <string.h>
 
+#include <sys/epoll.h>
 #include <rbl/unittest.h>
+#include <rbl/macros.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
-/**
- * The purpose of this test is to demonstrate the function of inter thread queues.
- *
- * Runs two threads A and B.
- * Thread A has a reactor or run loop
- * Thread B is just any old thread.
- *  -   but it has a reference to A's reactor
- *  -   uses that to send data to thread A via A's reactor
- *
- */
-#define QReader_TAG     "ITQ_QRDR"
-#define QWriter_TAG     "ITQ_QWRT"
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// InterthreadQueue
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//void itqueue_event_handler(RunloopQueueWatcherRef qwref, uint64_t events)
+//{
+//    void* ctx = qwref->queue_event_handler_arg;
+//    RunloopRef rl = runloop_queue_watcher_get_reactor(qwref);
+//    EventfdQueueRef queue = qwref->queue;
+//    Functor queue_data = runloop_eventfd_queue_remove(queue);
+//    RBL_ASSERT((!Functor_is_empty(&(queue_data))), "An empty entry in a func list");
+//    PostableFunction pf = queue_data.f;
+//    void* postable_arg = queue_data.arg;
+//    runloop_post(rl, pf, postable_arg);
+//}
+//
+//#define InterThreadQ_TYPE "itQu"
+//typedef struct InterthreadQueue {
+//    RBL_DECLARE_TAG;
+//    EventfdQueueRef queue;
+//    RunloopRef runloop;
+//    RunloopQueueWatcherRef qwatcher_ref;
+//    RBL_DECLARE_END_TAG;
+//} InterthreadQueue_s, InterthreadQueue, *InterthreadQueueRef;
+//
+//InterthreadQueueRef itqueue_new(RunloopRef rl)
+//{
+//    InterthreadQueueRef itq_ref = malloc(sizeof(InterthreadQueue));
+//    RBL_SET_TAG(InterThreadQ_TYPE, itq_ref);
+//    RBL_SET_END_TAG(InterThreadQ_TYPE, itq_ref)
+//    itq_ref->runloop = rl;
+//    itq_ref->queue = runloop_eventfd_queue_new();
+//    itq_ref->qwatcher_ref = runloop_queue_watcher_new(itq_ref->runloop, itq_ref->queue);
+//    runloop_queue_watcher_register(itq_ref->qwatcher_ref, &itqueue_event_handler, itq_ref);
+//    return itq_ref;
+//}
+//void itqueue_add(InterthreadQueueRef qref, Functor func)
+//{
+//    runloop_eventfd_queue_add(qref->queue, func);
+//}
+//Functor itqueue_remove(InterthreadQueueRef qref)
+//{
+//    Functor func = runloop_eventfd_queue_remove(qref->queue);
+//    return func;
+//}
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// reader cntext
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define Reader_TAG "Qreader"
 typedef struct QReader_s {
     RBL_DECLARE_TAG;
-    RunloopRef   _reactor_ref;
+    InterthreadQueueRef queue;
+    RunloopRef runloop_ref;
     int count;
     int expected_count;
-    EventfdQueueRef         evqueue_ref;
-    RunloopQueueWatcherRef  queue_watcher_ref;
+    RBL_DECLARE_END_TAG;
 } QReader, *QReaderRef;
 
-void qcallback(RunloopQueueWatcherRef qref, uint64_t event)
-{
-    printf("queue handler\n");
-}
 
-
-QReaderRef qreader_new(int expected_count)
+QReaderRef queue_reader_new(RunloopRef rl, InterthreadQueueRef queue, int expected_count)
 {
     QReaderRef this = malloc(sizeof(QReader));
-    RBL_SET_TAG(QReader_TAG, this);
+    RBL_SET_TAG(Reactor_TAG, this);
+    RBL_SET_END_TAG(Reactor_TAG, this);
+    this->queue = queue;
+    this->runloop_ref = rl;
     this->expected_count = expected_count;
-    this->count = 0;
-    this->_reactor_ref = runloop_new();
-    REACTOR_CHECK_TAG(this->_reactor_ref)
-    this->evqueue_ref = runloop_eventfd_queue_new();
-    this->queue_watcher_ref = runloop_queue_watcher_new(this->_reactor_ref, this->evqueue_ref);
-    runloop_queue_watcher_register(this->queue_watcher_ref, qcallback, this);
-
-//    runloop_ref->interthread_queue_watcher_ref = runloop_queue_watcher_new(runloop_ref,
-//                                                                           runloop_ref->interthread_queue_ref);
-//    uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
-//    runloop_queue_watcher_register(runloop_ref->interthread_queue_watcher_ref, &interthread_queue_handler,
-//                                   (void *) runloop_ref->interthread_queue_ref);
-//
-//    runloop_enable_interthread_queue(this->_reactor_ref);
+    this->count = 1;
     return this;
 }
-
-void qreader_free(QReaderRef rdrref)
+void queue_reader_dispose(QReaderRef this)
 {
-    RBL_CHECK_TAG(QReader_TAG, rdrref);
-    runloop_free(rdrref->_reactor_ref);
-    free(rdrref);
-}
-RunloopRef qreader_get_reactor(QReaderRef qr)
-{
-    RBL_CHECK_TAG(QReader_TAG, qr);
-    return qr->_reactor_ref;
-}
-EventfdQueueRef  qreader_get_evqueue(QReaderRef qr)
-{
-    RBL_CHECK_TAG(QReader_TAG, qr);
-    return qr->_reactor_ref->interthread_queue_ref;
-}
-RunloopQueueWatcherRef qreader_get_queue_watcher(QReaderRef qr)
-{
-    RBL_CHECK_TAG(QReader_TAG, qr);
-    return qr->_reactor_ref->interthread_queue_watcher_ref;
-}
-
-void qreader_post(QReaderRef rdrref, PostableFunction f, void* arg)
-{
-    RunloopRef rx = qreader_get_reactor(rdrref);
-    runloop_post(rx, f, arg);
-}
-
-typedef struct QWriter_s {
-    RBL_DECLARE_TAG;
-    QReaderRef   qrdr_ref;
-    EventfdQueueRef queue;
-    int count_max;
-    int count;
-} QWriter, *QWriterRef;
-
-QWriterRef QWriter_new(QReaderRef qrdr, int max)
-{
-    QWriterRef this = malloc(sizeof(QWriter));
-    RBL_SET_TAG(QWriter_TAG, this);
-    this->qrdr_ref = qrdr;
-    this->queue = qreader_get_evqueue(this->qrdr_ref);
-    this->count_max = max;
-    this->count = 0;
-}
-
-void QWriter_free(QWriterRef this)
-{
-    qreader_free(this->qrdr_ref);
     free(this);
 }
-void timercb(RunloopTimerRef timer, uint64_t event)
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Writer context
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define Writer_TAG "QWrtr"
+#define WrtrArg_TAG "WrtrArg"
+typedef struct QWriter_s {
+    RBL_DECLARE_TAG;
+    InterthreadQueueRef queue;
+    RunloopRef rdr_runloop_ref;
+    int count_max;
+    long post_count;
+    RBL_DECLARE_END_TAG;
+} QWriter, *QWriterRef;
+
+typedef struct WriterArg {
+    RBL_DECLARE_TAG;
+    long count;
+    long post_count;
+    QWriterRef qwriter_ref;
+    RBL_DECLARE_END_TAG;
+} WriterArg, *WriterArgRef;
+
+QWriterRef queue_writer_new(RunloopRef rl, InterthreadQueueRef queue, int max)
 {
-    printf("readthread timer ccb\n");
+    QWriterRef this = malloc(sizeof(QReader));
+    RBL_SET_TAG(Writer_TAG, this);
+    RBL_SET_END_TAG(Writer_TAG, this)
+    this->rdr_runloop_ref = rl;
+    this->queue = queue;
+    this->count_max = max;
+    this->post_count = 0;
+    return this;
 }
+void queue_writer_dispose(QReaderRef this)
+{
+    free(this);
+}
+WriterArgRef writer_arg_new(QWriterRef qwrtr_ref, long count)
+{
+    WriterArgRef waref = malloc(sizeof(WriterArg));
+    RBL_SET_TAG(WrtrArg_TAG, waref)
+    RBL_SET_END_TAG(WrtrArg_TAG, waref)
+    waref->count = count;
+    waref->post_count = 1;
+    waref->qwriter_ref = qwrtr_ref;
+    return waref;
+}
+//void queue_event_handler(RunloopQueueWatcherRef qw, uint64_t event)
+//{
+//    void* ctx = qw->queue_event_handler_arg;
+//    QReaderRef rdr = (QReaderRef)ctx;
+//    RunloopRef rl = runloop_queue_watcher_get_reactor(qw);
+//    InterthreadQueueRef queue = rdr->queue;
+//    Functor queue_data = runloop_eventfd_queue_remove(queue->queue);
+//
+//    WriterArgRef writer_arg_ref = (WriterArgRef)queue_data.arg;
+//
+//    printf("Q Handler received %p count: %d\n", &queue_data, rdr->count);
+//    bool x = (long)writer_arg_ref->count == (long)rdr->count;
+//    RBL_ASSERT(x, "count check failed in queue_event_handler");
+//    rdr->count++;
+//    // now call the postable function passed by the writer
+//
+//    PostableFunction pf = queue_data.f;
+//    void* postable_arg = queue_data.arg;
+//    runloop_post(rl, pf, postable_arg);
+//
+//    if (rdr->count >= rdr->expected_count) {
+//        runloop_queue_watcher_deregister(qw);
+//    }
+//
+//}
+/**
+ * arg is QReaderRef
+ */
 void* reader_thread_func(void* arg)
 {
     QReaderRef q_rdr_ctx = (QReaderRef)arg;
-    RBL_CHECK_TAG(QReader_TAG, q_rdr_ctx)
-    RunloopRef runloop_ref = qreader_get_reactor(q_rdr_ctx);
-    RunloopTimerRef timerref = runloop_timer_set(runloop_ref, &timercb, NULL, 2000, true);
-    REACTOR_CHECK_TAG(runloop_ref)
-    RunloopQueueWatcherRef qw = qreader_get_queue_watcher(q_rdr_ctx);
-
-
-    WQUEUE_CHECK_TAG(qw)
+    RunloopRef runloop_ref = q_rdr_ctx->runloop_ref;
+    pid_t tid = gettid();
+//    RunloopQueueWatcherRef qw = runloop_queue_watcher_new(runloop_ref, q_rdr_ctx->queue);
+//    runloop_queue_watcher_register(qw, queue_event_handler, arg);
+    printf("reader thread rl: %p tid: %ld\n", runloop_ref, (long)tid);
     runloop_run(runloop_ref, -1);
     return NULL;
 }
-void writers_postable_func(RunloopRef runloop_ref, void* arg)
+/**
+ *  The writer thread wants this function run on the reader thread
+ */
+void writer_post_function(RunloopRef rl, void* arg)
 {
-    RunloopQueueWatcherRef wqref = (RunloopQueueWatcherRef)arg;
-    WQUEUE_CHECK_TAG(wqref)
-    QWriterRef wrtref = (QWriterRef)wqref->queue_event_handler_arg;
-    RBL_CHECK_TAG(QWriter_TAG, wrtref);
-    printf("writers postable func arg: %p rdrref:%p count:%d max_count:%d\n", arg, wrtref, wrtref->count, wrtref->count_max);
-    if (wrtref->count >= wrtref->count_max) {
-        printf("writer is done\n");
-        runloop_queue_watcher_deregister(wqref);
+    WriterArgRef wref = (WriterArgRef)arg;
+    QWriterRef qwrtr_ref = wref->qwriter_ref;
+    qwrtr_ref->post_count++;
+    long pcount = qwrtr_ref->post_count;
+    long count = wref->count;
+    pthread_t mytid = pthread_self();
+    pid_t tid = gettid();
+    printf("writer post function thread: %ld  rl: %p arg: %p arg->count: %ld post_count: %ld\n",
+           (long)tid, rl, arg, count, pcount);
+    if(count == qwrtr_ref->count_max) {
+        runloop_queue_watcher_deregister(qwrtr_ref->queue->qwatcher_ref);
+//        close(qwrtr_ref->rdr_runloop_ref->epoll_fd);
     }
 }
+/**
+ *  arg is a QWriterRef
+ */
 void* writer_thread_func(void* arg)
 {
     QWriterRef wrtr = (QWriterRef)arg;
-    RunloopRef runloop_ref = qreader_get_reactor(wrtr->qrdr_ref);
-    RBL_CHECK_TAG(QWriter_TAG, wrtr)
-    for(long i = 0; i <= wrtr->count_max; i++) {
+    InterthreadQueueRef itqref = wrtr->queue;
+    pid_t tid = gettid();
+    printf("writer thread tid: %ld \n", (long)tid);
+    for(long i = 1; i <= 10; i++) {
         usleep(500000);
-        wrtr->count = (int)i;
-        printf("writer thread  i: %ld\n", i);
-        /**
-         * This is the big test - send to a reactor on an other thread
-         */
-        runloop_interthread_post(runloop_ref, &writers_postable_func, (void *) wrtr);
+        WriterArgRef writer_arg_ref = writer_arg_new(wrtr, i);
+        Functor func = {.f = (void*)&writer_post_function, .arg = (void*) writer_arg_ref};
+        itqueue_add(itqref, func);
+//        runloop_eventfd_queue_add(wrtr->queue, func);
+//        if(wrtr->rdr_runloop_ref->interthread_queue_ref != NULL) {
+//            runloop_eventfd_queue_add(wrtr->rdr_runloop_ref->interthread_queue_ref, func);
+//        }
     }
     return NULL;
 }
 /**
- * start a reader thread and a writer thread.
- * The writer thread periodically posts or schedules a call back to run
- * on a runloop owned by the reader thread.
- * That callback uses a context to count the number of times it is called
+ * Test EventFdQueue using a reader and write thread.
+ * Writer thread loops a number of times writing data to an instance of EventFdQueue
+ * Reader thread has a runloop and a RunloopQueueWatcher waiting for data on the
+ * same EventFdQueue.
+ * The queue watcher counts the number of times it receives data on the queue
+ * and terminates when it has the expected number.
+ *
+ * IN addition the data from the queue is a postable function and an arg value.
+ *
+ * The queue watcher function posts that function to the readers runloop.
+ * TODO - need a way of counting the number of calls to the writer_post_function.
+ * TODO current can only verify writer_post_function is called by debugging
+ *
+ * test passes if both reader and write counted the same number of time data
+ * was transmitted via the queue.
+ *
+ * Success demonstrate how another thread can post a function to a runloop
+ *
+ * @return
  */
-int test_itq()
+int test_q()
 {
-    QReaderRef rdr = qreader_new(10);
-    QWriterRef wrtr = QWriter_new(rdr, 10);
+    RunloopRef rdr_runloop_ref = runloop_new();
+    InterthreadQueueRef itqref = itqueue_new(rdr_runloop_ref);
+    QReaderRef rdr = queue_reader_new(rdr_runloop_ref, itqref, 10);
+    QWriterRef wrtr = queue_writer_new(rdr_runloop_ref, itqref, 10);
 
     pthread_t rdr_thread;
     pthread_t wrtr_thread;
 
     int r_rdr = pthread_create(&rdr_thread, NULL, reader_thread_func, (void*)rdr);
-//    int r_wrtr = pthread_create(&wrtr_thread, NULL, writer_thread_func, (void*)wrtr);
+    int r_wrtr = pthread_create(&wrtr_thread, NULL, writer_thread_func, (void*)wrtr);
 
     pthread_join(rdr_thread, NULL);
-//    pthread_join(wrtr_thread, NULL);
-    UT_TRUE((wrtr->count == wrtr->count_max));
+    pthread_join(wrtr_thread, NULL);
+    printf("expected_count : %ld count: %ld count_max: %ld post_count: %ld",(long)rdr->expected_count, (long)rdr->count, (long)wrtr->count_max, (long)wrtr->post_count);
+    UT_TRUE((rdr->expected_count == wrtr->post_count));
+    UT_TRUE((wrtr->post_count == wrtr->count_max));
     return 0;
 }
 
 int main()
 {
-    UT_ADD(test_itq);
+    UT_ADD(test_q);
     int rc = UT_RUN();
     return rc;
 }

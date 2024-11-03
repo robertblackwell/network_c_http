@@ -1,108 +1,57 @@
-#include <http_in_c/runloop/runloop.h>
-#include <http_in_c//runloop/rl_internal.h>
-#include <rbl/logger.h>
 
 #include <assert.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
+#include <pthread.h>
+/* See feature_test_macros(7) */
+#include <stdint.h>
+#include <string.h>
 
-static void static_handler(RunloopEventfdRef watcher, uint64_t event)
-{
-    RunloopEventfdRef eventfd_ref = watcher;
-    RunloopInterthreadQueueRef itq_ref = (RunloopInterthreadQueueRef) eventfd_ref->fd_event_handler_arg;
-    ITQUEUE_CHECK_TAG(itq_ref)
-    assert(eventfd_ref == itq_ref->eventfd_ref);
-    assert(itq_ref->queue_event_handler != NULL);
-    itq_ref->queue_event_handler(itq_ref->queue_event_handler_arg);
-}
-static void anonymous_free(RunloopWatcherRef p)
-{
-    RunloopInterthreadQueueRef queue_watcher_ref = (RunloopInterthreadQueueRef)p;
-    ITQUEUE_CHECK_TAG(queue_watcher_ref)
-    runloop_interthread_queue_dispose(queue_watcher_ref);
-}
-void runloop_interthread_queue_init(RunloopInterthreadQueueRef this, RunloopRef runloop)
-{
-    ITQUEUE_SET_TAG(this);
-    this->eventfd_ref = runloop_eventfd_new(runloop);
-    this->queue = RunList_new();
-//    this->queue_event_handler = NULL;
-//    this->queue_event_handler_arg = NULL;
-}
-RunloopInterthreadQueueRef runloop_interthread_queue_new(RunloopRef runloop_ref)
-{
-    RunloopInterthreadQueueRef this = malloc(sizeof(RunloopInterthreadQueue ));
-    runloop_interthread_queue_init(this, runloop_ref);
-    return this;
-}
-void runloop_interthread_queue_dispose(RunloopInterthreadQueueRef this)
-{
-    ITQUEUE_CHECK_TAG(this)
-    close(this->eventfd_ref->fd);
-    free((void*)this);
-}
-void runloop_interthread_queue_add(RunloopInterthreadQueueRef this, void* item)
-{
-    ITQUEUE_CHECK_TAG(this)
-    pthread_mutex_lock(&(this->queue_mutex));
-    List_add_back(this->queue, item);
-    RBL_LOG_FMT("Queue_add: %d\n", List_size(me->list));
-//    runloop_eventfd_fire(this->eventfd_ref);
-    uint64_t buf = 1;
-    int x = write(this->eventfd_ref->write_fd, &buf, sizeof(buf));
-    assert(x == sizeof(buf));
+#include <sys/epoll.h>
+#include <rbl/macros.h>
+#include <http_in_c/common/utils.h>
+#include <http_in_c/runloop/runloop.h>
+#include <http_in_c/runloop/rl_internal.h>
+//struct InterthreadQueue_s;
+//typedef struct InterthreadQueue_s InterthreadQueue, *InterthreadQueueRef;
+//InterthreadQueueRef itqueue_new(RunloopRef rl);
+//void itqueue_add(InterthreadQueueRef qref, Functor func);
+//Functor itqueue_remove(InterthreadQueueRef qref);
 
-    pthread_mutex_unlock(&(this->queue_mutex));
-
-}
-void runloop_interthread_queue_drain(RunloopInterthreadQueueRef this, void(*draincb)(void*))
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// InterthreadQueue
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+static void itqueue_event_handler(RunloopQueueWatcherRef qwref, uint64_t events)
 {
-    ITQUEUE_CHECK_TAG(this)
-    RunloopRef rx = this->eventfd_ref->runloop;
-    pthread_mutex_lock(&(this->queue_mutex));
-    for(void* op = List_remove_first(this->queue); op != NULL;) {
-        draincb(op);
-    }
-    runloop_eventfd_clear_all_events(this->eventfd_ref);
-    pthread_mutex_unlock(&(this->queue_mutex));
-    RBL_LOG_FMT("Queue_pop: socket is %ld nread: %d buf : %ld\n", (long)op, nread, buf);
-    // remember to read from the pipe to clear the event
-}
-void runloop_interthread_queue_register(RunloopInterthreadQueueRef this, InterthreadQueueEventHandler evhandler, void* arg, uint64_t watch_what)
-{
-    ITQUEUE_CHECK_TAG(this)
-
-    uint32_t interest = watch_what;
-    void* eventfd_ptr = this->eventfd_ref;
-    void* queue_handler_ptr = &(this->queue_event_handler);
-    void* queue_handler_arg = &(this->queue_event_handler_arg);
-    this->queue_event_handler = evhandler;
-    this->queue_event_handler_arg = arg;
-    this->eventfd_ref->fd_event_handler = static_handler;
-    this->eventfd_ref->fd_event_handler_arg = (void*) this;
-    runloop_eventfd_register(this->eventfd_ref);
-//    int res = runloop_register(this->runloop, this->fd, interest, (RunloopWatcherRef) (this));
-//    assert(res ==0);
-}
-void runloop_interthreaD_queue_deregister(RunloopInterthreadQueueRef this)
-{
-    ITQUEUE_CHECK_TAG(this)
-    int res = runloop_deregister(this->eventfd_ref->runloop, this->eventfd_ref->fd);
-    assert(res == 0);
-}
-RunloopRef runloop_interthread_queue_get_reactor(RunloopInterthreadQueueRef this)
-{
-    ITQUEUE_CHECK_TAG(this)
-    return this->eventfd_ref->runloop;
-}
-int runloop_interthread_queue_get_fd(RunloopInterthreadQueueRef this)
-{
-    ITQUEUE_CHECK_TAG(this)
-    return this->eventfd_ref->fd;
+    void* ctx = qwref->queue_event_handler_arg;
+    RunloopRef rl = runloop_queue_watcher_get_reactor(qwref);
+    EventfdQueueRef queue = qwref->queue;
+    Functor queue_data = runloop_eventfd_queue_remove(queue);
+    RBL_ASSERT((!Functor_is_empty(&(queue_data))), "An empty entry in a func list");
+    PostableFunction pf = queue_data.f;
+    void* postable_arg = queue_data.arg;
+    runloop_post(rl, pf, postable_arg);
 }
 
-void runloop_interthread_queue_verify(RunloopInterthreadQueueRef this)
+#define InterThreadQ_TYPE "itQu"
+
+InterthreadQueueRef itqueue_new(RunloopRef rl)
 {
-    ITQUEUE_CHECK_TAG(this)
+    InterthreadQueueRef itq_ref = malloc(sizeof(InterthreadQueue));
+    RBL_SET_TAG(InterThreadQ_TYPE, itq_ref);
+    RBL_SET_END_TAG(InterThreadQ_TYPE, itq_ref)
+    itq_ref->runloop = rl;
+    itq_ref->queue = runloop_eventfd_queue_new();
+    itq_ref->qwatcher_ref = runloop_queue_watcher_new(itq_ref->runloop, itq_ref->queue);
+    runloop_queue_watcher_register(itq_ref->qwatcher_ref, &itqueue_event_handler, itq_ref);
+    return itq_ref;
+}
+void itqueue_add(InterthreadQueueRef qref, Functor func)
+{
+    runloop_eventfd_queue_add(qref->queue, func);
+}
+Functor itqueue_remove(InterthreadQueueRef qref)
+{
+    Functor func = runloop_eventfd_queue_remove(qref->queue);
+    return func;
 }

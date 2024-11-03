@@ -24,7 +24,10 @@ void Functor_free(FunctorRef this)
 {
     free(this);
 }
-
+bool Functor_is_empty(FunctorRef this)
+{
+    return(this->f == NULL && this->arg == NULL);
+}
 void Functor_call(FunctorRef this, RunloopRef runloop_ref)
 {
     this->f(runloop_ref, this->arg);

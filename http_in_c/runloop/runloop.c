@@ -16,9 +16,9 @@
 #include <rbl/macros.h>
 #include <http_in_c/common/list.h>
 
-__thread RunloopRef my_reactor_ptr = NULL;
-
-#define CHECK_THREAD(reactor_ref) //assert(reactor_ref == my_reactor_ptr);
+//__thread RunloopRef my_reactor_ptr = NULL;
+//
+//#define CHECK_THREAD(reactor_ref) //assert(reactor_ref == my_reactor_ptr);
 
 
 
@@ -29,6 +29,7 @@ static void drain_callback(void* arg)
 static void interthread_queue_handler(RunloopQueueWatcherRef watcher, uint64_t event)
 {
     printf("interthread_queue_handler\n");
+    return;
     RunloopRef rx = runloop_queue_watcher_get_reactor(watcher);
     EventfdQueueRef evqref = watcher->queue;
     Functor func = runloop_eventfd_queue_remove(evqref);
@@ -68,10 +69,10 @@ static void runloop_epoll_ctl(RunloopRef athis, int op, int fd, uint64_t interes
     RBL_ASSERT((status == 0), "epoll ctl call failed");
 }
 
-RunloopRef runloop_get_threads_reactor()
-{
-    return my_reactor_ptr;
-}
+//RunloopRef runloop_get_threads_reactor()
+//{
+//    return my_reactor_ptr;
+//}
 
 /**
  * Create a new reactor runloop. Should only be one per thread
@@ -84,8 +85,7 @@ RunloopRef runloop_new(void) {
     return (RunloopRef)runloop;
 }
 void runloop_init(RunloopRef athis) {
-//    assert(my_reactor_ptr == NULL);
-    my_reactor_ptr = athis;
+
     RunloopRef runloop = athis;
 
     REACTOR_SET_TAG(runloop)
@@ -96,8 +96,12 @@ void runloop_init(RunloopRef athis) {
     RBL_LOG_FMT("runloop_new epoll_fd %d", runloop->epoll_fd);
     runloop->table = FdTable_new();
     runloop->ready_list = functor_list_new(runloop_READY_LIST_MAX);
+#ifdef RUNLOOP_ITQUEUE_ENABLE
+    runloop_enable_interthread_queue(runloop);
+#else
     runloop->interthread_queue_ref = NULL;
     runloop->interthread_queue_watcher_ref = NULL;
+#endif
 }
 void runloop_enable_interthread_queue(RunloopRef runloop_ref)
 {
@@ -111,7 +115,7 @@ void runloop_enable_interthread_queue(RunloopRef runloop_ref)
 void runloop_close(RunloopRef athis)
 {
     REACTOR_CHECK_TAG(athis)
-    CHECK_THREAD(athis)
+//    CHECK_THREAD(athis)
     athis->closed_flag = true;
     int status = close(athis->epoll_fd);
     RBL_LOG_FMT("runloop_close status: %d errno: %d", status, errno);
@@ -126,7 +130,7 @@ void runloop_close(RunloopRef athis)
 void runloop_free(RunloopRef athis)
 {
     REACTOR_CHECK_TAG(athis)
-    CHECK_THREAD(athis)
+//    CHECK_THREAD(athis)
     if(! athis->closed_flag) {
         runloop_close(athis);
     }
@@ -148,7 +152,7 @@ void runloop_free(RunloopRef athis)
 int runloop_register(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherRef wref)
 {
     REACTOR_CHECK_TAG(athis)
-    CHECK_THREAD(athis)
+//    CHECK_THREAD(athis)
     RBL_LOG_FMT("fd : %d  for events %d", fd, interest);
     runloop_epoll_ctl(athis, EPOLL_CTL_ADD, fd, interest);
     FdTable_insert(athis->table, wref, fd);
@@ -157,7 +161,7 @@ int runloop_register(RunloopRef athis, int fd, uint32_t interest, RunloopWatcher
 int runloop_deregister(RunloopRef athis, int fd)
 {
     REACTOR_CHECK_TAG(athis)
-    CHECK_THREAD(athis)
+//    CHECK_THREAD(athis)
     RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
     runloop_epoll_ctl(athis, EPOLL_CTL_DEL, fd, EPOLLEXCLUSIVE | EPOLLIN);
     FdTable_remove(athis->table, fd);
@@ -166,7 +170,7 @@ int runloop_deregister(RunloopRef athis, int fd)
 
 int runloop_reregister(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherRef wref) {
     REACTOR_CHECK_TAG(athis)
-    CHECK_THREAD(athis)
+//    CHECK_THREAD(athis)
     RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
     runloop_epoll_ctl(athis, EPOLL_CTL_MOD, fd, interest);
     RunloopWatcherRef wref_tmp = FdTable_lookup(athis->table, fd);
@@ -176,7 +180,7 @@ int runloop_reregister(RunloopRef athis, int fd, uint32_t interest, RunloopWatch
 void runloop_delete(RunloopRef athis, int fd)
 {
     REACTOR_CHECK_TAG(athis)
-    CHECK_THREAD(athis)
+//    CHECK_THREAD(athis)
     RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
     FdTable_remove(athis->table, fd);
 }
@@ -189,7 +193,7 @@ void print_events(struct epoll_event events[], int count)
 }
 int runloop_run(RunloopRef athis, time_t timeout) {
     REACTOR_CHECK_TAG(athis)
-    CHECK_THREAD(athis)
+//    CHECK_THREAD(athis)
     int result;
     struct epoll_event events[runloop_MAX_EPOLL_FDS];
 

@@ -70,11 +70,15 @@ void runloop_eventfd_queue_add(EventfdQueueRef athis, Functor item)
     pthread_mutex_unlock(&(me->queue_mutex));
 
 }
-Functor runloop_eventfd_queue_remove(EventfdQueueRef athis)
-{
-    EvfQueuePtr me = (EvfQueuePtr)athis;
+Functor runloop_eventfd_queue_remove(EventfdQueueRef athis) {
+    EvfQueuePtr me = (EvfQueuePtr) athis;
     pthread_mutex_lock(&(me->queue_mutex));
-    Functor op = functor_list_remove(me->list);
+    Functor op;
+    if (functor_list_size(me->list) > 0) {
+        op = functor_list_remove(me->list);
+    } else {
+        op.f = NULL; op.arg = NULL;
+    }
     uint64_t buf;
     int nread = read(me->readfd, &buf, sizeof(buf));
     pthread_mutex_unlock(&(me->queue_mutex));

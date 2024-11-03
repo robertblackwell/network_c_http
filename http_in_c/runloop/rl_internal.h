@@ -52,6 +52,7 @@ FunctorRef Functor_new(PostableFunction f, void* arg);
 void Functor_init(FunctorRef funref, PostableFunction f, void* arg);
 void Functor_free(FunctorRef athis);
 void Functor_call(FunctorRef athis, RunloopRef runloop_ref);
+bool Functor_is_empty(FunctorRef f);
 void Functor_dealloc(void **p);
 struct Functor_s
 {
@@ -221,14 +222,22 @@ struct RunloopQueueWatcher_s {
  */
 typedef uint64_t RunloopInterthreadQueueEvent;
 typedef void(RunloopInterthreadQueuetWatcherCallerback(void* ctx));
-struct RunloopInterthreadQueue_s {
+struct InterthreadQueue_s {
     RBL_DECLARE_TAG;
-    RunloopEventfdRef                      eventfd_ref;
-    ListRef                             queue;
-    pthread_mutex_t                     queue_mutex;
-    InterthreadQueueEventHandler        queue_event_handler;
-    void*                               queue_event_handler_arg;
-};
+    EventfdQueueRef queue;
+    RunloopRef runloop;
+    RunloopQueueWatcherRef qwatcher_ref;
+    RBL_DECLARE_END_TAG;
+};// InterthreadQueue_s;, InterthreadQueue, *InterthreadQueueRef;
+
+//struct RunloopInterthreadQueue_s {
+//    RBL_DECLARE_TAG;
+//    RunloopEventfdRef                      eventfd_ref;
+//    ListRef                             queue;
+//    pthread_mutex_t                     queue_mutex;
+//    InterthreadQueueEventHandler        queue_event_handler;
+//    void*                               queue_event_handler_arg;
+//};
 
 
 /**

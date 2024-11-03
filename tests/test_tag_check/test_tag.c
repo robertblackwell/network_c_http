@@ -2,9 +2,6 @@
 #include <stdlib.h>
 #include <rbl/unittest.h>
 
-
-#define RBL_TAG_CHECK_ON
-
 #define TypeA_TAG "TYPEA"
 #include <rbl/check_tag.h>
 
