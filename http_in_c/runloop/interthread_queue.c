@@ -21,11 +21,12 @@
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // InterthreadQueue
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-static void itqueue_event_handler(RunloopQueueWatcherRef qwref, uint64_t events)
+static void itqueue_postable(RunloopRef rl, void* itq_ref_arg)//(RunloopQueueWatcherRef qwref, uint64_t events)
 {
-    void* ctx = qwref->queue_event_handler_arg;
-    RunloopRef rl = runloop_queue_watcher_get_reactor(qwref);
-    EventfdQueueRef queue = qwref->queue;
+    InterthreadQueueRef itq_ref = itq_ref_arg;
+//    void* ctx = qwref->queue_postable_arg;
+//    RunloopRef rl = runloop_queue_watcher_get_reactor(qwref);
+    EventfdQueueRef queue = itq_ref->queue;
     Functor queue_data = runloop_eventfd_queue_remove(queue);
     RBL_ASSERT((!Functor_is_empty(&(queue_data))), "An empty entry in a func list");
     PostableFunction pf = queue_data.f;
@@ -43,7 +44,7 @@ InterthreadQueueRef itqueue_new(RunloopRef rl)
     itq_ref->runloop = rl;
     itq_ref->queue = runloop_eventfd_queue_new();
     itq_ref->qwatcher_ref = runloop_queue_watcher_new(itq_ref->runloop, itq_ref->queue);
-    runloop_queue_watcher_register(itq_ref->qwatcher_ref, &itqueue_event_handler, itq_ref);
+    runloop_queue_watcher_register(itq_ref->qwatcher_ref, &itqueue_postable, itq_ref);
     return itq_ref;
 }
 void itqueue_add(InterthreadQueueRef qref, Functor func)

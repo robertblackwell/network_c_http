@@ -30,8 +30,8 @@ typedef struct WriteCtx_s {
     char*               id;
     int                 writefd;
     int                 interval_ms;
-    RunloopStreamRef  swatcher;
-    RunloopTimerRef   twatcher;
+    RunloopStreamRef    swatcher;
+    RunloopTimerRef     twatcher;
 } WriteCtx;
 void WriteCtx_init(WriteCtx* this, int fd, RunloopStreamRef swatcher, RunloopTimerRef twatcher, int max);
 

@@ -19,8 +19,11 @@
 static void handler(RunloopWatcherRef watcher, uint64_t event)
 {
     RunloopListenerRef listener_ref = (RunloopListenerRef)watcher;
-    if(listener_ref->listen_evhandler) {
-        listener_ref->listen_evhandler(listener_ref,  event);
+    if(listener_ref->listen_postable) {
+        /**
+         * This should be posted not called
+         */
+        listener_ref->listen_postable(listener_ref->runloop,  listener_ref->listen_postable_arg);
     }
 }
 static void anonymous_free(RunloopWatcherRef p)
@@ -36,8 +39,8 @@ void runloop_listener_init(RunloopListenerRef athis, RunloopRef runloop, int fd)
     athis->free = &anonymous_free;
     athis->handler = &handler;
     athis->context = athis;
-    athis->listen_arg = NULL;
-    athis->listen_evhandler = NULL;
+    athis->listen_postable_arg = NULL;
+    athis->listen_postable = NULL;
 }
 RunloopListenerRef runloop_listener_new(RunloopRef runloop, int fd)
 {
@@ -51,16 +54,16 @@ void runloop_listener_free(RunloopListenerRef athis)
     close(athis->fd);
     free((void*)athis);
 }
-void runloop_listener_register(RunloopListenerRef athis, ListenerEventHandler event_handler, void* arg)
+void runloop_listener_register(RunloopListenerRef athis, PostableFunction postable, void* postable_arg)
 {
     runloop_listener_verify(athis);
     athis->handler = &handler;
     athis->context = athis;
-    if( event_handler != NULL) {
-        athis->listen_evhandler = event_handler;
+    if( postable != NULL) {
+        athis->listen_postable = postable;
     }
-    if (arg != NULL) {
-        athis->listen_arg = arg;
+    if (postable_arg != NULL) {
+        athis->listen_postable_arg = postable_arg;
     }
 
     /**
@@ -79,14 +82,14 @@ void runloop_listener_deregister(RunloopListenerRef athis)
     LISTNER_CHECK_TAG(athis)
     runloop_deregister(athis->runloop, athis->fd);
 }
-void runloop_listener_arm(RunloopListenerRef athis, ListenerEventHandler fd_event_handler, void* arg)
+void runloop_listener_arm(RunloopListenerRef athis, PostableFunction postable, void* postable_arg)
 {
     LISTNER_CHECK_TAG(athis)
-    if(fd_event_handler != NULL) {
-        athis->listen_evhandler = fd_event_handler;
+    if(postable != NULL) {
+        athis->listen_postable = postable;
     }
-    if (arg != NULL) {
-        athis->listen_arg = arg;
+    if (postable_arg != NULL) {
+        athis->listen_postable_arg = postable_arg;
     }
     uint32_t interest = EPOLLIN; // | EPOLLEXCLUSIVE ;
 

@@ -19,7 +19,7 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //void itqueue_event_handler(RunloopQueueWatcherRef qwref, uint64_t events)
 //{
-//    void* ctx = qwref->queue_event_handler_arg;
+//    void* ctx = qwref->queue_postable_arg;
 //    RunloopRef rl = runloop_queue_watcher_get_reactor(qwref);
 //    EventfdQueueRef queue = qwref->queue;
 //    Functor queue_data = runloop_eventfd_queue_remove(queue);
@@ -134,9 +134,9 @@ WriterArgRef writer_arg_new(QWriterRef qwrtr_ref, long count)
     waref->qwriter_ref = qwrtr_ref;
     return waref;
 }
-//void queue_event_handler(RunloopQueueWatcherRef qw, uint64_t event)
+//void queue_postable(RunloopQueueWatcherRef qw, uint64_t event)
 //{
-//    void* ctx = qw->queue_event_handler_arg;
+//    void* ctx = qw->queue_postable_arg;
 //    QReaderRef rdr = (QReaderRef)ctx;
 //    RunloopRef rl = runloop_queue_watcher_get_reactor(qw);
 //    InterthreadQueueRef queue = rdr->queue;
@@ -146,7 +146,7 @@ WriterArgRef writer_arg_new(QWriterRef qwrtr_ref, long count)
 //
 //    printf("Q Handler received %p count: %d\n", &queue_data, rdr->count);
 //    bool x = (long)writer_arg_ref->count == (long)rdr->count;
-//    RBL_ASSERT(x, "count check failed in queue_event_handler");
+//    RBL_ASSERT(x, "count check failed in queue_postable");
 //    rdr->count++;
 //    // now call the postable function passed by the writer
 //
@@ -168,7 +168,7 @@ void* reader_thread_func(void* arg)
     RunloopRef runloop_ref = q_rdr_ctx->runloop_ref;
     pid_t tid = gettid();
 //    RunloopQueueWatcherRef qw = runloop_queue_watcher_new(runloop_ref, q_rdr_ctx->queue);
-//    runloop_queue_watcher_register(qw, queue_event_handler, arg);
+//    runloop_queue_watcher_register(qw, queue_postable, arg);
     printf("reader thread rl: %p tid: %ld\n", runloop_ref, (long)tid);
     runloop_run(runloop_ref, -1);
     return NULL;

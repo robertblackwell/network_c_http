@@ -62,7 +62,7 @@ void Writer_add_fd(Writer* this, int fd, int max, int interval_ms)
     this->ctx_table[this->count].writefd = fd;
     this->count++;
 }
-static void wrtr_wait(RunloopTimerRef watch, uint64_t event);
+static void wrtr_wait_timer_fired(RunloopRef rl, void* arg);
 static void wrtr_cb(RunloopStreamRef sock_watch, uint64_t event)
 {
     RunloopRef reactor = sock_watch->runloop;
@@ -91,15 +91,18 @@ static void wrtr_cb(RunloopStreamRef sock_watch, uint64_t event)
     // rearm the timer
     runloop_timer_rearm(ctx->twatcher);
 }
-static void wrtr_wait(RunloopTimerRef watch, uint64_t event)
+static void wrtr_wait_timer_fired(RunloopRef rl, void* ctx_p_arg)
 {
-    WTIMER_CHECK_TAG(watch)
     RBL_LOG_FMT("test_io: Socket watcher wrtr_wait\n");
-    WriteCtx* ctx = (WriteCtx*)(watch->timer_handler_arg);
+    WriteCtx* ctx = ctx_p_arg;
+    RunloopRef runloop_ref = ctx->swatcher->runloop;
+    RunloopStreamRef stream_ref = ctx->swatcher;
+    RunloopTimerRef timer_ref = ctx->twatcher;
+    int fd = stream_ref->fd;
     WR_CTX_CHECK_TAG(ctx)
     SOCKW_CHECK_TAG(ctx->swatcher)
     WTIMER_CHECK_TAG(ctx->twatcher)
-    RBL_LOG_FMT("test_io: Socket watcher wrtr_wait fd: %d event : %lx errno: %d\n", watch->fd, event, errno);
+    RBL_LOG_FMT("test_io: Socket watcher wrtr_wait_timer_fired write_fd: %d", ctx->writefd);
 
     int write_here = 0;
     if(write_here) {
@@ -108,7 +111,7 @@ static void wrtr_wait(RunloopTimerRef watch, uint64_t event)
         int nwrite = write(ctx->writefd, wbuf, strlen(wbuf));
         free(wbuf);
     } else {
-        runloop_timer_disarm(watch);
+        runloop_timer_disarm(timer_ref);
         uint64_t interest = EPOLLERR | EPOLLOUT;
         runloop_stream_arm_write(ctx->swatcher, &wrtr_cb, (void *) ctx);
     }
@@ -123,7 +126,7 @@ void* writer_thread_func(void* arg)
 
         wrtr->ctx_table[i].swatcher = runloop_stream_new(runloop_ref, ctx->writefd);
         wrtr->ctx_table[i].twatcher = runloop_timer_new(runloop_ref);
-        runloop_timer_register(wrtr->ctx_table[i].twatcher, &wrtr_wait, (void *) ctx, ctx->interval_ms, true);
+        runloop_timer_register(wrtr->ctx_table[i].twatcher, &wrtr_wait_timer_fired, (void *) ctx, ctx->interval_ms, true);
 
         WR_CTX_CHECK_TAG(ctx)
         WTIMER_CHECK_TAG(ctx->twatcher);

@@ -21,8 +21,8 @@
 #include <http_in_c/sync/sync_client.h>
 
 
-static void on_event_listening(RunloopListenerRef listener_ref, uint64_t event);
-static void on_timer(RunloopTimerRef watcher, EventMask event);
+static void on_event_listening(RunloopRef rl, void* listener_ref_arg);
+static void on_timer(RunloopRef rl, void* arg);
 
 
 ListenerRef Listener_new(int listen_fd)
@@ -69,35 +69,33 @@ void Listener_listen(ListenerRef sref)
 /**
  * When the timer fires it is time to kill the listener.
  */
-static void on_timer(RunloopTimerRef watcher, EventMask event)
+static void on_timer(RunloopRef rl, void* listener_ref_arg)
 {
     printf("on_timer entered \n");
-    uint64_t epollin = EPOLLIN & event;
-    uint64_t error = EPOLLERR & event;
-    ListenerRef listener_ref = (ListenerRef) watcher->timer_handler_arg;
-    RBL_LOG_FMT("event is : %lx  EPOLLIN: %ld  EPOLLERR: %ld", event, epollin, error);
+    ListenerRef listener_ref = (ListenerRef) listener_ref_arg;
+    RBL_LOG_MSG("on_timer closing runloop ");
     runloop_close(listener_ref->reactor_ref);
 //    runloop_free(listener_ref->reactor_ref);
 }
 
-static void on_event_listening(RunloopListenerRef listener_ref, uint64_t event)
+static void on_event_listening(RunloopRef rl, void* listener_ref_arg)
 {
     printf("listening_hander \n");
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
 
-    ListenerRef server_ref = listener_ref->listen_arg;
-    int sock2 = accept(server_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
+    ListenerRef listener_ref  = listener_ref_arg;
+    int sock2 = accept(listener_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
     if(sock2 <= 0) {
         int errno_saved = errno;
         RBL_LOG_FMT("%s %d %d %s", "Listener thread :: accept failed terminating sock2 : ", sock2, errno, strerror(errno_saved));
     } else {
-        printf("Sock2 successfull sock: %d server_ref %p listen_ref: %p  listen_count: %d\n", sock2, server_ref, listener_ref, server_ref->listen_counter);
-        if(server_ref->listen_counter == 0) {
+        printf("Sock2 successfull sock: %d server_ref %p listen_ref: %p  listen_count: %d\n", sock2, listener_ref, listener_ref, listener_ref->listen_counter);
+        if(listener_ref->listen_counter == 0) {
             // pretend to be busy
             sleep(1);
         }
-        server_ref->listen_counter++;
+        listener_ref->listen_counter++;
         sleep(0.6);
     }
     close(sock2);

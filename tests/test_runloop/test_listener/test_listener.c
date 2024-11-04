@@ -39,6 +39,7 @@ int test_listeners()
     int fd = create_listener_socket(9001, "localhost");
     set_non_blocking(fd);
     tclient.listen_fd = fd;
+
     ListenerRef server1 = Listener_new(fd);
     ListenerRef server2 = Listener_new(fd);
 

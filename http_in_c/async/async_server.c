@@ -28,7 +28,7 @@ void async_socket_bind(int socket, int port, const char* host);
 int async_bind_and_listen_socket(int socket, int port, const char *host);
 #endif
 
-void on_event_listening(RunloopListenerRef listener_watcher_ref, uint64_t event);
+void on_event_listening(RunloopRef rl, void* server_ref_arg);
 static void on_handler_completion_cb(AsyncServerRef sref, AsyncHandlerRef handler_ref)
 {
     RBL_LOG_FMT("file: async_server.c on_handler_completion_cb");
@@ -189,11 +189,12 @@ void async_socket_bind(int socket, int port, const char* host)
 }
 #endif
 
-void on_event_listening(RunloopListenerRef listener_watcher_ref, uint64_t event)
+void on_event_listening(RunloopRef rl, void* server_ref_arg)
 {
     RBL_LOG_FMT("listening_hander");
-    AsyncServerRef server_ref = listener_watcher_ref->listen_arg;
+    AsyncServerRef server_ref = server_ref_arg;
     RBL_CHECK_TAG(AsyncServer_TAG, server_ref)
+    RunloopListenerRef listener_watcher_ref = server_ref->listening_watcher_ref;
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
 

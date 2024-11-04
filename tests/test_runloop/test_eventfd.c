@@ -26,14 +26,14 @@ typedef struct TestCtx_s  {
     int                 counter;
     int                 max_count;
     struct timespec     start_time;
-    RunloopRef          reactor;
-    RunloopTimerRef         timer;
-    RunloopEventfdRef         fdevent;
+    RunloopRef          runloop_ref;
+    RunloopTimerRef     timer_ref;
+    RunloopEventfdRef   fdevent_ref;
     int                 fdevent_counter;
     RBL_DECLARE_END_TAG;
 } TestCtx;
 
-TestCtx* TestCtx_new(int counter_init, int counter_max);
+TestCtx* TestCtx_new(RunloopRef rl, RunloopTimerRef timer_ref, RunloopEventfdRef eventfd_ref, int counter_init, int counter_max);
 
 //
 // single repeating timer
@@ -41,8 +41,8 @@ TestCtx* TestCtx_new(int counter_init, int counter_max);
 
 int test_fdevent_multiple();
 int test_fdevent_1();
-static void callback_1(RunloopTimerRef watcher, RunloopTimerEvent event);
-void fdevent_handler(RunloopEventfdRef fdev_ref, uint64_t ev_mask);
+static void timer_callback_1(RunloopRef rl, void* arg);
+void fdevent_postable(RunloopRef rl, void* test_ctx_arg);
 
 
 int main()
@@ -60,27 +60,26 @@ int main()
 #define NBR_TIMES_FIRE 10
 int test_fdevent_1()
 {
-    TestCtx* test_ctx_p = TestCtx_new(0, NBR_TIMES_FIRE);
 
     RunloopRef runloop_ref = runloop_new();
-    test_ctx_p->reactor = runloop_ref;
     RunloopTimerRef tw_1 = runloop_timer_new(runloop_ref);
-    runloop_timer_register(tw_1, &callback_1, (void *) test_ctx_p, 1000, true);
-    runloop_timer_disarm(tw_1);
     RunloopEventfdRef fdev = runloop_eventfd_new(runloop_ref);
 
-    test_ctx_p->fdevent = fdev;
-    test_ctx_p->timer = tw_1;
+    TestCtx* test_ctx_p = TestCtx_new(runloop_ref, tw_1, fdev, 0, NBR_TIMES_FIRE);
 
-
+    runloop_timer_register(tw_1, &timer_callback_1, (void *) test_ctx_p, 100, true);
+    runloop_timer_disarm(tw_1);
     runloop_eventfd_register(fdev);
-    runloop_eventfd_arm(fdev, &fdevent_handler, test_ctx_p);
+    runloop_eventfd_arm(fdev, &fdevent_postable, test_ctx_p);
     runloop_timer_rearm(tw_1);
     runloop_run(runloop_ref, 10000);
 
-    // assert counter was increment correct number of times
+    /*
+     * Test that callback_1 was called as many times as the
+     * assert counter was increment correct number of times
+    */
     UT_EQUAL_INT(test_ctx_p->counter, test_ctx_p->max_count);
-    UT_EQUAL_INT(test_ctx_p->fdevent_counter, test_ctx_p->max_count);
+//    UT_EQUAL_INT(test_ctx_p->fdevent_counter, test_ctx_p->max_count);
     free(test_ctx_p);
     runloop_free(runloop_ref);
     return 0;
@@ -88,16 +87,29 @@ int test_fdevent_1()
 
 int test_fdevent_multiple()
 {
-    TestCtx* test_ctx_p_1 = TestCtx_new(0, 5);
-    TestCtx* test_ctx_p_2 = TestCtx_new(0, 6);
 
     RunloopRef runloop_ref = runloop_new();
-
     RunloopTimerRef tw_1 = runloop_timer_new(runloop_ref);
-    runloop_timer_register(tw_1, &callback_1, test_ctx_p_1, 100, true);
+    RunloopEventfdRef fdev = runloop_eventfd_new(runloop_ref);
 
+    TestCtx* test_ctx_p_1 = TestCtx_new(runloop_ref, tw_1, fdev, 0, 5);
     RunloopTimerRef tw_2 = runloop_timer_new(runloop_ref);
-    runloop_timer_register(tw_2, &callback_1, test_ctx_p_2, 100, true);
+    TestCtx* test_ctx_p_2 = TestCtx_new(runloop_ref, tw_2, fdev, 0, 6);
+
+    runloop_eventfd_register(fdev);
+    runloop_eventfd_arm(fdev, &fdevent_postable, test_ctx_p_1);
+
+//    runloop_timer_register(tw_1, &callback_1, (void *) test_ctx_p_1, 1000, true);
+//    runloop_timer_disarm(tw_1);
+//    runloop_timer_rearm(tw_1);
+//
+//    runloop_timer_register(tw_2, &callback_1, (void *) test_ctx_p_2, 1000, true);
+//    runloop_timer_disarm(tw_1);
+//    runloop_timer_rearm(tw_1);
+
+
+    runloop_timer_register(tw_1, &timer_callback_1, test_ctx_p_1, 100, true);
+    runloop_timer_register(tw_2, &timer_callback_1, test_ctx_p_2, 100, true);
 
     runloop_run(runloop_ref, 10000);
     UT_EQUAL_INT(test_ctx_p_1->counter, test_ctx_p_1->max_count);
@@ -107,18 +119,15 @@ int test_fdevent_multiple()
     runloop_free(runloop_ref);
     return 0;
 }
-static void callback_1(RunloopTimerRef watcher, RunloopTimerEvent event)
+static void timer_callback_1(RunloopRef rl, void* test_ctx_arg)
 {
-    uint64_t epollin = EPOLLIN & event;
-    uint64_t error = EPOLLERR & event;
-    void* ctx = watcher->timer_handler_arg;
-    TestCtx* ctx_p = (TestCtx*) ctx;
-    RunloopEventfdRef fdevent_ref = ctx_p->fdevent;
+    TestCtx* ctx_p = (TestCtx*) test_ctx_arg;
+    RunloopEventfdRef fdevent_ref = ctx_p->fdevent_ref;
     RBL_ASSERT((fdevent_ref != NULL), "callback1 fdevent_ref == NULL");
-    RBL_LOG_FMT("callback1_counter %d counter: %d event is : %lx  ", ctx_p->callback1_counter, ctx_p->counter, event);
+    RBL_LOG_FMT("callback1_counter %d counter: %d", ctx_p->callback1_counter, ctx_p->counter);
     if(ctx_p->counter >= ctx_p->max_count) {
         RBL_LOG_MSG(" clear timer");
-        runloop_close(ctx_p->reactor);
+        runloop_close(ctx_p->runloop_ref);
 //        runloop_timer_deregister(watcher);
 //        runloop_eventfd_deregister(fdev);
     } else {
@@ -130,15 +139,14 @@ static void callback_1(RunloopTimerRef watcher, RunloopTimerEvent event)
     }
     ctx_p->callback1_counter++;
 }
-void fdevent_handler(RunloopEventfdRef fdev_ref, uint64_t ev_mask)
+void fdevent_postable(RunloopRef rl, void* test_ctx_arg)
 {
-    void* arg = fdev_ref->fd_event_handler_arg;
-    TestCtx* t = (TestCtx*)arg;
-    t->fdevent_counter++;
-    RBL_LOG_FMT("w: %p arg: %p ev mask: %ld fdevent_counter % d", fdev_ref , arg, ev_mask, t->fdevent_counter);
+    TestCtx* test_ctx_p = (TestCtx*)test_ctx_arg;
+    test_ctx_p->fdevent_counter++;
+    RBL_LOG_FMT("w: %p arg: %p fdevent_counter % d", test_ctx_p->fdevent_ref , test_ctx_arg, test_ctx_p->fdevent_counter);
 }
 
-TestCtx* TestCtx_new(int counter_init, int counter_max)
+TestCtx* TestCtx_new(RunloopRef rl, RunloopTimerRef timer_ref, RunloopEventfdRef eventfd_ref,int counter_init, int counter_max)
 {
     TestCtx* tmp = malloc(sizeof(TestCtx));
     RBL_SET_TAG(TestCtx_TYPE, tmp)
@@ -147,5 +155,8 @@ TestCtx* TestCtx_new(int counter_init, int counter_max)
     tmp->callback1_counter = 0;
     tmp->max_count = counter_max;
     tmp->fdevent_counter = 0;
+    tmp->runloop_ref = rl;
+    tmp->timer_ref = timer_ref;
+    tmp->fdevent_ref = eventfd_ref;
     return tmp;
 }

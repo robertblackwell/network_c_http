@@ -1,6 +1,16 @@
 New set of priorities Nov 2024:
-    make logger multi-threaded
-
+    ✔ make logger multi-threaded @done(24-11-03 20:42)
+    ☐ find the multi-threaded bug
+    ☐ timers do not post the callback - fix
+    ☐ runloop.h does not cleanly display the external interface, still too much private stuff
+    ☐ interthread queue - have a version that seems to work. More testing.
+    ✔ eventfd has 3 different mechanisms. Have tests that try them all @done(24-11-04 16:40)
+    ☐ review tests for io and listen
+    ☐ how to encode #define CCCCC inside the cmakelist.txt file to apply for part of the code base. More generally how to handle config via #defines
+    ✔ can some fds be level triggered while others are edge ? - answer is yes - level vs edge is by fd @done(24-11-04 08:56)
+    ☐ following on trigger question - change runloop functions so that some fd's can be level triggered and others edge
+    ☐ there is confusion between runloop_register and runloop_arm - clear up that confusion
+    ☐ epoll has a mechanism to remeber a void* for each fd - could used this rather than the fd to find the instance of the watcher struct
 
 
 This project is out of control:

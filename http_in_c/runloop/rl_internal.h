@@ -176,8 +176,8 @@ typedef struct EventfdQueue_s {
 typedef uint64_t WEventFdMask;
 struct RunloopEventfd_s {
     struct RunloopWatcher_s;
-    FdEventHandler      fd_event_handler;
-    void*               fd_event_handler_arg;
+    PostableFunction    fdevent_postable;
+    void*               fdevent_postable_arg;
     int                 write_fd;
 };
 
@@ -200,8 +200,8 @@ struct RunloopStream_s {
  */
 typedef struct RunloopListener_s {
     struct RunloopWatcher_s;
-    ListenerEventHandler     listen_evhandler;
-    void*                    listen_arg;
+    PostableFunction         listen_postable;
+    void*                    listen_postable_arg;
 } RunloopListener;
 
 /**
@@ -213,8 +213,8 @@ struct RunloopQueueWatcher_s {
     struct RunloopWatcher_s;
     EventfdQueueRef            queue;
     // reactor cb and arg
-    QueueEventHandler       queue_event_handler;
-    void*                   queue_event_handler_arg;
+    PostableFunction       queue_postable;
+    void*                  queue_postable_arg;
 };
 
 /**
@@ -235,8 +235,8 @@ struct InterthreadQueue_s {
 //    RunloopEventfdRef                      eventfd_ref;
 //    ListRef                             queue;
 //    pthread_mutex_t                     queue_mutex;
-//    InterthreadQueueEventHandler        queue_event_handler;
-//    void*                               queue_event_handler_arg;
+//    InterthreadQueueEventHandler        queue_postable;
+//    void*                               queue_postable_arg;
 //};
 
 

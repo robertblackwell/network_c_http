@@ -10,7 +10,10 @@ static void handler(RunloopWatcherRef watcher, uint64_t event)
 {
     RunloopQueueWatcherRef queue_watcher_ref = (RunloopQueueWatcherRef)watcher;
     WQUEUE_CHECK_TAG(queue_watcher_ref)
-    queue_watcher_ref->queue_event_handler(queue_watcher_ref, event);
+    /**
+     * should be posted to runloop not called
+     */
+    queue_watcher_ref->queue_postable(queue_watcher_ref->runloop, queue_watcher_ref->queue_postable_arg);
 }
 static void anonymous_free(RunloopWatcherRef p)
 {
@@ -42,14 +45,14 @@ void runloop_queue_watcher_dispose(RunloopQueueWatcherRef* athis)
     free((void*)*athis);
     *athis = NULL;
 }
-void runloop_queue_watcher_register(RunloopQueueWatcherRef athis, QueueEventHandler cb, void* arg)
+void runloop_queue_watcher_register(RunloopQueueWatcherRef athis, PostableFunction postable_cb, void* postable_arg)
 {
 //    WQUEUE_CHECK_TAG(this)
     uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
 
 //    uint32_t interest = watch_what;
-    athis->queue_event_handler = cb;
-    athis->queue_event_handler_arg = arg;
+    athis->queue_postable = postable_cb;
+    athis->queue_postable_arg = postable_arg;
     int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherRef) (athis));
     assert(res ==0);
 }
@@ -58,10 +61,10 @@ void runloop_queue_watcher_change_watch(RunloopQueueWatcherRef athis, QueueEvent
     WQUEUE_CHECK_TAG(athis)
     uint32_t interest = watch_what;
     if(cb != NULL) {
-        athis->queue_event_handler = cb;
+        athis->queue_postable = cb;
     }
     if (arg != NULL) {
-        athis->queue_event_handler_arg = arg;
+        athis->queue_postable_arg = arg;
     }
     int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherRef) athis);
     assert(res == 0);

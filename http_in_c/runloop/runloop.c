@@ -34,7 +34,7 @@ static void interthread_queue_handler(RunloopQueueWatcherRef watcher, uint64_t e
     EventfdQueueRef evqref = watcher->queue;
     Functor func = runloop_eventfd_queue_remove(evqref);
     void* pf = func.f;
-    watcher->queue_event_handler_arg = func.arg;
+    watcher->queue_postable_arg = func.arg;
     void* arg = (void*) watcher;
     long d = (long) func.arg;
     printf("reactor::interthread_queue_handler f: %p d: %ld \n", pf, d);
@@ -96,22 +96,18 @@ void runloop_init(RunloopRef athis) {
     RBL_LOG_FMT("runloop_new epoll_fd %d", runloop->epoll_fd);
     runloop->table = FdTable_new();
     runloop->ready_list = functor_list_new(runloop_READY_LIST_MAX);
-#ifdef RUNLOOP_ITQUEUE_ENABLE
-    runloop_enable_interthread_queue(runloop);
-#else
     runloop->interthread_queue_ref = NULL;
     runloop->interthread_queue_watcher_ref = NULL;
-#endif
 }
-void runloop_enable_interthread_queue(RunloopRef runloop_ref)
-{
-    runloop_ref->interthread_queue_ref = runloop_eventfd_queue_new();
-    runloop_ref->interthread_queue_watcher_ref = runloop_queue_watcher_new(runloop_ref,
-                                                                           runloop_ref->interthread_queue_ref);
-    uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
-    runloop_queue_watcher_register(runloop_ref->interthread_queue_watcher_ref, &interthread_queue_handler,
-                         (void *) runloop_ref->interthread_queue_ref);
-}
+//void runloop_enable_interthread_queue(RunloopRef runloop_ref)
+//{
+//    runloop_ref->interthread_queue_ref = runloop_eventfd_queue_new();
+//    runloop_ref->interthread_queue_watcher_ref = runloop_queue_watcher_new(runloop_ref,
+//                                                                           runloop_ref->interthread_queue_ref);
+//    uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
+//    runloop_queue_watcher_register(runloop_ref->interthread_queue_watcher_ref, &interthread_queue_handler,
+//                         (void *) runloop_ref->interthread_queue_ref);
+//}
 void runloop_close(RunloopRef athis)
 {
     REACTOR_CHECK_TAG(athis)
