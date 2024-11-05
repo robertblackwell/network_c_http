@@ -5,7 +5,8 @@
 
 DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef request)
 {
-    CHECK_TAG(DemoHandler_TAG, href)
+    RBL_CHECK_TAG(DemoHandler_TAG, href)
+    RBL_CHECK_END_TAG(DemoHandler_TAG, href)
     DemoMessageRef reply = demo_message_new();
     demo_message_set_is_request(reply, false);
     BufferChainRef request_body = demo_message_get_body(request);

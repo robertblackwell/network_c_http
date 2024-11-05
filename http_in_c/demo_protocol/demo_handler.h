@@ -19,9 +19,9 @@ typedef struct DemoHandler_s DemoHandler, *DemoHandlerRef;
 typedef void(*DH_Completion_CB)(void* server_ref, DemoHandlerRef href);
 
 typedef struct DemoHandler_s {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
     int                 raw_socket;
-    ReactorRef          reactor_ref;
+    RunloopRef          reactor_ref;
     DemoConnectionRef   demo_connection_ref;
     DH_Completion_CB    completion_callback;
 //    void(*completion_callback)(void* server_ref, DemoHandlerRef href);
@@ -29,17 +29,18 @@ typedef struct DemoHandler_s {
     ListRef             input_list;
     ListRef             output_list; // List of DemoMessageRef - responses
     DemoMessageRef      active_response;
+    RBL_DECLARE_END_TAG;
 
 } DemoHandler, *DemoHandlerRef;
 
 DemoHandlerRef demohandler_new(
         int socket,
-        ReactorRef reactor_ref,
+        RunloopRef reactor_ref,
         void(*completion_cb)(void*, DemoHandlerRef),
         void* completion_cb_arg);
 void demohandler_init(
         DemoHandlerRef this, int socket,
-        ReactorRef reactor_ref,
+        RunloopRef reactor_ref,
         void(*completion_cb)(void*, DemoHandlerRef),
         void* completion_cb_arg);
 void demohandler_free(DemoHandlerRef this);

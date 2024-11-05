@@ -1,7 +1,7 @@
 
 #define CHLOG_ON
 #include <http_in_c/async/async.h>
-#include <http_in_c/async/async_internal.h>
+#include <http_in_c/async/junk/async_internal.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -214,7 +214,7 @@ void on_event_listening(RunloopRef rl, void* server_ref_arg)
     async_socket_set_nonblocking(sock2);
     AsyncHandlerRef handler = async_handler_new(
             sock2,
-            runloop_listener_get_reactor(listener_watcher_ref),
+            runloop_listener_get_runloop(listener_watcher_ref),
             server_ref);
 
     List_add_back(server_ref->handler_list, handler);

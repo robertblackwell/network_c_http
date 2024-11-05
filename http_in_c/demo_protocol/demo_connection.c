@@ -24,51 +24,53 @@
 #define WRITE_STATE_ACTIVE   23
 #define WRITE_STATE_STOP     24
 
-static void event_handler(RtorStreamRef stream_ref, uint64_t event);
+static void event_handler(RunloopStreamRef stream_ref, uint64_t event);
 static void write_epollout(DemoConnectionRef connection_ref);
 static void read_epollin(DemoConnectionRef connection_ref);
 
 static void read_start(DemoConnectionRef connection_ref);
-static void postable_reader(ReactorRef reactor_ref, void* arg);
+static void postable_reader(RunloopRef runloop_ref, void* arg);
 static void reader(DemoConnectionRef connection_ref);
 static void on_read_complete(DemoConnectionRef connection_ref, DemoMessageRef msg, int error_code);
 static void read_error(DemoConnectionRef connection_ref, char* msg);
 
-static void postable_writer(ReactorRef reactor_ref, void* arg);
-static void postable_write_call_cb(ReactorRef reactor_ref, void* arg);
+static void postable_writer(RunloopRef runloop_ref, void* arg);
+static void postable_write_call_cb(RunloopRef runloop_ref, void* arg);
 static void writer(DemoConnectionRef connection_ref);
 static void write_error(DemoConnectionRef connection_ref, char* msg);
 
-static void postable_cleanup(ReactorRef reactor, void* cref);
+static void postable_cleanup(RunloopRef runloop, void* cref);
 /**
  * Utility function that wraps all runloop_post() calls so this module can
  * keep track of outstanding pending function calls
  */
-static void post_to_reactor(DemoConnectionRef connection_ref, void(*postable_function)(ReactorRef, void*));
+static void post_to_runloop(DemoConnectionRef connection_ref, void(*postable_function)(RunloopRef, void*));
 
 
 DemoConnectionRef democonnection_new(
         int socket,
-        ReactorRef reactor_ref,
+        RunloopRef runloop_ref,
         DemoHandlerRef handler_ref,
         void(*connection_completion_cb)(void* href))
 {
     DemoConnectionRef this = malloc(sizeof(DemoConnection));
-    democonnection_init(this, socket, reactor_ref, handler_ref, connection_completion_cb);
+    democonnection_init(this, socket, runloop_ref, handler_ref, connection_completion_cb);
     return this;
 }
 void democonnection_init(
         DemoConnectionRef this,
         int socket,
-        ReactorRef reactor_ref,
+        RunloopRef runloop_ref,
         DemoHandlerRef handler_ref,
         void(*connection_completion_cb)(void* href))
 {
-    SET_TAG(DemoConnection_TAG, this)
-    CHECK_TAG(DemoConnection_TAG, this)
-    this->reactor_ref = reactor_ref;
+    RBL_SET_TAG(DemoConnection_TAG, this)
+    RBL_SET_END_TAG(DemoConnection_TAG, this)
+    RBL_CHECK_TAG(DemoConnection_TAG, this)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, this)
+    this->runloop_ref = runloop_ref;
     this->handler_ref = handler_ref;
-    this->socket_stream_ref = runloop_stream_new(reactor_ref, socket);
+    this->socket_stream_ref = runloop_stream_new(runloop_ref, socket);
     this->socket_stream_ref->context = this;
     this->active_input_buffer_ref = NULL;
     this->active_output_buffer_ref = NULL;
@@ -89,7 +91,8 @@ void democonnection_init(
 }
 void democonnection_free(DemoConnectionRef this)
 {
-    CHECK_TAG(DemoConnection_TAG, this)
+    RBL_CHECK_TAG(DemoConnection_TAG, this)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, this)
     int fd = this->socket_stream_ref->fd;
     close(fd);
     runloop_stream_free(this->socket_stream_ref);
@@ -104,14 +107,15 @@ void democonnection_free(DemoConnectionRef this)
     free(this);
 }
 /////////////////////////////////////////////////////////////////////////////////////
-// event handler called from the Reactor on receiving an epoll event
+// event handler called from the Runloop on receiving an epoll event
 ///////////////////////////////////////////////////////////////////////////////////////
-static void event_handler(RtorStreamRef stream_ref, uint64_t event)
+static void event_handler(RunloopStreamRef stream_ref, uint64_t event)
 {
-    LOG_FMT("event_handler %lx", event);
+    RBL_LOG_FMT("event_handler %lx", event);
     DemoConnectionRef connection_ref = stream_ref->context;
-    CHECK_TAG(DemoConnection_TAG, connection_ref)
-    LOG_FMT("demohandler handler ");
+    RBL_CHECK_TAG(DemoConnection_TAG, stream_ref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, stream_ref)
+    RBL_LOG_FMT("demohandler handler ");
     if(event & EPOLLOUT) {
         write_epollout(connection_ref);
     }
@@ -123,7 +127,8 @@ static void event_handler(RtorStreamRef stream_ref, uint64_t event)
 }
 static void read_epollin(DemoConnectionRef connection_ref)
 {
-    CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, connection_ref)
     if(connection_ref->read_state == READ_STATE_EAGAINED) {
         connection_ref->read_state = READ_STATE_ACTIVE;
         read_start(connection_ref);
@@ -131,11 +136,12 @@ static void read_epollin(DemoConnectionRef connection_ref)
 }
 static void write_epollout(DemoConnectionRef connection_ref)
 {
-    CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, connection_ref)
     if(connection_ref->write_state == WRITE_STATE_EAGAINED) {
         connection_ref->write_state = WRITE_STATE_ACTIVE;
         connection_ref->writeside_posted = true;
-        post_to_reactor(connection_ref,&postable_writer);
+        post_to_runloop(connection_ref,&postable_writer);
     }
 }
 
@@ -144,8 +150,10 @@ static void write_epollout(DemoConnectionRef connection_ref)
 ////////////////////////////////////////////////////////////////////////////////////
 void democonnection_read(DemoConnectionRef connection_ref, void(*on_demo_read_cb)(void* href, DemoMessageRef, int statuc))
 {
-    LOG_FMT("democonnect_read");
-    CHTTP_ASSERT((connection_ref->read_state != READ_STATE_ACTIVE), "a read is already active");
+    RBL_CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, connection_ref)
+    RBL_LOG_FMT("democonnect_read");
+    RBL_ASSERT((connection_ref->read_state != READ_STATE_ACTIVE), "a read is already active");
     if(connection_ref->read_state == READ_STATE_IDLE) {
         connection_ref->read_state = READ_STATE_ACTIVE;
         connection_ref->on_read_cb = on_demo_read_cb;
@@ -159,14 +167,17 @@ void democonnection_read(DemoConnectionRef connection_ref, void(*on_demo_read_cb
 }
 static void read_start(DemoConnectionRef connection_ref)
 {
-    CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, connection_ref)
     connection_ref->readside_posted = true;
-    post_to_reactor(connection_ref, &postable_reader);
+    post_to_runloop(connection_ref, &postable_reader);
 }
-static void postable_reader(ReactorRef reactor_ref, void* arg)
+static void postable_reader(RunloopRef runloop_ref, void* arg)
 {
     DemoConnectionRef connection_ref = arg;
-    LOG_FMT("postable_reader read_state: %d", connection_ref->read_state);
+    RBL_CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, connection_ref)
+    RBL_LOG_FMT("postable_reader read_state: %d", connection_ref->read_state);
     if(connection_ref->read_state == READ_STATE_STOP) {
         connection_ref->on_read_cb(connection_ref->handler_ref, NULL, DemoConnectionErrCode_is_closed);
         return;
@@ -174,7 +185,8 @@ static void postable_reader(ReactorRef reactor_ref, void* arg)
     reader(connection_ref);
 }
 static void reader(DemoConnectionRef connection_ref) {
-    CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, connection_ref)
     if(connection_ref->read_state == READ_STATE_STOP) {
         connection_ref->on_read_cb(connection_ref->handler_ref, NULL, DemoConnectionErrCode_is_closed);
     }
@@ -196,15 +208,15 @@ static void reader(DemoConnectionRef connection_ref) {
     int eagain = EAGAIN;
     char* errstr = strerror(errno_save);
     if(bytes_available > 0) {
-        LOG_FMT("Before DemoParser_consume read_state %d", connection_ref->read_state);
+        RBL_LOG_FMT("Before DemoParser_consume read_state %d", connection_ref->read_state);
         // TODO experiment with generic programming in C
         int ec = connection_ref->parser_ref->parser_consume((ParserInterfaceRef)connection_ref->parser_ref, iob);
 //        int ec = DemoParser_consume(connection_ref->parser_ref, iob);
-        LOG_FMT("After DemoParser_consume returns  errno: %d read_state %d ", errno_save, connection_ref->read_state);
+        RBL_LOG_FMT("After DemoParser_consume returns  errno: %d read_state %d ", errno_save, connection_ref->read_state);
         if(ec == 0) {
             if(connection_ref->read_state == READ_STATE_ACTIVE) {
-                LOG_FMT("reader post postable_reader connection_ref->read_state: %d\n", connection_ref->read_state);
-                post_to_reactor(connection_ref, &postable_reader);
+                RBL_LOG_FMT("reader post postable_reader connection_ref->read_state: %d\n", connection_ref->read_state);
+                post_to_runloop(connection_ref, &postable_reader);
             }
         } else {
         }
@@ -215,19 +227,20 @@ static void reader(DemoConnectionRef connection_ref) {
     } else {
         read_error(connection_ref, "reader - io error close and move on");
     }
-    LOG_FMT("reader return\n");
+    RBL_LOG_FMT("reader return\n");
 }
-static void postable_read_cb(ReactorRef reactor_ref, void* arg)
+static void postable_read_cb(RunloopRef runloop_ref, void* arg)
 {
     DemoConnectionRef connection_ref = arg;
 
 }
 static void on_read_complete(DemoConnectionRef connection_ref, DemoMessageRef msg, int error_code)
 {
-    CHECK_TAG(DemoConnection_TAG, connection_ref)
-    CHTTP_ASSERT( (((msg != NULL) && (error_code == 0)) || ((msg == NULL) && (error_code != 0))), "msg != NULL and error_code == 0 failed OR msg == NULL and error_code != 0 failed");
+    RBL_CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, connection_ref)
+    RBL_ASSERT( (((msg != NULL) && (error_code == 0)) || ((msg == NULL) && (error_code != 0))), "msg != NULL and error_code == 0 failed OR msg == NULL and error_code != 0 failed");
     connection_ref->read_state = READ_STATE_IDLE;
-    LOG_FMT("read_message_handler - on_write_cb  read_state: %d\n", connection_ref->read_state);
+    RBL_LOG_FMT("read_message_handler - on_write_cb  read_state: %d\n", connection_ref->read_state);
     DC_Read_CB tmp = connection_ref->on_read_cb;
     /**
      * Need the on_read_cb property NULL befor going further
@@ -245,10 +258,11 @@ void democonnection_write(
         DemoMessageRef response_ref,
         void(*on_demo_write_cb)(void* href, int statuc))
 {
-    CHECK_TAG(DemoConnection_TAG, connection_ref)
-    CHTTP_ASSERT((response_ref != NULL), "got NULL instead of a response_ref");
-    CHTTP_ASSERT((on_demo_write_cb != NULL), "got NULL for on_demo_write_cb");
-    CHTTP_ASSERT((connection_ref->write_state == WRITE_STATE_IDLE), "a write is already active");
+    RBL_CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, connection_ref)
+    RBL_ASSERT((response_ref != NULL), "got NULL instead of a response_ref");
+    RBL_ASSERT((on_demo_write_cb != NULL), "got NULL for on_demo_write_cb");
+    RBL_ASSERT((connection_ref->write_state == WRITE_STATE_IDLE), "a write is already active");
     connection_ref->on_write_cb = on_demo_write_cb;
     connection_ref->write_state == WRITE_STATE_ACTIVE;
     connection_ref->active_output_buffer_ref = demo_message_serialize(response_ref);
@@ -256,26 +270,28 @@ void democonnection_write(
         connection_ref->on_write_cb(connection_ref->handler_ref, DemoConnectionErrCode_is_closed);
         return;
     }
-    post_to_reactor(connection_ref, &postable_writer);
+    post_to_runloop(connection_ref, &postable_writer);
 }
-static void postable_writer(ReactorRef reactor_ref, void* arg)
+static void postable_writer(RunloopRef runloop_ref, void* arg)
 {
     DemoConnectionRef connection_ref = arg;
-    CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, connection_ref)
     if(connection_ref->write_state == WRITE_STATE_STOP) {
         IOBuffer_dispose(&(connection_ref->active_output_buffer_ref));
         connection_ref->on_write_cb(connection_ref->handler_ref, DemoConnectionErrCode_is_closed);
         return;
     }
-    CHTTP_ASSERT((connection_ref->active_output_buffer_ref != NULL), "post_write_handler");
-    CHTTP_ASSERT((connection_ref->write_state == WRITE_STATE_IDLE), "cannot call write while write state is not idle");
+    RBL_ASSERT((connection_ref->active_output_buffer_ref != NULL), "post_write_handler");
+    RBL_ASSERT((connection_ref->write_state == WRITE_STATE_IDLE), "cannot call write while write state is not idle");
     writer(connection_ref);
 }
 
 static void writer(DemoConnectionRef connection_ref)
 {
-    CHECK_TAG(DemoConnection_TAG, connection_ref)
-    CHTTP_ASSERT((connection_ref->active_output_buffer_ref != NULL), "writer");
+    RBL_CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, connection_ref)
+    RBL_ASSERT((connection_ref->active_output_buffer_ref != NULL), "writer");
     IOBufferRef iob = connection_ref->active_output_buffer_ref;
 
     long wrc = send(connection_ref->socket_stream_ref->fd, IOBuffer_data(iob), IOBuffer_data_len(iob), MSG_DONTWAIT);
@@ -286,11 +302,11 @@ static void writer(DemoConnectionRef connection_ref)
             connection_ref->write_state = WRITE_STATE_IDLE;
             IOBuffer_dispose(&(connection_ref->active_output_buffer_ref));
             connection_ref->active_output_buffer_ref = NULL;
-            post_to_reactor(connection_ref, &postable_write_call_cb);
+            post_to_runloop(connection_ref, &postable_write_call_cb);
         } else {
             // write not complete schedule another try
             connection_ref->write_state = WRITE_STATE_ACTIVE;
-            post_to_reactor(connection_ref, &postable_writer);
+            post_to_runloop(connection_ref, &postable_writer);
         }
     } else if (wrc == 0) {
         write_error(connection_ref, "think the fd is closed by other end");
@@ -301,15 +317,16 @@ static void writer(DemoConnectionRef connection_ref)
         write_error(connection_ref, "think this was an io error");
     }
 }
-static void post_to_reactor(DemoConnectionRef connection_ref, void(*postable_function)(ReactorRef, void*))
+static void post_to_runloop(DemoConnectionRef connection_ref, void(*postable_function)(RunloopRef, void*))
 {
-    runloop_post(connection_ref->reactor_ref, postable_function, connection_ref);
+    runloop_post(connection_ref->runloop_ref, postable_function, connection_ref);
 }
-static void postable_write_call_cb(ReactorRef reactor_ref, void* arg)
+static void postable_write_call_cb(RunloopRef runloop_ref, void* arg)
 {
     DemoConnectionRef connection_ref = arg;
-    CHECK_TAG(DemoConnection_TAG, connection_ref)
-    CHTTP_ASSERT((connection_ref->on_write_cb != NULL), "write call back is NULL");
+    RBL_CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, connection_ref)
+    RBL_ASSERT((connection_ref->on_write_cb != NULL), "write call back is NULL");
     connection_ref->on_write_cb(connection_ref->handler_ref, 0);
 }
 /////////////////////////////////////////////////////////////////////////////////////
@@ -320,21 +337,23 @@ static void postable_write_call_cb(ReactorRef reactor_ref, void* arg)
 
 static void write_error(DemoConnectionRef connection_ref, char* msg)
 {
-    CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, connection_ref)
     printf("Write_error got an error this is the message: %s  fd: %d\n", msg, connection_ref->socket_stream_ref->fd);
     connection_ref->write_state = WRITE_STATE_STOP;
     connection_ref->on_write_cb(connection_ref->handler_ref, DemoConnectionErrCode_io_error);
     connection_ref->on_write_cb = NULL;
-    post_to_reactor(connection_ref, &postable_cleanup);
+    post_to_runloop(connection_ref, &postable_cleanup);
 }
 static void read_error(DemoConnectionRef connection_ref, char* msg)
 {
-    CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, connection_ref)
     printf("Read_error got an error this is the message: %s  fd: %d\n", msg, connection_ref->socket_stream_ref->fd);
     connection_ref->read_state = READ_STATE_STOP;
     connection_ref->on_read_cb(connection_ref->handler_ref, NULL, DemoConnectionErrCode_io_error);
     connection_ref->on_read_cb = NULL;
-    post_to_reactor(connection_ref, &postable_cleanup);
+    post_to_runloop(connection_ref, &postable_cleanup);
 }
 /////////////////////////////////////////////////////////////////////////////////////
 // end of error functions
@@ -345,12 +364,13 @@ static void read_error(DemoConnectionRef connection_ref, char* msg)
 /**
  * This must be the last democonnection function to run and it should only run once.
  */
-static void postable_cleanup(ReactorRef reactor, void* cref)
+static void postable_cleanup(RunloopRef runloop, void* cref)
 {
     DemoConnectionRef connection_ref = cref;
     printf("postable_cleanup entered\n");
-    CHTTP_ASSERT((connection_ref->cleanup_done_flag == false), "cleanup should not run more than once");
-    CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_ASSERT((connection_ref->cleanup_done_flag == false), "cleanup should not run more than once");
+    RBL_CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, connection_ref)
     runloop_stream_deregister(connection_ref->socket_stream_ref);
 //    close(connection_ref->socket_stream_ref->fd);
     connection_ref->on_close_cb(connection_ref->handler_ref);
@@ -363,7 +383,8 @@ static void postable_cleanup(ReactorRef reactor, void* cref)
 /////////////////////////////////////////////////////////////////////////////////////
 static DemoMessageRef reply_invalid_request(DemoConnectionRef connection_ref, const char* error_message)
 {
-    CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, connection_ref)
     DemoMessageRef m = demo_message_new();
     demo_message_set_is_request(m, false);
     BufferChainRef bdy =  BufferChain_new();
@@ -376,7 +397,8 @@ static DemoMessageRef reply_invalid_request(DemoConnectionRef connection_ref, co
 }
 static DemoMessageRef process_request(DemoConnectionRef connection_ref, DemoMessageRef request)
 {
-    CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_TAG(DemoConnection_TAG, connection_ref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, connection_ref)
     DemoMessageRef reply = demo_message_new();
 //    DemoMessageRef request = connection_ref->parser_ref->m_current_message_ptr;
     demo_message_set_is_request(reply, false);

@@ -3,12 +3,13 @@
 message("test_include_dirs     ${TEST_INCLUDE_DIRS}")
 message("test_link_libs        ${TEST_LINK_LIBS}")
 
-set(TARGET test_check)
+set(TARGET test_tag_check)
 add_executable(${TARGET}
-	test_check.c
+        test_tag.c
 )
 
-target_include_directories(${TARGET} 
+target_compile_definitions(${TARGET} PUBLIC RBL_TAG_CHECK_ON)
+target_include_directories(${TARGET}
 	PUBLIC 
 		${TEST_INCLUDE_dirS})
 

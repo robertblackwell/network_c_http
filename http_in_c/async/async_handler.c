@@ -1,6 +1,4 @@
 
-
-#define RBL_LOG_ENABLE
 #include <http_in_c/async/async.h>
 #include <rbl/macros.h>
 #include <rbl/check_tag.h>
@@ -14,7 +12,7 @@
 #include <errno.h>
 
 //static AsyncMessageRef process_request(AsyncHandlerRef href, AsyncMessageRef request);
-static void handle_request(AsyncHandlerRef href, MessageRef msgref);
+static void handle_request(AsyncHandlerRef href, MessageRef request_ptr);
 void async_handler_handle_response(AsyncHandlerRef href, MessageRef request_ptr, MessageRef response_ptr);
 static void handle_write_complete(AsyncHandlerRef href);
 

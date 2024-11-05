@@ -121,6 +121,9 @@ int test_simple()
     UT_EQUAL_INT(f4, 500);
     return 0;
 }
+/**
+ * Tests that common/queue works between two threads
+ */
 int main()
 {
     UT_ADD(test_simple);

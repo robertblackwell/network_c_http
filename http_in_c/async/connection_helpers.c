@@ -1,6 +1,4 @@
 
-
-#define RBL_LOG_ENABLE
 #include <http_in_c/async/connection_internal.h>
 
 //static void event_handler(RunloopStreamRef stream_ref, uint64_t event);

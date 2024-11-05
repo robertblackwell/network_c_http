@@ -105,7 +105,7 @@ void WListenerFd_disarm(RunloopListenerRef athis)
     int res = runloop_reregister(athis->runloop, athis->fd, 0L, (RunloopWatcherRef) athis);
     assert(res == 0);
 }
-RunloopRef runloop_listener_get_reactor(RunloopListenerRef athis)
+RunloopRef runloop_listener_get_runloop(RunloopListenerRef athis)
 {
     return athis->runloop;
 }

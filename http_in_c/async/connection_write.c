@@ -1,10 +1,8 @@
 
-
-#define RBL_LOG_ENABLE
 #include <http_in_c/async/connection_internal.h>
 
-static void writer(AsyncConnectionRef connection_ref);
-static void write_error(AsyncConnectionRef connection_ref, char* msg);
+static void writer(AsyncConnectionRef cref);
+static void write_error(AsyncConnectionRef cref, char* msg);
 static void post_postable_writer(AsyncConnectionRef cref);
 static void write_complete(AsyncConnectionRef cref);
 static void write_incomplete(AsyncConnectionRef cref);
@@ -39,7 +37,7 @@ static void writer(AsyncConnectionRef cref)
     long nsend = send(cref->socket_stream_ref->fd, IOBuffer_data(iob), IOBuffer_data_len(iob), MSG_DONTWAIT);
     int errno_saved = errno;
     if(nsend > 0) {
-        IOBuffer_consume(iob, nsend);
+        IOBuffer_consume(iob, (int)nsend);
         if(IOBuffer_data_len(iob) == 0) {
             // write is complete
             cref->write_state = WRITE_STATE_IDLE;

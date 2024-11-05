@@ -1,5 +1,5 @@
 
-#define RBL_LOG_ENABLE
+
 #include <rbl/macros.h>
 #include <http_in_c/sync/sync.h>
 #include <http_in_c/socket_functions.h>

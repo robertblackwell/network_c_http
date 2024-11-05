@@ -1,5 +1,3 @@
-//#define RBL_LOG_ENABLED 1
-//#define RBL_LOG_ALLOW_GLOBAL 1
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
 #include <rbl/macros.h>

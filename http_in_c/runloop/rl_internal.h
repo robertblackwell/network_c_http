@@ -187,13 +187,34 @@ struct RunloopEventfd_s {
 struct RunloopStream_s {
     struct RunloopWatcher_s;
     uint64_t                 event_mask;
-    SocketEventHandler       both_handler;
-    void*                    both_arg;
-    SocketEventHandler       read_evhandler;
-    void*                    read_arg;
-    SocketEventHandler       write_evhandler;
-    void*                    write_arg;
+//    PostableFunction         both_postable_cb;
+//    void*                    both_postable_arg;
+    PostableFunction         read_postable_cb;
+    void*                    read_postable_arg;
+    PostableFunction         write_postable_cb;
+    void*                    write_postable_arg;
 };
+
+typedef struct AsioStream_s {
+    RBL_DECLARE_TAG;
+    int                 fd;
+    RunloopRef          runloop_ref;
+    RunloopStreamRef    runloop_stream_ref;
+
+    int                 read_state;
+    void*               read_buffer;
+    long                read_buffer_size;
+    AsioReadcallback    read_callback;
+    void*               read_callback_arg;
+
+    int                 write_state;
+    void*               write_buffer;
+    long                write_buffer_size;
+    AsioWritecallback   write_callback;
+    void*               write_callback_arg;
+    RBL_DECLARE_END_TAG;
+} AsioStream, *AsioStreamRef;
+
 
 /**
  * WListener

@@ -20,13 +20,15 @@
 
 
 struct DemoSyncWriter_s {
-    DEMOSYNCWRITER_DECLARE_TAG;
+    RBL_DECLARE_TAG;
     int m_sock;
+    RBL_DECLARE_END_TAG;
 };
 
 void demosync_writer_init(DemoSyncWriterRef this, int sock)
 {
-    DEMOSYNCWRITER_SET_TAG(this)
+    RBL_SET_TAG(DemoSyncWriter_TAG , this)
+    RBL_SET_END_TAG(DemoSyncWriter_TAG , this)
     this->m_sock = sock;
 }
 DemoSyncWriterRef demosync_writer_new(int socket)
@@ -39,12 +41,14 @@ DemoSyncWriterRef demosync_writer_new(int socket)
 }
 void demosync_writer_destroy(DemoSyncWriterRef this)
 {
-    DEMOSYNCWRITER_CHECK_TAG(this)
+    RBL_CHECK_TAG(DemoSyncWriter_TAG, this)
+    RBL_CHECK_END_TAG(DemoSyncWriter_TAG, this)
 }
 void demosync_writer_dispose(DemoSyncWriterRef* this_ptr)
 {
     DemoSyncWriterRef this = *(this_ptr);
-    DEMOSYNCWRITER_CHECK_TAG(this)
+    RBL_CHECK_TAG(DemoSyncWriter_TAG, this)
+    RBL_CHECK_END_TAG(DemoSyncWriter_TAG, this)
     demosync_writer_destroy(this);
     eg_free(*this_ptr);
     *this_ptr = NULL;
@@ -60,7 +64,8 @@ void demosync_writer_dispose(DemoSyncWriterRef* this_ptr)
  */
 void demosync_writer_write_chunk(DemoSyncWriterRef this, void* buffer, int len)
 {
-    DEMOSYNCWRITER_CHECK_TAG(this)
+    RBL_CHECK_TAG(DemoSyncWriter_TAG, this)
+    RBL_CHECK_END_TAG(DemoSyncWriter_TAG, this)
     char* c = (char*)buffer;
     void* tmp_buffer = buffer;
     int tmp_len = len;
@@ -95,10 +100,12 @@ void demosync_writer_write(DemoSyncWriterRef this, DemoMessageRef msg_ref)
  */
 void demosync_writer_end(DemoSyncWriterRef this)
 {
-    DEMOSYNCWRITER_CHECK_TAG(this)
+    RBL_CHECK_TAG(DemoSyncWriter_TAG, this)
+    RBL_CHECK_END_TAG(DemoSyncWriter_TAG, this)
 }
 int demosync_writer_sock_fd(DemoSyncWriterRef this)
 {
-    DEMOSYNCWRITER_CHECK_TAG(this)
+    RBL_CHECK_TAG(DemoSyncWriter_TAG, this)
+    RBL_CHECK_END_TAG(DemoSyncWriter_TAG, this)
     return this->m_sock;
 }

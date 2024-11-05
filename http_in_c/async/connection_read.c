@@ -164,9 +164,9 @@ llhttp_errno_t async_on_read_message_complete(http_parser_t* parser_ptr, Message
     RBL_LOG_FMT("read_message_handler - on_write_cb  read_state: %s", async_read_state_str(connection_ref->read_state));
     return HPE_OK;
 }
-static void postable_handle_request(RunloopRef reactor_ref, void* arg)
+static void postable_handle_request(RunloopRef reactor_ref, void* handler_ref_arg)
 {
-    AsyncHandlerRef href = arg;
+    AsyncHandlerRef href = handler_ref_arg;
     RBL_CHECK_TAG(AsyncHandler_TAG, href);
     RBL_CHECK_TAG(AsyncConnection_TAG, href->async_connection_ref);
     AsyncConnectionRef cref = href->async_connection_ref;

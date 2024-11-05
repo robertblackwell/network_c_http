@@ -1,6 +1,3 @@
-#define XR_TRACE_ENABLEx
-#define ENABLE_LOGx
-
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
 #include <stdint.h>

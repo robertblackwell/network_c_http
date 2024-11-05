@@ -1,8 +1,8 @@
 #ifndef rbl_logger_h
 #define rbl_logger_h
-#define RBL_LOG_ENABLED
-#define RBL_LOG_ALLOW_GLOBAL
+
 #include <stdio.h>
+
 extern void rbl_log_function(char* level, const char* funcname, const char* filename, int line, char* message);
 
 // RBL_LOG_ALLOW_GLOBAL - is a global switch to turn logging off globally

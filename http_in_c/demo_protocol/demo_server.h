@@ -15,14 +15,15 @@
 typedef struct DemoHandler_s DemoHandler, *DemoHandlerRef;
 typedef struct  DemoServer_s DemoServer, *DemoServerRef;
 struct DemoServer_s {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
     int                     port;
     socket_handle_t         listening_socket_fd;
-    ReactorRef              reactor_ref;
-    RtorListenerRef         listening_watcher_ref;
+    RunloopRef              runloop_ref;
+    RunloopListenerRef      listening_watcher_ref;
     TcpConnListRef          conn_list_ref;
     ListRef                 handler_list;
     void(*completion_callback)(DemoServerRef, DemoHandlerRef);
+    RBL_DECLARE_END_TAG;
 };
 
 /**

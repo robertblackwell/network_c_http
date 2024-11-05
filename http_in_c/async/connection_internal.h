@@ -1,7 +1,5 @@
 #ifndef async_connection_h
 #define async_connection_h
-
-#define RBL_LOG_ENABLE
 #include <http_in_c/async/async.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -113,5 +111,7 @@ void async_postable_cleanup(RunloopRef reactor, void* cref);
 const char* async_read_state_str(int state);
 const char* async_write_state_str(int state);
 const char* async_epoll_event_str(int event);
+void write_epollout(RunloopRef rl, void* connection_ref_arg);
+void read_epollin(RunloopRef rl, void* connection_ref_arg);
 
 #endif

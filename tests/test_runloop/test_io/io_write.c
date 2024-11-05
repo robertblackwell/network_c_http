@@ -1,5 +1,6 @@
 
-#define CHLOG_ON
+//#define RBL_LOG_ENABLED
+//#define RBL_LOG_ALLOW_GLOBAL
 #include "io_write.h"
 #include <assert.h>
 #include <stdio.h>
@@ -12,6 +13,7 @@
 #include <http_in_c/common/utils.h>
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c//runloop/rl_internal.h>
+void async_socket_set_nonblocking(int socket);
 
 /**
  * The writer does the following
@@ -31,6 +33,7 @@ void WriteCtx_init(WriteCtx* this, int fd, RunloopStreamRef swatcher, RunloopTim
     this->swatcher = swatcher;
     this->write_count = 0;
     this->max_write_count = max;
+    async_socket_set_nonblocking(fd);
 }
 
 
@@ -53,6 +56,8 @@ void Writer_dispose(Writer* this)
 void Writer_add_fd(Writer* this, int fd, int max, int interval_ms)
 {
     WRTR_CHECK(this)
+    async_socket_set_nonblocking(fd);
+
     WriteCtx* ctx = &(this->ctx_table[this->count]);
     this->ctx_table[this->count].write_count = 0;
     this->ctx_table[this->count].max_write_count = max;
@@ -60,31 +65,60 @@ void Writer_add_fd(Writer* this, int fd, int max, int interval_ms)
     this->ctx_table[this->count].id = "WRITE";
     this->ctx_table[this->count].ctx_tag = WCTX_TAG;
     this->ctx_table[this->count].writefd = fd;
+    this->ctx_table[this->count].writer_index = this->count;
     this->count++;
 }
 static void wrtr_wait_timer_fired(RunloopRef rl, void* arg);
-static void wrtr_cb(RunloopStreamRef sock_watch, uint64_t event)
-{
-    RunloopRef reactor = sock_watch->runloop;
-    runloop_stream_verify(sock_watch);
-    WriteCtx* ctx = (WriteCtx*)(sock_watch->write_arg);
-    RBL_LOG_FMT("test_io: Socket watcher wrtr_callback");
 
+static void fill_buffer(char* line, char* buffer, int max_len, int required_data_length)
+{
+    memset(buffer, '?', max_len);
+    ulong line_length = strlen(line);
+    char* stopping = &(buffer[required_data_length]);
+    char* p = buffer;
+    while(true) {
+        ulong x = sprintf(p, "%s", line);
+        p = p + x;
+        if((p - buffer) > required_data_length) {
+            *p = (char)0;
+            break;
+        }
+    }
+    printf("done");
+}
+static void wrtr_cb(RunloopRef rl, void* write_ctx_p_arg)
+{
+    WriteCtx* ctx = write_ctx_p_arg;
+    RunloopStreamRef stream = ctx->swatcher;
+    RunloopRef reactor = runloop_stream_get_reactor(stream);
+    runloop_stream_verify(stream);
+    int fd = runloop_stream_get_fd(stream);
+#if 0
+    char big_buffer[200000];
     char* wbuf = malloc(100);
-    sprintf(wbuf, "this is a line from writer - %d\n", ctx->write_count);
+    sprintf(wbuf, "this is a line from writer %d count: %d", ctx->writer_index, ctx->write_count);
+    fill_buffer(wbuf, big_buffer, 200000, 190000);
+    long bbuflen = strlen(big_buffer);
     // synchronous write - assume the write buffers are big enough to take the entire message
     // we only got here if the fd is ready for a write
-    int nwrite = write(sock_watch->fd, wbuf, strlen(wbuf));
+    int nwrite = write(fd, big_buffer, strlen(big_buffer));
+#else
+    char* wbuf = malloc(100);
+    sprintf(wbuf, "this is a line from writer %d count: %d", ctx->writer_index, ctx->write_count);
+    int nwrite = write(fd, wbuf, strlen(wbuf));
+#endif
+    int eno = errno;
+    int eag = EAGAIN;
     free(wbuf);
+    RBL_LOG_FMT("index: %d fd: %d nread: %d errno: %d write_count %d\n", ctx->writer_index, fd, nwrite, errno, ctx->write_count);
     ctx->write_count++;
-    RBL_LOG_FMT("test_io: Socket watcher wrtr_callback fd: %d event : %lx nread: %d errno: %d write_count %d\n", sock_watch->fd, event, nwrite, errno, ctx->write_count);
     if(ctx->write_count > ctx->max_write_count) {
         runloop_deregister(reactor, ctx->swatcher->fd);
         runloop_deregister(reactor, ctx->twatcher->fd);
         return;
     }
     // disarm writeable events on this fd
-    runloop_stream_disarm_write(sock_watch);
+    runloop_stream_disarm_write(stream);
     WR_CTX_CHECK_TAG(ctx)
     SOCKW_CHECK_TAG(ctx->swatcher)
     WTIMER_CHECK_TAG(ctx->twatcher)

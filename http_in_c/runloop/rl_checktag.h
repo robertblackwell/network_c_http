@@ -13,6 +13,7 @@
 #define ITQueue_TAG     "ITQUEUE"
 #define FdTable_TAG     "FDTABL"
 #define FunctorList_TAG "FUNCLST"
+#define AsioStream_TAG "AsioSTRM"
 
 #define WATCHER_DECLARE_TAG RBL_DECLARE_TAG(Watcher)
 

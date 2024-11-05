@@ -18,29 +18,34 @@
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
 
-#define WRTR_TAG 123456789
-#define WCTX_TAG 918273645
+#define Writer_TAG "12345678"
+#define WriteCtx_TAG "WCTXTag"
 #define WR_CTX_CHECK_TAG(w) assert(w->ctx_tag == WCTX_TAG);
 #define WRTR_CHECK(w) assert(w->wrtr_tag == WRTR_TAG);
 
 typedef struct WriteCtx_s {
-    int                 ctx_tag;
+    RBL_DECLARE_TAG;
     int                 write_count;
     int                 max_write_count;
+    void*               write_buffer;
     char*               id;
     int                 writer_index;
     int                 writefd;
     int                 interval_ms;
     RunloopStreamRef    swatcher;
     RunloopTimerRef     twatcher;
+    AsioStreamRef       asio_stream_ref;
+    RBL_DECLARE_END_TAG;
 } WriteCtx;
+
 void WriteCtx_init(WriteCtx* this, int fd, RunloopStreamRef swatcher, RunloopTimerRef twatcher, int max);
 
 
 typedef struct Writer_s {
-    int     wrtr_tag;
+    RBL_DECLARE_TAG;
     int     count;
     WriteCtx ctx_table[10];
+    RBL_DECLARE_END_TAG;
 } Writer;
 
 

@@ -75,7 +75,7 @@ struct AsyncServer_s {
     int                     port;
     int                     listening_socket_fd;
     RunloopRef              reactor_ref;
-    RunloopListenerRef         listening_watcher_ref;
+    RunloopListenerRef      listening_watcher_ref;
     /**
      * List of handler servicing client connections
      */
@@ -147,7 +147,7 @@ void async_connection_write(AsyncConnectionRef connection_ref, MessageRef); //, 
 /**=============================================================================
  * AsyncHandler  api
  * Within an AsyncServer there is one instance of AsyncHandler for each
- * active connectio. These are created when an accept returns and
+ * active connection. These are created when an accept returns and
  * destroyed when a connection closes.
 =============================================================================*/
 typedef struct AsyncHandler_s {

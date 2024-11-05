@@ -22,9 +22,8 @@ set(TEST_LINK_LIBS
 	)
 set(TEST_SERVER_BASEURL "http://whiteacorn.com/utests/echo/test.php")
 add_subdirectory(test_buffers)
-#add_subdirectory(test_check_macro)
-#add_subdirectory(test_demo_parser)
-#add_subdirectory(test_memalloc)
+#add_subdirectory(test_demo_parser) #does not build
+#add_subdirectory(test_generic) #does not build
 add_subdirectory(test_generic_list)
 add_subdirectory(test_generic_stack)
 add_subdirectory(test_hdrlist)
@@ -32,14 +31,19 @@ add_subdirectory(test_hdrlist)
 add_subdirectory(test_kvpair)
 add_subdirectory(test_list)
 add_subdirectory(test_list_macro)
+#add_subdirectory(test_memalloc) #does not build
 add_subdirectory(test_message)
+#add_subdirectory(test_own)
 add_subdirectory(test_parser)
 add_subdirectory(test_query)
 add_subdirectory(test_queue)
+
+add_subdirectory(test_rbl)
 add_subdirectory(test_runloop)
+
+#add_subdirectory(test_rw)
 add_subdirectory(test_static_list)
-add_subdirectory(test_tag_check)
-add_subdirectory(test_url)
+#add_subdirectory(test_url) #this is superceded by test_url_parser
 add_subdirectory(test_url_parser)
 
 if (OFF)
@@ -51,12 +55,13 @@ if (C_HTTP_Verbose)
 	message("TEST_INLCUDE_DIRS             ${TEST_INCLUDE_DIRS}")
 
 endif()
+
 # these are not really 'test' in most cases they are experiments to try out an idea 
 # or practice using a facility - such as json or strand
 # x_test_request 		# same comment as test_x_client_request - not sure which one will survive
 # x_test_ssl_server 	# boost server example implemented
 # x_test_strand 		# experiment with strand
-# x_test_tcp			# possibly will be devloped into a real test not sure its needed
+# x_test_tcp			# possibly will be developed into a real test not sure its needed
 # x_test_client_request # decome a real tests as more marvin/client/request* progresses 
 # x_test_connect        # probably deprecated
 # x_test_helpers		# need to investigate whther the helpers any required anymore

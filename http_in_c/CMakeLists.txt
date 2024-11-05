@@ -82,7 +82,7 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 		runloop/rl_internal.h
 	#aio api
         async/async.h
-		async/async_internal.h
+		async/junk/async_internal.h
 	)
 
 set(C_HTTP_LIBRARY_SOURCE_FILES
@@ -136,6 +136,8 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		runloop/functor.c
 		runloop/functor_list.c
 	#async
+		async/async_handler.c
+		async/async_socket.c
 		async/async_server.c
         async/connection_api.c
 		async/connection_cleanup.c
@@ -143,8 +145,6 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		async/connection_helpers.c
 		async/connection_read.c
 		async/connection_write.c
-		async/async_handler.c
-		async/async_socket.c
 #		async/async_process_request.c
 	#demo_protocol
 #		demo_protocol/demo_client.c

@@ -17,9 +17,9 @@
 
 //static DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef request);
 static void handle_request( void* href, DemoMessageRef msgref, int error_code);
-static void postable_write_start(ReactorRef reactor_ref, void* href);
+static void postable_write_start(RunloopRef reactor_ref, void* href);
 static void on_write_complete_cb(void* href, int status);
-static void handler_postable_read_start(ReactorRef reactor_ref, void* href);
+static void handler_postable_read_start(RunloopRef reactor_ref, void* href);
 
 static void connection_completion_cb(void* href)
 {
@@ -29,7 +29,7 @@ static void connection_completion_cb(void* href)
 }
 DemoHandlerRef demohandler_new(
         int socket,
-        ReactorRef reactor_ref,
+        RunloopRef reactor_ref,
         void(*completion_cb)(void*, DemoHandlerRef),
         void* server_ref)
 {
@@ -40,12 +40,14 @@ DemoHandlerRef demohandler_new(
 void demohandler_init(
         DemoHandlerRef this,
         int socket,
-        ReactorRef reactor_ref,
+        RunloopRef reactor_ref,
         void(*completion_cb)(void*, DemoHandlerRef),
         void* server_ref)
 {
-    SET_TAG(DemoHandler_TAG, this)
-    CHECK_TAG(DemoHandler_TAG, this)
+    RBL_SET_TAG(DemoHandler_TAG, this)
+    RBL_SET_END_TAG(DemoHandler_TAG, this)
+    RBL_CHECK_TAG(DemoHandler_TAG, this)
+    RBL_CHECK_END_TAG(DemoHandler_TAG, this)
     this->raw_socket = socket;
     this->demo_connection_ref = democonnection_new(
             socket,
@@ -63,7 +65,8 @@ void demohandler_init(
 }
 void demohandler_free(DemoHandlerRef this)
 {
-    CHECK_TAG(DemoHandler_TAG, this)
+    RBL_CHECK_TAG(DemoHandler_TAG, this)
+    RBL_CHECK_END_TAG(DemoHandler_TAG, this)
     democonnection_free(this->demo_connection_ref);
     this->demo_connection_ref = NULL;
     List_dispose(&(this->input_list));
@@ -81,7 +84,7 @@ void demohandler_anonymous_dispose(void** p)
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 static void handle_request(void* href, DemoMessageRef msgref, int error_code)
 {
-    LOG_FMT("handler handle_request \n");
+    RBL_LOG_FMT("handler handle_request \n");
     DemoHandlerRef handler_ref = href;
     DemoMessageRef response = NULL;
     if(error_code) {
@@ -99,7 +102,8 @@ static void handle_request(void* href, DemoMessageRef msgref, int error_code)
 #if 0
 static DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef request)
 {
-    CHECK_TAG(DemoHandler_TAG, href)
+    RBL_CHECK_TAG(DemoHandler_TAG, href)
+    RBL_CHECK_END_TAG(DemoHandler_TAG, href)
     DemoMessageRef reply = demo_message_new();
     demo_message_set_is_request(reply, false);
     BufferChainRef request_body = demo_message_get_body(request);
@@ -112,15 +116,17 @@ static DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef reques
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // write sequence
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-static void postable_write_start(ReactorRef reactor_ref, void* href)
+static void postable_write_start(RunloopRef reactor_ref, void* href)
 {
     DemoHandlerRef handler_ref = href;
+    RBL_CHECK_TAG(DemoHandler_TAG, handler_ref)
+    RBL_CHECK_END_TAG(DemoHandler_TAG, handler_ref)
     printf("postable_write_start active_response:%p fd:%d  write_state: %d\n", handler_ref->active_response, handler_ref->demo_connection_ref->socket_stream_ref->fd, handler_ref->demo_connection_ref->write_state);
     if(handler_ref->active_response != NULL) {
         return;
     }
     DemoMessageRef response = List_remove_first(handler_ref->output_list);
-    CHTTP_ASSERT((handler_ref->active_response == NULL), "handler active response should be NULL");
+    RBL_ASSERT((handler_ref->active_response == NULL), "handler active response should be NULL");
     handler_ref->active_response = response;
     if(response != NULL) {
         democonnection_write(handler_ref->demo_connection_ref, response, on_write_complete_cb);
@@ -129,6 +135,8 @@ static void postable_write_start(ReactorRef reactor_ref, void* href)
 static void on_write_complete_cb(void* href, int status)
 {
     DemoHandlerRef handler_ref = href;
+    RBL_CHECK_TAG(DemoHandler_TAG, handler_ref)
+    RBL_CHECK_END_TAG(DemoHandler_TAG, handler_ref)
     printf("on_write_complete_cb fd:%d  write_state:%d\n", handler_ref->demo_connection_ref->socket_stream_ref->fd, handler_ref->demo_connection_ref->write_state);
     demo_message_dispose(&(handler_ref->active_response));
     if(List_size(handler_ref->output_list) == 1) {
@@ -138,8 +146,10 @@ static void on_write_complete_cb(void* href, int status)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // read sequence
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-static void handler_postable_read_start(ReactorRef reactor_ref, void* href)
+static void handler_postable_read_start(RunloopRef reactor_ref, void* href)
 {
     DemoHandlerRef handler_ref = href;
+    RBL_CHECK_TAG(DemoHandler_TAG, handler_ref)
+    RBL_CHECK_END_TAG(DemoHandler_TAG, handler_ref)
     democonnection_read(handler_ref->demo_connection_ref, &handle_request);
 }

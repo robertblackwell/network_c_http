@@ -5,7 +5,7 @@ message("test_link_libs        ${TEST_LINK_LIBS}")
 
 set(TARGET test_logger)
 add_executable(${TARGET}
-	test_main.c
+        test_main.c
 )
 
 target_include_directories(${TARGET} 

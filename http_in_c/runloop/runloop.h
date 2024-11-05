@@ -32,6 +32,10 @@ typedef struct RunloopTimer_s RunloopTimer,  *RunloopTimerRef;      // Wait for 
 struct RunloopStream_s;
 typedef struct RunloopStream_s RunloopStream, *RunloopStreamRef;         // Wait for an IO event on a fd
 
+struct AsioStream_s;
+typedef struct AsioStream_s AsioStream, *AsioStreamRef;         // Wait for an IO event on a fd
+
+
 struct RunloopQueueWatcher_s;
 typedef struct RunloopQueueWatcher_s RunloopQueueWatcher, *RunloopQueueWatcherRef;        // Wait for a inter thread queue event
 
@@ -68,6 +72,10 @@ typedef void (*FdEventHandler)      (RunloopEventfdRef fd_event_ref, uint64_t ev
 typedef void (*QueueEventHandler)   (RunloopQueueWatcherRef qref, uint64_t events);
 //typedef void (*InterthreadQueueEventHandler)   (RunloopInterthreadQueueRef qref);
 typedef void (*ListenerEventHandler)(RunloopListenerRef listener_ref, uint64_t events);
+
+typedef void(*AsioReadcallback)(void* arg, long length, int error_number);
+typedef void(*AsioWritecallback)(void* arg, long length, int error_number);
+
 
 /**
  * A reactor is a device that:
@@ -145,7 +153,7 @@ void runloop_listener_deregister(RunloopListenerRef athis);
 void runloop_listener_arm(RunloopListenerRef athis, PostableFunction postable, void* postable_arg);
 void runloop_listener_disarm(RunloopListenerRef athis);
 void runloop_listener_verify(RunloopListenerRef r);
-RunloopRef runloop_listener_get_reactor(RunloopListenerRef athis);
+RunloopRef runloop_listener_get_runloop(RunloopListenerRef athis);
 int runloop_listener_get_fd(RunloopListenerRef this);
 //#define runloop_listenerFd_get_reactor(p) Watcher_get_reactor((RunloopWatcherRef)p)
 
@@ -161,15 +169,31 @@ void runloop_stream_init(RunloopStreamRef athis, RunloopRef runloop, int fd);
 void runloop_stream_free(RunloopStreamRef athis);
 void runloop_stream_register(RunloopStreamRef athis);
 void runloop_stream_deregister(RunloopStreamRef athis);
-void runloop_stream_arm_both(RunloopStreamRef athis, SocketEventHandler event_handler, void* arg);
-void runloop_stream_arm_read(RunloopStreamRef athis, SocketEventHandler event_handler, void* arg);
-void runloop_stream_arm_write(RunloopStreamRef athis, SocketEventHandler event_handler, void* arg);
+void runloop_stream_arm_both(RunloopStreamRef athis,
+                             PostableFunction read_postable_cb, void* read_arg,
+                             PostableFunction write_postable_cb, void* write_arg);
+
+void runloop_stream_arm_read(RunloopStreamRef athis, PostableFunction postable_callback, void* arg);
+void runloop_stream_arm_write(RunloopStreamRef athis, PostableFunction postable_callback, void* arg);
 void runloop_stream_disarm_read(RunloopStreamRef athis);
 void runloop_stream_disarm_write(RunloopStreamRef athis);
 void runloop_stream_verify(RunloopStreamRef r);
 RunloopRef runloop_stream_get_reactor(RunloopStreamRef athis);
 int runloop_stream_get_fd(RunloopStreamRef this);
 //#define runloop_stream_get_reactor(p) Watcher_get_reactor((RunloopWatcherRef)p)
+/**
+ * Async io is a more convenient interface for reading and writing data to fd's like sockets.
+ *
+ * It is a proactor interface rather than the reactor provided by the runloop_stream
+ * interface above
+ */
+AsioStreamRef asio_stream_new(int socket, RunloopRef runloop_ref);
+void asio_stream_init(AsioStreamRef this, int fd, RunloopRef runloop_ref);
+void asio_stream_free(AsioStreamRef this);
+void asio_stream_destroy(AsioStreamRef cref);
+void asio_stream_amonymous_dispose(void* p);
+void asio_stream_read(AsioStreamRef stream_ref, void* buffer, long max_length, AsioReadcallback cb, void*  arg);
+void asio_stream_write(AsioStreamRef stream_ref, void* buffer, long length, AsioWritecallback cb, void*  arg);
 
 /**
  * epoll provides a facility to create a file descriptor that is not attached to any file/pipe/device
@@ -213,7 +237,7 @@ Functor runloop_eventfd_queue_remove(EventfdQueueRef athis);
 RunloopQueueWatcherRef runloop_queue_watcher_new(RunloopRef runloop, EventfdQueueRef qref);
 void runloop_queue_watcher_dispose(RunloopQueueWatcherRef* athis);
 void runloop_queue_watcher_register(RunloopQueueWatcherRef athis, PostableFunction postable_cb, void* postable_arg);
-void runloop_queue_watcher_change_watch(RunloopQueueWatcherRef athis, QueueEventHandler cb, void* arg, uint64_t watch_what);
+void runloop_queue_watcher_change_watch(RunloopQueueWatcherRef athis, PostableFunction postable_cb, void* arg, uint64_t watch_what);
 void runloop_queue_watcher_deregister(RunloopQueueWatcherRef athis);
 void runloop_queue_watcher_verify(RunloopQueueWatcherRef r);
 RunloopRef runloop_queue_watcher_get_reactor(RunloopQueueWatcherRef athis);

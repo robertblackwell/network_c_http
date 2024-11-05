@@ -1,5 +1,6 @@
 
-#define CHLOG_ON
+#define RBL_LOG_ENABLED
+#define RBL_LOG_ALLOW_GLOBAL
 
 #include "io_read.h"
 #include <assert.h>
@@ -14,6 +15,8 @@
 #include <http_in_c/common/utils.h>
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
+
+void async_socket_set_nonblocking(int socket);
 
 /**
  * the reader does the following
@@ -42,34 +45,40 @@ void Reader_dispose(Reader* this)
 }
 void Reader_add_fd(Reader* this, int fd, int max)
 {
+    async_socket_set_nonblocking(fd);
+
     this->ctx_table[this->count].id = "READ";
     this->ctx_table[this->count].read_count = 0;
     this->ctx_table[this->count].max_read_count = max;
     this->ctx_table[this->count].readfd = fd;
+    this->ctx_table[this->count].reader_index = this->count;
     this->count++;
 
 }
 
-void rd_callback(RunloopStreamRef io_watcher_ref, uint64_t event)
+void read_callback(RunloopRef rl, void* read_ctx_ref_arg)
 {
-    runloop_stream_verify(io_watcher_ref);
-    ReadCtx* ctx = (ReadCtx*)io_watcher_ref->read_arg;
-    RunloopRef reactor = runloop_stream_get_reactor(io_watcher_ref);
-    int in = event | EPOLLIN;
-    char buf[1000];
-    int nread = read(runloop_stream_get_fd(io_watcher_ref), buf, 1000);
+    ReadCtx* ctx = (ReadCtx*)read_ctx_ref_arg;
+    RunloopStreamRef stream = ctx->swatcher;
+    RunloopRef runloop_ref = runloop_stream_get_reactor(stream);
+    char buf[100000];
+    int x = sizeof(buf);
+    memset(buf, 0, sizeof(buf));
+    int fd = runloop_stream_get_fd(stream);
+    int nread = read(fd, buf, 100000);
     char* s;
     if(nread > 0) {
         buf[nread] = (char)0;
-        s = buf;
+        s = &(buf[0]);
+        RBL_LOG_FMT("index: %d count:%d fd: %d buf: %s errno: %d", ctx->reader_index, ctx->read_count, fd, buf, errno);
     } else {
         s = "badread";
+        RBL_LOG_FMT("BAD READ rd_callback read_count: %d fd: %d nread: %d buf: %s errno: %d", ctx->read_count,
+                fd, nread, s, errno);
     }
-    RBL_LOG_FMT("test_io: Socket watcher rd_callback read_count: %d fd: %d event %lx nread: %d buf: %s errno: %d\n", ctx->read_count,
-                runloop_stream_get_fd(io_watcher_ref), event, nread, s, errno);
     ctx->read_count++;
     if(ctx->read_count > ctx->max_read_count) {
-        runloop_deregister(reactor, runloop_stream_get_fd(io_watcher_ref));
+        runloop_deregister(runloop_ref, runloop_stream_get_fd(stream));
     } else {
         return;
     }
@@ -84,11 +93,8 @@ void* reader_thread_func(void* arg)
         RunloopStreamRef sw = rdr->ctx_table[i].swatcher;
         uint64_t interest = EPOLLERR | EPOLLIN;
         runloop_stream_register(sw);
-        runloop_stream_arm_read(sw, &rd_callback, (void *) ctx);
-//        WIoFd_change_watch(sw, &rd_callback, (void*) ctx, interest);
+        runloop_stream_arm_read(sw, &read_callback, (void *) ctx);
     }
-
     runloop_run(runloop_ref, 1000000);
     return NULL;
-
 }

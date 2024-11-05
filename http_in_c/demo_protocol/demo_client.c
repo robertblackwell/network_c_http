@@ -19,24 +19,27 @@
 #include <rbl/check_tag.h>
 
 struct DemoClient_s {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
     int       sock;
     DemoSyncWriterRef  wrtr;
     DemoSyncReaderRef  rdr;
+    RBL_DECLARE_END_TAG;
 };
 
 DemoClientRef democlient_new()
 {
     DemoClientRef this = eg_alloc(sizeof(DemoClient));
-    SET_TAG(DemoClient_TAG, this)
+    RBL_SET_TAG(DemoClient_TAG, this)
+    RBL_SET_END_TAG(DemoClient_TAG, this)
     this->rdr = NULL;
     this->wrtr = NULL;
 }
 void democlient_dispose(DemoClientRef* this_ptr)
 {
     DemoClientRef this = *this_ptr;
-   CHECK_TAG(DemoClient_TAG, this)
-    LOG_FMT("democlient_dispose %p  %d\n", this, this->sock);
+    RBL_CHECK_TAG(DemoClient_TAG, this)
+    RBL_CHECK_END_TAG(DemoClient_TAG, this)
+    RBL_LOG_FMT("democlient_dispose %p  %d\n", this, this->sock);
     if(this->rdr) demosync_reader_dispose(&(this->rdr));
     if(this->wrtr) demosync_writer_dispose(&(this->wrtr));
     close(this->sock);
@@ -45,10 +48,12 @@ void democlient_dispose(DemoClientRef* this_ptr)
 }
 void democlient_raw_connect(DemoClientRef this, int sockfd, struct sockaddr* sockaddr_p, int sockaddr_len)
 {
-    LOG_FMT("democlient_raw_connect %p sockfd: %d\n", this, sockfd);
+    RBL_CHECK_TAG(DemoClient_TAG, this)
+    RBL_CHECK_END_TAG(DemoClient_TAG, this)
+    RBL_LOG_FMT("democlient_raw_connect %p sockfd: %d\n", this, sockfd);
     if (connect(sockfd,sockaddr_p, sockaddr_len) < 0) {
         int errno_saved = errno;
-        LOG_ERROR("democlient_raw_connect ERROR client %p connecting sockfd: % derrno: %d\n", this, sockfd, errno_saved);
+        RBL_LOG_ERROR("democlient_raw_connect ERROR client %p connecting sockfd: % derrno: %d\n", this, sockfd, errno_saved);
     }
     this->sock = sockfd;
     this->wrtr =  demosync_writer_new(sockfd);
@@ -58,13 +63,14 @@ void democlient_raw_connect(DemoClientRef this, int sockfd, struct sockaddr* soc
 void democlient_connect(DemoClientRef this, char* host, int portno)
 {
     int sockfd, n;
-   CHECK_TAG(DemoClient_TAG, this)
+    RBL_CHECK_TAG(DemoClient_TAG, this)
+    RBL_CHECK_END_TAG(DemoClient_TAG, this)
     struct sockaddr_in serv_addr;
     struct hostent *hostent;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
-        LOG_ERROR("ERROR opening socket");
+        RBL_LOG_ERROR("ERROR opening socket");
 
     hostent = gethostbyname(host);
     if (hostent == NULL) {
@@ -75,10 +81,10 @@ void democlient_connect(DemoClientRef this, char* host, int portno)
     serv_addr.sin_family = AF_INET;
     bcopy((char *)hostent->h_addr, (char *)&serv_addr.sin_addr.s_addr, hostent->h_length);
     serv_addr.sin_port = htons(portno);
-    LOG_FMT("democlient_connect %p sockfd: %d\n", this, sockfd);
+    RBL_LOG_FMT("democlient_connect %p sockfd: %d\n", this, sockfd);
     if (connect(sockfd,(struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
         int errno_saved = errno;
-        LOG_ERROR("ERROR client %p connecting sockfd: % derrno: %d\n", this, sockfd, errno_saved);
+        RBL_LOG_ERROR("ERROR client %p connecting sockfd: % derrno: %d\n", this, sockfd, errno_saved);
     }
     this->sock = sockfd;
     this->wrtr = demosync_writer_new(sockfd);
@@ -87,7 +93,8 @@ void democlient_connect(DemoClientRef this, char* host, int portno)
 }
 void democlient_roundtrip(DemoClientRef this, const char* req_buffers[], DemoMessageRef* response_ptr)
 {
-    CHECK_TAG(DemoClient_TAG, this)
+    RBL_CHECK_TAG(DemoClient_TAG, this)
+    RBL_CHECK_END_TAG(DemoClient_TAG, this)
     int buf_index = 0;
     int buf_len;
     char* buf;
@@ -112,14 +119,15 @@ void democlient_roundtrip(DemoClientRef this, const char* req_buffers[], DemoMes
 }
 void democlient_request_round_trip(DemoClientRef this, DemoMessageRef request, DemoMessageRef* response_ptr)
 {
-    CHECK_TAG(DemoClient_TAG, this)
+    RBL_CHECK_TAG(DemoClient_TAG, this)
+    RBL_CHECK_END_TAG(DemoClient_TAG, this)
     IOBufferRef req_io_buf = demo_message_serialize(request);
     demosync_writer_write_chunk(this->wrtr, IOBuffer_data(req_io_buf), IOBuffer_data_len(req_io_buf));
 
     int rc = demosync_reader_read(this->rdr, response_ptr);
     if(rc != READER_OK) {
         int errno_saved = errno;
-        LOG_ERROR("bad rc from SyncReader_read rc: errno %d\n", errno_saved);
+        RBL_LOG_ERROR("bad rc from SyncReader_read rc: errno %d\n", errno_saved);
         assert(false);
     }
 }

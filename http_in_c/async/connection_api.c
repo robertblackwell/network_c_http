@@ -1,6 +1,4 @@
 
-
-#define CHLOG_ON
 #include <http_in_c/async/connection_internal.h>
 static void async_connection_close(AsyncConnectionRef cref);
 
@@ -29,7 +27,7 @@ void async_connection_init(
     this->socket = socket;
     this->socket_stream_ref = runloop_stream_new(reactor_ref, socket);
     this->socket_stream_ref->context = this;
-    this->socket_stream_ref->both_arg = this;
+//    this->socket_stream_ref->both_postable_arg = this;
     this->active_input_buffer_ref = NULL;
     this->active_output_buffer_ref = NULL;
     ParserOnMessageCompleteHandler h = async_on_read_message_complete;
@@ -43,7 +41,9 @@ void async_connection_init(
     this->writeside_posted = false;
     this->cleanup_done_flag = false;
     runloop_stream_register(this->socket_stream_ref);
-    runloop_stream_arm_both(this->socket_stream_ref, &async_event_handler, this);
+    runloop_stream_arm_both(this->socket_stream_ref,
+                            &read_epollin, this,
+                            &write_epollout, this);
 }
 void async_connection_destroy(AsyncConnectionRef this)
 {

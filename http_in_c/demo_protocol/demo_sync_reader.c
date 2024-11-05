@@ -16,7 +16,7 @@
 
 struct DemoSyncReader_s
 {
-    DECLARE_TAG;
+    RBL_DECLARE_TAG;
     DemoParserRef       m_parser;
     IOBufferRef         m_iobuffer;
     RdSocket            m_rdsocket;
@@ -24,12 +24,13 @@ struct DemoSyncReader_s
     int                 m_http_errno;
     char*               m_http_err_name;
     char*               m_http_err_description;
-
+    RBL_DECLARE_END_TAG;
 };
 void demosync_reader_init(DemoSyncReaderRef  this, RdSocket rdsock)
 {
     ASSERT_NOT_NULL(this);
-    SET_TAG(DemoSyncReader_TAG, this)
+    RBL_SET_TAG(DemoSyncReader_TAG, this)
+    RBL_SET_END_TAG(DemoSyncReader_TAG, this)
     this->m_parser = DemoParser_new();
 //    this->m_socket = socket;
     this->m_rdsocket = rdsock;
@@ -57,21 +58,24 @@ DemoSyncReaderRef demosync_reader_new(int rdsock_fd)
 
 void demosync_reader_destroy(DemoSyncReaderRef this)
 {
-    CHECK_TAG(DemoSyncReader_TAG,this)
+    RBL_CHECK_TAG(DemoSyncReader_TAG,this)
+    RBL_CHECK_END_TAG(DemoSyncReader_TAG,this)
     IOBuffer_dispose(&(this->m_iobuffer));
 
 }
 void demosync_reader_dispose(DemoSyncReaderRef* this_ptr)
 {
     DemoSyncReaderRef this = *this_ptr;
-    CHECK_TAG(DemoSyncReader_TAG,this)
+    RBL_CHECK_TAG(DemoSyncReader_TAG,this)
+    RBL_CHECK_END_TAG(DemoSyncReader_TAG,this)
     demosync_reader_destroy(this);
     eg_free((void*)this);
     *this_ptr = NULL;
 }
 int demosync_reader_read(DemoSyncReaderRef this, DemoMessageRef* msgref_ptr)
 {
-    CHECK_TAG(DemoSyncReader_TAG,this)
+    RBL_CHECK_TAG(DemoSyncReader_TAG,this)
+    RBL_CHECK_END_TAG(DemoSyncReader_TAG,this)
     IOBufferRef iobuf = this->m_iobuffer;
     DemoMessageRef message_ptr = demo_message_new();
     DemoParser_begin(this->m_parser, message_ptr);

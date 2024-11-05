@@ -47,7 +47,7 @@ option(C_HTTP_Verbose "Print a lot of diagnostic stuff" ON)
 option(C_HTTP_DebugBuild "Perform build as type Debug" ON)
 option(C_HTTP_BuildDocs "Build doxygen documentation" ON)
 option(C_HTTP_SyncServerUseQueue, "Determines whether the sync_server app uses a queue or shares a listening sockets between threads")
-
+SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 ##=============================================================================
 # project C compile options
 ##=============================================================================
@@ -62,10 +62,6 @@ set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -pthread -fvisibility=hidden")
 set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -D_GNU_SOURCE")
 set (CHTTP_CXX_FLAGS "${CHTTP_CXX_FLAGS} -D_GNU_SOURCE")
 
-#CH_TYPE_CHECK_ON
-set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DTYPE_CHECK_ON")
-set (CHTTP_CXX_FLAGS "${CHTTP_CXX_FLAGS} -DTYPE_CHECK_ON")
-
 #RBL_TAG_CHECK_ON
 #	puts a validation tag at the start of every struct and checks it on every access
 set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DCH_TAG_CHECK_ON")
@@ -75,7 +71,6 @@ set (CHTTP_CXX_FLAGS "${CHTTP_CXX_FLAGS} -DCH_TAG_CHECK_ON")
 #	the work threads in the sync_server uses an interthread queue for getting accept()'d sockets
 #   to the worker threads.
 #   When disabled uses a connom listener socket for all threads and each thread does its own accept
-
 #set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS}  -DSYNC_WORKER_QUEUEX")
 #set (CHTTP_CXX_FLAGS "${CHTTP_CXX_FLAGS}  -DSYNC_WORKER_QUEUEX")
 
@@ -83,15 +78,18 @@ set (CHTTP_CXX_FLAGS "${CHTTP_CXX_FLAGS} -DCH_TAG_CHECK_ON")
 #		Writes a pattern over the memory occupied by a struct when free'd
 #		paranoid - trying to provoke errors
 set (CHTTP_C_FLAGS "${CHTTP_CXX_FLAGS} -DCH_SCRIBBLE")
-set (CHTTP_C_FLAGS "${CHTTP_CXX_FLAGS} -DCH_SCRIBBLE")
+set (CHTTP_CXX_FLAGS "${CHTTP_CXX_FLAGS} -DCH_SCRIBBLE")
 
 #CH_ASYNC_SINGLE_THREAD
 # Forces the async server to run as a single threaded server. Hopefully a temporary
 # restriction while I figure out shared listening sockets
 # If disabled async_server will be multi threaded using a shared listening socket
-set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DCH_ASYNC_SINGLE_THREAD -DRBL_TAG_CHECK_ENABLED")
-set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DRBL_TAG_CHECK_ENABLED")
-set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DRBL_LOG_ENABLED -DRBL_LOG_ALLOW_GLOBAL")
+set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DCH_ASYNC_SINGLE_THREAD")
+
+#enable logging everywhere
+#set (CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DRBL_LOG_ENABLED -DRBL_LOG_ALLOW_GLOBAL")
+#set (CHTTP_CXX_FLAGS "${CHTTP_C_FLAGS} -DRBL_LOG_ENABLED -DRBL_LOG_ALLOW_GLOBAL")
+
 
 message("CHTTP_C_FLAGS ${CHTTP_C_FLAGS}")
 ## ============================================================================

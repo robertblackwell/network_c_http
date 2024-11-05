@@ -56,7 +56,7 @@ void runloop_queue_watcher_register(RunloopQueueWatcherRef athis, PostableFuncti
     int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherRef) (athis));
     assert(res ==0);
 }
-void runloop_queue_watcher_change_watch(RunloopQueueWatcherRef athis, QueueEventHandler cb, void* arg, uint64_t watch_what)
+void runloop_queue_watcher_change_watch(RunloopQueueWatcherRef athis, PostableFunction cb, void* arg, uint64_t watch_what)
 {
     WQUEUE_CHECK_TAG(athis)
     uint32_t interest = watch_what;

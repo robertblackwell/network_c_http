@@ -1,5 +1,3 @@
-
-#define RBL_LOG_ENABLE
 #include <http_in_c/sync/sync.h>
 #include <http_in_c/sync/sync_internal.h>
 

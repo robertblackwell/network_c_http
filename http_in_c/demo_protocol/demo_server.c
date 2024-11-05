@@ -1,5 +1,4 @@
 
-#define CHLOG_ON
 #include <http_in_c/runloop/rl_internal.h>
 #include <http_in_c/demo_protocol/demo_server.h>
 #include <http_in_c/demo_protocol/demo_handler.h>
@@ -11,6 +10,7 @@
 #include <fcntl.h>
 #include <sys/epoll.h>
 #include <rbl/logger.h>
+#include <rbl/check_tag.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/socket_functions.h>
@@ -19,14 +19,15 @@ static DemoHandlerRef my_only_client;
 
 static socket_handle_t create_listener_socket(int port, const char *host);
 static void set_non_blocking(socket_handle_t socket);
-void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event);
+void on_event_listening(RunloopListenerRef listener_watcher_ref, uint64_t event);
 
 static void on_handler_completion_cb(void* void_server_ref, DemoHandlerRef handler_ref)
 {
     printf("file: demo_server.c on_handler_completeion_cb \n");
 
     DemoServerRef server_ref = void_server_ref;
-    CHECK_TAG(DemoServer_TAG, server_ref)
+    RBL_CHECK_TAG(DemoServer_TAG, server_ref)
+    RBL_CHECK_END_TAG(DemoServer_TAG, server_ref)
     ListIter x = List_find(server_ref->handler_list, handler_ref);
     DemoHandlerRef href = List_itr_unpack(server_ref->handler_list, x);
     List_itr_remove(server_ref->handler_list, &x);
@@ -34,12 +35,13 @@ static void on_handler_completion_cb(void* void_server_ref, DemoHandlerRef handl
 DemoServerRef DemoServer_new(int port)
 {
     DemoServerRef sref = (DemoServerRef) eg_alloc(sizeof(DemoServer));
-    SET_TAG(DemoServer_TAG, sref)
+    RBL_SET_TAG(DemoServer_TAG, sref)
+    RBL_SET_END_TAG(DemoServer_TAG, sref)
     sref->port = port;
-    sref->reactor_ref = runloop_new();
+    sref->runloop_ref = runloop_new();
     sref->listening_socket_fd = create_listener_socket(port, "127.0.0.1");
     set_non_blocking(sref->listening_socket_fd);
-    sref->listening_watcher_ref = runloop_listener_new(sref->reactor_ref, sref->listening_socket_fd);
+    sref->listening_watcher_ref = runloop_listener_new(sref->runloop_ref, sref->listening_socket_fd);
     // TODO this is a memory leak
     // the list is the owner of handler references
     sref->handler_list = List_new(demohandler_anonymous_dispose);
@@ -48,19 +50,21 @@ DemoServerRef DemoServer_new(int port)
 }
 void DemoServer_free(DemoServerRef this)
 {
-    CHECK_TAG(DemoServer_TAG, this)
+    RBL_CHECK_TAG(DemoServer_TAG, this)
+    RBL_CHECK_END_TAG(DemoServer_TAG, this)
     ASSERT_NOT_NULL(this);
     runloop_listener_deregister(this->listening_watcher_ref);
     runloop_listener_free(this->listening_watcher_ref);
     close(this->listening_socket_fd);
-    runloop_free(this->reactor_ref);
+    runloop_free(this->runloop_ref);
     List_dispose(&(this->handler_list));
     free(this);
 
 }
 void DemoServer_dispose(DemoServerRef *sref)
 {
-    CHECK_TAG(DemoServer_TAG, *sref)
+    RBL_CHECK_TAG(DemoServer_TAG, *sref)
+    RBL_CHECK_END_TAG(DemoServer_TAG, *sref)
     ASSERT_NOT_NULL(*sref);
     free(*sref);
     *sref = NULL;
@@ -68,21 +72,23 @@ void DemoServer_dispose(DemoServerRef *sref)
 
 void DemoServer_listen(DemoServerRef sref)
 {
-    CHECK_TAG(DemoServer_TAG, sref)
+    RBL_CHECK_TAG(DemoServer_TAG, sref)
+    RBL_CHECK_END_TAG(DemoServer_TAG, sref)
     ASSERT_NOT_NULL(sref)
     int port = sref->port;
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
-    RtorListenerRef lw = sref->listening_watcher_ref;
+    RunloopListenerRef lw = sref->listening_watcher_ref;
     runloop_listener_register(lw, on_event_listening, sref);
-    runloop_run(sref->reactor_ref, -1);
-    LOG_FMT("DemoServer finishing");
+    runloop_run(sref->runloop_ref, -1);
+    RBL_LOG_FMT("DemoServer finishing");
 
 }
 
 void DemoServer_terminate(DemoServerRef this)
 {
-    CHECK_TAG(DemoServer_TAG, this)
+    RBL_CHECK_TAG(DemoServer_TAG, this)
+    RBL_CHECK_END_TAG(DemoServer_TAG, this)
 
     close(this->listening_socket_fd);
 }
@@ -138,12 +144,12 @@ void set_non_blocking(socket_handle_t socket)
     assert(fres == 0);
 }
 
-void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event)
+void on_event_listening(RunloopListenerRef listener_watcher_ref, uint64_t event)
 {
 
     printf("listening_hander \n");
-    DemoServerRef server_ref = listener_watcher_ref->listen_arg;
-    CHECK_TAG(DemoServer_TAG, server_ref)
+    DemoServerRef server_ref = listener_watcher_ref->listen_postable_arg;
+    RBL_CHECK_TAG(DemoServer_TAG, server_ref)
 
 //    DemoServerRef server_ref = listener_watcher_ref->listen_arg;
 
@@ -153,12 +159,12 @@ void on_event_listening(RtorListenerRef listener_watcher_ref, uint64_t event)
     int sock2 = accept(server_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
     if(sock2 <= 0) {
         printf("accpt failed errno %d  sttrerror: %s\n", errno, strerror(errno));
-        LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
+        RBL_LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
     }
-    LOG_FMT("Listerner accepted sock fd: %d", sock2);
+    RBL_LOG_FMT("Listerner accepted sock fd: %d", sock2);
     DemoHandlerRef handler = demohandler_new(
             sock2,
-            runloop_listener_get_reactor(listener_watcher_ref),
+            runloop_listener_get_runloop(listener_watcher_ref),
             on_handler_completion_cb,
             server_ref);
 

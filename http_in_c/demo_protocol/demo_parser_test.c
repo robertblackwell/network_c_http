@@ -14,15 +14,15 @@ DemoParserTestRef DemoParserTest_new(char* description, char** lines, verify_fun
     this->description = description;
     this->lines = lines;
     this->verify_function = vf;
+    return this;
 }
-
-
 
 DemoReadResultRef DemoReadResult_new(DemoMessageRef msg, int rc)
 {
     DemoReadResultRef rdref = eg_alloc(sizeof(DemoReadResult));
     rdref->message = msg;
     rdref->rc = rc;
+    return rdref;
 }
 void DemoReadResult_dispose(DemoReadResultRef* this_ptr)
 {

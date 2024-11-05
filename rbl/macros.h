@@ -8,13 +8,19 @@
  * @{
  */
 
-#define RBL_ASSERT(test, msg) \
+#define RBL_ASSERT_OLD(test, msg) \
 do { \
     if(!test) { \
         RBL_LOG_ERROR("RBL_ASSERT failed file: %s line %d msg: %s", __FILE__, __LINE__, msg ); \
         assert(test); \
     } \
 } while(0)
+#define RBL_ASSERT(test, msg) \
+    if(!test) { \
+        RBL_LOG_ERROR("RBL_ASSERT failed file: %s line %d msg: %s", __FILE__, __LINE__, msg ); \
+        assert(test);         \
+        return;               \
+    }
 
 #define RBL_FATAL_ERROR(msg) \
 do { \

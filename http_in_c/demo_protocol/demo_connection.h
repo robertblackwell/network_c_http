@@ -6,6 +6,7 @@
 #include <http_in_c/demo_protocol/demo_server.h>
 //#include <http_in_c/demo_protocol/demo_handler.h>
 #include <http_in_c/demo_protocol/demo_parser.h>
+#include <rbl/check_tag.h>
 
 #define DemoConnection_TAG "DmCONN"
 #include <rbl/check_tag.h>
@@ -31,34 +32,35 @@ typedef void(*DC_Write_CB)(void* href, int status);
 typedef void(*DC_Close_CB)(void* href);
 
 typedef struct DemoConnection_s {
-    DECLARE_TAG;
-    ReactorRef      reactor_ref;
-    RtorStreamRef   socket_stream_ref;
-    DemoHandlerRef  handler_ref;
-    IOBufferRef     active_input_buffer_ref;
-    IOBufferRef     active_output_buffer_ref;
-    DemoParserRef   parser_ref;
-    int             read_state;
-    int             write_state;
-    DC_Read_CB      on_read_cb;
-    DC_Write_CB     on_write_cb;
-    DC_Close_CB     on_close_cb;
-    bool            cleanup_done_flag;
-    bool            readside_posted;
-    bool            writeside_posted;
-    bool            post_active;
+    RBL_DECLARE_TAG;
+    RunloopRef       reactor_ref;
+    RunloopStreamRef socket_stream_ref;
+    DemoHandlerRef   handler_ref;
+    IOBufferRef      active_input_buffer_ref;
+    IOBufferRef      active_output_buffer_ref;
+    DemoParserRef    parser_ref;
+    int              read_state;
+    int              write_state;
+    DC_Read_CB       on_read_cb;
+    DC_Write_CB      on_write_cb;
+    DC_Close_CB      on_close_cb;
+    bool             cleanup_done_flag;
+    bool             readside_posted;
+    bool             writeside_posted;
+    bool             post_active;
+    RBL_DECLARE_END_TAG;
 
 } DemoConnection, *DemoConnectionRef;
 
 DemoConnectionRef democonnection_new(
         int socket,
-        ReactorRef reactor_ref,
+        RunloopRef runloop_ref,
         DemoHandlerRef handler_ref,
         void(*connection_completion_cb)(void* href));
 void democonnection_init(
         DemoConnectionRef this,
         int socket,
-        ReactorRef reactor_ref,
+        RunloopRef runloop_ref,
         DemoHandlerRef handler_ref,
         void(*connection_completion_cb)(void* href));
 void democonnection_free(DemoConnectionRef this);

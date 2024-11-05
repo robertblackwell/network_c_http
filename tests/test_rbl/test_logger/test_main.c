@@ -40,7 +40,7 @@ int test_1(void)
 
 void test_f()
 {
-    LOG_FMT("%s %d", "this is a string parameter", 42);
+    RBL_LOG_FMT("%s %d", "this is a string parameter", 42);
 }
 
 int test_2()

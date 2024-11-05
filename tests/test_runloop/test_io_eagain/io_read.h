@@ -14,23 +14,32 @@
 
 #include <sys/epoll.h>
 #include <math.h>
+#include <rbl/check_tag.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/runloop/runloop.h>
 
+#define Reader_TAG "RDTag"
+#define ReadCtx_TAG "RDRCtx"
+
 typedef struct ReadCtx_s {
-    int                 ctx_tag;
+    RBL_DECLARE_TAG;
     int                 read_count;
     int                 max_read_count;
     char*               id;
     int                 reader_index;
     int                 readfd;
-    RunloopStreamRef            swatcher;
+    void*               read_buffer;
+    long                read_buffer_length;
+    RunloopStreamRef    swatcher;
+    AsioStreamRef       asio_stream_ref;
+    RBL_DECLARE_END_TAG;
 } ReadCtx;
 
 typedef struct Reader_s {
-    int     rd_tag;
+    RBL_DECLARE_TAG;
     int     count;
     ReadCtx ctx_table[10];
+    RBL_DECLARE_END_TAG;
 } Reader;
 
 void Reader_init(Reader* this);
