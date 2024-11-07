@@ -48,7 +48,7 @@ static int *int_in_heap(int key) {
  * Perform a general epoll_ctl call with error checking.
  * In the event of an error abort 
  */
-static void runloop_epoll_ctl(RunloopRef athis, int op, int fd, uint64_t interest)
+static void runloop_epoll_ctl(RunloopRef athis, int op, int fd, uint64_t interest, void* watcher)
 {
     REACTOR_CHECK_TAG(athis)
     struct epoll_event epev = {
@@ -57,6 +57,8 @@ static void runloop_epoll_ctl(RunloopRef athis, int op, int fd, uint64_t interes
             .fd = fd,
         }
     };
+    // note epev.data is a union so the next line overites .fd = fd
+    epev.data.ptr = watcher;
     int status = epoll_ctl(athis->epoll_fd, op, fd, &(epev));
     if (status != 0) {
         int errno_saved = errno;
@@ -148,7 +150,7 @@ int runloop_register(RunloopRef athis, int fd, uint32_t interest, RunloopWatcher
     REACTOR_CHECK_TAG(athis)
 //    CHECK_THREAD(athis)
     RBL_LOG_FMT("fd : %d  for events %d", fd, interest);
-    runloop_epoll_ctl(athis, EPOLL_CTL_ADD, fd, interest);
+    runloop_epoll_ctl(athis, EPOLL_CTL_ADD, fd, interest, wref);
     FdTable_insert(athis->table, wref, fd);
     return 0;
 }
@@ -157,7 +159,7 @@ int runloop_deregister(RunloopRef athis, int fd)
     REACTOR_CHECK_TAG(athis)
 //    CHECK_THREAD(athis)
     RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
-    runloop_epoll_ctl(athis, EPOLL_CTL_DEL, fd, EPOLLEXCLUSIVE | EPOLLIN);
+    runloop_epoll_ctl(athis, EPOLL_CTL_DEL, fd, EPOLLEXCLUSIVE | EPOLLIN, NULL);
     FdTable_remove(athis->table, fd);
     return 0;
 }
@@ -166,7 +168,7 @@ int runloop_reregister(RunloopRef athis, int fd, uint32_t interest, RunloopWatch
     REACTOR_CHECK_TAG(athis)
 //    CHECK_THREAD(athis)
     RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
-    runloop_epoll_ctl(athis, EPOLL_CTL_MOD, fd, interest);
+    runloop_epoll_ctl(athis, EPOLL_CTL_MOD, fd, interest, wref);
     RunloopWatcherRef wref_tmp = FdTable_lookup(athis->table, fd);
     assert(wref == wref_tmp);
     return 0;
@@ -233,11 +235,17 @@ int runloop_run(RunloopRef athis, time_t timeout) {
                 default: {
                     for (int i = 0; i < nfds; i++) {
                         REACTOR_CHECK_TAG(athis)
+#if 1
+                        RunloopWatcherRef wr = events[i].data.ptr;
+                        int fd = wr->fd;
+#else
                         int fd = events[i].data.fd;
                         void *arg = events[i].data.ptr;
+#endif
                         int mask = events[i].events;
                         RBL_LOG_FMT("runloop_run loop fd: %d events: %x", fd, mask);
                         RunloopWatcherRef wref = FdTable_lookup(athis->table, fd);
+                        assert(wr == wref);
                         wref->handler(wref, events[i].events);
                         RBL_LOG_FMT("fd: %d", fd);
                         // call handler
