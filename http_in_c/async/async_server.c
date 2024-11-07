@@ -1,7 +1,4 @@
-
-#define CHLOG_ON
 #include <http_in_c/async/async.h>
-#include <http_in_c/async/junk/async_internal.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -13,6 +10,7 @@
 #include <rbl/macros.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/utils.h>
+#include "./async_socket.h"
 
 #if 0
 static AsyncHandlerRef my_only_client;

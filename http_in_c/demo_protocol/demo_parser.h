@@ -77,21 +77,22 @@ typedef struct DemoParserPrivateReturnValue_s DemoParserPrivateReturnValue;
  */
 struct DemoParser_s;
 typedef struct DemoParser_s DemoParser, *DemoParserRef;
-typedef void(*DP_MessageComple_CB)(void* ctx, DemoMessageRef, int error_code);
+typedef void(*DP_MessageComplete_CB)(void* ctx, DemoMessageRef, int error_code);
 struct DemoParser_s {
     ParserInterface;
     RBL_DECLARE_TAG;
-    int  m_state;
-    void* on_read_ctx;
-    DP_MessageComple_CB on_message_complete;
+    uint8_t             lrc;
+    int                 m_state;
+    void*               on_read_ctx;
+    DP_MessageComplete_CB on_message_complete;
 //    void(*on_read_message_cb)(void* read_ctx, DemoMessageRef msg, int error_code);
 //    void(*on_read_parser_error_cb)(void* read_ctx, const char* error_message);
-    DemoMessageRef  m_current_message_ptr;
+    DemoMessageRef      m_current_message_ptr;
     RBL_DECLARE_END_TAG;
 };
 
 DemoParserRef DemoParser_new(
-        DP_MessageComple_CB on_message_complete_cb,
+        DP_MessageComplete_CB on_message_complete_cb,
         void* on_read_ctx);
 void DemoParser_dispose(DemoParserRef* parser_p);
 void DemoParser_free(DemoParserRef this);

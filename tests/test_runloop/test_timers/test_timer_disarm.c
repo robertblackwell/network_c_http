@@ -1,6 +1,4 @@
 
-#define ENABLE_LOGx
-#include <http_in_c/async-old/types.h>
 #include <assert.h>
 #include <stdio.h>
 #include <pthread.h>

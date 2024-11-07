@@ -10,7 +10,7 @@
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/utils.h>
 #include <rbl/logger.h>
-#include <http_in_c/socket_functions.h>
+#include <http_in_c/common/socket_functions.h>
 #include <http_in_c/common/queue.h>
 
 #include <rbl/check_tag.h>

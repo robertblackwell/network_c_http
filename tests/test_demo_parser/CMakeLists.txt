@@ -6,6 +6,8 @@ message("test_link_libs        ${TEST_LINK_LIBS}")
 set(TARGET test_demo_parser)
 add_executable(${TARGET}
 		test_demo_parser.c
+		test_harness.c
+		test_harness.h
 		)
 
 target_include_directories(${TARGET}

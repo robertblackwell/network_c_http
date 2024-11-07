@@ -10,8 +10,8 @@
 #include <rbl/macros.h>
 #include <http_in_c/runloop/runloop.h>
 #include <rbl/logger.h>
-#include "io_read.h"
-#include "io_write.h"
+#include "io_read_asio.h"
+#include "io_write_asio.h"
 /**
 Tests Socket watcher - WSocket
 
@@ -58,22 +58,22 @@ int test_io()
     int pipe_2[2]; pipe(pipe_2);
     int max_io = 5;
 
-    ReaderTable* rdr = ReaderTable_new();
+    ReaderTableRef rdr = ReaderTable_new();
     ReaderTable_add_fd(rdr, pipe_1[0], max_io);
     ReaderTable_add_fd(rdr, pipe_2[0], max_io);
     RBL_LOG_FMT("read fd %d %d \n", pipe_1[0], pipe_2[0]);
     RBL_LOG_FMT("write fd %d %d \n", pipe_1[1], pipe_2[1]);
     pthread_t rdr_thread;
-    WriterTable* wrtr = WriterTable_new();
-    WriterTable_add_fd(wrtr, pipe_1[1], max_io, 500);
-    WriterTable_add_fd(wrtr, pipe_2[1], max_io, 500);
+    WriterTableRef wrtr = WriterTable_new();
+    WriterTable_add_fd(wrtr, pipe_1[1], max_io, 5000);
+    WriterTable_add_fd(wrtr, pipe_2[1], max_io, 5000);
     pthread_t wrtr_thread;
 
     int r_rdr = pthread_create(&rdr_thread, NULL, reader_thread_func, (void*)rdr);
-    int r_wrtr = pthread_create(&wrtr_thread, NULL, writer_thread_func, (void*)wrtr);
+//    int r_wrtr = pthread_create(&wrtr_thread, NULL, writer_thread_func, (void*)wrtr);
 
     pthread_join(rdr_thread, NULL);
-    pthread_join(wrtr_thread, NULL);
+//    pthread_join(wrtr_thread, NULL);
     RBL_LOG_MSG("Trace after join\n\n")
     printf("After join\n");
     return 0;

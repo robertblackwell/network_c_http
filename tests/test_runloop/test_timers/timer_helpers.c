@@ -1,7 +1,5 @@
 #ifndef TIMER_HELPERS
 #define TIMER_HELPERS
-#define ENABLE_LOGx
-#include <http_in_c/async-old/types.h>
 #include <stdio.h>
 #include <pthread.h>
              /* See feature_test_macros(7) */

@@ -2,7 +2,7 @@
 
 #include <rbl/macros.h>
 #include <http_in_c/sync/sync.h>
-#include <http_in_c/socket_functions.h>
+#include <http_in_c/common/socket_functions.h>
 #include <http_in_c/sync/sync_internal.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/utils.h>

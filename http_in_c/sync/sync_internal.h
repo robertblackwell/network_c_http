@@ -1,7 +1,7 @@
 #ifndef c_http_sync_sync_internal_h
 #define c_http_sync_sync_internal_h
 #include <rbl/logger.h>
-#include <http_in_c/socket_functions.h>
+#include <http_in_c/common/socket_functions.h>
 #include <http_in_c/common/queue.h>
 #include <http_in_c/http/parser.h>
 

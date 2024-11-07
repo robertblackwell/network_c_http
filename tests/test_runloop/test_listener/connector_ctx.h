@@ -1,8 +1,6 @@
 #ifndef c_http_tests_test_reactor_connector_h
 #define c_http_tests_test_reactor_connector_h
 
-#define XR_TRACE_ENABLE
-//#include <http_in_c/async-old/types.h>
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -14,7 +12,7 @@
 #include <errno.h>
 #include <rbl/unittest.h>
 #include <http_in_c/common/utils.h>
-#include <http_in_c/socket_functions.h>
+#include <http_in_c/common/socket_functions.h>
 #include <http_in_c/sync/sync_client.h>
 #include <http_in_c/runloop/runloop.h>
 

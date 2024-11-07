@@ -54,7 +54,7 @@ static void runloop_epoll_ctl(RunloopRef athis, int op, int fd, uint64_t interes
     struct epoll_event epev = {
         .events = interest,
         .data = {
-            .fd = fd
+            .fd = fd,
         }
     };
     int status = epoll_ctl(athis->epoll_fd, op, fd, &(epev));
@@ -86,6 +86,7 @@ void runloop_init(RunloopRef athis) {
     RunloopRef runloop = athis;
 
     REACTOR_SET_TAG(runloop)
+    runloop->tid = gettid();
     runloop->epoll_fd = epoll_create1(0);
     runloop->closed_flag = false;
     runloop->runloop_executing = false;
@@ -187,6 +188,7 @@ void print_events(struct epoll_event events[], int count)
 int runloop_run(RunloopRef athis, time_t timeout) {
     REACTOR_CHECK_TAG(athis)
 //    CHECK_THREAD(athis)
+    athis->tid = gettid();
     int result;
     struct epoll_event events[runloop_MAX_EPOLL_FDS];
 
@@ -208,7 +210,11 @@ int runloop_run(RunloopRef athis, time_t timeout) {
         /**
          * All entries on the ready should be executed before we look for more fd events
          */
-        assert(functor_list_size(athis->ready_list) == 0);
+//        if((functor_list_size(athis->ready_list)) > 0) {
+//            Functor func = functor_list_remove(athis->ready_list);
+//            printf("We are here");
+//        }
+//        assert(functor_list_size(athis->ready_list) == 0);
         RBL_LOG_FMT("reactor epoll_wait before active fd : %ld ready_list_size: %d",
                     FdTable_size(athis->table), functor_list_size(athis->ready_list));
         int nfds = epoll_wait(athis->epoll_fd, events, max_events, -1);
@@ -240,6 +246,7 @@ int runloop_run(RunloopRef athis, time_t timeout) {
                 for (int i = 0; i < nfds; i++) {
                     REACTOR_CHECK_TAG(athis)
                     int fd = events[i].data.fd;
+                    void* arg = events[i].data.ptr;
                     int mask = events[i].events;
                     RBL_LOG_FMT("runloop_run loop fd: %d events: %x", fd, mask);
                     RunloopWatcherRef wref = FdTable_lookup(athis->table, fd);
@@ -281,7 +288,10 @@ cleanup:
 int runloop_post(RunloopRef athis, PostableFunction cb, void* arg)
 {
     REACTOR_CHECK_TAG(athis)
+    assert(athis->tid == gettid());
     RBL_LOG_FMT("runloop_post entered functor_list_size: %d funct: %p arg: %p runloop_executing: %d", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
+    assert(cb != NULL);
+    assert(arg != NULL);
     Functor func = {.f = cb, .arg = arg};
     functor_list_add(athis->ready_list, func);
     RBL_LOG_FMT("runloop_post exited functor_list_size: %d func: %p arg: %p runloop_executing: %d", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);

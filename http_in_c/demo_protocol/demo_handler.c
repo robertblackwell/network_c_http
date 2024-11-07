@@ -92,9 +92,11 @@ static void handle_request(void* href, DemoMessageRef msgref, int error_code)
     } else {
         response = process_request(handler_ref, msgref);
         List_add_back(handler_ref->output_list, response);
-        if (List_size(handler_ref->output_list) == 1) {
+        if(List_size(handler_ref->output_list) > 1) {
+            assert(false);
+        } else if (List_size(handler_ref->output_list) == 1) {
             runloop_post(handler_ref->reactor_ref, postable_write_start, href);
-        }
+        } // why not else
         demo_message_free(msgref);
         runloop_post(handler_ref->reactor_ref, handler_postable_read_start, href);
     }
@@ -121,7 +123,7 @@ static void postable_write_start(RunloopRef reactor_ref, void* href)
     DemoHandlerRef handler_ref = href;
     RBL_CHECK_TAG(DemoHandler_TAG, handler_ref)
     RBL_CHECK_END_TAG(DemoHandler_TAG, handler_ref)
-    printf("postable_write_start active_response:%p fd:%d  write_state: %d\n", handler_ref->active_response, handler_ref->demo_connection_ref->socket_stream_ref->fd, handler_ref->demo_connection_ref->write_state);
+    printf("postable_write_start active_response:%p fd:%d  write_state: %d\n", handler_ref->active_response, handler_ref->demo_connection_ref->asio_stream_ref->fd, handler_ref->demo_connection_ref->write_state);
     if(handler_ref->active_response != NULL) {
         return;
     }
@@ -137,10 +139,12 @@ static void on_write_complete_cb(void* href, int status)
     DemoHandlerRef handler_ref = href;
     RBL_CHECK_TAG(DemoHandler_TAG, handler_ref)
     RBL_CHECK_END_TAG(DemoHandler_TAG, handler_ref)
-    printf("on_write_complete_cb fd:%d  write_state:%d\n", handler_ref->demo_connection_ref->socket_stream_ref->fd, handler_ref->demo_connection_ref->write_state);
+    printf("on_write_complete_cb fd:%d  write_state:%d\n", handler_ref->demo_connection_ref->asio_stream_ref->fd, handler_ref->demo_connection_ref->write_state);
     demo_message_dispose(&(handler_ref->active_response));
-    if(List_size(handler_ref->output_list) == 1) {
+    if(List_size(handler_ref->output_list) >= 1) {
         runloop_post(handler_ref->reactor_ref, postable_write_start, href);
+    } else {
+        runloop_post(handler_ref->reactor_ref, handler_postable_read_start, href);
     }
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////

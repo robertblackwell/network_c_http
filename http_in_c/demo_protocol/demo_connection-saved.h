@@ -33,12 +33,10 @@ typedef void(*DC_Close_CB)(void* href);
 
 typedef struct DemoConnection_s {
     RBL_DECLARE_TAG;
-    RunloopRef       runloop_ref;
-    AsioStreamRef    asio_stream_ref;
-//    RunloopStreamRef socket_stream_ref;
+    RunloopRef       reactor_ref;
+    RunloopStreamRef socket_stream_ref;
     DemoHandlerRef   handler_ref;
     IOBufferRef      active_input_buffer_ref;
-    long             read_buffer_size;
     IOBufferRef      active_output_buffer_ref;
     DemoParserRef    parser_ref;
     int              read_state;

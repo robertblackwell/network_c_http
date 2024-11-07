@@ -1,14 +1,8 @@
-
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-//#include <http_in_c/common/http_parser/ll_parser_types.h>
 #include <rbl/unittest.h>
 #include <rbl/logger.h>
-#include <http_in_c/http/kvpair.h>
-#include <http_in_c/http/message.h>
-#include <http_in_c/test_helpers/message_private.h>
-//#include <http_in_c/saved/sync_reader.h>
 #include "test_harness.h"
 int run_list (ListRef tests)
 {

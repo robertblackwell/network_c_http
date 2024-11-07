@@ -1,7 +1,6 @@
 
 #define RBL_LOG_ENABLE 1
 #define RBL_LOG_ALLOW_GLOBAL 1
-#include <http_in_c/async-old/types.h>
 #include <stdio.h>
 #include <pthread.h>
              /* See feature_test_macros(7) */

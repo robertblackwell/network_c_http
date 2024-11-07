@@ -2,8 +2,6 @@
 #define c_http_tests_test_reactor_listener_h
 
 
-#define XR_TRACE_ENABLE
-#include <http_in_c/async-old/types.h>
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -15,9 +13,10 @@
 #include <errno.h>
 #include <rbl/unittest.h>
 #include <http_in_c/common/utils.h>
-#include <http_in_c/socket_functions.h>
+#include <http_in_c/common/socket_functions.h>
 #include <http_in_c/sync/sync_client.h>
 #include <http_in_c/runloop/runloop.h>
+#include "asio_listener.h"
 
 typedef int socket_handle_t;
 
@@ -30,23 +29,22 @@ typedef int socket_handle_t;
  *      controlled by a w_timer
  * 
  */
-struct Listener_s {
+struct ListenerCtx_s {
     socket_handle_t         listening_socket_fd;
-    XrHandlerFunction       handler;
-    RunloopRef              reactor_ref;
-    RunloopListenerRef         listening_watcher_ref;
-    RunloopTimerRef            timer_ref;
-    TcpConnListRef          conn_list_ref;
+    RunloopRef              runloop_ref;
+    RunloopListenerRef      listening_watcher_ref;
+    RunloopTimerRef         timer_ref;
+    AsioListenerRef         asio_listener_ref;
     int                     listen_counter;
     int                     accept_count;
 };
-typedef struct  Listener_s TestServer, *ListenerRef;
+typedef struct  ListenerCtx_s TestServer, *ListenerCtxRef;
 
 
-ListenerRef Listener_new(int listen_fd);
-ListenerRef Listener_init(ListenerRef sref, int listen_fd);
-void Listener_dispose(ListenerRef *sref);
-void Listener_listen(ListenerRef sref);
+ListenerCtxRef listener_ctx_new(int listen_fd);
+ListenerCtxRef listener_ctx_init(ListenerCtxRef sref, int listen_fd);
+void listener_ctx_dispose(ListenerCtxRef *sref);
+void listener_ctx_listen(ListenerCtxRef sref);
 
 socket_handle_t create_listener_socket(int port, const char *host);
 void set_non_blocking(socket_handle_t socket);

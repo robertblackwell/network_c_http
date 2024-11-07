@@ -187,8 +187,8 @@ int runloop_stream_get_fd(RunloopStreamRef this);
  * It is a proactor interface rather than the reactor provided by the runloop_stream
  * interface above
  */
-AsioStreamRef asio_stream_new(int socket, RunloopRef runloop_ref);
-void asio_stream_init(AsioStreamRef this, int fd, RunloopRef runloop_ref);
+AsioStreamRef asio_stream_new(RunloopRef runloop_ref, int socket);
+void asio_stream_init(AsioStreamRef this, RunloopRef runloop_ref, int fd);
 void asio_stream_free(AsioStreamRef this);
 void asio_stream_destroy(AsioStreamRef cref);
 void asio_stream_amonymous_dispose(void* p);

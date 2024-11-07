@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <assert.h>
 #include <errno.h>
-#include <http_in_c/common/http_parser/ll_parser_types.h>
 #include <http_in_c/common/iobuffer.h>
 
 #define TYPE DemoSyncWriter

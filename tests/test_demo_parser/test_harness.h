@@ -2,9 +2,8 @@
 #define c_http_test_parser_harness_h
 #include <stdbool.h>
 #include <http_in_c/common/list.h>
-#include <http_in_c/http/message.h>
-//#include <http_in_c/saved/sync_reader.h>
-#include <http_in_c/http/parser.h>
+#include <http_in_c/demo_protocol/demo_message.h>
+#include <http_in_c/demo_protocol/demo_parser.h>
 
 /* Test input - is a list of blocks of text and some context so that these blocks can be
  * "read" and "processed" one at a time*/
@@ -15,6 +14,7 @@ typedef struct test_input_s {
     int           errno;
 
 } test_input_t;
+test_input_t* test_input_new(const char* description, const char* blocks[]);
 void test_input_init(test_input_t* this, const char* description, const char* blocks[]);
 const char* test_input_next(test_input_t* this);
 bool test_input_finished(test_input_t* this);
@@ -26,11 +26,11 @@ int test_input_read_some(test_input_t* this, void* buffer, int length);
  * instance. If the message pointer is not null the return code is HPE_OK
  */
 typedef struct test_output_s {
-    MessageRef  message;
-    int         rc;
+    DemoMessageRef  message;
+    int             rc;
 } test_output_t, *test_output_r;
 
-test_output_r test_output_new(MessageRef msg, int rc);
+test_output_r test_output_new(DemoMessageRef msg, int rc);
 void test_output_dispose(test_output_r* this_ptr);
 
 

@@ -1,10 +1,4 @@
-
-#
-# test socket io watcher
-#
-
-set(TARGET_IO test_io)
-add_executable(${TARGET_IO}
+add_executable(test_io
 		test_io.c
 		io_read.h
 		io_read.c
@@ -12,12 +6,18 @@ add_executable(${TARGET_IO}
 		io_write.c
 		)
 
-target_include_directories(${TARGET_IO}
-		PUBLIC
-		${TEST_INCLUDE_dirS})
+target_include_directories(test_io PUBLIC ${TEST_INCLUDE_dirS})
+target_link_libraries(test_io PUBLIC ${TEST_LINK_LIBS})
+add_test(test_io test_io)
 
-target_link_libraries(${TARGET_IO}
-		PUBLIC ${TEST_LINK_LIBS})
+add_executable(test_io_asio
+		test_io_asio.c
+        io_read_asio.h
+        io_read_asio.c
+		io_write_asio.h
+		io_write_asio.c
+)
 
-add_test(${TARGET_IO} ${TARGET_IO})
-
+target_include_directories(test_io_asio PUBLIC ${TEST_INCLUDE_dirS})
+target_link_libraries(test_io_asio PUBLIC ${TEST_LINK_LIBS})
+add_test(test_io_asio test_io_asio)

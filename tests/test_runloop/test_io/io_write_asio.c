@@ -1,7 +1,7 @@
 
 //#define RBL_LOG_ENABLED
 //#define RBL_LOG_ALLOW_GLOBAL
-#include "io_write.h"
+#include "io_write_asio.h"
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -25,17 +25,32 @@ void async_socket_set_nonblocking(int socket);
  *  rearm the timer
  *
  */
-void WriteCtx_init(WriteCtx* this, int fd, RunloopStreamRef stream_ref, RunloopTimerRef timer_ref, int max)
+void WriteCtx_init(WriteCtx* this, int fd, int myindex, int max, int interval_ms)
 {
     RBL_SET_TAG(WriteCtx_ATG, this)
     RBL_SET_END_TAG(WriteCtx_ATG, this)
     this->id = "WRITE";
     this->writefd = fd;
-    this->timer_ref = timer_ref;
-    this->stream_ref = stream_ref;
+    this->timer_ref = NULL;
+    this->asiostream_ref = NULL;
     this->write_count = 0;
+    this->writer_index = myindex;
+    this->interval_ms = interval_ms;
     this->max_write_count = max;
+    this->outbuffer = malloc(20000);
+    this->outbuffer_max_length = 20000;
+    this->outbuffer_length = 0;
     async_socket_set_nonblocking(fd);
+}
+void WriteCtx_set_stream_ref(WriteCtx* ctx, RunloopRef rl, int fd)
+{
+#if 1
+    ctx->stream_ref = runloop_stream_new(rl, fd);
+    ctx->asiostream_ref = NULL;
+#else
+    ctx->asiostream_ref = asio_stream_new(rl, fd);
+    ctx->stream_ref = ctx->asiostream_ref->runloop_stream_ref;
+#endif
 }
 
 
@@ -64,19 +79,19 @@ void WriterTable_add_fd(WriterTable* this, int fd, int max, int interval_ms)
     async_socket_set_nonblocking(fd);
 
     WriteCtx* ctx = &(this->ctx_table[this->count]);
-    WriteCtx_init(ctx, fd, NULL, NULL, max);
-    ctx->write_count = 0;
-    ctx->max_write_count = max;
-    ctx->interval_ms = interval_ms;
-    ctx->id = "WRITE";
-    ctx->writefd = fd;
-    ctx->writer_index = this->count;
-    ctx->outbuffer_length = 0;
+    WriteCtx_init(ctx, fd, this->count, max, interval_ms);
+//    ctx->write_count = 0;
+//    ctx->max_write_count = max;
+//    ctx->interval_ms = interval_ms;
+//    ctx->id = "WRITE";
+//    ctx->writefd = fd;
+//    ctx->writer_index = this->count;
+//    ctx->outbuffer_length = 0;
     this->count++;
 }
 static void wrtr_wait_timer_fired(RunloopRef rl, void* arg);
 
-static void fill_buffer(char* line, char* buffer, int max_len, int required_data_length)
+static size_t fill_buffer(char* line, char* buffer, int max_len, int required_data_length)
 {
     memset(buffer, '?', max_len);
     ulong line_length = strlen(line);
@@ -91,6 +106,8 @@ static void fill_buffer(char* line, char* buffer, int max_len, int required_data
         }
     }
     printf("done");
+    size_t x = (p - buffer);
+    return x;
 }
 static void wrtr_cb(RunloopRef rl, void* write_ctx_p_arg)
 {
@@ -166,8 +183,11 @@ void* writer_thread_func(void* arg)
     for(int i = 0; i < wrtr->count; i++) {
         WriteCtx* ctx = &(wrtr->ctx_table[i]);
 
-        wrtr->ctx_table[i].stream_ref = runloop_stream_new(runloop_ref, ctx->writefd);
-        wrtr->ctx_table[i].timer_ref = runloop_timer_new(runloop_ref);
+        WriteCtx_set_stream_ref(ctx, runloop_ref, ctx->writefd);
+//        ctx->asiostream_ref = asio_stream_new(runloop_ref, ctx->writefd);
+//        ctx->stream_ref = ctx->asiostream_ref->runloop_stream_ref;
+
+        ctx->timer_ref = runloop_timer_new(runloop_ref);
         runloop_timer_register(wrtr->ctx_table[i].timer_ref, &wrtr_wait_timer_fired, (void *) ctx, ctx->interval_ms, true);
 
         RBL_CHECK_TAG(WriteCtx_ATG, ctx)

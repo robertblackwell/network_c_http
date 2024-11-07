@@ -1,6 +1,6 @@
 
 #define XR_TRACE_ENABLE
-#include "connector.h"
+#include "connector_ctx.h"
 //#include <http_in_c/async/types.h>
 #include <assert.h>
 #include <stdio.h>
@@ -13,7 +13,7 @@
 #include <errno.h>
 #include <rbl/unittest.h>
 #include <http_in_c/common/utils.h>
-#include <http_in_c/socket_functions.h>
+#include <http_in_c/common/socket_functions.h>
 #include <http_in_c/sync/sync_client.h>
 
 void* connector_thread_func(void* arg)

@@ -46,11 +46,12 @@ enum State {
 void DemoParser_initialize(DemoParserRef this);
 
 DemoParserRef DemoParser_new(
-        DP_MessageComple_CB on_message_complete_cb,
+        DP_MessageComplete_CB on_message_complete_cb,
         void* on_read_ctx)
 {
     DemoParserRef this = malloc(sizeof(DemoParser));
     RBL_SET_TAG(DemoParser_TAG, this)
+    RBL_SET_END_TAG(DemoParser_TAG, this)
     this->parser_consume = (int(*)(ParserInterfaceRef, IOBufferRef))&DemoParser_consume;
     this->message_factory = (void*(*)())&demo_message_new;
     this->message_free = (void(*)(void*))&demo_message_free;
@@ -92,10 +93,13 @@ int DemoParser_append_bytes(DemoParserRef this, void *buffer, unsigned length)
     return 0;
 }
 /**
- * Comsumes some or all of the data given by buf and length and either partially or fully parses a DemoMessage.
+ * Comsumes some or all of the data given by iobuffer_ref.
+ *
+ * The iobuffer_ref is updated to reflect how much data was consumed
+ *
  * The possible outcomes are:
  *   1   consumes all of the data annd only parses a partial message
- *   2   comsumes only some of the data and only parses part of a message - THIS SHOULD NEVER HAPPEN
+ *   2   consumes only some of the data and only parses part of a message - THIS SHOULD NEVER HAPPEN
  *   3   consume all of the data and complete the parsing of a message.
  *          IN which case the message is in m_current_message_ptr
  *          and the bytes_consumed == length or the input IOBUffer is now empty
@@ -128,31 +132,8 @@ DemoParserErrCode DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_re
                 if(this->m_current_message_ptr == NULL) {
                     this->m_current_message_ptr = demo_message_new();
                 }
-                if(ch == CH_SOH) this->m_state = STATE_OPCODE;
+                if(ch == CH_STX) this->m_state = STATE_BODY;
                 break;
-            case STATE_OPCODE:
-                switch(ch) {
-                    case 'R':
-                    case 'Q': {
-                        demo_message_set_is_request(this->m_current_message_ptr, (ch == 'Q'));
-                        this->m_state = STATE_STX_WAIT;
-                        break;
-                    }
-                    default:
-                        this->m_state = STATE_ERROR_RECOVERY;
-                        error_code = DemoParserErr_invalid_opcode;
-                        break;
-                }
-                break;
-            case STATE_STX_WAIT: {
-                if (ch == CH_STX) {
-                    this->m_state = STATE_BODY;
-                } else {
-                    this->m_state = STATE_ERROR_RECOVERY;
-                    error_code = DemoParserErr_expected_stx;
-                }
-                break;
-            }
             case STATE_BODY: {
                 if (isprint(ch)) {
                     BufferChainRef bc = demo_message_get_body(this->m_current_message_ptr);
@@ -161,36 +142,27 @@ DemoParserErrCode DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_re
                     const char* xx = IOBuffer_cstr(iobtmp);
                     IOBuffer_free(iobtmp);
                 } else if (ch == CH_ETX) {
-                    this->m_state = STATE_LRC;
-//                    finalize_body(this);
+                    this->m_state = STATE_IDLE;
+                    this->on_message_complete(this, this->m_current_message_ptr, 0);
+                    this->m_current_message_ptr = demo_message_new();
+                    IOBuffer_consume(iobuffer_ref, i+1);
                 } else {
                     this->m_state = STATE_ERROR_RECOVERY;
                     error_code = DemoParserErr_expected_ascii;
                 }
                 break;
             }
-            case STATE_LRC:
-                demo_message_set_lrc(this->m_current_message_ptr, ch);
-                this->m_state = STATE_IDLE;
-                RBL_LOG_FMT("DemmoParser_consume got a message will call new message handler \n");
-                this->on_message_complete(this->on_read_ctx, this->m_current_message_ptr, 0);
-                this->m_current_message_ptr = demo_message_new();
-                IOBuffer_consume(iobuffer_ref, i+1);
-                return 0;
-                break;
-            case STATE_EOT_WAIT:
-                break;
             case STATE_ERROR_RECOVERY:
                 /**
                  * Come to this state after a parse error - search for SOH until end of buffer.
                  * If not found the terminate the read operation with an error
                  */
-                if((ch == CH_SOH) && (i < length - 1)) {
-                    this->m_state = STATE_OPCODE;
+                if((ch == CH_STX) && (i < length - 1)) {
+                    this->m_state = STATE_BODY;
                 } else {
                     if(i == length - 1) {
                         RBL_LOG_FMT("DemmoParser_consume parse error \n");
-                        this->on_message_complete(this->on_read_ctx, NULL, DemoParserErr_expected_stx);
+                        this->on_message_complete(this, NULL, DemoParserErr_expected_stx);
                         demo_message_dispose(&(this->m_current_message_ptr));
                         this->m_current_message_ptr = demo_message_new();
                         IOBuffer_consume(iobuffer_ref, i + 1);
@@ -202,7 +174,12 @@ DemoParserErrCode DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_re
                 assert(false);
         }
     }
-    IOBuffer_consume(iobuffer_ref, length);
+    if((this->m_state != STATE_IDLE) && (length == 0)) {
+        this->on_message_complete(this, NULL, DemoParserErr_expected_stx);
+        demo_message_dispose(&(this->m_current_message_ptr));
+        this->m_current_message_ptr = demo_message_new();
+        return DemoParserErr_expected_stx;
+    }
     return 0;
 }
 

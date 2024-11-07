@@ -13,13 +13,13 @@
 #include <rbl/check_tag.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/utils.h>
-#include <http_in_c/socket_functions.h>
+#include <http_in_c/common/socket_functions.h>
 
 static DemoHandlerRef my_only_client;
 
 static socket_handle_t create_listener_socket(int port, const char *host);
 static void set_non_blocking(socket_handle_t socket);
-void on_event_listening(RunloopListenerRef listener_watcher_ref, uint64_t event);
+void on_event_listening(RunloopRef rl, void* arg_server_ref);
 
 static void on_handler_completion_cb(void* void_server_ref, DemoHandlerRef handler_ref)
 {
@@ -32,9 +32,8 @@ static void on_handler_completion_cb(void* void_server_ref, DemoHandlerRef handl
     DemoHandlerRef href = List_itr_unpack(server_ref->handler_list, x);
     List_itr_remove(server_ref->handler_list, &x);
 }
-DemoServerRef DemoServer_new(int port)
+void DemoServer_init(DemoServerRef sref, int port)
 {
-    DemoServerRef sref = (DemoServerRef) eg_alloc(sizeof(DemoServer));
     RBL_SET_TAG(DemoServer_TAG, sref)
     RBL_SET_END_TAG(DemoServer_TAG, sref)
     sref->port = port;
@@ -46,8 +45,14 @@ DemoServerRef DemoServer_new(int port)
     // the list is the owner of handler references
     sref->handler_list = List_new(demohandler_anonymous_dispose);
 //    sref->completion_callback = &on_handler_completion_cb;
+}
+DemoServerRef DemoServer_new(int port)
+{
+    DemoServerRef sref = (DemoServerRef) eg_alloc(sizeof(DemoServer));
+    DemoServer_init(sref, port);
     return sref;
 }
+
 void DemoServer_free(DemoServerRef this)
 {
     RBL_CHECK_TAG(DemoServer_TAG, this)
@@ -144,14 +149,13 @@ void set_non_blocking(socket_handle_t socket)
     assert(fres == 0);
 }
 
-void on_event_listening(RunloopListenerRef listener_watcher_ref, uint64_t event)
+void on_event_listening(RunloopRef rl, void* arg_server_ref) // RunloopListenerRef listener_watcher_ref, uint64_t event)
 {
 
     printf("listening_hander \n");
-    DemoServerRef server_ref = listener_watcher_ref->listen_postable_arg;
+    DemoServerRef server_ref = arg_server_ref; //listener_watcher_ref->listen_postable_arg;
     RBL_CHECK_TAG(DemoServer_TAG, server_ref)
-
-//    DemoServerRef server_ref = listener_watcher_ref->listen_arg;
+    RBL_CHECK_END_TAG(DemoServer_TAG, server_ref)
 
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
@@ -164,7 +168,7 @@ void on_event_listening(RunloopListenerRef listener_watcher_ref, uint64_t event)
     RBL_LOG_FMT("Listerner accepted sock fd: %d", sock2);
     DemoHandlerRef handler = demohandler_new(
             sock2,
-            runloop_listener_get_runloop(listener_watcher_ref),
+            rl,
             on_handler_completion_cb,
             server_ref);
 

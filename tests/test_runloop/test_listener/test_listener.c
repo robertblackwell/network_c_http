@@ -6,12 +6,12 @@
 #include <string.h>
 #include <rbl/unittest.h>
 #include <http_in_c/common/utils.h>
-#include "listener.h"
-#include "connector.h"
+#include "listener_ctx.h"
+#include "connector_ctx.h"
 
 /**
  * This test has two goals:
- * 1.   verify that a listener event is handled correcly. That is that a listen event on a socket is generated
+ * 1.   verify that a listener event is handled correcly. That is a listen event on a socket is generated
  *      when another thread connects to the same host/port.
  *
  * 2.   In addition we are testing that multiple threads can be listening on the same socket and that
@@ -23,9 +23,9 @@
 
 void* listener_thread_func(void* arg)
 {
-    ListenerRef server_ref = (ListenerRef) arg;
+    ListenerCtxRef server_ref = (ListenerCtxRef) arg;
     printf("Listener thread server: %p \n", server_ref);
-    Listener_listen(server_ref);
+    listener_ctx_listen(server_ref);
 }
 
 int test_listeners()
@@ -40,8 +40,8 @@ int test_listeners()
     set_non_blocking(fd);
     tclient.listen_fd = fd;
 
-    ListenerRef server1 = Listener_new(fd);
-    ListenerRef server2 = Listener_new(fd);
+    ListenerCtxRef server1 = listener_ctx_new(fd);
+    ListenerCtxRef server2 = listener_ctx_new(fd);
 
     printf("Sizeof \n");
     int r1 = pthread_create(&listener_thread_1, NULL, &listener_thread_func, server1);

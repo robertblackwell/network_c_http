@@ -2,7 +2,7 @@
 #define RBL_LOG_ENABLED
 #define RBL_LOG_ALLOW_GLOBAL
 
-#include "io_read.h"
+#include "io_read_asio.h"
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -36,8 +36,21 @@ void ReadCtx_init(ReadCtx* this, int my_index, int fd, int max)
     this->max_read_count = max;
     this->readfd = fd;
     this->reader_index = my_index;
-    this->swatcher = NULL;
+    this->inbuffer = malloc(20000);
+    this->inbuffer_max_length = 20000;
+    this->inbuffer_length = 0;
+    this->asiostream_ref = NULL;
 
+}
+void ReadCtx_set_stream_ref(ReadCtx* ctx, RunloopRef rl, int fd)
+{
+#if 1
+    ctx->stream_ref = runloop_stream_new(rl, fd);
+    ctx->asiostream_ref = NULL;
+#else
+    ctx->asiostream_ref = asio_stream_new(rl, fd);
+    ctx->stream_ref = ctx->asiostream_ref->runloop_stream_ref;
+#endif
 }
 
 void ReaderTable_init(ReaderTable* this)
@@ -71,7 +84,7 @@ void ReaderTable_add_fd(ReaderTable* this, int fd, int max)
 void read_callback(RunloopRef rl, void* read_ctx_ref_arg)
 {
     ReadCtx* ctx = (ReadCtx*)read_ctx_ref_arg;
-    RunloopStreamRef stream = ctx->swatcher;
+    RunloopStreamRef stream = ctx->stream_ref;
     RunloopRef runloop_ref = runloop_stream_get_reactor(stream);
     char buf[100000];
     int x = sizeof(buf);
@@ -86,7 +99,7 @@ void read_callback(RunloopRef rl, void* read_ctx_ref_arg)
     } else {
         s = "badread";
         RBL_LOG_FMT("BAD READ rd_callback read_count: %d fd: %d nread: %d buf: %s errno: %d", ctx->read_count,
-                fd, nread, s, errno);
+                    fd, nread, s, errno);
     }
     ctx->read_count++;
     if(ctx->read_count > ctx->max_read_count) {
@@ -95,18 +108,31 @@ void read_callback(RunloopRef rl, void* read_ctx_ref_arg)
         return;
     }
 }
-
+void start_read(RunloopRef rl, void* ctx_arg)
+{
+    ReadCtxRef ctx = ctx_arg;
+    uint64_t interest = EPOLLERR | EPOLLIN;
+    runloop_stream_register(ctx->stream_ref);
+    runloop_stream_arm_read(ctx->stream_ref, &read_callback, (void *) ctx);
+}
+void timer_dummy(RunloopRef rl, void* arg)
+{
+    printf("timer_dummy");
+    runloop_post(rl, start_read, arg);
+//    assert(false);
+}
 void* reader_thread_func(void* arg)
 {
     RunloopRef runloop_ref = runloop_new();
     ReaderTable* rdr = (ReaderTable*)arg;
     for(int i = 0; i < rdr->count; i++) {
         ReadCtx* ctx = &(rdr->ctx_table[i]);
-        rdr->ctx_table[i].swatcher = runloop_stream_new(runloop_ref, ctx->readfd);
-        RunloopStreamRef sw = rdr->ctx_table[i].swatcher;
-        uint64_t interest = EPOLLERR | EPOLLIN;
-        runloop_stream_register(sw);
-        runloop_stream_arm_read(sw, &read_callback, (void *) ctx);
+        ReadCtx_set_stream_ref(ctx, runloop_ref, ctx->readfd);
+        RunloopTimerRef t = runloop_timer_set(runloop_ref, timer_dummy, ctx, 100000, false);
+        runloop_post(runloop_ref, start_read, ctx);
+//        uint64_t interest = EPOLLERR | EPOLLIN;
+//        runloop_stream_register(ctx->stream_ref);
+//        runloop_stream_arm_read(ctx->stream_ref, &read_callback, (void *) ctx);
     }
     runloop_run(runloop_ref, 1000000);
     return NULL;

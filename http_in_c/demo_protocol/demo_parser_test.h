@@ -1,7 +1,6 @@
 #ifndef c_c_demo_parser_test_h
 #define c_c_demo_parser_test_h
 #include <http_in_c/common/list.h>
-#include <http_in_c/saved/rdsocket.h>
 #include <http_in_c/http/message.h>
 #include <http_in_c//demo_protocol/demo_sync_reader.h>
 

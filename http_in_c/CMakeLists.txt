@@ -29,7 +29,7 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 	#misc
         ../rbl/logger.h
 		../rbl/unittest.h
-		socket_functions.h
+		common/socket_functions.h
 		../rbl/check_tag.h
 	#common
 		#common/generics
@@ -59,18 +59,16 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 #		sync/sync_handler_example.h
 #		sync/worker.h
 	#demo_protocol
-#		demo_protocol/demo_client.h
-#		demo_protocol/demo_connection.h
-#		demo_protocol/demo_process_request.h
-#		demo_protocol/demo_handler.h
-#		demo_protocol/demo_message.h
-#		demo_protocol/demo_parser.h
-#		demo_protocol/demo_parser_test.h
-#		demo_protocol/demo_server.h
+		demo_protocol/demo_client.h
+		demo_protocol/demo_connection.h
+		demo_protocol/demo_handler.h
+		demo_protocol/demo_message.h
+		demo_protocol/demo_parser.h
+		demo_protocol/demo_process_request.h
+		demo_protocol/demo_server.h
 #		demo_protocol/demo_sync_reader.h
-#		demo_protocol/demo_sync_writer.h
-#		demo_protocol/demo_parser_test.h
-#		demo_protocol/demo_sync_reader_private.h
+		demo_protocol/demo_sync_reader_private.h
+		demo_protocol/demo_sync_writer.h
 
 
 		#sync simple_server sync_app
@@ -82,7 +80,7 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 		runloop/rl_internal.h
 	#aio api
         async/async.h
-		async/junk/async_internal.h
+		../junk/junk/async_internal.h
 	)
 
 set(C_HTTP_LIBRARY_SOURCE_FILES
@@ -91,7 +89,7 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 	#misc
 		../rbl/unittest.c
         ../rbl/logger.c
-		socket_functions.c
+		common/socket_functions.c
 
 
 	#http/1.1 API
@@ -121,20 +119,21 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		sync/worker.c
 
 	#aio runloop and aio_http/1.1 details
-		runloop/fdtable.c
+		runloop/asio_stream.c
+		runloop/eventfd_queue.c
 		runloop/fd_map.c
-        runloop/runloop.c
-		runloop/w_listener.c
-		runloop/w_eventfd.c
-		runloop/w_timerfd.c
-        runloop/w_stream.c
-		runloop/w_queue.c
-		runloop/interthread_queue.c
-		runloop/watcher.c
-        runloop/eventfd_queue.c
-		runloop/run_list.c
+		runloop/fdtable.c
 		runloop/functor.c
 		runloop/functor_list.c
+		runloop/interthread_queue.c
+		runloop/run_list.c
+        runloop/runloop.c
+		runloop/w_eventfd.c
+		runloop/w_listener.c
+		runloop/w_queue.c
+		runloop/w_stream.c
+		runloop/w_timerfd.c
+		runloop/watcher.c
 	#async
 		async/async_handler.c
 		async/async_socket.c
@@ -147,17 +146,16 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		async/connection_write.c
 #		async/async_process_request.c
 	#demo_protocol
-#		demo_protocol/demo_client.c
-#		demo_protocol/demo_handler.c
-#		demo_protocol/demo_process_request.c
-#		demo_protocol/demo_connection.c
-#		demo_protocol/demo_message.c
-#		demo_protocol/demo_parser.c
+		demo_protocol/demo_client.c
+		demo_protocol/demo_connection.c
+		demo_protocol/demo_handler.c
+		demo_protocol/demo_message.c
+		demo_protocol/demo_parser.c
 #		demo_protocol/demo_parser_test.c
-#		demo_protocol/demo_parser_test.c
-#		demo_protocol/demo_server.c
+		demo_protocol/demo_process_request.c
+		demo_protocol/demo_server.c
 #		demo_protocol/demo_sync_reader.c
-#		demo_protocol/demo_sync_writer.c
+		demo_protocol/demo_sync_writer.c
 	#async_demo
 #		async_demo/demo_server.c
 #		async_demo/demo_handler.c

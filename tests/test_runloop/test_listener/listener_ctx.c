@@ -2,7 +2,7 @@
 #define XR_TRACE_ENABLE
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
-#include "listener.h"
+#include "listener_ctx.h"
 //#include <http_in_c/async/types.h>
 #include <assert.h>
 #include <stdio.h>
@@ -17,74 +17,99 @@
 #include <rbl/unittest.h>
 #include <rbl/logger.h>
 #include <http_in_c/common/utils.h>
-#include <http_in_c/socket_functions.h>
+#include <http_in_c/common/socket_functions.h>
 #include <http_in_c/sync/sync_client.h>
 
-
-static void on_event_listening(RunloopRef rl, void* listener_ref_arg);
+#ifdef ASIO_LISTENER_DISABLED
+    #ifdef ASIO_LISTENER_ENABLED
+        #undef ASIO_LISTENER_ENABLED
+    #endif
+#endif
 static void on_timer(RunloopRef rl, void* arg);
+#ifdef ASIO_ENABLED
+static void on_accept(void* arg, int fd, int status);
+#else
+static void on_event_listening(RunloopRef rl, void* listener_ref_arg);
+#endif
 
-
-ListenerRef Listener_new(int listen_fd)
+ListenerCtxRef listener_ctx_new(int listen_fd)
 {
-    ListenerRef sref = malloc(sizeof(TestServer));
+    ListenerCtxRef sref = malloc(sizeof(TestServer));
     sref->listening_socket_fd = listen_fd;
     sref->listen_counter = 0;
     sref->accept_count = 0;
-    printf("Listener_new %p   listen fd: %d\n", sref, listen_fd);
+    printf("listener_ctx_new %p   listen fd: %d\n", sref, listen_fd);
     return sref;
 }
-ListenerRef Listener_init(ListenerRef sref, int listen_fd)
+ListenerCtxRef listener_ctx_init(ListenerCtxRef sref, int listen_fd)
 {
     sref->listening_socket_fd = listen_fd;
     sref->listen_counter = 0;
     sref->accept_count = 0;
 
-    printf("Listener_init %p   listen fd: %d\n", sref, listen_fd);
+    printf("listener_ctx_init %p   listen fd: %d\n", sref, listen_fd);
     return sref;
 }
-void Listener_dispose(ListenerRef *sref)
+void listener_ctx_dispose(ListenerCtxRef *sref)
 {
     ASSERT_NOT_NULL(*sref);
     free(*sref);
     *sref = NULL;
 }
-void Listener_listen(ListenerRef sref)
+#ifdef ASIO_ENABLED
+void listener_ctx_listen(ListenerCtxRef listener_ctx_ref)
 {
-    ASSERT_NOT_NULL(sref)
+    ASSERT_NOT_NULL(listener_ctx_ref)
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
-    sref->reactor_ref = runloop_new();
-    sref->listening_watcher_ref = runloop_listener_new(sref->reactor_ref, sref->listening_socket_fd);
-    RunloopListenerRef lw = sref->listening_watcher_ref;
-
-    runloop_listener_register(lw, on_event_listening, sref);
-    printf("Listener_listen reactor: %p listen sock: %d  lw: %p\n", sref->reactor_ref, sref->listening_socket_fd, lw);
-    sref->timer_ref = runloop_timer_new(sref->reactor_ref);
-    runloop_timer_register(sref->timer_ref, &on_timer, (void *) sref, 5000, false);
-    runloop_run(sref->reactor_ref, -1);
+    listener_ctx_ref->runloop_ref = runloop_new();
+    listener_ctx_ref->asio_listener_ref = asio_listener_new(listener_ctx_ref->runloop_ref, listener_ctx_ref->listening_socket_fd);
+    listener_ctx_ref->timer_ref = runloop_timer_set(listener_ctx_ref->runloop_ref, on_timer, listener_ctx_ref, 5000, false);
+    asio_listen(listener_ctx_ref->asio_listener_ref, &on_accept, listener_ctx_ref);
+    runloop_run(listener_ctx_ref->runloop_ref, -1);
     printf("Listener reactor ended \n");
-    runloop_free(sref->reactor_ref);
+    runloop_free(listener_ctx_ref->runloop_ref);
 }
-/**
- * When the timer fires it is time to kill the listener.
- */
-static void on_timer(RunloopRef rl, void* listener_ref_arg)
+static void on_accept(void* ctx_arg, int accept_fd, int status)
 {
-    printf("on_timer entered \n");
-    ListenerRef listener_ref = (ListenerRef) listener_ref_arg;
-    RBL_LOG_MSG("on_timer closing runloop ");
-    runloop_close(listener_ref->reactor_ref);
-//    runloop_free(listener_ref->reactor_ref);
+    pid_t tid = gettid();
+    printf("on_accept thread: %d ctx_arg: %p, fd: %d status: %d\n", tid, ctx_arg, accept_fd, status);
+    ListenerCtxRef lctx_ref  = ctx_arg;
+    if(lctx_ref->accept_count ==0) {
+        sleep(1);
+    } else {
+        usleep(1000 * 500);
+    }
+    lctx_ref->listen_counter++;
+    lctx_ref->accept_count++;
+
 }
 
+#else
+void listener_ctx_listen(ListenerCtxRef listener_ctx_ref)
+{
+    ASSERT_NOT_NULL(listener_ctx_ref)
+    struct sockaddr_in peername;
+    unsigned int addr_length = (unsigned int) sizeof(peername);
+    listener_ctx_ref->runloop_ref = runloop_new();
+    listener_ctx_ref->listening_watcher_ref = runloop_listener_new(listener_ctx_ref->runloop_ref, listener_ctx_ref->listening_socket_fd);
+    RunloopListenerRef lw = listener_ctx_ref->listening_watcher_ref;
+
+    runloop_listener_register(lw, on_event_listening, listener_ctx_ref);
+    printf("listener_ctx_listen reactor: %p listen sock: %d  lw: %p\n", listener_ctx_ref->runloop_ref, listener_ctx_ref->listening_socket_fd, lw);
+    listener_ctx_ref->timer_ref = runloop_timer_new(listener_ctx_ref->runloop_ref);
+    runloop_timer_register(listener_ctx_ref->timer_ref, &on_timer, (void *) listener_ctx_ref, 5000, false);
+    runloop_run(listener_ctx_ref->runloop_ref, -1);
+    printf("Listener reactor ended \n");
+    runloop_free(listener_ctx_ref->runloop_ref);
+}
 static void on_event_listening(RunloopRef rl, void* listener_ref_arg)
 {
     printf("listening_hander \n");
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
 
-    ListenerRef listener_ref  = listener_ref_arg;
+    ListenerCtxRef listener_ref  = listener_ref_arg;
     int sock2 = accept(listener_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
     if(sock2 <= 0) {
         int errno_saved = errno;
@@ -100,6 +125,19 @@ static void on_event_listening(RunloopRef rl, void* listener_ref_arg)
     }
     close(sock2);
     printf("on_event_listen new socket is : %d\n", sock2);
+}
+
+#endif
+/**
+ * When the timer fires it is time to kill the listener.
+ */
+static void on_timer(RunloopRef rl, void* listener_ref_arg)
+{
+    printf("on_timer entered \n");
+    ListenerCtxRef listener_ref = (ListenerCtxRef) listener_ref_arg;
+    RBL_LOG_MSG("on_timer closing runloop ");
+    runloop_close(listener_ref->runloop_ref);
+//    runloop_free(listener_ref->reactor_ref);
 }
 
 

@@ -114,6 +114,7 @@ struct Runloop_s {
     int                     epoll_fd;
     bool                    closed_flag;
     bool                    runloop_executing;
+    pid_t                   tid;
     FdTableRef              table; // (int, CallbackData)
     FunctorListRef          ready_list;
 #if 1

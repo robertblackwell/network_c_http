@@ -1,18 +1,21 @@
 
-set(TARGET_LISTENER test_listener)
-add_executable(${TARGET_LISTENER}
+set(test_listener_src
 		test_listener.c
-		listener.h
-		listener.c
-		connector.h
-		connector.c
-		)
+		listener_ctx.h
+		listener_ctx.c
+		connector_ctx.h
+		connector_ctx.c
+		asio_listener.c
+		asio_listener.h
+)
+add_executable(test_listener ${test_listener_src})
+target_compile_definitions(test_listener PUBLIC ASIO_LISTENER_DISABLED)
+target_include_directories(test_listener PUBLIC ${TEST_INCLUDE_dirS})
+target_link_libraries(test_listener	PUBLIC ${TEST_LINK_LIBS})
+add_test(test_listener test_listener)
 
-target_include_directories(${TARGET_LISTENER}
-		PUBLIC
-		${TEST_INCLUDE_dirS})
-
-target_link_libraries(${TARGET_LISTENER}
-		PUBLIC ${TEST_LINK_LIBS})
-
-add_test(${TARGET_LISTENER} ${TARGET_LISTENER})
+add_executable(test_listener_asio ${test_listener_src})
+target_compile_definitions(test_listener_asio PUBLIC ASIO_LISTENER_ENABLED)
+target_include_directories(test_listener_asio PUBLIC ${TEST_INCLUDE_dirS})
+target_link_libraries(test_listener_asio	PUBLIC ${TEST_LINK_LIBS})
+add_test(test_listener_asio test_listener_asio)

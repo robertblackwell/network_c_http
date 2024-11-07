@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <mcheck.h>
 #include<signal.h>
-#include <http_in_c/async/junk/async_internal.h>
+#include <http_in_c/async/async_socket.h>
+#include <http_in_c/async/async.h>
 
 // forward decleration of the function that processes a request into a response
 static void process_request(AsyncHandlerRef href, MessageRef request);

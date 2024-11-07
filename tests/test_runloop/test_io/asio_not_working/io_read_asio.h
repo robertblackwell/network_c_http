@@ -14,11 +14,12 @@
 
 #include <sys/epoll.h>
 #include <math.h>
+#include <rbl/check_tag.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/runloop/runloop.h>
-#include <rbl/check_tag.h>
+
 #define ReadCtx_TAG "rdctx"
-#define ReaderTable_TAG "rdtbl"
+#define ReaderTable_TAG "rdrtbl"
 
 typedef struct ReadCtx_s {
     RBL_DECLARE_TAG;
@@ -27,11 +28,15 @@ typedef struct ReadCtx_s {
     char*               id;
     int                 reader_index;
     int                 readfd;
-    RunloopStreamRef    swatcher;
+    AsioStreamRef       asio_stream_ref;
+    char*               inbuffer;
+    int                 inbuf_max_length;
+    int                 inbuf_length;
     RBL_DECLARE_END_TAG;
 } ReadCtx, *ReadCtxRef;
 
-void ReadCtx_init(ReadCtx* ctx, int my_index, int fd, int max);
+void ReadCtx_init(ReadCtx* this, int fd, int my_index, int max_count);
+
 
 typedef struct ReaderTable_s {
     RBL_DECLARE_TAG;
@@ -40,10 +45,10 @@ typedef struct ReaderTable_s {
     RBL_DECLARE_END_TAG;
 } ReaderTable, *ReaderTableRef;
 
-void ReaderTable_init(ReaderTable* this);
-ReaderTable* ReaderTable_new();
-void ReaderTable_dispose(ReaderTable* this);
-void ReaderTable_add_fd(ReaderTable* this, int fd, int max);
+void ReaderTable_init(ReaderTableRef this);
+ReaderTableRef ReaderTable_new();
+void ReaderTable_dispose(ReaderTableRef this);
+void ReaderTable_add_fd(ReaderTableRef this, int fd, int max);
 
 void rd_callback(RunloopStreamRef socket_watcher_ref, uint64_t event);
 void* reader_thread_func(void* arg);

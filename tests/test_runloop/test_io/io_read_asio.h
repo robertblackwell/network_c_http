@@ -1,5 +1,5 @@
-#ifndef c_http_tests_reactor_io_read_h
-#define c_http_tests_reactor_io_read_h
+#ifndef c_http_tests_runloop_io_read_asio_h
+#define c_http_tests_runloop_io_read_asio_h
 
 
 #include <assert.h>
@@ -27,11 +27,17 @@ typedef struct ReadCtx_s {
     char*               id;
     int                 reader_index;
     int                 readfd;
-    RunloopStreamRef    swatcher;
+    char*               inbuffer;
+    int                 inbuffer_max_length;
+    int                 inbuffer_length;
+    AsioStreamRef       asiostream_ref;
+    RunloopStreamRef    stream_ref;
+
     RBL_DECLARE_END_TAG;
 } ReadCtx, *ReadCtxRef;
 
 void ReadCtx_init(ReadCtx* ctx, int my_index, int fd, int max);
+void ReadCtx_set_stream_ref(ReadCtx* ctx, RunloopRef rl, int fd);
 
 typedef struct ReaderTable_s {
     RBL_DECLARE_TAG;

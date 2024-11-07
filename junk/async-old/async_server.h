@@ -1,7 +1,7 @@
 #ifndef c_http_xr_server_h
 #define c_http_xr_server_h
 
-#include <http_in_c/socket_functions.h>
+#include <http_in_c/common/socket_functions.h>
 #include <http_in_c/constants.h>
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c//async/types.h>

@@ -3,7 +3,7 @@
 #include <http_in_c/common/list.h>
 #include <http_in_c/http/message.h>
 #include <http_in_c/common/iobuffer.h>
-#include <http_in_c/socket_functions.h>
+#include <http_in_c/common/socket_functions.h>
 #include <http_in_c/saved/datasource.h>
 
 /**

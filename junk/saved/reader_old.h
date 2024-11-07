@@ -5,7 +5,7 @@
 #include <http_in_c/http/message.h>
 #include <http_in_c/common/http_parser/ll_parser.h>
 #include <http_in_c/common/iobuffer.h>
-#include <http_in_c/socket_functions.h>
+#include <http_in_c/common/socket_functions.h>
 
 /**
  * Reader and its associated SyncReader_?? functions implement an object that can read and parse http messages from

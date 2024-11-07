@@ -1,5 +1,5 @@
-#ifndef c_http_tests_reactor_io_write_h
-#define c_http_tests_reactor_io_write_h
+#ifndef c_http_tests_runloop_io_write_asio_h
+#define c_http_tests_runloop_io_write_asio_h
 
 
 #include <assert.h>
@@ -17,10 +17,9 @@
 #include <http_in_c/common/utils.h>
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
-#include <rbl/check_tag.h>
 
-#define WriterTable_TAG "WrtTbl"
-#define WriteCtx_ATG "wrtCtx"
+#define WriteTable_TAG "WrtTbl"
+#define WriteCtx_TAG "WrtCtx"
 
 typedef struct WriteCtx_s {
     RBL_DECLARE_TAG;
@@ -30,15 +29,15 @@ typedef struct WriteCtx_s {
     int                 writer_index;
     int                 writefd;
     int                 interval_ms;
-    char*               outbuffer[10000];
-    int                 outbuffer_max_length;
-    int                 outbuffer_length;
-    RunloopStreamRef    stream_ref;
+    char*               outbuffer;
+    size_t              outbuffer_max_length;
+    size_t              outbuffer_length;
     AsioStreamRef       asio_stream_ref;
     RunloopTimerRef     timer_ref;
     RBL_DECLARE_END_TAG;
-} WriteCtx;
-void WriteCtx_init(WriteCtx* this, int fd, RunloopStreamRef swatcher, RunloopTimerRef twatcher, int max);
+} WriteCtx, *WriteCtxRef;
+
+void WriteCtx_init(WriteCtx* this, int fd, int myindex, int max_writes);
 
 
 typedef struct WriterTable_s {
@@ -46,10 +45,10 @@ typedef struct WriterTable_s {
     int     count;
     WriteCtx ctx_table[10];
     RBL_DECLARE_END_TAG;
-} WriterTable;
+} WriterTable, *WriterTableRef;
 
 
-void WriterTable_init(WriterTable* this);
+void WriterTable_init(WriterTableRef this);
 WriterTable* WriterTable_new();
 void WriterTable_dispose(WriterTable* this);
 void WriterTable_add_fd(WriterTable* this, int fd, int max, int interval_ms);

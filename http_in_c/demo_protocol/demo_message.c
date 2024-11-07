@@ -20,8 +20,6 @@
 struct DemoMessage_s
 {
     RBL_DECLARE_TAG;
-    bool            opcode; //can be either 'REQ' or 'RESP'
-    uint8_t         lrc;
     BufferChainRef  body;
     RBL_DECLARE_END_TAG;
 };
@@ -33,7 +31,6 @@ DemoMessageRef demo_message_new ()
     RBL_SET_END_TAG(DemoMessage_TAG, mref);
     if(mref == NULL) goto error_label_1;
     mref->body = NULL;
-    mref->opcode = false;
     mref->body = BufferChain_new();
     return mref;
 
@@ -85,32 +82,24 @@ IOBufferRef demo_message_serialize(DemoMessageRef mref)
 {
     RBL_CHECK_TAG(DemoMessage_TAG, mref);
     RBL_CHECK_END_TAG(DemoMessage_TAG, mref);
-    char sbuf[3];
-    sbuf[0] = 0x01;
-    sbuf[1] = (mref->opcode) ? 'Q': 'R';
-    sbuf[2] = 0x02;
     BufferChainRef bc = BufferChain_new();
-    IOBufferRef b = IOBuffer_from_buf(sbuf, 3);
-    BufferChain_append_IOBuffer(bc, b);
     BufferChain_append_bufferchain(bc, mref->body);
     char* end_str = "\03L\x04";
     BufferChain_append(bc, (void*) end_str, 3);
     IOBufferRef result = BufferChain_compact(bc);
     BufferChain_dispose(&(bc));
-    IOBuffer_dispose(&(b));
     return result;
 }
 bool demo_message_get_is_request(DemoMessageRef this)
 {
     RBL_CHECK_TAG(DemoMessage_TAG, this);
     RBL_CHECK_END_TAG(DemoMessage_TAG, this);
-    return this->opcode;
+    return true;
 }
 void demo_message_set_is_request(DemoMessageRef this, bool yn)
 {
     RBL_CHECK_TAG(DemoMessage_TAG, this);
     RBL_CHECK_END_TAG(DemoMessage_TAG, this);
-    this->opcode = yn;
 }
 void demo_message_set_content_length(DemoMessageRef this, int length)
 {
@@ -130,7 +119,6 @@ void demo_message_set_lrc(DemoMessageRef this, char lrc)
 {
     RBL_CHECK_TAG(DemoMessage_TAG, this);
     RBL_CHECK_END_TAG(DemoMessage_TAG, this);
-    this->lrc = lrc;
 }
 BufferChainRef demo_message_get_body(DemoMessageRef this)
 {

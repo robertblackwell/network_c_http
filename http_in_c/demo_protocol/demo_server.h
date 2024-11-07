@@ -1,12 +1,11 @@
 #ifndef c_demo_server_h
 #define c_demo_server_h
 
-#include <http_in_c/socket_functions.h>
+#include <http_in_c/common/socket_functions.h>
 #include <http_in_c/constants.h>
 #include <http_in_c/runloop/runloop.h>
-#include <http_in_c/async-old/types.h>
+
 #include <http_in_c/http/message.h>
-#include <http_in_c/async-old/handler.h>
 
 #define DemoServer_TAG "DmSRVR"
 #include <rbl/check_tag.h>
@@ -20,7 +19,6 @@ struct DemoServer_s {
     socket_handle_t         listening_socket_fd;
     RunloopRef              runloop_ref;
     RunloopListenerRef      listening_watcher_ref;
-    TcpConnListRef          conn_list_ref;
     ListRef                 handler_list;
     void(*completion_callback)(DemoServerRef, DemoHandlerRef);
     RBL_DECLARE_END_TAG;

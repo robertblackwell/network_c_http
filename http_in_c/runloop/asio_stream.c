@@ -1,9 +1,10 @@
 #include <rbl/check_tag.h>
 #include <rbl/logger.h>
 #include <rbl/macros.h>
-#include <http_in_c/socket_functions.h>
+#include <http_in_c/common/socket_functions.h>
 #include <http_in_c/runloop/rl_internal.h>
-#include "./asio_stream.h"
+#include <stdlib.h>
+#include <assert.h>
 #include <unistd.h>
 #include <errno.h>
 
@@ -28,16 +29,17 @@ static void write_eagain(AsioStreamRef cref);
 static void epollin_postable_cb(RunloopRef rl, void* cref_arg);
 static void epollout_postable_cb(RunloopRef rl, void* cref_arg);
 
-AsioStreamRef asio_stream_new(int socket, RunloopRef reactor_ref)
+AsioStreamRef asio_stream_new(RunloopRef reactor_ref, int socket)
 {
     AsioStreamRef this = malloc(sizeof(AsioStream));
-    asio_stream_init(this, socket, reactor_ref);
+    asio_stream_init(this, reactor_ref, socket);
     return this;
 }
-void asio_stream_init(AsioStreamRef this, int socket, RunloopRef reactor_ref)
+void asio_stream_init(AsioStreamRef this, RunloopRef reactor_ref, int socket)
 {
     RBL_ASSERT((this != NULL), "")
     RBL_SET_TAG(AsioStream_TAG, this)
+    RBL_SET_END_TAG(AsioStream_TAG, this)
     RBL_CHECK_TAG(AsioStream_TAG, this)
     RBL_CHECK_END_TAG(AsioStream_TAG, this)
     RBL_LOG_FMT("AsioStream socket: %d", socket)
@@ -81,7 +83,7 @@ void asio_stream_close(AsioStreamRef cref)
 {
     RBL_ASSERT((cref != NULL), "")
     RBL_CHECK_TAG(AsioStream_TAG, cref)
-    RBL_CHECK_END_TAG(AsioStream_TAG, this)
+    RBL_CHECK_END_TAG(AsioStream_TAG, cref)
     RBL_ASSERT((cref->fd > 0), "socket should be positive");
     runloop_stream_deregister(cref->runloop_stream_ref);
     close(cref->fd);
