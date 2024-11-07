@@ -81,38 +81,6 @@ void ReaderTable_add_fd(ReaderTable* this, int fd, int max)
     this->count++;
 
 }
-void read_callback(RunloopRef rl, void* read_ctx_ref_arg)
-{
-    ReadCtx* ctx = (ReadCtx*)read_ctx_ref_arg;
-    RunloopStreamRef stream = ctx->stream_ref;
-    RunloopRef runloop_ref = runloop_stream_get_reactor(stream);
-    char buf[100000];
-    int x = sizeof(buf);
-    memset(buf, 0, sizeof(buf));
-    int fd = runloop_stream_get_fd(stream);
-    int nread = read(fd, buf, 100000);
-    char* s;
-    if(nread > 0) {
-        buf[nread] = (char)0;
-        s = &(buf[0]);
-        if(nread > 100) {
-            RBL_LOG_FMT("index: %d count:%d fd: %d errno: %d", ctx->reader_index, ctx->read_count, fd, errno);
-        } else {
-            RBL_LOG_FMT("index: %d count:%d fd: %d buf: %s errno: %d", ctx->reader_index, ctx->read_count, fd, buf,
-                        errno);
-        }
-    } else {
-        s = "badread";
-        RBL_LOG_FMT("BAD READ rd_callback read_count: %d fd: %d nread: %d buf: %s errno: %d", ctx->read_count,
-                    fd, nread, s, errno);
-    }
-    ctx->read_count++;
-    if(ctx->read_count > ctx->max_read_count) {
-        runloop_deregister(runloop_ref, runloop_stream_get_fd(stream));
-    } else {
-        return;
-    }
-}
 void start_read(RunloopRef rl, void* ctx_arg);
 void on_read_data(void* ctx_arg, long bytes_read, int status)
 {
@@ -147,13 +115,7 @@ void* reader_thread_func(void* arg)
 #else
         asio_stream_read(ctx->asiostream_ref, ctx->inbuffer, ctx->inbuffer_max_length, on_read_data, ctx);
 #endif
-//        RunloopTimerRef t = runloop_timer_set(runloop_ref, timer_dummy, ctx, 100000, false);
-//        runloop_post(runloop_ref, start_read, ctx);
-//        uint64_t interest = EPOLLERR | EPOLLIN;
-//        runloop_stream_register(ctx->stream_ref);
-//        runloop_stream_arm_read(ctx->stream_ref, &read_callback, (void *) ctx);
     }
-
     runloop_run(runloop_ref, 1000000);
     return NULL;
 }
