@@ -93,7 +93,8 @@ void on_read_data(void* ctx_arg, long bytes_read, int status)
     }
     if(bytes_read > 0) {
         ctx->read_count++;
-        runloop_post(ctx->asiostream_ref->runloop_ref, start_read, ctx);
+        RunloopRef rl = asio_stream_get_runloop(ctx->asiostream_ref);
+        runloop_post(rl, start_read, ctx);
     } else {
         asio_stream_close(ctx->asiostream_ref);
     }

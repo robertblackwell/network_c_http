@@ -195,6 +195,7 @@ void asio_stream_amonymous_dispose(void* p);
 void asio_stream_read(AsioStreamRef stream_ref, void* buffer, long max_length, AsioReadcallback cb, void*  arg);
 void asio_stream_write(AsioStreamRef stream_ref, void* buffer, long length, AsioWritecallback cb, void*  arg);
 void asio_stream_close(AsioStreamRef cref);
+RunloopRef asio_stream_get_runloop(AsioStreamRef asio_stream_ref);
 
 /**
  * epoll provides a facility to create a file descriptor that is not attached to any file/pipe/device

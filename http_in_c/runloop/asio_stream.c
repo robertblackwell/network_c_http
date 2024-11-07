@@ -34,7 +34,7 @@ AsioStreamRef asio_stream_new(RunloopRef reactor_ref, int socket)
     asio_stream_init(this, reactor_ref, socket);
     return this;
 }
-void asio_stream_init(AsioStreamRef this, RunloopRef reactor_ref, int socket)
+void asio_stream_init(AsioStreamRef this, RunloopRef runloop_ref, int socket)
 {
     RBL_ASSERT((this != NULL), "")
     RBL_SET_TAG(AsioStream_TAG, this)
@@ -42,9 +42,9 @@ void asio_stream_init(AsioStreamRef this, RunloopRef reactor_ref, int socket)
     RBL_CHECK_TAG(AsioStream_TAG, this)
     RBL_CHECK_END_TAG(AsioStream_TAG, this)
     RBL_LOG_FMT("AsioStream socket: %d", socket)
-    this->runloop_ref = reactor_ref;
+//    this->runloop_ref = reactor_ref;
     this->fd = socket;
-    this->runloop_stream_ref = runloop_stream_new(reactor_ref, socket);
+    this->runloop_stream_ref = runloop_stream_new(runloop_ref, socket);
     this->read_state = READ_STATE_IDLE;
     this->read_callback = NULL;
     this->read_callback_arg = NULL;
@@ -127,7 +127,10 @@ void asio_stream_write(AsioStreamRef connection_ref, void* buffer, long length, 
     connection_ref->write_state = WRITE_STATE_ACTIVE;
     try_write(connection_ref);
 }
-
+RunloopRef asio_stream_get_runloop(AsioStreamRef asio_stream_ref)
+{
+    return asio_stream_ref->runloop_stream_ref->runloop;
+}
 static void try_read(AsioStreamRef cref)
 {
     RBL_ASSERT((cref != NULL), "")
