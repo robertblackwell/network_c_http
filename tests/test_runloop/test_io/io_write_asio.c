@@ -44,7 +44,7 @@ void WriteCtx_init(WriteCtx* this, int fd, int myindex, int max, int interval_ms
 }
 void WriteCtx_set_stream_ref(WriteCtx* ctx, RunloopRef rl, int fd)
 {
-#if 1
+#if 0
     ctx->stream_ref = runloop_stream_new(rl, fd);
     ctx->asiostream_ref = NULL;
 #else
@@ -80,13 +80,6 @@ void WriterTable_add_fd(WriterTable* this, int fd, int max, int interval_ms)
 
     WriteCtx* ctx = &(this->ctx_table[this->count]);
     WriteCtx_init(ctx, fd, this->count, max, interval_ms);
-//    ctx->write_count = 0;
-//    ctx->max_write_count = max;
-//    ctx->interval_ms = interval_ms;
-//    ctx->id = "WRITE";
-//    ctx->writefd = fd;
-//    ctx->writer_index = this->count;
-//    ctx->outbuffer_length = 0;
     this->count++;
 }
 static void wrtr_wait_timer_fired(RunloopRef rl, void* arg);
@@ -109,71 +102,36 @@ static size_t fill_buffer(char* line, char* buffer, int max_len, int required_da
     size_t x = (p - buffer);
     return x;
 }
-static void wrtr_cb(RunloopRef rl, void* write_ctx_p_arg)
+void on_write_complete(void* ctx_arg, long bytes_written, int status)
 {
-    WriteCtx* ctx = write_ctx_p_arg;
-    RunloopStreamRef stream = ctx->stream_ref;
-    RunloopRef reactor = runloop_stream_get_reactor(stream);
-    runloop_stream_verify(stream);
-    int fd = runloop_stream_get_fd(stream);
-#if 0
-    char big_buffer[200000];
-    char* wbuf = malloc(100);
-    sprintf(wbuf, "this is a line from writer %d count: %d", ctx->writer_index, ctx->write_count);
-    fill_buffer(wbuf, big_buffer, 200000, 190000);
-    long bbuflen = strlen(big_buffer);
-    // synchronous write - assume the write buffers are big enough to take the entire message
-    // we only got here if the fd is ready for a write
-    int nwrite = write(fd, big_buffer, strlen(big_buffer));
-#else
-    char* wbuf = malloc(100);
-    sprintf(wbuf, "this is a line from writer %d count: %d", ctx->writer_index, ctx->write_count);
-    int nwrite = write(fd, wbuf, strlen(wbuf));
-#endif
-    int eno = errno;
-    int eag = EAGAIN;
-    free(wbuf);
-    RBL_LOG_FMT("index: %d fd: %d nread: %d errno: %d write_count %d\n", ctx->writer_index, fd, nwrite, errno, ctx->write_count);
-    ctx->write_count++;
-    if(ctx->write_count > ctx->max_write_count) {
-        runloop_deregister(reactor, ctx->stream_ref->fd);
-        runloop_deregister(reactor, ctx->timer_ref->fd);
-        return;
-    }
-    // disarm writeable events on this fd
-    runloop_stream_disarm_write(stream);
-    RBL_CHECK_TAG(WriteCtx_ATG, ctx)
-    RBL_CHECK_END_TAG(WriteCtx_ATG, ctx)
-    SOCKW_CHECK_TAG(ctx->stream_ref)
-    WTIMER_CHECK_TAG(ctx->timer_ref)
-    // rearm the timer
-    runloop_timer_rearm(ctx->timer_ref);
+    WriteCtxRef ctx = ctx_arg;
+    runloop_timer_register(ctx->timer_ref, &wrtr_wait_timer_fired, (void *) ctx, ctx->interval_ms, false);
 }
 static void wrtr_wait_timer_fired(RunloopRef rl, void* ctx_p_arg)
 {
     RBL_LOG_FMT("test_io: Socket watcher wrtr_wait\n");
     WriteCtx* ctx = ctx_p_arg;
-    RunloopRef runloop_ref = ctx->stream_ref->runloop;
     RunloopStreamRef stream_ref = ctx->stream_ref;
-    RunloopTimerRef timer_ref = ctx->timer_ref;
-    int fd = stream_ref->fd;
     RBL_CHECK_TAG(WriteCtx_ATG, ctx)
     RBL_CHECK_END_TAG(WriteCtx_ATG, ctx)
     SOCKW_CHECK_TAG(ctx->stream_ref)
     WTIMER_CHECK_TAG(ctx->timer_ref)
     RBL_LOG_FMT("test_io: Socket watcher wrtr_wait_timer_fired write_fd: %d", ctx->writefd);
-
-    int write_here = 0;
-    if(write_here) {
-        char* wbuf = malloc(100);
-        sprintf(wbuf, "this is a line from writer - %d\n", ctx->write_count);
-        int nwrite = write(ctx->writefd, wbuf, strlen(wbuf));
-        free(wbuf);
+    if(ctx->write_count > ctx->max_write_count) {
+        asio_stream_close(ctx->asiostream_ref);
     } else {
-        runloop_timer_disarm(timer_ref);
-        uint64_t interest = EPOLLERR | EPOLLOUT;
-        runloop_stream_arm_write(ctx->stream_ref, &wrtr_cb, (void *) ctx);
+        ctx->write_count++;
+        char tmp[200];
+        sprintf(tmp, "this is a line from writer %d count: %d\n", ctx->writer_index, ctx->write_count);
+        size_t len = fill_buffer(tmp, ctx->outbuffer, ctx->outbuffer_max_length, 100000);
+        asio_stream_write(ctx->asiostream_ref, ctx->outbuffer, strlen(ctx->outbuffer), &on_write_complete, ctx);
     }
+}
+void start_write(RunloopRef rl, void* ctx_arg)
+{
+    WriteCtxRef ctx = ctx_arg;
+    sprintf(ctx->outbuffer, "this is a line from writer %d count: %d", ctx->writer_index, ctx->write_count);
+    asio_stream_write(ctx->asiostream_ref, ctx->outbuffer, strlen(ctx->outbuffer), &on_write_complete, ctx);
 }
 void* writer_thread_func(void* arg)
 {
@@ -182,34 +140,15 @@ void* writer_thread_func(void* arg)
     WriterTable* wrtr = (WriterTable*)arg;
     for(int i = 0; i < wrtr->count; i++) {
         WriteCtx* ctx = &(wrtr->ctx_table[i]);
-
         WriteCtx_set_stream_ref(ctx, runloop_ref, ctx->writefd);
-//        ctx->asiostream_ref = asio_stream_new(runloop_ref, ctx->writefd);
-//        ctx->stream_ref = ctx->asiostream_ref->runloop_stream_ref;
-
         ctx->timer_ref = runloop_timer_new(runloop_ref);
-        runloop_timer_register(wrtr->ctx_table[i].timer_ref, &wrtr_wait_timer_fired, (void *) ctx, ctx->interval_ms, true);
+        runloop_timer_register(ctx->timer_ref, &wrtr_wait_timer_fired, (void *) ctx, ctx->interval_ms, false);
 
         RBL_CHECK_TAG(WriteCtx_ATG, ctx)
         RBL_CHECK_END_TAG(WriteCtx_ATG, ctx)
         WTIMER_CHECK_TAG(ctx->timer_ref);
         SOCKW_CHECK_TAG(ctx->stream_ref);
-
-        RunloopStreamRef sw = wrtr->ctx_table[i].stream_ref;
-
-        if(wait_first) {
-            // register armed - wait 2 seconds
-            // register disarmed - timer cb will arm it
-            runloop_stream_register(ctx->stream_ref);
-            runloop_stream_arm_write(ctx->stream_ref, &wrtr_cb, (void *) ctx);
-        } else {
-
-            uint64_t interest = EPOLLERR | EPOLLOUT;
-            runloop_stream_register(sw);
-            runloop_stream_arm_write(sw, &wrtr_cb, (void *) ctx);
-        }
     }
-
     runloop_run(runloop_ref, 10000000);
     return NULL;
 }

@@ -36,15 +36,15 @@ void ReadCtx_init(ReadCtx* this, int my_index, int fd, int max)
     this->max_read_count = max;
     this->readfd = fd;
     this->reader_index = my_index;
-    this->inbuffer = malloc(20000);
-    this->inbuffer_max_length = 20000;
+    this->inbuffer = malloc(200000);
+    this->inbuffer_max_length = 200000;
     this->inbuffer_length = 0;
     this->asiostream_ref = NULL;
 
 }
 void ReadCtx_set_stream_ref(ReadCtx* ctx, RunloopRef rl, int fd)
 {
-#if 1
+#if 0
     ctx->stream_ref = runloop_stream_new(rl, fd);
     ctx->asiostream_ref = NULL;
 #else
@@ -95,7 +95,12 @@ void read_callback(RunloopRef rl, void* read_ctx_ref_arg)
     if(nread > 0) {
         buf[nread] = (char)0;
         s = &(buf[0]);
-        RBL_LOG_FMT("index: %d count:%d fd: %d buf: %s errno: %d", ctx->reader_index, ctx->read_count, fd, buf, errno);
+        if(nread > 100) {
+            RBL_LOG_FMT("index: %d count:%d fd: %d errno: %d", ctx->reader_index, ctx->read_count, fd, errno);
+        } else {
+            RBL_LOG_FMT("index: %d count:%d fd: %d buf: %s errno: %d", ctx->reader_index, ctx->read_count, fd, buf,
+                        errno);
+        }
     } else {
         s = "badread";
         RBL_LOG_FMT("BAD READ rd_callback read_count: %d fd: %d nread: %d buf: %s errno: %d", ctx->read_count,
@@ -108,18 +113,27 @@ void read_callback(RunloopRef rl, void* read_ctx_ref_arg)
         return;
     }
 }
+void start_read(RunloopRef rl, void* ctx_arg);
+void on_read_data(void* ctx_arg, long bytes_read, int status)
+{
+    ReadCtxRef ctx = ctx_arg;
+    ctx->inbuffer[bytes_read] = (char)0;
+    if(bytes_read <= 100) {
+        RBL_LOG_FMT("on_read_data bytes_read: %ld status: %d %s", bytes_read, status, ctx->inbuffer);
+    } else {
+        RBL_LOG_FMT("on_read_data bytes_read: %ld status: %d ", bytes_read, status);
+    }
+    if(bytes_read > 0) {
+        ctx->read_count++;
+        runloop_post(ctx->asiostream_ref->runloop_ref, start_read, ctx);
+    } else {
+        asio_stream_close(ctx->asiostream_ref);
+    }
+}
 void start_read(RunloopRef rl, void* ctx_arg)
 {
     ReadCtxRef ctx = ctx_arg;
-    uint64_t interest = EPOLLERR | EPOLLIN;
-    runloop_stream_register(ctx->stream_ref);
-    runloop_stream_arm_read(ctx->stream_ref, &read_callback, (void *) ctx);
-}
-void timer_dummy(RunloopRef rl, void* arg)
-{
-    printf("timer_dummy");
-    runloop_post(rl, start_read, arg);
-//    assert(false);
+    asio_stream_read(ctx->asiostream_ref, ctx->inbuffer, ctx->inbuffer_max_length, on_read_data, ctx);
 }
 void* reader_thread_func(void* arg)
 {
@@ -128,12 +142,18 @@ void* reader_thread_func(void* arg)
     for(int i = 0; i < rdr->count; i++) {
         ReadCtx* ctx = &(rdr->ctx_table[i]);
         ReadCtx_set_stream_ref(ctx, runloop_ref, ctx->readfd);
-        RunloopTimerRef t = runloop_timer_set(runloop_ref, timer_dummy, ctx, 100000, false);
+#if 1
         runloop_post(runloop_ref, start_read, ctx);
+#else
+        asio_stream_read(ctx->asiostream_ref, ctx->inbuffer, ctx->inbuffer_max_length, on_read_data, ctx);
+#endif
+//        RunloopTimerRef t = runloop_timer_set(runloop_ref, timer_dummy, ctx, 100000, false);
+//        runloop_post(runloop_ref, start_read, ctx);
 //        uint64_t interest = EPOLLERR | EPOLLIN;
 //        runloop_stream_register(ctx->stream_ref);
 //        runloop_stream_arm_read(ctx->stream_ref, &read_callback, (void *) ctx);
     }
+
     runloop_run(runloop_ref, 1000000);
     return NULL;
 }

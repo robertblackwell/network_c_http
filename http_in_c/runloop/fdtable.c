@@ -67,7 +67,9 @@ RunloopWatcherRef FdTable_lookup(FdTableRef this, int fd)
 {
     RBL_CHECK_TAG(FdTable_TAG, this);
     RBL_CHECK_END_TAG(FdTable_TAG, this)
-	assert(this->entries[fd] != NULL);
+    if(this->entries[fd] == NULL) {
+        assert(this->entries[fd] != NULL);
+    }
 	return 	(this->entries[fd]);
 
 }

@@ -197,88 +197,73 @@ int runloop_run(RunloopRef athis, time_t timeout) {
     while (true) {
         REACTOR_CHECK_TAG(athis)
         time_t passed = time(NULL) - start;
-        if(FdTable_size(athis->table) == 0) {
-            result = -1;
-            goto cleanup;
-        }
-        if((FdTable_size(athis->table) == 1) && (athis->interthread_queue_ref != NULL)) {
-            runloop_queue_watcher_deregister(athis->interthread_queue_watcher_ref);
-            result = -1;
+
+        if((FdTable_size(athis->table) == 0) &&((functor_list_size(athis->ready_list) == 0))) {
+            // no more work to do - clean exit
+            result = 0;
             goto cleanup;
         }
         int max_events = runloop_MAX_EPOLL_FDS;
-        /**
-         * All entries on the ready should be executed before we look for more fd events
-         */
-//        if((functor_list_size(athis->ready_list)) > 0) {
-//            Functor func = functor_list_remove(athis->ready_list);
-//            printf("We are here");
-//        }
-//        assert(functor_list_size(athis->ready_list) == 0);
-        RBL_LOG_FMT("reactor epoll_wait before active fd : %ld ready_list_size: %d",
-                    FdTable_size(athis->table), functor_list_size(athis->ready_list));
-        int nfds = epoll_wait(athis->epoll_fd, events, max_events, -1);
-        RBL_LOG_FMT("reactor epoll_wait returned nfds: %d fd[0]: %d fds active: %ld  ready_list_size:%d",
-                    nfds, events[0].data.fd,
-                    FdTable_size(athis->table), functor_list_size(athis->ready_list));
-        time_t currtime = time(NULL);
-        switch (nfds) {
-            case -1:
-                int saved_errno = errno;
-                if (errno == EINTR) {
-                    printf("reactor interrupted\n");
-                    result = -1;
+        if(functor_list_size(athis->ready_list) == 0) {
+            int nfds = epoll_wait(athis->epoll_fd, events, max_events, -1);
+            RBL_LOG_FMT("reactor epoll_wait returned nfds: %d fd[0]: %d fds active: %ld  ready_list_size:%d",
+                        nfds, events[0].data.fd,
+                        FdTable_size(athis->table), functor_list_size(athis->ready_list));
+            time_t currtime = time(NULL);
+            switch (nfds) {
+                case -1:
+                    int saved_errno = errno;
+                    if (errno == EINTR) {
+                        printf("reactor interrupted\n");
+                        result = -1;
+                        goto cleanup;
+                        continue;
+                    } else if (athis->closed_flag) {
+                        result = 0;
+                    } else {
+                        perror("XXX epoll_wait");
+                        result = -1;
+                        int ern = errno;
+                    }
                     goto cleanup;
-                    continue;
-                } else if(athis->closed_flag) {
+                case 0:
                     result = 0;
-                } else {
-                    perror("XXX epoll_wait");
-                    result = -1;
-                    int ern = errno;
+                    close(athis->epoll_fd);
+                    goto cleanup;
+                default: {
+                    for (int i = 0; i < nfds; i++) {
+                        REACTOR_CHECK_TAG(athis)
+                        int fd = events[i].data.fd;
+                        void *arg = events[i].data.ptr;
+                        int mask = events[i].events;
+                        RBL_LOG_FMT("runloop_run loop fd: %d events: %x", fd, mask);
+                        RunloopWatcherRef wref = FdTable_lookup(athis->table, fd);
+                        wref->handler(wref, events[i].events);
+                        RBL_LOG_FMT("fd: %d", fd);
+                        // call handler
+                        REACTOR_CHECK_TAG(athis)
+                    }
                 }
-                goto cleanup;
-            case 0:
-                result = 0;
-                close(athis->epoll_fd);
-                goto cleanup;
-            default: {
-                for (int i = 0; i < nfds; i++) {
-                    REACTOR_CHECK_TAG(athis)
-                    int fd = events[i].data.fd;
-                    void* arg = events[i].data.ptr;
-                    int mask = events[i].events;
-                    RBL_LOG_FMT("runloop_run loop fd: %d events: %x", fd, mask);
-                    RunloopWatcherRef wref = FdTable_lookup(athis->table, fd);
-                    wref->handler(wref, events[i].events);
-                    RBL_LOG_FMT("fd: %d", fd);
-                    // call handler
-                    REACTOR_CHECK_TAG(athis)
+            }
+        } else {
+            FunctorRef fnc;
+            while (1) {
+                REACTOR_CHECK_TAG(athis)
+                if (functor_list_size(athis->ready_list) == 0) {
+                    break;
+                }
+                Functor func = functor_list_remove(athis->ready_list);
+                athis->runloop_executing = true;
+                func.f(athis, func.arg);
+                athis->runloop_executing = false;
+                REACTOR_CHECK_TAG(athis)
+                if (functor_list_size(athis->ready_list) == 0) {
+                    RBL_LOG_FMT("reactor runlist loop  break functor_list_size: %d func: %p arg: %p",
+                                functor_list_size(athis->ready_list), func.f, func.arg);
+                    break;
                 }
             }
         }
-        FunctorRef fnc;
-        while(1) {
-            REACTOR_CHECK_TAG(athis)
-            if(functor_list_size(athis->ready_list) == 0) {
-                break;
-            }
-            Functor func = functor_list_remove(athis->ready_list);
-            athis->runloop_executing = true;
-            func.f(athis, func.arg);
-            athis->runloop_executing = false;
-            REACTOR_CHECK_TAG(athis)
-            if(functor_list_size(athis->ready_list) == 0) {
-                RBL_LOG_FMT("reactor runlist loop  break functor_list_size: %d func: %p arg: %p", functor_list_size(athis->ready_list), func.f, func.arg);
-                break;
-            }
-        }
-//        printf("reactor after runlist loop functor_list_size: %d\n", functor_list_size(athis->ready_list));
-//        while(fnc = RunList_remove_first(athis->ready_list)) {
-//
-//            Functor_call(fnc, athis);
-//            Functor_free(fnc);
-//        }
     }
 
 cleanup:

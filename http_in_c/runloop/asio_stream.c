@@ -21,7 +21,6 @@
 #define WRITE_STATE_ACTIVE 22
 #define WRITE_STATE_EAGAIN 22
 
-static void asio_stream_close(AsioStreamRef cref);
 static void try_read(AsioStreamRef cref);
 static void try_write(AsioStreamRef cref);
 static void read_eagain(AsioStreamRef cref);
