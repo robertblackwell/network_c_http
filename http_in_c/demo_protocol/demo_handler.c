@@ -28,19 +28,19 @@ static void connection_completion_cb(void* href)
     handler_ref->completion_callback(handler_ref->server_ref, href);
 }
 DemoHandlerRef demohandler_new(
-        int socket,
         RunloopRef reactor_ref,
+        int socket,
         void(*completion_cb)(void*, DemoHandlerRef),
         void* server_ref)
 {
     DemoHandlerRef this = malloc(sizeof(DemoHandler));
-    demohandler_init(this, socket, reactor_ref, completion_cb, server_ref);
+    demohandler_init(this, reactor_ref, socket, completion_cb, server_ref);
     return this;
 }
 void demohandler_init(
         DemoHandlerRef this,
+        RunloopRef runloop_ref,
         int socket,
-        RunloopRef reactor_ref,
         void(*completion_cb)(void*, DemoHandlerRef),
         void* server_ref)
 {
@@ -50,18 +50,18 @@ void demohandler_init(
     RBL_CHECK_END_TAG(DemoHandler_TAG, this)
     this->raw_socket = socket;
     this->demo_connection_ref = democonnection_new(
+            runloop_ref,
             socket,
-            reactor_ref,
             this,
             connection_completion_cb);
-    this->reactor_ref = reactor_ref;
+    this->runloop_ref = runloop_ref;
     this->completion_callback = completion_cb;
     this->server_ref = server_ref;
     this->input_list = List_new(NULL);
     this->output_list = List_new(NULL);
     this->active_response = NULL;
 
-    democonnection_read(this->demo_connection_ref, &handle_request);
+    democonnection_read(this->demo_connection_ref, &handle_request, this);
 }
 void demohandler_free(DemoHandlerRef this)
 {
@@ -95,10 +95,10 @@ static void handle_request(void* href, DemoMessageRef msgref, int error_code)
         if(List_size(handler_ref->output_list) > 1) {
             assert(false);
         } else if (List_size(handler_ref->output_list) == 1) {
-            runloop_post(handler_ref->reactor_ref, postable_write_start, href);
+            runloop_post(handler_ref->runloop_ref, postable_write_start, href);
         } // why not else
         demo_message_free(msgref);
-        runloop_post(handler_ref->reactor_ref, handler_postable_read_start, href);
+        runloop_post(handler_ref->runloop_ref, handler_postable_read_start, href);
     }
 }
 #if 0
@@ -118,7 +118,7 @@ static DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef reques
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // write sequence
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-static void postable_write_start(RunloopRef reactor_ref, void* href)
+static void postable_write_start(RunloopRef runloop_ref, void* href)
 {
     DemoHandlerRef handler_ref = href;
     RBL_CHECK_TAG(DemoHandler_TAG, handler_ref)
@@ -131,7 +131,7 @@ static void postable_write_start(RunloopRef reactor_ref, void* href)
     RBL_ASSERT((handler_ref->active_response == NULL), "handler active response should be NULL");
     handler_ref->active_response = response;
     if(response != NULL) {
-        democonnection_write(handler_ref->demo_connection_ref, response, on_write_complete_cb);
+        democonnection_write(handler_ref->demo_connection_ref, response, on_write_complete_cb, href);
     }
 }
 static void on_write_complete_cb(void* href, int status)
@@ -142,18 +142,18 @@ static void on_write_complete_cb(void* href, int status)
     printf("on_write_complete_cb fd:%d  write_state:%d\n", handler_ref->demo_connection_ref->asio_stream_ref->fd, handler_ref->demo_connection_ref->write_state);
     demo_message_dispose(&(handler_ref->active_response));
     if(List_size(handler_ref->output_list) >= 1) {
-        runloop_post(handler_ref->reactor_ref, postable_write_start, href);
+        runloop_post(handler_ref->runloop_ref, postable_write_start, href);
     } else {
-        runloop_post(handler_ref->reactor_ref, handler_postable_read_start, href);
+        runloop_post(handler_ref->runloop_ref, handler_postable_read_start, href);
     }
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // read sequence
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-static void handler_postable_read_start(RunloopRef reactor_ref, void* href)
+static void handler_postable_read_start(RunloopRef runloop_ref, void* href)
 {
     DemoHandlerRef handler_ref = href;
     RBL_CHECK_TAG(DemoHandler_TAG, handler_ref)
     RBL_CHECK_END_TAG(DemoHandler_TAG, handler_ref)
-    democonnection_read(handler_ref->demo_connection_ref, &handle_request);
+    democonnection_read(handler_ref->demo_connection_ref, &handle_request, href);
 }

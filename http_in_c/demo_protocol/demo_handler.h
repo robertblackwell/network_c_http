@@ -21,7 +21,7 @@ typedef void(*DH_Completion_CB)(void* server_ref, DemoHandlerRef href);
 typedef struct DemoHandler_s {
     RBL_DECLARE_TAG;
     int                 raw_socket;
-    RunloopRef          reactor_ref;
+    RunloopRef          runloop_ref;
     DemoConnectionRef   demo_connection_ref;
     DH_Completion_CB    completion_callback;
 //    void(*completion_callback)(void* server_ref, DemoHandlerRef href);
@@ -34,13 +34,14 @@ typedef struct DemoHandler_s {
 } DemoHandler, *DemoHandlerRef;
 
 DemoHandlerRef demohandler_new(
+        RunloopRef runloop_ref,
         int socket,
-        RunloopRef reactor_ref,
         void(*completion_cb)(void*, DemoHandlerRef),
         void* completion_cb_arg);
 void demohandler_init(
-        DemoHandlerRef this, int socket,
-        RunloopRef reactor_ref,
+        DemoHandlerRef this,
+        RunloopRef runloop_ref,
+        int socket,
         void(*completion_cb)(void*, DemoHandlerRef),
         void* completion_cb_arg);
 void demohandler_free(DemoHandlerRef this);
