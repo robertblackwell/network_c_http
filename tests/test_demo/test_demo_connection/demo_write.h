@@ -18,6 +18,7 @@
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
 #include <rbl/check_tag.h>
+#include <http_in_c/demo_protocol/demo_connection.h>
 
 #define WriterTable_TAG "WrtTbl"
 #define WriteCtx_ATG "wrtCtx"
@@ -33,8 +34,7 @@ typedef struct WriteCtx_s {
     char*               outbuffer;
     int                 outbuffer_max_length;
     int                 outbuffer_length;
-    RunloopStreamRef    stream_ref;
-    AsioStreamRef       asiostream_ref;
+    DemoConnectionRef   demo_conn_ref;
     RunloopTimerRef     timer_ref;
     RBL_DECLARE_END_TAG;
 } WriteCtx, *WriteCtxRef;

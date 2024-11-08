@@ -83,11 +83,10 @@ void parser_test_destroy(parser_test_t* this)
 {
     ASSERT_NOT_NULL(this);
 }
-void on_message_handler(void* parser_ref_arg, DemoMessageRef msg_ref, int status)
+void on_message_handler(void* ctx_arg, DemoMessageRef msg_ref)
 {
-    DemoParserRef parser_ref = parser_ref_arg;
-    parser_test_t* ptest = parser_ref->on_read_ctx;
-    test_output_r r = test_output_new(msg_ref, status);
+    parser_test_t* ptest = ctx_arg;
+    test_output_r r = test_output_new(msg_ref, 0);
     List_add_back(ptest->m_results, r);
 }
 
@@ -105,9 +104,9 @@ int parser_test_run(parser_test_t* this)
         int bytes_read = test_input_read_some(ds_ptr, buffer, length);
         if(bytes_read > 0) {
             IOBuffer_commit(iob, bytes_read);
-            rc = DemoParser_consume(parser_ref, iob);
+            DemoParser_consume(parser_ref, iob);
         } else if(bytes_read == 0) {
-            rc = DemoParser_consume(parser_ref, iob);
+            // simulate eof
             break;
         } else {
             // IO Error

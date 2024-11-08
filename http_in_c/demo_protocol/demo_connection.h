@@ -36,7 +36,7 @@ typedef struct DemoConnection_s {
     RunloopRef       runloop_ref;
     AsioStreamRef    asio_stream_ref;
 //    RunloopStreamRef socket_stream_ref;
-    DemoHandlerRef   handler_ref;
+    void*            handler_ref;
     IOBufferRef      active_input_buffer_ref;
     long             read_buffer_size;
     IOBufferRef      active_output_buffer_ref;
@@ -44,8 +44,11 @@ typedef struct DemoConnection_s {
     int              read_state;
     int              write_state;
     DC_Read_CB       on_read_cb;
+    void*            on_read_cb_arg;
     DC_Write_CB      on_write_cb;
+    void*            on_write_cb_arg;
     DC_Close_CB      on_close_cb;
+    void*            on_close_cb_arg;
     bool             cleanup_done_flag;
     bool             readside_posted;
     bool             writeside_posted;
@@ -55,20 +58,22 @@ typedef struct DemoConnection_s {
 } DemoConnection, *DemoConnectionRef;
 
 DemoConnectionRef democonnection_new(
-        int socket,
         RunloopRef runloop_ref,
-        DemoHandlerRef handler_ref,
-        void(*connection_completion_cb)(void* href));
+        int socket,
+        void(*connection_completion_cb)(void* href),
+        void* handler_ref
+        );
 void democonnection_init(
         DemoConnectionRef this,
-        int socket,
         RunloopRef runloop_ref,
-        DemoHandlerRef handler_ref,
-        void(*connection_completion_cb)(void* href));
+        int socket,
+        void(*connection_completion_cb)(void* href),
+        void* handler_ref
+        );
 void democonnection_free(DemoConnectionRef this);
 void democonnection_amonymous_dispose(void* p);
 
-void democonnection_read(DemoConnectionRef connection_ref, void(*on_demo_read_cb)(void* href, DemoMessageRef, int statuc));
-void democonnection_write(DemoConnectionRef connection_ref, DemoMessageRef, void(*on_demo_write_cb)(void* href, int statuc));
-
+void democonnection_read(DemoConnectionRef connection_ref, void(*on_demo_read_cb)(void* href, DemoMessageRef, int status), void* href);
+void democonnection_write(DemoConnectionRef connection_ref, DemoMessageRef, void(*on_demo_write_cb)(void* href, int status), void* href);
+void democonnection_close(DemoConnectionRef cref);
 #endif

@@ -4,37 +4,13 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
-             /* See feature_test_macros(7) */
 #include <string.h>
 #include <rbl/unittest.h>
 #include <rbl/macros.h>
 #include <http_in_c/runloop/runloop.h>
 #include <rbl/logger.h>
 #include "io_read_asio.h"
-#include "io_write_asio.h"
-/**
-Tests Socket watcher - WSocket
-
- Creates two threads, one will write and one will read.
-
- Writer thread
-    initiate a timer for each of the fd - this will start the folloing repeating sequence for each fd
-
-    wait for timer to expire
-    wait for fd to become writable
-    write a message to fd
-    set timer to start cycle again
-
-Reader thread
-
-    setup a POLLIN fd watcher for each of the FDs
-
-    wait for fd to become readable
-    read and print message
-
-  @TODO - would be worth seeing how to d this in a single thread
-
- */
+#include "demo_write.h"
 void async_socket_set_nonblocking(int socket)
 {
     int flags = fcntl(socket, F_GETFL, 0);
@@ -66,7 +42,7 @@ int test_io()
     pthread_t rdr_thread;
     WriterTableRef wrtr = WriterTable_new();
     WriterTable_add_fd(wrtr, pipe_1[1], max_io, 500);
-    WriterTable_add_fd(wrtr, pipe_2[1], max_io, 500);
+//    WriterTable_add_fd(wrtr, pipe_2[1], max_io, 500);
     pthread_t wrtr_thread;
 
     int r_rdr = pthread_create(&rdr_thread, NULL, reader_thread_func, (void*)rdr);

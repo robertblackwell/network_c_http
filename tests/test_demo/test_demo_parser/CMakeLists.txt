@@ -8,7 +8,9 @@ add_executable(${TARGET}
         test_demo_parser.c
         test_harness.c
         test_harness.h
-		)
+		../test_demo_connection/fill_iobuffer.c
+		../test_demo_connection/fill_iobuffer.h
+)
 
 target_include_directories(${TARGET}
 		PUBLIC

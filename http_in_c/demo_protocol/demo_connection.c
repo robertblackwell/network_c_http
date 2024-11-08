@@ -1,3 +1,5 @@
+#define RBL_LOG_ENABLED
+#define RBL_LOG_ALLOW_GLOBAL
 #include <http_in_c/demo_protocol/demo_connection.h>
 #include <http_in_c/runloop/rl_internal.h>
 #include <stdlib.h>
@@ -23,6 +25,7 @@
 static void read_start(DemoConnectionRef cref);
 static void read_start_postable(RunloopRef rl, void* cref_arg);
 static void postable_read_start(RunloopRef runloop_ref, void* arg);
+static void on_parser_new_message_complete(void* arg_ctx, DemoMessageRef msg);
 static void on_read_complete(DemoConnectionRef cref, DemoMessageRef msg, int error_code);
 static void read_error(DemoConnectionRef cref, char* msg);
 
@@ -42,29 +45,31 @@ static void post_to_runloop(DemoConnectionRef cref, void(*postable_function)(Run
 
 
 DemoConnectionRef democonnection_new(
-        int socket,
         RunloopRef runloop_ref,
-        DemoHandlerRef handler_ref,
-        void(*connection_completion_cb)(void* href))
+        int socket,
+        void(*connection_completion_cb)(void* href),
+        void* handler_ref
+)
 {
     DemoConnectionRef this = malloc(sizeof(DemoConnection));
-    democonnection_init(this, socket, runloop_ref, handler_ref, connection_completion_cb);
+    democonnection_init(this, runloop_ref, socket, connection_completion_cb, handler_ref);
     return this;
 }
 void democonnection_init(
         DemoConnectionRef this,
-        int socket,
         RunloopRef runloop_ref,
-        DemoHandlerRef handler_ref,
-        void(*connection_completion_cb)(void* href))
+        int socket,
+        void(*connection_completion_cb)(void* href),
+        void* handler_ref
+        )
 {
     RBL_SET_TAG(DemoConnection_TAG, this)
     RBL_SET_END_TAG(DemoConnection_TAG, this)
     RBL_CHECK_TAG(DemoConnection_TAG, this)
     RBL_CHECK_END_TAG(DemoConnection_TAG, this)
     this->runloop_ref = runloop_ref;
-    this->handler_ref = handler_ref;
     this->asio_stream_ref = asio_stream_new(runloop_ref, socket);
+    this->handler_ref = handler_ref;
     this->read_buffer_size = 1000;
     this->active_input_buffer_ref = NULL;
     this->active_output_buffer_ref = NULL;
@@ -77,8 +82,12 @@ void democonnection_init(
     this->cleanup_done_flag = false;
     this->on_close_cb = connection_completion_cb;
     this->parser_ref = DemoParser_new(
-            (void*)&on_read_complete,
+            (void*)&on_parser_new_message_complete,
             this);
+}
+void democonnection_close(DemoConnectionRef cref)
+{
+    asio_stream_close(cref->asio_stream_ref);
 }
 void democonnection_free(DemoConnectionRef this)
 {
@@ -97,26 +106,29 @@ void democonnection_free(DemoConnectionRef this)
     }
     free(this);
 }
+static void call_on_write_cb(DemoConnectionRef cref, int status);
+static void call_on_read_cb(DemoConnectionRef cref, DemoMessageRef msgref, int status);
+
 /////////////////////////////////////////////////////////////////////////////////////
 // read sequence - sequence of functions called processing a read operation
 ////////////////////////////////////////////////////////////////////////////////////
-void democonnection_read(DemoConnectionRef cref, void(*on_demo_read_cb)(void* href, DemoMessageRef, int statuc))
+void democonnection_read(DemoConnectionRef cref, void(*on_demo_read_cb)(void* href, DemoMessageRef, int status), void* href)
 {
     RBL_CHECK_TAG(DemoConnection_TAG, cref)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
     RBL_LOG_FMT("democonnect_read");
     assert(on_demo_read_cb != NULL);
     assert(cref->active_input_buffer_ref == NULL);
+    cref->on_read_cb = on_demo_read_cb;
+    cref->on_read_cb_arg = href;
     read_start(cref);
 }
 static void read_start(DemoConnectionRef cref)
 {
     RBL_CHECK_TAG(DemoConnection_TAG, cref)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
-//    cref->readside_posted = true;
-//    post_to_runloop(cref, &postable_reader);
     if (cref->active_input_buffer_ref == NULL) {
-        cref->active_input_buffer_ref = IOBuffer_new_with_capacity(cref->read_buffer_size);
+        cref->active_input_buffer_ref = IOBuffer_new_with_capacity((int)cref->read_buffer_size);
     }
     if(IOBuffer_data_len(cref->active_input_buffer_ref) == 0) {
         IOBufferRef iob = cref->active_input_buffer_ref;
@@ -127,14 +139,20 @@ static void read_start(DemoConnectionRef cref)
         read_process_data(cref);
     }
 }
+static void on_parser_new_message_complete(void* arg_ctx, DemoMessageRef msg_ref)
+{
+    RBL_LOG_FMT("arg_ctx %p msg_ref: %p", arg_ctx, msg_ref)
+    call_on_read_cb(arg_ctx, msg_ref, 0);
+}
 static void read_have_data_cb(void* cref_arg, long bytes_available, int err_status)
 {
     DemoConnectionRef cref = cref_arg;
     RBL_CHECK_TAG(DemoConnection_TAG, cref)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
     IOBufferRef iob = cref->active_input_buffer_ref;
+    RBL_LOG_FMT("cref_arg: %p bytes_available: %ld status: %d", cref_arg, bytes_available, err_status);
     if(bytes_available > 0) {
-        IOBuffer_commit(iob, bytes_available);
+        IOBuffer_commit(iob, (int)bytes_available);
         read_process_data(cref);
     } else {
         read_error(cref, "");
@@ -145,26 +163,14 @@ static void read_process_data(DemoConnectionRef cref) {
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
     IOBufferRef iob = cref->active_input_buffer_ref;
     int bytes_available = IOBuffer_data_len(iob);
-    if(bytes_available > 0) {
-        RBL_LOG_FMT("Before DemoParser_consume read_state %d", cref->read_state);
-        // TODO experiment with generic programming in C
-        DemoParserRC ec = cref->parser_ref->parser_consume((ParserInterfaceRef)cref->parser_ref, iob);
-//        int ec = DemoParser_consume(cref->parser_ref, iob);
-        RBL_LOG_FMT("After DemoParser_consume returns  errno: %d read_state %d ", errno_save, cref->read_state);
-        if(ec == DemoParserRC_message_incomplete) {
-            // read more data
-            post_to_runloop(cref, &postable_read_start);
-        } else if(ec == DemoParserRC_end_of_message) {
-            // have a complete message - parser will call the appropriate function
-        } else {
-            //parse error
-            // parser will call the appropriate function
-        }
-    } else {
-        // is this an error
-        assert(false);
-    }
-    RBL_LOG_FMT("reader return\n");
+    assert(bytes_available > 0);
+    RBL_LOG_FMT("Before DemoParser_consume read_state %d", cref->read_state);
+    DemoParser_consume(cref->parser_ref, iob);
+    assert(cref->active_input_buffer_ref != NULL);
+    assert(IOBuffer_data_len(cref->active_input_buffer_ref) == 0);
+    IOBuffer_free(cref->active_input_buffer_ref);
+    cref->active_input_buffer_ref = NULL;
+    RBL_LOG_FMT("After DemoParser_consume returns  ");
 }
 
 static void postable_read_start(RunloopRef runloop_ref, void* arg)
@@ -174,7 +180,8 @@ static void postable_read_start(RunloopRef runloop_ref, void* arg)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
     RBL_LOG_FMT("postable_read_start read_state: %d", cref->read_state);
     if(cref->read_state == READ_STATE_STOP) {
-        cref->on_read_cb(cref->handler_ref, NULL, DemoConnectionErrCode_is_closed);
+        call_on_read_cb(cref, NULL, DemoConnectionErrCode_is_closed);
+//        cref->on_read_cb(arg, NULL, DemoConnectionErrCode_is_closed);
         return;
     }
     read_start(cref);
@@ -186,17 +193,35 @@ static void on_read_complete(DemoConnectionRef cref, DemoMessageRef msg, int err
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
     RBL_ASSERT( (((msg != NULL) && (error_code == 0)) || ((msg == NULL) && (error_code != 0))), "msg != NULL and error_code == 0 failed OR msg == NULL and error_code != 0 failed");
     cref->read_state = READ_STATE_IDLE;
-    RBL_LOG_FMT("read_message_handler - on_write_cb  read_state: %d\n", cref->read_state);
-    DC_Read_CB tmp = cref->on_read_cb;
-    /**
-     * Need the on_read_cb property NULL befor going further
-     */
+    RBL_LOG_FMT("read_message_handler - on_read_cb  read_state: %d\n", cref->read_state);
+    call_on_read_cb(cref, msg, error_code);
+
+//    DC_Read_CB tmp = cref->on_read_cb;
+//    void* arg = cref->on_read_cb_arg;
+//    /**
+//     * Need the on_read_cb property NULL befor going further
+//     */
+//    cref->on_read_cb = NULL;
+//    cref->on_read_cb_arg = NULL;
+//    tmp(arg, msg, error_code);
+//    /**
+//     * should either - close or throw away all input data
+//     * @TODO resolve
+//     */
+}
+static void call_on_read_cb(DemoConnectionRef cref, DemoMessageRef msg, int status)
+{
+    RBL_CHECK_TAG(DemoConnection_TAG, cref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
+    RBL_ASSERT((cref->on_read_cb != NULL), "write call back is NULL");
+    RBL_ASSERT((cref->on_read_cb_arg != NULL), "write call arg back is NULL");
+    void(*tmp)(void*, DemoMessageRef, int) = cref->on_read_cb;
+    void* arg = cref->on_read_cb_arg;
     cref->on_read_cb = NULL;
-    tmp(cref->handler_ref, msg, error_code);
-    /**
-     * should either - close or throw away all input data
-     * @TODO resolve
-     */
+    cref->on_read_cb_arg = NULL;
+    tmp(arg, msg, status);
+//    cref->on_write_cb(cref->on_write_cb_arg, 0);
+
 }
 /////////////////////////////////////////////////////////////////////////////////////
 // end of read sequence
@@ -206,7 +231,8 @@ static void on_read_complete(DemoConnectionRef cref, DemoMessageRef msg, int err
 void democonnection_write(
         DemoConnectionRef cref,
         DemoMessageRef response_ref,
-        void(*on_demo_write_cb)(void* href, int statuc))
+        void(*on_demo_write_cb)(void* href, int status),
+        void* href)
 {
     RBL_CHECK_TAG(DemoConnection_TAG, cref)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
@@ -216,14 +242,17 @@ void democonnection_write(
     RBL_ASSERT((cref->on_write_cb == NULL), "there is already a write in progress");
     RBL_ASSERT((cref->active_output_buffer_ref == NULL),"something wrong active output buffer should be null")
     cref->on_write_cb = on_demo_write_cb;
+    cref->on_write_cb_arg = href;
     cref->write_state == WRITE_STATE_ACTIVE;
     cref->active_output_buffer_ref = demo_message_serialize(response_ref);
     if(cref->write_state == WRITE_STATE_STOP) {
-        cref->on_write_cb(cref->handler_ref, DemoConnectionErrCode_is_closed);
+        call_on_write_cb(cref, DemoConnectionErrCode_is_closed);
+//        cref->on_write_cb(href, DemoConnectionErrCode_is_closed);
         return;
     }
     post_to_runloop(cref, &postable_writer);
 }
+
 static void postable_writer(RunloopRef runloop_ref, void* arg)
 {
     DemoConnectionRef cref = arg;
@@ -231,7 +260,8 @@ static void postable_writer(RunloopRef runloop_ref, void* arg)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
     if(cref->write_state == WRITE_STATE_STOP) {
         IOBuffer_dispose(&(cref->active_output_buffer_ref));
-        cref->on_write_cb(cref->handler_ref, DemoConnectionErrCode_is_closed);
+        call_on_write_cb(cref, DemoConnectionErrCode_is_closed);
+//        cref->on_write_cb(cref->on_write_cb_arg, DemoConnectionErrCode_is_closed);
         return;
     }
     RBL_ASSERT((cref->active_output_buffer_ref != NULL), "post_write_handler");
@@ -268,8 +298,22 @@ static void postable_write_call_cb(RunloopRef runloop_ref, void* arg)
     DemoConnectionRef cref = arg;
     RBL_CHECK_TAG(DemoConnection_TAG, cref)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
+    call_on_write_cb(cref, 0);
+//    RBL_ASSERT((cref->on_write_cb != NULL), "write call back is NULL");
+//    cref->on_write_cb(cref->on_write_cb_arg, 0);
+}
+static void call_on_write_cb(DemoConnectionRef cref, int status)
+{
+    RBL_CHECK_TAG(DemoConnection_TAG, cref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
     RBL_ASSERT((cref->on_write_cb != NULL), "write call back is NULL");
-    cref->on_write_cb(cref->handler_ref, 0);
+    RBL_ASSERT((cref->on_write_cb_arg != NULL), "write call arg back is NULL");
+    void(*tmp)(void*, int) = cref->on_write_cb;
+    void* arg = cref->on_write_cb_arg;
+    cref->on_write_cb = NULL;
+    cref->on_write_cb_arg = NULL;
+    tmp(arg, status);
+//    cref->on_write_cb(cref->on_write_cb_arg, 0);
 }
 /////////////////////////////////////////////////////////////////////////////////////
 // end of read sequence
@@ -283,8 +327,10 @@ static void write_error(DemoConnectionRef cref, char* msg)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
     printf("Write_error got an error this is the message: %s  fd: %d\n", msg, cref->asio_stream_ref->fd);
     cref->write_state = WRITE_STATE_STOP;
-    cref->on_write_cb(cref->handler_ref, DemoConnectionErrCode_io_error);
-    cref->on_write_cb = NULL;
+    call_on_write_cb(cref, DemoConnectionErrCode_io_error);
+//    cref->on_write_cb(cref->on_write_cb_arg, DemoConnectionErrCode_io_error);
+//    cref->on_write_cb = NULL;
+//    cref->on_write_cb_arg = NULL;
     post_to_runloop(cref, &postable_cleanup);
 }
 static void read_error(DemoConnectionRef cref, char* msg)
@@ -293,8 +339,6 @@ static void read_error(DemoConnectionRef cref, char* msg)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
     printf("Read_error got an error this is the message: %s  fd: %d\n", msg, cref->asio_stream_ref->fd);
     cref->read_state = READ_STATE_STOP;
-    cref->on_read_cb(cref->handler_ref, NULL, DemoConnectionErrCode_io_error);
-    cref->on_read_cb = NULL;
     post_to_runloop(cref, &postable_cleanup);
 }
 /////////////////////////////////////////////////////////////////////////////////////
@@ -313,9 +357,8 @@ static void postable_cleanup(RunloopRef runloop, void* arg_cref)
     RBL_ASSERT((cref->cleanup_done_flag == false), "cleanup should not run more than once");
     RBL_CHECK_TAG(DemoConnection_TAG, cref)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
-    runloop_stream_deregister(cref->asio_stream_ref->runloop_stream_ref);
-//    close(cref->socket_stream_ref->fd);
-    cref->on_close_cb(cref->handler_ref);
+    asio_stream_close(cref->asio_stream_ref);
+    cref->on_close_cb(cref->on_close_cb_arg);
 }
 /////////////////////////////////////////////////////////////////////////////////////
 // end of cleanup

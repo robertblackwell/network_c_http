@@ -46,8 +46,8 @@ enum State {
 void DemoParser_initialize(DemoParserRef this);
 
 DemoParserRef DemoParser_new(
-        DP_MessageComplete_CB on_message_complete_cb,
-        void* on_read_ctx)
+        DP_MessageComplete_CB on_new_message_callback,
+        void* on_new_message_complete_ctx)
 {
     DemoParserRef this = malloc(sizeof(DemoParser));
     RBL_SET_TAG(DemoParser_TAG, this)
@@ -57,8 +57,8 @@ DemoParserRef DemoParser_new(
     this->message_free = (void(*)(void*))&demo_message_free;
     this->m_state = STATE_IDLE;
     this->m_current_message_ptr = NULL;
-    this->on_message_complete = on_message_complete_cb;
-    this->on_read_ctx = on_read_ctx;
+    this->on_new_message_callback = on_new_message_callback;
+    this->on_new_message_complete_ctx = on_new_message_complete_ctx;
     return this;
 }
 void DemoParser_free(DemoParserRef this)
@@ -92,41 +92,21 @@ int DemoParser_append_bytes(DemoParserRef this, void *buffer, unsigned length)
     RBL_CHECK_END_TAG(DemoParser_TAG, this)
     return 0;
 }
-/**
- * Comsumes some or all of the data given by iobuffer_ref.
- *
- * The iobuffer_ref is updated to reflect how much data was consumed
- *
- * The possible outcomes are:
- *   1   consumes all of the data annd only parses a partial message
- *   2   consumes only some of the data and only parses part of a message - THIS SHOULD NEVER HAPPEN
- *   3   consume all of the data and complete the parsing of a message.
- *          IN which case the message is in m_current_message_ptr
- *          and the bytes_consumed == length or the input IOBUffer is now empty
- *   4   consume only some of the data and completes the parsing of a message.
- *          this means that the input buffer had the tail of one message and the start of another
- *          the completed message is in m_current_message_ptr
- *          bytes_consumed < length
- *          the input IOBUffer is NOT empty
- *          the input IOBuffer MUST be presented again to the parser because there is unprocessed data in it
- *    3. error - a parse error was detected and there is data left in the buffer unprocessed
- *          error_code will give details of the error
- *          the buffer must be presented again
- *    4. error - a parse error was detected and the is NO data left unprocessed in the buffer
- *          error_code will give details of the error
- *          the buffer should NOT be presented again
- */
-DemoParserErrCode DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_ref)
+void DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_ref)
 {
     void* buf = IOBuffer_data(iobuffer_ref);
     int length = IOBuffer_data_len(iobuffer_ref);
+    assert(length != 0);
     int error_code = 0;
     RBL_CHECK_TAG(DemoParser_TAG, this)
     RBL_CHECK_END_TAG(DemoParser_TAG, this)
 
     char* charbuf = (char*) buf;
     for(int i = 0; i < length; i++) {
+        int ch2 = (int)(*(char*)IOBuffer_data(iobuffer_ref));
+        IOBuffer_consume(iobuffer_ref, 1);
         int ch = (int)charbuf[i];
+        assert(ch == ch2);
         switch (this->m_state) {
             case STATE_IDLE:
                 if(this->m_current_message_ptr == NULL) {
@@ -143,12 +123,11 @@ DemoParserErrCode DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_re
                     IOBuffer_free(iobtmp);
                 } else if (ch == CH_ETX) {
                     this->m_state = STATE_IDLE;
-                    this->on_message_complete(this, this->m_current_message_ptr, 0);
+                    this->on_new_message_callback(this-> on_new_message_complete_ctx, this->m_current_message_ptr);
                     this->m_current_message_ptr = demo_message_new();
-                    IOBuffer_consume(iobuffer_ref, i+1);
+                    this->m_state = STATE_IDLE;
                 } else {
                     this->m_state = STATE_ERROR_RECOVERY;
-                    error_code = DemoParserErr_expected_ascii;
                 }
                 break;
             }
@@ -162,11 +141,9 @@ DemoParserErrCode DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_re
                 } else {
                     if(i == length - 1) {
                         RBL_LOG_FMT("DemmoParser_consume parse error \n");
-                        this->on_message_complete(this, NULL, DemoParserErr_expected_stx);
                         demo_message_dispose(&(this->m_current_message_ptr));
                         this->m_current_message_ptr = demo_message_new();
-                        IOBuffer_consume(iobuffer_ref, i + 1);
-                        return DemoParserErr_expected_stx;
+                        return;
                     }
                 }
                 break;
@@ -174,13 +151,6 @@ DemoParserErrCode DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_re
                 assert(false);
         }
     }
-    if((this->m_state != STATE_IDLE) && (length == 0)) {
-        this->on_message_complete(this, NULL, DemoParserErr_expected_stx);
-        demo_message_dispose(&(this->m_current_message_ptr));
-        this->m_current_message_ptr = demo_message_new();
-        return DemoParserErr_expected_stx;
-    }
-    return 0;
 }
 
 int DemoParser_get_errno(DemoParserRef this)

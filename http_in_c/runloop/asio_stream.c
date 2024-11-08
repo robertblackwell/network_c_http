@@ -1,3 +1,5 @@
+#define RBL_LOG_ENABLED
+#define RBL_LOG_ALLOW_GLOBAL
 #include <rbl/check_tag.h>
 #include <rbl/logger.h>
 #include <rbl/macros.h>
@@ -41,7 +43,7 @@ void asio_stream_init(AsioStreamRef this, RunloopRef runloop_ref, int socket)
     RBL_SET_END_TAG(AsioStream_TAG, this)
     RBL_CHECK_TAG(AsioStream_TAG, this)
     RBL_CHECK_END_TAG(AsioStream_TAG, this)
-    RBL_LOG_FMT("AsioStream socket: %d", socket)
+    RBL_LOG_FMT("AsioStream socket: %p, fd: %d", this, socket)
 //    this->runloop_ref = reactor_ref;
     this->fd = socket;
     this->runloop_stream_ref = runloop_stream_new(runloop_ref, socket);
@@ -137,6 +139,7 @@ static void try_read(AsioStreamRef cref)
     RBL_CHECK_TAG(AsioStream_TAG, cref)
     RBL_CHECK_END_TAG(AsioStream_TAG, cref)
     long nread = read(cref->fd, cref->read_buffer, cref->read_buffer_size);
+    RBL_LOG_FMT("asio_stream %p nread: %ld", cref, nread)
     int saved_errno = errno;
     if(nread > 0) {
         cref->read_state = READ_STATE_IDLE;
@@ -159,6 +162,7 @@ static void read_eagain(AsioStreamRef cref)
     RBL_ASSERT((cref != NULL), "")
     RBL_CHECK_TAG(AsioStream_TAG, cref)
     RBL_CHECK_END_TAG(AsioStream_TAG, cref)
+    RBL_LOG_FMT("asio_stream %p", cref);
     cref->read_state = READ_STATE_EAGAIN;
 #ifdef STREAM_LEVEL_TRIGGERED
     runloop_stream_arm_read(cref->runloop_stream_ref, epollin_postable_cb, cref);
@@ -168,6 +172,7 @@ static void epollin_postable_cb(RunloopRef rl, void* cref_arg)
 {
     AsioStreamRef cref = cref_arg;
     RBL_ASSERT((cref != NULL), "")
+    RBL_LOG_FMT("asio_sttream %p", cref)
     RBL_CHECK_TAG(AsioStream_TAG, cref)
     RBL_CHECK_END_TAG(AsioStream_TAG, cref)
     if(cref->read_state == READ_STATE_EAGAIN) {
@@ -185,6 +190,7 @@ static void try_write(AsioStreamRef cref)
     RBL_CHECK_TAG(AsioStream_TAG, cref)
     RBL_CHECK_END_TAG(AsioStream_TAG, cref)
     long n = write(cref->fd, cref->write_buffer, cref->write_buffer_size);
+    RBL_LOG_FMT("asio_stream %p fd: %d nwrite: %ld ", cref, cref->fd, n)
     int saved_errno = errno;
     if(n > 0) {
         cref->write_state = WRITE_STATE_IDLE;

@@ -53,54 +53,37 @@ struct ParserInterface_s {
     void*(*message_factory)();
     void(*message_free)(void*);
 };
-
-#if 0
-/**
- * Value object return by http_parser_consume()
- */
-struct DemoParserPrivateReturnValue_s {
-//    long            bytes_consumed;
-//    bool            eom_flag;
-    int             error_code;
-};
-typedef struct DemoParserPrivateReturnValue_s DemoParserPrivateReturnValue;
-//typedef struct DemoParserReturnValue_s {
-//    void*       completed_message_ref;
-//    IOBufferRef remaining_data_ref;
-//    bool        error_flag;
-//    int         error_code;
-//}DemoParserReturnValue, *DemoParserReturnValueRef;
-#endif
 /**
  * Type holding context data for http_parser_t functions. Allows for parsing to continue
  * over buffer and message boundaries
  */
 struct DemoParser_s;
 typedef struct DemoParser_s DemoParser, *DemoParserRef;
-typedef void(*DP_MessageComplete_CB)(void* ctx, DemoMessageRef, int error_code);
+typedef void(*DP_MessageComplete_CB)(void* ctx, DemoMessageRef);
 struct DemoParser_s {
     ParserInterface;
     RBL_DECLARE_TAG;
-    uint8_t             lrc;
     int                 m_state;
-    void*               on_read_ctx;
-    DP_MessageComplete_CB on_message_complete;
-//    void(*on_read_message_cb)(void* read_ctx, DemoMessageRef msg, int error_code);
-//    void(*on_read_parser_error_cb)(void* read_ctx, const char* error_message);
+    void*               on_new_message_complete_ctx; // generally a pointer to the connection
+    DP_MessageComplete_CB on_new_message_callback;
     DemoMessageRef      m_current_message_ptr;
     RBL_DECLARE_END_TAG;
 };
 
 DemoParserRef DemoParser_new(
+        /**
+         * This function is called every time the paser completes a new message
+         */
         DP_MessageComplete_CB on_message_complete_cb,
-        void* on_read_ctx);
+        /**
+         * This is an anonymous pointer to the context object you want the on_message_complete_cb
+         * to have while it decides what to do with the new message.
+         */
+        void* on_new_message_ctx);
 void DemoParser_dispose(DemoParserRef* parser_p);
 void DemoParser_free(DemoParserRef this);
 
-DemoParserErrCode DemoParser_consume(DemoParserRef parser, IOBufferRef iobuffer_ref);
-
-int  DemoParser_get_errno(DemoParserRef parser);
-DemoParserError     DemoParser_get_error(DemoParserRef parser);
+void DemoParser_consume(DemoParserRef parser, IOBufferRef iobuffer_ref);
 
 #endif
 

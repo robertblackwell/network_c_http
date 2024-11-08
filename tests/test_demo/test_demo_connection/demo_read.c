@@ -2,7 +2,7 @@
 #define RBL_LOG_ENABLED
 #define RBL_LOG_ALLOW_GLOBAL
 
-#include "io_read_asio.h"
+#include "demo_read.h"
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -31,6 +31,7 @@ void ReadCtx_init(ReadCtx* this, int my_index, int fd, int max)
 {
     RBL_SET_TAG(ReadCtx_TAG, this)
     RBL_SET_END_TAG(ReadCtx_TAG, this)
+    this->input_list_ref = List_new(NULL);
     this->id = "READ";
     this->read_count = 0;
     this->max_read_count = max;
@@ -39,18 +40,7 @@ void ReadCtx_init(ReadCtx* this, int my_index, int fd, int max)
     this->inbuffer = malloc(200000);
     this->inbuffer_max_length = 200000;
     this->inbuffer_length = 0;
-    this->asiostream_ref = NULL;
-
-}
-void ReadCtx_set_stream_ref(ReadCtx* ctx, RunloopRef rl, int fd)
-{
-#if 0
-    ctx->stream_ref = runloop_stream_new(rl, fd);
-    ctx->asiostream_ref = NULL;
-#else
-    ctx->asiostream_ref = asio_stream_new(rl, fd);
-    ctx->stream_ref = ctx->asiostream_ref->runloop_stream_ref;
-#endif
+    this->demo_conn_ref = NULL;
 }
 
 void ReaderTable_init(ReaderTable* this)
@@ -79,34 +69,26 @@ void ReaderTable_add_fd(ReaderTable* this, int fd, int max)
     ReadCtxRef ctx = &(this->ctx_table[this->count]);
     ReadCtx_init(ctx, this->count, fd, max);
     this->count++;
-
 }
 void start_read(RunloopRef rl, void* ctx_arg);
-void on_read_data(void* ctx_arg, long bytes_read, int status)
+void on_read_message(void* href, DemoMessageRef msg, int status)
 {
-    ReadCtxRef ctx = ctx_arg;
-    ctx->inbuffer[bytes_read] = (char)0;
-    if(bytes_read > 0) {
-        if(bytes_read <= 100) {
-            RBL_LOG_FMT("asio_stream: %p count: %d bytes_read: %ld status: %d %s", ctx->asiostream_ref, ctx->read_count, bytes_read, status, ctx->inbuffer);
-        } else {
-            RBL_LOG_FMT("asio_stream: %p  count: %d bytes_read: %ld status: %d ", ctx->asiostream_ref, ctx->read_count, bytes_read, status);
-        }
-        if(ctx->read_count >= ctx->max_read_count) {
-            RBL_LOG_FMT("asio_stream: %p count exceeded count: %d", ctx->asiostream_ref, ctx->read_count)
-        } else {
-            ctx->read_count++;
-            RunloopRef rl = asio_stream_get_runloop(ctx->asiostream_ref);
-            runloop_post(rl, start_read, ctx);
-        }
-    } else {
-        asio_stream_close(ctx->asiostream_ref);
-    }
+    ReadCtxRef ctx = href;
+    RBL_LOG_FMT("connection_ref: %p count: %d status: %d msg: %s", ctx->demo_conn_ref, ctx->read_count, status, IOBuffer_cstr(demo_message_serialize(msg)));
+    ctx->read_count++;
+    List_add_back(ctx->input_list_ref, msg);
+    runloop_post(ctx->demo_conn_ref->runloop_ref, start_read, ctx);
+    RBL_LOG_FMT("connection_ref: %p ctx->inut_list size: %d", ctx->demo_conn_ref, List_size(ctx->input_list_ref));
 }
 void start_read(RunloopRef rl, void* ctx_arg)
 {
     ReadCtxRef ctx = ctx_arg;
-    asio_stream_read(ctx->asiostream_ref, ctx->inbuffer, ctx->inbuffer_max_length, on_read_data, ctx);
+    DemoConnectionRef cref = ctx->demo_conn_ref;
+    democonnection_read(cref, on_read_message, ctx);
+}
+static void on_connection_complete(void* arg)
+{
+
 }
 void* reader_thread_func(void* arg)
 {
@@ -114,13 +96,10 @@ void* reader_thread_func(void* arg)
     ReaderTable* rdr = (ReaderTable*)arg;
     for(int i = 0; i < rdr->count; i++) {
         ReadCtx* ctx = &(rdr->ctx_table[i]);
-        ReadCtx_set_stream_ref(ctx, runloop_ref, ctx->readfd);
-#if 1
+        ctx->demo_conn_ref = democonnection_new(runloop_ref, ctx->readfd, &on_connection_complete, ctx);
         runloop_post(runloop_ref, start_read, ctx);
-#else
-        asio_stream_read(ctx->asiostream_ref, ctx->inbuffer, ctx->inbuffer_max_length, on_read_data, ctx);
-#endif
     }
     runloop_run(runloop_ref, 1000000);
+    RBL_LOG_FMT("after runloop_run()")
     return NULL;
 }
