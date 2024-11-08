@@ -2,7 +2,7 @@
 #define RBL_LOG_ENABLED
 #define RBL_LOG_ALLOW_GLOBAL
 
-#include "io_read.h"
+#include "io_read_asio.h"
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -36,8 +36,21 @@ void ReadCtx_init(ReadCtx* this, int my_index, int fd, int max)
     this->max_read_count = max;
     this->readfd = fd;
     this->reader_index = my_index;
-    this->swatcher = NULL;
+    this->inbuffer = malloc(200000);
+    this->inbuffer_max_length = 200000;
+    this->inbuffer_length = 0;
+    this->asiostream_ref = NULL;
 
+}
+void ReadCtx_set_stream_ref(ReadCtx* ctx, RunloopRef rl, int fd)
+{
+#if 0
+    ctx->stream_ref = runloop_stream_new(rl, fd);
+    ctx->asiostream_ref = NULL;
+#else
+    ctx->asiostream_ref = asio_stream_new(rl, fd);
+    ctx->stream_ref = ctx->asiostream_ref->runloop_stream_ref;
+#endif
 }
 
 void ReaderTable_init(ReaderTable* this)
@@ -68,45 +81,41 @@ void ReaderTable_add_fd(ReaderTable* this, int fd, int max)
     this->count++;
 
 }
-void read_callback(RunloopRef rl, void* read_ctx_ref_arg)
+void start_read(RunloopRef rl, void* ctx_arg);
+void on_read_data(void* ctx_arg, long bytes_read, int status)
 {
-    ReadCtx* ctx = (ReadCtx*)read_ctx_ref_arg;
-    RunloopStreamRef stream = ctx->swatcher;
-    RunloopRef runloop_ref = runloop_stream_get_reactor(stream);
-    char buf[100000];
-    int x = sizeof(buf);
-    memset(buf, 0, sizeof(buf));
-    int fd = runloop_stream_get_fd(stream);
-    int nread = read(fd, buf, 100000);
-    char* s;
-    if(nread > 0) {
-        buf[nread] = (char)0;
-        s = &(buf[0]);
-        RBL_LOG_FMT("index: %d count:%d fd: %d buf: %s errno: %d", ctx->reader_index, ctx->read_count, fd, buf, errno);
+    ReadCtxRef ctx = ctx_arg;
+    ctx->inbuffer[bytes_read] = (char)0;
+    if(bytes_read <= 100) {
+        RBL_LOG_FMT("on_read_data bytes_read: %ld status: %d %s", bytes_read, status, ctx->inbuffer);
     } else {
-        s = "badread";
-        RBL_LOG_FMT("BAD READ rd_callback read_count: %d fd: %d nread: %d buf: %s errno: %d", ctx->read_count,
-                fd, nread, s, errno);
+        RBL_LOG_FMT("on_read_data bytes_read: %ld status: %d ", bytes_read, status);
     }
-    ctx->read_count++;
-    if(ctx->read_count > ctx->max_read_count) {
-        runloop_deregister(runloop_ref, runloop_stream_get_fd(stream));
+    if(bytes_read > 0) {
+        ctx->read_count++;
+        RunloopRef rl = asio_stream_get_runloop(ctx->asiostream_ref);
+        runloop_post(rl, start_read, ctx);
     } else {
-        return;
+        asio_stream_close(ctx->asiostream_ref);
     }
 }
-
+void start_read(RunloopRef rl, void* ctx_arg)
+{
+    ReadCtxRef ctx = ctx_arg;
+    asio_stream_read(ctx->asiostream_ref, ctx->inbuffer, ctx->inbuffer_max_length, on_read_data, ctx);
+}
 void* reader_thread_func(void* arg)
 {
     RunloopRef runloop_ref = runloop_new();
     ReaderTable* rdr = (ReaderTable*)arg;
     for(int i = 0; i < rdr->count; i++) {
         ReadCtx* ctx = &(rdr->ctx_table[i]);
-        rdr->ctx_table[i].swatcher = runloop_stream_new(runloop_ref, ctx->readfd);
-        RunloopStreamRef sw = rdr->ctx_table[i].swatcher;
-        uint64_t interest = EPOLLERR | EPOLLIN;
-        runloop_stream_register(sw);
-        runloop_stream_arm_read(sw, &read_callback, (void *) ctx);
+        ReadCtx_set_stream_ref(ctx, runloop_ref, ctx->readfd);
+#if 1
+        runloop_post(runloop_ref, start_read, ctx);
+#else
+        asio_stream_read(ctx->asiostream_ref, ctx->inbuffer, ctx->inbuffer_max_length, on_read_data, ctx);
+#endif
     }
     runloop_run(runloop_ref, 1000000);
     return NULL;

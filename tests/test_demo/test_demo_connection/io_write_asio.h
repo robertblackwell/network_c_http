@@ -30,23 +30,23 @@ typedef struct WriteCtx_s {
     int                 writer_index;
     int                 writefd;
     int                 interval_ms;
-    char*               outbuffer[10000];
+    char*               outbuffer;
     int                 outbuffer_max_length;
     int                 outbuffer_length;
     RunloopStreamRef    stream_ref;
-    AsioStreamRef       asio_stream_ref;
+    AsioStreamRef       asiostream_ref;
     RunloopTimerRef     timer_ref;
     RBL_DECLARE_END_TAG;
-} WriteCtx;
-void WriteCtx_init(WriteCtx* this, int fd, RunloopStreamRef swatcher, RunloopTimerRef twatcher, int max);
-
+} WriteCtx, *WriteCtxRef;
+void WriteCtx_init(WriteCtx* this, int fd, int myindex, int max, int write_interval_ms);
+void WriteCtx_set_stream_ref(WriteCtx* ctx, RunloopRef rl, int fd);
 
 typedef struct WriterTable_s {
     RBL_DECLARE_TAG;
     int     count;
     WriteCtx ctx_table[10];
     RBL_DECLARE_END_TAG;
-} WriterTable;
+} WriterTable, *WriterTableRef;
 
 
 void WriterTable_init(WriterTable* this);
