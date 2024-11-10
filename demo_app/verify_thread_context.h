@@ -4,7 +4,7 @@
 
 #ifndef C_HTTP_VERIFY_THREAD_CONTEXT_H
 #define C_HTTP_VERIFY_THREAD_CONTEXT_H
-
+#include "verify_statistics.h"
 #include <http_in_c/demo_protocol/demo_message.h>
 
 struct ThreadContext_s {
@@ -24,6 +24,8 @@ struct ThreadContext_s {
      */
     int roundtrip_per_connection_counter;
     int total_roundtrips;
+
+    ResponseTimesArrayRef response_times_ref;
     /**
      * Total time for this thread
      */
@@ -32,6 +34,7 @@ struct ThreadContext_s {
      * response time for each round trip executed by this thread
      */
     double resp_times[MAX_ROUNDTRIPS_PER_THREAD];
+
     /**
      * The most recent unique id string generated for round trip
      */

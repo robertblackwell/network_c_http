@@ -1,7 +1,73 @@
 //
 // Created by robert on 11/10/24.
 //
+#include <stdlib.h>
+#include <assert.h>
+#include <stdio.h>
 #include "verify_statistics.h"
+
+struct ResponseTimesArray_s {
+    int size_in_doubles;
+    int next_index;
+    double total_elapsed_time;
+    union {
+        double* readings_ptr;
+        double  readings[];
+    };
+};
+ResponseTimesArrayRef rta_new(int size_in_doubles)
+{
+    ResponseTimesArrayRef this = malloc(sizeof(ResponseTimesArray));
+    this->size_in_doubles = size_in_doubles;
+    this->next_index = 0;
+    this->readings_ptr = malloc(size_in_doubles * sizeof(double));
+    return this;
+}
+int rta_length(ResponseTimesArrayRef this)
+{
+    return this->next_index;
+}
+void rta_expand(ResponseTimesArrayRef this, int to_nbr_doubles)
+{
+    assert(to_nbr_doubles > this->size_in_doubles);
+    this->readings_ptr = realloc(this->readings_ptr, to_nbr_doubles * sizeof(double));
+}
+void rta_add(ResponseTimesArrayRef this, double value)
+{
+    if(this->next_index + 1 >= this->size_in_doubles) {
+        rta_expand(this, this->size_in_doubles * 2);
+    }
+    this->readings[this->next_index] = value;
+    this->next_index++;
+}
+void rta_append(ResponseTimesArrayRef dest, ResponseTimesArrayRef src)
+{
+    if((dest->next_index + src->next_index) > dest->size_in_doubles) {
+        rta_expand(dest, dest->next_index + src->next_index);
+    }
+    for(int i = 0; i < src->next_index; i++) {
+        dest->readings[dest->next_index] = src->readings_ptr[i];
+        dest->next_index++;
+    }
+}
+double rta_at_index(ResponseTimesArrayRef this, int index)
+{
+    assert(index < this->next_index);
+    return this->readings[index];
+}
+double rta_get_elapsed_time(ResponseTimesArrayRef this)
+{
+    return this->total_elapsed_time;
+}
+void rta_set_elapsed_time(ResponseTimesArrayRef this, double elapsed_time)
+{
+    this->total_elapsed_time = elapsed_time;
+}
+void rta_stat_analyse(ResponseTimesArrayRef all, double* average, double* stddev)
+{
+
+}
+
 struct timeval get_time()
 {
     struct timeval t;
