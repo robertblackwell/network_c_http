@@ -1,75 +1,16 @@
-#include <http_in_c/demo_protocol/demo_server.h>
-#include <http_in_c/http/message.h>
-#include <http_in_c/common/socket_functions.h>
-#include <rbl/logger.h>
+//
+// Created by robert on 11/10/24.
+//
 #include <stdio.h>
-#include <mcheck.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include<signal.h>
-#include "demo_process_main.h"
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include "verify_getopt.h"
+#include <rbl/logger.h>
 
-static void usage();
-static void process_args(int argc, char* argv[], char** host_p, int* port, int* nbr_roundtrips_per_connection_p, int* nbr_connections_per_thread_p, int* nbr_threads_p, int* nbr_processes_p);
-void* thread_function(void* arg);
-char* default_host = "127.0.0.1";
-int   default_port = 9011;
-
-DemoServerRef g_sref;
-void sig_handler(int signo)
+void verify_usage()
 {
-    printf("demo_app.c signal handler \n");
-    if ((signo == SIGINT) || (signo == SIGABRT)) {
-        printf("received SIGINT or SIGABRT\n");
-        DemoServer_free(g_sref);
-        g_sref = NULL;
-        exit(0);
-    }
-}
-int main(int argc, char** argv) {
-    if (signal(SIGINT, sig_handler) == SIG_ERR) {
-        printf("sync_app.c main signal() failed");
-    }
-    if (signal(SIGABRT, sig_handler) == SIG_ERR) {
-        printf("sync_app.c main signal() failed");
-    }
-    //printf("Hello this is xr-junk main \n");
-    int port = 9011;
-    char* host = malloc(100);
-    int nbr_threads = 2;
-    int nbr_processes = 3;
-    int nbr_connections_per_thread = 2;
-    int nbr_roundtrips_per_connection = 2;
-    int i = 0;
-#if 0
-    while(argv[i] != NULL) {
-        printf("arg[%d] = %s\n", i, argv[i]);
-        i++;
-    }
-#endif
-    process_args(argc, argv,
-                 &host,
-                 &port,
-                 &nbr_roundtrips_per_connection,
-                 &nbr_connections_per_thread,
-                 &nbr_threads,
-                 &nbr_processes);
-//    g_sref = sref;
-    printf("host: %s port: %d nbr_processes: %d nbr_threads: %d nbr_connections_per_thread: %d nbr_roundthrips_per_connection %d\n",
-           host, port, nbr_processes, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection
-           );
-    int child_pid;
-    for (int p = 0; p < nbr_processes; p++) {
-        if ((child_pid = fork()) == 0) {
-            demo_process_main(host, port, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection);
-            exit(0);
-        }
-    }
-    while (wait(NULL) > 0);
-}
-static void usage()
-{
-    printf("Name: demo_server\n");
+    printf("Name: demo_verify\n");
     printf("\nDescription\n");
     printf("\tThis is a multi-process multi-threaded async_server waiting to receive STX.....ETX messages. \n");
     printf("\n");
@@ -92,11 +33,12 @@ static void usage()
     printf("\t-h\tPrints this usage message. Does not take an argument\n");
     printf("\t-i\tHost ip address                                          - default 127.0.0.1\n");
     printf("\t-p\tPort number to use                                       - default 9011\n");
-    printf("\t-n\tNbr Processes running servers                            - default 2\n");
-    printf("\t-t\tNbr threads per process each running a server            - default 3\n");
+    printf("\t-t\tNbr threads                                              - default 2\n");
+    printf("\t-c\tNbr connections per thread                               - default 3\n");
+    printf("\t-r\tNbr roundtrips per connection                            - default 3\n");
 
 }
-static void process_args(int argc, char* argv[], char** host_ip_p, int* port, int* nbr_roundtrips_per_connection_p, int* nbr_connections_per_thread_p, int* nbr_threads_p, int* nbr_processes_p) {
+void verify_process_args(int argc, char* argv[], char** host_ip_p, int* port, int* nbr_roundtrips_per_connection_p, int* nbr_connections_per_thread_p, int* nbr_threads_p) {
     int c;
     char* host_ptr = NULL;
     int port_number = 9011;
@@ -137,7 +79,7 @@ static void process_args(int argc, char* argv[], char** host_ip_p, int* port, in
             case '?':
                 printf("There was an error in the options list\n");
             default:
-                usage();
+                verify_usage();
                 exit(0);
         }
     }
@@ -146,6 +88,5 @@ static void process_args(int argc, char* argv[], char** host_ip_p, int* port, in
     *nbr_roundtrips_per_connection_p = nbr_roundtrips_per_connection;
     *nbr_connections_per_thread_p = nbr_connections_per_thread;
     *nbr_threads_p = nbr_threads;
-    *nbr_processes_p = nbr_processes;
-
+//    *nbr_processes_p = nbr_processes;
 }

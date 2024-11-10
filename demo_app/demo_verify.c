@@ -5,7 +5,11 @@
 #include <pthread.h>
 #include <sys/time.h>
 #include <math.h>
+#include "verify_getopt.h"
+#include "verify_statistics.h"
+#include "verify_thread_context.h"
 
+#if 0
 #define NBR_PROCCES 1
 #define NBR_THREADS 8
 #define NBR_CONNECTIONS_PER_THREAD 3
@@ -15,8 +19,8 @@
 
 long nbr_round_trips_per_thread = NBR_CONNECTIONS_PER_THREAD * NBR_ROUNDTRIPS_PER_CONNECTION;
 long nbr_round_trips = NBR_THREADS * MAX_ROUNDTRIPS_PER_THREAD;
-
-
+#endif
+#if 0
 typedef struct ThreadContext {
     /**
      * How many round trips in this experiment
@@ -101,6 +105,7 @@ bool verify_response(ThreadContext* ctx, DemoMessageRef request, DemoMessageRef 
 //    }
 //    return (x == 0);
 }
+
 struct timeval get_time()
 {
     struct timeval t;
@@ -114,46 +119,8 @@ double time_diff_ms(struct timeval t1, struct timeval t2)
     double dif = (double )(t1.tv_sec - t2.tv_sec) + (double)(t1.tv_usec - t2.tv_usec) * 1e-6;
     return dif;
 }
-void* threadfn(void* data)
-{
-    ThreadContext* ctx = (ThreadContext*)data;
-    struct timeval start_time = get_time();
-    for(int i = 0; i < ctx->max_connections_per_thread; i++) {
-        struct timeval iter_start_time = get_time();
-        DemoClientRef client = democlient_new();
-        democlient_connect(client, "localhost", 9011);
-        ctx->roundtrip_per_connection_counter = 0;
-        while(1) {
-            Ctx_mk_uid(ctx);
-            DemoMessageRef request = mk_request(ctx);
-            DemoMessageRef response = NULL;
-            int rc1 = democlient_write_message(client, request);
-            if (rc1 != 0) break;
-            int rc2 = democlient_read_message(client, &response);
-            if (rc2 != 0) break;
-            IOBufferRef iob_req = demo_message_serialize(request);
-            IOBufferRef iob_resp = demo_message_serialize(response);
-            if (!verify_response(ctx, request, response)) {
-                printf("Verify response failed");
-            }
-            struct timeval iter_end_time = get_time();
-            ctx->resp_times[ctx->total_roundtrips] =  time_diff_ms(iter_end_time, iter_start_time);
-            ctx->roundtrip_per_connection_counter++;
-            ctx->total_roundtrips++;
-            if(ctx->roundtrip_per_connection_counter >= ctx->max_rountrips_per_connection) {
-                break;
-            }
-            demo_message_dispose(&request);
-            if(response != NULL)
-                demo_message_dispose(&response);
-
-        }
-        democlient_dispose(&client);
-    }
-    struct timeval end_time = get_time();
-    ctx->total_time =  time_diff_ms(end_time, start_time);
-    return NULL;
-}
+#endif
+#if 0
 /**
  * Append the response times from a single thread onto the array of all response
  * times.
@@ -222,6 +189,8 @@ void analyse_response_times(double all[MAX_RESPONSE_TIMES], double buckets[10])
     }
     printf("Hello");
 }
+#endif
+void* threadfn(void* data);
 
 int main()
 {
@@ -257,6 +226,43 @@ int main()
     printf("Total elapsed time %f  threads: %d per connections per thread: %d rountrips per connection: %d\n", tot_time, NBR_THREADS, NBR_CONNECTIONS_PER_THREAD, NBR_ROUNDTRIPS_PER_CONNECTION);
     printf("Nbr threads : %d  nbr connections per thread: %d nbr of requests per connection: %d av time %f \n", NBR_THREADS, NBR_CONNECTIONS_PER_THREAD, NBR_ROUNDTRIPS_PER_CONNECTION, av_time);
     printf("Response times mean: %f stddev: %f total nbr roundtrips: %d \n", avg, stddev, MAX_RESPONSE_TIMES);
-
 }
-
+void* threadfn(void* data)
+{
+    ThreadContext* ctx = (ThreadContext*)data;
+    struct timeval start_time = get_time();
+    for(int i = 0; i < ctx->max_connections_per_thread; i++) {
+        struct timeval iter_start_time = get_time();
+        DemoClientRef client = democlient_new();
+        democlient_connect(client, "localhost", 9011);
+        ctx->roundtrip_per_connection_counter = 0;
+        while(1) {
+            Ctx_mk_uid(ctx);
+            DemoMessageRef request = mk_request(ctx);
+            DemoMessageRef response = NULL;
+            int rc1 = democlient_write_message(client, request);
+            if (rc1 != 0) break;
+            int rc2 = democlient_read_message(client, &response);
+            if (rc2 != 0) break;
+            IOBufferRef iob_req = demo_message_serialize(request);
+            IOBufferRef iob_resp = demo_message_serialize(response);
+            if (!verify_response(ctx, request, response)) {
+                printf("Verify response failed");
+            }
+            struct timeval iter_end_time = get_time();
+            ctx->resp_times[ctx->total_roundtrips] =  time_diff_ms(iter_end_time, iter_start_time);
+            ctx->roundtrip_per_connection_counter++;
+            ctx->total_roundtrips++;
+            if(ctx->roundtrip_per_connection_counter >= ctx->max_rountrips_per_connection) {
+                break;
+            }
+            demo_message_dispose(&request);
+            if(response != NULL)
+                demo_message_dispose(&response);
+        }
+        democlient_dispose(&client);
+    }
+    struct timeval end_time = get_time();
+    ctx->total_time =  time_diff_ms(end_time, start_time);
+    return NULL;
+}
