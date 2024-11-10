@@ -16,21 +16,37 @@
 #include <http_in_c/common/socket_functions.h>
 
 static DemoHandlerRef my_only_client;
-
-//static socket_handle_t create_listener_socket(int port, const char *host);
 static void set_non_blocking(socket_handle_t socket);
 void on_event_listening(RunloopRef rl, void* arg_server_ref);
 
 static void on_handler_completion_cb(void* void_server_ref, DemoHandlerRef handler_ref)
 {
-    printf("file: demo_server.c on_handler_completeion_cb \n");
-
+    RBL_LOG_FMT("file: demo_server.c on_handler_completeion_cb \n");
     DemoServerRef server_ref = void_server_ref;
     RBL_CHECK_TAG(DemoServer_TAG, server_ref)
     RBL_CHECK_END_TAG(DemoServer_TAG, server_ref)
+    RBL_CHECK_TAG(DemoHandler_TAG, handler_ref)
+    /**
+     * remove the departing handle from the handler_list
+     */
     ListIter x = List_find(server_ref->handler_list, handler_ref);
+    assert(x != NULL);
     DemoHandlerRef href = List_itr_unpack(server_ref->handler_list, x);
+    assert(href == handler_ref);
+    /**
+     * BEWARE - the list remove call also free()'s the handle object
+     *
+     * For the moment this fixed the following TODO
+     */
     List_itr_remove(server_ref->handler_list, &x);
+    RBL_CHECK_TAG(DemoHandler_TAG, handler_ref)
+    demohandler_free(handler_ref);
+
+    /**
+     * @TODO - this needs fixing - FIXED pass NULL as dispose function in DemoServer_init
+     *
+    demohandler_free(handler_ref);
+    */
 }
 void DemoServer_init(DemoServerRef sref, int port, char const * host, int listen_fd, DemoProcessRequestFunction* process_request)
 {
@@ -42,17 +58,8 @@ void DemoServer_init(DemoServerRef sref, int port, char const * host, int listen
     sref->process_request_function = process_request;
 
     sref->runloop_ref = runloop_new();
-
-    // Setup the socket
-#if 0
-    sref->listening_socket_fd = create_listener_socket(port, host);
-    set_non_blocking(sref->listening_socket_fd);
-#endif
     sref->listening_watcher_ref = runloop_listener_new(sref->runloop_ref, sref->listening_socket_fd);
-    // TODO this is a memory leak
-    // the list is the owner of handler references
-    sref->handler_list = List_new(demohandler_anonymous_dispose);
-//    sref->completion_callback = &on_handler_completion_cb;
+    sref->handler_list = List_new(NULL);
 }
 DemoServerRef DemoServer_new(int port, char const * host, int listen_fd, DemoProcessRequestFunction* process_request)
 {
@@ -107,59 +114,6 @@ void DemoServer_terminate(DemoServerRef this)
 
     close(this->listening_socket_fd);
 }
-
-#if 0
-//
-// create a listening socket from host and port
-//
-static socket_handle_t create_listener_socket(int port, const char *host)
-{
-    struct sockaddr_in sin;
-    memset(&sin, 0, sizeof(sin));
-    socket_handle_t tmp_socket;
-    sin.sin_family = AF_INET; // or AF_INET6 (address family)
-    sin.sin_port = htons(port);
-    sin.sin_addr.s_addr = inet_addr("127.0.0.1");
-    int result;
-    int yes = 1;
-
-    if((tmp_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1) {
-        goto error_01;
-    }
-    if((result = setsockopt(tmp_socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes))) != 0) {
-        goto error_02;
-    }
-    if((result = bind(tmp_socket, (struct sockaddr *) &sin, sizeof(sin))) != 0) {
-        int x = errno;
-        goto error_03;
-    }
-    if((result = listen(tmp_socket, SOMAXCONN)) != 0) {
-        goto error_04;
-    }
-    return tmp_socket;
-
-    error_01:
-    printf("socket call failed with errno %d %s\n", errno, strerror(errno));
-    assert(0);
-    error_02:
-    printf("setsockopt call failed with errno %d %s\n", errno, strerror(errno));
-    assert(0);
-    error_03:
-    printf("bind call failed with errno %d %s\n", errno, strerror(errno));
-    assert(0);
-    error_04:
-    printf("listen call failed with errno %d %s\n", errno, strerror(errno));
-    assert(0);
-}
-
-void set_non_blocking(socket_handle_t socket)
-{
-    int flags = fcntl(socket, F_GETFL, 0);
-    int modFlags2 = flags | O_NONBLOCK;
-    int fres = fcntl(socket, F_SETFL, modFlags2);
-    assert(fres == 0);
-}
-#endif
 void on_event_listening(RunloopRef rl, void* arg_server_ref) // RunloopListenerRef listener_watcher_ref, uint64_t event)
 {
 

@@ -110,6 +110,7 @@ IOBufferRef BufferChain_compact(const BufferChainRef this)
     }
     return iob_final;
     memerror_01:
+        assert(false);
         return NULL;
 }
 bool BufferChain_eq_cstr(const BufferChainRef this, char* cstr)

@@ -15,6 +15,7 @@ DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef request)
     *(char*)(IOBuffer_data(iob)) = 'R';
     BufferChainRef bc =  BufferChain_new();
     BufferChain_append_IOBuffer(bc, iob);
+    IOBuffer_free(iob);
 //    BufferChain_append_bufferchain(bc, request_body);
     demo_message_set_body(reply, bc);
     return reply;

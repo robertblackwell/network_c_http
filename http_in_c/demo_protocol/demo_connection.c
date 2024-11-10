@@ -338,7 +338,7 @@ static void read_error(DemoConnectionRef cref, char* msg)
 {
     RBL_CHECK_TAG(DemoConnection_TAG, cref)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
-    printf("Read_error got an error this is the message: %s  fd: %d\n", msg, cref->asio_stream_ref->fd);
+    RBL_LOG_FMT("Read_error got an error this is the message: %s  fd: %d\n", msg, cref->asio_stream_ref->fd);
     cref->read_state = READ_STATE_STOP;
     RunloopRef rl = asio_stream_get_runloop(cref->asio_stream_ref);
     postable_cleanup(rl, cref);
@@ -358,7 +358,7 @@ static void read_error(DemoConnectionRef cref, char* msg)
 static void postable_cleanup(RunloopRef runloop, void* arg_cref)
 {
     DemoConnectionRef cref = arg_cref;
-    printf("postable_cleanup entered\n");
+    RBL_LOG_FMT("postable_cleanup entered\n");
     RBL_ASSERT((cref->cleanup_done_flag == false), "cleanup should not run more than once");
     RBL_CHECK_TAG(DemoConnection_TAG, cref)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)

@@ -41,7 +41,7 @@ int main(int argc, char** argv)
     if (signal(SIGABRT, sig_handler) == SIG_ERR) {
         printf("sync_app.c main signal() failed");
     }
-    printf("Hello this is xr-junk main \n");
+    //printf("Hello this is xr-junk main \n");
     int port = 9011;
     int t = 2;
     int n;

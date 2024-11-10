@@ -21,7 +21,7 @@ typedef struct IOBuffer_s {
     int    buffer_capacity;   // always holds the size of the buffer
     void*  buffer_ptr;        // points to the start of unused data in buffer
     int    buffer_length;     // same as capacity
-    int    buffer_remaining;  // length of data no consumed
+    int    buffer_remaining;  // length of data not consumed
 
 } IOBuffer, *IOBufferRef;
 

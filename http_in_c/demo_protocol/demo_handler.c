@@ -23,7 +23,7 @@ static void handler_postable_read_start(RunloopRef reactor_ref, void* href);
 
 static void connection_completion_cb(void* href)
 {
-    printf("file demo_handler.c connection_completion_cb\n");
+    RBL_LOG_FMT("file demo_handler.c connection_completion_cb\n");
     DemoHandlerRef handler_ref = href;
     handler_ref->completion_callback(handler_ref->server_ref, href);
 }
@@ -64,6 +64,7 @@ void demohandler_init(
 
     democonnection_read(this->demo_connection_ref, &handle_request, this);
 }
+
 void demohandler_free(DemoHandlerRef this)
 {
     RBL_CHECK_TAG(DemoHandler_TAG, this)
@@ -124,7 +125,7 @@ static void postable_write_start(RunloopRef runloop_ref, void* href)
     RBL_CHECK_TAG(DemoHandler_TAG, handler_ref)
     RBL_CHECK_END_TAG(DemoHandler_TAG, handler_ref)
     pid_t tid = gettid();
-    printf("postable_write_start tid: %d active_response:%p fd:%d  write_state: %d\n", tid, handler_ref->active_response, handler_ref->demo_connection_ref->asio_stream_ref->fd, handler_ref->demo_connection_ref->write_state);
+    RBL_LOG_FMT("postable_write_start tid: %d active_response:%p fd:%d  write_state: %d\n", tid, handler_ref->active_response, handler_ref->demo_connection_ref->asio_stream_ref->fd, handler_ref->demo_connection_ref->write_state);
     if(handler_ref->active_response != NULL) {
         return;
     }
@@ -140,7 +141,7 @@ static void on_write_complete_cb(void* href, int status)
     DemoHandlerRef handler_ref = href;
     RBL_CHECK_TAG(DemoHandler_TAG, handler_ref)
     RBL_CHECK_END_TAG(DemoHandler_TAG, handler_ref)
-    printf("on_write_complete_cb fd:%d  write_state:%d\n", handler_ref->demo_connection_ref->asio_stream_ref->fd, handler_ref->demo_connection_ref->write_state);
+    RBL_LOG_FMT("on_write_complete_cb fd:%d  write_state:%d\n", handler_ref->demo_connection_ref->asio_stream_ref->fd, handler_ref->demo_connection_ref->write_state);
     demo_message_dispose(&(handler_ref->active_response));
     if(List_size(handler_ref->output_list) >= 1) {
         runloop_post(handler_ref->runloop_ref, postable_write_start, href);
