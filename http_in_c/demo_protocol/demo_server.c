@@ -67,16 +67,20 @@ DemoServerRef DemoServer_new(int port, char const * host, int listen_fd, DemoPro
     DemoServer_init(sref, port, host, listen_fd, process_request);
     return sref;
 }
-
 void DemoServer_free(DemoServerRef this)
 {
     RBL_CHECK_TAG(DemoServer_TAG, this)
     RBL_CHECK_END_TAG(DemoServer_TAG, this)
     ASSERT_NOT_NULL(this);
+    // I own the listener
     runloop_listener_deregister(this->listening_watcher_ref);
     runloop_listener_free(this->listening_watcher_ref);
-    close(this->listening_socket_fd);
+    // I own the runloop
     runloop_free(this->runloop_ref);
+    // this should already be closed in the listener_deregister
+    close(this->listening_socket_fd);
+    // I own the handler list and it should be empty
+    assert(List_size(this->handler_list) ==0);
     List_dispose(&(this->handler_list));
     free(this);
 

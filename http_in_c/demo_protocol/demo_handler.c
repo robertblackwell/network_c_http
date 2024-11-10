@@ -71,6 +71,10 @@ void demohandler_free(DemoHandlerRef this)
     RBL_CHECK_END_TAG(DemoHandler_TAG, this)
     democonnection_free(this->demo_connection_ref);
     this->demo_connection_ref = NULL;
+    // dont own this->server_ref
+    // dont own runloop_ref
+    assert(List_size(this->input_list) ==0);
+    assert(List_size(this->output_list) ==0);
     List_dispose(&(this->input_list));
     List_dispose(&(this->output_list));
     free(this);
