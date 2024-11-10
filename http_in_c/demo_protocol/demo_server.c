@@ -1,7 +1,7 @@
 
-#include <http_in_c/runloop/rl_internal.h>
 #include <http_in_c/demo_protocol/demo_server.h>
-#include <http_in_c/demo_protocol/demo_handler.h>
+//#include <http_in_c/runloop/rl_internal.h>
+//#include <http_in_c/demo_protocol/demo_handler.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -17,7 +17,7 @@
 
 static DemoHandlerRef my_only_client;
 
-static socket_handle_t create_listener_socket(int port, const char *host);
+//static socket_handle_t create_listener_socket(int port, const char *host);
 static void set_non_blocking(socket_handle_t socket);
 void on_event_listening(RunloopRef rl, void* arg_server_ref);
 
@@ -32,24 +32,32 @@ static void on_handler_completion_cb(void* void_server_ref, DemoHandlerRef handl
     DemoHandlerRef href = List_itr_unpack(server_ref->handler_list, x);
     List_itr_remove(server_ref->handler_list, &x);
 }
-void DemoServer_init(DemoServerRef sref, int port)
+void DemoServer_init(DemoServerRef sref, int port, char const * host, int listen_fd, DemoProcessRequestFunction* process_request)
 {
     RBL_SET_TAG(DemoServer_TAG, sref)
     RBL_SET_END_TAG(DemoServer_TAG, sref)
     sref->port = port;
+    sref->host = host;
+    sref->listening_socket_fd = listen_fd;
+    sref->process_request_function = process_request;
+
     sref->runloop_ref = runloop_new();
-    sref->listening_socket_fd = create_listener_socket(port, "127.0.0.1");
+
+    // Setup the socket
+#if 0
+    sref->listening_socket_fd = create_listener_socket(port, host);
     set_non_blocking(sref->listening_socket_fd);
+#endif
     sref->listening_watcher_ref = runloop_listener_new(sref->runloop_ref, sref->listening_socket_fd);
     // TODO this is a memory leak
     // the list is the owner of handler references
     sref->handler_list = List_new(demohandler_anonymous_dispose);
 //    sref->completion_callback = &on_handler_completion_cb;
 }
-DemoServerRef DemoServer_new(int port)
+DemoServerRef DemoServer_new(int port, char const * host, int listen_fd, DemoProcessRequestFunction* process_request)
 {
     DemoServerRef sref = (DemoServerRef) eg_alloc(sizeof(DemoServer));
-    DemoServer_init(sref, port);
+    DemoServer_init(sref, port, host, listen_fd, process_request);
     return sref;
 }
 
@@ -80,6 +88,8 @@ void DemoServer_listen(DemoServerRef sref)
     RBL_CHECK_TAG(DemoServer_TAG, sref)
     RBL_CHECK_END_TAG(DemoServer_TAG, sref)
     ASSERT_NOT_NULL(sref)
+    pid_t tid = gettid();
+    printf("demo_server_listen sref: %p tid: %d\n", sref, tid);
     int port = sref->port;
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
@@ -98,6 +108,7 @@ void DemoServer_terminate(DemoServerRef this)
     close(this->listening_socket_fd);
 }
 
+#if 0
 //
 // create a listening socket from host and port
 //
@@ -148,7 +159,7 @@ void set_non_blocking(socket_handle_t socket)
     int fres = fcntl(socket, F_SETFL, modFlags2);
     assert(fres == 0);
 }
-
+#endif
 void on_event_listening(RunloopRef rl, void* arg_server_ref) // RunloopListenerRef listener_watcher_ref, uint64_t event)
 {
 
@@ -167,8 +178,8 @@ void on_event_listening(RunloopRef rl, void* arg_server_ref) // RunloopListenerR
     }
     RBL_LOG_FMT("Listerner accepted sock fd: %d", sock2);
     DemoHandlerRef handler = demohandler_new(
-            sock2,
             rl,
+            sock2,
             on_handler_completion_cb,
             server_ref);
 

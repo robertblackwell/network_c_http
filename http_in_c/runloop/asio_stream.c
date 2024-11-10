@@ -1,5 +1,5 @@
-#define RBL_LOG_ENABLED
-#define RBL_LOG_ALLOW_GLOBAL
+//#define RBL_LOG_ENABLED
+//#define RBL_LOG_ALLOW_GLOBAL
 #include <rbl/check_tag.h>
 #include <rbl/logger.h>
 #include <rbl/macros.h>
@@ -70,13 +70,15 @@ void asio_stream_destroy(AsioStreamRef this)
     RBL_CHECK_TAG(AsioStream_TAG, this)
     RBL_CHECK_END_TAG(AsioStream_TAG, this)
     int fd = this->runloop_stream_ref->fd;
-    runloop_stream_deregister(this->runloop_stream_ref);
-    runloop_stream_free(this->runloop_stream_ref);
-    this->runloop_stream_ref = NULL;
-    RBL_LOG_FMT("asio_stream_free close socket: %d", fd)
-    if(this->fd > 0) {
+    int fd2 = this->fd;
+    assert(fd == fd2);
+
+    if(fd > 0) {
         asio_stream_close(this);
     }
+    free(this->runloop_stream_ref);
+    this->runloop_stream_ref = NULL;
+    RBL_LOG_FMT("asio_stream_free close socket: %d", fd)
     RBL_SET_TAG("xxxxxxx", this) // corrupt the tag
     RBL_INVALIDATE_TAG(this)
 }
@@ -89,6 +91,7 @@ void asio_stream_close(AsioStreamRef cref)
     runloop_stream_deregister(cref->runloop_stream_ref);
     close(cref->fd);
     cref->fd = -1;
+    cref->runloop_stream_ref->fd = -1;
 }
 void asio_stream_free(AsioStreamRef this)
 {

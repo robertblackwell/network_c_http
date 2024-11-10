@@ -1,6 +1,6 @@
 
-#define RBL_LOG_ENABLED
-#define RBL_LOG_ALLOW_GLOBAL
+//#define RBL_LOG_ENABLED
+//#define RBL_LOG_ALLOW_GLOBAL
 #include "demo_write.h"
 #include "fill_iobuffer.h"
 

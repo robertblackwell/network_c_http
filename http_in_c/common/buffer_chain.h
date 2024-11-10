@@ -123,6 +123,12 @@ void BufferChain_add_back(BufferChainRef this, IOBufferRef iobuf);
  * @return IOBufferRef or NULL if the chain is empty
  */
 IOBufferRef BufferChain_pop_front(BufferChainRef this);
+/**
+ * @brief Gives a non-owning ref to the first IOBufferRef from the BufferChain
+ * @param this BufferChainRef
+ * @return IOBufferRef or NULL if the chain is empty
+ */
+IOBufferRef BufferChain_front(BufferChainRef this);
 
 /*
  * too dangerous

@@ -46,7 +46,7 @@ ListenerCtxRef listener_ctx_init(ListenerCtxRef sref, int listen_fd);
 void listener_ctx_dispose(ListenerCtxRef *sref);
 void listener_ctx_listen(ListenerCtxRef sref);
 
-socket_handle_t create_listener_socket(int port, const char *host);
+socket_handle_t local_create_listener_socket(int port, const char *host);
 void set_non_blocking(socket_handle_t socket);
 
 

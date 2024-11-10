@@ -19,6 +19,37 @@
 #include <arpa/inet.h>
 #include <netinet/tcp.h>
 
+socket_handle_t create_listener_socket(int port, const char *host)
+{
+    struct sockaddr_in sin;
+    memset(&sin, 0, sizeof(sin));
+    socket_handle_t tmp_socket;
+    sin.sin_family = AF_INET; // or AF_INET6 (address family)
+    sin.sin_port = htons(port);
+    sin.sin_addr.s_addr = inet_addr("127.0.0.1");
+    int result;
+    int yes = 1;
+
+    if((tmp_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1) {
+        printf("socket call failed with errno %d \n", errno);
+        assert(0);
+    }
+    if((result = setsockopt(tmp_socket, SOL_SOCKET, SO_REUSEPORT  , &yes, sizeof(yes))) != 0) {
+        printf("setsockopt call failed with errno %d \n", errno);
+        assert(0);
+    }
+    if((result = bind(tmp_socket, (struct sockaddr *) &sin, sizeof(sin))) != 0) {
+        printf("bind call failed with errno %d \n", errno);
+        assert(0);
+    }
+    if((result = listen(tmp_socket, SOMAXCONN)) != 0) {
+        printf("listen call failed with errno %d \n", errno);
+        assert(0);
+    }
+    return tmp_socket;
+}
+
+
 void socket_throw_error(socket_handle_t socket, int errorno, const char* message)
 {
     const char* m = message;

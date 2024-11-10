@@ -3,10 +3,12 @@
 #include <http_in_c/demo_protocol/demo_client.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/cbuffer.h>
-#include <http_in_c/http/message.h>
+#include <http_in_c/demo_protocol//demo_message.h>
+#include <http_in_c/demo_protocol/demo_parser.h>
 #include <http_in_c/demo_protocol/demo_sync_reader.h>
 #include <http_in_c/demo_protocol/demo_sync_writer.h>
 #include <rbl/logger.h>
+#include <http_in_c/common/list.h>
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -14,25 +16,39 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <errno.h>
-
+#include <http_in_c/demo_protocol/demo_parser.h>
 #define DemoClient_TAG "DECLNT"
 #include <rbl/check_tag.h>
 
+
 struct DemoClient_s {
     RBL_DECLARE_TAG;
-    int       sock;
-    DemoSyncWriterRef  wrtr;
-    DemoSyncReaderRef  rdr;
+    int             sock;
+    DemoParserRef   parser_ref;
+    ListRef         input_message_list;
+    ListRef         output_message_list;
     RBL_DECLARE_END_TAG;
 };
+void on_new_message(void* ctx, DemoMessageRef msg)
+{
+    DemoClientRef client_ref = ctx;
+    assert(msg != NULL);
+    List_add_back(client_ref->input_message_list, msg);
+}
 
-DemoClientRef democlient_new()
+DemoClientRef democlient_new(DemoParserRef parser_ref)
 {
     DemoClientRef this = eg_alloc(sizeof(DemoClient));
+    democlient_init(this);
+    return this;
+}
+void democlient_init(DemoClientRef this)
+{
     RBL_SET_TAG(DemoClient_TAG, this)
     RBL_SET_END_TAG(DemoClient_TAG, this)
-    this->rdr = NULL;
-    this->wrtr = NULL;
+    this->parser_ref = DemoParser_new(&on_new_message, this);
+    this->input_message_list = List_new(NULL);
+    this->output_message_list = List_new(NULL);
 }
 void democlient_dispose(DemoClientRef* this_ptr)
 {
@@ -40,25 +56,9 @@ void democlient_dispose(DemoClientRef* this_ptr)
     RBL_CHECK_TAG(DemoClient_TAG, this)
     RBL_CHECK_END_TAG(DemoClient_TAG, this)
     RBL_LOG_FMT("democlient_dispose %p  %d\n", this, this->sock);
-    if(this->rdr) demosync_reader_dispose(&(this->rdr));
-    if(this->wrtr) demosync_writer_dispose(&(this->wrtr));
     close(this->sock);
     eg_free(*this_ptr);
     *this_ptr = NULL;
-}
-void democlient_raw_connect(DemoClientRef this, int sockfd, struct sockaddr* sockaddr_p, int sockaddr_len)
-{
-    RBL_CHECK_TAG(DemoClient_TAG, this)
-    RBL_CHECK_END_TAG(DemoClient_TAG, this)
-    RBL_LOG_FMT("democlient_raw_connect %p sockfd: %d\n", this, sockfd);
-    if (connect(sockfd,sockaddr_p, sockaddr_len) < 0) {
-        int errno_saved = errno;
-        RBL_LOG_ERROR("democlient_raw_connect ERROR client %p connecting sockfd: % derrno: %d\n", this, sockfd, errno_saved);
-    }
-    this->sock = sockfd;
-    this->wrtr =  demosync_writer_new(sockfd);
-    this->rdr = demosync_reader_new(sockfd);
-
 }
 void democlient_connect(DemoClientRef this, char* host, int portno)
 {
@@ -87,47 +87,43 @@ void democlient_connect(DemoClientRef this, char* host, int portno)
         RBL_LOG_ERROR("ERROR client %p connecting sockfd: % derrno: %d\n", this, sockfd, errno_saved);
     }
     this->sock = sockfd;
-    this->wrtr = demosync_writer_new(sockfd);
-    this->rdr = demosync_reader_new(sockfd);
-
 }
-void democlient_roundtrip(DemoClientRef this, const char* req_buffers[], DemoMessageRef* response_ptr)
+int democlient_write_message(DemoClientRef client_ref, DemoMessageRef msg_ref)
 {
-    RBL_CHECK_TAG(DemoClient_TAG, this)
-    RBL_CHECK_END_TAG(DemoClient_TAG, this)
-    int buf_index = 0;
-    int buf_len;
-    char* buf;
-    while(req_buffers[buf_index] != NULL) {
-        buf = (char*)req_buffers[buf_index];
-        buf_len = strlen(buf);
-        int bytes_written = write(this->sock, buf, buf_len);
-        buf_index++;
-    }
-    IOBufferRef iobx = IOBuffer_new_with_capacity(120);
-    int bytes = read(this->sock, IOBuffer_space(iobx), IOBuffer_space_len(iobx));
+    IOBufferRef outbuf = demo_message_serialize(msg_ref);
+    void* out_data = IOBuffer_data(outbuf);
+    int out_len = IOBuffer_data_len(outbuf);
+    assert(out_len > 0);
+    long bytes_written = write(client_ref->sock, out_data, out_len);
     int errno_saved = errno;
-    printf("demo_client roundtrip bytes %d errno %d buffer: %s \n", bytes, errno_saved, IOBuffer_cstr(iobx));
-//    int rc = demosync_reader_read(this->rdr, response_ptr);
-//    IOBufferRef ser = demo_message_serialize(response_ptr);
-//    printf("democlient roundtrip %s\n", IOBuffer_cstr(ser));
-//    if(rc != READER_OK) {
-//        int errno_saved = errno;
-//        LOG_ERROR("bad rc from SyncReader_read rc: errno %d\n", errno_saved);
-//        assert(false);
-//    }
+    if(bytes_written != out_len) {
+        if (bytes_written > 0) {
+            assert(0);
+        } else if (bytes_written == 0) {
+            return -1;
+        }
+    }
+    return errno_saved;
 }
-void democlient_request_round_trip(DemoClientRef this, DemoMessageRef request, DemoMessageRef* response_ptr)
+int democlient_read_message(DemoClientRef client_ref, DemoMessageRef* msg_ref_ptr)
 {
-    RBL_CHECK_TAG(DemoClient_TAG, this)
-    RBL_CHECK_END_TAG(DemoClient_TAG, this)
-    IOBufferRef req_io_buf = demo_message_serialize(request);
-    demosync_writer_write_chunk(this->wrtr, IOBuffer_data(req_io_buf), IOBuffer_data_len(req_io_buf));
-
-    int rc = demosync_reader_read(this->rdr, response_ptr);
-    if(rc != READER_OK) {
-        int errno_saved = errno;
-        RBL_LOG_ERROR("bad rc from SyncReader_read rc: errno %d\n", errno_saved);
-        assert(false);
+    while(1) {
+        if(List_size(client_ref->input_message_list) > 0) {
+            DemoMessageRef m = List_remove_first(client_ref->input_message_list);
+            *msg_ref_ptr = m;
+            return 0;
+        } else {
+            IOBufferRef iob = IOBuffer_new_with_capacity(20000);
+            void *buf = IOBuffer_space(iob);
+            int len = IOBuffer_space_len(iob);
+            long bytes_read = read(client_ref->sock, buf, len);
+            if (bytes_read > 0) {
+                IOBuffer_commit(iob, (int) bytes_read);
+                RBL_LOG_FMT("response raw: %s \n", IOBuffer_cstr(iob));
+                DemoParser_consume(client_ref->parser_ref, iob);
+            } else {
+                return -1;
+            }
+        }
     }
 }

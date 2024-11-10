@@ -17,7 +17,7 @@
 
 #define MAX_THREADS 100
 
-
+#if 0
 //
 // create a listening socket from host and port
 //
@@ -62,7 +62,7 @@ socket_handle_t create_listener_socket(int port, const char* host)
         RBL_LOG_ERROR("listen call failed with errno %d ", errno);
         assert(0);
 }
-
+#endif
 sync_server_r sync_server_new(int port, size_t read_buffer_size, int nbr_threads, SyncAppMessageHandler app_handler)
 {
     sync_server_r sref = (sync_server_r)eg_alloc(sizeof(sync_server_t));

@@ -2,34 +2,36 @@ import  socket
 import time
 import pprint
 
+host = 'localhost'
+port = 9011
+
 def delay():
     # return 
     time.sleep(0.0000001)
+
+def make_frame(opcode: str, body: str) -> bytes:
+    assert(len(opcode) == 1)
+    frame = "\x02" + opcode + body + "\x03"
+    return bytes(frame, 'utf-8')
 
 def test_check(test_name: str, expected: bytes, result: bytes):
     if expected == result:
         print("Test {} success".format(test_name))
     else:
-        print("Test {} failed Expected : {} got : {}".format(test_name, expected, result))
+        print("Test {} failed Expected : {!r} got : {!r}".format(test_name, expected, result))
 
 def make_big_frame(opcode:str, body: str, repeat:int):
-    frame = ""
-    frame = "\x01" + opcode + "\x02" + body*repeat + "\x03" + "L"
+    frame = make_frame(opcode, body*repeat)
     return frame
 
-def make_frame(opcode: str, body: str):
-    frame = ""
-    frame = "\x01" + opcode + "\x02" + body + "\x03" + "L"
+
+def make_bytes_response_frame(body: str)->bytes:
+    frame = make_frame('R', body)
     return frame
 
-def make_bytes_response_frame(body: str):
-    frame = ""
-    frame = "\x01" + 'R' + "\x02" + body + "\x03" + "L" + "\x04"
-    return bytes(frame, 'utf-8')
 def make_big_bytes_response_frame(body: str, repeat:int):
-    frame = ""
-    frame = "\x01" + "R" + "\x02" + body*repeat + "\x03" + "L" + "\x04"
-    return bytes(frame, 'utf-8')
+    frame = make_frame('R', body*repeat)
+    return frame
 
 
 def fragment_frame(frame: str, nbr_fragments: int):
@@ -58,11 +60,12 @@ def send_frame_as_fragments(sock: socket.socket, frame:str, number_fragments):
 
 def test_simple():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('localhost', 9011))
+    s.connect((host, port))
     for i in range(1):
-        s.sendall(b"\x01Q\x02123456789\x03L")
+        m = make_frame('Q', '123456789')
+        s.sendall(m)
         data = s.recv(1024)
-        expected = b"\x01R\x02123456789\x03L\x04"
+        expected = make_frame('R', '123456789')
         if data != expected:
             print("test_simple failed expected : {} got: {}".format(expected, data))
         else:
@@ -71,11 +74,12 @@ def test_simple():
 
 def test_frame_error_simple():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('localhost', 9011))
+    s.connect((host, port))
     for i in range(1):
-        s.sendall(b"\x01Q\x03123456789\x03L")
+        f = make_frame('Q', '123456789')
+        expected = make_frame('R', '123456789')
+        s.sendall(f)
         data = s.recv(1024)
-        expected = b"\x01R\x02123456789\x03L\x04"
         if data != expected:
             print("test_simple failed expected : {} got: {}".format(expected, data))
         else:
@@ -84,7 +88,7 @@ def test_frame_error_simple():
 
 def test_error_close_during_frame():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('localhost', 9011))
+    s.connect((host, port))
     
     s.sendall(b"\x01Q\x02123456789poiuytrew")
     s.close()
@@ -92,7 +96,7 @@ def test_error_close_during_frame():
                 
 def test_error_close_after_frame():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('localhost', 9011))
+    s.connect((host, port))
     
     s.sendall(b"\x01Q\x02123456789poiuytrew\x03L")
     s.close()
@@ -100,7 +104,7 @@ def test_error_close_after_frame():
                 
 def test_error_close_during_receive():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('localhost', 9011))
+    s.connect((host, port))
     s.sendall(b"\x01Q\x02123456789poiuytrew\x03L")
     data = s.recv(3);
     s.close();
@@ -109,11 +113,12 @@ def test_error_close_during_receive():
         
 def test_simple_multiple_buffers():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('localhost', 9011))
+    s.connect((host, port))
     for i in range(1):
-        s.sendall(b"\x01Q\x02123456789abcdefghijklmno")
+        f1 = b'\x02Q123456789abcdefghijklmno'
+        s.sendall(f1)
         # delay()
-        s.sendall(b"ABCDEFGHIJK\x03L")
+        s.sendall(b"ABCDEFGHIJK\x03")
         # delay()
         data = s.recv(3*1024)
         expected = make_bytes_response_frame("123456789abcdefghijklmnoABCDEFGHIJK")
@@ -122,7 +127,7 @@ def test_simple_multiple_buffers():
 
 def test_message_data_left_in_buffer():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('localhost', 9011))
+    s.connect((host, port))
     for i in range(2):
         s.sendall(b"\x01Q\x02123456789abcdefghijklmno\x03L\x01Q\x02MNBVCXZ")
         # delay()
@@ -142,7 +147,7 @@ def test_message_data_left_in_buffer():
         
 def test_send_2_frames_1_buffer():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('localhost', 9011))
+    s.connect((host, port))
     for i in range(1):
         frame1 = make_frame("Q", "[mnbvcxzlkjhgfdsapoiuytrewq]")
         frame2 = make_frame("Q", "[QWERTYUIOPASDFGHJKLZXCVBNM]")
@@ -157,25 +162,25 @@ def test_send_2_frames_1_buffer():
             data_total = data
         expected = b"\x01R\x02[mnbvcxzlkjhgfdsapoiuytrewq]\x03L\x04\x01R\x02[QWERTYUIOPASDFGHJKLZXCVBNM]\x03L\x04"
         test_check("test_send_fragments", expected, data_total)
-    s.close();
+    s.close()
 
 def test_send_fragments():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('localhost', 9011))
+    s.connect((host, port))
     for i in range(5):
         frame = make_frame("Q", "[mnbvcxzlkjhgfdsapoiuytrewq][QWERTYUIOPASDFGHJKLZXCVBNM]")
-        send_frame_as_fragments(s, frame, 4)
+        send_frame_as_fragments(s, frame.decode('utf-8'), 4)
         data = s.recv(1024)
         expected = make_bytes_response_frame("[mnbvcxzlkjhgfdsapoiuytrewq][QWERTYUIOPASDFGHJKLZXCVBNM]")
         test_check("test_send_fragments", expected, data)
-    s.close();
+    s.close()
 
 def test_send_big_fragments():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect(('localhost', 9011))
+    s.connect((host, port))
     for i in range(1):
         frame = make_big_frame("Q", "[mnbvcxzlkjhgfdsapoiuytrewq][QWERTYUIOPASDFGHJKLZXCVBNM]", 10)
-        send_frame_as_fragments(s, frame, 1)
+        send_frame_as_fragments(s, frame.decode('utf-8'), 1)
         data = s.recv(100000)
         expected = make_big_bytes_response_frame("[mnbvcxzlkjhgfdsapoiuytrewq][QWERTYUIOPASDFGHJKLZXCVBNM]", 10)
         test_check("test_send_big_fragments", expected, data)
@@ -195,5 +200,6 @@ def test_good():
         test_simple_multiple_buffers()
         test_send_big_fragments()
 
+test_simple()
 # test_errors() 
-test_good()           
+# test_good()           

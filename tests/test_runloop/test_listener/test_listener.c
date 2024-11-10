@@ -36,7 +36,7 @@ int test_listeners()
     Connector tclient;
     tclient.max_count = 5;
     tclient.count = 0;
-    int fd = create_listener_socket(9001, "localhost");
+    int fd = local_create_listener_socket(9001, "localhost");
     set_non_blocking(fd);
     tclient.listen_fd = fd;
 

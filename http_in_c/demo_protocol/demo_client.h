@@ -2,6 +2,7 @@
 #define c_http_demo_client_h
 
 #include <http_in_c/demo_protocol/demo_message.h>
+#include <http_in_c/demo_protocol/demo_parser.h>
 
 #include <assert.h>
 #include <stdio.h>
@@ -25,6 +26,8 @@ typedef struct DemoClient_s DemoClient, *DemoClientRef;
  * @return DemoClientRef
  */
 DemoClientRef democlient_new();
+void democlient_init(DemoClientRef this);
+
 /**
  * @brief Free ca client instance and all it associated resources, including closing the socket connection to the server.
  *
@@ -41,22 +44,9 @@ void democlient_dispose(DemoClientRef* this_ptr);
  * @param port            A port number
  */
 void democlient_connect(DemoClientRef this, char* host, int port);
+int democlient_read_message(DemoClientRef client_ref, DemoMessageRef* msg_ref_ptr);
+int democlient_write_message(DemoClientRef client_ref, DemoMessageRef msg_ref);
 
-/**
- * @brief Sends a request to a server and waits for a response
- * \param this        DemoClientRef
- * \param req_buffers The Request as a c-array of char* terminated by NULL
- * \param response    MessageRef
- */
-void democlient_roundtrip(DemoClientRef this, const char* req_buffers[], DemoMessageRef* response);
-
-/**
- * @brief Sends a request to a server and waits for a response
- * \param this        DemoClientRef
- * \param request     MessageRef  The Request as MessageRef instance
- * \param response    MessageRef
- */
-void democlient_request_round_trip(DemoClientRef this, DemoMessageRef request, DemoMessageRef* response);
 
 /** @} */
 #endif

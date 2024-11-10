@@ -141,7 +141,7 @@ static void on_timer(RunloopRef rl, void* listener_ref_arg)
 }
 
 
-socket_handle_t create_listener_socket(int port, const char *host)
+socket_handle_t local_create_listener_socket(int port, const char *host)
 {
     struct sockaddr_in sin;
     memset(&sin, 0, sizeof(sin));

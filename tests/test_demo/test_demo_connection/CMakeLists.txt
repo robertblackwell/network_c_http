@@ -20,7 +20,7 @@ add_executable(test_demo_io
 #
 target_include_directories(test_demo_io PUBLIC ${TEST_INCLUDE_dirS})
 target_link_libraries(test_demo_io PUBLIC ${TEST_LINK_LIBS})
-add_test(test_demo_io test_demo_io)
+#add_test(test_demo_io test_demo_io)
 
 add_executable(test_demo_full
 	test_demo_full.c

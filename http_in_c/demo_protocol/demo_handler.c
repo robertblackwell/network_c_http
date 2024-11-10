@@ -52,8 +52,9 @@ void demohandler_init(
     this->demo_connection_ref = democonnection_new(
             runloop_ref,
             socket,
-            this,
-            connection_completion_cb);
+            connection_completion_cb,
+            this
+            );
     this->runloop_ref = runloop_ref;
     this->completion_callback = completion_cb;
     this->server_ref = server_ref;
@@ -91,14 +92,13 @@ static void handle_request(void* href, DemoMessageRef msgref, int error_code)
         printf("DemoHandler handler_request error_code %d\n", error_code);
     } else {
         response = process_request(handler_ref, msgref);
+        demo_message_free(msgref);
         List_add_back(handler_ref->output_list, response);
         if(List_size(handler_ref->output_list) > 1) {
             assert(false);
         } else if (List_size(handler_ref->output_list) == 1) {
             runloop_post(handler_ref->runloop_ref, postable_write_start, href);
         } // why not else
-        demo_message_free(msgref);
-        runloop_post(handler_ref->runloop_ref, handler_postable_read_start, href);
     }
 }
 #if 0
@@ -123,7 +123,8 @@ static void postable_write_start(RunloopRef runloop_ref, void* href)
     DemoHandlerRef handler_ref = href;
     RBL_CHECK_TAG(DemoHandler_TAG, handler_ref)
     RBL_CHECK_END_TAG(DemoHandler_TAG, handler_ref)
-    printf("postable_write_start active_response:%p fd:%d  write_state: %d\n", handler_ref->active_response, handler_ref->demo_connection_ref->asio_stream_ref->fd, handler_ref->demo_connection_ref->write_state);
+    pid_t tid = gettid();
+    printf("postable_write_start tid: %d active_response:%p fd:%d  write_state: %d\n", tid, handler_ref->active_response, handler_ref->demo_connection_ref->asio_stream_ref->fd, handler_ref->demo_connection_ref->write_state);
     if(handler_ref->active_response != NULL) {
         return;
     }

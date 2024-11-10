@@ -1,5 +1,5 @@
-#define RBL_LOG_ENABLED
-#define RBL_LOG_ALLOW_GLOBAL
+//#define RBL_LOG_ENABLED
+//#define RBL_LOG_ALLOW_GLOBAL
 #include <http_in_c/demo_protocol/demo_connection.h>
 #include <http_in_c/runloop/rl_internal.h>
 #include <stdlib.h>
@@ -81,6 +81,7 @@ void democonnection_init(
     this->on_read_cb = NULL;
     this->cleanup_done_flag = false;
     this->on_close_cb = connection_completion_cb;
+    this->on_close_cb_arg = handler_ref;
     this->parser_ref = DemoParser_new(
             (void*)&on_parser_new_message_complete,
             this);
@@ -339,7 +340,11 @@ static void read_error(DemoConnectionRef cref, char* msg)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
     printf("Read_error got an error this is the message: %s  fd: %d\n", msg, cref->asio_stream_ref->fd);
     cref->read_state = READ_STATE_STOP;
+    RunloopRef rl = asio_stream_get_runloop(cref->asio_stream_ref);
+    postable_cleanup(rl, cref);
+#if 0
     post_to_runloop(cref, &postable_cleanup);
+#endif
 }
 /////////////////////////////////////////////////////////////////////////////////////
 // end of error functions
@@ -366,6 +371,7 @@ static void postable_cleanup(RunloopRef runloop, void* arg_cref)
 // process request - DEPRECATED ... I think. Look in demohandler.c for
 // these functions.
 /////////////////////////////////////////////////////////////////////////////////////
+#if 0
 static DemoMessageRef reply_invalid_request(DemoConnectionRef cref, const char* error_message)
 {
     RBL_CHECK_TAG(DemoConnection_TAG, cref)
@@ -392,3 +398,4 @@ static DemoMessageRef process_request(DemoConnectionRef cref, DemoMessageRef req
     BufferChain_append_bufferchain(bc, request_body);
     demo_message_set_body(reply, bc);
 }
+#endif

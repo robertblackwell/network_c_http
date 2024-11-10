@@ -3,8 +3,6 @@
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/common/list.h>
 #include <http_in_c/common/iobuffer.h>
-#include <http_in_c/demo_protocol/demo_server.h>
-//#include <http_in_c/demo_protocol/demo_handler.h>
 #include <http_in_c/demo_protocol/demo_parser.h>
 #include <rbl/check_tag.h>
 

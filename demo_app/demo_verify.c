@@ -6,14 +6,25 @@
 #include <sys/time.h>
 #include <math.h>
 
-#define NBR_CONCURRENT 1
-#define NBR_PER_THREAD 10
+#define NBR_PROCCES 1
+#define NBR_THREADS 4
+#define NBR_CONNECTIONS_PER_THREAD 3
+#define NBR_ROUNDTRIPS_PER_CONNECTION 30
+#define MAX_ROUNDTRIPS_PER_THREAD (NBR_CONNECTIONS_PER_THREAD * NBR_ROUNDTRIPS_PER_CONNECTION)
+#define MAX_RESPONSE_TIMES (NBR_THREADS * MAX_ROUNDTRIPS_PER_THREAD)
+
+long nbr_round_trips_per_thread = NBR_CONNECTIONS_PER_THREAD * NBR_ROUNDTRIPS_PER_CONNECTION;
+long nbr_round_trips = NBR_THREADS * MAX_ROUNDTRIPS_PER_THREAD;
+
 
 typedef struct ThreadContext {
     /**
      * How many round trips in this experiment
      */
-    int howmany;
+    int max_rountrips_per_connection;
+    int rountrips_count;
+
+    int max_connections_per_thread;
     /**
      * Unique identifier for this thread
      */
@@ -21,21 +32,30 @@ typedef struct ThreadContext {
     /**
      * count of roundtrips completed
      */
-    int counter;
+    int roundtrip_per_connection_counter;
+    int total_roundtrips;
+    /**
+     * Total time for this thread
+     */
     double total_time;
-    double resp_times[NBR_PER_THREAD];
+    /**
+     * response time for each round trip executed by this thread
+     */
+    double resp_times[MAX_ROUNDTRIPS_PER_THREAD];
     /**
      * The most recent unique id string generated for round trip
      */
     char uid[100];
 }ThreadContext;
 
-ThreadContext* Ctx_new(int id)
+ThreadContext* Ctx_new(int id, int max_roundtrips, int max_connections_per_thread, int max_threads)
 {
     ThreadContext* ctx = malloc(sizeof(ThreadContext));
-    ctx->howmany = NBR_PER_THREAD;
+    ctx->max_rountrips_per_connection = max_roundtrips;
+    ctx->max_connections_per_thread = max_connections_per_thread;
     ctx->ident = id;
-    ctx->counter = 0;
+    ctx->roundtrip_per_connection_counter = 0;
+    ctx->total_roundtrips = 0;
 }
 /**
  * Create a request message with target = /echo, an Echo_id header, empty body
@@ -48,7 +68,7 @@ DemoMessageRef mk_request(ThreadContext* ctx)
     demo_message_set_is_request(request, true);
     BufferChainRef body = BufferChain_new();
     char buf[100];
-    sprintf(buf, "%d %d 1234567890", ctx->ident, ctx->counter);
+    sprintf(buf, "%d %d 1234567890", ctx->ident, ctx->roundtrip_per_connection_counter);
     BufferChain_append_cstr(body, buf);
     demo_message_set_body(request, body);
     return request;
@@ -56,7 +76,7 @@ DemoMessageRef mk_request(ThreadContext* ctx)
 
 void Ctx_mk_uid(ThreadContext* ctx)
 {
-    sprintf(ctx->uid, "%d:%d", ctx->ident, ctx->counter);
+    sprintf(ctx->uid, "%d:%d", ctx->ident, ctx->roundtrip_per_connection_counter);
 }
 
 /**
@@ -91,75 +111,95 @@ struct timeval get_time()
 }
 double time_diff_ms(struct timeval t1, struct timeval t2)
 {
-    double dif = (t1.tv_sec - t2.tv_sec) + (t1.tv_usec - t2.tv_usec) * 1e-6;
+    double dif = (double )(t1.tv_sec - t2.tv_sec) + (double)(t1.tv_usec - t2.tv_usec) * 1e-6;
     return dif;
 }
 void* threadfn(void* data)
 {
     ThreadContext* ctx = (ThreadContext*)data;
     struct timeval start_time = get_time();
-    for(int i = 0; i < ctx->howmany; i++) {
+    for(int i = 0; i < ctx->max_connections_per_thread; i++) {
         struct timeval iter_start_time = get_time();
-        DemoMessageRef response;
         DemoClientRef client = democlient_new();
         democlient_connect(client, "localhost", 9011);
-        Ctx_mk_uid(ctx);
-        DemoMessageRef request = mk_request(ctx);
-        IOBufferRef serialized = demo_message_serialize(request);
-        const char* req_buffer[] = {
-            IOBuffer_cstr(serialized), NULL
-        };
+        ctx->roundtrip_per_connection_counter = 0;
+        while(1) {
+            Ctx_mk_uid(ctx);
+            DemoMessageRef request = mk_request(ctx);
+            DemoMessageRef response = NULL;
+            int rc1 = democlient_write_message(client, request);
+            if (rc1 != 0) break;
+            int rc2 = democlient_read_message(client, &response);
+            if (rc2 != 0) break;
+            IOBufferRef iob_req = demo_message_serialize(request);
+            IOBufferRef iob_resp = demo_message_serialize(response);
+            if (!verify_response(ctx, request, response)) {
+                printf("Verify response failed");
+            }
+            struct timeval iter_end_time = get_time();
+            ctx->resp_times[ctx->total_roundtrips] =  time_diff_ms(iter_end_time, iter_start_time);
+            ctx->roundtrip_per_connection_counter++;
+            ctx->total_roundtrips++;
+            if(ctx->roundtrip_per_connection_counter >= ctx->max_rountrips_per_connection) {
+                break;
+            }
+            demo_message_dispose(&request);
+            if(response != NULL)
+                demo_message_dispose(&response);
 
-        democlient_roundtrip(client, req_buffer,  &response);
-        IOBufferRef iob = demo_message_serialize(response);
-
-        if(! verify_response(ctx, request, response)) {
-            printf("Verify response failed");
         }
-        ctx->counter++;
-        IOBuffer_destroy(serialized);
-        demo_message_dispose(&request);
-        demo_message_dispose(&response);
         democlient_dispose(&client);
-        struct timeval iter_end_time = get_time();
-        ctx->resp_times[i] =  time_diff_ms(iter_end_time, iter_start_time);
     }
     struct timeval end_time = get_time();
     ctx->total_time =  time_diff_ms(end_time, start_time);
+    return NULL;
 }
-
-void combine_response_times(double all[NBR_PER_THREAD*NBR_CONCURRENT], double rt[NBR_PER_THREAD], int thrd_ix)
+/**
+ * Append the response times from a single thread onto the array of all response
+ * times.
+ */
+void append_thread_response_times(double all[MAX_RESPONSE_TIMES], const double thread_response_times[MAX_ROUNDTRIPS_PER_THREAD], int thread_ix)
 {
-    for(int i = 0; i < NBR_PER_THREAD; i++) {
-        double v = rt[i];
-        all[thrd_ix*NBR_PER_THREAD + i] = rt[i];
+//    printf("append_thread_response_times thread_ix: %d\n", thread_ix);
+//    for(int i = 0; i < MAX_ROUNDTRIPS_PER_THREAD;i++) {
+//        printf("i: %d rt[i]: %f\n", i, thread_response_times[i]);
+//    }
+    for(int i = 0; i < MAX_ROUNDTRIPS_PER_THREAD; i++) {
+        double v = thread_response_times[i];
+        all[(thread_ix * MAX_ROUNDTRIPS_PER_THREAD) + i] = thread_response_times[i];
+//        printf("i: %d input: %f all[i:%d]: %f\n", i, thread_response_times[i], ((thread_ix * MAX_ROUNDTRIPS_PER_THREAD) + i), all[(thread_ix * MAX_ROUNDTRIPS_PER_THREAD) + i]);
     }
+//    for(int i = 0; i < MAX_RESPONSE_TIMES; i++) {
+//        printf("i: %d all[i]: %f\n", i, all[i]);
+//    }
 }
-void stat_analyse(double all[NBR_PER_THREAD*NBR_CONCURRENT], double* average, double* stdev)
+void stat_analyse(const double all[MAX_RESPONSE_TIMES], double* average, double* stdev)
 {
     double mean = 0.0;
     double total = 0.0;
-    for(int i = 0; i < NBR_PER_THREAD*NBR_CONCURRENT; i++) {
+    for(int i = 0; i < MAX_RESPONSE_TIMES; i++) {
         double v = all[i];
         total = total+v;
     }
-    mean = total / (NBR_PER_THREAD*NBR_CONCURRENT*1.0);
-    total = 0.0;
-    for(int i = 0; i < NBR_PER_THREAD*NBR_CONCURRENT; i++) {
+    mean = total / (MAX_RESPONSE_TIMES * 1.0);
+    double std_total = 0.0;
+    for(int i = 0; i < MAX_RESPONSE_TIMES; i++) {
         double v = all[i];
-        total = total+(v-mean)*(v-mean);
+        double x = (v-mean);
+        double xx = x * x;
+        std_total = std_total + xx;
     }
-    double variance = total / (NBR_PER_THREAD*NBR_CONCURRENT*1.0);
+    double variance = std_total / (MAX_RESPONSE_TIMES * 1.0);
     double stddev = sqrt(variance);
     *average = mean;
     *stdev = stddev;
 }
 
-void analyse_response_times(double all[NBR_PER_THREAD*NBR_CONCURRENT], double buckets[10])
+void analyse_response_times(double all[MAX_RESPONSE_TIMES], double buckets[10])
 {
     double min = all[0];
     double max = 0.0;
-    for(int i = 0; i < NBR_PER_THREAD*NBR_CONCURRENT; i++) {
+    for(int i = 0; i < MAX_RESPONSE_TIMES; i++) {
         double v = all[i];
         if (min > v) min = v;
         if (max < v) max = v;
@@ -171,7 +211,7 @@ void analyse_response_times(double all[NBR_PER_THREAD*NBR_CONCURRENT], double bu
         bucket_count[b] = 0;
         bucket_lower[b] = min+b*bucket_gap;
     }
-    for(int i = 0; i <  NBR_PER_THREAD*NBR_CONCURRENT; i++) {
+    for(int i = 0; i <  MAX_RESPONSE_TIMES; i++) {
         for(int b = 0; b < 10; b++) {
             double z = min + (i*bucket_gap);
             if(all[i] >= min + i * bucket_gap) {
@@ -192,20 +232,20 @@ int main()
     int x5 = sizeof(long);
     int x6 = sizeof(long long);
 
-    double all[NBR_CONCURRENT*NBR_PER_THREAD];
+    double all[MAX_RESPONSE_TIMES];
     struct timeval main_time_start = get_time();
-    pthread_t workers[NBR_CONCURRENT];
-    ThreadContext* tctx[NBR_CONCURRENT];
-    for(int t = 0; t < NBR_CONCURRENT; t++) {
-        ThreadContext* ctx = Ctx_new(t);
+    pthread_t workers[NBR_THREADS];
+    ThreadContext* tctx[NBR_THREADS];
+    for(int t = 0; t < NBR_THREADS; t++) {
+        ThreadContext* ctx = Ctx_new(t, NBR_ROUNDTRIPS_PER_CONNECTION, NBR_CONNECTIONS_PER_THREAD, NBR_THREADS);
         tctx[t] = ctx;
         pthread_create(&(workers[t]), NULL, threadfn, (void*)ctx);
     }
     double tot_time = 0;
-    for(int t = 0; t < NBR_CONCURRENT; t++) {
+    for(int t = 0; t < NBR_THREADS; t++) {
         pthread_join(workers[t], NULL);
         tot_time = tot_time + tctx[t]->total_time;
-        combine_response_times(all, tctx[t]->resp_times, t);
+        append_thread_response_times(all, tctx[t]->resp_times, t);
     }
     int buckets[10];
     double avg;
@@ -213,10 +253,10 @@ int main()
     stat_analyse(all, &avg, &stddev);
     struct timeval main_end_time = get_time();
     double main_elapsed = time_diff_ms(main_end_time, main_time_start);
-    double av_time = main_elapsed / (NBR_CONCURRENT * 1.0);
-    printf("Total elapsed time %f  threads: %d per thread: %d\n", main_elapsed, NBR_CONCURRENT, NBR_PER_THREAD);
-    printf("Nbr threads : %d  nbr of requests per thread: %d av time %f \n", NBR_CONCURRENT, NBR_PER_THREAD, av_time);
-    printf("Response times mean: %f stddev: %f\n", avg, stddev);
+    double av_time = main_elapsed / (NBR_THREADS * 1.0);
+    printf("Total elapsed time %f  threads: %d per connections per thread: %d rountrips per connection: %d\n", tot_time, NBR_THREADS, NBR_CONNECTIONS_PER_THREAD, NBR_ROUNDTRIPS_PER_CONNECTION);
+    printf("Nbr threads : %d  nbr connections per thread: %d nbr of requests per connection: %d av time %f \n", NBR_THREADS, NBR_CONNECTIONS_PER_THREAD, NBR_ROUNDTRIPS_PER_CONNECTION, av_time);
+    printf("Response times mean: %f stddev: %f total nbr roundtrips: %d \n", avg, stddev, MAX_RESPONSE_TIMES);
 
 }
 

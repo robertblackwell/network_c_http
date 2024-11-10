@@ -22,8 +22,6 @@ set(TEST_LINK_LIBS
 	)
 set(TEST_SERVER_BASEURL "http://whiteacorn.com/utests/echo/test.php")
 add_subdirectory(test_buffers)
-add_subdirectory(test_demo/test_demo_parser) #does not build
-add_subdirectory(test_demo/test_demo_connection)
 #add_subdirectory(test_generic) #does not build
 add_subdirectory(test_generic_list)
 add_subdirectory(test_generic_stack)
@@ -46,6 +44,8 @@ add_subdirectory(test_runloop)
 add_subdirectory(test_static_list)
 #add_subdirectory(test_url) #this is superceded by test_url_parser
 add_subdirectory(test_url_parser)
+add_subdirectory(test_demo/test_demo_parser) #does not build
+add_subdirectory(test_demo/test_demo_connection)
 
 if (OFF)
 endif()

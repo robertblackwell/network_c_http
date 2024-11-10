@@ -4,8 +4,8 @@
 #include <http_in_c/runloop/rl_internal.h>
 #include <http_in_c/common/list.h>
 #include <http_in_c/common/iobuffer.h>
-#include <http_in_c/demo_protocol/demo_server.h>
 #include <http_in_c/demo_protocol/demo_connection.h>
+#include <http_in_c/demo_protocol/demo_server.h>
 
 #define DemoHandler_TAG "DmHDLR"
 #include <http_in_c/runloop/rl_checktag.h>

@@ -2,6 +2,7 @@
 #include <http_in_c/demo_protocol/demo_message.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/http/header_list.h>
+#include <rbl/logger.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -20,6 +21,7 @@
 struct DemoMessage_s
 {
     RBL_DECLARE_TAG;
+    bool            is_request;
     BufferChainRef  body;
     RBL_DECLARE_END_TAG;
 };
@@ -36,6 +38,19 @@ DemoMessageRef demo_message_new ()
 
     error_label_1:
         return NULL;
+}
+static char get_body_first_char(DemoMessageRef msg_ref)
+{
+    assert(BufferChain_size(msg_ref->body));
+    IOBufferRef iob = BufferChain_front(msg_ref->body);
+    char first_byte = (char)(*(char*)(IOBuffer_data(iob)));
+    return first_byte;
+}
+static char set_body_first_char(DemoMessageRef msg_ref, char first_byte)
+{
+    assert(BufferChain_size(msg_ref->body));
+    IOBufferRef iob = BufferChain_front(msg_ref->body);
+    (*(char*)(IOBuffer_data(iob))) = first_byte;
 }
 /**
  * @brief Create a new request message instance
@@ -83,9 +98,11 @@ IOBufferRef demo_message_serialize(DemoMessageRef mref)
     RBL_CHECK_TAG(DemoMessage_TAG, mref);
     RBL_CHECK_END_TAG(DemoMessage_TAG, mref);
     BufferChainRef bc = BufferChain_new();
+    char* start_str = "\02";
+    char* end_str = "\03";
+    BufferChain_append(bc, (void*)start_str, 1);
     BufferChain_append_bufferchain(bc, mref->body);
-    char* end_str = "\03L\x04";
-    BufferChain_append(bc, (void*) end_str, 3);
+    BufferChain_append(bc, (void*) end_str, 1);
     IOBufferRef result = BufferChain_compact(bc);
     BufferChain_dispose(&(bc));
     return result;
@@ -94,12 +111,16 @@ bool demo_message_get_is_request(DemoMessageRef this)
 {
     RBL_CHECK_TAG(DemoMessage_TAG, this);
     RBL_CHECK_END_TAG(DemoMessage_TAG, this);
-    return true;
 }
 void demo_message_set_is_request(DemoMessageRef this, bool yn)
 {
     RBL_CHECK_TAG(DemoMessage_TAG, this);
     RBL_CHECK_END_TAG(DemoMessage_TAG, this);
+    return;
+    if(yn)
+        set_body_first_char(this, 'Q');
+    else
+        set_body_first_char(this, 'R');
 }
 void demo_message_set_content_length(DemoMessageRef this, int length)
 {
@@ -131,10 +152,8 @@ void demo_message_set_body(DemoMessageRef this, BufferChainRef bc)
     RBL_CHECK_TAG(DemoMessage_TAG, this);
     RBL_CHECK_END_TAG(DemoMessage_TAG, this);
     if(this->body != NULL) {
-        printf("demomessage_set_body existing body being ignored bc: %p  this->body: %p\n", bc, this->body);
+        RBL_LOG_FMT("demomessage_set_body existing body being ignored bc: %p  this->body: %p", bc, this->body);
         BufferChain_dispose(&(this->body));
-//        BufferChain_free(this->body);
-//        this->body = NULL;
     }
     this->body = bc;
 }

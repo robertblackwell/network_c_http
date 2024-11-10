@@ -115,6 +115,7 @@ void* thread_function(void* arg)
     async_socket_listen(ctx->server_ptr->listening_socket_fd);
     runloop_run(ctx->server_ptr->reactor_ref, -1 /* infinite*/);
     AsyncServer_dispose(&ctx->server_ptr);
+    return NULL;
 }
 void sig_handler(int signo)
 {
