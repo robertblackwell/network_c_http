@@ -22,7 +22,7 @@ long nbr_round_trips = nbr_threads * MAX_ROUNDTRIPS_PER_THREAD;
 #endif
 void* threadfn(void* data);
 
-int main()
+int main(int argc, char* argv[])
 {
     int x1 = sizeof(char);
     int x2 = sizeof(char*);
@@ -33,20 +33,35 @@ int main()
 //    double all[MAX_RESPONSE_TIMES];
 
     struct timeval main_time_start = get_time();
-
+    char* host_buf = malloc(200);
+    strcpy(host_buf, "127.0.0.1");
+    int port = 9011;
     int nbr_threads = NBR_THREADS;
     int nbr_connections_per_thread = NBR_CONNECTIONS_PER_THREAD;
-    int nbr_roundtriips_per_connection = NBR_ROUNDTRIPS_PER_CONNECTION;
-    int total_nbr_roundtrips = nbr_threads * nbr_connections_per_thread * nbr_roundtriips_per_connection;
+    int nbr_roundtrips_per_connection = NBR_ROUNDTRIPS_PER_CONNECTION;
+    int total_nbr_roundtrips = nbr_threads * nbr_connections_per_thread * nbr_roundtrips_per_connection;
     pthread_t workers[nbr_threads];
     ThreadContext* tctx[nbr_threads];
-
+    /**
+     * get run parameters
+     */
+    verify_process_args(argc, argv,
+                        &host_buf, &port,
+                        &nbr_roundtrips_per_connection,
+                        &nbr_connections_per_thread,
+                        &nbr_threads);
+    /**
+     * run the test threads
+     */
     for(int t = 0; t < nbr_threads; t++) {
-        ThreadContext* ctx = Ctx_new(t, nbr_roundtriips_per_connection, nbr_connections_per_thread, nbr_threads);
+        ThreadContext* ctx = Ctx_new(t, nbr_roundtrips_per_connection, nbr_connections_per_thread, nbr_threads);
         tctx[t] = ctx;
         pthread_create(&(workers[t]), NULL, threadfn, (void*)ctx);
     }
     double tot_time = 0;
+    /**
+     * Consolidate the results from each thread
+     */
     ResponseTimesArrayRef all_readings = rta_new(total_nbr_roundtrips);
     for(int t = 0; t < nbr_threads; t++) {
         pthread_join(workers[t], NULL);
@@ -56,6 +71,9 @@ int main()
 //        tot_time = tot_time + tctx[t]->total_time;
 //        append_thread_response_times(all, tctx[t]->resp_times, t);
     }
+    /**
+     * Analyse the results
+     */
     int buckets[10];
     double avg;
     double stddev;
@@ -64,8 +82,8 @@ int main()
     struct timeval main_end_time = get_time();
     double main_elapsed = time_diff_ms(main_end_time, main_time_start);
     double av_time = main_elapsed / (nbr_threads * 1.0);
-    printf("Total elapsed time %f  threads: %d per connections per thread: %d rountrips per connection: %d\n", tot_time, nbr_threads, nbr_connections_per_thread, nbr_roundtriips_per_connection);
-    printf("Nbr threads : %d  nbr connections per thread: %d nbr of requests per connection: %d av time %f \n", nbr_threads, nbr_connections_per_thread, nbr_roundtriips_per_connection, av_time);
+    printf("Total elapsed time %f  threads: %d per connections per thread: %d rountrips per connection: %d\n", tot_time, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection);
+    printf("Nbr threads : %d  nbr connections per thread: %d nbr of requests per connection: %d av time %f \n", nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection, av_time);
     printf("Response times mean: %f stddev: %f total nbr roundtrips: %d \n", avg, stddev, total_roundtrips);
 }
 void* threadfn(void* data)
