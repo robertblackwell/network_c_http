@@ -28,7 +28,7 @@
 #include <rbl/check_tag.h>
 
 #define DYN_RESP_TIMES
-typedef struct thread_context_s {
+typedef struct ThreadContext_s {
     RBL_DECLARE_TAG;
     int port;
     size_t read_buffer_size;

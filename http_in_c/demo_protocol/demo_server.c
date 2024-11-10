@@ -100,7 +100,7 @@ void DemoServer_listen(DemoServerRef sref)
     RBL_CHECK_END_TAG(DemoServer_TAG, sref)
     ASSERT_NOT_NULL(sref)
     pid_t tid = gettid();
-    printf("demo_server_listen sref: %p tid: %d\n", sref, tid);
+//    printf("demo_server_listen sref: %p tid: %d\n", sref, tid);
     int port = sref->port;
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
@@ -121,7 +121,7 @@ void DemoServer_terminate(DemoServerRef this)
 void on_event_listening(RunloopRef rl, void* arg_server_ref) // RunloopListenerRef listener_watcher_ref, uint64_t event)
 {
 
-    printf("listening_hander \n");
+//    printf("listening_hander \n");
     DemoServerRef server_ref = arg_server_ref; //listener_watcher_ref->listen_postable_arg;
     RBL_CHECK_TAG(DemoServer_TAG, server_ref)
     RBL_CHECK_END_TAG(DemoServer_TAG, server_ref)

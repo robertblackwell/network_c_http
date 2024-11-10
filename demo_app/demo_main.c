@@ -4,7 +4,10 @@
 #include <rbl/logger.h>
 #include <stdio.h>
 #include <mcheck.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #include<signal.h>
+#include "demo_process_main.h"
 
 static void usage();
 static void process_args(int argc, char* argv[], int* port, int* t, int* n);
@@ -20,21 +23,7 @@ void sig_handler(int signo)
         exit(0);
     }
 }
-#define MAX_NUMBER_THREADS 5
-typedef struct thread_context_s {
-    int             ident;
-    pthread_t       thread;
-    int             port;
-    const char*     host;
-    int             listening_socket;
-    void*           return_value;
-    DemoServerRef   server_ref;
-} thread_context_t;
-
-static thread_context_t thread_table[MAX_NUMBER_THREADS];
-
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     if (signal(SIGINT, sig_handler) == SIG_ERR) {
         printf("sync_app.c main signal() failed");
     }
@@ -43,40 +32,22 @@ int main(int argc, char** argv)
     }
     //printf("Hello this is xr-junk main \n");
     int port = 9011;
-    int t = 2;
-    int n;
-    char* host = "127.0.0.1";
+    char *host = "127.0.0.1";
+    int nbr_threads = 2;
+    int nbr_processes = 3;
+    int nbr_connections_per_thread = 2;
+    int nbr_roundtrips_per_connection = 2;
 //    process_args(argc, argv, &port, &t, &n);
 //    g_sref = sref;
-    int number_threads = t;
-//    int listening_socket_fd = create_listener_socket(port, host);
-    for(int i = 0; i < number_threads; i++) {
-        thread_context_t* ctx = &(thread_table[i]);
-        ctx->ident = i;
-        ctx->port = port;
-        ctx->host = host;
-//        ctx->listening_socket = listening_socket_fd;
-//        ctx->server_ref = DemoServer_new(port, host, listening_socket_fd, NULL);
-        pthread_create(&(ctx->thread), NULL, thread_function, ctx);
+    int child_pid;
+    for (int p = 0; p < nbr_processes; p++) {
+        if ((child_pid = fork()) == 0) {
+            demo_process_main(host, port, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection);
+            exit(0);
+        }
     }
-    for(int i = 0; i < number_threads; i++) {
-        thread_context_t* ctx = &(thread_table[i]);
-        pthread_join(ctx->thread, (void**)&(ctx->return_value));
-    }
+    while (wait(NULL) > 0);
 }
-void* thread_function(void* arg)
-{
-    thread_context_t* ctx = arg;
-    RBL_LOG_FMT("thread function ident: %d pthread_t: %lu listening_socket: %d", ctx->ident, ctx->thread, ctx->listening_socket)
-    int listening_socket_fd = create_listener_socket(ctx->port, ctx->host);
-    ctx->server_ref = DemoServer_new(ctx->port, ctx->host, listening_socket_fd, NULL);
-    g_sref = ctx->server_ref;
-    DemoServer_listen(ctx->server_ref);
-    runloop_run(ctx->server_ref->runloop_ref, -1 /* infinite*/);
-    DemoServer_dispose(&ctx->server_ref);
-    return NULL;
-}
-
 static void usage()
 {
     printf("Name: demo_server\n");

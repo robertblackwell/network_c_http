@@ -1,5 +1,6 @@
 add_executable(demo_app
 	demo_main.c
+	demo_process_main.c
 )
 
 target_include_directories(demo_app

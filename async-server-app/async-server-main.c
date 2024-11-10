@@ -19,7 +19,7 @@ AsyncServerRef g_sref;
  * Top level structure for keeping track of thread specific structures.
  * TODO: reduce the use of malloc()
  */
-typedef struct thread_context_s {
+typedef struct ThreadContext_s {
     int             ident;
     pthread_t       thread;
     int             port;
