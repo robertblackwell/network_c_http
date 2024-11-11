@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <string.h>
 #include "verify_getopt.h"
-#include <rbl/logger.h>
+//#include <rbl/logger.h>
 
 void verify_usage()
 {
@@ -50,27 +50,27 @@ void verify_process_args(int argc, char* argv[], char** host_ip_p, int* port, in
 //        printf("c = %c\n", (char)c);
         switch (c) {
             case 'n':
-                RBL_LOG_FMT("-t options %s", optarg);
+//                RBL_LOG_FMT("-t options %s", optarg);
                 nbr_processes = atoi(optarg);
                 break;
             case 't':
-                RBL_LOG_FMT("-t options %s", optarg);
+//                RBL_LOG_FMT("-t options %s", optarg);
                 nbr_threads = atoi(optarg);
                 break;
             case 'r':
-                RBL_LOG_FMT("-r options %s", optarg);
+//                RBL_LOG_FMT("-r options %s", optarg);
                 nbr_roundtrips_per_connection = atoi(optarg);
                 break;
             case 'c':
-                RBL_LOG_FMT("-c options %s", optarg);
+//                RBL_LOG_FMT("-c options %s", optarg);
                 nbr_connections_per_thread = atoi(optarg);
                 break;
             case 'p':
-                RBL_LOG_FMT("-p options %s", optarg);
+//                RBL_LOG_FMT("-p options %s", optarg);
                 port_number = atoi(optarg);
                 break;
             case 'h':
-                RBL_LOG_FMT("-h options %s", optarg);
+//                RBL_LOG_FMT("-h options %s", optarg);
                 int len = (int)strlen(optarg);
                 host_ptr = malloc(len+1);
                 strcpy(host_ptr, optarg);

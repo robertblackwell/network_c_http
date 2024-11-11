@@ -10,10 +10,7 @@ struct ResponseTimesArray_s {
     int size_in_doubles;
     int next_index;
     double total_elapsed_time;
-    union {
-        double* readings_ptr;
-        double  readings[];
-    };
+    double* readings_ptr;
 };
 ResponseTimesArrayRef rta_new(int size_in_doubles)
 {
@@ -37,7 +34,7 @@ void rta_add(ResponseTimesArrayRef this, double value)
     if(this->next_index + 1 >= this->size_in_doubles) {
         rta_expand(this, this->size_in_doubles * 2);
     }
-    this->readings[this->next_index] = value;
+    this->readings_ptr[this->next_index] = value;
     this->next_index++;
 }
 void rta_append(ResponseTimesArrayRef dest, ResponseTimesArrayRef src)
@@ -46,14 +43,14 @@ void rta_append(ResponseTimesArrayRef dest, ResponseTimesArrayRef src)
         rta_expand(dest, dest->next_index + src->next_index);
     }
     for(int i = 0; i < src->next_index; i++) {
-        dest->readings[dest->next_index] = src->readings_ptr[i];
+        dest->readings_ptr[dest->next_index] = src->readings_ptr[i];
         dest->next_index++;
     }
 }
 double rta_at_index(ResponseTimesArrayRef this, int index)
 {
     assert(index < this->next_index);
-    return this->readings[index];
+    return this->readings_ptr[index];
 }
 double rta_get_elapsed_time(ResponseTimesArrayRef this)
 {
@@ -63,9 +60,28 @@ void rta_set_elapsed_time(ResponseTimesArrayRef this, double elapsed_time)
 {
     this->total_elapsed_time = elapsed_time;
 }
-void rta_stat_analyse(ResponseTimesArrayRef all, double* average, double* stddev)
+void rta_stat_analyse(ResponseTimesArrayRef all, double* average_p, double* stddev_p, int* total_nbr_roundtrips)
 {
-
+    double mean = 0.0;
+    double total = 0.0;
+    int nbr_response_times = rta_length(all);
+    for(int i = 0; i < nbr_response_times; i++) {
+        double v = rta_at_index(all, i);
+        total = total+v;
+    }
+    mean = total / (nbr_response_times * 1.0);
+    double std_total = 0.0;
+    for(int i = 0; i < nbr_response_times; i++) {
+        double v = rta_at_index(all, i);
+        double x = (v-mean);
+        double xx = x * x;
+        std_total = std_total + xx;
+    }
+    double variance = std_total / (nbr_response_times * 1.0);
+    double stddev = sqrt(variance);
+    *average_p = mean;
+    *stddev_p = stddev;
+    *total_nbr_roundtrips = nbr_response_times;
 }
 
 struct timeval get_time()

@@ -16,9 +16,6 @@
 #define MAX_ROUNDTRIPS_PER_THREAD (NBR_CONNECTIONS_PER_THREAD * NBR_ROUNDTRIPS_PER_CONNECTION)
 #define MAX_RESPONSE_TIMES (NBR_THREADS * MAX_ROUNDTRIPS_PER_THREAD)
 
-long nbr_round_trips_per_thread = NBR_CONNECTIONS_PER_THREAD * NBR_ROUNDTRIPS_PER_CONNECTION;
-long nbr_round_trips = NBR_THREADS * MAX_ROUNDTRIPS_PER_THREAD;
-
 typedef struct ResponseTimesArray_s ResponseTimesArray, *ResponseTimesArrayRef;
 
 ResponseTimesArrayRef rta_new(int size_in_doubles);
