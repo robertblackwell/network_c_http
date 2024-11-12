@@ -29,11 +29,11 @@ struct ThreadContext_s {
     /**
      * Total time for this thread
      */
-    double total_time;
+//    double total_time;
     /**
      * response time for each round trip executed by this thread
      */
-    double resp_times[MAX_ROUNDTRIPS_PER_THREAD];
+//    double resp_times[MAX_ROUNDTRIPS_PER_THREAD];
 
     /**
      * The most recent unique id string generated for round trip

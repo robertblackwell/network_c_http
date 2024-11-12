@@ -9,6 +9,14 @@
 #include "verify_statistics.h"
 #include "verify_thread_context.h"
 
+
+#define NBR_PROCCES 1
+#define NBR_THREADS 8
+#define NBR_CONNECTIONS_PER_THREAD 3
+#define NBR_ROUNDTRIPS_PER_CONNECTION 30
+#define MAX_ROUNDTRIPS_PER_THREAD (NBR_CONNECTIONS_PER_THREAD * NBR_ROUNDTRIPS_PER_CONNECTION)
+#define MAX_RESPONSE_TIMES (NBR_THREADS * MAX_ROUNDTRIPS_PER_THREAD)
+
 #if 0
 #define NBR_PROCCES 1
 #define nbr_threads 8

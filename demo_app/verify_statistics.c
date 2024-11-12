@@ -97,7 +97,7 @@ double time_diff_ms(struct timeval t1, struct timeval t2)
     double dif = (double )(t1.tv_sec - t2.tv_sec) + (double)(t1.tv_usec - t2.tv_usec) * 1e-6;
     return dif;
 }
-
+#if 0
 /**
  * Append the response times from a single thread onto the array of all response
  * times.
@@ -166,3 +166,4 @@ void analyse_response_times(double all[MAX_RESPONSE_TIMES], double buckets[10])
     }
     printf("Hello");
 }
+#endif
