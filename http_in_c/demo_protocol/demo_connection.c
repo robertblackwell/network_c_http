@@ -98,7 +98,7 @@ void democonnection_free(DemoConnectionRef this)
     close(fd);
     asio_stream_free(this->asio_stream_ref);
     this->asio_stream_ref = NULL;
-    DemoParser_dispose(&(this->parser_ref));
+    DemoParser_free(this->parser_ref);
     if(this->active_output_buffer_ref) {
         IOBuffer_free(this->active_output_buffer_ref);
         this->active_output_buffer_ref = NULL;

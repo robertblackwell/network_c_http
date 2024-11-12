@@ -105,10 +105,8 @@ int        runloop_register(RunloopRef athis, int fd, uint32_t interest, Runloop
 int        runloop_deregister(RunloopRef athis, int fd);
 int        runloop_reregister(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherRef wref);
 int        runloop_run(RunloopRef athis, time_t timeout);
-int        runloop_post(RunloopRef athis, PostableFunction cb, void* arg);
-void       runloop_interthread_post(RunloopRef athis, PostableFunction cb, void* arg);
+void        runloop_post(RunloopRef athis, PostableFunction cb, void* arg);
 void       runloop_delete(RunloopRef athis, int fd);
-void       runloop_enable_interthread_queue(RunloopRef runloop_ref);
 void       runloop_verify(RunloopRef r);
 
 RunloopRef Watcher_get_reactor(RunloopWatcherRef athis);
@@ -172,7 +170,6 @@ void runloop_stream_deregister(RunloopStreamRef athis);
 void runloop_stream_arm_both(RunloopStreamRef athis,
                              PostableFunction read_postable_cb, void* read_arg,
                              PostableFunction write_postable_cb, void* write_arg);
-
 void runloop_stream_arm_read(RunloopStreamRef athis, PostableFunction postable_callback, void* arg);
 void runloop_stream_arm_write(RunloopStreamRef athis, PostableFunction postable_callback, void* arg);
 void runloop_stream_disarm_read(RunloopStreamRef athis);
@@ -191,7 +188,6 @@ AsioStreamRef asio_stream_new(RunloopRef runloop_ref, int socket);
 void asio_stream_init(AsioStreamRef this, RunloopRef runloop_ref, int fd);
 void asio_stream_free(AsioStreamRef this);
 void asio_stream_destroy(AsioStreamRef cref);
-void asio_stream_amonymous_dispose(void* p);
 void asio_stream_read(AsioStreamRef stream_ref, void* buffer, long max_length, AsioReadcallback cb, void*  arg);
 void asio_stream_write(AsioStreamRef stream_ref, void* buffer, long length, AsioWritecallback cb, void*  arg);
 void asio_stream_close(AsioStreamRef cref);
@@ -237,7 +233,7 @@ Functor runloop_eventfd_queue_remove(EventfdQueueRef athis);
  * a new entry is added to the queue by the same or a different thread.
  */
 RunloopQueueWatcherRef runloop_queue_watcher_new(RunloopRef runloop, EventfdQueueRef qref);
-void runloop_queue_watcher_dispose(RunloopQueueWatcherRef* athis);
+void runloop_queue_watcher_free(RunloopQueueWatcherRef this);
 void runloop_queue_watcher_register(RunloopQueueWatcherRef athis, PostableFunction postable_cb, void* postable_arg);
 void runloop_queue_watcher_change_watch(RunloopQueueWatcherRef athis, PostableFunction postable_cb, void* arg, uint64_t watch_what);
 void runloop_queue_watcher_deregister(RunloopQueueWatcherRef athis);
@@ -256,19 +252,9 @@ int runloop_queue_watcher_get_fd(RunloopQueueWatcherRef this);
  *
  */
 InterthreadQueueRef itqueue_new(RunloopRef rl);
+void itqueue_free(InterthreadQueueRef this);
 void itqueue_add(InterthreadQueueRef qref, Functor func);
 Functor itqueue_remove(InterthreadQueueRef qref);
-
-//RunloopInterthreadQueueRef runloop_interthread_queue_new(RunloopRef runloop_ref);
-//void runloop_interthread_queue_init(RunloopInterthreadQueueRef this, RunloopRef runloop);
-//void runloop_interthread_queue_dispose(RunloopInterthreadQueueRef this);
-//void runloop_interthread_queue_add(RunloopInterthreadQueueRef this, void* item);
-//void runloop_interthread_queue_drain(RunloopInterthreadQueueRef this, void(*draincb)(void*));
-//void runloop_interthread_queue_register(RunloopInterthreadQueueRef this, InterthreadQueueEventHandler evhandler, void* arg, uint64_t watch_what);
-//void runloop_interthreaD_queue_deregister(RunloopInterthreadQueueRef this);
-//RunloopRef runloop_interthread_queue_get_reactor(RunloopInterthreadQueueRef athis);
-//int runloop_interthread_queue_get_fd(RunloopInterthreadQueueRef athis);
-//void runloop_interthread_queue_verify(RunloopInterthreadQueueRef this);
 
 
 #endif

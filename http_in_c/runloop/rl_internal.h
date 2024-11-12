@@ -36,9 +36,6 @@ int        FdTable_iterator(FdTableRef athis);
 int        FdTable_next_iterator(FdTableRef athis, int iter);
 uint64_t   FdTable_size(FdTableRef athis);
 
-typedef ListRef RunListRef;
-typedef ListIter RunListIter;
-
 /**
  * A Functor is a generic callback - a function pointer (of type PostableFunction) and single anonymous argument.
  *
@@ -60,30 +57,6 @@ struct Functor_s
     PostableFunction f;
     void *arg;
 };
-
-/**
- * runlist - is a list of Functors - these are functors that are ready to run.
- * Use should be confined to a single thread as there is no synchronization.
- * Intended to be used within a Runloop or Runloop
- */
-RunListRef RunList_new();
-//======================
-
-void RunList_dispose();
-void RunList_add_back(RunListRef this, FunctorRef f);
-FunctorRef RunList_remove_front(RunListRef this);
-int RunList_size (RunListRef rl_ref);
-FunctorRef  RunList_first (RunListRef rl_ref);
-FunctorRef  RunList_last (RunListRef rl_ref);
-FunctorRef  RunList_remove_first (RunListRef rl_ref);
-FunctorRef  RunList_remove_last (RunListRef rl_ref);
-FunctorRef  RunList_itr_unpack (RunListRef rl_ref, RunListIter iter);
-RunListIter RunList_iterator (RunListRef rl_ref);
-RunListIter RunList_itr_next (RunListRef rl_ref, RunListIter iter);
-void RunList_itr_remove (RunListRef rl_ref, RunListIter *iter);
-
-typedef struct InterthreadRunList_s InterthreadRunList, *InterthreadRunListRef;
-
 typedef struct FunctorList_s {
 //    char       tag[RBL_TAG_LENGTH];
     RBL_DECLARE_TAG;
@@ -117,12 +90,6 @@ struct Runloop_s {
     pid_t                   tid;
     FdTableRef              table; // (int, CallbackData)
     FunctorListRef          ready_list;
-#if 1
-    EventfdQueueRef         interthread_queue_ref;
-    RunloopQueueWatcherRef  interthread_queue_watcher_ref;
-#else
-    RunloopInterthreadQueueRef interthread_queue;
-#endif
     RBL_DECLARE_END_TAG;
 };
 /**

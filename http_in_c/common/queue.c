@@ -97,8 +97,8 @@ QueueRef Queue_new()
     pthread_cond_init(&(q->not_empty_cv), NULL);
     pthread_cond_init(&(q->not_full_cv), NULL);
     return q;
-}    
-void Queue_dispose(QueueRef* qref_ptr)
+}
+void Queue_xxdispose(QueueRef* qref_ptr)
 {
     QueueRef qref = * qref_ptr;
     pthread_cond_destroy(&(qref->not_full_cv));
@@ -107,7 +107,14 @@ void Queue_dispose(QueueRef* qref_ptr)
     free((void*)qref);
     *qref_ptr = NULL;
 }
-    
+void Queue_free(QueueRef qref)
+{
+    pthread_cond_destroy(&(qref->not_full_cv));
+    pthread_cond_destroy(&(qref->not_empty_cv));
+    pthread_mutex_destroy(&(qref->queue_mutex));
+    free(qref);
+}
+
 SocketFD Queue_remove(QueueRef qref)
 {
     pthread_mutex_lock(&(qref->queue_mutex));

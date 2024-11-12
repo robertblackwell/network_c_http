@@ -17,6 +17,7 @@ New set of priorities Nov 2024:
       ☐ -- List_itr_remove  is one such example. Need to review all list functions and their calls to make this clean
       ☐ should review all List_new() calls to be sure we know which lists are free()ing their content objects
       ☐ with a view to removing this option
+    ☐ httpmessage does not correctly free the elements of the HDRList_free does not correc 
 
 This project is out of control:
   ☐ Too many things happening

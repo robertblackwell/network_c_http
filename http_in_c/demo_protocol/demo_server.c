@@ -81,7 +81,7 @@ void DemoServer_free(DemoServerRef this)
     close(this->listening_socket_fd);
     // I own the handler list and it should be empty
     assert(List_size(this->handler_list) ==0);
-    List_dispose(&(this->handler_list));
+    List_free(this->handler_list);
     free(this);
 
 }

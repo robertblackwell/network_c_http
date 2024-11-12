@@ -80,7 +80,6 @@ DemoParserRef DemoParser_new(
          * to have while it decides what to do with the new message.
          */
         void* on_new_message_ctx);
-void DemoParser_dispose(DemoParserRef* parser_p);
 void DemoParser_free(DemoParserRef this);
 
 void DemoParser_consume(DemoParserRef parser, IOBufferRef iobuffer_ref);

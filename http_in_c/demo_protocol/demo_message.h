@@ -12,8 +12,6 @@ DemoMessageRef demo_message_new();
 DemoMessageRef demo_message_new_request();
 DemoMessageRef demo_message_new_response();
 void demo_message_free(DemoMessageRef p);
-void demo_message_dispose(DemoMessageRef* p);
-void demo_message_dealloc(void* m);
 /**
  * @brief Methods to test and set whether a message is a request or response
  */

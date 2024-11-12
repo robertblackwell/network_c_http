@@ -15,12 +15,6 @@ static void handler(RunloopWatcherRef watcher, uint64_t event)
      */
     queue_watcher_ref->queue_postable(queue_watcher_ref->runloop, queue_watcher_ref->queue_postable_arg);
 }
-static void anonymous_free(RunloopWatcherRef p)
-{
-    RunloopQueueWatcherRef queue_watcher_ref = (RunloopQueueWatcherRef)p;
-    WQUEUE_CHECK_TAG(queue_watcher_ref)
-    runloop_queue_watcher_dispose(&queue_watcher_ref);
-}
 void WQueue_init(RunloopQueueWatcherRef this, RunloopRef runloop, EventfdQueueRef qref)
 {
     WQUEUE_SET_TAG(this);
@@ -28,7 +22,6 @@ void WQueue_init(RunloopQueueWatcherRef this, RunloopRef runloop, EventfdQueueRe
     this->queue = qref;
     this->fd = runloop_eventfd_queue_readfd(qref);
     this->runloop = runloop;
-    this->free = &anonymous_free;
     this->handler = &handler;
     this->context = this;
 }
@@ -38,12 +31,11 @@ RunloopQueueWatcherRef runloop_queue_watcher_new(RunloopRef runloop, EventfdQueu
     WQueue_init(this, runloop, qref);
     return this;
 }
-void runloop_queue_watcher_dispose(RunloopQueueWatcherRef* athis)
+void runloop_queue_watcher_free(RunloopQueueWatcherRef this)
 {
-    WQUEUE_CHECK_TAG(*athis)
-    close((*athis)->fd);
-    free((void*)*athis);
-    *athis = NULL;
+    WQUEUE_CHECK_TAG(this)
+    close(this->fd);
+    free(this);
 }
 void runloop_queue_watcher_register(RunloopQueueWatcherRef athis, PostableFunction postable_cb, void* postable_arg)
 {

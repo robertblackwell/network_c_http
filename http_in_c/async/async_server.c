@@ -90,7 +90,7 @@ void AsyncServer_destroy(AsyncServerRef this)
     runloop_listener_free(this->listening_watcher_ref);
     close(this->listening_socket_fd);
     runloop_free(this->reactor_ref);
-    List_dispose(&(this->handler_list));
+    List_free(this->handler_list);
     RBL_INVALIDATE_TAG(this)
     // RBL_INVALIDATE_STRUCT(this, AsyncServer)
 }
@@ -99,11 +99,6 @@ void AsyncServer_free(AsyncServerRef this)
     RBL_CHECK_TAG(AsyncServer_TAG, this)
     ASSERT_NOT_NULL(this);
     AsyncServer_destroy(this);
-//    runloop_listener_deregister(this->listening_watcher_ref);
-//    runloop_listener_free(this->listening_watcher_ref);
-//    close(this->listening_socket_fd);
-//    runloop_free(this->reactor_ref);
-//    List_dispose(&(this->handler_list));
     free(this);
 
 }

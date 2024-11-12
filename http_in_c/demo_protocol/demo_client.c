@@ -52,7 +52,7 @@ void democlient_free(DemoClientRef this)
 {
     RBL_CHECK_TAG(DemoClient_TAG, this)
     RBL_CHECK_END_TAG(DemoClient_TAG, this)
-    RBL_LOG_FMT("democlient_dispose %p  %d\n", this, this->sock);
+    RBL_LOG_FMT("democlient_free %p  %d\n", this, this->sock);
     close(this->sock);
     eg_free(this);
 }

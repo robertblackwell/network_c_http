@@ -65,8 +65,8 @@ void async_handler_destroy(AsyncHandlerRef this)
     RBL_CHECK_TAG(AsyncHandler_TAG, this)
     async_connection_free(this->async_connection_ref);
     this->async_connection_ref = NULL;
-    List_dispose(&(this->input_list));
-    List_dispose(&(this->output_list));
+    List_free(this->input_list);
+    List_free(this->output_list);
     RBL_INVALIDATE_TAG(this)
     // RBL_INVALIDATE_STRUCT(this, AsyncHandler)
 }

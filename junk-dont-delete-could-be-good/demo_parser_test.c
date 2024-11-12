@@ -79,12 +79,12 @@ int WPT_read_msg(WrappedParserTestRef this, IOBufferRef ctx, MessageRef* msgref_
                 if((bytes_read == 0) && this->m_parser->m_started && (!this->m_parser->m_message_done)) {
                     bytes_read = 0;
                 } else {
-                    Message_dispose(&(message_ptr));
+                    Message_free(message_ptr);
                     *msgref_ptr = NULL;
                     return 0;
                 }
             } else if (bytes_read < 0) {
-                Message_dispose(&(message_ptr));
+                Message_free(message_ptr);
                 *msgref_ptr = NULL;
                 return -1;
             }
@@ -107,7 +107,7 @@ int WPT_read_msg(WrappedParserTestRef this, IOBufferRef ctx, MessageRef* msgref_
                 http_parser_error_t pe = Parser_get_error(this->m_parser);
                 printf("Error details %s %s \n", pe.m_name, pe.m_description);
 //                assert(false);
-                Message_dispose(&message_ptr);
+                Message_free(message_ptr);
                 *msgref_ptr = NULL;
                 return -2;
                 break;

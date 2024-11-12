@@ -13,7 +13,7 @@ set(RUNLOOP_SOURCE_FILES
 		${CMAKE_CURRENT_SOURCE_DIR}/functor.c
 		${CMAKE_CURRENT_SOURCE_DIR}/functor_list.c
 		${CMAKE_CURRENT_SOURCE_DIR}/interthread_queue.c
-		${CMAKE_CURRENT_SOURCE_DIR}/run_list.c
+#		${CMAKE_CURRENT_SOURCE_DIR}/run_list.c
         ${CMAKE_CURRENT_SOURCE_DIR}/runloop.c
 		${CMAKE_CURRENT_SOURCE_DIR}/w_eventfd.c
 		${CMAKE_CURRENT_SOURCE_DIR}/w_listener.c

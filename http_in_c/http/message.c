@@ -80,7 +80,7 @@ MessageRef Message_new_response()
 void Message_free(MessageRef this)
 {
     RBL_CHECK_TAG(Message_TAG, this)
-    HdrList_free(this->headers);
+    HdrList_safe_free(this->headers);
     Cbuffer_free(this->target);
     Cbuffer_free(this->reason);
     eg_free(this);

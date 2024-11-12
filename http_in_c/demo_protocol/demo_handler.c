@@ -73,17 +73,11 @@ void demohandler_free(DemoHandlerRef this)
     this->demo_connection_ref = NULL;
     // dont own this->server_ref
     // dont own runloop_ref
-    assert(List_size(this->input_list) ==0);
-    assert(List_size(this->output_list) ==0);
-    List_dispose(&(this->input_list));
-    List_dispose(&(this->output_list));
+    assert(List_size(this->input_list) == 0);
+    assert(List_size(this->output_list) == 0);
+    List_free(this->input_list);
+    List_free(this->output_list);
     free(this);
-}
-void demohandler_anonymous_dispose(void** p)
-{
-    DemoHandlerRef ref = *p;
-    demohandler_free(ref);
-    *p = NULL;
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // main driver functon - keeps everything going
@@ -146,7 +140,8 @@ static void on_write_complete_cb(void* href, int status)
     RBL_CHECK_TAG(DemoHandler_TAG, handler_ref)
     RBL_CHECK_END_TAG(DemoHandler_TAG, handler_ref)
     RBL_LOG_FMT("on_write_complete_cb fd:%d  write_state:%d\n", handler_ref->demo_connection_ref->asio_stream_ref->fd, handler_ref->demo_connection_ref->write_state);
-    demo_message_dispose(&(handler_ref->active_response));
+    demo_message_free(handler_ref->active_response);
+    handler_ref->active_response = NULL;
     if(List_size(handler_ref->output_list) >= 1) {
         runloop_post(handler_ref->runloop_ref, postable_write_start, href);
     } else {

@@ -96,18 +96,7 @@ void runloop_init(RunloopRef athis) {
     RBL_LOG_FMT("runloop_new epoll_fd %d", runloop->epoll_fd);
     runloop->table = FdTable_new();
     runloop->ready_list = functor_list_new(runloop_READY_LIST_MAX);
-    runloop->interthread_queue_ref = NULL;
-    runloop->interthread_queue_watcher_ref = NULL;
 }
-//void runloop_enable_interthread_queue(RunloopRef runloop_ref)
-//{
-//    runloop_ref->interthread_queue_ref = runloop_eventfd_queue_new();
-//    runloop_ref->interthread_queue_watcher_ref = runloop_queue_watcher_new(runloop_ref,
-//                                                                           runloop_ref->interthread_queue_ref);
-//    uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
-//    runloop_queue_watcher_register(runloop_ref->interthread_queue_watcher_ref, &interthread_queue_handler,
-//                         (void *) runloop_ref->interthread_queue_ref);
-//}
 void runloop_close(RunloopRef athis)
 {
     REACTOR_CHECK_TAG(athis)
@@ -129,12 +118,6 @@ void runloop_free(RunloopRef athis)
 //    CHECK_THREAD(athis)
     if(! athis->closed_flag) {
         runloop_close(athis);
-    }
-    if(athis->interthread_queue_ref) {
-        runloop_eventfd_queue_free(athis->interthread_queue_ref);
-    }
-    if(athis->interthread_queue_watcher_ref) {
-        runloop_queue_watcher_dispose(&(athis->interthread_queue_watcher_ref));
     }
     FdTable_free(athis->table);
     functor_list_free(athis->ready_list);
@@ -278,7 +261,7 @@ cleanup:
     return result;
 }
 
-int runloop_post(RunloopRef athis, PostableFunction cb, void* arg)
+void runloop_post(RunloopRef athis, PostableFunction cb, void* arg)
 {
     REACTOR_CHECK_TAG(athis)
     assert(athis->tid == gettid());
@@ -288,15 +271,4 @@ int runloop_post(RunloopRef athis, PostableFunction cb, void* arg)
     Functor func = {.f = cb, .arg = arg};
     functor_list_add(athis->ready_list, func);
     RBL_LOG_FMT("runloop_post exited functor_list_size: %d func: %p arg: %p runloop_executing: %d", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
-}
-
-void runloop_interthread_post(RunloopRef athis, PostableFunction cb, void* arg)
-{
-    REACTOR_CHECK_TAG(athis)
-    Functor func = {.f = cb, .arg = arg};
-    runloop_eventfd_queue_add(athis->interthread_queue_ref, func);
-#if 1
-#else
-    runloop_interthread_queue_add(athis->interthread_queue, fr);
-#endif
 }

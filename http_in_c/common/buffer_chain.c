@@ -30,28 +30,10 @@ void BufferChain_free(BufferChainRef this)
         List_itr_remove(this->m_chain, &iter);
         iter = next;
     }
-    List_dispose(&(this->m_chain));
+    List_free(this->m_chain);
     free((void*)this);
 }
 
-void BufferChain_dispose(BufferChainRef* thisptr)
-{
-    BufferChainRef this = *thisptr;
-    ListIterator iter = List_iterator(this->m_chain);
-    for(;;) {
-        if(iter == NULL) {
-            break;
-        }
-        ListIterator next = List_itr_next(this->m_chain, iter);
-        IOBufferRef iob = List_itr_unpack(this->m_chain, iter);
-        IOBuffer_free(iob);
-        List_itr_remove(this->m_chain, &iter);
-        iter = next;
-    }
-    List_dispose(&(this->m_chain));
-    *thisptr = NULL;
-    free((void*)this);
-}
 void BufferChain_append(BufferChainRef this, void* buf, int len)
 {
     if (this->m_size > 0) {

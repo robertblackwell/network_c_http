@@ -80,21 +80,6 @@ void demo_message_free(DemoMessageRef this)
     this->body = NULL;
     eg_free(this);
 }
-void demo_message_dispose(DemoMessageRef* this_p)
-{
-    DEMO_MESSAGE_CHECK_TAG(*this_p)
-    DemoMessageRef this = *this_p;
-    RBL_CHECK_TAG(DemoMessage_TAG, this);
-    RBL_CHECK_END_TAG(DemoMessage_TAG, this);
-    BufferChain_free(this->body);
-    this->body = NULL;
-    eg_free(*this_p);
-    *this_p = NULL;
-}
-void demo_message_dispose_anonymous(void* p)
-{
-    demo_message_dispose((DemoMessageRef*)&p);
-}
 IOBufferRef demo_message_serialize(DemoMessageRef mref)
 {
     RBL_CHECK_TAG(DemoMessage_TAG, mref);

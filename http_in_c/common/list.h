@@ -63,7 +63,7 @@ void List_init(ListRef lref, ListItemDeallocator dealloc);
 /// void* content.
 /// But does not deallocate the memory for the list structure itself.
 ///
-void List_destroy(ListRef lref);
+void List_safe_deinit(ListRef lref, void(*free_item)(void*));
 
 ///
 /// Frees all memory associated with the list.
@@ -73,7 +73,12 @@ void List_destroy(ListRef lref);
 /// It is up to the caller to set it, AFTER THIS CALL, to what ever value
 /// is appropriate for UNDEFINED
 ///
-void List_free(ListRef lref);
+void List_safe_free(ListRef lref, void(*free_item)(void*));
+
+///
+/// Deallocates a list - will crash if the list is not empty
+/// \param this
+void List_free(ListRef this);
 ///
 /// Frees all memory associated with the list.
 ///

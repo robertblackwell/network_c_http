@@ -82,9 +82,8 @@ KVPairRef KVPair_from_cstrpair(CStrPair cstrp)
     return KVPair_from_cstrs(cstrp.key, cstrp.value);
 }
 
-void KVPair_dispose(KVPairRef* hlref_ptr)
+void KVPair_free(KVPairRef hlref)
 {
-    KVPairRef hlref = *hlref_ptr;
     eg_free(hlref->label_ptr);
     hlref->label_len = 0;
 //    hlref->label_ptr = NULL;
@@ -92,9 +91,8 @@ void KVPair_dispose(KVPairRef* hlref_ptr)
     hlref->value_len = 0;
 //    hlref->value_ptr = NULL;
     eg_free((void*) hlref);
-    *hlref_ptr = NULL;
 }
-void KVPair_dealloc(void* ptr) { KVPair_dispose((KVPairRef*)(ptr));}
+void KVPair_dealloc(void* ptr) { KVPair_free((KVPairRef)(ptr));}
 char* KVPair_label(const KVPairRef hlref)
 {
     return hlref->label_ptr;

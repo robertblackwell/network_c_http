@@ -11,24 +11,19 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-static void dealloc(void **ptr)
+static void kvp_free(void *ptr)
 {
-    KVPair_dispose((KVPairRef *) ptr);
+    KVPair_free((KVPairRef) ptr);
 }
 
 HdrListRef HdrList_new()
 {
-    return (HdrListRef) List_new(dealloc);
+    return (HdrListRef) List_new(NULL);
 }
-void HdrList_free(HdrListRef lref)
+void HdrList_safe_free(HdrListRef lref)
 {
-    List_free(lref);
+    List_safe_free(lref, kvp_free);
 }
-void HdrList_dispose(HdrListRef *lref_ptr)
-{
-    List_dispose(lref_ptr);
-}
-
 int HdrList_size(HdrListRef lref)
 {
     return List_size(lref);

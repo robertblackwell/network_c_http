@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include <rbl/unittest.h>
 #include <rbl/logger.h>
 #include <http_in_c/http/kvpair.h>
@@ -27,7 +28,7 @@ int test_kvpair_new()
     int v2b = strcmp(v2, val2);
     UT_EQUAL_INT(v2b, 0);
     // note all labels are upper case
-    KVPair_dispose(&hlref);
+    KVPair_free(hlref);
     return 0;
 }
 

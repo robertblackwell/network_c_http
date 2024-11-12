@@ -67,18 +67,9 @@ void DemoParser_free(DemoParserRef this)
     RBL_CHECK_END_TAG(DemoParser_TAG, this)
     ASSERT_NOT_NULL(this);
     if(this->m_current_message_ptr) {
-        demo_message_dispose(&(this->m_current_message_ptr));
+        demo_message_free(this->m_current_message_ptr);
     }
     free(this);
-}
-void DemoParser_dispose(DemoParserRef* this_p)
-{
-    RBL_CHECK_TAG(DemoParser_TAG, *this_p)
-    RBL_CHECK_END_TAG(DemoParser_TAG, *this_p)
-    ASSERT_NOT_NULL(*this_p);
-    DemoParser_free(*this_p);
-    *this_p = NULL;
-
 }
 DemoMessageRef DemoParser_current_message(DemoParserRef this)
 {
@@ -141,7 +132,7 @@ void DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_ref)
                 } else {
                     if(i == length - 1) {
                         RBL_LOG_FMT("DemmoParser_consume parse error \n");
-                        demo_message_dispose(&(this->m_current_message_ptr));
+                        demo_message_free(this->m_current_message_ptr);
                         this->m_current_message_ptr = demo_message_new();
                         return;
                     }

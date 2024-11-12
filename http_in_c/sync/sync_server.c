@@ -151,7 +151,7 @@ void sync_server_listen(sync_server_r server)
             sync_worker_dispose(wref);
         }
     }
-    Queue_dispose(&(server->qref));
+    Queue_free(server->qref);
     // also wait for the monitor  to complete
     
 }

@@ -63,7 +63,7 @@ void test_output_dispose(test_output_r* this_ptr)
 {
     test_output_r this = *this_ptr;
     if(this->message != NULL)
-        demo_message_dispose(&(this->message));
+        demo_message_free(this->message);
 }
 
 void parser_test_init(parser_test_t* this, const char* description, const char* lines[], verify_function_t verify_func)

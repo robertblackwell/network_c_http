@@ -17,7 +17,6 @@ struct List_s {
     int count;
     ListNode* head;
     ListNode* tail;
-    ListItemDeallocator dealloc;
 };
 
 ListNode* ListNode_new(void* content, ListNode* prev, ListNode* next)
@@ -26,18 +25,24 @@ ListNode* ListNode_new(void* content, ListNode* prev, ListNode* next)
     lnref->item = content;
     lnref->forward = next;
     lnref->backward = prev;
+    return lnref;
+}
+void ListNode_free(ListNode* this)
+{
+    free(this);
 }
 void ListNode_dispose(ListRef lref, ListNode** lnref_ptr)
 {
-    ASSERT_NOT_NULL(lref);
-    ASSERT_NOT_NULL(lnref_ptr);
-    ListNode* lnref = *lnref_ptr;
-    if(lref->dealloc != NULL) {
-        if(lnref->item != NULL)
-            lref->dealloc(&(lnref->item));
-    }
-    eg_free((void*)*lnref_ptr);
-    *lnref_ptr = NULL;
+    assert(0);
+//    ASSERT_NOT_NULL(lref);
+//    ASSERT_NOT_NULL(lnref_ptr);
+//    ListNode* lnref = *lnref_ptr;
+//    if(lref->dealloc != NULL) {
+//        if(lnref->item != NULL)
+//            lref->dealloc(&(lnref->item));
+//    }
+//    eg_free((void*)*lnref_ptr);
+//    *lnref_ptr = NULL;
 }
 
 
@@ -58,43 +63,50 @@ void List_init(ListRef lref, ListItemDeallocator dealloc)
     lref->count = 0;
     lref->head = NULL;
     lref->tail = NULL;
-    lref->dealloc = dealloc;
 }
 
 // destroy the content including freeing any dynamic memory leaving a functioning empty list
-void List_destroy(ListRef lref)
+void List_safe_deinit(ListRef this, void(*item_free)(void*))
 {
-    ASSERT_NOT_NULL(lref);
-    ListItemDeallocator dealloc = lref->dealloc;
-    ListNode* t = lref->head;
+    ASSERT_NOT_NULL(this);
+    if(this->count == 0) {
+        return;
+    }
+    assert(item_free != NULL);
+    ListNode* t = this->head;
     for(;;) {
         // how to free the contained item
         if(t == NULL) {
             break;
         }
-        if(lref->dealloc != NULL) {
-            lref->dealloc(&(t->item));
-        }
+        item_free((t->item));
         ListNode* tnext = t->forward;
-        ListNode_dispose(lref, &t);
+        ListNode_free(t);
         t = tnext;
     }
-    List_init(lref, dealloc);
+    this->count = 0;
+    this->head = NULL;
+    this->tail = NULL;
 }
 void List_free(ListRef lref)
 {
     ASSERT_NOT_NULL(lref);
-    List_destroy(lref);
+    assert(lref->count == 0);
     free(lref);
 }
-//free the entire list including invalidating the lref
-void List_dispose(ListRef* lref_ptr)
+void List_safe_free(ListRef this, void(*item_free)(void*))
 {
-    ASSERT_NOT_NULL(*lref_ptr);
-    List_destroy(*lref_ptr);
-    free((void*)*lref_ptr);
-    *lref_ptr = NULL;
+    List_safe_deinit(this, item_free);
+    List_free(this);
 }
+//free the entire list including invalidating the lref
+//void List_dispose(ListRef* lref_ptr)
+//{
+//    ASSERT_NOT_NULL(*lref_ptr);
+//    List_destroy(*lref_ptr);
+//    free((void*)*lref_ptr);
+//    *lref_ptr = NULL;
+//}
 int List_size(const ListRef lref)
 {
     return lref->count;
@@ -179,7 +191,7 @@ void* List_remove_first(ListRef lref)
         lref->count--;
         void* content = lref->head->item;
         lref->head->item = NULL;
-        ListNode_dispose(lref, &(lref->head));
+        ListNode_free(lref->head);
         lref->head = NULL; lref->tail = NULL;
         return content;
     }
@@ -190,7 +202,7 @@ void* List_remove_first(ListRef lref)
     first->forward = NULL;
     first->backward = NULL;
     first->item = NULL;
-    ListNode_dispose(lref, &first);
+    ListNode_free(first);
     lref->count--;
     return content;
 }
@@ -262,7 +274,7 @@ void List_itr_remove(ListRef lref, ListIterator* itr_ptr)
         lref->count = 0;
         lref->head = NULL;
         lref->tail = NULL;
-        ListNode_dispose(lref, itr_ptr);
+        ListNode_free(*itr_ptr);
         return;
     }
     if(lref->head == *itr_ptr) {
@@ -277,7 +289,7 @@ void List_itr_remove(ListRef lref, ListIterator* itr_ptr)
     }
     lref->count--;
 
-    ListNode_dispose(lref, itr_ptr);
+    ListNode_free(*itr_ptr);
 }
 
 // gets the value of the item held in the Node pointed at by this iterator
