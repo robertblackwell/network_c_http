@@ -75,8 +75,8 @@ void democonnection_init(
     this->active_output_buffer_ref = NULL;
     this->read_state = READ_STATE_IDLE;
     this->write_state = WRITE_STATE_IDLE;
-    this->readside_posted = false;
-    this->writeside_posted = false;
+//    this->readside_posted = false;
+//    this->writeside_posted = false;
     this->on_write_cb = NULL;
     this->on_read_cb = NULL;
     this->cleanup_done_flag = false;
@@ -196,19 +196,6 @@ static void on_read_complete(DemoConnectionRef cref, DemoMessageRef msg, int err
     cref->read_state = READ_STATE_IDLE;
     RBL_LOG_FMT("read_message_handler - on_read_cb  read_state: %d\n", cref->read_state);
     call_on_read_cb(cref, msg, error_code);
-
-//    DC_Read_CB tmp = cref->on_read_cb;
-//    void* arg = cref->on_read_cb_arg;
-//    /**
-//     * Need the on_read_cb property NULL befor going further
-//     */
-//    cref->on_read_cb = NULL;
-//    cref->on_read_cb_arg = NULL;
-//    tmp(arg, msg, error_code);
-//    /**
-//     * should either - close or throw away all input data
-//     * @TODO resolve
-//     */
 }
 static void call_on_read_cb(DemoConnectionRef cref, DemoMessageRef msg, int status)
 {
@@ -221,8 +208,6 @@ static void call_on_read_cb(DemoConnectionRef cref, DemoMessageRef msg, int stat
     cref->on_read_cb = NULL;
     cref->on_read_cb_arg = NULL;
     tmp(arg, msg, status);
-//    cref->on_write_cb(cref->on_write_cb_arg, 0);
-
 }
 /////////////////////////////////////////////////////////////////////////////////////
 // end of read sequence
@@ -248,7 +233,6 @@ void democonnection_write(
     cref->active_output_buffer_ref = demo_message_serialize(response_ref);
     if(cref->write_state == WRITE_STATE_STOP) {
         call_on_write_cb(cref, DemoConnectionErrCode_is_closed);
-//        cref->on_write_cb(href, DemoConnectionErrCode_is_closed);
         return;
     }
     post_to_runloop(cref, &postable_writer);
@@ -262,7 +246,6 @@ static void postable_writer(RunloopRef runloop_ref, void* arg)
     if(cref->write_state == WRITE_STATE_STOP) {
         IOBuffer_dispose(&(cref->active_output_buffer_ref));
         call_on_write_cb(cref, DemoConnectionErrCode_is_closed);
-//        cref->on_write_cb(cref->on_write_cb_arg, DemoConnectionErrCode_is_closed);
         return;
     }
     RBL_ASSERT((cref->active_output_buffer_ref != NULL), "post_write_handler");
@@ -281,7 +264,7 @@ static void writer_cb(void* cref_arg, long bytes_written, int status)
     RBL_ASSERT((cref->active_output_buffer_ref != NULL), "writer");
     IOBufferRef iob = cref->active_output_buffer_ref;
     RBL_ASSERT((bytes_written > 0),"should not get here is no bytes written");
-    IOBuffer_consume(iob, bytes_written);
+    IOBuffer_consume(iob, (int)bytes_written);
     if(IOBuffer_data_len(iob) > 0) {
         runloop_post(cref->runloop_ref, postable_writer, cref);
     } else {
@@ -300,8 +283,6 @@ static void postable_write_call_cb(RunloopRef runloop_ref, void* arg)
     RBL_CHECK_TAG(DemoConnection_TAG, cref)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
     call_on_write_cb(cref, 0);
-//    RBL_ASSERT((cref->on_write_cb != NULL), "write call back is NULL");
-//    cref->on_write_cb(cref->on_write_cb_arg, 0);
 }
 static void call_on_write_cb(DemoConnectionRef cref, int status)
 {
@@ -314,7 +295,6 @@ static void call_on_write_cb(DemoConnectionRef cref, int status)
     cref->on_write_cb = NULL;
     cref->on_write_cb_arg = NULL;
     tmp(arg, status);
-//    cref->on_write_cb(cref->on_write_cb_arg, 0);
 }
 /////////////////////////////////////////////////////////////////////////////////////
 // end of read sequence
@@ -329,9 +309,6 @@ static void write_error(DemoConnectionRef cref, char* msg)
     printf("Write_error got an error this is the message: %s  fd: %d\n", msg, cref->asio_stream_ref->fd);
     cref->write_state = WRITE_STATE_STOP;
     call_on_write_cb(cref, DemoConnectionErrCode_io_error);
-//    cref->on_write_cb(cref->on_write_cb_arg, DemoConnectionErrCode_io_error);
-//    cref->on_write_cb = NULL;
-//    cref->on_write_cb_arg = NULL;
     post_to_runloop(cref, &postable_cleanup);
 }
 static void read_error(DemoConnectionRef cref, char* msg)
@@ -342,9 +319,6 @@ static void read_error(DemoConnectionRef cref, char* msg)
     cref->read_state = READ_STATE_STOP;
     RunloopRef rl = asio_stream_get_runloop(cref->asio_stream_ref);
     postable_cleanup(rl, cref);
-#if 0
-    post_to_runloop(cref, &postable_cleanup);
-#endif
 }
 /////////////////////////////////////////////////////////////////////////////////////
 // end of error functions
@@ -368,34 +342,3 @@ static void postable_cleanup(RunloopRef runloop, void* arg_cref)
 /////////////////////////////////////////////////////////////////////////////////////
 // end of cleanup
 /////////////////////////////////////////////////////////////////////////////////////
-// process request - DEPRECATED ... I think. Look in demohandler.c for
-// these functions.
-/////////////////////////////////////////////////////////////////////////////////////
-#if 0
-static DemoMessageRef reply_invalid_request(DemoConnectionRef cref, const char* error_message)
-{
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
-    DemoMessageRef m = demo_message_new();
-    demo_message_set_is_request(m, false);
-    BufferChainRef bdy =  BufferChain_new();
-    BufferChain_append_cstr(bdy, "You made a mistake. message: ");
-    char tmp[100];
-    sprintf(tmp, "%s", error_message);
-    BufferChain_append_cstr(bdy, tmp);
-    demo_message_set_body(m, bdy);
-    return m;
-}
-static DemoMessageRef process_request(DemoConnectionRef cref, DemoMessageRef request)
-{
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
-    DemoMessageRef reply = demo_message_new();
-//    DemoMessageRef request = cref->parser_ref->m_current_message_ptr;
-    demo_message_set_is_request(reply, false);
-    BufferChainRef request_body = demo_message_get_body(request);
-    BufferChainRef bc = BufferChain_new();
-    BufferChain_append_bufferchain(bc, request_body);
-    demo_message_set_body(reply, bc);
-}
-#endif

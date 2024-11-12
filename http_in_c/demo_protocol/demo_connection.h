@@ -33,7 +33,6 @@ typedef struct DemoConnection_s {
     RBL_DECLARE_TAG;
     RunloopRef       runloop_ref;
     AsioStreamRef    asio_stream_ref;
-//    RunloopStreamRef socket_stream_ref;
     void*            handler_ref;
     IOBufferRef      active_input_buffer_ref;
     long             read_buffer_size;
@@ -48,9 +47,9 @@ typedef struct DemoConnection_s {
     DC_Close_CB      on_close_cb;
     void*            on_close_cb_arg;
     bool             cleanup_done_flag;
-    bool             readside_posted;
-    bool             writeside_posted;
-    bool             post_active;
+//    bool             readside_posted;
+//    bool             writeside_posted;
+//    bool             post_active;
     RBL_DECLARE_END_TAG;
 
 } DemoConnection, *DemoConnectionRef;
@@ -69,8 +68,6 @@ void democonnection_init(
         void* handler_ref
         );
 void democonnection_free(DemoConnectionRef this);
-void democonnection_amonymous_dispose(void* p);
-
 void democonnection_read(DemoConnectionRef connection_ref, void(*on_demo_read_cb)(void* href, DemoMessageRef, int status), void* href);
 void democonnection_write(DemoConnectionRef connection_ref, DemoMessageRef, void(*on_demo_write_cb)(void* href, int status), void* href);
 void democonnection_close(DemoConnectionRef cref);

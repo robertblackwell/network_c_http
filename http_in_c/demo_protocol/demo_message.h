@@ -21,7 +21,6 @@ bool demo_message_is_request(DemoMessageRef mref);
 bool demo_message_get_is_request(DemoMessageRef this);
 void demo_message_set_is_request(DemoMessageRef this, bool yn);
 void demo_message_set_lrc(DemoMessageRef this, char lrc);
-
 void demo_message_set_content_length(DemoMessageRef this, int length);
 BufferChainRef demo_message_get_body(DemoMessageRef mref);
 void demo_message_set_body(DemoMessageRef mref, BufferChainRef bodyp);
