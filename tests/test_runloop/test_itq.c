@@ -120,7 +120,7 @@ QWriterRef queue_writer_new(RunloopRef rl, InterthreadQueueRef queue, int max)
     this->post_count = 0;
     return this;
 }
-void queue_writer_dispose(QReaderRef this)
+void queue_writer_free(QReaderRef this)
 {
     free(this);
 }

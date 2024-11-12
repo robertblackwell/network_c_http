@@ -59,7 +59,7 @@ void sync_worker_join(sync_worker_r wref);
 
 sync_client_t* sync_client_new(size_t read_buffer_size);
 void sync_client_init(sync_client_t* this, size_t read_buffer_size);
-void sync_client_dispose(sync_client_t** this_ptr);
+void sync_client_free(sync_client_t* this);
 void sync_client_connect(sync_client_t* this, char* host, int port);
 //void sync_client_request_round_trip(sync_client_t* this, MessageRef request, SyncConnectionClientMessageHandler handler);
 void* sync_client_get_userptr(sync_client_t* this);

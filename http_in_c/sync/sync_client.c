@@ -54,6 +54,12 @@ void sync_client_dispose(sync_client_t** this_ptr)
     // in here add code to obliterate the structure
     *this_ptr = NULL;
 }
+void sync_client_free(sync_client_t* this)
+{
+    RBL_CHECK_TAG(sync_client_TAG, this)
+    sync_client_destroy(this);
+    eg_free(this);
+}
 #if 0
 static struct hostent* _gethostname(char* host)
 {

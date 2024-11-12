@@ -25,7 +25,7 @@ void* connector_thread_func(void* arg)
         sync_client_t* client_ptr = sync_client_new(10000);
         sync_client_connect(client_ptr, "localhost", 9001);
         usleep(200000);
-        sync_client_dispose(&client_ptr);
+        sync_client_free(client_ptr);
     }
     printf("Connector loop ended \n");
     // now wait here for all connections to be processed

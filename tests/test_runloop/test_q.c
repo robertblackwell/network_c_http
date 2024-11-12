@@ -33,7 +33,7 @@ QReaderRef queue_reader_new(RunloopRef rl, EventfdQueueRef queue, RunloopQueueWa
     this->count = 1;
     return this;
 }
-void queue_reader_dispose(QReaderRef this)
+void queue_reader_free(QReaderRef this)
 {
     free(this);
 }
@@ -60,7 +60,7 @@ QWriterRef queue_writer_new(RunloopRef rl,  EventfdQueueRef queue, int max)
     this->post_count = 0;
     return this;
 }
-void queue_writer_dispose(QReaderRef this)
+void queue_writer_free(QReaderRef this)
 {
     free(this);
 }

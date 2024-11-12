@@ -342,7 +342,7 @@ void* threadfn(void* data)
 
         RBL_LOG_FMT("roundtrip return ident id %d socket:%d connection: %d cycle %d", ctx->ident, CTX_SOCKET(ctx), iconn, ctx->cycle_index)
         sync_client_close(client_ptr);
-        sync_client_dispose(&client_ptr);
+        sync_client_free(client_ptr);
         ctx->client_ptr = NULL;
         RBL_LOG_FMT("Completed round-trip loop ident: %d socket: %d counter: %d connection_index: %d cycle_index: %d",
                    ctx->ident, CTX_SOCKET(ctx), ctx->counter, ctx->connection_index, ctx->cycle_index);

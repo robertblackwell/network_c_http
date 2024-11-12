@@ -21,7 +21,7 @@
 typedef struct Client_s Client, *ClientRef;
 
 ClientRef Client_new();
-void Client_dispose(ClientRef* this_ptr);
+void Client_free(ClientRef this);
 void Client_connect(ClientRef this, char* host, int port, SyncAppMessageHandler handler);
 void Client_roundtrip(ClientRef this, const char* req_buffers[], MessageRef* response);
 void Client_request_round_trip(ClientRef this, MessageRef request, MessageRef* response);
