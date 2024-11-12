@@ -51,7 +51,7 @@ typedef struct WriterTable_s {
 
 void WriterTable_init(WriterTable* this);
 WriterTable* WriterTable_new();
-void WriterTable_dispose(WriterTable* this);
+void WriterTable_free(WriterTable* this);
 void WriterTable_add_fd(WriterTable* this, int fd, int max, int interval_ms);
 void wrtr_callback(RunloopStreamRef watch, void* arg, uint64_t event);
 void* writer_thread_func(void* arg);

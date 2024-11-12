@@ -41,7 +41,7 @@ static void writer(AsyncConnectionRef cref)
         if(IOBuffer_data_len(iob) == 0) {
             // write is complete
             cref->write_state = WRITE_STATE_IDLE;
-            IOBuffer_dispose(&(cref->active_output_buffer_ref));
+            IOBuffer_free(cref->active_output_buffer_ref);
             cref->active_output_buffer_ref = NULL;
             write_complete(cref);
         } else {

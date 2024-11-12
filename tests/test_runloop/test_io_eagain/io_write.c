@@ -52,7 +52,7 @@ Writer* Writer_new()
     Writer_init(tmp);
     return tmp;
 }
-void Writer_dispose(Writer* this)
+void Writer_free(Writer* this)
 {
     RBL_CHECK_TAG(Writer_TAG, this)
     RBL_CHECK_END_TAG(Writer_TAG, this)

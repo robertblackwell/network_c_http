@@ -27,8 +27,8 @@ CbufferRef Cbuffer_new();
  *  WARNING - THIS FUNCTION ALLOCATES MEMORY
  */
 CbufferRef Cbuffer_from_cstring(const char* cstr);
-
-void Cbuffer_dispose(CbufferRef* cbuf);
+void Cbuffer_free(CbufferRef cbuf);
+//void Cbuffer_dispose(CbufferRef* cbuf);
 
 /**
  *  @brief Gets a void* pointer to the start of the used portion of memory area

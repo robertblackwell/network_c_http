@@ -11,14 +11,10 @@ typedef struct BufferChain_s {
         int       m_size;
 } BufferChain;
 
-static void dealloc(void** p)
-{
-    IOBuffer_dispose((IOBufferRef*)p);
-}
 BufferChainRef BufferChain_new()
 {
     BufferChainRef tmp = eg_alloc(sizeof(BufferChain));
-    tmp->m_chain = List_new(dealloc);
+    tmp->m_chain = List_new(NULL);
     tmp->m_size = 0;
 }
 void BufferChain_free(BufferChainRef this)
@@ -29,6 +25,8 @@ void BufferChain_free(BufferChainRef this)
             break;
         }
         ListIterator next = List_itr_next(this->m_chain, iter);
+        IOBufferRef iob = List_itr_unpack(this->m_chain, iter);
+        IOBuffer_free(iob);
         List_itr_remove(this->m_chain, &iter);
         iter = next;
     }
@@ -45,6 +43,8 @@ void BufferChain_dispose(BufferChainRef* thisptr)
             break;
         }
         ListIterator next = List_itr_next(this->m_chain, iter);
+        IOBufferRef iob = List_itr_unpack(this->m_chain, iter);
+        IOBuffer_free(iob);
         List_itr_remove(this->m_chain, &iter);
         iter = next;
     }

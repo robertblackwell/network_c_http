@@ -56,8 +56,10 @@ test_output_r test_output_new(MessageRef msg, int rc)
 void test_output_dispose(test_output_r* this_ptr)
 {
     test_output_r this = *this_ptr;
-    if(this->message != NULL)
-        Message_dispose(&(this->message));
+    if(this->message != NULL) {
+        Message_free(this->message);
+        this->message = NULL;
+    }
 }
 
 void parser_test_init(parser_test_t* this, const char* description, const char* lines[], verify_function_t verify_func)
@@ -121,6 +123,6 @@ int parser_test_run(parser_test_t* this)
     }
     int r =this->m_verify_func(this->m_results);
     printf("Return from verify %d\n", r);
-    IOBuffer_dispose(&iobuf_ref);
+    IOBuffer_free(iobuf_ref); iobuf_ref = NULL;
     return r;
 }

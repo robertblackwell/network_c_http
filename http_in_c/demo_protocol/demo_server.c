@@ -85,14 +85,6 @@ void DemoServer_free(DemoServerRef this)
     free(this);
 
 }
-void DemoServer_dispose(DemoServerRef *sref)
-{
-    RBL_CHECK_TAG(DemoServer_TAG, *sref)
-    RBL_CHECK_END_TAG(DemoServer_TAG, *sref)
-    ASSERT_NOT_NULL(*sref);
-    free(*sref);
-    *sref = NULL;
-}
 
 void DemoServer_listen(DemoServerRef sref)
 {

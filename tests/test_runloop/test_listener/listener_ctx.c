@@ -50,7 +50,7 @@ ListenerCtxRef listener_ctx_init(ListenerCtxRef sref, int listen_fd)
     printf("listener_ctx_init %p   listen fd: %d\n", sref, listen_fd);
     return sref;
 }
-void listener_ctx_dispose(ListenerCtxRef *sref)
+void listener_ctx_free(ListenerCtxRef *sref)
 {
     ASSERT_NOT_NULL(*sref);
     free(*sref);

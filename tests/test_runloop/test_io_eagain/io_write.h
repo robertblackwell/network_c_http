@@ -51,7 +51,7 @@ typedef struct Writer_s {
 
 void Writer_init(Writer* this);
 Writer* Writer_new();
-void Writer_dispose(Writer* this);
+void Writer_free(Writer* this);
 void Writer_add_fd(Writer* this, int fd, int max, int interval_ms);
 void wrtr_callback(RunloopStreamRef watch, void* arg, uint64_t event);
 void* writer_thread_func(void* arg);

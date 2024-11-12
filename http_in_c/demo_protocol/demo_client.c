@@ -3,10 +3,8 @@
 #include <http_in_c/demo_protocol/demo_client.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/cbuffer.h>
-#include <http_in_c/demo_protocol//demo_message.h>
+#include <http_in_c/demo_protocol/demo_message.h>
 #include <http_in_c/demo_protocol/demo_parser.h>
-#include <http_in_c/demo_protocol/demo_sync_reader.h>
-#include <http_in_c/demo_protocol/demo_sync_writer.h>
 #include <rbl/logger.h>
 #include <http_in_c/common/list.h>
 #include <assert.h>
@@ -50,16 +48,15 @@ void democlient_init(DemoClientRef this)
     this->input_message_list = List_new(NULL);
     this->output_message_list = List_new(NULL);
 }
-void democlient_dispose(DemoClientRef* this_ptr)
+void democlient_free(DemoClientRef this)
 {
-    DemoClientRef this = *this_ptr;
     RBL_CHECK_TAG(DemoClient_TAG, this)
     RBL_CHECK_END_TAG(DemoClient_TAG, this)
     RBL_LOG_FMT("democlient_dispose %p  %d\n", this, this->sock);
     close(this->sock);
-    eg_free(*this_ptr);
-    *this_ptr = NULL;
+    eg_free(this);
 }
+
 void democlient_connect(DemoClientRef this, char* host, int portno)
 {
     int sockfd, n;

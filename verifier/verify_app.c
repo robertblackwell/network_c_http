@@ -329,10 +329,13 @@ void* threadfn(void* data)
                 ctx->resp_times[i] =  tmp;
                 RBL_ASSERT((ctx->response_ptr != NULL), "");
                 verify_response(ctx, ctx->request_ptr, ctx->response_ptr);
-                Message_dispose(&(ctx->request_ptr));
-                Message_dispose(&(ctx->response_ptr));
+                Message_free(ctx->request_ptr);
+                ctx->request_ptr = NULL;
+                Message_free(ctx->response_ptr);
+                ctx->response_ptr = NULL;
             } else {
-                Message_dispose(&(ctx->request_ptr));
+                Message_free(ctx->request_ptr);
+                ctx->request_ptr = NULL;
                 break;
             }
         }

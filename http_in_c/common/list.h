@@ -68,6 +68,15 @@ void List_destroy(ListRef lref);
 ///
 /// Frees all memory associated with the list.
 ///
+/// NOTE: the ListRef lref is NOT updated.
+///
+/// It is up to the caller to set it, AFTER THIS CALL, to what ever value
+/// is appropriate for UNDEFINED
+///
+void List_free(ListRef lref);
+///
+/// Frees all memory associated with the list.
+///
 /// NOTE: the ListRef* lref_ptr argument maybe a little unusual. This function is used as follows:
 ///
 ///   ListRef mylist = List_new(mydeallocator_function);

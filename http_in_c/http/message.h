@@ -47,7 +47,7 @@ MessageRef Message_new();
 MessageRef Message_new_request();
 MessageRef Message_new_response();
 
-void Message_dispose(MessageRef* p);
+void Message_free(MessageRef p);
 void Message_dealloc(void* m);
 /**
  * @brief Methods to test and set whether a message is a request or response

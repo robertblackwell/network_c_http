@@ -66,7 +66,7 @@ WriterTable* WriterTable_new()
     WriterTable_init(tmp);
     return tmp;
 }
-void WriterTable_dispose(WriterTable* this)
+void WriterTable_free(WriterTable* this)
 {
     RBL_CHECK_TAG(WriterTable_TAG, this)
     RBL_CHECK_END_TAG(WriterTable_TAG, this)

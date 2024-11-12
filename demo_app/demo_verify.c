@@ -126,11 +126,14 @@ void* threadfn(void* data)
             if(ctx->roundtrip_per_connection_counter >= ctx->max_rountrips_per_connection) {
                 break;
             }
-            demo_message_dispose(&request);
-            if(response != NULL)
-                demo_message_dispose(&response);
+            demo_message_free(request);
+            request = NULL;
+            if(response != NULL) {
+                demo_message_free(response);
+                response = NULL;
+            }
         }
-        democlient_dispose(&client);
+        democlient_free(client);
     }
     struct timeval end_time = get_time();
 

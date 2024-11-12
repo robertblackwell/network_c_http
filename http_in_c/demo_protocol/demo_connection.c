@@ -100,10 +100,12 @@ void democonnection_free(DemoConnectionRef this)
     this->asio_stream_ref = NULL;
     DemoParser_dispose(&(this->parser_ref));
     if(this->active_output_buffer_ref) {
-        IOBuffer_dispose(&(this->active_output_buffer_ref));
+        IOBuffer_free(this->active_output_buffer_ref);
+        this->active_output_buffer_ref = NULL;
     }
     if(this->active_input_buffer_ref) {
-        IOBuffer_dispose(&(this->active_input_buffer_ref));
+        IOBuffer_free(this->active_input_buffer_ref);
+        this->active_input_buffer_ref = NULL;
     }
     free(this);
 }
@@ -244,7 +246,8 @@ static void postable_writer(RunloopRef runloop_ref, void* arg)
     RBL_CHECK_TAG(DemoConnection_TAG, cref)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
     if(cref->write_state == WRITE_STATE_STOP) {
-        IOBuffer_dispose(&(cref->active_output_buffer_ref));
+        IOBuffer_free(cref->active_output_buffer_ref);
+        cref->active_output_buffer_ref = NULL;
         call_on_write_cb(cref, DemoConnectionErrCode_is_closed);
         return;
     }
@@ -268,7 +271,7 @@ static void writer_cb(void* cref_arg, long bytes_written, int status)
     if(IOBuffer_data_len(iob) > 0) {
         runloop_post(cref->runloop_ref, postable_writer, cref);
     } else {
-        IOBuffer_dispose(&(cref->active_output_buffer_ref));
+        IOBuffer_free(cref->active_output_buffer_ref);
         cref->active_output_buffer_ref = NULL;
         post_to_runloop(cref, &postable_write_call_cb);
     }

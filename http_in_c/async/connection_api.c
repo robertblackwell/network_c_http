@@ -56,12 +56,15 @@ void async_connection_destroy(AsyncConnectionRef this)
     if(this->socket > 0) {
         async_connection_close(this);
     }
-    http_parser_dispose(&(this->http_parser_ptr));
+    http_parser_free(this->http_parser_ptr);
+    this->http_parser_ptr = NULL;
     if(this->active_output_buffer_ref) {
-        IOBuffer_dispose(&(this->active_output_buffer_ref));
+        IOBuffer_free(this->active_output_buffer_ref);
+        this->active_output_buffer_ref = NULL;
     }
     if(this->active_input_buffer_ref) {
-        IOBuffer_dispose(&(this->active_input_buffer_ref));
+        IOBuffer_free(this->active_input_buffer_ref);
+        this->active_input_buffer_ref = NULL;
     }
     RBL_SET_TAG("xxxxxxx", this) // corrupt the tag
     RBL_INVALIDATE_TAG(this)

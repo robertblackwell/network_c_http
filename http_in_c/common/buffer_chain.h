@@ -21,13 +21,13 @@ typedef void* BufferChainIter;
  * @return BufferChainRef
  */
 BufferChainRef BufferChain_new();
-void BufferChain_free(BufferChainRef this);
 /**
  * @brief Free a BufferChain and its associated resources.
- * @note This fuunction upodates the argument to NULL.
+ * @note This function does not update the argument. Its up to the called
+ * to assign it to a suitable value after it becomes undefined.
  * @param this BufferChainref
  */
-void BufferChain_dispose(BufferChainRef* this);
+void BufferChain_free(BufferChainRef this);
 /**
  * @brief Append the given data + len to the buffer chain by copying.
  *

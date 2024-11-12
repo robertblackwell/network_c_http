@@ -97,7 +97,7 @@ int test_hdrlist_find()
     UT_EQUAL_INT(HdrList_size(hdrlistref), 0);
 
     HdrList_dispose(&hdrlistref);
-    Cbuffer_dispose(&cbref);
+    Cbuffer_free(cbref);cbref = NULL;
 
     return 0;
 }
@@ -120,8 +120,8 @@ int test_serialize_headers()
     HdrList_add_front(hdrs, hl_content_type);
     CbufferRef ser = HdrList_serialize(hdrs);
     free(body_len_str);
-    HdrList_dispose(&hdrs);
-    Cbuffer_dispose(&ser);
+    HdrList_free(hdrs);
+    Cbuffer_free(ser);
     return 0;
 }
 int test_serialize_headers_2()
@@ -137,8 +137,8 @@ int test_serialize_headers_2()
 
     CbufferRef ser = HdrList_serialize(hdrs);
     free(body_len_str);
-    Cbuffer_dispose(&ser);
-    HdrList_dispose(&hdrs);
+    Cbuffer_free(ser);
+    HdrList_free(hdrs);
     return 0;
 }
 int test_hdr_add_many()

@@ -48,7 +48,7 @@ MessageRef Message_new ()
     return mref;
 
     error_label_2:
-        Message_dispose(&mref);
+        Message_free(mref);
     error_label_1:
         return NULL;
 }
@@ -77,20 +77,13 @@ MessageRef Message_new_response()
     }
     return NULL;
 }
-void Message_dispose(MessageRef* this_p)
+void Message_free(MessageRef this)
 {
-    MessageRef this = *this_p;
     RBL_CHECK_TAG(Message_TAG, this)
-    HdrList_dispose(&(this->headers));
-    Cbuffer_dispose(&(this->target));
-    Cbuffer_dispose(&(this->reason));
-
-    eg_free(*this_p);
-    *this_p = NULL;
-}
-void Message_dispose_anonymous(void* p)
-{
-    Message_dispose((MessageRef*)&p);
+    HdrList_free(this->headers);
+    Cbuffer_free(this->target);
+    Cbuffer_free(this->reason);
+    eg_free(this);
 }
 MessageRef MessageResponse(HttpStatus status, void* body)
 {
@@ -99,8 +92,8 @@ MessageRef MessageResponse(HttpStatus status, void* body)
     mref->is_request = false;
     mref->status_code = status;
     mref->body = body;
-    if(mref->target != NULL) Cbuffer_dispose(&(mref->target));
-    if(mref->reason != NULL) Cbuffer_dispose(&(mref->reason));
+    if(mref->target != NULL) Cbuffer_free(mref->target);
+    if(mref->reason != NULL) Cbuffer_free(mref->reason);
     return mref;
     error_1:
         return NULL;
@@ -136,7 +129,7 @@ IOBufferRef Message_serialize(MessageRef mref)
         BufferChain_add_back(bc_result, iob_body);
     }
     IOBufferRef result = BufferChain_compact(bc_result);
-    BufferChain_dispose(&bc_result);
+    BufferChain_free(bc_result);
     return result;
 }
 IOBufferRef Message_dump(MessageRef mref)
@@ -172,7 +165,7 @@ IOBufferRef Message_dump(MessageRef mref)
     }
     BufferChain_append_cstr(bc_result, "body end ===========================================================\r\n");
     IOBufferRef result = BufferChain_compact(bc_result);
-    BufferChain_dispose(&bc_result);
+    BufferChain_free(bc_result);
     return result;
 }
 void Message_add_header_cstring(MessageRef this, const char* key, const char* value)

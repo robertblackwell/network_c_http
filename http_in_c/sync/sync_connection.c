@@ -43,7 +43,7 @@ static llhttp_errno_t parser_on_message_handler(http_parser_t* parser_ptr, Messa
 static void message_dealloc(void** p)
 {
     void* mref = *p;
-    Message_dispose(*p);
+    Message_free(*p);
     *p = NULL;
 }
 void sync_connection_init(sync_connection_t* this, int socketfd, size_t read_buffer_size) //, SyncConnectionServerMessageHandler handler, sync_worker_r worker_ref)
@@ -74,7 +74,8 @@ sync_connection_t* sync_connection_new(int socketfd, size_t read_buffer_size) //
 void sync_connection_destroy(sync_connection_t* this)
 {
     RBL_CHECK_TAG(SYNC_CONNECTION_TAG, this)
-    IOBuffer_dispose(&(this->m_iobuffer));
+    IOBuffer_free(this->m_iobuffer);
+    this->m_iobuffer = NULL;
     RBL_INVALIDATE_TAG(this)
     // RBL_INVALIDATE_STRUCT(this, sync_connection_t)
 }

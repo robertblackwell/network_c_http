@@ -123,11 +123,9 @@ CbufferRef Cbuffer_from_cstring(const char* c_str)
 /**
  * This is the only method that can operate on an invalidated Cbuffer
  * That is one who has had their memory stolen
- * @param cbuf_ref_addr
  */
-void Cbuffer_dispose(CbufferRef* cbuf_ref_addr)
+void Cbuffer_free(CbufferRef this)
 {
-    CbufferRef this =  *cbuf_ref_addr;
     CB_CHECK_TAG_ONLY(this);
     assert(this != NULL);
     // this will allow success free of invalidated cbuffer
@@ -135,7 +133,6 @@ void Cbuffer_dispose(CbufferRef* cbuf_ref_addr)
         eg_free(this->m_memPtr);
     }
     eg_free(this);
-    *cbuf_ref_addr = NULL;
 }
 /**
  * gets a pointer to the start of the memory slab being managed by the instance

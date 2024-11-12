@@ -117,6 +117,7 @@ int parser_test_run(parser_test_t* this)
     }
     int r =this->m_verify_func(this->m_results);
     printf("Return from verify %d\n", r);
-    IOBuffer_dispose(&iobuf_ref);
+    IOBuffer_free(iobuf_ref);
+    iobuf_ref = NULL;
     return r;
 }

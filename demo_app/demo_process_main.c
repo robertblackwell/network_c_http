@@ -49,6 +49,7 @@ void* thread_function(void* arg)
     ctx->server_ref = DemoServer_new(ctx->port, ctx->host, listening_socket_fd, NULL);
     DemoServer_listen(ctx->server_ref);
     runloop_run(ctx->server_ref->runloop_ref, -1 /* infinite*/);
-    DemoServer_dispose(&ctx->server_ref);
+    DemoServer_free(ctx->server_ref);
+    ctx->server_ref = NULL;
     return NULL;
 }

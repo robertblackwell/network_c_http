@@ -65,7 +65,7 @@ ReaderTable* ReaderTable_new()
     ReaderTable_init(tmp);
     return tmp;
 }
-void ReaderTable_dispose(ReaderTable* this)
+void ReaderTable_free(ReaderTable* this)
 {
     RBL_CHECK_TAG(ReaderTable_TAG, this)
     RBL_CHECK_END_TAG(ReaderTable_TAG, this)

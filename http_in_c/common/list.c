@@ -81,7 +81,12 @@ void List_destroy(ListRef lref)
     }
     List_init(lref, dealloc);
 }
-
+void List_free(ListRef lref)
+{
+    ASSERT_NOT_NULL(lref);
+    List_destroy(lref);
+    free(lref);
+}
 //free the entire list including invalidating the lref
 void List_dispose(ListRef* lref_ptr)
 {

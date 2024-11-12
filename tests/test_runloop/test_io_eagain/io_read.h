@@ -44,7 +44,7 @@ typedef struct Reader_s {
 
 void Reader_init(Reader* this);
 Reader* Reader_new();
-void Reader_dispose(Reader* this);
+void Reader_free(Reader* this);
 void Reader_add_fd(Reader* this, int fd, int max);
 
 void rd_callback(RunloopStreamRef socket_watcher_ref, uint64_t event);

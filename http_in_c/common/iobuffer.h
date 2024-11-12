@@ -183,7 +183,7 @@ void IOBuffer_consolidate_space(IOBufferRef this);
  *
  * @param p IOBufferRef*
  */
-void IOBuffer_dispose(IOBufferRef* p);
+//void IOBuffer_dispose(IOBufferRef* p);
 bool IOBuffer_empty(IOBufferRef this);
 bool IOBuffer_equal(IOBufferRef a, IOBufferRef b);
 /**

@@ -38,6 +38,7 @@ typedef ListIter HdrListIter;
 
 HdrListRef  HdrList_new();
 void HdrList_dispose(HdrListRef* lref_ptr) ;
+void HdrList_free(HdrListRef p);
 int  HdrList_size(HdrListRef lref);
 
 KVPairRef  HdrList_first(HdrListRef lref);

@@ -38,7 +38,6 @@ struct DemoServer_s {
 DemoServerRef DemoServer_new(int port, char const * host, int listen_fd, DemoProcessRequestFunction* process_request);
 void DemoServer_init(DemoServerRef sref, int port, char const * host, int listen_fd, DemoProcessRequestFunction* process_request);
 void DemoServer_free(DemoServerRef this);
-void DemoServer_dispose(DemoServerRef* srefptr);
 void DemoServer_listen(DemoServerRef server);
 void DemoServer_terminate(DemoServerRef this);
 #endif

@@ -35,8 +35,8 @@ void democlient_init(DemoClientRef this);
  *
  * @param this_ptr DemoClientRef*
  */
-void democlient_dispose(DemoClientRef* this_ptr);
-
+//void democlient_dispose(DemoClientRef* this_ptr);
+void democlient_free(DemoClientRef this);
 /**
  * @brief Connecto the the given host and port.
  * @param this DemoClientRef

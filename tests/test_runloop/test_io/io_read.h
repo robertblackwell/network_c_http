@@ -42,7 +42,7 @@ typedef struct ReaderTable_s {
 
 void ReaderTable_init(ReaderTable* this);
 ReaderTable* ReaderTable_new();
-void ReaderTable_dispose(ReaderTable* this);
+void ReaderTable_free(ReaderTableRef this);
 void ReaderTable_add_fd(ReaderTable* this, int fd, int max);
 
 void rd_callback(RunloopStreamRef socket_watcher_ref, uint64_t event);

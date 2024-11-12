@@ -20,7 +20,10 @@ HdrListRef HdrList_new()
 {
     return (HdrListRef) List_new(dealloc);
 }
-
+void HdrList_free(HdrListRef lref)
+{
+    List_free(lref);
+}
 void HdrList_dispose(HdrListRef *lref_ptr)
 {
     List_dispose(lref_ptr);

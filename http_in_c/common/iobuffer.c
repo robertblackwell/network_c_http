@@ -179,13 +179,6 @@ void IOBuffer_reset(IOBufferRef this)
     this->buffer_ptr = this->mem_p;
     this->buffer_remaining = 0;
 }
-void IOBuffer_dispose(IOBufferRef* p)
-{
-    RBL_CHECK_TAG(IOBuffer_TAG, *p)
-    IOBuffer_destroy(*p);
-    eg__free(*p);
-    *p = NULL;
-}
 void IOBuffer_free(IOBufferRef this)
 {
     RBL_CHECK_TAG(IOBuffer_TAG, this)

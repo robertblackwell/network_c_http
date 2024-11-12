@@ -52,11 +52,10 @@ void http_parser_reset(http_parser_t* this)
 {
 
 }
-void http_parser_dispose(http_parser_r* parser_p)
+void http_parser_free(http_parser_r this)
 {
-    ASSERT_NOT_NULL(*parser_p);
-    RBL_CHECK_TAG(HTTP_PARSER_TAG, *parser_p)
-    http_parser_r this= *parser_p;
+    ASSERT_NOT_NULL(this);
+    RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
     if (this->m_llhttp_ptr != NULL) {
         free(this->m_llhttp_ptr);
         this->m_llhttp_ptr = NULL;
@@ -66,14 +65,12 @@ void http_parser_dispose(http_parser_r* parser_p)
         this->m_llhttp_settings_ptr = NULL;
     }
 
-    if(this->m_name_buf != NULL) Cbuffer_dispose(&(this->m_name_buf));
-    if(this->m_url_buf != NULL) Cbuffer_dispose(&(this->m_url_buf));
-    if(this->m_status_buf != NULL) Cbuffer_dispose(&(this->m_status_buf));
-    if(this->m_value_buf != NULL) Cbuffer_dispose(&(this->m_value_buf));
-    if(this->m_name_buf != NULL) Cbuffer_dispose(&(this->m_name_buf));
+    if(this->m_name_buf != NULL) Cbuffer_free(this->m_name_buf);
+    if(this->m_url_buf != NULL) Cbuffer_free(this->m_url_buf);
+    if(this->m_status_buf != NULL) Cbuffer_free(this->m_status_buf);
+    if(this->m_value_buf != NULL) Cbuffer_free(this->m_value_buf);
+    if(this->m_name_buf != NULL) Cbuffer_free(this->m_name_buf);
     free(this);
-    *parser_p = NULL;
-
 }
 int Parser_append_bytes(http_parser_r this, void *buffer, unsigned length)
 {
@@ -83,11 +80,6 @@ int Parser_append_bytes(http_parser_r this, void *buffer, unsigned length)
     size_t nparsed = (unsigned long)llhttp_get_error_pos(this->m_llhttp_ptr) - (unsigned long)buffer;
     return (int)nparsed;
 }
-//void Parser_begin(http_parser_r this, MessageRef message_ptr)
-//{
-//    http_parser_initialize(this);
-//    this->m_current_message_ptr = message_ptr;
-//}
 
 llhttp_errno_t http_parser_consume(http_parser_r parser, const void* buffer, int length)
 {
@@ -199,7 +191,7 @@ int message_begin_cb(llhttp_t* parser)
     RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
 
     if(this->current_message_ptr != NULL) {
-        Message_dispose(&(this->current_message_ptr));
+        Message_free(this->current_message_ptr);
         this->current_message_ptr = Message_new();
     } else {
         this->current_message_ptr = Message_new();

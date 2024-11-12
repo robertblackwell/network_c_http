@@ -64,7 +64,7 @@ struct http_parser_s {
 };
 void http_parser_reset(http_parser_t*);
 http_parser_r http_parser_new(ParserOnMessageCompleteHandler handler, void* handler_context) ;
-void http_parser_dispose(http_parser_r* parser_p);
+void http_parser_free(http_parser_r this);
 
 /**
  * @brief The guts of the http message parsing process.

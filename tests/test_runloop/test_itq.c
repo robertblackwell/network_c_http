@@ -83,7 +83,7 @@ QReaderRef queue_reader_new(RunloopRef rl, InterthreadQueueRef queue, int expect
     this->count = 1;
     return this;
 }
-void queue_reader_dispose(QReaderRef this)
+void queue_reader_free(QReaderRef this)
 {
     free(this);
 }

@@ -76,7 +76,8 @@ void demo_message_free(DemoMessageRef this)
     RBL_CHECK_TAG(DemoMessage_TAG, this);
     RBL_CHECK_END_TAG(DemoMessage_TAG, this);
 
-    BufferChain_dispose(&((this)->body));
+    BufferChain_free(((this)->body));
+    this->body = NULL;
     eg_free(this);
 }
 void demo_message_dispose(DemoMessageRef* this_p)
@@ -85,7 +86,8 @@ void demo_message_dispose(DemoMessageRef* this_p)
     DemoMessageRef this = *this_p;
     RBL_CHECK_TAG(DemoMessage_TAG, this);
     RBL_CHECK_END_TAG(DemoMessage_TAG, this);
-    BufferChain_dispose(&((*this_p)->body));
+    BufferChain_free(this->body);
+    this->body = NULL;
     eg_free(*this_p);
     *this_p = NULL;
 }
@@ -104,7 +106,7 @@ IOBufferRef demo_message_serialize(DemoMessageRef mref)
     BufferChain_append_bufferchain(bc, mref->body);
     BufferChain_append(bc, (void*) end_str, 1);
     IOBufferRef result = BufferChain_compact(bc);
-    BufferChain_dispose(&(bc));
+    BufferChain_free((bc));
     return result;
 }
 bool demo_message_get_is_request(DemoMessageRef this)
@@ -153,7 +155,7 @@ void demo_message_set_body(DemoMessageRef this, BufferChainRef bc)
     RBL_CHECK_END_TAG(DemoMessage_TAG, this);
     if(this->body != NULL) {
         RBL_LOG_FMT("demomessage_set_body existing body being ignored bc: %p  this->body: %p", bc, this->body);
-        BufferChain_dispose(&(this->body));
+        BufferChain_free((this->body));
     }
     this->body = bc;
 }
