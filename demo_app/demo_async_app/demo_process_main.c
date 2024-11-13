@@ -23,10 +23,10 @@ typedef struct ThreadContext_s {
     DemoServerRef   server_ref;
 } ThreadContext;
 
-static ThreadContext thread_table[MAX_NBR_THREADS];
 
 void demo_process_main(char* host, int port, int nbr_threads, int nbr_connections_per_thread, int nbr_rountrips_per_connection)
 {
+    ThreadContext thread_table[nbr_threads];
     assert(nbr_threads <= MAX_NBR_THREADS);
     printf("Process starting pid: %d\n", getpid());
     for(int i = 0; i < nbr_threads; i++) {

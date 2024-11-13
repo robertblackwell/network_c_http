@@ -5,9 +5,9 @@
 #include <pthread.h>
 #include <sys/time.h>
 #include <math.h>
-#include "demo_app/demo_verify_app/verify_getopt.h"
+#include "verify_getopt.h"
 #include "verify_statistics.h"
-#include "demo_app/demo_verify_app/verify_thread_context.h"
+#include "verify_thread_context.h"
 
 
 #define NBR_PROCCES 1
@@ -32,13 +32,6 @@ void* threadfn(void* data);
 
 int main(int argc, char* argv[])
 {
-    int x1 = sizeof(char);
-    int x2 = sizeof(char*);
-    int x3 = sizeof(void*);
-    int x4 = sizeof(int);
-    int x5 = sizeof(long);
-    int x6 = sizeof(long long);
-//    double all[MAX_RESPONSE_TIMES];
 
     struct timeval main_time_start = get_time();
     char* host_buf = malloc(200);
@@ -48,8 +41,6 @@ int main(int argc, char* argv[])
     int nbr_connections_per_thread = NBR_CONNECTIONS_PER_THREAD;
     int nbr_roundtrips_per_connection = NBR_ROUNDTRIPS_PER_CONNECTION;
     int total_nbr_roundtrips = nbr_threads * nbr_connections_per_thread * nbr_roundtrips_per_connection;
-    pthread_t workers[nbr_threads];
-    ThreadContext* tctx[nbr_threads];
     /**
      * get run parameters
      */
@@ -61,6 +52,8 @@ int main(int argc, char* argv[])
     /**
      * run the test threads
      */
+    pthread_t workers[nbr_threads];
+    ThreadContext* tctx[nbr_threads];
     for(int t = 0; t < nbr_threads; t++) {
         ThreadContext* ctx = Ctx_new(t, nbr_roundtrips_per_connection, nbr_connections_per_thread, nbr_threads);
         tctx[t] = ctx;
@@ -82,7 +75,6 @@ int main(int argc, char* argv[])
     /**
      * Analyse the results
      */
-    int buckets[10];
     double avg;
     double stddev;
     int total_roundtrips;
@@ -99,11 +91,11 @@ void* threadfn(void* data)
     ThreadContext* ctx = (ThreadContext*)data;
     struct timeval start_time = get_time();
     for(int i = 0; i < ctx->max_connections_per_thread; i++) {
-        struct timeval iter_start_time = get_time();
         DemoSyncSocketRef client = demo_syncsocket_new();
         demo_syncsocket_connect(client, "localhost", 9011);
         ctx->roundtrip_per_connection_counter = 0;
         while(1) {
+            struct timeval iter_start_time = get_time();
             Ctx_mk_uid(ctx);
             DemoMessageRef request = mk_request(ctx);
             DemoMessageRef response = NULL;

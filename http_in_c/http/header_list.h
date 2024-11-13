@@ -53,13 +53,6 @@ void        HdrList_itr_remove(HdrListRef lref, HdrListIter* iter_addr);
 void HdrList_add_back(HdrListRef lref, KVPairRef item);
 void HdrList_add_front(HdrListRef lref, KVPairRef item);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-///
-///
-/// WARNING after this the code is not generated - it comes from the relevant hand_code.h/.c file
-///
-///
-////////////////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * Convenience function so that a list of headers can be filled in with code like:
  *

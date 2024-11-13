@@ -1,6 +1,6 @@
 New set of priorities Nov 2024:
     ✔ make logger multi-threaded @done(24-11-03 20:42)
-    ☐ find the multi-threaded bug
+    ☐ find the multi-threaded 
     ☐ timers do not post the callback - fix
     ☐ runloop.h does not cleanly display the external interface, still too much private stuff
     ☐ interthread queue - have a version that seems to work. More testing.
@@ -17,7 +17,8 @@ New set of priorities Nov 2024:
       ☐ -- List_itr_remove  is one such example. Need to review all list functions and their calls to make this clean
       ☐ should review all List_new() calls to be sure we know which lists are free()ing their content objects
       ☐ with a view to removing this option
-    ☐ httpmessage does not correctly free the elements of the HDRList_free does not correc 
+    ☐ httpmessage does not correctly free the elements of the HDRList_free
+    ☐ test_demo_full does not finish 
 
 This project is out of control:
   ☐ Too many things happening

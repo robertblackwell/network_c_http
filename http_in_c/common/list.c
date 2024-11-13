@@ -227,7 +227,7 @@ void* List_remove_last(ListRef lref)
         void* content = lref->head->item;
         lref->head->item = NULL;
 
-        ListNode_dispose(lref, &(lref->head));
+        ListNode_free(lref->head    );
         lref->head = NULL; lref->tail = NULL;
         return content;
     }
@@ -239,7 +239,7 @@ void* List_remove_last(ListRef lref)
     last->backward = NULL;
     last->item = NULL;
 
-    ListNode_dispose(lref, &last);
+    ListNode_free(last);
     lref->count--;
     return content;
 }

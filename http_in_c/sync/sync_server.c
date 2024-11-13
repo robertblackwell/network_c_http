@@ -17,67 +17,13 @@
 
 #define MAX_THREADS 100
 
-#if 0
-//
-// create a listening socket from host and port
-//
-socket_handle_t create_listener_socket(int port, const char* host)
-{
-
-    struct sockaddr_in sin;
-    memset(&sin, 0, sizeof(sin));
-    socket_handle_t tmp_socket;
-    sin.sin_family = AF_INET; // or AF_INET6 (address family)
-    sin.sin_port = htons(port);
-    sin.sin_addr.s_addr = inet_addr("127.0.0.1");
-    int result;
-    int yes = 1;
-
-    if( (tmp_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1 ) 
-        goto error_01;
-
-    // sin.sin_len = sizeof(sin);
-    if( (result = setsockopt(tmp_socket, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes))) != 0 )
-        goto error_02;
-    if( (result = setsockopt(tmp_socket, SOL_SOCKET, SO_REUSEPORT, &yes, sizeof(yes))) != 0 )
-        goto error_02;
-
-    if( (result = bind(tmp_socket, (struct sockaddr *)&sin, sizeof(sin))) != 0)
-        goto error_03;
-
-    if((result = listen(tmp_socket, SOMAXCONN)) != 0)
-        goto error_04;
-    return tmp_socket;
-
-    error_01:
-        RBL_LOG_ERROR("socket call failed with errno %d ", errno);
-        assert(0);
-    error_02:
-        RBL_LOG_ERROR("setsockopt call failed with errno %d ", errno);
-        assert(0);
-    error_03:
-        RBL_LOG_ERROR("bind call failed with errno %d ", errno);
-        assert(0);
-    error_04:
-        RBL_LOG_ERROR("listen call failed with errno %d ", errno);
-        assert(0);
-}
-#endif
 sync_server_r sync_server_new(int port, size_t read_buffer_size, int nbr_threads, SyncAppMessageHandler app_handler)
 {
     sync_server_r sref = (sync_server_r)eg_alloc(sizeof(sync_server_t));
     sref->nbr_workers = nbr_threads;
     sref->port = port;
     sref->app_handler = app_handler;
-#ifdef SYNC_WORKER_QUEUE
-    sref->qref = Queue_new();
-#endif
-
-#ifdef DYN_WORKER_TAB
-    sref->worker_tab = malloc(sizeof(sync_worker_r) * nbr_threads);
-#else
     assert(nbr_threads < MAX_THREADS);
-#endif
     RBL_SET_TAG(SYNC_SERVER_TAG, sref)
     return sref;
 }

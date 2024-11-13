@@ -1,5 +1,5 @@
 set(HEADER_FILES
-		${CMAKE_CURRENT_SOURCE_DIR}/demo_client.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/demo_sync_socket.h
         ${CMAKE_CURRENT_SOURCE_DIR}/demo_connection.h
 		${CMAKE_CURRENT_SOURCE_DIR}/demo_handler.h
         ${CMAKE_CURRENT_SOURCE_DIR}/demo_message.h
@@ -11,7 +11,7 @@ set(HEADER_FILES
 #		${CMAKE_CURRENT_SOURCE_DIR}/demo_sync_writer.h
 )
 set(SOURCE_FILES
-	${CMAKE_CURRENT_SOURCE_DIR}/demo_client.c
+		${CMAKE_CURRENT_SOURCE_DIR}/demo_sync_socket.c
 	${CMAKE_CURRENT_SOURCE_DIR}/demo_connection.c
 	${CMAKE_CURRENT_SOURCE_DIR}/demo_handler.c
 	${CMAKE_CURRENT_SOURCE_DIR}/demo_message.c

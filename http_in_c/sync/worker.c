@@ -86,10 +86,6 @@ static void* Worker_main(void* data)
     while(!terminate) {
         wref->active = false;
         wref->connection_ptr  = NULL;
-#if SYNC_WORKER_QUEUE
-        int my_socket_handle = Queue_remove(wref->qref);
-        wref->working = true;
-#else
         struct sockaddr peername;
         socklen_t addr_length;
         int sock2 = accept(wref->listen_socket, (struct sockaddr*)&peername, &addr_length);
@@ -99,7 +95,6 @@ static void* Worker_main(void* data)
             break;
         }
         int my_socket_handle = sock2;
-#endif
         RBL_LOG_FMT("Worker_main %p mySocketHandle: %d worker %d ########################################################################### %d START", wref, my_socket_handle, wref->id, wref->id);
         int sock = my_socket_handle;
         if(my_socket_handle == -1) {

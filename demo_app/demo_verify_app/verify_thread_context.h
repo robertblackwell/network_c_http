@@ -4,7 +4,7 @@
 
 #ifndef C_HTTP_VERIFY_THREAD_CONTEXT_H
 #define C_HTTP_VERIFY_THREAD_CONTEXT_H
-#include "verify_statistics.h"
+#include "demo_app/verify_statistics.h"
 #include <http_in_c/demo_protocol/demo_message.h>
 
 struct ThreadContext_s {
