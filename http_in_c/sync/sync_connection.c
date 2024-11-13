@@ -55,7 +55,7 @@ void sync_connection_init(sync_connection_t* this, int socketfd, size_t read_buf
     this->socketfd = socketfd;
 //    this->m_rdsocket = rdsock;
     this->m_iobuffer = IOBuffer_new();
-    this->input_list = List_new(message_dealloc);
+    this->input_list = List_new();
     this->reader_status = 0;
     this->read_buffer_size = read_buffer_size;
 //    this->callback.server_cb.server_handler = NULL;

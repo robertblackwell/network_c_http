@@ -71,7 +71,7 @@ void parser_test_init(parser_test_t* this, const char* description, const char* 
     ASSERT_NOT_NULL(this);
     test_input_init(&this->test_input, description, lines);
     this->m_verify_func = verify_func;
-    this->m_results = List_new(NULL);
+    this->m_results = List_new();
 }
 parser_test_t* parser_test_new(const char* description, const char* blocks[], verify_function_t vf)
 {

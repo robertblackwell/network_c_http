@@ -471,7 +471,7 @@ int test_ROK009_vfunc (ListRef results)
 #if 0
 ListRef make_test_A ()
 {
-    ListRef tl = List_new (NULL);
+    ListRef tl = List_new ();
     List_add_back (tl, test_case_ROK001());
     List_add_back (tl, test_case_ROK002());
     List_add_back (tl, test_case_ROK003());

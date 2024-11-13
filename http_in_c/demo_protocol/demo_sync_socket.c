@@ -18,7 +18,11 @@
 #define DemoClient_TAG "DECLNT"
 #include <rbl/check_tag.h>
 
-
+/**
+ * A demo_syncsocket is an object and set of functions that wrap an fd that represents
+ * either a pipe or socket and allows the reading and writing of complete DemoMessage
+ * packets.
+ */
 struct DemoSyncSocket_s {
     RBL_DECLARE_TAG;
     int             sock;
@@ -52,8 +56,8 @@ void demo_syncsocket_init(DemoSyncSocketRef this)
     RBL_SET_TAG(DemoClient_TAG, this)
     RBL_SET_END_TAG(DemoClient_TAG, this)
     this->parser_ref = DemoParser_new(&on_new_message, this);
-    this->input_message_list = List_new(NULL);
-    this->output_message_list = List_new(NULL);
+    this->input_message_list = List_new();
+    this->output_message_list = List_new();
 }
 void demo_syncsocket_free(DemoSyncSocketRef this)
 {

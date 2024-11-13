@@ -105,7 +105,7 @@ ListRef make_demo_test()
 {
 //    parser_test_r test_X001 = parser_test_new(test_B001_description, test_B001_lines, test_B001_vfunc);
 //    parser_test_r test_X002 = parser_test_new(test_B002_description, test_B002_lines, test_B001_vfunc);
-    ListRef tl = List_new (NULL);
+    ListRef tl = List_new ();
 //    List_add_back (tl, test_case_B001());
 //    List_add_back (tl, test_case_B002());
 //    List_add_back (tl, test_case_B004());

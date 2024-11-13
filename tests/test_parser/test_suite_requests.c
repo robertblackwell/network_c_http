@@ -477,7 +477,7 @@ static int test_ROK009_vfunc (ListRef results)
 
 static ListRef make_request_tests_A ()
 {
-    ListRef tl = List_new (NULL);
+    ListRef tl = List_new ();
     List_add_back (tl, test_case_ROK001());
     List_add_back (tl, test_case_ROK002());
     List_add_back (tl, test_case_ROK003());

@@ -47,17 +47,17 @@ void ListNode_dispose(ListRef lref, ListNode** lnref_ptr)
 
 
 // create and initialize
-ListRef List_new(ListItemDeallocator dealloc)
+ListRef List_new()
 {
     ListRef lref = eg_alloc(sizeof(List));
     if(lref != NULL) {
-        List_init(lref, dealloc);
+        List_init(lref);
     }
     return lref;
 }
 
 // initialize a given block of memory as empty list
-void List_init(ListRef lref, ListItemDeallocator dealloc)
+void List_init(ListRef lref)
 {
     ASSERT_NOT_NULL(lref);
     lref->count = 0;

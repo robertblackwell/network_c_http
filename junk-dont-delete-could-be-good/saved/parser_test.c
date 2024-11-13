@@ -41,7 +41,7 @@ void WPT_init(WrappedParserTestRef this, datasource_t* data_source, verify_funct
     ASSERT_NOT_NULL(this);
     this-> m_data_source = data_source;
     this->m_verify_func = verify_func;
-    this->m_results = List_new(read_result_dealloc);
+    this->m_results = List_new();
     this->m_rdsock = DataSourceSocket(this->m_data_source);
 }
 

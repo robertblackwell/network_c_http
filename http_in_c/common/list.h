@@ -42,7 +42,7 @@ typedef void(*ListItemDeallocator)(void**);
 /// \param dealloc ListItemDeallocator
 /// \return ListRef
 ///
-ListRef List_new(ListItemDeallocator dealloc);
+ListRef List_new();
 
 ///
 /// Initializes a list structure for which the memory has already been acquired.
@@ -54,7 +54,7 @@ ListRef List_new(ListItemDeallocator dealloc);
 /// \param lref    ListRef or ListRef
 /// \param dealloc ListItemDeallocator
 ///
-void List_init(ListRef lref, ListItemDeallocator dealloc);
+void List_init(ListRef lref);
 
 ///
 /// De-init an existing List instance
@@ -84,7 +84,7 @@ void List_free(ListRef this);
 ///
 /// NOTE: the ListRef* lref_ptr argument maybe a little unusual. This function is used as follows:
 ///
-///   ListRef mylist = List_new(mydeallocator_function);
+///   ListRef mylist = List_new();
 ///
 ///   ..... do stuff with the list
 ///

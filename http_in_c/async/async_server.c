@@ -58,7 +58,7 @@ void AsyncServer_init_with_socket(AsyncServerRef sref, int port, const char* hos
     sref->listening_watcher_ref = runloop_listener_new(sref->reactor_ref, sref->listening_socket_fd);
     // TODO this is a memory leak
     // the list is the owner of handler references
-    sref->handler_list = List_new(async_handler_anonymous_dispose);
+    sref->handler_list = List_new();
 }
 
 void AsyncServer_init(AsyncServerRef sref, int port_number, const char* host, AsyncProcessRequestFunction process_request)

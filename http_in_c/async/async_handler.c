@@ -54,8 +54,8 @@ void async_handler_init(
             this
 );
     this->server_ref = server_ref;
-    this->input_list = List_new(NULL);
-    this->output_list = List_new(NULL);
+    this->input_list = List_new();
+    this->output_list = List_new();
 
     RBL_LOG_FMT("socket: %d", socket);
     async_connection_read(this->async_connection_ref);

@@ -31,7 +31,7 @@ void ReadCtx_init(ReadCtx* this, int my_index, int fd, int max)
 {
     RBL_SET_TAG(ReadCtx_TAG, this)
     RBL_SET_END_TAG(ReadCtx_TAG, this)
-    this->input_list_ref = List_new(NULL);
+    this->input_list_ref = List_new();
     this->id = "READ";
     this->read_count = 0;
     this->max_read_count = max;

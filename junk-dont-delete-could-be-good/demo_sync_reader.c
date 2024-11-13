@@ -43,8 +43,8 @@ void demosync_reader_init(DemoSyncReaderRef  this, int socket_fd)
     this->m_parser = DemoParser_new(on_new_message, this);
     this->m_socket_fd = socket_fd;
     this->m_iobuffer = IOBuffer_new();
-    this->input_message_list = List_new(NULL);
-    this->output_message_list = List_new(NULL);
+    this->input_message_list = List_new();
+    this->output_message_list = List_new();
 }
 
 DemoSyncReaderRef demosync_reader_private_new(int socket_fd)

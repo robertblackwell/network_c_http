@@ -354,7 +354,7 @@ ListRef make_test_A()
     ParserTestRef test_A006 = ParserTest_new(test_A006_description, test_A006_lines, test_A006_vfunc);
     ParserTestRef test_A007 = ParserTest_new(test_A007_description, test_A007_lines, test_A007_vfunc);
     ParserTestRef test_A008 = ParserTest_new(test_A008_description, test_A008_lines, test_A008_vfunc);
-    ListRef tl = List_new(NULL);
+    ListRef tl = List_new();
     List_add_back(tl, test_A0011);
     List_add_back(tl, test_A001);
     List_add_back(tl, test_A002);

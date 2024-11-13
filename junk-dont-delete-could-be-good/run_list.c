@@ -41,7 +41,7 @@
 
 RunListRef RunList_new()
 {
-    return (RunListRef) List_new(Functor_dealloc);
+    return (RunListRef) List_new();
 }
 
 void RunList_dispose(RunListRef *rl_ref_ptr)

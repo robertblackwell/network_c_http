@@ -59,7 +59,7 @@ void DemoServer_init(DemoServerRef sref, int port, char const * host, int listen
 
     sref->runloop_ref = runloop_new();
     sref->listening_watcher_ref = runloop_listener_new(sref->runloop_ref, sref->listening_socket_fd);
-    sref->handler_list = List_new(NULL);
+    sref->handler_list = List_new();
 }
 DemoServerRef DemoServer_new(int port, char const * host, int listen_fd, DemoProcessRequestFunction* process_request)
 {

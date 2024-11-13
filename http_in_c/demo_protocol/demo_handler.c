@@ -58,8 +58,8 @@ void demohandler_init(
     this->runloop_ref = runloop_ref;
     this->completion_callback = completion_cb;
     this->server_ref = server_ref;
-    this->input_list = List_new(NULL);
-    this->output_list = List_new(NULL);
+    this->input_list = List_new();
+    this->output_list = List_new();
     this->active_response = NULL;
 
     democonnection_read(this->demo_connection_ref, &handle_request, this);
