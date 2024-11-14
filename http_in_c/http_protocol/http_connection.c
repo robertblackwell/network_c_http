@@ -1,6 +1,6 @@
 //#define RBL_LOG_ENABLED
 //#define RBL_LOG_ALLOW_GLOBAL
-#include <http_in_c/demo_protocol/demo_connection.h>
+#include <http_in_c/http_protocol/http_connection.h>
 #include <http_in_c/runloop/rl_internal.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -12,7 +12,7 @@
 #include <rbl/macros.h>
 #include <rbl/logger.h>
 #include <http_in_c/runloop/runloop.h>
-#include <http_in_c/demo_protocol/demo_message.h>
+#include <http_in_c/http_protocol/http_message.h>
 
 #define READ_STATE_IDLE     11
 #define READ_STATE_ACTIVE   13
@@ -22,51 +22,51 @@
 #define WRITE_STATE_ACTIVE   23
 #define WRITE_STATE_STOP     24
 
-static void read_start(DemoConnectionRef cref);
+static void read_start(HttpConnectionRef cref);
 static void read_start_postable(RunloopRef rl, void* cref_arg);
 static void postable_read_start(RunloopRef runloop_ref, void* arg);
-static void on_parser_new_message_complete(void* arg_ctx, DemoMessageRef msg);
-static void on_read_complete(DemoConnectionRef cref, DemoMessageRef msg, int error_code);
-static void read_error(DemoConnectionRef cref, char* msg);
+static void on_parser_new_message_complete(void* arg_ctx, HttpMessageRef msg);
+static void on_read_complete(HttpConnectionRef cref, HttpMessageRef msg, int error_code);
+static void read_error(HttpConnectionRef cref, char* msg);
 
 static void postable_writer(RunloopRef runloop_ref, void* arg);
 static void postable_write_call_cb(RunloopRef runloop_ref, void* arg);
 static void writer_cb(void* cref_arg, long bytes_written, int status);
-static void write_error(DemoConnectionRef cref, char* msg);
+static void write_error(HttpConnectionRef cref, char* msg);
 
 static void postable_cleanup(RunloopRef runloop, void* cref);
 static void read_have_data_cb(void* cref_arg, long bytes_available, int err_status);
-static void read_process_data(DemoConnectionRef cref);
+static void read_process_data(HttpConnectionRef cref);
 /**
  * Utility function that wraps all runloop_post() calls so this module can
  * keep track of outstanding pending function calls
  */
-static void post_to_runloop(DemoConnectionRef cref, void(*postable_function)(RunloopRef, void*));
+static void post_to_runloop(HttpConnectionRef cref, void(*postable_function)(RunloopRef, void*));
 
 
-DemoConnectionRef democonnection_new(
+HttpConnectionRef http_connection_new(
         RunloopRef runloop_ref,
         int socket,
         void(*connection_completion_cb)(void* href),
         void* handler_ref
 )
 {
-    DemoConnectionRef this = malloc(sizeof(DemoConnection));
-    democonnection_init(this, runloop_ref, socket, connection_completion_cb, handler_ref);
+    HttpConnectionRef this = malloc(sizeof(HttpConnection));
+    http_connection_init(this, runloop_ref, socket, connection_completion_cb, handler_ref);
     return this;
 }
-void democonnection_init(
-        DemoConnectionRef this,
+void http_connection_init(
+        HttpConnectionRef this,
         RunloopRef runloop_ref,
         int socket,
         void(*connection_completion_cb)(void* href),
         void* handler_ref
         )
 {
-    RBL_SET_TAG(DemoConnection_TAG, this)
-    RBL_SET_END_TAG(DemoConnection_TAG, this)
-    RBL_CHECK_TAG(DemoConnection_TAG, this)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, this)
+    RBL_SET_TAG(HttpConnection_TAG, this)
+    RBL_SET_END_TAG(HttpConnection_TAG, this)
+    RBL_CHECK_TAG(HttpConnection_TAG, this)
+    RBL_CHECK_END_TAG(HttpConnection_TAG, this)
     this->runloop_ref = runloop_ref;
     this->asio_stream_ref = asio_stream_new(runloop_ref, socket);
     this->handler_ref = handler_ref;
@@ -82,23 +82,23 @@ void democonnection_init(
     this->cleanup_done_flag = false;
     this->on_close_cb = connection_completion_cb;
     this->on_close_cb_arg = handler_ref;
-    this->parser_ref = DemoParser_new(
+    this->parser_ref = HttpParser_new(
             (void*)&on_parser_new_message_complete,
             this);
 }
-void democonnection_close(DemoConnectionRef cref)
+void http_connection_close(HttpConnectionRef cref)
 {
     asio_stream_close(cref->asio_stream_ref);
 }
-void democonnection_free(DemoConnectionRef this)
+void http_connection_free(HttpConnectionRef this)
 {
-    RBL_CHECK_TAG(DemoConnection_TAG, this)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, this)
+    RBL_CHECK_TAG(HttpConnection_TAG, this)
+    RBL_CHECK_END_TAG(HttpConnection_TAG, this)
     int fd = this->asio_stream_ref->fd;
     close(fd);
     asio_stream_free(this->asio_stream_ref);
     this->asio_stream_ref = NULL;
-    DemoParser_free(this->parser_ref);
+    HttpParser_free(this->parser_ref);
     if(this->active_output_buffer_ref) {
         IOBuffer_free(this->active_output_buffer_ref);
         this->active_output_buffer_ref = NULL;
@@ -109,27 +109,27 @@ void democonnection_free(DemoConnectionRef this)
     }
     free(this);
 }
-static void call_on_write_cb(DemoConnectionRef cref, int status);
-static void call_on_read_cb(DemoConnectionRef cref, DemoMessageRef msgref, int status);
+static void call_on_write_cb(HttpConnectionRef cref, int status);
+static void call_on_read_cb(HttpConnectionRef cref, HttpMessageRef msgref, int status);
 
 /////////////////////////////////////////////////////////////////////////////////////
 // read sequence - sequence of functions called processing a read operation
 ////////////////////////////////////////////////////////////////////////////////////
-void democonnection_read(DemoConnectionRef cref, void(*on_demo_read_cb)(void* href, DemoMessageRef, int status), void* href)
+void http_connection_read(HttpConnectionRef cref, void(*on_http_read_cb)(void* href, HttpMessageRef, int status), void* href)
 {
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
-    RBL_LOG_FMT("democonnect_read");
-    assert(on_demo_read_cb != NULL);
+    RBL_CHECK_TAG(HttpConnection_TAG, cref)
+    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
+    RBL_LOG_FMT("http_connect_read");
+    assert(on_http_read_cb != NULL);
     assert(cref->active_input_buffer_ref == NULL);
-    cref->on_read_cb = on_demo_read_cb;
+    cref->on_read_cb = on_http_read_cb;
     cref->on_read_cb_arg = href;
     read_start(cref);
 }
-static void read_start(DemoConnectionRef cref)
+static void read_start(HttpConnectionRef cref)
 {
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
+    RBL_CHECK_TAG(HttpConnection_TAG, cref)
+    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
     if (cref->active_input_buffer_ref == NULL) {
         cref->active_input_buffer_ref = IOBuffer_new_with_capacity((int)cref->read_buffer_size);
     }
@@ -142,16 +142,16 @@ static void read_start(DemoConnectionRef cref)
         read_process_data(cref);
     }
 }
-static void on_parser_new_message_complete(void* arg_ctx, DemoMessageRef msg_ref)
+static void on_parser_new_message_complete(void* arg_ctx, HttpMessageRef msg_ref)
 {
     RBL_LOG_FMT("arg_ctx %p msg_ref: %p", arg_ctx, msg_ref)
     call_on_read_cb(arg_ctx, msg_ref, 0);
 }
 static void read_have_data_cb(void* cref_arg, long bytes_available, int err_status)
 {
-    DemoConnectionRef cref = cref_arg;
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
+    HttpConnectionRef cref = cref_arg;
+    RBL_CHECK_TAG(HttpConnection_TAG, cref)
+    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
     IOBufferRef iob = cref->active_input_buffer_ref;
     RBL_LOG_FMT("cref_arg: %p bytes_available: %ld status: %d", cref_arg, bytes_available, err_status);
     if(bytes_available > 0) {
@@ -161,51 +161,51 @@ static void read_have_data_cb(void* cref_arg, long bytes_available, int err_stat
         read_error(cref, "");
     }
 }
-static void read_process_data(DemoConnectionRef cref) {
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
+static void read_process_data(HttpConnectionRef cref) {
+    RBL_CHECK_TAG(HttpConnection_TAG, cref)
+    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
     IOBufferRef iob = cref->active_input_buffer_ref;
     int bytes_available = IOBuffer_data_len(iob);
     assert(bytes_available > 0);
-    RBL_LOG_FMT("Before DemoParser_consume read_state %d", cref->read_state);
-    DemoParser_consume(cref->parser_ref, iob);
+    RBL_LOG_FMT("Before HttpParser_consume read_state %d", cref->read_state);
+    HttpParser_consume(cref->parser_ref, iob);
     assert(cref->active_input_buffer_ref != NULL);
     assert(IOBuffer_data_len(cref->active_input_buffer_ref) == 0);
     IOBuffer_free(cref->active_input_buffer_ref);
     cref->active_input_buffer_ref = NULL;
-    RBL_LOG_FMT("After DemoParser_consume returns  ");
+    RBL_LOG_FMT("After HttpParser_consume returns  ");
 }
 
 static void postable_read_start(RunloopRef runloop_ref, void* arg)
 {
-    DemoConnectionRef cref = arg;
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
+    HttpConnectionRef cref = arg;
+    RBL_CHECK_TAG(HttpConnection_TAG, cref)
+    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
     RBL_LOG_FMT("postable_read_start read_state: %d", cref->read_state);
     if(cref->read_state == READ_STATE_STOP) {
-        call_on_read_cb(cref, NULL, DemoConnectionErrCode_is_closed);
-//        cref->on_read_cb(arg, NULL, DemoConnectionErrCode_is_closed);
+        call_on_read_cb(cref, NULL, HttpConnectionErrCode_is_closed);
+//        cref->on_read_cb(arg, NULL, HttpConnectionErrCode_is_closed);
         return;
     }
     read_start(cref);
 }
 
-static void on_read_complete(DemoConnectionRef cref, DemoMessageRef msg, int error_code)
+static void on_read_complete(HttpConnectionRef cref, HttpMessageRef msg, int error_code)
 {
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
+    RBL_CHECK_TAG(HttpConnection_TAG, cref)
+    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
     RBL_ASSERT( (((msg != NULL) && (error_code == 0)) || ((msg == NULL) && (error_code != 0))), "msg != NULL and error_code == 0 failed OR msg == NULL and error_code != 0 failed");
     cref->read_state = READ_STATE_IDLE;
     RBL_LOG_FMT("read_message_handler - on_read_cb  read_state: %d\n", cref->read_state);
     call_on_read_cb(cref, msg, error_code);
 }
-static void call_on_read_cb(DemoConnectionRef cref, DemoMessageRef msg, int status)
+static void call_on_read_cb(HttpConnectionRef cref, HttpMessageRef msg, int status)
 {
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
+    RBL_CHECK_TAG(HttpConnection_TAG, cref)
+    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
     RBL_ASSERT((cref->on_read_cb != NULL), "write call back is NULL");
     RBL_ASSERT((cref->on_read_cb_arg != NULL), "write call arg back is NULL");
-    void(*tmp)(void*, DemoMessageRef, int) = cref->on_read_cb;
+    void(*tmp)(void*, HttpMessageRef, int) = cref->on_read_cb;
     void* arg = cref->on_read_cb_arg;
     cref->on_read_cb = NULL;
     cref->on_read_cb_arg = NULL;
@@ -216,25 +216,25 @@ static void call_on_read_cb(DemoConnectionRef cref, DemoMessageRef msg, int stat
 /////////////////////////////////////////////////////////////////////////////////////
 // write sequence - sequence of functions called during write operation
 ////////////////////////////////////////////////////////////////////////////////////
-void democonnection_write(
-        DemoConnectionRef cref,
-        DemoMessageRef response_ref,
-        void(*on_demo_write_cb)(void* href, int status),
+void http_connection_write(
+        HttpConnectionRef cref,
+        HttpMessageRef response_ref,
+        void(*on_http_write_cb)(void* href, int status),
         void* href)
 {
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
+    RBL_CHECK_TAG(HttpConnection_TAG, cref)
+    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
     RBL_ASSERT((response_ref != NULL), "got NULL instead of a response_ref");
-    RBL_ASSERT((on_demo_write_cb != NULL), "got NULL for on_demo_write_cb");
+    RBL_ASSERT((on_http_write_cb != NULL), "got NULL for on_http_write_cb");
     RBL_ASSERT((cref->write_state == WRITE_STATE_IDLE), "a write is already active");
     RBL_ASSERT((cref->on_write_cb == NULL), "there is already a write in progress");
     RBL_ASSERT((cref->active_output_buffer_ref == NULL),"something wrong active output buffer should be null")
-    cref->on_write_cb = on_demo_write_cb;
+    cref->on_write_cb = on_http_write_cb;
     cref->on_write_cb_arg = href;
     cref->write_state == WRITE_STATE_ACTIVE;
-    cref->active_output_buffer_ref = demo_message_serialize(response_ref);
+    cref->active_output_buffer_ref = http_message_serialize(response_ref);
     if(cref->write_state == WRITE_STATE_STOP) {
-        call_on_write_cb(cref, DemoConnectionErrCode_is_closed);
+        call_on_write_cb(cref, HttpConnectionErrCode_is_closed);
         return;
     }
     post_to_runloop(cref, &postable_writer);
@@ -242,13 +242,13 @@ void democonnection_write(
 
 static void postable_writer(RunloopRef runloop_ref, void* arg)
 {
-    DemoConnectionRef cref = arg;
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
+    HttpConnectionRef cref = arg;
+    RBL_CHECK_TAG(HttpConnection_TAG, cref)
+    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
     if(cref->write_state == WRITE_STATE_STOP) {
         IOBuffer_free(cref->active_output_buffer_ref);
         cref->active_output_buffer_ref = NULL;
-        call_on_write_cb(cref, DemoConnectionErrCode_is_closed);
+        call_on_write_cb(cref, HttpConnectionErrCode_is_closed);
         return;
     }
     RBL_ASSERT((cref->active_output_buffer_ref != NULL), "post_write_handler");
@@ -261,9 +261,9 @@ static void postable_writer(RunloopRef runloop_ref, void* arg)
 
 static void writer_cb(void* cref_arg, long bytes_written, int status)
 {
-    DemoConnectionRef cref = cref_arg;
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
+    HttpConnectionRef cref = cref_arg;
+    RBL_CHECK_TAG(HttpConnection_TAG, cref)
+    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
     RBL_ASSERT((cref->active_output_buffer_ref != NULL), "writer");
     IOBufferRef iob = cref->active_output_buffer_ref;
     RBL_ASSERT((bytes_written > 0),"should not get here is no bytes written");
@@ -276,21 +276,21 @@ static void writer_cb(void* cref_arg, long bytes_written, int status)
         post_to_runloop(cref, &postable_write_call_cb);
     }
 }
-static void post_to_runloop(DemoConnectionRef cref, void(*postable_function)(RunloopRef, void*))
+static void post_to_runloop(HttpConnectionRef cref, void(*postable_function)(RunloopRef, void*))
 {
     runloop_post(cref->runloop_ref, postable_function, cref);
 }
 static void postable_write_call_cb(RunloopRef runloop_ref, void* arg)
 {
-    DemoConnectionRef cref = arg;
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
+    HttpConnectionRef cref = arg;
+    RBL_CHECK_TAG(HttpConnection_TAG, cref)
+    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
     call_on_write_cb(cref, 0);
 }
-static void call_on_write_cb(DemoConnectionRef cref, int status)
+static void call_on_write_cb(HttpConnectionRef cref, int status)
 {
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
+    RBL_CHECK_TAG(HttpConnection_TAG, cref)
+    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
     RBL_ASSERT((cref->on_write_cb != NULL), "write call back is NULL");
     RBL_ASSERT((cref->on_write_cb_arg != NULL), "write call arg back is NULL");
     void(*tmp)(void*, int) = cref->on_write_cb;
@@ -305,19 +305,19 @@ static void call_on_write_cb(DemoConnectionRef cref, int status)
 // Error functions
 /////////////////////////////////////////////////////////////////////////////////////
 
-static void write_error(DemoConnectionRef cref, char* msg)
+static void write_error(HttpConnectionRef cref, char* msg)
 {
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
+    RBL_CHECK_TAG(HttpConnection_TAG, cref)
+    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
     printf("Write_error got an error this is the message: %s  fd: %d\n", msg, cref->asio_stream_ref->fd);
     cref->write_state = WRITE_STATE_STOP;
-    call_on_write_cb(cref, DemoConnectionErrCode_io_error);
+    call_on_write_cb(cref, HttpConnectionErrCode_io_error);
     post_to_runloop(cref, &postable_cleanup);
 }
-static void read_error(DemoConnectionRef cref, char* msg)
+static void read_error(HttpConnectionRef cref, char* msg)
 {
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
+    RBL_CHECK_TAG(HttpConnection_TAG, cref)
+    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
     RBL_LOG_FMT("Read_error got an error this is the message: %s  fd: %d\n", msg, cref->asio_stream_ref->fd);
     cref->read_state = READ_STATE_STOP;
     RunloopRef rl = asio_stream_get_runloop(cref->asio_stream_ref);
@@ -330,15 +330,15 @@ static void read_error(DemoConnectionRef cref, char* msg)
 /////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * This must be the last democonnection function to run and it should only run once.
+ * This must be the last http_connection function to run and it should only run once.
  */
 static void postable_cleanup(RunloopRef runloop, void* arg_cref)
 {
-    DemoConnectionRef cref = arg_cref;
+    HttpConnectionRef cref = arg_cref;
     RBL_LOG_FMT("postable_cleanup entered\n");
     RBL_ASSERT((cref->cleanup_done_flag == false), "cleanup should not run more than once");
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
+    RBL_CHECK_TAG(HttpConnection_TAG, cref)
+    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
     asio_stream_close(cref->asio_stream_ref);
     cref->on_close_cb(cref->on_close_cb_arg);
 }

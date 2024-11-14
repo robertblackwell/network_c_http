@@ -54,21 +54,21 @@ typedef struct HttpConnection_s {
 
 } HttpConnection, *HttpConnectionRef;
 
-HttpConnectionRef Httpconnection_new(
+HttpConnectionRef http_connection_new(
         RunloopRef runloop_ref,
         int socket,
         void(*connection_completion_cb)(void* href),
         void* handler_ref
         );
-void Httpconnection_init(
+void http_connection_init(
         HttpConnectionRef this,
         RunloopRef runloop_ref,
         int socket,
         void(*connection_completion_cb)(void* href),
         void* handler_ref
         );
-void Httpconnection_free(HttpConnectionRef this);
-void Httpconnection_read(HttpConnectionRef connection_ref, void(*on_http_read_cb)(void* href, HttpMessageRef, int status), void* href);
-void Httpconnection_write(HttpConnectionRef connection_ref, HttpMessageRef, void(*on_http_write_cb)(void* href, int status), void* href);
-void Httpconnection_close(HttpConnectionRef cref);
+void http_connection_free(HttpConnectionRef this);
+void http_connection_read(HttpConnectionRef connection_ref, void(*on_http_read_cb)(void* href, HttpMessageRef, int status), void* href);
+void http_connection_write(HttpConnectionRef connection_ref, HttpMessageRef, void(*on_http_write_cb)(void* href, int status), void* href);
+void http_connection_close(HttpConnectionRef cref);
 #endif

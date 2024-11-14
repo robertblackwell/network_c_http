@@ -1,8 +1,8 @@
-#ifndef c_http_demo_syncsocket_h
-#define c_http_demo_syncsocket_h
+#ifndef c_http_http_syncsocket_h
+#define c_http_http_syncsocket_h
 
-#include <http_in_c/demo_protocol/demo_message.h>
-#include <http_in_c/demo_protocol/demo_parser.h>
+#include <http_in_c/http_protocol/http_message.h>
+#include <http_in_c/http_protocol/http_parser.h>
 
 #include <assert.h>
 #include <stdio.h>
@@ -19,34 +19,34 @@
  * one or more request roundtrip
  * @{
  */
-typedef struct DemoSyncSocket_s DemoSyncSocket, *DemoSyncSocketRef;
+typedef struct HttpSyncSocket_s HttpSyncSocket, *HttpSyncSocketRef;
 
 /**
  * @brief Create a new client instance.
- * @return DemoSyncSocketRef
+ * @return HttpSyncSocketRef
  */
-DemoSyncSocketRef demo_syncsocket_new();
-void demo_syncsocket_init(DemoSyncSocketRef this);
-DemoSyncSocketRef demo_syncsocket_new_from_fd(int fd);
+HttpSyncSocketRef http_syncsocket_new();
+void http_syncsocket_init(HttpSyncSocketRef this);
+HttpSyncSocketRef http_syncsocket_new_from_fd(int fd);
 
 /**
  * @brief Free ca client instance and all it associated resources, including closing the socket connection to the server.
  *
- * @NOTE: This function updates the variable holding the DemoSyncSocketRef to NULL.
+ * @NOTE: This function updates the variable holding the HttpSyncSocketRef to NULL.
  *
- * @param this_ptr DemoSyncSocketRef*
+ * @param this_ptr HttpSyncSocketRef*
  */
-void demo_syncsocket_free(DemoSyncSocketRef this);
+void http_syncsocket_free(HttpSyncSocketRef this);
 /**
  * @brief Connecto the the given host and port.
- * @param this DemoSyncSocketRef
+ * @param this HttpSyncSocketRef
  * @param host char*      A host name like "localhost" or "google.com"
  * @param port            A port number
  */
-void demo_syncsocket_connect(DemoSyncSocketRef this, char* host, int port);
-int demo_syncsocket_read_message(DemoSyncSocketRef client_ref, DemoMessageRef* msg_ref_ptr);
-int demo_syncsocket_write_message(DemoSyncSocketRef client_ref, DemoMessageRef msg_ref);
-void demo_syncsocket_close(DemoSyncSocketRef this);
+void http_syncsocket_connect(HttpSyncSocketRef this, char* host, int port);
+int http_syncsocket_read_message(HttpSyncSocketRef client_ref, HttpMessageRef* msg_ref_ptr);
+int http_syncsocket_write_message(HttpSyncSocketRef client_ref, HttpMessageRef msg_ref);
+void http_syncsocket_close(HttpSyncSocketRef this);
 
 /** @} */
 #endif

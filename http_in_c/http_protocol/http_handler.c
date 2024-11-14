@@ -27,17 +27,17 @@ static void connection_completion_cb(void* href)
     HttpHandlerRef handler_ref = href;
     handler_ref->completion_callback(handler_ref->server_ref, href);
 }
-HttpHandlerRef demohandler_new(
+HttpHandlerRef http_handler_new(
         RunloopRef reactor_ref,
         int socket,
         void(*completion_cb)(void*, HttpHandlerRef),
         void* server_ref)
 {
     HttpHandlerRef this = malloc(sizeof(HttpHandler));
-    demohandler_init(this, reactor_ref, socket, completion_cb, server_ref);
+    http_handler_init(this, reactor_ref, socket, completion_cb, server_ref);
     return this;
 }
-void demohandler_init(
+void http_handler_init(
         HttpHandlerRef this,
         RunloopRef runloop_ref,
         int socket,
@@ -49,7 +49,7 @@ void demohandler_init(
     RBL_CHECK_TAG(HttpHandler_TAG, this)
     RBL_CHECK_END_TAG(HttpHandler_TAG, this)
     this->raw_socket = socket;
-    this->http_connection_ref = democonnection_new(
+    this->http_connection_ref = http_connection_new(
             runloop_ref,
             socket,
             connection_completion_cb,
@@ -62,14 +62,14 @@ void demohandler_init(
     this->output_list = List_new();
     this->active_response = NULL;
 
-    democonnection_read(this->http_connection_ref, &handle_request, this);
+    http_connection_read(this->http_connection_ref, &handle_request, this);
 }
 
-void demohandler_free(HttpHandlerRef this)
+void http_handler_free(HttpHandlerRef this)
 {
     RBL_CHECK_TAG(HttpHandler_TAG, this)
     RBL_CHECK_END_TAG(HttpHandler_TAG, this)
-    democonnection_free(this->http_connection_ref);
+    http_connection_free(this->http_connection_ref);
     this->http_connection_ref = NULL;
     // dont own this->server_ref
     // dont own runloop_ref
@@ -131,7 +131,7 @@ static void postable_write_start(RunloopRef runloop_ref, void* href)
     RBL_ASSERT((handler_ref->active_response == NULL), "handler active response should be NULL");
     handler_ref->active_response = response;
     if(response != NULL) {
-        democonnection_write(handler_ref->http_connection_ref, response, on_write_complete_cb, href);
+        http_connection_write(handler_ref->http_connection_ref, response, on_write_complete_cb, href);
     }
 }
 static void on_write_complete_cb(void* href, int status)
@@ -156,5 +156,5 @@ static void handler_postable_read_start(RunloopRef runloop_ref, void* href)
     HttpHandlerRef handler_ref = href;
     RBL_CHECK_TAG(HttpHandler_TAG, handler_ref)
     RBL_CHECK_END_TAG(HttpHandler_TAG, handler_ref)
-    democonnection_read(handler_ref->http_connection_ref, &handle_request, href);
+    http_connection_read(handler_ref->http_connection_ref, &handle_request, href);
 }

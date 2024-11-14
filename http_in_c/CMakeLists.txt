@@ -42,19 +42,19 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 		${EXTSRC}/llhttp/http.c
 		${EXTSRC}/llhttp/llhttp.c
 	#async
-		async/async_handler.c
-		async/async_socket.c
-		async/async_server.c
-        async/connection_api.c
-		async/connection_cleanup.c
-		async/connection_event.c
-		async/connection_helpers.c
-		async/connection_read.c
-		async/connection_write.c
+#		async/async_handler.c
+#		async/async_socket.c
+#		async/async_server.c
+#        async/connection_api.c
+#		async/connection_cleanup.c
+#		async/connection_event.c
+#		async/connection_helpers.c
+#		async/connection_read.c
+#		async/connection_write.c
 	)
 
 set_source_files_properties(${C_HTTP_LIBRARY_SOURCE_FILES} PROPERTIES LANGUAGE C)
-add_subdirectory(async)
+#add_subdirectory(http_protocol)
 add_subdirectory(common)
 add_subdirectory(demo_protocol)
 add_subdirectory(http)

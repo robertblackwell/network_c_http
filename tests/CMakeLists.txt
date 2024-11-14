@@ -33,7 +33,7 @@ add_subdirectory(test_list_macro)
 #add_subdirectory(test_memalloc) #does not build
 add_subdirectory(test_message)
 #add_subdirectory(test_own)
-add_subdirectory(test_parser)
+add_subdirectory(test_http_parser)
 add_subdirectory(test_query)
 add_subdirectory(test_queue)
 

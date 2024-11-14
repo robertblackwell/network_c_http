@@ -223,9 +223,9 @@ enable_testing()
 
 add_subdirectory(http_in_c)
 add_subdirectory(tests)
-add_subdirectory(sync_server_app)
-add_subdirectory(verifier)
-add_subdirectory(async-server-app)
+#add_subdirectory(sync_server_app)
+#add_subdirectory(verifier)
+#add_subdirectory(async-server-app)
 add_subdirectory(demo_app)
 
 # Doxygen
