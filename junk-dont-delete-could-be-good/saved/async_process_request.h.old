@@ -1,8 +1,0 @@
-#ifndef C_HTTP_ASYNC_PROCESS_REQUEST_H
-#define C_HTTP_ASYNC_PROCESS_REQUEST_H
-#include <http_in_c/http/message.h>
-#include <http_in_c/async/async_handler.h>
-
-MessageRef process_request(AsyncHandlerRef href, MessageRef request);
-
-#endif

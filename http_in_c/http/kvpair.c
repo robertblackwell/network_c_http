@@ -93,11 +93,11 @@ void KVPair_free(KVPairRef hlref)
     eg_free((void*) hlref);
 }
 void KVPair_dealloc(void* ptr) { KVPair_free((KVPairRef)(ptr));}
-char* KVPair_label(const KVPairRef hlref)
+char* KVPair_label(KVPair const * hlref)
 {
     return hlref->label_ptr;
 }
-char* KVPair_value(const KVPairRef hlref)
+char* KVPair_value(KVPair const * hlref)
 {
     return hlref->value_ptr;
 }

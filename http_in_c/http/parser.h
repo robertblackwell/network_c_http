@@ -80,8 +80,13 @@ void http_parser_free(http_parser_r this);
  * The http_parser_consume() function will only return  if:
  *
  * -    it has consumed all the data. So read some more and give it to consume.
+ *
  * -    an error was encountered.
  *      Either a parse error, or an io error - This should be treated as fatal and the connection closed.
+ *
+ * -    in a situation where a messsage does not contain a message length value the parser may need to be given
+ *      an End-Of_File signal in the form of a call to http_parser_consume with a zero length buffer.
+ *      This need for this will be signalled by llhttp_message_needs_eof(parser->m_llhttp_ptr) returning true
  *
  *
  * @param parser http_parser_r
@@ -90,6 +95,7 @@ void http_parser_free(http_parser_r this);
  * @return llhttp_errno_t
  */
 llhttp_errno_t          http_parser_consume(http_parser_t* parser, const void* buffer, int length);
+llhttp_errno_t          http_parser_comsume_buffer(http_parser_t* parser, IOBufferRef iobuffer_ref);
 llhttp_errno_t          http_parser_get_errno(http_parser_t* parser);
 http_parser_error_t     http_parser_get_error(http_parser_t* parser);
 const void*             http_parser_last_byte_parsed(http_parser_t* this);

@@ -65,7 +65,7 @@ void KVPair_set_value(KVPairRef hlref, const char* valptr, size_t vallen);
  *                      held inside the KVPairRef so ownership is retained
  *                      in the KVPairRef hlref
  */
-char* KVPair_label(const KVPairRef hlref);
+char* KVPair_label(KVPair const * hlref);
 /**
  * @brief Returns the value string for an existing KVPair.
  * \param hlref KVPairRef
@@ -73,6 +73,6 @@ char* KVPair_label(const KVPairRef hlref);
  *                      held inside the KVPairRef so ownership is retained
  *                      in the KVPairRef hlref
  */
-char* KVPair_value(const KVPairRef hlref);
+char* KVPair_value(KVPair const * hlref);
 /** @} */
 #endif

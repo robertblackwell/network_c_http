@@ -37,7 +37,10 @@ typedef ListIter HdrListIter;
 
 
 HdrListRef  HdrList_new();
-//void HdrList_dispose(HdrListRef* lref_ptr) ;
+/**
+ * This function free all the elements as well as the list root.
+ * It can do this because itt know the type of the element
+ */
 void HdrList_safe_free(HdrListRef p);
 int  HdrList_size(HdrListRef lref);
 

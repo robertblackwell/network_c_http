@@ -1,30 +1,29 @@
+Finsh off demo:
+  ☐ valgrind for memory leaks
+  ☐ profile to find  bottle necks
+  ☐ record some async vs sync comparison times
+
+Pickup http:
+  ☐ get parse tests working and review parser in light of how its done in demo
+  ☐ refresh http verify and sync server in light of demo and get those working
+  ☐ what can demon_async_app tells us about http_async_app structure
+  ☐ valgrind for memory leaks
+  ☐ profile for bottle necks
+  ☐ run tests to compare performance of sync and asyn servers
+
 New set of priorities Nov 2024:
-    ✔ make logger multi-threaded @done(24-11-03 20:42)
-    ☐ find the multi-threaded 
     ☐ timers do not post the callback - fix
     ☐ runloop.h does not cleanly display the external interface, still too much private stuff
     ☐ interthread queue - have a version that seems to work. More testing.
-    ✔ eventfd has 3 different mechanisms. Have tests that try them all @done(24-11-04 16:40)
-    ✔ review tests for io and listen @done(24-11-10 13:37)
-    ✔ how to encode #define CCCCC inside the cmakelist.txt file to apply for part of the code base. More generally how to handle config via #defines @done(24-11-10 13:37)
-    ✔ can some fds be level triggered while others are edge ? - answer is yes - level vs edge is by fd @done(24-11-04 08:56)
-    ✔ following on trigger question - change runloop functions so that some fd's can be level triggered and others edge @done(24-11-10 13:37)
     ☐ there is confusion between runloop_register and runloop_arm - clear up that confusion
-    ✔ epoll has a mechanism to remeber a void* for each fd - could used this rather than the fd to find the instance of the watcher struct @done(24-11-10 13:37)
     ☐ demo_app and demo_verify seem to be working. valgrind for memory leaks
     ☐ demo_app profile tools work out how to do this - clion may have a way
-    ☐ a problem with lists some list function free() the object held by the list 
-      ☐ -- List_itr_remove  is one such example. Need to review all list functions and their calls to make this clean
-      ☐ should review all List_new() calls to be sure we know which lists are free()ing their content objects
-      ☐ with a view to removing this option
     ☐ httpmessage does not correctly free the elements of the HDRList_free
     ☐ test_demo_full does not finish 
 
-This project is out of control:
   ☐ Too many things happening
   ☐ Demo protocol needs to be finished - run valgrind to find memory leaks
   ☐ parser interface needs to be uniformized - that requires Html parser looks like the DemoParser
-New list of TODOs :
   ☐ what if anything is the correct role for thread local storage
   ☐ need to find ways to reduce the malloc-ing that is taking place
       ☐ for the 2 run lists use an array of Functors with pass and return by value for adding and removing
@@ -36,7 +35,6 @@ New list of TODOs :
   ☐ add posting to a reactor from another thread
   ☐ make the reactor tests more understandable 
   ☐ reactor q test fails
-  Tidy up the async stuff:
   ☐ review reactor and run loop functions with a view to keeping as small as possible
   ☐ review watchers for the same reason
   ☐ in both cases make sure comments are correct
@@ -46,41 +44,26 @@ New list of TODOs :
   ☐ check tagging is correct everywhere and try to put tagging inside the .c file not visible in the .h file
   ☐ have a single aio_api.h file which pulls in all the stuff needed for async io
   ☐ can we timeout waitiing for listen/read/write events
-Tidy up sync stuff:
   ☐ have a single interface header file for sync example
 
-
-
-TODO:
-API for sync server: 
   ☐ ceg_alloc - a better name
   ☐ check all header files in api for extraneous include - that is include of non api header files
   ☐ Message peeks into ll_parser_types to latch onto the enums provided by llhttp. Must be a tidier way to do this.
-Logging:
   ☐ merge c_http/logging.h/c + print macros in aio_api/type.h
 
-master header files for each layer of the module tree:
 
-Tests:
  ☐ better tests for List found a bug in it recently that was not caught by tests
  ☐ more tests for buffers - a number of new methods with no tests
-Buffers:  
-Installation as a library:
   ☐ add installation step to the Cmake files
-Policy free(&):
  ☐ review the policy of free(&thing) that has caused some bugs. Also an issue for List remove type functions. How to enforce
  ☐ XXX_free -> XXX_dispose not yet complete
-Misc:
  ☐ handler_example demo how to parse url/target, query string as tools for a meaningful handle function
  ☐ make handler_example echo the request in a way that demonstrates if picked out all the relevant bits of the request
-Macros:
  ☐ add the tag and type check macros to the top level macro file
  ☐ put check_tag usage in .c file not .h file
-Documentation:
 ☐ documentation
 ☐ more documentation for writer, bufferchain, client server - in particular explain the handler
 ☐ work out how to do read-the-docs documentation  
-AIO API:
 ☐ XrHandler still uses HdrList and hence peeks behind the api - fix
 ☐ XXX_free to var variable in aio_api and reactor folders
 ☐ lets get the server working at least in a rudimentary fashion
@@ -89,20 +72,29 @@ AIO API:
 ☐ probably need a Connector object
 ☐ this about having a SockReader and SockWriter as derived types of Conn rather than loading everything (all the read/write functions) into Conn
 
-Runloop Interface:
 ☐ rethink the reactor interface - multiple watchers per socket fd, more fine grained arm/disarm - actually more convenient arming/disarming. 
 ☐ The interface should not require knowledge of such things as epollin epollout  
-Other:
 ☐ combine new and register into a single call and use arm and disarm consistently
 ☐ timers have their own chain and tiggered by epoll_wait return rather than use an FDA
 ☐ io watchers need to support multiple watchers per fd each watching different events and different callbacks. This is so each socket fd can have both a read watcher and a write watcher. This is necessary to handle duplex protocols such as http/1.1 tunnel.
 ☐ inter thread queue does not seem to work find out why - how to have multi threaded async server. Maybe investigate libuv thread pool
 ☐ clean up xr server - too much redundant code
-conn:
  ☐ make conn into an opaque object
 
 ＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿＿
 Archive:
+  ✔ make logger multi-threaded @done(24-11-03 20:42) @project(New set of priorities Nov 2024)
+  ✔ find the multi-threaded   @done(24-11-12 19:36) @project(New set of priorities Nov 2024)
+  ✔ eventfd has 3 different mechanisms. Have tests that try them all @done(24-11-04 16:40) @project(New set of priorities Nov 2024)
+  ✔ review tests for io and listen @done(24-11-10 13:37) @project(New set of priorities Nov 2024)
+  ✔ how to encode #define CCCCC inside the cmakelist.txt file to apply for part of the code base. More generally how to handle config via #defines @done(24-11-10 13:37) @project(New set of priorities Nov 2024)
+  ✔ can some fds be level triggered while others are edge ? - answer is yes - level vs edge is by fd @done(24-11-04 08:56) @project(New set of priorities Nov 2024)
+  ✔ following on trigger question - change runloop functions so that some fd's can be level triggered and others edge @done(24-11-10 13:37) @project(New set of priorities Nov 2024)
+  ✔ epoll has a mechanism to remeber a void* for each fd - could used this rather than the fd to find the instance of the watcher struct @done(24-11-10 13:37) @project(New set of priorities Nov 2024)
+  ✔ a problem with lists some list function free() the object held by the list @done(24-11-13 19:52) @project(New set of priorities Nov 2024)
+  ✔ -- List_itr_remove  is one such example. Need to review all list functions and their calls to make this clean @done(24-11-13 19:52) @project(New set of priorities Nov 2024)
+  ✔ should review all List_new() calls to be sure we know which lists are free()ing their content objects @done(24-11-13 19:52) @project(New set of priorities Nov 2024)
+  ✔ with a view to removing this option @done(24-11-13 19:52) @project(New set of priorities Nov 2024)
  ✔ rename XrReactor to something simpler and more generally introduce a runloop naming scheme @done (22-11-17 09:09) @project(New list of TODOs )
  ✔ make sure all the reactor tests actually run - there are some commented out @done (22-11-17 09:09) @project(New list of TODOs )
  ✔ ensure that tagggin does not break quietly if the tag is too big - gets caught at runtiime @done (21-10-17 10:39) @project(New list of TODOs )
