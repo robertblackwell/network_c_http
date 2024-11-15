@@ -4,9 +4,9 @@
  * This file contains a number of parsing tests for request messages
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// PERR01  request with error no minor version
+// REQ_ParseERRor_01  request with error no minor version
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-static int vfunc_perr01 (ListRef results)
+static int vfunc_REQ_parse_ERRor_01 (ListRef results)
 {
     test_output_t* rref = (test_output_t*) List_remove_first (results);
     MessageRef m1 = rref->message;
@@ -27,9 +27,9 @@ static int vfunc_perr01 (ListRef results)
     return 0;
 #endif
 }
-static parser_test_t* test_case_perr01() {
+static parser_test_t* test_case_REQ_Parse_ERRor_01() {
 // A0011
-    static const char *description = "perr01 parser error no minor version";
+    static const char *description = "REQ ParseError01 parser error no minor version";
     static const char *lines[] = {
             (char *) "GET /target HTTP/1.\r\n",
             (char *) "Host: ahost\r\n",
@@ -38,12 +38,12 @@ static parser_test_t* test_case_perr01() {
             (char *) "Content-length: 0\r\n\r\n",
             NULL
     };
-    return parser_test_new(description, lines, vfunc_perr01);
+    return parser_test_new(description, lines, vfunc_REQ_parse_ERRor_01);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // IOERR01  request simulated IO error
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-static int test_ioerr01_vfunc (ListRef results)
+static int test_REQ_ioerror_01_vfunc (ListRef results)
 {
     test_output_t* rref = (test_output_t*) List_remove_first (results);
     MessageRef m1 = rref->message;
@@ -64,8 +64,8 @@ static int test_ioerr01_vfunc (ListRef results)
     return 0;
 #endif
 }
-static parser_test_t* test_case_ioerr01() {
-    static const char *description = "A0012 simulated io error";
+static parser_test_t* test_case_REQ_ioerror_01() {
+    static const char *description = "REQIOError request with simulated io error";
     static const char *lines[] = {
             (char *) "GET /target HTTP/1.1\r\n",
             (char *) "Host: ahost\r\n",
@@ -74,12 +74,12 @@ static parser_test_t* test_case_ioerr01() {
             (char *) "error",
             NULL
     };
-    return parser_test_new(description, lines, test_ioerr01_vfunc);
+    return parser_test_new(description, lines, test_REQ_ioerror_01_vfunc);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ROK001  response OK 200 with body and content length 10
+// REQ_001  response OK 200 with body and content length 10
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-static int test_ROK001_vfunc (ListRef results)
+static int test_REQ_001_vfunc (ListRef results)
 {
     test_output_t* rref = (test_output_t*) List_remove_first (results);
     MessageRef m1 = rref->message;
@@ -98,8 +98,8 @@ static int test_ROK001_vfunc (ListRef results)
     CHECK_BODY(m1, "01234567890");
     return 0;
 }
-static parser_test_t* test_case_ROK001() {
-    static const char *description = "A001 response 200 with body and content length 10";
+static parser_test_t* test_case_REQ_001() {
+    static const char *description = "REQ 001 good request with content length and content in a single buffer";
     static const char *lines[] = {
             (char *) "GET /target HTTP/1.1\r\n",
             (char *) "Host: ahost\r\n",
@@ -109,12 +109,12 @@ static parser_test_t* test_case_ROK001() {
             (char *) "01234567890",
             NULL
     };
-    return parser_test_new(description, lines, test_ROK001_vfunc);
+    return parser_test_new(description, lines, test_REQ_001_vfunc);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ROK002  response OK 201 with body and content length 10 some body data in header buffer
+// REQ_002  response OK 201 with body and content length 10 some body data in header buffer
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-static int test_ROK002_vfunc (ListRef results)
+static int test_REQ_002_vfunc (ListRef results)
 {
     test_output_t* rref = (test_output_t*) List_remove_first (results);
     MessageRef m1 = rref->message;
@@ -130,8 +130,8 @@ static int test_ROK002_vfunc (ListRef results)
 
     return 0;
 }
-static parser_test_t* test_case_ROK002() {
-    static const char *description = "ROK002 response 201 body length 10 SOME body data in header buffer";
+static parser_test_t* test_case_REQ_002() {
+    static const char *description = "REQ 002 good request with content spread over 2 buffers";
     static const char *lines[] = {
             (char *) "GET /target HTTP/1.1\r\n",
             (char *) "Host: ahost\r\n",
@@ -141,12 +141,12 @@ static parser_test_t* test_case_ROK002() {
             (char *) "CDEFGHIJ",
             NULL
     };
-    return parser_test_new(description, lines, test_ROK002_vfunc);
+    return parser_test_new(description, lines, test_REQ_002_vfunc);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ROK003  response OK 201 with body and content length 10 data in same buffer as black header line
+// REQ_003  REQ_003 good request with blank line between header and content in same buffer as content
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-static int test_ROK003_vfunc (ListRef results)
+static int test_REQ_003_vfunc (ListRef results)
 {
     test_output_t* rref = (test_output_t*) List_remove_first (results);
     MessageRef m1 = rref->message;
@@ -177,9 +177,9 @@ static int test_ROK003_vfunc (ListRef results)
     UT_EQUAL_CSTR(KVPair_value (hlref_content_length), "10");
     return 0;
 };
-static parser_test_t* test_case_ROK003()
+static parser_test_t* test_case_REQ_003()
 {
-    static const char *description = "ROK003 response 201 body length 10 SOME body data in with blank line buffer EOH and EOM at same time";
+    static const char *description = "REQ 003 good request with blank line between header and content in same buffer as content";
     static const char *lines[] = {
             (char *) "GET /target HTTP/1.1\r\n",
             (char *) "Host: ahost\r\n",
@@ -189,12 +189,12 @@ static parser_test_t* test_case_ROK003()
             (char *) "\r\n\r\nABCDEFGHIJ",
             NULL
     };
-    return parser_test_new(description, lines, test_ROK003_vfunc);
+    return parser_test_new(description, lines, test_REQ_003_vfunc);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ROK004  response OK 200 with body and content length 10
+// REQ_004  REQ_004 good request chunked body
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-static int test_ROK004_vfunc (ListRef results) {
+static int test_REQ_004_vfunc (ListRef results) {
     test_output_t* rref = (test_output_t*) List_remove_first(results);
     MessageRef m1 = rref->message;
     HdrListRef h = Message_get_headerlist(m1);
@@ -208,8 +208,8 @@ static int test_ROK004_vfunc (ListRef results) {
     CHECK_BODY(m1, "12345678901234567890XXXXX12345678901234567890HGHGH1234567890");
     return 0;
 }
-static parser_test_t* test_case_ROK004() {
-    static const char *description = "ROK004 response 201 body chunked encoding NO body data in header buffer";
+static parser_test_t* test_case_REQ_004() {
+    static const char *description = "REQ 004 good request chunked body";
     static const char *lines[] = {
             (char *) "GET /target HTTP/1.1\r\n",
             (char *) "Host: ahost\r\n",
@@ -225,14 +225,14 @@ static parser_test_t* test_case_ROK004() {
             (char *) "\r\n",
             NULL
     };
-    return parser_test_new(description, lines, test_ROK004_vfunc);
+    return parser_test_new(description, lines, test_REQ_004_vfunc);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ROK005  response OK 201 chunked encoding - some body data in buffer with blank header line
+// REQ_005 good request chunked body spread over buffers mixed with blank lines"
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-static int test_ROK005_vfunc (ListRef results);
-static parser_test_t* test_case_ROK005() {
-    static const char *description = "ROK005 response  201 body chunked encoding SOME body data in buffer with blank line after header";
+static int test_REQ_005_vfunc (ListRef results);
+static parser_test_t* test_case_REQ_005() {
+    static const char *description = "REQ 005 good request chunked body spread over buffers mixed with blank lines";
     static const char *lines[] = {
             (char *) "GET /target HTTP/1.1\r\n",
             (char *) "Host: ahost\r\n",
@@ -248,9 +248,9 @@ static parser_test_t* test_case_ROK005() {
             (char *) "\r\n",
             NULL
     };
-    return parser_test_new(description, lines, test_ROK005_vfunc);
+    return parser_test_new(description, lines, test_REQ_005_vfunc);
 }
-static int test_ROK005_vfunc (ListRef results)
+static int test_REQ_005_vfunc (ListRef results)
 {
     test_output_t* rref = (test_output_t*) List_remove_first (results);
     MessageRef m1 = rref->message;
@@ -268,11 +268,11 @@ static int test_ROK005_vfunc (ListRef results)
 
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ROK006  response OK 201 simple chunked body
+// REQ_006  good request chunked body with another buffer arrangement
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-static int test_ROK006_vfunc (ListRef results);
-static parser_test_t* test_case_ROK006() {
-    static const char *description = "ROK006 simple 201 body chunked - chunks spread over different buffers";
+static int test_REQ_006_vfunc (ListRef results);
+static parser_test_t* test_case_REQ_006() {
+    static const char *description = "REQ 006 simple 201 body chunked - chunks spread over different buffers";
     static const char *lines[] = {
             (char *) "GET /target HTTP/1.1\r\n",
             (char *) "Host: ahost\r\n",
@@ -289,9 +289,9 @@ static parser_test_t* test_case_ROK006() {
             (char *) "\r\n",
             NULL
     };
-    return parser_test_new(description, lines, test_ROK006_vfunc);
+    return parser_test_new(description, lines, test_REQ_006_vfunc);
 }
-static int test_ROK006_vfunc (ListRef results)
+static int test_REQ_006_vfunc (ListRef results)
 {
     test_output_t* rref = (test_output_t*) List_remove_first (results);
     MessageRef m1 = rref->message;
@@ -309,12 +309,12 @@ static int test_ROK006_vfunc (ListRef results)
 
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ROK007  request and response back to back
+// REQ_007  2 requests back to back and a shared buffer
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-static int test_ROK007_vfunc (ListRef results);
-static parser_test_t* test_case_ROK007()
+static int test_REQ_007_vfunc (ListRef results);
+static parser_test_t* test_case_REQ_007()
 {
-    static const char *description = "ROK007 request and response back to back ";
+    static const char *description = "REQ_007 request and response back to back ";
     static const char *lines[] = {
         (char *) "GET /target HTTP/1.1\r\n",
         (char *) "Host: ahost\r\n",
@@ -333,9 +333,9 @@ static parser_test_t* test_case_ROK007()
         (char *) "ABCDEFGHIJK\0      ",
         NULL
     };
-    return parser_test_new(description, lines, test_ROK007_vfunc);
+    return parser_test_new(description, lines, test_REQ_007_vfunc);
 }
-static int test_ROK007_vfunc (ListRef results)
+static int test_REQ_007_vfunc (ListRef results)
 {
     test_output_t* rref = (test_output_t*) List_remove_first (results);
     MessageRef m1 = rref->message;
@@ -380,13 +380,12 @@ static int test_ROK007_vfunc (ListRef results)
     return 0;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ROK008  request GET with Transfer-Encoding: identity/dummy and No content-length
-// Gives an error "invalid transfer encoding" Not convinced this is correct
+// REQ_008  request without content length - end-of-message signalled by EOF
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-static int test_ROK008_vfunc (ListRef results);
-static parser_test_t* test_case_ROK008() {
+static int test_REQ_008_vfunc (ListRef results);
+static parser_test_t* test_case_REQ_008() {
 // A008
-    static const char *description = "ROK008 No content-length, has transfer encoding but not chunked. Parsing should make content-length: 10";
+    static const char *description = "REQ_008  request without content length - end-of-message signalled by EOF";
     static const char *lines[] = {
             (char *) "GET /target HTTP/1.1\r\n",
             (char *) "Host: ahost\r\n",
@@ -398,9 +397,9 @@ static parser_test_t* test_case_ROK008() {
             (char *) "1234567890",
             (char *) NULL,
     };
-    return parser_test_new(description, lines, test_ROK008_vfunc);
+    return parser_test_new(description, lines, test_REQ_008_vfunc);
 }
-static int test_ROK008_vfunc (ListRef results)
+static int test_REQ_008_vfunc (ListRef results)
 {
     test_output_t* rref = (test_output_t*) List_remove_first (results);
     MessageRef m1 = rref->message;
@@ -427,15 +426,11 @@ static int test_ROK008_vfunc (ListRef results)
 //    return 0;
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// ROK009  request GET without Content-Length or Transfer-Encoding: chunked
-// A stringt http1.1 parsing is allowed to reject this request.
-// However as shown below - this sequence is parsed as two messages:
-// -    the first one is a GET with no body
-// -    the second is an invalid message
+// REQ_009 request No content-length, no transfer encoding. Parses correctly
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-static int test_ROK009_vfunc (ListRef results);
-static parser_test_t* test_case_ROK009() {
-    static const char *description = "ROK009 No content-length, no transfer encoding. Parses correctly";
+static int test_REQ_009_vfunc (ListRef results);
+static parser_test_t* test_case_REQ_009() {
+    static const char *description = "REQ_009 request No content-length, no transfer encoding. Parses correctly";
     static const char *lines[] = {
             (char *) "GET /target HTTP/1.1\r\n",
             (char *) "Host: ahost\r\n",
@@ -446,9 +441,9 @@ static parser_test_t* test_case_ROK009() {
             (char *) "4567890",
             (char *) NULL,
     };
-    return parser_test_new(description, lines, test_ROK009_vfunc);
+    return parser_test_new(description, lines, test_REQ_009_vfunc);
 }
-static int test_ROK009_vfunc (ListRef results)
+static int test_REQ_009_vfunc (ListRef results)
 {
     test_output_t* rref = (test_output_t*) List_remove_first (results);
     MessageRef m1 = rref->message;
@@ -478,24 +473,24 @@ static int test_ROK009_vfunc (ListRef results)
 static ListRef make_request_tests_A ()
 {
     ListRef tl = List_new ();
-    List_add_back (tl, test_case_ROK001());
-    List_add_back (tl, test_case_ROK002());
-    List_add_back (tl, test_case_ROK003());
-    List_add_back (tl, test_case_ROK004());
-    List_add_back (tl, test_case_ROK005());
-    List_add_back (tl, test_case_ROK006());
-    List_add_back (tl, test_case_ROK007());
-    List_add_back (tl, test_case_ROK008());
-    List_add_back (tl, test_case_ROK009());
-    List_add_back (tl, test_case_perr01());
-    List_add_back (tl, test_case_ioerr01());
+    List_add_back (tl, test_case_REQ_001());
+    List_add_back (tl, test_case_REQ_002());
+    List_add_back (tl, test_case_REQ_003());
+    List_add_back (tl, test_case_REQ_004());
+    List_add_back (tl, test_case_REQ_005());
+    List_add_back (tl, test_case_REQ_006());
+    List_add_back (tl, test_case_REQ_007());
+    List_add_back (tl, test_case_REQ_008());
+    List_add_back (tl, test_case_REQ_009());
+    List_add_back (tl, test_case_REQ_Parse_ERRor_01());
+    List_add_back (tl, test_case_REQ_ioerror_01());
     return tl;
 }
 
 static ListRef make_request_tests_B ()
 {
     ListRef tl = List_new (NULL);
-    List_add_back (tl, test_case_perr01());
+    List_add_back (tl, test_case_REQ_ioerror_01());
     return tl;
 }
 int test_requests()

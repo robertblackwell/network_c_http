@@ -3,7 +3,7 @@
 message("test_include_dirs     ${TEST_INCLUDE_DIRS}")
 message("test_link_libs        ${TEST_LINK_LIBS}")
 
-set(TARGET test_parser)
+set(TARGET test_http_parser)
 add_executable(${TARGET}
 		test_main.c
 		run_list.c

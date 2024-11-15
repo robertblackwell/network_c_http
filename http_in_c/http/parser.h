@@ -96,6 +96,7 @@ void http_parser_free(http_parser_r this);
  */
 llhttp_errno_t          http_parser_consume(http_parser_t* parser, const void* buffer, int length);
 llhttp_errno_t          http_parser_comsume_buffer(http_parser_t* parser, IOBufferRef iobuffer_ref);
+llhttp_errno_t          http_parser_consume_eof(http_parser_t* parser);
 llhttp_errno_t          http_parser_get_errno(http_parser_t* parser);
 http_parser_error_t     http_parser_get_error(http_parser_t* parser);
 const void*             http_parser_last_byte_parsed(http_parser_t* this);

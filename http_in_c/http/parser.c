@@ -87,18 +87,36 @@ llhttp_errno_t http_parser_consume(http_parser_r parser, const void* buffer, int
     char* b = (char*) buffer;
     int need_eof = llhttp_message_needs_eof(parser->m_llhttp_ptr);
     llhttp_errno_t x = http_parser_get_errno(parser);
-    llhttp_errno_t errno = HPE_OK;
-    if (length == 0) {
-        errno = llhttp_finish(parser->m_llhttp_ptr);
+    llhttp_errno_t llerrno = HPE_OK;
+    if ((length == 0) && (llhttp_message_needs_eof(parser->m_llhttp_ptr))) {
+        llerrno = llhttp_finish(parser->m_llhttp_ptr);
     } else {
-        errno = llhttp_execute(parser->m_llhttp_ptr, b, length);
-//        int need_eof = llhttp_message_needs_eof(this->m_llhttp_ptr);
-//        if(need_eof) {
-//            return llhttp_finish(this->m_llhttp_ptr);
-//        }
+        llerrno = llhttp_execute(parser->m_llhttp_ptr, b, length);
     }
-    return errno;
+    return llerrno;
 }
+llhttp_errno_t  http_parser_consume_iobuffer(http_parser_r parser, IOBufferRef iob)
+{
+    llhttp_errno_t llerrno;
+    void* bufptr = IOBuffer_data(iob);
+    int buflength = IOBuffer_data_len(iob);
+    if ((buflength == 0) && (llhttp_message_needs_eof(parser->m_llhttp_ptr))) {
+        llerrno = llhttp_finish(parser->m_llhttp_ptr);
+    } else {
+        llerrno = llhttp_execute(parser->m_llhttp_ptr, bufptr, buflength);
+    }
+    return llerrno;
+
+}
+llhttp_errno_t  http_parser_consume_eof(http_parser_t* parser)
+{
+    llhttp_errno_t llerrno = HPE_OK;
+    if(llhttp_message_needs_eof(parser->m_llhttp_ptr)) {
+        llerrno = llhttp_finish(parser->m_llhttp_ptr);
+    }
+    return llerrno;
+}
+
 llhttp_errno_t http_parser_get_errno(http_parser_t* this)
 {
     RBL_CHECK_TAG(HTTP_PARSER_TAG, this)

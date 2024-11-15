@@ -100,29 +100,36 @@ int parser_test_run(parser_test_t* this)
         char buffer[1000];
         char* b = (char*) &buffer;
         int length = 900;
-        int status = test_input_read_some(ds_ptr, &buffer, length);
-        if(status > 0) {
-            rc = http_parser_consume(pref, (void *) buffer, status);
+        int bytes_read = test_input_read_some(ds_ptr, &buffer, length);
+
+        if(bytes_read > 0) {
+            rc = http_parser_consume(pref, (void *) buffer, bytes_read);
             if(rc != HPE_OK) {
-                printf("WPT_run status > 0 rc: %d\n", rc);
+//                printf("WPT_run status > 0 rc: %d\n", rc);
                 List_add_back(this->m_results, test_output_new(NULL, rc));
                 break;
             }
-        } else if(status == 0) {
+#if 1
+        } else if(bytes_read == 0) {
+            int xx = llhttp_message_needs_eof(pref->m_llhttp_ptr);
+            if(xx) {
+                printf("xx is true");
+            }
             rc = http_parser_consume(pref, NULL, 0);
             if(rc != HPE_OK) {
-                printf("WPT_run status == 0 rc: %d\n", rc);
+//                printf("WPT_run status == 0 rc: %d\n", rc);
                 List_add_back(this->m_results, test_output_new(NULL, rc));
             }
             break;
+#endif
         } else {
-            printf("WPT_run status < 0 io error rc: %d\n", HPE_USER);
+//            printf("WPT_run status < 0 io error rc: %d\n", HPE_USER);
             List_add_back(this->m_results, test_output_new(NULL, HPE_USER));
             break;
         }
     }
     int r =this->m_verify_func(this->m_results);
-    printf("Return from verify %d\n", r);
+    printf("Return from verify %d %s\n", r, this->test_input.description);
     IOBuffer_free(iobuf_ref); iobuf_ref = NULL;
     return r;
 }
