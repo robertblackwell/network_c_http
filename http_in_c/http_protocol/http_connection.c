@@ -141,6 +141,7 @@ void http_connection_read(HttpConnectionRef cref, void(*on_http_read_cb)(void* h
         call_on_read_cb(cref, msgref, 0);
     } else if(List_size(cref->input_message_list_ref) == 1) {
         HttpMessageRef msgref = List_remove_first(cref->input_message_list_ref);
+        cref->read_state = READ_STATE_ACTIVE;
         call_on_read_cb(cref, msgref, 0);
     } else {
         // nothing in the input queue so start a read operation
@@ -245,6 +246,7 @@ static void read_process_data(HttpConnectionRef cref) {
     if(en == HPE_OK) {
         if(List_size(cref->input_message_list_ref) > 0) {
             HttpMessageRef msg = List_remove_first(cref->input_message_list_ref);
+            cref->read_state = READ_STATE_IDLE;
             call_on_read_cb(cref, msg, 0);
         }
     } else {
@@ -270,49 +272,14 @@ static void on_parser_new_message_complete(void* arg_ctx, HttpMessageRef msg_ref
     RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
     List_add_back(cref->input_message_list_ref, msg_ref);
 }
-#if 0
-static void read_process_eof(HttpConnectionRef cref)
+static void postable_call_on_read_cb(RunloopRef runloop_ref, void* arg_cref)
 {
-    RBL_CHECK_TAG(HttpConnection_TAG, cref)
-    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
-    IOBufferRef iob = cref->active_input_buffer_ref;
-    enum llhttp_errno  en =  HttpParser_consume_eof(cref->parser_ref);
-    if(en != HPE_OK) {
-        const char* etext = llhttp_errno_name(en);
-//        error_response(etext);
-        read_error(cref, "");
-    }
-    assert(cref->active_input_buffer_ref != NULL);
-    assert(IOBuffer_data_len(cref->active_input_buffer_ref) == 0);
-    IOBuffer_free(cref->active_input_buffer_ref);
-    cref->active_input_buffer_ref = NULL;
-    RBL_LOG_FMT("After HttpParser_consume_eof returns  ");
-}
-
-static void postable_read_start(RunloopRef runloop_ref, void* arg)
-{
-    HttpConnectionRef cref = arg;
-    RBL_CHECK_TAG(HttpConnection_TAG, cref)
-    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
-    RBL_LOG_FMT("postable_read_start read_state: %d", cref->read_state);
-    if(cref->read_state == READ_STATE_STOP) {
-        call_on_read_cb(cref, NULL, HttpConnectionErrCode_is_closed);
-//        cref->on_read_cb(arg, NULL, HttpConnectionErrCode_is_closed);
-        return;
-    }
-    read_start(cref);
-}
-
-static void on_read_complete(HttpConnectionRef cref, HttpMessageRef msg, int error_code)
-{
-    RBL_CHECK_TAG(HttpConnection_TAG, cref)
-    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
-    RBL_ASSERT( (((msg != NULL) && (error_code == 0)) || ((msg == NULL) && (error_code != 0))), "msg != NULL and error_code == 0 failed OR msg == NULL and error_code != 0 failed");
+    HttpConnectionRef cref = arg_cref;
+    assert(List_size(cref->input_message_list_ref) > 0);
+    HttpMessageRef msgref = List_remove_first(cref->input_message_list_ref);
     cref->read_state = READ_STATE_IDLE;
-    RBL_LOG_FMT("read_message_handler - on_read_cb  read_state: %d\n", cref->read_state);
-    call_on_read_cb(cref, msg, error_code);
+    call_on_read_cb(cref, msgref, 0);
 }
-#endif
 static void call_on_read_cb(HttpConnectionRef cref, HttpMessageRef msg, int status)
 {
     RBL_CHECK_TAG(HttpConnection_TAG, cref)

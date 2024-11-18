@@ -1,5 +1,5 @@
-#include <http_in_c/demo_protocol/demo_server.h>
-#include <http_in_c/demo_protocol/demo_message.h>
+#include <http_in_c/http_protocol/http_server.h>
+#include <http_in_c/http/http_message.h>
 #include <http_in_c/common/socket_functions.h>
 #include <rbl/logger.h>
 #include <stdio.h>
@@ -8,7 +8,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include<signal.h>
-#include "process_main.h"
+#include "http_process_main.h"
 
 static void usage();
 static void process_args(int argc, char* argv[], char** host_p, int* port, int* nbr_roundtrips_per_connection_p, int* nbr_connections_per_thread_p, int* nbr_threads_p, int* nbr_processes_p);
@@ -16,13 +16,13 @@ void* thread_function(void* arg);
 char* default_host = "127.0.0.1";
 int   default_port = 9011;
 
-DemoServerRef g_sref;
+HttpServerRef g_sref;
 void sig_handler(int signo)
 {
-    printf("demo_app.c signal handler \n");
+    printf("htp_app.c signal handler \n");
     if ((signo == SIGINT) || (signo == SIGABRT)) {
         printf("received SIGINT or SIGABRT\n");
-        DemoServer_free(g_sref);
+        HttpServer_free(g_sref);
         g_sref = NULL;
         exit(0);
     }
@@ -42,6 +42,12 @@ int main(int argc, char** argv) {
     int nbr_connections_per_thread = 2;
     int nbr_roundtrips_per_connection = 2;
     int i = 0;
+#if 0
+    while(argv[i] != NULL) {
+        printf("arg[%d] = %s\n", i, argv[i]);
+        i++;
+    }
+#endif
     process_args(argc, argv,
                  &host,
                  &port,
@@ -50,14 +56,13 @@ int main(int argc, char** argv) {
                  &nbr_threads,
                  &nbr_processes);
 //    g_sref = sref;
-    printf("host: %s port: %d nbr_processes: %d nbr_threads: %d nbr_connections_per_thread: %d nbr_roundthrips_per_connection %d\n",
-           host, port, nbr_processes, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection
+    printf("host: %s port: %d nbr_processes: %d nbr_threads: %d \n",
+           host, port, nbr_processes, nbr_threads
            );
     int child_pid;
-    host = "127.0.0.1";
     for (int p = 0; p < nbr_processes; p++) {
         if ((child_pid = fork()) == 0) {
-            process_main(host, port, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection);
+            http_process_main(host, port, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection);
             exit(0);
         }
     }
@@ -65,9 +70,9 @@ int main(int argc, char** argv) {
 }
 static void usage()
 {
-    printf("Name: demo_sync_server\n");
+    printf("Name: http_server\n");
     printf("\nDescription\n");
-    printf("\tThis is a multi-process multi-threaded synchronous waiting to receive STX.....ETX messages. \n");
+    printf("\tThis is a multi-process multi-threaded async_server waiting to receive http 1.1 messages. \n");
     printf("\n");
     printf("\tThat is this program forks a number of child processes which in turn start a number of  \n");
     printf("\tthreads. Each thread in each subprocess runs an instance of the server. \n");
@@ -76,7 +81,7 @@ static void usage()
     printf("\n");
     printf("\tEach server instance listen for request on the host:port options described below. \n");
     printf("\n");
-    printf("\tEach server instance can serve only one requests at a time on a connection.\n");
+    printf("\tEach server instance can serve multiple consecutive requests on the same connection.\n");
     printf("\n");
     printf("\tA server instance responds by sending back the request message.\n\n");
     printf("\n");

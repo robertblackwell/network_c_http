@@ -1,5 +1,5 @@
-#include <http_in_c/demo_protocol/demo_server.h>
-#include <http_in_c/demo_protocol/demo_message.h>
+#include <http_in_c/http_protocol/http_server.h>
+#include <http_in_c/http/http_message.h>
 #include <http_in_c/common/socket_functions.h>
 #include <rbl/logger.h>
 #include <stdio.h>
@@ -16,13 +16,13 @@ void* thread_function(void* arg);
 char* default_host = "127.0.0.1";
 int   default_port = 9011;
 
-DemoServerRef g_sref;
+HttpServerRef g_sref;
 void sig_handler(int signo)
 {
     printf("demo_app.c signal handler \n");
     if ((signo == SIGINT) || (signo == SIGABRT)) {
         printf("received SIGINT or SIGABRT\n");
-        DemoServer_free(g_sref);
+        HttpServer_free(g_sref);
         g_sref = NULL;
         exit(0);
     }
@@ -65,9 +65,9 @@ int main(int argc, char** argv) {
 }
 static void usage()
 {
-    printf("Name: demo_sync_server\n");
+    printf("Name: http_sync_server\n");
     printf("\nDescription\n");
-    printf("\tThis is a multi-process multi-threaded synchronous waiting to receive STX.....ETX messages. \n");
+    printf("\tThis is a multi-process multi-threaded synchronous waiting to receive http 1.1 messages. \n");
     printf("\n");
     printf("\tThat is this program forks a number of child processes which in turn start a number of  \n");
     printf("\tthreads. Each thread in each subprocess runs an instance of the server. \n");

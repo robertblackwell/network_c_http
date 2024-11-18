@@ -1,7 +1,7 @@
-#include "demo_process_main.h"
+#include "http_process_main.h"
 
-#include <http_in_c/demo_protocol/demo_server.h>
-#include <http_in_c/demo_protocol/demo_message.h>
+#include <http_in_c/http_protocol/http_server.h>
+#include <http_in_c/http/http_message.h>
 #include <http_in_c/common/socket_functions.h>
 #include <rbl/logger.h>
 #include <stdio.h>
@@ -20,11 +20,11 @@ typedef struct ThreadContext_s {
     const char*     host;
     int             listening_socket;
     void*           return_value;
-    DemoServerRef   server_ref;
+    HttpServerRef   server_ref;
 } ThreadContext;
 
 
-void demo_process_main(char* host, int port, int nbr_threads, int nbr_connections_per_thread, int nbr_rountrips_per_connection)
+void http_process_main(char* host, int port, int nbr_threads, int nbr_connections_per_thread, int nbr_rountrips_per_connection)
 {
     ThreadContext thread_table[nbr_threads];
     assert(nbr_threads <= MAX_NBR_THREADS);
@@ -46,10 +46,10 @@ void* thread_function(void* arg)
     ThreadContext* ctx = arg;
     int listening_socket_fd = create_listener_socket(ctx->port, ctx->host);
     printf("thread pid: %d tid: %d host: %s port: %d ident: %d pthread_t: %lu listening_socket: %d\n", getpid(), gettid(), ctx->host, ctx->port, ctx->ident, ctx->thread, ctx->listening_socket);
-    ctx->server_ref = DemoServer_new(ctx->port, ctx->host, listening_socket_fd, NULL);
-    DemoServer_listen(ctx->server_ref);
+    ctx->server_ref = HttpServer_new(ctx->port, ctx->host, listening_socket_fd, NULL);
+    HttpServer_listen(ctx->server_ref);
     runloop_run(ctx->server_ref->runloop_ref, -1 /* infinite*/);
-    DemoServer_free(ctx->server_ref);
+    HttpServer_free(ctx->server_ref);
     ctx->server_ref = NULL;
     return NULL;
 }

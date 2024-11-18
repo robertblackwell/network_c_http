@@ -86,9 +86,20 @@ void demo_syncsocket_connect(DemoSyncSocketRef this, char* host, int port)
         exit(0);
     }
     bzero((char *) &serv_addr, sizeof(serv_addr));
+#if 1
     serv_addr.sin_family = AF_INET;
-    bcopy((char *)hostent->h_addr, (char *)&serv_addr.sin_addr.s_addr, hostent->h_length);
+    // bcopy((char *)hostent->h_addr, (char *)&serv_addr.sin_addr.s_addr, hostent->h_length);
+    bcopy((char *)hostent->h_addr_list[0], (char *)&serv_addr.sin_addr.s_addr, hostent->h_length);
     serv_addr.sin_port = htons(port);
+#else
+
+    serv_addr.sin_family = AF_INET;
+    serv_addr.sin_port = port;
+    if(inet_pton(AF_INET, host, &serv_addr.sin_addr)) {
+        fprintf(stderr,"ERROR, inet_pton\n");
+        exit(0);
+    }
+#endif
     RBL_LOG_FMT("demo_syncsocket_connect %p sockfd: %d\n", this, sockfd);
     if (connect(sockfd,(struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
         int errno_saved = errno;

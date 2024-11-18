@@ -4,16 +4,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
 #include <getopt.h>
+#include <string.h>
 #include "verify_getopt.h"
 //#include <rbl/logger.h>
 
 void verify_usage()
 {
-    printf("Name: demo_verify\n");
+    printf("Name: http_verify\n");
     printf("\nDescription\n");
-    printf("\tThis is a multi-process multi-threaded async_server waiting to receive STX.....ETX messages. \n");
+    printf("\tThis is a multi-process multi-threaded async_server waiting to receive http 1.1 messages. \n");
     printf("\n");
     printf("\tThat is this program forks a number of child processes which in turn start a number of  \n");
     printf("\tthreads. Each thread in each subprocess runs an instance of the server. \n");

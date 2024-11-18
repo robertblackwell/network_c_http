@@ -85,6 +85,10 @@ void HttpMessage_free(HttpMessageRef p)
     Cbuffer_free(p->reason);
     eg_free(p);
 }
+void HttpMessage_anonymous_free(void* p)
+{
+    HttpMessage_free(p);
+}
 HttpMessageRef MessageResponse(HttpStatus status, void* body)
 {
     HttpMessageRef mref = HttpMessage_new();
