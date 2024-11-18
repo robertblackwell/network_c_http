@@ -8,7 +8,7 @@
 #include <http_in_c/common/list.h>
 #include <http_in_c/http/kvpair.h>
 #include <http_in_c/http/header_list.h>
-#include <http_in_c/http/message.h>
+#include <http_in_c/http/http_message.h>
 
 int run_list (ListRef tests);
 
@@ -20,7 +20,7 @@ int run_list (ListRef tests);
 } while(0);
 
 #define CHECK_BODY(M, S) do {\
-    BufferChainRef body = Message_get_body(M); \
+    BufferChainRef body = HttpMessage_get_body(M); \
     bool x##M = BufferChain_eq_cstr(body, S); \
     UT_EQUAL_INT(x##M, 1); \
 } while(0);

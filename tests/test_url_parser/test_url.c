@@ -9,7 +9,7 @@
 #include <http_in_c/common/list.h>
 #include <http_in_c/saved/sync_server.h>
 #include <http_in_c/http/header_list.h>
-#include <http_in_c/http/message.h>
+#include <http_in_c/http/http_message.h>
 
 //https://github.com/uriparser/uriparser
 

@@ -7,7 +7,7 @@
 #include <http_in_c/constants.h>
 #include <http_in_c/runloop/runloop.h>
 
-#include <http_in_c/http/message.h>
+#include <http_in_c/http/http_message.h>
 
 #define DemoServer_TAG "DmSRVR"
 #include <rbl/check_tag.h>

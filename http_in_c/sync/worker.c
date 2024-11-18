@@ -13,7 +13,7 @@
 #include <rbl/macros.h>
 #include <rbl/logger.h>
 #include <rbl/check_tag.h>
-static int on_message_handler_2(MessageRef response_ptr, sync_worker_t* context)
+static int on_message_handler_2(HttpMessageRef response_ptr, sync_worker_t* context)
 {
     sync_worker_t* worker_ptr = context;
     RBL_LOG_FMT("verify on_message_handler socket: %d", worker_ptr->connection_ptr->socketfd);
@@ -23,19 +23,19 @@ static int on_message_handler_2(MessageRef response_ptr, sync_worker_t* context)
     return HPE_OK;
 }
 
-static int connection_message_handler(MessageRef request_ptr, sync_worker_r context)
+static int connection_message_handler(HttpMessageRef request_ptr, sync_worker_r context)
 {
     sync_worker_t* worker_ptr = context;
-    MessageRef response_ptr = worker_ptr->app_handler(request_ptr, worker_ptr);
-    int cmp_tmp = Message_cmp_header(request_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
+    HttpMessageRef response_ptr = worker_ptr->app_handler(request_ptr, worker_ptr);
+    int cmp_tmp = HttpMessage_cmp_header(request_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
     if(cmp_tmp == 1) {
-        Message_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
+        HttpMessage_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
     } else {
-        Message_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_CLOSE);
+        HttpMessage_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_CLOSE);
     }
     RBL_ASSERT((response_ptr != NULL), "response is not permitted to be NULL");
-    IOBufferRef request_serialized = Message_dump(request_ptr);
-    IOBufferRef response_serialized = Message_dump(response_ptr);
+    IOBufferRef request_serialized = HttpMessage_dump(request_ptr);
+    IOBufferRef response_serialized = HttpMessage_dump(response_ptr);
     RBL_LOG_FMT("app_handler_example request  ====================================================================");
 //    RBL_LOG_FMT("%s", IOBuffer_cstr(request_serialized));
 //    RBL_LOG_FMT("app_handler_example response ====================================================================");
@@ -103,7 +103,7 @@ static void* Worker_main(void* data)
             sock = 0;
         } else {
             wref->active_socket = (int) my_socket_handle;
-            MessageRef request_ptr = NULL;
+            HttpMessageRef request_ptr = NULL;
             wref->active = true;
             sync_connection_t* conn = sync_connection_new(sock, wref->read_buffer_size);//, connection_message_handler, wref);
             wref->connection_ptr = conn;
@@ -112,16 +112,17 @@ static void* Worker_main(void* data)
                 if (gotone) {
                     RBL_ASSERT((request_ptr != NULL), "request should not be NULL");
                     sync_worker_t *worker_ptr = wref;
-                    MessageRef response_ptr = worker_ptr->app_handler(request_ptr, worker_ptr);
-                    int cmp_tmp = Message_cmp_header(request_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
+                    HttpMessageRef response_ptr = worker_ptr->app_handler(request_ptr, worker_ptr);
+                    int cmp_tmp = HttpMessage_cmp_header(request_ptr, HEADER_CONNECTION_KEY,
+                                                         HEADER_CONNECTION_KEEPALIVE);
                     if (cmp_tmp == 1) {
-                        Message_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
+                        HttpMessage_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
                     } else {
-                        Message_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_CLOSE);
+                        HttpMessage_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_CLOSE);
                     }
                     RBL_ASSERT((response_ptr != NULL), "response is not permitted to be NULL");
-                    IOBufferRef request_serialized = Message_dump(request_ptr);
-                    IOBufferRef response_serialized = Message_dump(response_ptr);
+                    IOBufferRef request_serialized = HttpMessage_dump(request_ptr);
+                    IOBufferRef response_serialized = HttpMessage_dump(response_ptr);
                     RBL_LOG_FMT("app_handler_example request  ====================================================================");
                     RBL_LOG_FMT("%s", IOBuffer_cstr(request_serialized));
                     RBL_LOG_FMT("app_handler_example response ====================================================================");

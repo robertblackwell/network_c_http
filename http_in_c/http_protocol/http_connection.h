@@ -3,7 +3,7 @@
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/common/list.h>
 #include <http_in_c/common/iobuffer.h>
-#include <http_in_c/http_protocol/http_parser.h>
+#include <http_in_c/http/parser.h>
 #include <rbl/check_tag.h>
 
 #define HttpConnection_TAG "DmCONN"
@@ -34,6 +34,7 @@ typedef struct HttpConnection_s {
     RunloopRef       runloop_ref;
     AsioStreamRef    asio_stream_ref;
     void*            handler_ref;
+    ListRef          input_message_list_ref;
     IOBufferRef      active_input_buffer_ref;
     long             read_buffer_size;
     IOBufferRef      active_output_buffer_ref;

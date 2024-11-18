@@ -6,7 +6,7 @@
 #include <http_in_c/sync/sync_internal.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/cbuffer.h>
-#include <http_in_c/http/message.h>
+#include <http_in_c/http/http_message.h>
 #include <rbl/logger.h>
 #include <assert.h>
 #include <stdio.h>
@@ -176,7 +176,7 @@ void sync_client_connect(sync_client_t* this, char* host, int portno)//, SyncApp
 #endif
 
 }
-//void sync_client_request_round_trip(sync_client_t* this, MessageRef request_ref, SyncConnectionClientMessageHandler handler)
+//void sync_client_request_round_trip(sync_client_t* this, HttpMessageRef request_ref, SyncConnectionClientMessageHandler handler)
 //{
 //    CHECK_TAG(sync_client_TAG, this)
 //    sync_connection_write(this->connection_ptr, request_ref);

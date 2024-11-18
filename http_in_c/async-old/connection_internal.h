@@ -10,7 +10,7 @@
 #include <errno.h>
 #include <rbl/macros.h>
 #include <rbl/logger.h>
-#include <http_in_c/http/message.h>
+#include <http_in_c/http/http_message.h>
 
 /**
  * Means that there is probably data available to read (that is not definitely EAGAIN)

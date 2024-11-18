@@ -1,5 +1,5 @@
 
-#include <http_in_c/http/message.h>
+#include <http_in_c/http/http_message.h>
 #include <http_in_c/test_helpers/message_private.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/http/header_list.h>
@@ -19,7 +19,7 @@
 
 
 
-struct Message_s
+struct HttpMessage_s
 {
     RBL_DECLARE_TAG;
     BufferChainRef body;
@@ -33,9 +33,9 @@ struct Message_s
     CbufferRef target;
 };
 
-MessageRef Message_new ()
+HttpMessageRef HttpMessage_new ()
 {
-    MessageRef mref = (MessageRef) eg_alloc(sizeof(Message));
+    HttpMessageRef mref = (HttpMessageRef) eg_alloc(sizeof(HttpMessage));
     if(mref == NULL) goto error_label_1;
     RBL_SET_TAG(Message_TAG, mref)
     mref->body = NULL;
@@ -48,17 +48,17 @@ MessageRef Message_new ()
     return mref;
 
     error_label_2:
-        Message_free(mref);
+    HttpMessage_free(mref);
     error_label_1:
         return NULL;
 }
 /**
  * @brief Create a new request message instance
- * @return MessageRef
+ * @return HttpMessageRef
  */
-MessageRef Message_new_request()
+HttpMessageRef HttpMessage_new_request()
 {
-    MessageRef mref = Message_new();
+    HttpMessageRef mref = HttpMessage_new();
     if(mref != NULL) {
         mref->is_request = true;
 //        mref->target = Cbuffer_new();
@@ -66,10 +66,10 @@ MessageRef Message_new_request()
     }
     return NULL;
 }
-MessageRef Message_new_response()
+HttpMessageRef HttpMessage_new_response()
 {
 
-    MessageRef mref = Message_new();
+    HttpMessageRef mref = HttpMessage_new();
     if(mref != NULL) {
         mref->is_request = false;
 //        mref->reason = Cbuffer_new();
@@ -77,17 +77,17 @@ MessageRef Message_new_response()
     }
     return NULL;
 }
-void Message_free(MessageRef this)
+void HttpMessage_free(HttpMessageRef p)
 {
-    RBL_CHECK_TAG(Message_TAG, this)
-    HdrList_safe_free(this->headers);
-    Cbuffer_free(this->target);
-    Cbuffer_free(this->reason);
-    eg_free(this);
+    RBL_CHECK_TAG(Message_TAG, p)
+    HdrList_safe_free(p->headers);
+    Cbuffer_free(p->target);
+    Cbuffer_free(p->reason);
+    eg_free(p);
 }
-MessageRef MessageResponse(HttpStatus status, void* body)
+HttpMessageRef MessageResponse(HttpStatus status, void* body)
 {
-    MessageRef mref = Message_new();
+    HttpMessageRef mref = HttpMessage_new();
     if(mref == NULL) goto error_1;
     mref->is_request = false;
     mref->status_code = status;
@@ -98,21 +98,21 @@ MessageRef MessageResponse(HttpStatus status, void* body)
     error_1:
         return NULL;
 }
-IOBufferRef Message_serialize(MessageRef mref)
+IOBufferRef HttpMessage_serialize(HttpMessageRef this)
 {
-    RBL_CHECK_TAG(Message_TAG, mref)
+    RBL_CHECK_TAG(Message_TAG, this)
     BufferChainRef bc_result = BufferChain_new();
     char* first_line;
     int first_line_len;
-    if(mref->is_request) {
-        const char* meth = llhttp_method_name(mref->method);
-        first_line_len = asprintf(&first_line,"%s %s HTTP/%d.%d\r\n", meth, (char*)Cbuffer_data(mref->target), mref->major_vers, mref->minor_vers);
+    if(this->is_request) {
+        const char* meth = llhttp_method_name(this->method);
+        first_line_len = asprintf(&first_line, "%s %s HTTP/%d.%d\r\n", meth, (char*)Cbuffer_data(this->target), this->major_vers, this->minor_vers);
     } else {
-        first_line_len = asprintf(&first_line, "HTTP/%d.%d  %d %s\r\n",mref->major_vers, mref->minor_vers, mref->status_code, (char*)Cbuffer_data(mref->reason));
+        first_line_len = asprintf(&first_line, "HTTP/%d.%d  %d %s\r\n", this->major_vers, this->minor_vers, this->status_code, (char*)Cbuffer_data(this->reason));
     }
     BufferChain_append_cstr(bc_result, first_line);
     free(first_line);
-    HdrListRef hdrs = mref->headers;
+    HdrListRef hdrs = this->headers;
     ListIterator iter = HdrList_iterator(hdrs);
     while(iter != NULL) {
         KVPairRef item = HdrList_itr_unpack(hdrs, iter);
@@ -124,29 +124,29 @@ IOBufferRef Message_serialize(MessageRef mref)
         free(s);
     }
     BufferChain_append_cstr(bc_result, "\r\n");
-    if((mref->body != NULL) && (BufferChain_size(mref->body) != 0)) {
-        IOBufferRef iob_body = BufferChain_compact(mref->body);
+    if((this->body != NULL) && (BufferChain_size(this->body) != 0)) {
+        IOBufferRef iob_body = BufferChain_compact(this->body);
         BufferChain_add_back(bc_result, iob_body);
     }
     IOBufferRef result = BufferChain_compact(bc_result);
     BufferChain_free(bc_result);
     return result;
 }
-IOBufferRef Message_dump(MessageRef mref)
+IOBufferRef HttpMessage_dump(HttpMessageRef this)
 {
-    RBL_CHECK_TAG(Message_TAG, mref)
+    RBL_CHECK_TAG(Message_TAG, this)
     BufferChainRef bc_result = BufferChain_new();
     char* first_line;
     int first_line_len;
-    if(mref->is_request) {
-        const char* meth = llhttp_method_name(mref->method);
-        first_line_len = asprintf(&first_line,"%s %s HTTP/%d.%d\r\n", meth, (char*)Cbuffer_data(mref->target), mref->major_vers, mref->minor_vers);
+    if(this->is_request) {
+        const char* meth = llhttp_method_name(this->method);
+        first_line_len = asprintf(&first_line, "%s %s HTTP/%d.%d\r\n", meth, (char*)Cbuffer_data(this->target), this->major_vers, this->minor_vers);
     } else {
-        first_line_len = asprintf(&first_line, "HTTP/%d.%d  %d %s\r\n",mref->major_vers, mref->minor_vers, mref->status_code, (char*)Cbuffer_data(mref->reason));
+        first_line_len = asprintf(&first_line, "HTTP/%d.%d  %d %s\r\n", this->major_vers, this->minor_vers, this->status_code, (char*)Cbuffer_data(this->reason));
     }
     BufferChain_append_cstr(bc_result, first_line);
     free(first_line);
-    HdrListRef hdrs = mref->headers;
+    HdrListRef hdrs = this->headers;
     ListIterator iter = HdrList_iterator(hdrs);
     while(iter != NULL) {
         KVPairRef item = HdrList_itr_unpack(hdrs, iter);
@@ -159,8 +159,8 @@ IOBufferRef Message_dump(MessageRef mref)
     }
     BufferChain_append_cstr(bc_result, "\r\n");
     BufferChain_append_cstr(bc_result, "body begin ===========================================================\r\n");
-    if((mref->body != NULL) && (BufferChain_size(mref->body) != 0)) {
-        IOBufferRef iob_body = BufferChain_compact(mref->body);
+    if((this->body != NULL) && (BufferChain_size(this->body) != 0)) {
+        IOBufferRef iob_body = BufferChain_compact(this->body);
         BufferChain_add_back(bc_result, iob_body);
     }
     BufferChain_append_cstr(bc_result, "body end ===========================================================\r\n");
@@ -168,89 +168,89 @@ IOBufferRef Message_dump(MessageRef mref)
     BufferChain_free(bc_result);
     return result;
 }
-void Message_add_header_cstring(MessageRef this, const char* key, const char* value)
+void HttpMessage_add_header_cstring(HttpMessageRef mref, const char* label, const char* value)
+{
+    RBL_CHECK_TAG(Message_TAG, mref)
+    HdrListRef hdrlist = HttpMessage_get_headerlist(mref);
+    HdrList_add_cstr(hdrlist, label, value);
+}
+void HttpMessage_add_header_cbuf(HttpMessageRef this, CbufferRef key, CbufferRef value)
 {
     RBL_CHECK_TAG(Message_TAG, this)
-    HdrListRef hdrlist = Message_get_headerlist(this);
-    HdrList_add_cstr(hdrlist, key, value);
+    HdrList_add_cbuf(HttpMessage_get_headerlist(this), key, value);
 }
-void Message_add_header_cbuf(MessageRef this, CbufferRef key, CbufferRef value)
+HttpStatus HttpMessage_get_status(HttpMessageRef mref)
 {
-    RBL_CHECK_TAG(Message_TAG, this)
-    HdrList_add_cbuf(Message_get_headerlist(this), key, value);
+    RBL_CHECK_TAG(Message_TAG, mref)
+    return mref->status_code;
 }
-HttpStatus Message_get_status(MessageRef this)
+void HttpMessage_set_status(HttpMessageRef mref, HttpStatus status)
 {
-    RBL_CHECK_TAG(Message_TAG, this)
-    return this->status_code;
+    RBL_CHECK_TAG(Message_TAG, mref)
+    mref->status_code = status;
 }
-void Message_set_status(MessageRef this, HttpStatus status)
-{
-    RBL_CHECK_TAG(Message_TAG, this)
-    this->status_code = status;
-}
-bool Message_get_is_request(MessageRef this)
+bool HttpMessage_get_is_request(HttpMessageRef this)
 {
     RBL_CHECK_TAG(Message_TAG, this)
     return this->is_request;
 }
-void Message_set_is_request(MessageRef this, bool yn)
+void HttpMessage_set_is_request(HttpMessageRef this, bool yn)
 {
     RBL_CHECK_TAG(Message_TAG, this)
     this->is_request = yn;
 }
-HttpMinorVersion Message_get_minor_version(MessageRef this)
+HttpMinorVersion HttpMessage_get_minor_version(HttpMessageRef mref)
 {
-    RBL_CHECK_TAG(Message_TAG, this)
-    return this->minor_vers;
+    RBL_CHECK_TAG(Message_TAG, mref)
+    return mref->minor_vers;
 }
 
-void Message_set_minor_version(MessageRef this, HttpMinorVersion mv)
+void HttpMessage_set_minor_version(HttpMessageRef this, HttpMinorVersion mv)
 {
     RBL_CHECK_TAG(Message_TAG, this)
     this->minor_vers = mv;
 }
-void Message_set_version(MessageRef this, int major_vers, int minor_vers)
+void HttpMessage_set_version(HttpMessageRef this, int maj, int minor)
 {
     RBL_CHECK_TAG(Message_TAG, this)
-    this->minor_vers = minor_vers;
+    this->minor_vers = minor;
 }
-void Message_set_method(MessageRef this, HttpMethod method)
+void HttpMessage_set_method(HttpMessageRef mref, HttpMethod method)
 {
-    RBL_CHECK_TAG(Message_TAG, this)
-    this->method = method;
+    RBL_CHECK_TAG(Message_TAG, mref)
+    mref->method = method;
 }
-HttpMethod Message_get_method(MessageRef this)
+HttpMethod HttpMessage_get_method(HttpMessageRef mref)
 {
-    RBL_CHECK_TAG(Message_TAG, this)
-    return this->method;
+    RBL_CHECK_TAG(Message_TAG, mref)
+    return mref->method;
 }
 
 // target
-const char* Message_get_target(MessageRef this)
+const char* HttpMessage_get_target(HttpMessageRef this)
 {
     RBL_CHECK_TAG(Message_TAG, this)
     return (const char*)Cbuffer_cstr(this->target);
 }
-//void Message_move_target(MessageRef this, CbufferRef target)
+//void Message_move_target(HttpMessageRef this, CbufferRef target)
 //{
 //    if(this->target == NULL) {
 //        this->target = Cbuffer_new();
 //    }
 //    Cbuffer_move(this->target, target);
 //}
-void Message_set_target(MessageRef this, const char* targ)
+void HttpMessage_set_target(HttpMessageRef this, const char* target_cstr)
 {
     RBL_CHECK_TAG(Message_TAG, this)
     assert((this->target != NULL) && (Cbuffer_size(this->target) == 0));
-    Cbuffer_append_cstr(this->target, (const char*)targ);
+    Cbuffer_append_cstr(this->target, (const char*)target_cstr);
 }
-CbufferRef Message_get_target_cbuffer(MessageRef this)
+CbufferRef HttpMessage_get_target_cbuffer(HttpMessageRef this)
 {
     RBL_CHECK_TAG(Message_TAG, this)
     return Cbuffer_from_cstring(Cbuffer_cstr(this->target));
 }
-void Message_set_target_cbuffer(MessageRef this, CbufferRef target)
+void HttpMessage_set_target_cbuffer(HttpMessageRef this, CbufferRef target)
 {
     RBL_CHECK_TAG(Message_TAG, this)
     assert((this->target != NULL) && (Cbuffer_size(this->target) == 0));
@@ -258,39 +258,39 @@ void Message_set_target_cbuffer(MessageRef this, CbufferRef target)
 
 }
 // reason
-void Message_set_reason(MessageRef this, const char* reason_cstr)
+void HttpMessage_set_reason(HttpMessageRef this, const char* reason_cstr)
 {
     RBL_CHECK_TAG(Message_TAG, this)
     assert((this->reason != NULL) && (Cbuffer_size(this->reason) == 0));
     Cbuffer_append_cstr(this->reason, (const char*)reason_cstr);
 }
-//void Message_move_reason(MessageRef this, CbufferRef reason)
+//void Message_move_reason(HttpMessageRef this, CbufferRef reason)
 //{
 //    if(this->reason == NULL)
 //        this->reason = Cbuffer_new();
 //    Cbuffer_move(this->reason, reason);
 //}
-const char* Message_get_reason(MessageRef this)
+const char* HttpMessage_get_reason(HttpMessageRef this)
 {
     RBL_CHECK_TAG(Message_TAG, this)
     (const char*)Cbuffer_cstr(this->reason);
 }
-CbufferRef Message_get_reason_cbuffer(MessageRef this)
+CbufferRef Message_get_reason_cbuffer(HttpMessageRef this)
 {
     RBL_CHECK_TAG(Message_TAG, this)
     return Cbuffer_from_cstring(Cbuffer_cstr(this->reason));
 }
-void Message_set_reason_cbuffer(MessageRef this, CbufferRef target)
+void HttpMessage_set_reason_cbuffer(HttpMessageRef this, CbufferRef reason)
 {
     RBL_CHECK_TAG(Message_TAG, this)
     assert((this->reason != NULL) && (Cbuffer_size(this->reason) == 0));
-    Cbuffer_append_cstr(this->reason, (const char*)Cbuffer_cstr(target));
+    Cbuffer_append_cstr(this->reason, (const char*)Cbuffer_cstr(reason));
 }
-int Message_get_content_length(MessageRef this)
+int Message_get_content_length(HttpMessageRef this)
 {
     assert(false);
 }
-void Message_set_content_length(MessageRef this, int length)
+void HttpMessage_set_content_length(HttpMessageRef this, int length)
 {
     RBL_CHECK_TAG(Message_TAG, this)
     char buf[100];
@@ -306,24 +306,24 @@ void Message_set_content_length(MessageRef this, int length)
 }
 
 // headers
-HdrListRef Message_get_headerlist(MessageRef this)
+HdrListRef HttpMessage_get_headerlist(HttpMessageRef this)
 {
     RBL_CHECK_TAG(Message_TAG, this)
     return this->headers;
 }
-const char* Message_get_header_value(MessageRef mref, const char* labptr)
+const char* HttpMessage_get_header_value(HttpMessageRef mref, const char* labptr)
 {
     RBL_CHECK_TAG(Message_TAG, mref)
-    KVPairRef kvp = HdrList_find(Message_get_headerlist(mref), labptr);
+    KVPairRef kvp = HdrList_find(HttpMessage_get_headerlist(mref), labptr);
     if(kvp == NULL) {
         return NULL;
     }
     return KVPair_value(kvp);
 }
-int Message_cmp_header(MessageRef msgref, const char* key, const char* test_value)
+int HttpMessage_cmp_header(HttpMessageRef msgref, const char* key, const char* test_value)
 {
     RBL_CHECK_TAG(Message_TAG, msgref)
-    KVPairRef kvp = HdrList_find(Message_get_headerlist(msgref), key);
+    KVPairRef kvp = HdrList_find(HttpMessage_get_headerlist(msgref), key);
     if(kvp == NULL) {
         return -1;
     }
@@ -339,19 +339,19 @@ int Message_cmp_header(MessageRef msgref, const char* key, const char* test_valu
     return 1;
 }
 
-BufferChainRef Message_get_body(MessageRef this)
+BufferChainRef HttpMessage_get_body(HttpMessageRef this)
 {
     RBL_CHECK_TAG(Message_TAG, this)
     return this->body;
 }
-void Message_set_body(MessageRef this, BufferChainRef bc)
+void HttpMessage_set_body(HttpMessageRef mref, BufferChainRef bodyp)
 {
-    RBL_CHECK_TAG(Message_TAG, this)
-    this->body = bc;
+    RBL_CHECK_TAG(Message_TAG, mref)
+    mref->body = bodyp;
 }
-void Message_set_headers_arr(MessageRef this, const char* ar[][2])
+void HttpMessage_set_headers_arr(HttpMessageRef mref, const char* ar[][2])
 {
-    RBL_CHECK_TAG(Message_TAG, this)
-    HdrList_add_arr(this->headers, ar);
+    RBL_CHECK_TAG(Message_TAG, mref)
+    HdrList_add_arr(mref->headers, ar);
 }
 /**@}*/

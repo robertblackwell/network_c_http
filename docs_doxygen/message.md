@@ -1,4 +1,4 @@
-# Message Module
+# HttpMessage Module
 
 This module handles all aspects of http/1.1 messages. This includes:
 

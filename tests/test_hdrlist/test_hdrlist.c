@@ -8,7 +8,7 @@
 #include <http_in_c/common/list.h>
 #include <http_in_c/http/kvpair.h>
 #include <http_in_c/http/header_list.h>
-#include <http_in_c/http/message.h>
+#include <http_in_c/http/http_message.h>
 
 
 void free_kvpair(void* p) {

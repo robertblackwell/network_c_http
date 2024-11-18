@@ -11,7 +11,7 @@
 #include <llhttp/llhttp.h>
 #include <rbl/check_tag.h>
 #include <http_in_c/http/parser_types.h>
-#include <http_in_c/http/message.h>
+#include <http_in_c/http/http_message.h>
 #include <http_in_c/common/cbuffer.h>
 
 #define HTTP_PARSER_TAG "HTPARS"
@@ -37,20 +37,20 @@ struct http_parser_error_s {
 typedef struct http_parser_error_s http_parser_error_t;
 
 /**
- * Type holding context data for http_parser_t functions. Allows for parsing to continue
+ * Type holding context data for HttpParser functions. Allows for parsing to continue
  * over buffer and message boundaries
  */
-struct http_parser_s;
-typedef struct http_parser_s http_parser_t, *http_parser_r;
-typedef llhttp_errno_t (*ParserOnMessageCompleteHandler)(http_parser_r parser, MessageRef msg);
+struct HttpParser_s;
+typedef struct HttpParser_s HttpParser, *HttpParserRef;
+typedef llhttp_errno_t (*ParserOnMessageCompleteHandler)(HttpParserRef parser, HttpMessageRef msg);
 
-struct http_parser_s {
+struct HttpParser_s {
     RBL_DECLARE_TAG;
     bool m_started;
 
     llhttp_t*                m_llhttp_ptr;
     llhttp_settings_t*       m_llhttp_settings_ptr;
-    MessageRef               current_message_ptr;
+    HttpMessageRef               current_message_ptr;
     ParserOnMessageCompleteHandler on_message_handler;
     void*                    handler_context;
     int                      m_header_state;
@@ -62,9 +62,9 @@ struct http_parser_s {
     CbufferRef             m_name_buf;
     CbufferRef             m_value_buf;
 };
-void http_parser_reset(http_parser_t*);
-http_parser_r http_parser_new(ParserOnMessageCompleteHandler handler, void* handler_context) ;
-void http_parser_free(http_parser_r this);
+void HttpParser_reset(HttpParser*);
+HttpParserRef HttpParser_new(ParserOnMessageCompleteHandler handler, void* handler_context) ;
+void HttpParser_free(HttpParserRef this);
 
 /**
  * @brief The guts of the http message parsing process.
@@ -77,7 +77,7 @@ void http_parser_free(http_parser_r this);
  * process the message and send the reply before returning. This will suspend the parser until the processing
  * of the message is complete. And if necessary will continue with the next message
  *
- * The http_parser_consume() function will only return  if:
+ * The HttpParser_consume() function will only return  if:
  *
  * -    it has consumed all the data. So read some more and give it to consume.
  *
@@ -85,20 +85,20 @@ void http_parser_free(http_parser_r this);
  *      Either a parse error, or an io error - This should be treated as fatal and the connection closed.
  *
  * -    in a situation where a messsage does not contain a message length value the parser may need to be given
- *      an End-Of_File signal in the form of a call to http_parser_consume with a zero length buffer.
+ *      an End-Of_File signal in the form of a call to HttpParser_consume with a zero length buffer.
  *      This need for this will be signalled by llhttp_message_needs_eof(parser->m_llhttp_ptr) returning true
  *
  *
- * @param parser http_parser_r
+ * @param parser HttpParserRef
  * @param buffer A buffer of data presumable read from a tcp connectin
  * @param length Length of the data buffer
  * @return llhttp_errno_t
  */
-llhttp_errno_t          http_parser_consume(http_parser_t* parser, const void* buffer, int length);
-llhttp_errno_t          http_parser_comsume_buffer(http_parser_t* parser, IOBufferRef iobuffer_ref);
-llhttp_errno_t          http_parser_consume_eof(http_parser_t* parser);
-llhttp_errno_t          http_parser_get_errno(http_parser_t* parser);
-http_parser_error_t     http_parser_get_error(http_parser_t* parser);
-const void*             http_parser_last_byte_parsed(http_parser_t* this);
+llhttp_errno_t          HttpParser_consume(HttpParser *parser, const void* buffer, int length);
+llhttp_errno_t          HttpParser_consume_buffer(HttpParser* parser, IOBufferRef iobuffer_ref);
+llhttp_errno_t          HttpParser_consume_eof(HttpParser* parser);
+llhttp_errno_t          HttpParser_get_errno(HttpParser* parser);
+http_parser_error_t     HttpParser_get_error(HttpParser *parser);
+const void*             HttpParser_last_byte_parsed(HttpParser* this);
 
 #endif

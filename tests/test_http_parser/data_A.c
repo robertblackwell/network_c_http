@@ -1,6 +1,6 @@
 #include <rbl/unittest.h>
 #include <http_in_c/http/header_list.h>
-#include <http_in_c/http/message.h>
+#include <http_in_c/http/http_message.h>
 
 #undef A_ON
 // A001

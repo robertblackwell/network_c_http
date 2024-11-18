@@ -1,7 +1,7 @@
 #include "demo_process_main.h"
 
 #include <http_in_c/demo_protocol/demo_server.h>
-#include <http_in_c/http/message.h>
+#include <http_in_c/http/http_message.h>
 #include <http_in_c/common/socket_functions.h>
 #include <rbl/logger.h>
 #include <stdio.h>

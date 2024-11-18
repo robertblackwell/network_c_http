@@ -42,7 +42,7 @@ struct sync_worker_s {
 struct sync_connection_s
 {
     RBL_DECLARE_TAG;
-    http_parser_t*               m_parser;
+    HttpParser*               m_parser;
     IOBufferRef                  m_iobuffer;
     int                          socketfd;
     size_t                       read_buffer_size;
@@ -50,7 +50,7 @@ struct sync_connection_s
      * Next two fields are used for the on_message_callback to signal to the
      * read() function that a message has/has not been received.
      */
-    //MessageRef                   input_message_ref; //NULL when no messages received
+    //HttpMessageRef                   input_message_ref; //NULL when no messages received
     ListRef                      input_list;
     int                          reader_status;     // 1 indicates message received 0 otherwise
 

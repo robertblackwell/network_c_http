@@ -32,17 +32,17 @@ typedef struct HttpHandler_s {
 
 } HttpHandler, *HttpHandlerRef;
 
-HttpHandlerRef http_handler_new(
+HttpHandlerRef HttpHandler_new(
         RunloopRef runloop_ref,
         int socket,
         void(*completion_cb)(void*, HttpHandlerRef),
         void* completion_cb_arg);
-void http_handler_init(
+void HttpHandler_init(
         HttpHandlerRef this,
         RunloopRef runloop_ref,
         int socket,
         void(*completion_cb)(void*, HttpHandlerRef),
         void* completion_cb_arg);
-void http_handler_free(HttpHandlerRef this);
+void HttpHandler_free(HttpHandlerRef this);
 
 #endif

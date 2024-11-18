@@ -77,7 +77,7 @@ bool verify_response(ThreadContext* ctx, DemoMessageRef request, DemoMessageRef 
     IOBufferRef body_iob = BufferChain_compact(body);
     const char* cstr = IOBuffer_cstr(body_iob);
     return true;
-//    CbufferRef req_bc = Message_serialize(request);
+//    CbufferRef req_bc = HttpMessage_serialize(request);
 //    int x = strcmp(Cbuffer_cstr(body_bc), Cbuffer_cstr(req_bc));
 //    if( x != 0) {
 //        printf("Verify failed \n");

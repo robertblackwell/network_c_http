@@ -3,8 +3,8 @@
 #include <http_in_c/http_protocol/http_sync_socket.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/cbuffer.h>
-#include <http_in_c/http_protocol/http_message.h>
-#include <http_in_c/http_protocol/http_parser.h>
+#include <http_in_c/http/http_message.h>
+#include <http_in_c/http/parser.h>
 #include <rbl/logger.h>
 #include <http_in_c/common/list.h>
 #include <assert.h>
@@ -14,7 +14,7 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <errno.h>
-#include <http_in_c/http_protocol/http_parser.h>
+#include <http_in_c/http/parser.h>
 #define HttpClient_TAG "DECLNT"
 #include <rbl/check_tag.h>
 
@@ -102,7 +102,7 @@ void http_syncsocket_close(HttpSyncSocketRef sock)
 }
 int http_syncsocket_write_message(HttpSyncSocketRef client_ref, HttpMessageRef msg_ref)
 {
-    IOBufferRef outbuf = http_message_serialize(msg_ref);
+    IOBufferRef outbuf = HttpMessage_serialize(msg_ref);
     void* out_data = IOBuffer_data(outbuf);
     int out_len = IOBuffer_data_len(outbuf);
     assert(out_len > 0);
@@ -132,7 +132,7 @@ int http_syncsocket_read_message(HttpSyncSocketRef client_ref, HttpMessageRef* m
             if (bytes_read > 0) {
                 IOBuffer_commit(iob, (int) bytes_read);
                 RBL_LOG_FMT("response raw: %s \n", IOBuffer_cstr(iob));
-                HttpParser_consume(client_ref->parser_ref, iob);
+                HttpParser_consume_buffer(client_ref->parser_ref, iob);
             } else {
                 return -1;
             }

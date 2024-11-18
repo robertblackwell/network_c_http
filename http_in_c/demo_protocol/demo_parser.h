@@ -25,7 +25,7 @@ struct DemoParserError_s {
 typedef struct DemoParserError_s DemoParserError;
 
 /**
- * \brief  Return code used as part of the value returned by http_parser_consume() when processing data.
+ * \brief  Return code used as part of the value returned by HttpParser_consume() when processing data.
  */
 enum DemoParserRC {
     DemoParserRC_end_of_message = 0x01,
@@ -54,7 +54,7 @@ struct ParserInterface_s {
     void(*message_free)(void*);
 };
 /**
- * Type holding context data for http_parser_t functions. Allows for parsing to continue
+ * Type holding context data for HttpParser functions. Allows for parsing to continue
  * over buffer and message boundaries
  */
 struct DemoParser_s;

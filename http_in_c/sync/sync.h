@@ -1,6 +1,6 @@
 #ifndef c_http_sync_sync.h
 #define c_http_sync_sync.h
-#include <http_in_c/http/message.h>
+#include <http_in_c/http/http_message.h>
 
 #include <assert.h>
 #include <stdio.h>
@@ -16,7 +16,7 @@ typedef struct sync_worker_s sync_worker_t, *sync_worker_r;
 typedef struct sync_connection_s sync_connection_t, *sync_connection_p;
 typedef struct sync_client_s sync_client_t, *sync_client_r;
 
-typedef MessageRef(*SyncAppMessageHandler)(MessageRef request_ptr, sync_worker_t* worker_ptr);
+typedef HttpMessageRef(*SyncAppMessageHandler)(HttpMessageRef request_ptr, sync_worker_t* worker_ptr);
 
 // The 2 handlers should return one of:
 // HPE_OK       - the connection will continue to read and parse data
@@ -26,8 +26,8 @@ typedef MessageRef(*SyncAppMessageHandler)(MessageRef request_ptr, sync_worker_t
 //                remember to 'resume' the underlying llhttp parser
 // -1             Only if your code has detected an error in the message
 //
-typedef int(*SyncConnectionServerMessageHandler)(MessageRef request_ptr, sync_worker_t* worker_ptr);
-typedef int(*SyncConnectionClientMessageHandler)(MessageRef request_ptr, sync_client_t* client_ptr);
+typedef int(*SyncConnectionServerMessageHandler)(HttpMessageRef request_ptr, sync_worker_t* worker_ptr);
+typedef int(*SyncConnectionClientMessageHandler)(HttpMessageRef request_ptr, sync_client_t* client_ptr);
 
 sync_server_r sync_server_new(int port, size_t read_buffer_size, int nbr_threads, SyncAppMessageHandler app_handler);
 void sync_server_dispose(sync_server_r* srefptr);
@@ -61,7 +61,7 @@ sync_client_t* sync_client_new(size_t read_buffer_size);
 void sync_client_init(sync_client_t* this, size_t read_buffer_size);
 void sync_client_free(sync_client_t* this);
 void sync_client_connect(sync_client_t* this, char* host, int port);
-//void sync_client_request_round_trip(sync_client_t* this, MessageRef request, SyncConnectionClientMessageHandler handler);
+//void sync_client_request_round_trip(sync_client_t* this, HttpMessageRef request, SyncConnectionClientMessageHandler handler);
 void* sync_client_get_userptr(sync_client_t* this);
 void sync_client_set_userptr(sync_client_t* this, void* userptr);
 void sync_client_close(sync_client_t* this);
@@ -74,7 +74,7 @@ void sync_connection_dispose(sync_connection_t** this_ptr);
  * Gets a message into msg_ptr and returns 1, or
  * Puts NULL in msg_ptr and returns 0 - io error or parse error - you should close the connection
  */
-int sync_connection_read_message(sync_connection_t* this, MessageRef *msg_ptr);
+int sync_connection_read_message(sync_connection_t* this, HttpMessageRef *msg_ptr);
 // To be used by sync_server/sync_worker.
 // These next 2 functions will return when is=t has consumed all input data or hit a parse error
 // Not when a message is complete.
@@ -87,7 +87,7 @@ void sync_connection_close(sync_connection_t* this);
  *  Writes a complete http message to the associated socket and returns
  *  a status code to indicate success/io error/connection closed by other end
  */
-int sync_connection_write(sync_connection_t* this, MessageRef msg_ref);
+int sync_connection_write(sync_connection_t* this, HttpMessageRef msg_ref);
 int sync_connection_sock_fd(sync_connection_t* this);
 
 

@@ -1,5 +1,5 @@
 
-#include <http_in_c/Http_protocol/Http_server.h>
+#include <http_in_c/http_protocol/http_server.h>
 //#include <http_in_c/runloop/rl_internal.h>
 //#include <http_in_c/Http_protocol/Http_handler.h>
 #include <stdlib.h>
@@ -40,7 +40,7 @@ static void on_handler_completion_cb(void* void_server_ref, HttpHandlerRef handl
      */
     List_itr_remove(server_ref->handler_list, &x);
     RBL_CHECK_TAG(HttpHandler_TAG, handler_ref)
-    Httphandler_free(handler_ref);
+    HttpHandler_free(handler_ref);
 
     /**
      * @TODO - this needs fixing - FIXED pass NULL as dispose function in HttpServer_init
@@ -127,7 +127,7 @@ void on_event_listening(RunloopRef rl, void* arg_server_ref) // RunloopListenerR
         RBL_LOG_FMT("%s %d", "Listener thread :: accept failed terminating sock2 : ", sock2);
     }
     RBL_LOG_FMT("Listerner accepted sock fd: %d", sock2);
-    HttpHandlerRef handler = Httphandler_new(
+    HttpHandlerRef handler = HttpHandler_new(
             rl,
             sock2,
             on_handler_completion_cb,

@@ -2,7 +2,7 @@
 #define c_http_test_parser_harness_h
 #include <stdbool.h>
 #include <http_in_c/common/list.h>
-#include <http_in_c/http/message.h>
+#include <http_in_c/http/http_message.h>
 //#include <http_in_c/saved/sync_reader.h>
 #include <http_in_c/http/parser.h>
 
@@ -26,11 +26,11 @@ int test_input_read_some(test_input_t* this, void* buffer, int length);
  * instance. If the message pointer is not null the return code is HPE_OK
  */
 typedef struct test_output_s {
-    MessageRef  message;
+    HttpMessageRef  message;
     int         rc;
 } test_output_t, *test_output_r;
 
-test_output_r test_output_new(MessageRef msg, int rc);
+test_output_r test_output_new(HttpMessageRef msg, int rc);
 void test_output_dispose(test_output_r* this_ptr);
 
 
