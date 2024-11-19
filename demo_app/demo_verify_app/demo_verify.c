@@ -82,8 +82,8 @@ int main(int argc, char* argv[])
     struct timeval main_end_time = get_time();
     double main_elapsed = time_diff_ms(main_end_time, main_time_start);
     double av_time = main_elapsed / (nbr_threads * 1.0);
-    printf("Total elapsed time %f  threads: %d per connections per thread: %d rountrips per connection: %d\n", tot_time, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection);
-    printf("Nbr threads : %d  nbr connections per thread: %d nbr of requests per connection: %d av time %f \n", nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection, av_time);
+    printf("Total elapsed time %f  threads: %d per connections per thread: %d rountrips per connection: %d\n\n", tot_time, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection);
+    printf("Nbr threads : %d  nbr connections per thread: %d nbr of requests per connection: %d av time %f \n\n", nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection, av_time);
     printf("Response times mean: %f stddev: %f total nbr roundtrips: %d \n", avg, stddev, total_roundtrips);
 }
 void* threadfn(void* data)

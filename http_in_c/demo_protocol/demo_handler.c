@@ -86,9 +86,21 @@ static void handle_request(void* href, DemoMessageRef msgref, int error_code)
 {
     RBL_LOG_FMT("handler handle_request \n");
     DemoHandlerRef handler_ref = href;
+    RBL_CHECK_TAG(DemoHandler_TAG, handler_ref)
+    RBL_CHECK_END_TAG(DemoHandler_TAG, handler_ref)
+    DemoConnectionRef cref = handler_ref->demo_connection_ref;
+    RBL_CHECK_TAG(DemoConnection_TAG, cref)
+    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
+
     DemoMessageRef response = NULL;
     if(error_code) {
         printf("DemoHandler handler_request error_code %d\n", error_code);
+        // the demo_connection will get closed and freed when I (demo_handler) am freed
+//        democonnection_close(cref);
+//        democonnection_free(cref);
+//        handler_ref->demo_connection_ref = NULL;
+        // notify my server that I am closing
+        handler_ref->completion_callback(handler_ref->server_ref, handler_ref);
     } else {
         response = process_request(handler_ref, msgref);
         demo_message_free(msgref);

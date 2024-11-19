@@ -45,6 +45,7 @@ void* thread_function(void* arg)
 {
     ThreadContext* ctx = arg;
     int listening_socket_fd = create_listener_socket(ctx->port, ctx->host);
+
     printf("thread pid: %d tid: %d host: %s port: %d ident: %d pthread_t: %lu listening_socket: %d\n", getpid(), gettid(), ctx->host, ctx->port, ctx->ident, ctx->thread, ctx->listening_socket);
     ctx->server_ref = HttpServer_new(ctx->port, ctx->host, listening_socket_fd, NULL);
     HttpServer_listen(ctx->server_ref);

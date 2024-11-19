@@ -1,5 +1,5 @@
-//#define RBL_LOG_ENABLED
-//#define RBL_LOG_ALLOW_GLOBAL
+#define RBL_LOG_ENABLED
+#define RBL_LOG_ALLOW_GLOBAL
 #include <http_in_c/demo_protocol/demo_connection.h>
 #include <http_in_c/runloop/rl_internal.h>
 #include <stdlib.h>
@@ -77,7 +77,9 @@ void democonnection_init(
     this->read_state = READ_STATE_IDLE;
     this->write_state = WRITE_STATE_IDLE;
     this->on_write_cb = NULL;
+    this->on_write_cb_arg = NULL;
     this->on_read_cb = NULL;
+    this->on_read_cb_arg =  NULL;
     this->cleanup_done_flag = false;
     this->on_close_cb = connection_completion_cb;
     this->on_close_cb_arg = handler_ref;
@@ -194,9 +196,11 @@ static void read_have_data_cb(void* cref_arg, long bytes_available, int err_stat
          *  treat this the same as an IO error.
          *  Abandon all waiting input messages and Close the connection
          */
-        read_error(cref, "T");
+//        read_error(cref, "T");
+        call_on_read_cb(cref, NULL, -1);
     } else if(bytes_available < 0) {
-        read_error(cref, "");
+//        read_error(cref, "");
+        call_on_read_cb(cref, NULL, -2);
     } else {//   (bytes_available > 0)
         IOBuffer_commit(iob, (int)bytes_available);
         read_process_data(cref);

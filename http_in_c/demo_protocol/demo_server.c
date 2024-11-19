@@ -1,3 +1,5 @@
+#define RBL_LOG_ENABLED
+#define RBL_LOG_ALLOW_GLOBAL
 
 #include <http_in_c/demo_protocol/demo_server.h>
 //#include <http_in_c/runloop/rl_internal.h>
@@ -21,7 +23,7 @@ void on_event_listening(RunloopRef rl, void* arg_server_ref);
 
 static void on_handler_completion_cb(void* void_server_ref, DemoHandlerRef handler_ref)
 {
-    RBL_LOG_FMT("file: demo_server.c on_handler_completeion_cb \n");
+    RBL_LOG_FMT("file: demo_server.c on_handler_completion_cb \n");
     DemoServerRef server_ref = void_server_ref;
     RBL_CHECK_TAG(DemoServer_TAG, server_ref)
     RBL_CHECK_END_TAG(DemoServer_TAG, server_ref)
@@ -54,6 +56,7 @@ void DemoServer_init(DemoServerRef sref, int port, char const * host, int listen
     RBL_SET_END_TAG(DemoServer_TAG, sref)
     sref->port = port;
     sref->host = host;
+    socket_set_non_blocking(listen_fd);
     sref->listening_socket_fd = listen_fd;
     sref->process_request_function = process_request;
 
@@ -113,7 +116,6 @@ void DemoServer_terminate(DemoServerRef this)
 void on_event_listening(RunloopRef rl, void* arg_server_ref) // RunloopListenerRef listener_watcher_ref, uint64_t event)
 {
 
-//    printf("listening_hander \n");
     DemoServerRef server_ref = arg_server_ref; //listener_watcher_ref->listen_postable_arg;
     RBL_CHECK_TAG(DemoServer_TAG, server_ref)
     RBL_CHECK_END_TAG(DemoServer_TAG, server_ref)

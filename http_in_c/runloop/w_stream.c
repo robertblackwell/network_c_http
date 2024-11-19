@@ -1,5 +1,6 @@
-#include <http_in_c//runloop/runloop.h>
+#include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
+#include <rbl/logger.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,19 +17,22 @@
  */
 static void handler(RunloopWatcherRef watcher, uint64_t event)
 {
-    RunloopStreamRef sw = (RunloopStreamRef)watcher;
+    RunloopStreamRef rl_stream = (RunloopStreamRef)watcher;
     RunloopRef rl = watcher->runloop;
     /*
      * These should be posted not called
      */
-//    if(sw->both_postable_cb) {
-//        sw->both_postable_cb(rl, sw->both_postable_arg);
-//    }
-    if((sw->event_mask & EPOLLIN) && (sw->read_postable_cb)) {
-        sw->read_postable_cb(rl, sw->read_postable_arg);
+    if(rl_stream->event_mask & EPOLLIN) {
+        RBL_LOG_FMT("handler runloop_stream POLLIN fd: %d \n", rl_stream->fd);
     }
-    if((sw->event_mask & EPOLLOUT) && (sw->write_postable_cb)) {
-        sw->write_postable_cb(rl, sw->write_postable_arg);
+    if(rl_stream->event_mask & EPOLLOUT) {
+        RBL_LOG_FMT("handler runloop_stream POLLOUT fd: %d \n", rl_stream->fd);
+    }
+    if((rl_stream->event_mask & EPOLLIN) && (rl_stream->read_postable_cb)) {
+        rl_stream->read_postable_cb(rl, rl_stream->read_postable_arg);
+    }
+    if((rl_stream->event_mask & EPOLLOUT) && (rl_stream->write_postable_cb)) {
+        rl_stream->write_postable_cb(rl, rl_stream->write_postable_arg);
     }
 }
 

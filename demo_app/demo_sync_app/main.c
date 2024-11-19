@@ -67,7 +67,7 @@ static void usage()
 {
     printf("Name: demo_sync_server\n");
     printf("\nDescription\n");
-    printf("\tThis is a multi-process multi-threaded synchronous waiting to receive STX.....ETX messages. \n");
+    printf("\tThis is a multi-process multi-threaded synchronous server waiting to receive STX.....ETX messages. \n");
     printf("\n");
     printf("\tThat is this program forks a number of child processes which in turn start a number of  \n");
     printf("\tthreads. Each thread in each subprocess runs an instance of the server. \n");

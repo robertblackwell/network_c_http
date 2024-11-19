@@ -13,21 +13,14 @@ void verify_usage()
 {
     printf("Name: demo_verify\n");
     printf("\nDescription\n");
-    printf("\tThis is a multi-process multi-threaded async_server waiting to receive STX.....ETX messages. \n");
+    printf("\tThis is a multi-process multi-threaded async_client that sends receive STX.....ETX messages \n");
+    printf("\tto a server and measures the response time of each request and amalgamates those  \n");
+    printf("\treading into summary statistics.  \n");
     printf("\n");
-    printf("\tThat is this program forks a number of child processes which in turn start a number of  \n");
-    printf("\tthreads. Each thread in each subprocess runs an instance of the server. \n");
+    printf("\tThat is this program creates a number (-t) of threads. Each thread connects to the server a number of  \n");
+    printf("\ttimes (-c) and sends a requests/recieves a response (called a roundtrip) a number of times (-r). \n");
     printf("\n");
-    printf("\tThe total number of server instance running is (-n value) * (-t value). \n");
-    printf("\n");
-    printf("\tEach server instance listen for request on the host:port options described below. \n");
-    printf("\n");
-    printf("\tEach server instance can serve multiple consecutive requests on the same connection.\n");
-    printf("\n");
-    printf("\tA server instance responds by sending back the request message.\n\n");
-    printf("\n");
-    printf("\tIt is up to the requester to either send CONNECTION: close or close the connection\n");
-    printf("\tin order to close a session.\n");
+    printf("\tThe total number of request/response cycles is (-t) * (-c) * (-r)\n");
     printf("\n");
     printf("\nOptions\n");
 

@@ -13,7 +13,7 @@
 static void usage();
 static void process_args(int argc, char* argv[], char** host_p, int* port, int* nbr_roundtrips_per_connection_p, int* nbr_connections_per_thread_p, int* nbr_threads_p, int* nbr_processes_p);
 void* thread_function(void* arg);
-char* default_host = "127.0.0.1";
+char* default_host = "localhost";
 int   default_port = 9011;
 
 DemoServerRef g_sref;
@@ -91,7 +91,7 @@ static void usage()
     printf("\nOptions\n");
 
     printf("\t-h\tPrints this usage message. Does not take an argument\n");
-    printf("\t-i\tHost ip address                                          - default 127.0.0.1\n");
+    printf("\t-i\tHost name/ip address                                     - default localhost\n");
     printf("\t-p\tPort number to use                                       - default 9011\n");
     printf("\t-n\tNbr Processes running servers                            - default 2\n");
     printf("\t-t\tNbr threads per process each running a server            - default 3\n");
@@ -99,7 +99,7 @@ static void usage()
 }
 static void process_args(int argc, char* argv[], char** host_ip_p, int* port, int* nbr_roundtrips_per_connection_p, int* nbr_connections_per_thread_p, int* nbr_threads_p, int* nbr_processes_p) {
     int c;
-    char* host_ptr = NULL;
+    char* host_ptr = "localhost";
     int port_number = 9011;
     int nbr_processes = 1;
     int nbr_threads = 1;

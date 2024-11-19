@@ -60,8 +60,9 @@ def send_frame_as_fragments(sock: socket.socket, frame:str, number_fragments):
 
 def test_simple():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((host, port))
-    for i in range(1):
+    r = s.connect_ex((host, port))
+    print(f"connect result: {r}");
+    for i in range(3):
         m = make_frame('Q', '123456789')
         s.sendall(m)
         data = s.recv(1024)
@@ -70,7 +71,7 @@ def test_simple():
             print("test_simple failed expected : {} got: {}".format(expected, data))
         else:
             print("test_simple Passed")
-        s.close()
+    s.close()
 
 def test_frame_error_simple():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -199,7 +200,7 @@ def test_good():
         test_message_data_left_in_buffer()
         test_simple_multiple_buffers()
         test_send_big_fragments()
-
-test_simple()
+for j in range(3):
+    test_simple()
 # test_errors() 
 # test_good()           

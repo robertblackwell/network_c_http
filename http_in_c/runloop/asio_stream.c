@@ -88,7 +88,11 @@ void asio_stream_close(AsioStreamRef cref)
     RBL_CHECK_TAG(AsioStream_TAG, cref)
     RBL_CHECK_END_TAG(AsioStream_TAG, cref)
     RBL_ASSERT((cref->fd > 0), "socket should be positive");
+    /**
+     * @TODO - is this right
     runloop_stream_deregister(cref->runloop_stream_ref);
+    */
+    FdTable_remove(cref->runloop_stream_ref->runloop->table, cref->fd);
     close(cref->fd);
     cref->fd = -1;
     cref->runloop_stream_ref->fd = -1;
@@ -168,6 +172,7 @@ static void read_eagain(AsioStreamRef cref)
     RBL_LOG_FMT("asio_stream %p", cref);
     cref->read_state = READ_STATE_EAGAIN;
 #ifdef STREAM_LEVEL_TRIGGERED
+    printf("read_eagain arm read fd: %d\n", cref->runloop_stream_ref->fd);
     runloop_stream_arm_read(cref->runloop_stream_ref, epollin_postable_cb, cref);
 #endif
 }
@@ -183,6 +188,8 @@ static void epollin_postable_cb(RunloopRef rl, void* cref_arg)
         if(cref->read_callback == NULL) {
             cref->read_state = READ_STATE_IDLE;
         } else {
+            printf("epollin_postable_cb disram read fd: %d\n", cref->runloop_stream_ref->fd);
+            runloop_stream_disarm_read(cref->runloop_stream_ref);
             try_read(cref);
         }
     }
