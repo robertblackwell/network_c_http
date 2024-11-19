@@ -223,12 +223,6 @@ static void read_have_data_cb(void* cref_arg, long bytes_available, int err_stat
             }
         } else {
             call_on_read_cb(cref, NULL, rc);
-            /**
-             *
-             * @TODO fix
-            const char * etext = demo_message_error_name(status);
-             */
-//            read_error(cref, "");
         }
     }
 }
@@ -356,47 +350,4 @@ static void call_on_write_cb(DemoConnectionRef cref, int status)
 }
 /////////////////////////////////////////////////////////////////////////////////////
 // end of read sequence
-/////////////////////////////////////////////////////////////////////////////////////
-// Error functions
-/////////////////////////////////////////////////////////////////////////////////////
-
-static void write_error(DemoConnectionRef cref, char* msg)
-{
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
-    printf("Write_error got an error this is the message: %s  fd: %d\n", msg, cref->asio_stream_ref->fd);
-    cref->write_state = WRITE_STATE_STOP;
-    call_on_write_cb(cref, DemoConnectionErrCode_io_error);
-    post_to_runloop(cref, &postable_cleanup);
-}
-static void read_error(DemoConnectionRef cref, char* msg)
-{
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
-    RBL_LOG_FMT("Read_error got an error this is the message: %s  fd: %d\n", msg, cref->asio_stream_ref->fd);
-    cref->read_state = READ_STATE_STOP;
-    RunloopRef rl = asio_stream_get_runloop(cref->asio_stream_ref);
-    postable_cleanup(rl, cref);
-}
-/////////////////////////////////////////////////////////////////////////////////////
-// end of error functions
-/////////////////////////////////////////////////////////////////////////////////////
-// cleanup sequence - functions called when connection is terminating
-/////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * This must be the last democonnection function to run and it should only run once.
- */
-static void postable_cleanup(RunloopRef runloop, void* arg_cref)
-{
-    DemoConnectionRef cref = arg_cref;
-    RBL_LOG_FMT("postable_cleanup entered\n");
-    RBL_ASSERT((cref->cleanup_done_flag == false), "cleanup should not run more than once");
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
-    asio_stream_close(cref->asio_stream_ref);
-    cref->on_close_cb(cref->on_close_cb_arg);
-}
-/////////////////////////////////////////////////////////////////////////////////////
-// end of cleanup
 /////////////////////////////////////////////////////////////////////////////////////
