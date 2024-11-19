@@ -94,7 +94,7 @@ static void handle_request(void* href, DemoMessageRef msgref, int error_code)
 
     DemoMessageRef response = NULL;
     if(error_code) {
-        printf("DemoHandler handler_request error_code %d\n", error_code);
+        RBL_LOG_FMT("DemoHandler handler_request error_code %d\n", error_code);
         // the demo_connection will get closed and freed when I (demo_handler) am freed
 //        democonnection_close(cref);
 //        democonnection_free(cref);

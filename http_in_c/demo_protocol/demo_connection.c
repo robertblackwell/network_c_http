@@ -121,7 +121,7 @@ void democonnection_read(DemoConnectionRef cref, void(*on_demo_read_cb)(void* hr
 {
     RBL_CHECK_TAG(DemoConnection_TAG, cref)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
-    RBL_LOG_FMT("democonnect_read");
+    RBL_LOG_FMT("democonnect_read fd: %d", cref->asio_stream_ref->runloop_stream_ref->fd);
     assert(on_demo_read_cb != NULL);
 
     // should be in READ_STATE_IDLE - check the variable values for state

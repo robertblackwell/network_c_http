@@ -172,7 +172,7 @@ static void read_eagain(AsioStreamRef cref)
     RBL_LOG_FMT("asio_stream %p", cref);
     cref->read_state = READ_STATE_EAGAIN;
 #ifdef STREAM_LEVEL_TRIGGERED
-    printf("read_eagain arm read fd: %d\n", cref->runloop_stream_ref->fd);
+    RBL_LOG_FMT("read_eagain arm read fd: %d\n", cref->runloop_stream_ref->fd);
     runloop_stream_arm_read(cref->runloop_stream_ref, epollin_postable_cb, cref);
 #endif
 }
@@ -188,7 +188,7 @@ static void epollin_postable_cb(RunloopRef rl, void* cref_arg)
         if(cref->read_callback == NULL) {
             cref->read_state = READ_STATE_IDLE;
         } else {
-            printf("epollin_postable_cb disram read fd: %d\n", cref->runloop_stream_ref->fd);
+            RBL_LOG_FMT("epollin_postable_cb disram read fd: %d\n", cref->runloop_stream_ref->fd);
             runloop_stream_disarm_read(cref->runloop_stream_ref);
             try_read(cref);
         }
