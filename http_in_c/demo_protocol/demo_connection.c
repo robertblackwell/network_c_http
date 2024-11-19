@@ -117,8 +117,7 @@ static void call_on_read_cb(DemoConnectionRef cref, DemoMessageRef msgref, int s
 /////////////////////////////////////////////////////////////////////////////////////
 // read sequence - sequence of functions called processing a read operation
 ////////////////////////////////////////////////////////////////////////////////////
-void democonnection_read(DemoConnectionRef cref, void(*on_demo_read_cb)(void* href, DemoMessageRef, int status), void* href)
-{
+void democonnection_read(DemoConnectionRef cref, void(*on_demo_read_cb)(void* href, DemoMessageRef, int status), void* href) {
     RBL_CHECK_TAG(DemoConnection_TAG, cref)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
     RBL_LOG_FMT("democonnect_read fd: %d", cref->asio_stream_ref->runloop_stream_ref->fd);
@@ -132,44 +131,33 @@ void democonnection_read(DemoConnectionRef cref, void(*on_demo_read_cb)(void* hr
 
     cref->on_read_cb = on_demo_read_cb;
     cref->on_read_cb_arg = href;
-    if(List_size(cref->input_message_list_ref) > 1) {
+    if (List_size(cref->input_message_list_ref) > 1) {
         // this means the client is pipelining
         // should not be  happening
         DemoMessageRef msgref = List_remove_first(cref->input_message_list_ref);
         call_on_read_cb(cref, msgref, 0);
-    } else if(List_size(cref->input_message_list_ref) == 1) {
+    } else if (List_size(cref->input_message_list_ref) == 1) {
         DemoMessageRef msgref = List_remove_first(cref->input_message_list_ref);
         cref->read_state = READ_STATE_ACTIVE;
         call_on_read_cb(cref, msgref, 0);
     } else {
         // nothing in the input ueue so start a read operation
         cref->read_state = READ_STATE_ACTIVE;
-        read_start(cref);
-    }
-}
-/**
- * this function is a continuation of demo_connection_read :
- * it is not called from anywhere else and hence the preconditions
- * are already checked in demo_connection_read
- */
-static void read_start(DemoConnectionRef cref)
-{
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
-    assert(cref->active_input_buffer_ref == NULL);
-    if (cref->active_input_buffer_ref == NULL) {
-        cref->active_input_buffer_ref = IOBuffer_new_with_capacity((int)cref->read_buffer_size);
-    }
-    assert(IOBuffer_data_len(cref->active_input_buffer_ref) == 0);
+        assert(cref->active_input_buffer_ref == NULL);
+        if (cref->active_input_buffer_ref == NULL) {
+            cref->active_input_buffer_ref = IOBuffer_new_with_capacity((int) cref->read_buffer_size);
+        }
+        assert(IOBuffer_data_len(cref->active_input_buffer_ref) == 0);
 
-    if(IOBuffer_data_len(cref->active_input_buffer_ref) == 0) {
-        IOBufferRef iob = cref->active_input_buffer_ref;
-        void *input_buffer_ptr = IOBuffer_space(iob);
-        int input_buffer_length = IOBuffer_space_len(iob);
-        asio_stream_read(cref->asio_stream_ref, input_buffer_ptr, input_buffer_length, &read_have_data_cb, cref);
-    } else {
-        // active_input_buffer should be fully processed  and free() at the end of the previous rread
-        assert(false);
+        if (IOBuffer_data_len(cref->active_input_buffer_ref) == 0) {
+            IOBufferRef iob = cref->active_input_buffer_ref;
+            void *input_buffer_ptr = IOBuffer_space(iob);
+            int input_buffer_length = IOBuffer_space_len(iob);
+            asio_stream_read(cref->asio_stream_ref, input_buffer_ptr, input_buffer_length, &read_have_data_cb, cref);
+        } else {
+            // active_input_buffer should be fully processed  and free() at the end of the previous rread
+            assert(false);
+        }
     }
 }
 /**
@@ -196,68 +184,54 @@ static void read_have_data_cb(void* cref_arg, long bytes_available, int err_stat
          *  treat this the same as an IO error.
          *  Abandon all waiting input messages and Close the connection
          */
-//        read_error(cref, "T");
         call_on_read_cb(cref, NULL, -1);
     } else if(bytes_available < 0) {
-//        read_error(cref, "");
         call_on_read_cb(cref, NULL, -2);
     } else {//   (bytes_available > 0)
         IOBuffer_commit(iob, (int)bytes_available);
-        read_process_data(cref);
-    }
-}
-/**
- * This function is only called from one place - read_have_data
- * Hence the prconditions are clear:
- * active_input_buffer_ref != NULL  IOBuffer_data_length(active_input_buffer_ref) > 0
- */
-static void read_process_data(DemoConnectionRef cref) {
-    RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
-    IOBufferRef iob = cref->active_input_buffer_ref;
-    int bytes_available = IOBuffer_data_len(iob);
-    assert(bytes_available > 0);
-    RBL_LOG_FMT("Before DemoParser_consume read_state %d", cref->read_state);
+        RBL_LOG_FMT("Before DemoParser_consume read_state %d", cref->read_state);
 
-    /**
-     * This call will put any new messages onto the input message queue(cref->input_message_list_ref)
-     *
-     * Further more the call will consume all of the buffer unless there is a parsing error
-     *
-     * A parsing error will be treated as an IO error and the connection will be shutdown.
-     *
-     * Hence
-     * -    If the return value is 0 dispose the buffer, set READ_STATE_IDLE and call the read callback
-     *
-     * -    if there is an error dispose the buffer(we wiwont need it),
-     *      set READ_STATE_STOP and start error processing.
-     *      -   there is an alternative approach, namely
-     *          -   set READ_STATE_IDLE,
-     *          -   pass the error code back to th caller and let them decide how to proceed.
-     *
-     */
-    int status = DemoParser_consume(cref->parser_ref, iob);
-
-    assert(cref->active_input_buffer_ref != NULL);
-    assert(IOBuffer_data_len(cref->active_input_buffer_ref) == 0);
-    IOBuffer_free(cref->active_input_buffer_ref);
-    cref->active_input_buffer_ref = NULL;
-
-    if(status == 0) {
-        if(List_size(cref->input_message_list_ref) > 0) {
-            DemoMessageRef msg = List_remove_first(cref->input_message_list_ref);
-            cref->read_state = READ_STATE_IDLE;
-            call_on_read_cb(cref, msg, 0);
-        }
-    } else {
         /**
+         * This call will put any new messages onto the input message queue(cref->input_message_list_ref)
          *
-         * @TODO fix
-        const char * etext = demo_message_error_name(status);
+         * Further more the call will consume all of the buffer unless there is a parsing error
+         *
+         * A parsing error will be treated as an IO error and the connection will be shutdown.
+         *
+         * Hence
+         * -    If the return value is 0 dispose the buffer, set READ_STATE_IDLE and call the read callback
+         *
+         * -    if there is an error dispose the buffer(we wiwont need it),
+         *      set READ_STATE_STOP and start error processing.
+         *      -   there is an alternative approach, namely
+         *          -   set READ_STATE_IDLE,
+         *          -   pass the error code back to th caller and let them decide how to proceed.
+         *
          */
-        read_error(cref, "");
+        int status = DemoParser_consume(cref->parser_ref, iob);
+
+        assert(cref->active_input_buffer_ref != NULL);
+        assert(IOBuffer_data_len(cref->active_input_buffer_ref) == 0);
+        IOBuffer_free(cref->active_input_buffer_ref);
+        cref->active_input_buffer_ref = NULL;
+
+        if(status == 0) {
+            if(List_size(cref->input_message_list_ref) > 0) {
+                DemoMessageRef msg = List_remove_first(cref->input_message_list_ref);
+                cref->read_state = READ_STATE_IDLE;
+                call_on_read_cb(cref, msg, 0);
+            }
+        } else {
+            /**
+             *
+             * @TODO fix
+            const char * etext = demo_message_error_name(status);
+             */
+            read_error(cref, "");
+        }
     }
 }
+
 /**
  * This function is called by the underlying parser when a new message is complete.
  *
