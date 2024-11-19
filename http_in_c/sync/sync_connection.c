@@ -17,13 +17,14 @@
 #define sync_connection_TAG "SYNCCONN"
 #include <rbl/check_tag.h>
 
-static llhttp_errno_t parser_on_message_handler(HttpParser* parser_ptr, HttpMessageRef input_message_ref)
+static void parser_on_message_handler(void* void_parser_ptr, HttpMessageRef input_message_ref)
 {
-    sync_connection_t* connptr = parser_ptr->handler_context;
+    HttpParserRef parser_ref = void_parser_ptr;
+    sync_connection_t* connptr = parser_ref->handler_context;
     RBL_ASSERT((input_message_ref != NULL), "obvious");
     List_add_back(connptr->input_list, input_message_ref);
     connptr->reader_status = 1;
-    return HPE_OK;
+//    return HPE_OK;
 //    if(connptr->is_server_callback) {
 //        connptr->input_message_ref = input_message_ref;
 //        List_add_back(connptr->input_list, input_message_ref);

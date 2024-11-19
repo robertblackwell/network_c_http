@@ -92,7 +92,7 @@ void* threadfn(void* data)
     struct timeval start_time = get_time();
     for(int i = 0; i < ctx->max_connections_per_thread; i++) {
         DemoSyncSocketRef client = demo_syncsocket_new();
-        demo_syncsocket_connect(client, "localhost", 9011);
+        demo_syncsocket_connect(client, "127.0.0.1", 9011);
         ctx->roundtrip_per_connection_counter = 0;
         while(1) {
             struct timeval iter_start_time = get_time();

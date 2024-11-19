@@ -30,7 +30,7 @@ static int chunk_complete_cb(llhttp_t* parser);
 static int on_reset_cb(llhttp_t* parser);
 
 void HttpParser_initialize(HttpParser *this);
-HttpParserRef HttpParser_new(ParserOnMessageCompleteHandler handler, void* handler_context)
+HttpParserRef HttpParser_new(void(*new_msg_handler)(void* ctx, HttpMessageRef new_msg_ref), void* handler_context)
 {
     HttpParserRef this = eg_alloc(sizeof(HttpParser));
     if(this == NULL)
@@ -44,7 +44,7 @@ HttpParserRef HttpParser_new(ParserOnMessageCompleteHandler handler, void* handl
     this->m_name_buf   = Cbuffer_new();
     this->m_value_buf  = Cbuffer_new();
     HttpParser_initialize(this);
-    this->on_message_handler = handler;
+    this->on_message_handler = new_msg_handler;
     this->handler_context = handler_context;
     return this;
 }
@@ -95,7 +95,7 @@ llhttp_errno_t HttpParser_consume(HttpParser *parser, const void* buffer, int le
     }
     return llerrno;
 }
-llhttp_errno_t  http_parser_consume_iobuffer(HttpParserRef parser, IOBufferRef iob)
+llhttp_errno_t  HttpParser_consume_buffer(HttpParserRef parser, IOBufferRef iob)
 {
     llhttp_errno_t llerrno;
     void* bufptr = IOBuffer_data(iob);
@@ -402,8 +402,8 @@ int message_complete_cb(llhttp_t* parser)
     RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
     HttpMessageRef tmp = this->current_message_ptr;
     this->current_message_ptr = HttpMessage_new();
-    llhttp_errno_t retval = this->on_message_handler(this, tmp);
-    return (int)retval;
+    this->on_message_handler(this, tmp);
+    return 0;
 }
 static
 int on_url_complete_cb(llhttp_t* parser)

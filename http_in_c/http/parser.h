@@ -42,28 +42,33 @@ typedef struct http_parser_error_s http_parser_error_t;
  */
 struct HttpParser_s;
 typedef struct HttpParser_s HttpParser, *HttpParserRef;
-typedef llhttp_errno_t (*ParserOnMessageCompleteHandler)(HttpParserRef parser, HttpMessageRef msg);
+typedef void (*ParserOnMessageCompleteHandler)(void* new_msg_ctx, HttpMessageRef msg);
 
 struct HttpParser_s {
     RBL_DECLARE_TAG;
     bool m_started;
 
-    llhttp_t*                m_llhttp_ptr;
-    llhttp_settings_t*       m_llhttp_settings_ptr;
-    HttpMessageRef               current_message_ptr;
-    ParserOnMessageCompleteHandler on_message_handler;
-    void*                    handler_context;
-    int                      m_header_state;
+    llhttp_t*                       m_llhttp_ptr;
+    llhttp_settings_t*              m_llhttp_settings_ptr;
+    HttpMessageRef                  current_message_ptr;
+    ParserOnMessageCompleteHandler  on_message_handler;
+    void*                           handler_context;
+    int                             m_header_state;
     ///////////////////////////////////////////////////////////////////////////////////
     // String buffers used to accumulate values from http-parser
     ///////////////////////////////////////////////////////////////////////////////////
-    CbufferRef             m_url_buf;
-    CbufferRef             m_status_buf;
-    CbufferRef             m_name_buf;
-    CbufferRef             m_value_buf;
+    CbufferRef                      m_url_buf;
+    CbufferRef                      m_status_buf;
+    CbufferRef                      m_name_buf;
+    CbufferRef                      m_value_buf;
 };
 void HttpParser_reset(HttpParser*);
-HttpParserRef HttpParser_new(ParserOnMessageCompleteHandler handler, void* handler_context) ;
+HttpParserRef HttpParser_new(
+        // a function that will be called by the parser when parsing of a new message is comlete
+        void(*on_new_message_cb)(void* on_new_message_ctx, HttpMessageRef new_message_ref),
+        // a pointer to a ctx object you want the handler to have access to while it
+        // deciddes what to do with a new message
+        void* handler_context) ;
 void HttpParser_free(HttpParserRef this);
 
 /**

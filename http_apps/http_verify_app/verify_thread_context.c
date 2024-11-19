@@ -49,13 +49,13 @@ ThreadContext* Ctx_new(int id, int nbr_roundtrips_per_connection, int nbr_connec
 }
 HttpMessageRef mk_request(ThreadContext* ctx)
 {
-    HttpMessageRef request = demo_message_new();
-    http_message_set_is_request(request, true);
+    HttpMessageRef request = HttpMessage_new();
+    HttpMessage_set_is_request(request, true);
     BufferChainRef body = BufferChain_new();
     char buf[100];
     sprintf(buf, "%d %d 1234567890", ctx->ident, ctx->roundtrip_per_connection_counter);
     BufferChain_append_cstr(body, buf);
-    http_message_set_body(request, body);
+    HttpMessage_set_body(request, body);
     return request;
 }
 
@@ -73,7 +73,7 @@ void Ctx_mk_uid(ThreadContext* ctx)
  */
 bool verify_response(ThreadContext* ctx, HttpMessageRef request, HttpMessageRef response)
 {
-    BufferChainRef body = demo_message_get_body(response);
+    BufferChainRef body = HttpMessage_get_body(response);
     IOBufferRef body_iob = BufferChain_compact(body);
     const char* cstr = IOBuffer_cstr(body_iob);
     return true;

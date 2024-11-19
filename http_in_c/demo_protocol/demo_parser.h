@@ -74,7 +74,7 @@ DemoParserRef DemoParser_new(
         /**
          * This function is called every time the parser completes a new message
          */
-        DP_MessageComplete_CB on_message_complete_cb,
+        void(on_message_complete_cb)(void* on_msg_ctx, DemoMessageRef msgref),
         /**
          * This is an anonymous pointer to the context object you want the on_message_complete_cb
          * to have while it decides what to do with the new message.
@@ -83,7 +83,7 @@ DemoParserRef DemoParser_new(
 
 void DemoParser_free(DemoParserRef this);
 
-void DemoParser_consume(DemoParserRef parser, IOBufferRef iobuffer_ref);
+int DemoParser_consume(DemoParserRef parser, IOBufferRef iobuffer_ref);
 
 #endif
 

@@ -86,20 +86,11 @@ void demo_syncsocket_connect(DemoSyncSocketRef this, char* host, int port)
         exit(0);
     }
     bzero((char *) &serv_addr, sizeof(serv_addr));
-#if 1
+    // this method is deprecated -
     serv_addr.sin_family = AF_INET;
     // bcopy((char *)hostent->h_addr, (char *)&serv_addr.sin_addr.s_addr, hostent->h_length);
     bcopy((char *)hostent->h_addr_list[0], (char *)&serv_addr.sin_addr.s_addr, hostent->h_length);
     serv_addr.sin_port = htons(port);
-#else
-
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = port;
-    if(inet_pton(AF_INET, host, &serv_addr.sin_addr)) {
-        fprintf(stderr,"ERROR, inet_pton\n");
-        exit(0);
-    }
-#endif
     RBL_LOG_FMT("demo_syncsocket_connect %p sockfd: %d\n", this, sockfd);
     if (connect(sockfd,(struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
         int errno_saved = errno;
@@ -143,7 +134,14 @@ int demo_syncsocket_read_message(DemoSyncSocketRef client_ref, DemoMessageRef* m
             if (bytes_read > 0) {
                 IOBuffer_commit(iob, (int) bytes_read);
                 RBL_LOG_FMT("response raw: %s \n", IOBuffer_cstr(iob));
+#if 1
                 DemoParser_consume(client_ref->parser_ref, iob);
+#else
+                int rc = DemoParser_consume(client_ref->parser_ref, iob);
+                if(rc != 0) {
+                    return -1;
+                }
+#endif
             } else {
                 return -1;
             }

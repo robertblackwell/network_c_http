@@ -86,8 +86,10 @@ void http_syncsocket_connect(HttpSyncSocketRef this, char* host, int port)
         exit(0);
     }
     bzero((char *) &serv_addr, sizeof(serv_addr));
+    // this method is deprecated -
     serv_addr.sin_family = AF_INET;
-    bcopy((char *)hostent->h_addr, (char *)&serv_addr.sin_addr.s_addr, hostent->h_length);
+    // bcopy((char *)hostent->h_addr, (char *)&serv_addr.sin_addr.s_addr, hostent->h_length);
+    bcopy((char *)hostent->h_addr_list[0], (char *)&serv_addr.sin_addr.s_addr, hostent->h_length);
     serv_addr.sin_port = htons(port);
     RBL_LOG_FMT("http_syncsocket_connect %p sockfd: %d\n", this, sockfd);
     if (connect(sockfd,(struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
@@ -132,7 +134,10 @@ int http_syncsocket_read_message(HttpSyncSocketRef client_ref, HttpMessageRef* m
             if (bytes_read > 0) {
                 IOBuffer_commit(iob, (int) bytes_read);
                 RBL_LOG_FMT("response raw: %s \n", IOBuffer_cstr(iob));
-                HttpParser_consume_buffer(client_ref->parser_ref, iob);
+                int rc = HttpParser_consume_buffer(client_ref->parser_ref, iob);
+                if(rc != 0) {
+                    return -1;
+                }
             } else {
                 return -1;
             }

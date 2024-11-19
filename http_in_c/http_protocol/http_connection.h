@@ -48,9 +48,6 @@ typedef struct HttpConnection_s {
     DC_Close_CB      on_close_cb;
     void*            on_close_cb_arg;
     bool             cleanup_done_flag;
-//    bool             readside_posted;
-//    bool             writeside_posted;
-//    bool             post_active;
     RBL_DECLARE_END_TAG;
 
 } HttpConnection, *HttpConnectionRef;

@@ -1,4 +1,4 @@
-#include <http_in_c/demo_protocol/demo_sync_socket.h>
+#include <http_in_c/http_protocol/http_sync_socket.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -91,8 +91,8 @@ void* threadfn(void* data)
     ThreadContext* ctx = (ThreadContext*)data;
     struct timeval start_time = get_time();
     for(int i = 0; i < ctx->max_connections_per_thread; i++) {
-        DemoSyncSocketRef client = demo_syncsocket_new();
-        demo_syncsocket_connect(client, "localhost", 9011);
+        HttpSyncSocketRef client = http_syncsocket_new();
+        http_syncsocket_connect(client, "localhost", 9011);
         ctx->roundtrip_per_connection_counter = 0;
         while(1) {
             struct timeval iter_start_time = get_time();
@@ -103,8 +103,8 @@ void* threadfn(void* data)
             if (rc1 != 0) break;
             int rc2 = http_syncsocket_read_message(client, &response);
             if (rc2 != 0) break;
-            IOBufferRef iob_req = http_message_serialize(request);
-            IOBufferRef iob_resp = http_message_serialize(response);
+            IOBufferRef iob_req = HttpMessage_serialize(request);
+            IOBufferRef iob_resp = HttpMessage_serialize(response);
             if (!verify_response(ctx, request, response)) {
                 printf("Verify response failed");
             }
@@ -118,10 +118,10 @@ void* threadfn(void* data)
             if(ctx->roundtrip_per_connection_counter >= ctx->max_rountrips_per_connection) {
                 break;
             }
-            http_message_free(request);
+            HttpMessage_free(request);
             request = NULL;
             if(response != NULL) {
-                http_message_free(response);
+                HttpMessage_free(response);
                 response = NULL;
             }
         }

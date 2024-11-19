@@ -37,8 +37,6 @@ static void write_error(HttpConnectionRef cref, char* msg);
 static void postable_cleanup(RunloopRef runloop, void* cref);
 static void read_have_data_cb(void* cref_arg, long bytes_available, int err_status);
 static void read_process_data(HttpConnectionRef cref);
-static void read_process_eof(HttpConnectionRef cref);
-
 /**
  * Utility function that wraps all runloop_post() calls so this module can
  * keep track of outstanding pending function calls
@@ -78,8 +76,6 @@ void http_connection_init(
     this->active_output_buffer_ref = NULL;
     this->read_state = READ_STATE_IDLE;
     this->write_state = WRITE_STATE_IDLE;
-//    this->readside_posted = false;
-//    this->writeside_posted = false;
     this->on_write_cb = NULL;
     this->on_read_cb = NULL;
     this->cleanup_done_flag = false;
@@ -162,7 +158,7 @@ static void read_start(HttpConnectionRef cref)
     if (cref->active_input_buffer_ref == NULL) {
         cref->active_input_buffer_ref = IOBuffer_new_with_capacity((int)cref->read_buffer_size);
     }
-    assert(IOBuffer_data_len(cref->active_input_buffer_ref) > 0);
+    assert(IOBuffer_data_len(cref->active_input_buffer_ref) == 0);
 
     if(IOBuffer_data_len(cref->active_input_buffer_ref) == 0) {
         IOBufferRef iob = cref->active_input_buffer_ref;
@@ -253,11 +249,6 @@ static void read_process_data(HttpConnectionRef cref) {
         const char *etext = llhttp_errno_name(en);
         read_error(cref, "");
     }
-//    assert(cref->active_input_buffer_ref != NULL);
-//    assert(IOBuffer_data_len(cref->active_input_buffer_ref) == 0);
-//    IOBuffer_free(cref->active_input_buffer_ref);
-//    cref->active_input_buffer_ref = NULL;
-    RBL_LOG_FMT("After HttpParser_consume returns  ");
 }
 /**
  * This function is called by the underlying llhttp_parser when a new message is complete.

@@ -79,12 +79,13 @@ void parser_test_destroy(parser_test_t* this)
 {
     ASSERT_NOT_NULL(this);
 }
-llhttp_errno_t on_message_handler(HttpParser* parser_ref, HttpMessageRef msg_ref)
+void on_message_handler(void* void_parser_ref, HttpMessageRef msg_ref)
 {
+    HttpParserRef parser_ref = void_parser_ref;
     parser_test_t* ptest = parser_ref->handler_context;
     test_output_r r = test_output_new(msg_ref, 0);
     List_add_back(ptest->m_results, r);
-    return HPE_OK;
+//    return HPE_OK;
 }
 
 int parser_test_run(parser_test_t* this)
@@ -106,8 +107,8 @@ int parser_test_run(parser_test_t* this)
             rc = HttpParser_consume(pref, (void *) buffer, bytes_read);
             if(rc != HPE_OK) {
 //                printf("WPT_run status > 0 rc: %d\n", rc);
-                char* x = llhttp_get_error_reason(pref->m_llhttp_ptr);
-                char* y = llhttp_errno_name(rc);
+                char* x = (char*)llhttp_get_error_reason(pref->m_llhttp_ptr);
+                char* y = (char*)llhttp_errno_name(rc);
                 List_add_back(this->m_results, test_output_new(NULL, rc));
                 break;
             }
@@ -132,7 +133,7 @@ int parser_test_run(parser_test_t* this)
     }
     char* y = "";
     if(rc != HPE_OK) {
-        y = llhttp_errno_name(rc);
+        y = (char*)llhttp_errno_name(rc);
     }
     int r =this->m_verify_func(this->m_results);
     printf("Return from verify %d %s rc: %s\n", r, this->test_input.description, y);

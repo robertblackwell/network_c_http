@@ -1,5 +1,5 @@
-#ifndef C_HTTP_DEMO_HANDLER_H
-#define C_HTTP_DEMO_HANDLER_H
+#ifndef C_HTTP_HTTP_HANDLER_H
+#define C_HTTP_HTTP_HANDLER_H
 #include <rbl/check_tag.h>
 #include <http_in_c/runloop/rl_internal.h>
 #include <http_in_c/common/list.h>

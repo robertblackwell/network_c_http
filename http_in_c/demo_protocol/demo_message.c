@@ -80,6 +80,10 @@ void demo_message_free(DemoMessageRef this)
     this->body = NULL;
     eg_free(this);
 }
+void demo_message_anonymous_free(void* p)
+{
+    demo_message_free((DemoMessageRef)p);
+}
 IOBufferRef demo_message_serialize(DemoMessageRef mref)
 {
     RBL_CHECK_TAG(DemoMessage_TAG, mref);

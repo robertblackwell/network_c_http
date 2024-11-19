@@ -83,7 +83,7 @@ int DemoParser_append_bytes(DemoParserRef this, void *buffer, unsigned length)
     RBL_CHECK_END_TAG(DemoParser_TAG, this)
     return 0;
 }
-void DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_ref)
+int DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_ref)
 {
     void* buf = IOBuffer_data(iobuffer_ref);
     int length = IOBuffer_data_len(iobuffer_ref);
@@ -134,7 +134,7 @@ void DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_ref)
                         RBL_LOG_FMT("DemmoParser_consume parse error \n");
                         demo_message_free(this->m_current_message_ptr);
                         this->m_current_message_ptr = demo_message_new();
-                        return;
+                        return 0;
                     }
                 }
                 break;
@@ -142,6 +142,7 @@ void DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_ref)
                 assert(false);
         }
     }
+    return 0;
 }
 
 int DemoParser_get_errno(DemoParserRef this)
