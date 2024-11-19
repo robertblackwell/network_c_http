@@ -192,42 +192,43 @@ static void read_have_data_cb(void* cref_arg, long bytes_available, int err_stat
         RBL_LOG_FMT("Before DemoParser_consume read_state %d", cref->read_state);
 
         /**
-         * This call will put any new messages onto the input message queue(cref->input_message_list_ref)
+         * The next function call will put any new messages onto the input message queue(cref->input_message_list_ref)
          *
          * Further more the call will consume all of the buffer unless there is a parsing error
          *
-         * A parsing error will be treated as an IO error and the connection will be shutdown.
+         * A parsing error will be treated as an IO error and returned to caller.
          *
          * Hence
          * -    If the return value is 0 dispose the buffer, set READ_STATE_IDLE and call the read callback
          *
-         * -    if there is an error dispose the buffer(we wiwont need it),
+         * -    if there is an error dispose the buffer(we will not need it),
          *      set READ_STATE_STOP and start error processing.
          *      -   there is an alternative approach, namely
          *          -   set READ_STATE_IDLE,
          *          -   pass the error code back to th caller and let them decide how to proceed.
          *
          */
-        int status = DemoParser_consume(cref->parser_ref, iob);
+        int rc = DemoParser_consume(cref->parser_ref, iob);
 
         assert(cref->active_input_buffer_ref != NULL);
         assert(IOBuffer_data_len(cref->active_input_buffer_ref) == 0);
         IOBuffer_free(cref->active_input_buffer_ref);
         cref->active_input_buffer_ref = NULL;
 
-        if(status == 0) {
+        if(rc == 0) {
             if(List_size(cref->input_message_list_ref) > 0) {
                 DemoMessageRef msg = List_remove_first(cref->input_message_list_ref);
                 cref->read_state = READ_STATE_IDLE;
                 call_on_read_cb(cref, msg, 0);
             }
         } else {
+            call_on_read_cb(cref, NULL, rc);
             /**
              *
              * @TODO fix
             const char * etext = demo_message_error_name(status);
              */
-            read_error(cref, "");
+//            read_error(cref, "");
         }
     }
 }
