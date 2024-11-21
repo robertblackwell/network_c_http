@@ -1,5 +1,5 @@
 #include <http_in_c/http_protocol/http_server.h>
-#include <http_in_c/http/http_message.h>
+#include <http_in_c/http_protocol/http_message.h>
 #include <http_in_c/common/socket_functions.h>
 #include <rbl/logger.h>
 #include <stdio.h>
@@ -22,7 +22,7 @@ void sig_handler(int signo)
     printf("demo_app.c signal handler \n");
     if ((signo == SIGINT) || (signo == SIGABRT)) {
         printf("received SIGINT or SIGABRT\n");
-        HttpServer_free(g_sref);
+        http_server_free(g_sref);
         g_sref = NULL;
         exit(0);
     }

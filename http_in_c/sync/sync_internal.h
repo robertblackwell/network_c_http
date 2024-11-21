@@ -3,7 +3,7 @@
 #include <rbl/logger.h>
 #include <http_in_c/common/socket_functions.h>
 #include <http_in_c/common/queue.h>
-#include <http_in_c/http/parser.h>
+#include <http_in_c/http_protocol/http_message_parser.h>
 
 #include <http_in_c/sync/sync.h>
 #include <http_in_c/sync/tags.h>
@@ -42,7 +42,7 @@ struct sync_worker_s {
 struct sync_connection_s
 {
     RBL_DECLARE_TAG;
-    HttpParser*               m_parser;
+    HttpMessageParser*               m_parser;
     IOBufferRef                  m_iobuffer;
     int                          socketfd;
     size_t                       read_buffer_size;

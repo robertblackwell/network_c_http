@@ -25,9 +25,9 @@ struct DemoParserError_s {
 typedef struct DemoParserError_s DemoParserError;
 
 /**
- * \brief  Return code used as part of the value returned by HttpParser_consume() when processing data.
+ * \brief  Return code used as part of the value returned by http_message_parser_consume() when processing data.
  */
-enum DemoParserRC {
+enum DemoMessageParserRC {
     DemoParserRC_end_of_message = 0x01,
     DemoParserRC_message_incomplete = 0x00,
     DemoParserRC_error = -1,
@@ -44,7 +44,7 @@ typedef int DemoParserErrCode;
 #define DemoParserErr_expected_stx_message   "expected etx"
 #define DemoParserErr_expected_ascii_message "expected printable"
 
-typedef enum DemoParserRC DemoParserRC;
+typedef enum DemoMessageParserRC DemoMessageParserRC;
 
 typedef struct ParserInterface_s ParserInterface, *ParserInterfaceRef;
 
@@ -54,13 +54,13 @@ struct ParserInterface_s {
     void(*message_free)(void*);
 };
 /**
- * Type holding context data for HttpParser functions. Allows for parsing to continue
+ * Type holding context data for HttpMessageParser functions. Allows for parsing to continue
  * over buffer and message boundaries
  */
-struct DemoParser_s;
-typedef struct DemoParser_s DemoParser, *DemoParserRef;
+struct DemoMessageParser_s;
+typedef struct DemoMessageParser_s DemoMessageParser, *DemoMessageParserRef;
 typedef void(*DP_MessageComplete_CB)(void* ctx, DemoMessageRef);
-struct DemoParser_s {
+struct DemoMessageParser_s {
     ParserInterface;
     RBL_DECLARE_TAG;
     int                    m_state;
@@ -70,20 +70,20 @@ struct DemoParser_s {
     RBL_DECLARE_END_TAG;
 };
 
-DemoParserRef DemoParser_new(
+DemoMessageParserRef demo_message_parser_new(
         /**
          * This function is called every time the parser completes a new message
          */
-        void(on_message_complete_cb)(void* on_msg_ctx, DemoMessageRef msgref),
+        void(*on_message_complete_cb)(void* on_msg_ctx, DemoMessageRef msgref),
         /**
          * This is an anonymous pointer to the context object you want the on_message_complete_cb
          * to have while it decides what to do with the new message.
          */
         void* on_new_message_ctx);
 
-void DemoParser_free(DemoParserRef this);
+void demo_message_parser_free(DemoMessageParserRef this);
 
-int DemoParser_consume(DemoParserRef parser, IOBufferRef iobuffer_ref);
+int demo_message_parser_consume(DemoMessageParserRef parser, IOBufferRef iobuffer_ref);
 
 #endif
 

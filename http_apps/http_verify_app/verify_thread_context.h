@@ -5,9 +5,10 @@
 #ifndef C_HTTP_HTTP_VERIFY_THREAD_CONTEXT_H
 #define C_HTTP_HTTP_VERIFY_THREAD_CONTEXT_H
 #include "verify_statistics.h"
-#include <http_in_c/http/http_message.h>
+#include <http_in_c/http_protocol/http_message.h>
 
-struct ThreadContext_s {
+struct VerifyThreadContext_s {
+    char* url;
     /**
      * How many round trips in this experiment
      */
@@ -41,11 +42,8 @@ struct ThreadContext_s {
     char uid[100];
 };
 
-typedef struct ThreadContext_s ThreadContext, *ThreadContextRef;
+typedef struct VerifyThreadContext_s VerifyThreadContext, *VerifyThreadContextRef;
 
-ThreadContext* Ctx_new(int id, int max_roundtrips, int max_connections_per_thread, int max_threads);
-HttpMessageRef mk_request(ThreadContext* ctx);
-void Ctx_mk_uid(ThreadContext* ctx);
-bool verify_response(ThreadContext* ctx, HttpMessageRef request, HttpMessageRef response);
+VerifyThreadContext* Ctx_new(int id, int max_roundtrips, int max_connections_per_thread, int max_threads);
 
 #endif //C_HTTP_VERIFY_THREAD_CONTEXT_H

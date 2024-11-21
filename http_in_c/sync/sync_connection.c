@@ -7,7 +7,7 @@
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/common/iobuffer.h>
-#include <http_in_c/http/parser.h>
+#include <http_in_c/http_protocol/http_message_parser.h>
 #include <rbl/logger.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -19,8 +19,8 @@
 
 static void parser_on_message_handler(void* void_parser_ptr, HttpMessageRef input_message_ref)
 {
-    HttpParserRef parser_ref = void_parser_ptr;
-    sync_connection_t* connptr = parser_ref->handler_context;
+    HttpMessageParserRef parser_ref = void_parser_ptr;
+    sync_connection_t* connptr = parser_ref->on_message_handler_context;
     RBL_ASSERT((input_message_ref != NULL), "obvious");
     List_add_back(connptr->input_list, input_message_ref);
     connptr->reader_status = 1;
@@ -44,7 +44,7 @@ static void parser_on_message_handler(void* void_parser_ptr, HttpMessageRef inpu
 static void message_dealloc(void** p)
 {
     void* mref = *p;
-    HttpMessage_free(*p);
+    http_message_free(*p);
     *p = NULL;
 }
 void sync_connection_init(sync_connection_t* this, int socketfd, size_t read_buffer_size) //, SyncConnectionServerMessageHandler handler, sync_worker_r worker_ref)
@@ -52,7 +52,7 @@ void sync_connection_init(sync_connection_t* this, int socketfd, size_t read_buf
     ASSERT_NOT_NULL(this);
     RBL_SET_TAG(SYNC_CONNECTION_TAG, this)
     RBL_LOG_FMT("sync_connection_init socketfd: %d", socketfd);
-    this->m_parser = HttpParser_new(&parser_on_message_handler, this);
+    this->m_parser = http_message_parser_new(&parser_on_message_handler, this);
     this->socketfd = socketfd;
 //    this->m_rdsocket = rdsock;
     this->m_iobuffer = IOBuffer_new();
@@ -108,7 +108,7 @@ int sync_connection_read(sync_connection_t* this)
 {
     RBL_CHECK_TAG(SYNC_CONNECTION_TAG, this)
     llhttp_errno_t rc;
-    HttpParser* pref = this->m_parser;
+    HttpMessageParser* pref = this->m_parser;
     while(1) {
         char buffer[1000000];
         char* b = (char*) &buffer;
@@ -120,7 +120,7 @@ int sync_connection_read(sync_connection_t* this)
         int errno_saved = errno;
         RBL_LOG_FMT("sync_connection_read after read from socket: %d nread: %d", this->socketfd, nread);
         if(nread > 0) {
-            rc = HttpParser_consume(pref, (void *) buffer, nread);
+            rc = http_message_parser_consume(pref, (void *) buffer, nread);
             if(this->socketfd == -1) {
                 // the message handler function closed the socket
                 return HPE_USER;
@@ -128,7 +128,7 @@ int sync_connection_read(sync_connection_t* this)
             RBL_ASSERT((this->socketfd != -1), "fd closed under neath me");
             if(rc != HPE_OK) {
                 if(rc == HPE_PAUSED) {
-                    void* last_ptr = (void*) HttpParser_last_byte_parsed(this->m_parser);
+                    void* last_ptr = (void*) http_message_parser_last_byte_parsed(this->m_parser);
                     void* y = (last_ptr);
                     void* z = ((void*)buffer + (nread-1));
                     bool x = (last_ptr == ((void*)buffer + (nread-1)));
@@ -148,7 +148,7 @@ int sync_connection_read(sync_connection_t* this)
 
             }
         } else if(nread == 0) {
-//            rc = HttpParser_consume(pref, NULL, 0);
+//            rc = http_message_parser_consume(pref, NULL, 0);
             return HPE_USER;
         } else {
             return HPE_USER;
@@ -195,7 +195,7 @@ int sync_connection_read_request(sync_connection_t* this, SyncConnectionServerMe
 int sync_connection_write(sync_connection_t* this, HttpMessageRef msg_ref)
 {
     RBL_CHECK_TAG(SYNC_CONNECTION_TAG, this)
-    IOBufferRef serialized = HttpMessage_serialize(msg_ref);
+    IOBufferRef serialized = http_message_serialize(msg_ref);
     int len = IOBuffer_data_len(serialized);
     int rc = write(this->socketfd, IOBuffer_data(serialized), IOBuffer_data_len(serialized));
     return rc;

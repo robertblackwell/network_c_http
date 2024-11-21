@@ -1,7 +1,7 @@
 #include "http_process_main.h"
 
 #include <http_in_c/http_protocol/http_server.h>
-#include <http_in_c/http/http_message.h>
+#include <http_in_c/http_protocol/http_message.h>
 #include <http_in_c/common/socket_functions.h>
 #include <rbl/logger.h>
 #include <stdio.h>
@@ -47,10 +47,10 @@ void* thread_function(void* arg)
     int listening_socket_fd = create_listener_socket(ctx->port, ctx->host);
 
     printf("thread pid: %d tid: %d host: %s port: %d ident: %d pthread_t: %lu listening_socket: %d\n", getpid(), gettid(), ctx->host, ctx->port, ctx->ident, ctx->thread, ctx->listening_socket);
-    ctx->server_ref = HttpServer_new(ctx->port, ctx->host, listening_socket_fd, NULL);
-    HttpServer_listen(ctx->server_ref);
+    ctx->server_ref = http_server_new(ctx->port, ctx->host, listening_socket_fd, NULL);
+    http_server_listen(ctx->server_ref);
     runloop_run(ctx->server_ref->runloop_ref, -1 /* infinite*/);
-    HttpServer_free(ctx->server_ref);
+    http_server_free(ctx->server_ref);
     ctx->server_ref = NULL;
     return NULL;
 }

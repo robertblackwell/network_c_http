@@ -22,7 +22,7 @@ void sig_handler(int signo)
     printf("demo_app.c signal handler \n");
     if ((signo == SIGINT) || (signo == SIGABRT)) {
         printf("received SIGINT or SIGABRT\n");
-        DemoServer_free(g_sref);
+        demo_server_free(g_sref);
         g_sref = NULL;
         exit(0);
     }

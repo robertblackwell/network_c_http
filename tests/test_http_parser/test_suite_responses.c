@@ -13,7 +13,7 @@ static int vfunc_eq010 (ListRef results)
     UT_EQUAL_PTR(rref->message, NULL);
     UT_EQUAL_INT(rref->rc, HPE_INVALID_VERSION);
     return 0;
-//    UT_EQUAL_CSTR(HttpMessage_get_reason(m1), "OK 11Reason Phrase");
+//    UT_EQUAL_CSTR(http_message_get_reason(m1), "OK 11Reason Phrase");
 #ifdef A_ON
     CHECK(h.at_key(HeaderFields::Host));
     CHECK(h.at_key(HeaderFields::Connection));
@@ -50,7 +50,7 @@ int test_eq011_vfunc (ListRef results)
     UT_EQUAL_PTR(rref->message, NULL);
     UT_EQUAL_INT(rref->rc, HPE_USER);
     return 0;
-//    UT_EQUAL_CSTR(HttpMessage_get_reason(m1), "OK 11Reason Phrase");
+//    UT_EQUAL_CSTR(http_message_get_reason(m1), "OK 11Reason Phrase");
 #ifdef A_ON
     CHECK(h.at_key(HeaderFields::Host));
     CHECK(h.at_key(HeaderFields::Connection));
@@ -83,15 +83,15 @@ static int test_ROK001_vfunc (ListRef results)
 {
     test_output_t* rref = (test_output_t*) List_remove_first (results);
     HttpMessageRef m1 = rref->message;
-    HdrListRef h = HttpMessage_get_headerlist(m1);
-    UT_EQUAL_INT(HttpMessage_get_status(m1), 200);
-    UT_EQUAL_CSTR(HttpMessage_get_reason(m1), "OK 11Reason Phrase");
+    HdrListRef h = http_message_get_headerlist(m1);
+    UT_EQUAL_INT(http_message_get_status(m1), 200);
+    UT_EQUAL_CSTR(http_message_get_reason(m1), "OK 11Reason Phrase");
 
     CHECK_HEADER(h, HEADER_HOST, "ahost");
     CHECK_HEADER(h, HEADER_CONNECTION_KEY, "keep-alive");
     CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
     CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "11");
-    BufferChainRef body = HttpMessage_get_body (m1);
+    BufferChainRef body = http_message_get_body (m1);
     bool x = BufferChain_eq_cstr (body, "01234567890");
     CHECK_BODY(m1, "01234567890");
     return 0;
@@ -116,9 +116,9 @@ static int test_ROK002_vfunc (ListRef results)
 {
     test_output_t* rref = (test_output_t*) List_remove_first (results);
     HttpMessageRef m1 = rref->message;
-    HdrListRef h = HttpMessage_get_headerlist(m1);
-    UT_EQUAL_INT(HttpMessage_get_status(m1), 201);
-    UT_EQUAL_CSTR(HttpMessage_get_reason(m1), "OK 22Reason Phrase");
+    HdrListRef h = http_message_get_headerlist(m1);
+    UT_EQUAL_INT(http_message_get_status(m1), 201);
+    UT_EQUAL_CSTR(http_message_get_reason(m1), "OK 22Reason Phrase");
 
     CHECK_HEADER(h, HEADER_HOST, "ahost");
     CHECK_HEADER(h, HEADER_CONNECTION_KEY, "keep-alive");
@@ -148,9 +148,9 @@ static int test_ROK003_vfunc (ListRef results)
 {
     test_output_t* rref = (test_output_t*) List_remove_first (results);
     HttpMessageRef m1 = rref->message;
-    HdrListRef h = HttpMessage_get_headerlist(m1);
-    UT_EQUAL_INT(HttpMessage_get_status(m1), 201);
-    UT_EQUAL_CSTR(HttpMessage_get_reason(m1), "OK 22Reason Phrase");
+    HdrListRef h = http_message_get_headerlist(m1);
+    UT_EQUAL_INT(http_message_get_status(m1), 201);
+    UT_EQUAL_CSTR(http_message_get_reason(m1), "OK 22Reason Phrase");
 
     CHECK_HEADER(h, HEADER_HOST, "ahost");
     CHECK_HEADER(h, HEADER_CONNECTION_KEY, "keep-alive");
@@ -195,9 +195,9 @@ parser_test_t* test_case_ROK003()
 static int test_ROK004_vfunc (ListRef results) {
     test_output_t* rref = (test_output_t*) List_remove_first(results);
     HttpMessageRef m1 = rref->message;
-    HdrListRef h = HttpMessage_get_headerlist(m1);
-    UT_EQUAL_INT(HttpMessage_get_status(m1), 201);
-    UT_EQUAL_CSTR(HttpMessage_get_reason(m1), "OK Reason Phrase");
+    HdrListRef h = http_message_get_headerlist(m1);
+    UT_EQUAL_INT(http_message_get_status(m1), 201);
+    UT_EQUAL_CSTR(http_message_get_reason(m1), "OK Reason Phrase");
 
     CHECK_HEADER(h, HEADER_HOST, "ahost");
     CHECK_HEADER(h, HEADER_CONNECTION_KEY, "keep-alive");
@@ -252,9 +252,9 @@ static int test_ROK005_vfunc (ListRef results)
 {
     test_output_t* rref = (test_output_t*) List_remove_first (results);
     HttpMessageRef m1 = rref->message;
-    HdrListRef h = HttpMessage_get_headerlist(m1);
-    UT_EQUAL_INT(HttpMessage_get_status(m1), 201);
-    UT_EQUAL_CSTR(HttpMessage_get_reason(m1), "OK Reason Phrase");
+    HdrListRef h = http_message_get_headerlist(m1);
+    UT_EQUAL_INT(http_message_get_status(m1), 201);
+    UT_EQUAL_CSTR(http_message_get_reason(m1), "OK Reason Phrase");
 
     CHECK_HEADER(h, HEADER_HOST, "ahost");
     CHECK_HEADER(h, HEADER_CONNECTION_KEY, "keep-alive");
@@ -293,9 +293,9 @@ int test_ROK006_vfunc (ListRef results)
 {
     test_output_t* rref = (test_output_t*) List_remove_first (results);
     HttpMessageRef m1 = rref->message;
-    HdrListRef h = HttpMessage_get_headerlist(m1);
-    UT_EQUAL_INT(HttpMessage_get_status(m1), 201);
-    UT_EQUAL_CSTR(HttpMessage_get_reason(m1), "OK Reason Phrase");
+    HdrListRef h = http_message_get_headerlist(m1);
+    UT_EQUAL_INT(http_message_get_status(m1), 201);
+    UT_EQUAL_CSTR(http_message_get_reason(m1), "OK Reason Phrase");
 
     CHECK_HEADER(h, HEADER_HOST, "ahost");
     CHECK_HEADER(h, HEADER_CONNECTION_KEY, "keep-alive");
@@ -342,34 +342,34 @@ static int test_ROK007_vfunc (ListRef results)
     UT_NOT_EQUAL_PTR(m1, m2);
     UT_NOT_EQUAL_PTR(m1, NULL);
     UT_NOT_EQUAL_PTR(m2, NULL);
-    HdrListRef h1 = HttpMessage_get_headerlist(m1);
-    HdrListRef h2 = HttpMessage_get_headerlist(m2);
+    HdrListRef h1 = http_message_get_headerlist(m1);
+    HdrListRef h2 = http_message_get_headerlist(m2);
     UT_NOT_EQUAL_PTR(h1, h2);
     UT_NOT_EQUAL_PTR(h1, NULL);
     UT_NOT_EQUAL_PTR(h2, NULL);
     {
-        HdrListRef h = HttpMessage_get_headerlist(m1);
-        UT_EQUAL_INT(HttpMessage_get_status(m1), 200);
-        UT_EQUAL_CSTR(HttpMessage_get_reason(m1), "OK 11Reason Phrase");
+        HdrListRef h = http_message_get_headerlist(m1);
+        UT_EQUAL_INT(http_message_get_status(m1), 200);
+        UT_EQUAL_CSTR(http_message_get_reason(m1), "OK 11Reason Phrase");
 
         CHECK_HEADER(h, HEADER_HOST, "ahost");
         CHECK_HEADER(h, HEADER_CONNECTION_KEY, "keep-alive");
         CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
         CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "10");
-        BufferChainRef bcref = HttpMessage_get_body (m1);
+        BufferChainRef bcref = http_message_get_body (m1);
         CHECK_BODY(m1, "1234567890");
     }
     {
-        HdrListRef h = HttpMessage_get_headerlist(m2);
-        UT_EQUAL_INT(HttpMessage_get_status(m2), 201);
-        UT_EQUAL_CSTR(HttpMessage_get_reason(m2), "OK 22Reason Phrase");
+        HdrListRef h = http_message_get_headerlist(m2);
+        UT_EQUAL_INT(http_message_get_status(m2), 201);
+        UT_EQUAL_CSTR(http_message_get_reason(m2), "OK 22Reason Phrase");
 
         CHECK_HEADER(h, HEADER_HOST, "ahost");
         CHECK_HEADER(h, HEADER_CONNECTION_KEY, "keep-alive");
         CHECK_HEADER(h, HEADER_PROXYCONNECTION, "keep-alive");
         CHECK_HEADER(h, HEADER_CONTENT_LENGTH, "11");
 
-        BufferChainRef bcref = HttpMessage_get_body(m2);
+        BufferChainRef bcref = http_message_get_body(m2);
         IOBufferRef iobref = BufferChain_compact(bcref);
         bool x01 = BufferChain_eq_cstr(bcref, "ABCDEFGHIJK");
         int y = x01;
@@ -403,10 +403,10 @@ int test_ROK008_vfunc (ListRef results)
     UT_EQUAL_INT(nn, 1)
     test_output_t* rref = (test_output_t*) List_remove_first (results);
     HttpMessageRef m1 = rref->message;
-    HdrListRef h = HttpMessage_get_headerlist(m1);
+    HdrListRef h = http_message_get_headerlist(m1);
     int n = HdrList_size (h);
-    UT_EQUAL_INT(HttpMessage_get_status(m1), 200);
-    UT_EQUAL_CSTR(HttpMessage_get_reason(m1), "OK 11Reason Phrase");
+    UT_EQUAL_INT(http_message_get_status(m1), 200);
+    UT_EQUAL_CSTR(http_message_get_reason(m1), "OK 11Reason Phrase");
 
     KVPairRef hlr = HdrList_find (h, HEADER_HOST);
     CHECK_HEADER(h, HEADER_HOST, "ahost");
@@ -438,10 +438,10 @@ static int test_ROK009_vfunc (ListRef results)
 {
     test_output_t* rref = (test_output_t*) List_remove_first (results);
     HttpMessageRef m1 = rref->message;
-    HdrListRef h = HttpMessage_get_headerlist(m1);
+    HdrListRef h = http_message_get_headerlist(m1);
     int n = HdrList_size (h);
-    UT_EQUAL_INT(HttpMessage_get_status(m1), 200);
-    UT_EQUAL_CSTR(HttpMessage_get_reason(m1), "OK 11Reason Phrase");
+    UT_EQUAL_INT(http_message_get_status(m1), 200);
+    UT_EQUAL_CSTR(http_message_get_reason(m1), "OK 11Reason Phrase");
 
     KVPairRef hlr = HdrList_find (h, HEADER_HOST);
     CHECK_HEADER(h, HEADER_HOST, "ahost");

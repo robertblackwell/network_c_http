@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <http_in_c/common/list.h>
 #include <http_in_c/demo_protocol/demo_message.h>
-#include <http_in_c/demo_protocol/demo_parser.h>
+#include <http_in_c/demo_protocol/demo_message_parser.h>
 
 /* Test input - is a list of blocks of text and some context so that these blocks can be
  * "read" and "processed" one at a time*/

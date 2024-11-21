@@ -46,10 +46,10 @@ void* thread_function(void* arg)
     ThreadContext* ctx = arg;
     int listening_socket_fd = create_listener_socket(ctx->port, ctx->host);
     printf("thread pid: %d tid: %d host: %s port: %d ident: %d pthread_t: %lu listening_socket: %d\n", getpid(), gettid(), ctx->host, ctx->port, ctx->ident, ctx->thread, ctx->listening_socket);
-    ctx->server_ref = DemoServer_new(ctx->port, ctx->host, listening_socket_fd, NULL);
-    DemoServer_listen(ctx->server_ref);
+    ctx->server_ref = demo_server_new(ctx->port, ctx->host, listening_socket_fd, NULL);
+    demo_server_listen(ctx->server_ref);
     runloop_run(ctx->server_ref->runloop_ref, -1 /* infinite*/);
-    DemoServer_free(ctx->server_ref);
+    demo_server_free(ctx->server_ref);
     ctx->server_ref = NULL;
     return NULL;
 }

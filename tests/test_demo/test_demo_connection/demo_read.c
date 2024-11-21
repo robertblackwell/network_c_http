@@ -84,7 +84,7 @@ void start_read(RunloopRef rl, void* ctx_arg)
 {
     ReadCtxRef ctx = ctx_arg;
     DemoConnectionRef cref = ctx->demo_conn_ref;
-    democonnection_read(cref, on_read_message, ctx);
+    demo_connection_read(cref, on_read_message, ctx);
 }
 static void on_connection_complete(void* arg)
 {
@@ -96,7 +96,7 @@ void* reader_thread_func(void* arg)
     ReaderTable* rdr = (ReaderTable*)arg;
     for(int i = 0; i < rdr->count; i++) {
         ReadCtx* ctx = &(rdr->ctx_table[i]);
-        ctx->demo_conn_ref = democonnection_new(runloop_ref, ctx->readfd, &on_connection_complete, ctx);
+        ctx->demo_conn_ref = demo_connection_new(runloop_ref, ctx->readfd, &on_connection_complete, ctx);
         runloop_post(runloop_ref, start_read, ctx);
     }
     runloop_run(runloop_ref, 1000000);

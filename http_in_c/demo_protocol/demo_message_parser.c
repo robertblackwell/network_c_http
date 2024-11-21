@@ -1,4 +1,4 @@
-#include <http_in_c/demo_protocol/demo_parser.h>
+#include <http_in_c/demo_protocol/demo_message_parser.h>
 #include <http_in_c/common/utils.h>
 #include <ctype.h>
 #include <rbl/logger.h>
@@ -43,25 +43,26 @@ enum State {
 #define ADD_TO_BODY(THIS, CH)   ()
 #define FINALIZE_BODY(THIS)
 
-void DemoParser_initialize(DemoParserRef this);
+void DemoParser_initialize(DemoMessageParserRef this);
 
-DemoParserRef DemoParser_new(
-        DP_MessageComplete_CB on_new_message_callback,
-        void* on_new_message_complete_ctx)
+DemoMessageParserRef demo_message_parser_new(
+        void (*on_message_complete_cb)(void *, DemoMessageRef),
+        void* on_new_message_ctx
+    )
 {
-    DemoParserRef this = malloc(sizeof(DemoParser));
+    DemoMessageParserRef this = malloc(sizeof(DemoMessageParser));
     RBL_SET_TAG(DemoParser_TAG, this)
     RBL_SET_END_TAG(DemoParser_TAG, this)
-    this->parser_consume = (int(*)(ParserInterfaceRef, IOBufferRef))&DemoParser_consume;
+    this->parser_consume = (int(*)(ParserInterfaceRef, IOBufferRef)) &demo_message_parser_consume;
     this->message_factory = (void*(*)())&demo_message_new;
     this->message_free = (void(*)(void*))&demo_message_free;
     this->m_state = STATE_IDLE;
     this->m_current_message_ptr = NULL;
-    this->on_new_message_callback = on_new_message_callback;
-    this->on_new_message_complete_ctx = on_new_message_complete_ctx;
+    this->on_new_message_callback = on_message_complete_cb;
+    this->on_new_message_complete_ctx = on_new_message_ctx;
     return this;
 }
-void DemoParser_free(DemoParserRef this)
+void demo_message_parser_free(DemoMessageParserRef this)
 {
     RBL_CHECK_TAG(DemoParser_TAG, this)
     RBL_CHECK_END_TAG(DemoParser_TAG, this)
@@ -71,26 +72,26 @@ void DemoParser_free(DemoParserRef this)
     }
     free(this);
 }
-DemoMessageRef DemoParser_current_message(DemoParserRef this)
+DemoMessageRef DemoParser_current_message(DemoMessageParserRef this)
 {
     RBL_CHECK_TAG(DemoParser_TAG, this)
     RBL_CHECK_END_TAG(DemoParser_TAG, this)
     return this->m_current_message_ptr;
 }
-int DemoParser_append_bytes(DemoParserRef this, void *buffer, unsigned length)
+int DemoParser_append_bytes(DemoMessageParserRef this, void *buffer, unsigned length)
 {
     RBL_CHECK_TAG(DemoParser_TAG, this)
     RBL_CHECK_END_TAG(DemoParser_TAG, this)
     return 0;
 }
-int DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_ref)
+int demo_message_parser_consume(DemoMessageParserRef parser, IOBufferRef iobuffer_ref)
 {
     void* buf = IOBuffer_data(iobuffer_ref);
     int length = IOBuffer_data_len(iobuffer_ref);
     assert(length != 0);
     int error_code = 0;
-    RBL_CHECK_TAG(DemoParser_TAG, this)
-    RBL_CHECK_END_TAG(DemoParser_TAG, this)
+    RBL_CHECK_TAG(DemoParser_TAG, parser)
+    RBL_CHECK_END_TAG(DemoParser_TAG, parser)
 
     char* charbuf = (char*) buf;
     for(int i = 0; i < length; i++) {
@@ -98,27 +99,27 @@ int DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_ref)
         IOBuffer_consume(iobuffer_ref, 1);
         int ch = (int)charbuf[i];
         assert(ch == ch2);
-        switch (this->m_state) {
+        switch (parser->m_state) {
             case STATE_IDLE:
-                if(this->m_current_message_ptr == NULL) {
-                    this->m_current_message_ptr = demo_message_new();
+                if(parser->m_current_message_ptr == NULL) {
+                    parser->m_current_message_ptr = demo_message_new();
                 }
-                if(ch == CH_STX) this->m_state = STATE_BODY;
+                if(ch == CH_STX) parser->m_state = STATE_BODY;
                 break;
             case STATE_BODY: {
                 if (isprint(ch)) {
-                    BufferChainRef bc = demo_message_get_body(this->m_current_message_ptr);
+                    BufferChainRef bc = demo_message_get_body(parser->m_current_message_ptr);
                     BufferChain_append(bc, &ch, 1);
                     IOBufferRef iobtmp = BufferChain_compact(bc);
                     const char* xx = IOBuffer_cstr(iobtmp);
                     IOBuffer_free(iobtmp);
                 } else if (ch == CH_ETX) {
-                    this->m_state = STATE_IDLE;
-                    this->on_new_message_callback(this-> on_new_message_complete_ctx, this->m_current_message_ptr);
-                    this->m_current_message_ptr = demo_message_new();
-                    this->m_state = STATE_IDLE;
+                    parser->m_state = STATE_IDLE;
+                    parser->on_new_message_callback(parser-> on_new_message_complete_ctx, parser->m_current_message_ptr);
+                    parser->m_current_message_ptr = demo_message_new();
+                    parser->m_state = STATE_IDLE;
                 } else {
-                    this->m_state = STATE_ERROR_RECOVERY;
+                    parser->m_state = STATE_ERROR_RECOVERY;
                 }
                 break;
             }
@@ -128,12 +129,12 @@ int DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_ref)
                  * If not found the terminate the read operation with an error
                  */
                 if((ch == CH_STX) && (i < length - 1)) {
-                    this->m_state = STATE_BODY;
+                    parser->m_state = STATE_BODY;
                 } else {
                     if(i == length - 1) {
                         RBL_LOG_FMT("DemmoParser_consume parse error \n");
-                        demo_message_free(this->m_current_message_ptr);
-                        this->m_current_message_ptr = demo_message_new();
+                        demo_message_free(parser->m_current_message_ptr);
+                        parser->m_current_message_ptr = demo_message_new();
                         return 0;
                     }
                 }
@@ -145,13 +146,13 @@ int DemoParser_consume(DemoParserRef this, IOBufferRef iobuffer_ref)
     return 0;
 }
 
-int DemoParser_get_errno(DemoParserRef this)
+int DemoParser_get_errno(DemoMessageParserRef this)
 {
     RBL_CHECK_TAG(DemoParser_TAG, this)
     RBL_CHECK_END_TAG(DemoParser_TAG, this)
     return 0;
 }
-DemoParserError DemoParser_get_error(DemoParserRef this)
+DemoParserError DemoParser_get_error(DemoMessageParserRef this)
 {
 //    llhttp_errno_t x = llhttp_get_errno(this->m_llhttp_ptr);
 //    char* n = (char*)llhttp_errno_name(x);
@@ -165,7 +166,7 @@ DemoParserError DemoParser_get_error(DemoParserRef this)
     return erst;
 }
 
-void DemoParser_initialize(DemoParserRef this)
+void DemoParser_initialize(DemoMessageParserRef this)
 {
     RBL_CHECK_TAG(DemoParser_TAG, this)
     RBL_CHECK_END_TAG(DemoParser_TAG, this)

@@ -41,32 +41,32 @@ enum HttpMinorVersion {minor_verson0=0, minor_version1=1};
 typedef void* HeaderIter;
 
 typedef int HttpMinorVersion;
-#define Message_TAG "MESSAGE"
+#define HttpMessage_TAG "HTTPMSGE"
 
-HttpMessageRef HttpMessage_new();
-HttpMessageRef HttpMessage_new_request();
-HttpMessageRef HttpMessage_new_response();
+HttpMessageRef http_message_new();
+HttpMessageRef http_message_new_request();
+HttpMessageRef http_message_new_response();
 
-void HttpMessage_free(HttpMessageRef p);
-void HttpMessage_anonymous_free(void* m);
+void http_message_free(HttpMessageRef p);
+void http_message_anonymous_free(void* m);
 /**
  * @brief Methods to test and set whether a message is a request or response
  */
-bool HttpMessage_is_request(HttpMessageRef mref);
-bool HttpMessage_get_is_request(HttpMessageRef this);
-void HttpMessage_set_is_request(HttpMessageRef this, bool yn);
+bool http_message_is_request(HttpMessageRef mref);
+bool http_message_get_is_request(HttpMessageRef this);
+void http_message_set_is_request(HttpMessageRef this, bool yn);
 /**
  * @brief Methods to get/set all first line fields
  */
-HttpStatus HttpMessage_get_status(HttpMessageRef mref);
-void HttpMessage_set_status(HttpMessageRef mref, HttpStatus status);
+HttpStatus http_message_get_status(HttpMessageRef mref);
+void http_message_set_status(HttpMessageRef mref, HttpStatus status);
 
-HttpMethod HttpMessage_get_method(HttpMessageRef mref);
-void HttpMessage_set_method(HttpMessageRef mref, HttpMethod method);
+HttpMethod http_message_get_method(HttpMessageRef mref);
+void http_message_set_method(HttpMessageRef mref, HttpMethod method);
 
-HttpMinorVersion HttpMessage_get_minor_version(HttpMessageRef mref);
-void HttpMessage_set_minor_version(HttpMessageRef this, HttpMinorVersion mv);
-void HttpMessage_set_version(HttpMessageRef this, int maj, int minor);
+HttpMinorVersion http_message_get_minor_version(HttpMessageRef mref);
+void http_message_set_minor_version(HttpMessageRef this, HttpMinorVersion mv);
+void http_message_set_version(HttpMessageRef this, int maj, int minor);
 /**
  * The first line fields that have string values (such as reason and target) come in two version:.
  *  -   const char* - version that takes or returns const char* which are all c strings. For this style
@@ -78,19 +78,20 @@ void HttpMessage_set_version(HttpMessageRef this, int maj, int minor);
  *      -   the getter returns an ownership along with the BufferRef so the caller is responsible for freeing the returned instance
  *      -   the setter makes a copy of the CbufferRef parameter so ownershp stays with the caller.
  */
-void HttpMessage_set_target(HttpMessageRef this, const char* target_cstr);
-const char* HttpMessage_get_target(HttpMessageRef this);
+void http_message_set_target(HttpMessageRef this, const char* target_cstr);
+const char* http_message_get_target(HttpMessageRef this);
 
-void HttpMessage_set_target_cbuffer(HttpMessageRef this, CbufferRef target);
-CbufferRef HttpMessage_get_target_cbuffer(HttpMessageRef this);
+void http_message_set_target_cbuffer(HttpMessageRef this, CbufferRef target);
+CbufferRef http_message_get_target_cbuffer(HttpMessageRef this);
 
-void HttpMessage_set_reason(HttpMessageRef this, const char* reason_cstr);
-const char* HttpMessage_get_reason(HttpMessageRef this);
+void http_message_set_reason(HttpMessageRef this, const char* reason_cstr);
+const char* http_message_get_reason(HttpMessageRef this);
 
-void HttpMessage_set_reason_cbuffer(HttpMessageRef this, CbufferRef reason);
-CbufferRef Message_get_reason_cbuffer(HttpMessageRef this);
+void http_message_set_reason_cbuffer(HttpMessageRef this, CbufferRef reason);
+CbufferRef http_message_get_reason_cbuffer(HttpMessageRef this);
 
-void HttpMessage_set_content_length(HttpMessageRef this, int length);
+void http_message_set_content_length(HttpMessageRef this, int length);
+
 /**
  * Add a new header line to the message. If the key is already in the header list
  * replace its value with the value provided in this call
@@ -101,8 +102,8 @@ void HttpMessage_set_content_length(HttpMessageRef this, int length);
  * @param value const char* The value part of the header line to be added. This is a c-string
  *                          and the value is copied
  */
-void HttpMessage_add_header_cstring(HttpMessageRef mref, const char* label, const char* value);
-void HttpMessage_add_header_cbuf(HttpMessageRef this, CbufferRef key, CbufferRef value);
+void http_message_add_header_cstring(HttpMessageRef mref, const char* label, const char* value);
+void http_message_add_header_cbuf(HttpMessageRef this, CbufferRef key, CbufferRef value);
 
 /**
  * Get the value string for the header line with the given label or key.
@@ -113,8 +114,8 @@ void HttpMessage_add_header_cbuf(HttpMessageRef this, CbufferRef key, CbufferRef
  *                              a string that is owned by the message instance. Do not free
  *                              value is always lower case
  */
-const char* HttpMessage_get_header_value(HttpMessageRef mref, const char* labptr);
-HdrListRef HttpMessage_get_headerlist(HttpMessageRef this);
+const char* http_message_get_header_value(HttpMessageRef mref, const char* labptr);
+HdrListRef http_message_get_headerlist(HttpMessageRef this);
 /**
  * Compares a header
  * @return
@@ -122,9 +123,9 @@ HdrListRef HttpMessage_get_headerlist(HttpMessageRef this);
  *  -   0 if key is in header list but test value is different to header value
  *  -   -1 key is not in header list
  */
-int HttpMessage_cmp_header(HttpMessageRef msgref, const char* key, const char* test_value);
+int http_message_cmp_header(HttpMessageRef msgref, const char* key, const char* test_value);
 
-void HttpMessage_set_headers_arr(HttpMessageRef mref, const char* ar[][2]);
+void http_message_set_headers_arr(HttpMessageRef mref, const char* ar[][2]);
 
 //const char* Message_header_iter_deref(HttpMessageRef mref, HeaderIter iter);
 
@@ -138,18 +139,18 @@ void HttpMessage_set_headers_arr(HttpMessageRef mref, const char* ar[][2]);
  *                          The Message_dispose() function will dispose the buffer chain
  *                          Consider that the HttpMessageRef retains ownership of the BufferChainRef
  */
-BufferChainRef HttpMessage_get_body(HttpMessageRef mref);
+BufferChainRef http_message_get_body(HttpMessageRef mref);
 /**
  * Following on from the previous function doc block. This function gives ownership of a BufferChainRef to
  * a HttpMessage instance.
  * @param mref   HttpMessageRef
  * @param body   BufferChainRef
  */
-void HttpMessage_set_body(HttpMessageRef mref, BufferChainRef bodyp);
+void http_message_set_body(HttpMessageRef mref, BufferChainRef bodyp);
 
 
-IOBufferRef HttpMessage_serialize(HttpMessageRef this);
-IOBufferRef HttpMessage_dump(HttpMessageRef this);
+IOBufferRef http_message_serialize(HttpMessageRef this);
+IOBufferRef http_message_dump(HttpMessageRef this);
 
 /**@}*/
 #endif

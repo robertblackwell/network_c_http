@@ -8,7 +8,7 @@
 #include <http_in_c/common/list.h>
 #include <http_in_c/http/kvpair.h>
 #include <http_in_c/http/header_list.h>
-#include <http_in_c/http/http_message.h>
+#include <http_in_c/http_protocol/http_message.h>
 
 
 #ifdef HDRXX
@@ -178,10 +178,10 @@ HttpMessageRef make_request_message()
             {"Key4", "value4"},
             {NULL, NULL}
     };
-    HttpMessageRef msg = HttpMessage_new_request();
-    HttpMessage_set_method(msg, HTTP_POST);
-    HttpMessage_set_target(msg, "/somewhere.php?a=111&b=222");
-    HttpMessage_set_headers_arr(msg, ar);
+    HttpMessageRef msg = http_message_new_request();
+    http_message_set_method(msg, HTTP_POST);
+    http_message_set_target(msg, "/somewhere.php?a=111&b=222");
+    http_message_set_headers_arr(msg, ar);
     return msg;
 }
 HttpMessageRef make_response_message()
@@ -193,10 +193,10 @@ HttpMessageRef make_response_message()
             {"Key4", "value4"},
             {NULL, NULL}
     };
-    HttpMessageRef msg = HttpMessage_new_response();
-    HttpMessage_set_status(msg, 203);
-    HttpMessage_set_reason(msg, "AREASON");
-    HttpMessage_set_headers_arr(msg, ar);
+    HttpMessageRef msg = http_message_new_response();
+    http_message_set_status(msg, 203);
+    http_message_set_reason(msg, "AREASON");
+    http_message_set_headers_arr(msg, ar);
     return msg;
 }
 HttpMessageRef make_response_message_empty_body()
@@ -208,11 +208,11 @@ HttpMessageRef make_response_message_empty_body()
             {"Key4", "value4"},
             {NULL, NULL}
     };
-    HttpMessageRef msg = HttpMessage_new_response();
-    HttpMessage_set_status(msg, 203);
-    HttpMessage_set_reason(msg, "AREASON");
-    HttpMessage_set_headers_arr(msg, ar);
-    HttpMessage_set_body(msg, BufferChain_new());
+    HttpMessageRef msg = http_message_new_response();
+    http_message_set_status(msg, 203);
+    http_message_set_reason(msg, "AREASON");
+    http_message_set_headers_arr(msg, ar);
+    http_message_set_body(msg, BufferChain_new());
     return msg;
 }
 static BufferChainRef make_chain_2()
@@ -240,11 +240,11 @@ HttpMessageRef make_response_message_with_body()
             {"Key4", "value4"},
             {NULL, NULL}
     };
-    HttpMessageRef msg = HttpMessage_new_response();
-    HttpMessage_set_status(msg, 203);
-    HttpMessage_set_reason(msg, "AREASON");
-    HttpMessage_set_headers_arr(msg, ar);
-    HttpMessage_set_body(msg, make_chain_2());
+    HttpMessageRef msg = http_message_new_response();
+    http_message_set_status(msg, 203);
+    http_message_set_reason(msg, "AREASON");
+    http_message_set_headers_arr(msg, ar);
+    http_message_set_body(msg, make_chain_2());
     return msg;
 }
 
@@ -252,7 +252,7 @@ int test_serialize()
 {
     {
         HttpMessageRef msg = make_request_message();
-        IOBufferRef ser = HttpMessage_serialize(msg);
+        IOBufferRef ser = http_message_serialize(msg);
         const char *correct = "POST /somewhere.php?a=111&b=222 HTTP/1.1\r\nKEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\n\r\n";
         const char *candidate = IOBuffer_cstr(ser);
         int r = strcmp(candidate, correct);
@@ -260,7 +260,7 @@ int test_serialize()
     }
     {
         HttpMessageRef msg = make_response_message();
-        IOBufferRef ser = HttpMessage_serialize(msg);
+        IOBufferRef ser = http_message_serialize(msg);
         const char *correct = "HTTP/1.1  203 AREASON\r\nKEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\n\r\n";
         const char *candidate = IOBuffer_cstr(ser);
         int r = strcmp(candidate, correct);
@@ -268,7 +268,7 @@ int test_serialize()
     }
     {
         HttpMessageRef msg = make_response_message_empty_body();
-        IOBufferRef ser = HttpMessage_serialize(msg);
+        IOBufferRef ser = http_message_serialize(msg);
         const char *correct = "HTTP/1.1  203 AREASON\r\nKEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\n\r\n";
         const char *candidate = IOBuffer_cstr(ser);
         int r = strcmp(candidate, correct);
@@ -276,7 +276,7 @@ int test_serialize()
     }
     {
         HttpMessageRef msg = make_response_message_with_body();
-        IOBufferRef ser = HttpMessage_serialize(msg);
+        IOBufferRef ser = http_message_serialize(msg);
         const char *correct = "HTTP/1.1  203 AREASON\r\nKEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\n\r\nABCDEFGHIJKLMNOPQRSTUVWXYZ1234";
         const char *candidate = IOBuffer_cstr(ser);
         int r = strcmp(candidate, correct);
@@ -287,8 +287,8 @@ int test_serialize()
 int test_content_length()
 {
     HttpMessageRef msg = make_response_message_empty_body();
-    HttpMessage_set_content_length(msg, 123);
-    IOBufferRef ser = HttpMessage_serialize(msg);
+    http_message_set_content_length(msg, 123);
+    IOBufferRef ser = http_message_serialize(msg);
     const char *correct = "HTTP/1.1  203 AREASON\r\nKEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\nCONTENT-LENGTH: 123\r\n\r\n";
     const char *candidate = IOBuffer_cstr(ser);
     int r = strcmp(candidate, correct);

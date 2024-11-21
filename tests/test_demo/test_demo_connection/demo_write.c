@@ -104,13 +104,13 @@ static void wrtr_wait_timer_fired(RunloopRef rl, void* ctx_p_arg)
     WTIMER_CHECK_TAG(ctx->timer_ref)
     RBL_LOG_FMT("test_io: Socket watcher wrtr_wait_timer_fired write_fd: %d", ctx->writefd);
     if(ctx->write_count > ctx->max_write_count) {
-        democonnection_close(cref);
+        demo_connection_close(cref);
     } else {
         ctx->write_count++;
         char tmp[200];
         sprintf(tmp, "this is a line from writer %d count: %d", ctx->writer_index, ctx->write_count);
         DemoMessageRef msg = fill_demo_message(tmp, 1000, 30 );
-        democonnection_write(cref, msg, on_write_complete, ctx);
+        demo_connection_write(cref, msg, on_write_complete, ctx);
     }
 }
 void start_write(RunloopRef rl, void* ctx_arg)
@@ -120,7 +120,7 @@ void start_write(RunloopRef rl, void* ctx_arg)
     char tmp[200];
     sprintf(tmp, "this is a line from writer %d count: %d", ctx->writer_index, ctx->write_count);
     DemoMessageRef msg = fill_demo_message(tmp, 1000, 30 );
-    democonnection_write(cref, msg, on_write_complete, ctx);
+    demo_connection_write(cref, msg, on_write_complete, ctx);
 }
 static void on_connection_complete(void* arg_ctx)
 {
@@ -133,7 +133,7 @@ void* writer_thread_func(void* arg)
     WriterTable* wrtr = (WriterTable*)arg;
     for(int i = 0; i < wrtr->count; i++) {
         WriteCtx* ctx = &(wrtr->ctx_table[i]);
-        ctx->demo_conn_ref = democonnection_new( runloop_ref, ctx->writefd,on_connection_complete, ctx);
+        ctx->demo_conn_ref = demo_connection_new(runloop_ref, ctx->writefd, on_connection_complete, ctx);
         ctx->timer_ref = runloop_timer_new(runloop_ref);
         runloop_timer_register(ctx->timer_ref, &wrtr_wait_timer_fired, (void *) ctx, ctx->interval_ms, false);
 

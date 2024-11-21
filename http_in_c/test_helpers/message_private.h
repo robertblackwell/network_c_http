@@ -17,4 +17,4 @@
   * @param this HttpMessageRef
   * @return HdrListRef
   */
-HdrListRef HttpMessage_get_headerlist(HttpMessageRef this);
+HdrListRef http_message_get_headerlist(HttpMessageRef this);

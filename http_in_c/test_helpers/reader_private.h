@@ -7,7 +7,7 @@
  */
 
 #include <http_in_c/common/http_parser/rdsocket.h>
-#include <http_in_c/http/http_message.h>
+#include <http_in_c/http_protocol/http_message.h>
 
 SyncReaderRef SyncReader_private_new(RdSocket rdsock);
 void SyncReader_private__init(SyncReaderRef this, RdSocket rdsock);

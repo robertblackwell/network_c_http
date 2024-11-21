@@ -1,5 +1,7 @@
 add_executable(http_verify_app
 	http_verify.c
+		../http_common/http_make_request_response.c
+		../http_common/http_make_request_response.h
 	verify_getopt.c
 	verify_getopt.h
 	verify_statistics.c

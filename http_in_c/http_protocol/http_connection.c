@@ -5,14 +5,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <sys/epoll.h>
-#include <errno.h>
 #include <rbl/macros.h>
 #include <rbl/logger.h>
 #include <http_in_c/runloop/runloop.h>
-#include <http_in_c/http/http_message.h>
+#include <http_in_c/http_protocol/http_message.h>
 
 #define READ_STATE_IDLE     11
 #define READ_STATE_ACTIVE   13
@@ -22,21 +18,17 @@
 #define WRITE_STATE_ACTIVE   23
 #define WRITE_STATE_STOP     24
 
-static void read_start(HttpConnectionRef cref);
-static void read_start_postable(RunloopRef rl, void* cref_arg);
-static void postable_read_start(RunloopRef runloop_ref, void* arg);
 static void on_parser_new_message_complete(void* arg_ctx, HttpMessageRef msg);
-static void on_read_complete(HttpConnectionRef cref, HttpMessageRef msg, int error_code);
-static void read_error(HttpConnectionRef cref, char* msg);
 
 static void postable_writer(RunloopRef runloop_ref, void* arg);
 static void postable_write_call_cb(RunloopRef runloop_ref, void* arg);
 static void writer_cb(void* cref_arg, long bytes_written, int status);
-static void write_error(HttpConnectionRef cref, char* msg);
 
-static void postable_cleanup(RunloopRef runloop, void* cref);
 static void read_have_data_cb(void* cref_arg, long bytes_available, int err_status);
-static void read_process_data(HttpConnectionRef cref);
+
+static void call_on_write_cb(HttpConnectionRef cref, int status);
+static void call_on_read_cb(HttpConnectionRef cref, HttpMessageRef msgref, int status);
+
 /**
  * Utility function that wraps all runloop_post() calls so this module can
  * keep track of outstanding pending function calls
@@ -77,11 +69,13 @@ void http_connection_init(
     this->read_state = READ_STATE_IDLE;
     this->write_state = WRITE_STATE_IDLE;
     this->on_write_cb = NULL;
+    this->on_write_cb_arg = NULL;
     this->on_read_cb = NULL;
+    this->on_read_cb_arg =  NULL;
     this->cleanup_done_flag = false;
     this->on_close_cb = connection_completion_cb;
     this->on_close_cb_arg = handler_ref;
-    this->parser_ref = HttpParser_new(
+    this->parser_ref = http_message_parser_new(
             (void*)&on_parser_new_message_complete,
             this);
 }
@@ -97,8 +91,8 @@ void http_connection_free(HttpConnectionRef this)
     close(fd);
     asio_stream_free(this->asio_stream_ref);
     this->asio_stream_ref = NULL;
-    HttpParser_free(this->parser_ref);
-    List_safe_free(this->input_message_list_ref, HttpMessage_anonymous_free);
+    http_message_parser_free(this->parser_ref);
+    List_safe_free(this->input_message_list_ref, http_message_anonymous_free);
     if(this->active_output_buffer_ref) {
         IOBuffer_free(this->active_output_buffer_ref);
         this->active_output_buffer_ref = NULL;
@@ -109,9 +103,6 @@ void http_connection_free(HttpConnectionRef this)
     }
     free(this);
 }
-static void call_on_write_cb(HttpConnectionRef cref, int status);
-static void call_on_read_cb(HttpConnectionRef cref, HttpMessageRef msgref, int status);
-
 /////////////////////////////////////////////////////////////////////////////////////
 // read sequence - sequence of functions called processing a read operation
 ////////////////////////////////////////////////////////////////////////////////////
@@ -119,10 +110,10 @@ void http_connection_read(HttpConnectionRef cref, void(*on_http_read_cb)(void* h
 {
     RBL_CHECK_TAG(HttpConnection_TAG, cref)
     RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
-    RBL_LOG_FMT("http_connect_read");
+    RBL_LOG_FMT("http_connect_read fd: %d", cref->asio_stream_ref->runloop_stream_ref->fd);
     assert(on_http_read_cb != NULL);
 
-    // should be in READ_STATE_IDLE - check the variable values for that state
+    // should be in READ_STATE_IDLE - check the variable values for state
     assert(cref->read_state == READ_STATE_IDLE);
     assert(cref->active_input_buffer_ref == NULL);
     assert(cref->on_read_cb == NULL);
@@ -130,44 +121,33 @@ void http_connection_read(HttpConnectionRef cref, void(*on_http_read_cb)(void* h
 
     cref->on_read_cb = on_http_read_cb;
     cref->on_read_cb_arg = href;
-    if(List_size(cref->input_message_list_ref) > 1) {
+    if (List_size(cref->input_message_list_ref) > 1) {
         // this means the client is pipelining
-        // should not be happening
+        // should not be  happening
         HttpMessageRef msgref = List_remove_first(cref->input_message_list_ref);
         call_on_read_cb(cref, msgref, 0);
-    } else if(List_size(cref->input_message_list_ref) == 1) {
+    } else if (List_size(cref->input_message_list_ref) == 1) {
         HttpMessageRef msgref = List_remove_first(cref->input_message_list_ref);
         cref->read_state = READ_STATE_ACTIVE;
         call_on_read_cb(cref, msgref, 0);
     } else {
         // nothing in the input queue so start a read operation
         cref->read_state = READ_STATE_ACTIVE;
-        read_start(cref);
-    }
-}
-/**
- * this function is a continuation of http_connection_read :
- * it is not called from anywhere else and hence the preconditions
- * are already checked in http_connection_read
- */
-static void read_start(HttpConnectionRef cref)
-{
-    RBL_CHECK_TAG(HttpConnection_TAG, cref)
-    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
-    assert(cref->active_input_buffer_ref == NULL);
-    if (cref->active_input_buffer_ref == NULL) {
-        cref->active_input_buffer_ref = IOBuffer_new_with_capacity((int)cref->read_buffer_size);
-    }
-    assert(IOBuffer_data_len(cref->active_input_buffer_ref) == 0);
+        assert(cref->active_input_buffer_ref == NULL);
+        if (cref->active_input_buffer_ref == NULL) {
+            cref->active_input_buffer_ref = IOBuffer_new_with_capacity((int) cref->read_buffer_size);
+        }
+        assert(IOBuffer_data_len(cref->active_input_buffer_ref) == 0);
 
-    if(IOBuffer_data_len(cref->active_input_buffer_ref) == 0) {
-        IOBufferRef iob = cref->active_input_buffer_ref;
-        void *input_buffer_ptr = IOBuffer_space(iob);
-        int input_buffer_length = IOBuffer_space_len(iob);
-        asio_stream_read(cref->asio_stream_ref, input_buffer_ptr, input_buffer_length, &read_have_data_cb, cref);
-    } else {
-        // active_input_buffer should be fully processed  and free() at the end of the previous rread
-        assert(false);
+        if (IOBuffer_data_len(cref->active_input_buffer_ref) == 0) {
+            IOBufferRef iob = cref->active_input_buffer_ref;
+            void *input_buffer_ptr = IOBuffer_space(iob);
+            int input_buffer_length = IOBuffer_space_len(iob);
+            asio_stream_read(cref->asio_stream_ref, input_buffer_ptr, input_buffer_length, &read_have_data_cb, cref);
+        } else {
+            // active_input_buffer should be fully processed  and free() at the end of the previous rread
+            assert(false);
+        }
     }
 }
 /**
@@ -194,66 +174,51 @@ static void read_have_data_cb(void* cref_arg, long bytes_available, int err_stat
          *  treat this the same as an IO error.
          *  Abandon all waiting input messages and Close the connection
          */
-        read_error(cref, "T");
+        call_on_read_cb(cref, NULL, -1);
     } else if(bytes_available < 0) {
-        read_error(cref, "");
+        call_on_read_cb(cref, NULL, -2);
     } else {//   (bytes_available > 0)
         IOBuffer_commit(iob, (int)bytes_available);
-        read_process_data(cref);
-    }
-}
-/**
- * This function is only called from one place - read_have_data
- * Hence the prconditions are clear:
- * active_input_buffer_ref != NULL  IOBuffer_data_length(active_input_buffer_ref) > 0
- */
-static void read_process_data(HttpConnectionRef cref) {
-    RBL_CHECK_TAG(HttpConnection_TAG, cref)
-    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
-    IOBufferRef iob = cref->active_input_buffer_ref;
-    int bytes_available = IOBuffer_data_len(iob);
-    assert(bytes_available > 0);
-    RBL_LOG_FMT("Before HttpParser_consume read_state %d", cref->read_state);
+        RBL_LOG_FMT("Before http_message_parser_consume read_state %d", cref->read_state);
 
-    /**
-     * This call will put any new messages onto the input message queue(cref->input_message_list_ref)
-     *
-     * Further more the call will consume all of the buffer unless there is a parsing error.
-     *
-     * A parsing error will be treated as an IO error and the connection will be shutdown.
-     *
-     * Hence
-     * -    if the return value is HPE_Ok dispose the buffer, set READ_STATE_IDLE and call the read callback
-     *
-     * -    if there is an error dispose the buffer (we wont need it),
-     *      set READ_STATE_STOP and start error processing.
-     *      -   there is an althernative approach, namely
-     *          -   set READ_STATE_IDLE,
-     *          -   pass the error code back to the caller and let them decide how to proceed.
-     *
-     */
-    enum llhttp_errno  en =  HttpParser_consume_buffer(cref->parser_ref, iob);
+        /**
+         * The next function call will put any new messages onto the input message queue(cref->input_message_list_ref)
+         *
+         * Further more the call will consume all of the buffer unless there is a parsing error
+         *
+         * A parsing error will be treated as an IO error and returned to caller.
+         *
+         * Hence
+         * -    If the return value is 0 dispose the buffer, set READ_STATE_IDLE and call the read callback
+         *
+         * -    if there is an error dispose the buffer(we will not need it),
+         *      set READ_STATE_STOP and start error processing.
+         *      -   there is an alternative approach, namely
+         *          -   set READ_STATE_IDLE,
+         *          -   pass the error code back to the caller and let them decide how to proceed.
+         *
+         */
+        enum llhttp_errno  en = http_message_parser_consume_buffer(cref->parser_ref, iob);
 
-    assert(cref->active_input_buffer_ref != NULL);
-    assert(IOBuffer_data_len(cref->active_input_buffer_ref) == 0);
-    IOBuffer_free(cref->active_input_buffer_ref);
-    cref->active_input_buffer_ref = NULL;
+        assert(cref->active_input_buffer_ref != NULL);
+        assert(IOBuffer_data_len(cref->active_input_buffer_ref) == 0);
+        IOBuffer_free(cref->active_input_buffer_ref);
+        cref->active_input_buffer_ref = NULL;
 
-    if(en == HPE_OK) {
-        if(List_size(cref->input_message_list_ref) > 0) {
-            HttpMessageRef msg = List_remove_first(cref->input_message_list_ref);
-            cref->read_state = READ_STATE_IDLE;
-            call_on_read_cb(cref, msg, 0);
+        if(en == HPE_OK) {
+            if(List_size(cref->input_message_list_ref) > 0) {
+                HttpMessageRef msg = List_remove_first(cref->input_message_list_ref);
+                cref->read_state = READ_STATE_IDLE;
+                call_on_read_cb(cref, msg, 0);
+            }
+        } else {
+            call_on_read_cb(cref, NULL, (int)en);
         }
-    } else {
-        const char *etext = llhttp_errno_name(en);
-        read_error(cref, "");
     }
 }
 /**
- * This function is called by the underlying llhttp_parser when a new message is complete.
- *
- * The new message is added to the connections input message queue(input_message_list_ref)
+ * This function is called by the underlying parser when a new message is complete.
+ * The new message is added to the connection input message queue(input_message_list_ref)
  */
 static void on_parser_new_message_complete(void* arg_ctx, HttpMessageRef msg_ref)
 {
@@ -284,8 +249,6 @@ static void call_on_read_cb(HttpConnectionRef cref, HttpMessageRef msg, int stat
     tmp(arg, msg, status);
 }
 /////////////////////////////////////////////////////////////////////////////////////
-// end of read sequence
-/////////////////////////////////////////////////////////////////////////////////////
 // write sequence - sequence of functions called during write operation
 ////////////////////////////////////////////////////////////////////////////////////
 void http_connection_write(
@@ -304,7 +267,7 @@ void http_connection_write(
     cref->on_write_cb = on_http_write_cb;
     cref->on_write_cb_arg = href;
     cref->write_state == WRITE_STATE_ACTIVE;
-    cref->active_output_buffer_ref = HttpMessage_serialize(response_ref);
+    cref->active_output_buffer_ref = http_message_serialize(response_ref);
     if(cref->write_state == WRITE_STATE_STOP) {
         call_on_write_cb(cref, HttpConnectionErrCode_is_closed);
         return;
@@ -371,49 +334,3 @@ static void call_on_write_cb(HttpConnectionRef cref, int status)
     cref->on_write_cb_arg = NULL;
     tmp(arg, status);
 }
-/////////////////////////////////////////////////////////////////////////////////////
-// end of read sequence
-/////////////////////////////////////////////////////////////////////////////////////
-// Error functions
-/////////////////////////////////////////////////////////////////////////////////////
-
-static void write_error(HttpConnectionRef cref, char* msg)
-{
-    RBL_CHECK_TAG(HttpConnection_TAG, cref)
-    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
-    printf("Write_error got an error this is the message: %s  fd: %d\n", msg, cref->asio_stream_ref->fd);
-    cref->write_state = WRITE_STATE_STOP;
-    call_on_write_cb(cref, HttpConnectionErrCode_io_error);
-    post_to_runloop(cref, &postable_cleanup);
-}
-static void read_error(HttpConnectionRef cref, char* msg)
-{
-    RBL_CHECK_TAG(HttpConnection_TAG, cref)
-    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
-    RBL_LOG_FMT("Read_error got an error this is the message: %s  fd: %d\n", msg, cref->asio_stream_ref->fd);
-    cref->read_state = READ_STATE_STOP;
-    RunloopRef rl = asio_stream_get_runloop(cref->asio_stream_ref);
-    postable_cleanup(rl, cref);
-}
-/////////////////////////////////////////////////////////////////////////////////////
-// end of error functions
-/////////////////////////////////////////////////////////////////////////////////////
-// cleanup sequence - functions called when connection is terminating
-/////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * This must be the last http_connection function to run and it should only run once.
- */
-static void postable_cleanup(RunloopRef runloop, void* arg_cref)
-{
-    HttpConnectionRef cref = arg_cref;
-    RBL_LOG_FMT("postable_cleanup entered\n");
-    RBL_ASSERT((cref->cleanup_done_flag == false), "cleanup should not run more than once");
-    RBL_CHECK_TAG(HttpConnection_TAG, cref)
-    RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
-    asio_stream_close(cref->asio_stream_ref);
-    cref->on_close_cb(cref->on_close_cb_arg);
-}
-/////////////////////////////////////////////////////////////////////////////////////
-// end of cleanup
-/////////////////////////////////////////////////////////////////////////////////////

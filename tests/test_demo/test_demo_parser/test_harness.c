@@ -94,7 +94,7 @@ int parser_test_run(parser_test_t* this)
 {
     IOBufferRef iobuf_ref = IOBuffer_new_with_capacity(10000);
     test_input_t* ds_ptr = &(this->test_input);
-    DemoParserRef parser_ref = DemoParser_new(on_message_handler, (void*)this);
+    DemoMessageParserRef parser_ref = demo_message_parser_new(on_message_handler, (void *) this);
     while(1) {
         int rc;
         IOBufferRef iob = IOBuffer_new(10000);
@@ -104,7 +104,7 @@ int parser_test_run(parser_test_t* this)
         int bytes_read = test_input_read_some(ds_ptr, buffer, length);
         if(bytes_read > 0) {
             IOBuffer_commit(iob, bytes_read);
-            DemoParser_consume(parser_ref, iob);
+            demo_message_parser_consume(parser_ref, iob);
         } else if(bytes_read == 0) {
             // simulate eof
             break;

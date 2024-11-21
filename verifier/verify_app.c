@@ -405,7 +405,7 @@ bool verify_response(thread_context_t* ctx, MessageRef request, MessageRef respo
         printf("verify_response failed response is NULL\n");
         return false;
     }
-    BufferChainRef body = HttpMessage_get_body(response);
+    BufferChainRef body = http_message_get_body(response);
     if(body == NULL) {
         body = BufferChain_new();
     }

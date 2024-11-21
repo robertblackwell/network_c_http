@@ -35,9 +35,9 @@
 //    char uid[100];
 //};
 
-ThreadContext* Ctx_new(int id, int nbr_roundtrips_per_connection, int nbr_connections_per_thread, int max_threads)
+VerifyThreadContext* Ctx_new(int id, int nbr_roundtrips_per_connection, int nbr_connections_per_thread, int max_threads)
 {
-    ThreadContext* ctx = malloc(sizeof(ThreadContext));
+    VerifyThreadContext* ctx = malloc(sizeof(VerifyThreadContext));
     ctx->max_rountrips_per_connection = nbr_roundtrips_per_connection;
     ctx->max_connections_per_thread = nbr_connections_per_thread;
     int n = nbr_roundtrips_per_connection * nbr_connections_per_thread;
@@ -47,42 +47,4 @@ ThreadContext* Ctx_new(int id, int nbr_roundtrips_per_connection, int nbr_connec
     ctx->total_roundtrips = 0;
     return ctx;
 }
-HttpMessageRef mk_request(ThreadContext* ctx)
-{
-    HttpMessageRef request = HttpMessage_new();
-    HttpMessage_set_is_request(request, true);
-    BufferChainRef body = BufferChain_new();
-    char buf[100];
-    sprintf(buf, "%d %d 1234567890", ctx->ident, ctx->roundtrip_per_connection_counter);
-    BufferChain_append_cstr(body, buf);
-    HttpMessage_set_body(request, body);
-    return request;
-}
 
-void Ctx_mk_uid(ThreadContext* ctx)
-{
-    sprintf(ctx->uid, "%d:%d", ctx->ident, ctx->roundtrip_per_connection_counter);
-}
-
-/**
- * Verify that the response is correct based on the ctx->uid and request values
- * \param ctx       ThreadContext*
- * \param request   DemoMessageRef
- * \param response  DemoMessageRef
- * \return bool
- */
-bool verify_response(ThreadContext* ctx, HttpMessageRef request, HttpMessageRef response)
-{
-    BufferChainRef body = HttpMessage_get_body(response);
-    IOBufferRef body_iob = BufferChain_compact(body);
-    const char* cstr = IOBuffer_cstr(body_iob);
-    return true;
-//    CbufferRef req_bc = HttpMessage_serialize(request);
-//    int x = strcmp(Cbuffer_cstr(body_bc), Cbuffer_cstr(req_bc));
-//    if( x != 0) {
-//        printf("Verify failed \n");
-//        printf("Req     :  %s\n", Cbuffer_cstr(req_bc));
-//        printf("Rsp body:  %s\n", Cbuffer_cstr(body_bc));
-//    }
-//    return (x == 0);
-}

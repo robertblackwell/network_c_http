@@ -8,6 +8,7 @@
 #include "verify_getopt.h"
 #include "verify_statistics.h"
 #include "verify_thread_context.h"
+#include "http_apps/http_common/http_make_request_response.h"
 
 
 #define NBR_PROCCES 1
@@ -53,9 +54,9 @@ int main(int argc, char* argv[])
      * run the test threads
      */
     pthread_t workers[nbr_threads];
-    ThreadContext* tctx[nbr_threads];
+    VerifyThreadContext* tctx[nbr_threads];
     for(int t = 0; t < nbr_threads; t++) {
-        ThreadContext* ctx = Ctx_new(t, nbr_roundtrips_per_connection, nbr_connections_per_thread, nbr_threads);
+        VerifyThreadContext* ctx = Ctx_new(t, nbr_roundtrips_per_connection, nbr_connections_per_thread, nbr_threads);
         tctx[t] = ctx;
         pthread_create(&(workers[t]), NULL, threadfn, (void*)ctx);
     }
@@ -88,7 +89,7 @@ int main(int argc, char* argv[])
 }
 void* threadfn(void* data)
 {
-    ThreadContext* ctx = (ThreadContext*)data;
+    VerifyThreadContext* ctx = (VerifyThreadContext*)data;
     struct timeval start_time = get_time();
     for(int i = 0; i < ctx->max_connections_per_thread; i++) {
         HttpSyncSocketRef client = http_syncsocket_new();
@@ -96,32 +97,33 @@ void* threadfn(void* data)
         ctx->roundtrip_per_connection_counter = 0;
         while(1) {
             struct timeval iter_start_time = get_time();
-            Ctx_mk_uid(ctx);
-            HttpMessageRef request = mk_request(ctx);
+            bool last_round = ctx->roundtrip_per_connection_counter + 1 == ctx->max_rountrips_per_connection;
+            HttpMessageRef request = http_make_request("/echo", last_round);
             HttpMessageRef response = NULL;
             int rc1 = http_syncsocket_write_message(client, request);
             if (rc1 != 0) break;
             int rc2 = http_syncsocket_read_message(client, &response);
             if (rc2 != 0) break;
-            IOBufferRef iob_req = HttpMessage_serialize(request);
-            IOBufferRef iob_resp = HttpMessage_serialize(response);
-            if (!verify_response(ctx, request, response)) {
-                printf("Verify response failed");
+            IOBufferRef iob_req = http_message_serialize(request);
+            IOBufferRef iob_resp = http_message_serialize(response);
+            if (!http_verify_response(request, response)) {
+                printf("Verify response failed\n");
+            } else {
+                printf("Http verify succeeded\n");
             }
             struct timeval iter_end_time = get_time();
 
             rta_add(ctx->response_times_ref, time_diff_ms(iter_end_time, iter_start_time));
 
-//            ctx->resp_times[ctx->total_roundtrips] =  time_diff_ms(iter_end_time, iter_start_time);
             ctx->roundtrip_per_connection_counter++;
             ctx->total_roundtrips++;
             if(ctx->roundtrip_per_connection_counter >= ctx->max_rountrips_per_connection) {
                 break;
             }
-            HttpMessage_free(request);
+            http_message_free(request);
             request = NULL;
             if(response != NULL) {
-                HttpMessage_free(response);
+                http_message_free(response);
                 response = NULL;
             }
         }

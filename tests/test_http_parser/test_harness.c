@@ -57,7 +57,7 @@ void test_output_dispose(test_output_r* this_ptr)
 {
     test_output_r this = *this_ptr;
     if(this->message != NULL) {
-        HttpMessage_free(this->message);
+        http_message_free(this->message);
         this->message = NULL;
     }
 }
@@ -81,8 +81,8 @@ void parser_test_destroy(parser_test_t* this)
 }
 void on_message_handler(void* void_parser_ref, HttpMessageRef msg_ref)
 {
-    HttpParserRef parser_ref = void_parser_ref;
-    parser_test_t* ptest = parser_ref->handler_context;
+    HttpMessageParserRef parser_ref = void_parser_ref;
+    parser_test_t* ptest = parser_ref->on_message_handler_context;
     test_output_r r = test_output_new(msg_ref, 0);
     List_add_back(ptest->m_results, r);
 //    return HPE_OK;
@@ -93,7 +93,7 @@ int parser_test_run(parser_test_t* this)
     IOBufferRef iobuf_ref = IOBuffer_new_with_capacity(256);
     test_input_t* ds_ptr = &this->test_input;
 
-    HttpParser* pref = HttpParser_new(on_message_handler, (void *) this);
+    HttpMessageParser* pref = http_message_parser_new(on_message_handler, (void *) this);
     llhttp_errno_t rc;
     while(1) {
 //        char*data = test_input_next(ds_ptr);
@@ -104,7 +104,7 @@ int parser_test_run(parser_test_t* this)
         int bytes_read = test_input_read_some(ds_ptr, &buffer, length);
 
         if(bytes_read > 0) {
-            rc = HttpParser_consume(pref, (void *) buffer, bytes_read);
+            rc = http_message_parser_consume(pref, (void *) buffer, bytes_read);
             if(rc != HPE_OK) {
 //                printf("WPT_run status > 0 rc: %d\n", rc);
                 char* x = (char*)llhttp_get_error_reason(pref->m_llhttp_ptr);
@@ -118,7 +118,7 @@ int parser_test_run(parser_test_t* this)
             if(xx) {
                 printf("xx is true");
             }
-            rc = HttpParser_consume(pref, NULL, 0);
+            rc = http_message_parser_consume(pref, NULL, 0);
             if(rc != HPE_OK) {
 //                printf("WPT_run status == 0 rc: %d\n", rc);
                 List_add_back(this->m_results, test_output_new(NULL, rc));

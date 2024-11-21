@@ -5,8 +5,8 @@
 #include <http_in_c/runloop/rl_internal.h>
 #include <http_in_c/common/list.h>
 #include <http_in_c/common/iobuffer.h>
-#include <http_in_c/http/http_message.h>
-#include <http_in_c/http/parser.h>
+#include <http_in_c/http_protocol/http_message.h>
+#include <http_in_c/http_protocol/http_message_parser.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netinet/tcp.h>

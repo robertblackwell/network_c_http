@@ -1,6 +1,6 @@
 #ifndef c_http_sync_sync.h
 #define c_http_sync_sync.h
-#include <http_in_c/http/http_message.h>
+#include <http_in_c/http_protocol/http_message.h>
 
 #include <assert.h>
 #include <stdio.h>

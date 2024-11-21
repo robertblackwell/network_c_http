@@ -1,7 +1,7 @@
 #ifndef c_http_api_sync_client_h
 #define c_http_api_sync_client_h
 
-#include <http_in_c/http/http_message.h>
+#include <http_in_c/http_protocol/http_message.h>
 #include <http_in_c/sync/sync.h>
 #include <assert.h>
 #include <stdio.h>

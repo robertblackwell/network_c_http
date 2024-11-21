@@ -27,15 +27,15 @@ static int connection_message_handler(HttpMessageRef request_ptr, sync_worker_r 
 {
     sync_worker_t* worker_ptr = context;
     HttpMessageRef response_ptr = worker_ptr->app_handler(request_ptr, worker_ptr);
-    int cmp_tmp = HttpMessage_cmp_header(request_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
+    int cmp_tmp = http_message_cmp_header(request_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
     if(cmp_tmp == 1) {
-        HttpMessage_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
+        http_message_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
     } else {
-        HttpMessage_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_CLOSE);
+        http_message_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_CLOSE);
     }
     RBL_ASSERT((response_ptr != NULL), "response is not permitted to be NULL");
-    IOBufferRef request_serialized = HttpMessage_dump(request_ptr);
-    IOBufferRef response_serialized = HttpMessage_dump(response_ptr);
+    IOBufferRef request_serialized = http_message_dump(request_ptr);
+    IOBufferRef response_serialized = http_message_dump(response_ptr);
     RBL_LOG_FMT("app_handler_example request  ====================================================================");
 //    RBL_LOG_FMT("%s", IOBuffer_cstr(request_serialized));
 //    RBL_LOG_FMT("app_handler_example response ====================================================================");
@@ -113,16 +113,17 @@ static void* Worker_main(void* data)
                     RBL_ASSERT((request_ptr != NULL), "request should not be NULL");
                     sync_worker_t *worker_ptr = wref;
                     HttpMessageRef response_ptr = worker_ptr->app_handler(request_ptr, worker_ptr);
-                    int cmp_tmp = HttpMessage_cmp_header(request_ptr, HEADER_CONNECTION_KEY,
+                    int cmp_tmp = http_message_cmp_header(request_ptr, HEADER_CONNECTION_KEY,
                                                          HEADER_CONNECTION_KEEPALIVE);
                     if (cmp_tmp == 1) {
-                        HttpMessage_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_KEEPALIVE);
+                        http_message_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY,
+                                                        HEADER_CONNECTION_KEEPALIVE);
                     } else {
-                        HttpMessage_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_CLOSE);
+                        http_message_add_header_cstring(response_ptr, HEADER_CONNECTION_KEY, HEADER_CONNECTION_CLOSE);
                     }
                     RBL_ASSERT((response_ptr != NULL), "response is not permitted to be NULL");
-                    IOBufferRef request_serialized = HttpMessage_dump(request_ptr);
-                    IOBufferRef response_serialized = HttpMessage_dump(response_ptr);
+                    IOBufferRef request_serialized = http_message_dump(request_ptr);
+                    IOBufferRef response_serialized = http_message_dump(response_ptr);
                     RBL_LOG_FMT("app_handler_example request  ====================================================================");
                     RBL_LOG_FMT("%s", IOBuffer_cstr(request_serialized));
                     RBL_LOG_FMT("app_handler_example response ====================================================================");

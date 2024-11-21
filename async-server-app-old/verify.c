@@ -74,7 +74,7 @@ void Ctx_mk_uid(ThreadContext* ctx)
  */
 bool verify_response(ThreadContext* ctx, MessageRef request, MessageRef response)
 {
-    BufferChainRef body = HttpMessage_get_body(response);
+    BufferChainRef body = http_message_get_body(response);
     CbufferRef body_bc = BufferChain_compact(body);
     CbufferRef req_bc = Message_serialize(request);
     int x = strcmp(Cbuffer_cstr(body_bc), Cbuffer_cstr(req_bc));
