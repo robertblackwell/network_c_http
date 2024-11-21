@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <http_in_c/common/make_uuid.h>
 #include "http_make_request_response.h"
 
-static void make_uuid(char** uuid_buffer);
 static BufferChainRef make_reply_body_from_request(HttpMessageRef request);
 
 /**
@@ -88,24 +88,6 @@ bool http_verify_response(HttpMessageRef request, HttpMessageRef response)
         return false;
     }
     return true;
-}
-
-static void make_uuid(char** uuid_buffer)
-{
-
-    srand(time(NULL));
-
-    // Generate four 32-bit random numbers
-    unsigned int num1 = rand();
-    unsigned int num2 = rand();
-    unsigned int num3 = rand();
-    unsigned int num4 = rand();
-
-    // Convert the random numbers to a string
-    char uuidStr[37];
-    sprintf(*uuid_buffer, "%08x-%04x-%04x-%04x-%08x%04x",
-            num1, num2 >> 16, num2 & 0xFFFF,
-            num3 >> 16, num3 & 0xFFFF, num4);
 }
 static BufferChainRef make_reply_body_from_request(HttpMessageRef request)
 {

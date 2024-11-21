@@ -4,7 +4,7 @@
 
 #ifndef C_HTTP_HTTP_VERIFY_THREAD_CONTEXT_H
 #define C_HTTP_HTTP_VERIFY_THREAD_CONTEXT_H
-#include "verify_statistics.h"
+#include "http_in_c/common/verify_statistics.h"
 #include <http_in_c/http_protocol/http_message.h>
 
 struct VerifyThreadContext_s {

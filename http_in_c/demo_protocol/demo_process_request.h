@@ -3,6 +3,6 @@
 #include <http_in_c/demo_protocol/demo_message.h>
 #include <http_in_c/demo_protocol/demo_handler.h>
 
-DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef request);
+DemoMessageRef demo_process_request(DemoHandlerRef href, DemoMessageRef request);
 
 #endif

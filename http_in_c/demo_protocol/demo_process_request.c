@@ -3,7 +3,7 @@
 #include <http_in_c/demo_protocol/demo_handler.h>
 #include <http_in_c/demo_protocol/demo_process_request.h>
 
-DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef request)
+DemoMessageRef demo_process_request(DemoHandlerRef href, DemoMessageRef request)
 {
     RBL_CHECK_TAG(DemoHandler_TAG, href)
     RBL_CHECK_END_TAG(DemoHandler_TAG, href)

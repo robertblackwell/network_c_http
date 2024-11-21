@@ -50,7 +50,7 @@ void* thread_function(void* arg)
     SyncThreadContext* ctx = arg;
     int listening_socket_fd = create_listener_socket(ctx->port, ctx->host);
     int x = socket_is_blocking(listening_socket_fd);
-    printf("thread pid: %d tid: %d host: %s port: %d ident: %d pthread_t: %lu listening_socket: %d\n", getpid(), gettid(), ctx->host, ctx->port, ctx->ident, ctx->thread, ctx->listening_socket);
+    printf("thread pid: %d tid: %d host: %s port: %d ident: %d listening_socket: %d\n", getpid(), gettid(), ctx->host, ctx->port, ctx->ident, listening_socket_fd);
 
     server_loop(listening_socket_fd);
 

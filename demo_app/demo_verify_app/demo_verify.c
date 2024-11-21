@@ -5,9 +5,10 @@
 #include <pthread.h>
 #include <sys/time.h>
 #include <math.h>
+#include <http_in_c/common/verify_statistics.h>
 #include "verify_getopt.h"
-#include "verify_statistics.h"
 #include "verify_thread_context.h"
+#include "../demo_common/demo_make-request_response.h"
 
 
 #define NBR_PROCCES 1
@@ -53,9 +54,9 @@ int main(int argc, char* argv[])
      * run the test threads
      */
     pthread_t workers[nbr_threads];
-    ThreadContext* tctx[nbr_threads];
+    VerifyThreadContext* tctx[nbr_threads];
     for(int t = 0; t < nbr_threads; t++) {
-        ThreadContext* ctx = Ctx_new(t, nbr_roundtrips_per_connection, nbr_connections_per_thread, nbr_threads);
+        VerifyThreadContext* ctx = Ctx_new(t, nbr_roundtrips_per_connection, nbr_connections_per_thread, nbr_threads);
         tctx[t] = ctx;
         pthread_create(&(workers[t]), NULL, threadfn, (void*)ctx);
     }
@@ -88,7 +89,7 @@ int main(int argc, char* argv[])
 }
 void* threadfn(void* data)
 {
-    ThreadContext* ctx = (ThreadContext*)data;
+    VerifyThreadContext* ctx = (VerifyThreadContext*)data;
     struct timeval start_time = get_time();
     for(int i = 0; i < ctx->max_connections_per_thread; i++) {
         DemoSyncSocketRef client = demo_syncsocket_new();
@@ -96,8 +97,7 @@ void* threadfn(void* data)
         ctx->roundtrip_per_connection_counter = 0;
         while(1) {
             struct timeval iter_start_time = get_time();
-            Ctx_mk_uid(ctx);
-            DemoMessageRef request = mk_request(ctx);
+            DemoMessageRef request = demo_make_request();
             DemoMessageRef response = NULL;
             int rc1 = demo_syncsocket_write_message(client, request);
             if (rc1 != 0) break;
@@ -105,7 +105,7 @@ void* threadfn(void* data)
             if (rc2 != 0) break;
             IOBufferRef iob_req = demo_message_serialize(request);
             IOBufferRef iob_resp = demo_message_serialize(response);
-            if (!verify_response(ctx, request, response)) {
+            if (!demo_verify_response(request, response)) {
                 printf("Verify response failed");
             }
             struct timeval iter_end_time = get_time();

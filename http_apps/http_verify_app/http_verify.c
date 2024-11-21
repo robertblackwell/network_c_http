@@ -6,7 +6,7 @@
 #include <sys/time.h>
 #include <math.h>
 #include "verify_getopt.h"
-#include "verify_statistics.h"
+#include "http_in_c/common/verify_statistics.h"
 #include "verify_thread_context.h"
 #include "http_apps/http_common/http_make_request_response.h"
 

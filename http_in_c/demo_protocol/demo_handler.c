@@ -97,7 +97,7 @@ static void handle_request(void* href, DemoMessageRef msgref, int error_code)
         RBL_LOG_FMT("DemoHandler handler_request error_code %d\n", error_code);
         handler_ref->completion_callback(handler_ref->server_ref, handler_ref);
     } else {
-        response = process_request(handler_ref, msgref);
+        response = demo_process_request(handler_ref, msgref);
         demo_message_free(msgref);
         List_add_back(handler_ref->output_list, response);
         if(List_size(handler_ref->output_list) > 1) {

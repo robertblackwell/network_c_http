@@ -2,12 +2,12 @@
 // Created by robert on 11/10/24.
 //
 
-#ifndef C_HTTP_VERIFY_THREAD_CONTEXT_H
-#define C_HTTP_VERIFY_THREAD_CONTEXT_H
-#include "verify_statistics.h"
+#ifndef C_HTTP_Demo_VERIFY_THREAD_CONTEXT_H
+#define C_HTTP_Demo_VERIFY_THREAD_CONTEXT_H
+#include <http_in_c/common/verify_statistics.h>
 #include <http_in_c/demo_protocol/demo_message.h>
 
-struct ThreadContext_s {
+struct VerifyThreadContext_s {
     /**
      * How many round trips in this experiment
      */
@@ -41,11 +41,11 @@ struct ThreadContext_s {
     char uid[100];
 };
 
-typedef struct ThreadContext_s ThreadContext, *ThreadContextRef;
+typedef struct VerifyThreadContext_s VerifyThreadContext, *VerifyThreadContextRef;
 
-ThreadContext* Ctx_new(int id, int max_roundtrips, int max_connections_per_thread, int max_threads);
-DemoMessageRef mk_request(ThreadContext* ctx);
-void Ctx_mk_uid(ThreadContext* ctx);
-bool verify_response(ThreadContext* ctx, DemoMessageRef request, DemoMessageRef response);
+VerifyThreadContext* Ctx_new(int id, int max_roundtrips, int max_connections_per_thread, int max_threads);
+DemoMessageRef mk_request(VerifyThreadContext* ctx);
+void Ctx_mk_uid(VerifyThreadContext* ctx);
+bool verify_response(VerifyThreadContext* ctx, DemoMessageRef request, DemoMessageRef response);
 
-#endif //C_HTTP_VERIFY_THREAD_CONTEXT_H
+#endif //C_HTTP_DEMO_VERIFY_THREAD_CONTEXT_H
