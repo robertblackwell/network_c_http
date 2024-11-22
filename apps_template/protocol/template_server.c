@@ -11,6 +11,7 @@
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/common/socket_functions.h>
+#include "demo_handler.h"
 
 static TmplHandlerRef my_only_client;
 static void set_non_blocking(socket_handle_t socket);
@@ -81,7 +82,6 @@ void tmpl_server_free(TmplServerRef this)
     assert(List_size(this->handler_list) ==0);
     List_free(this->handler_list);
     free(this);
-
 }
 
 void tmpl_server_listen(TmplServerRef sref)
@@ -89,16 +89,12 @@ void tmpl_server_listen(TmplServerRef sref)
     RBL_CHECK_TAG(TmplServer_TAG, sref)
     RBL_CHECK_END_TAG(TmplServer_TAG, sref)
     ASSERT_NOT_NULL(sref)
-//    pid_t tid = gettid();
-////    printf("tmpl_server_listen sref: %p tid: %d\n", sref, tid);
-//    int port = sref->port;
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
     RunloopListenerRef lw = sref->listening_watcher_ref;
     runloop_listener_register(lw, on_event_listening, sref);
     runloop_run(sref->runloop_ref, -1);
     RBL_LOG_FMT("TmplServer finishing");
-
 }
 
 void tmpl_server_terminate(TmplServerRef this)
@@ -110,7 +106,6 @@ void tmpl_server_terminate(TmplServerRef this)
 }
 void on_event_listening(RunloopRef rl, void* arg_server_ref) // RunloopListenerRef listener_watcher_ref, uint64_t event)
 {
-
     TmplServerRef server_ref = arg_server_ref; //listener_watcher_ref->listen_postable_arg;
     RBL_CHECK_TAG(TmplServer_TAG, server_ref)
     RBL_CHECK_END_TAG(TmplServer_TAG, server_ref)
@@ -127,6 +122,7 @@ void on_event_listening(RunloopRef rl, void* arg_server_ref) // RunloopListenerR
     TmplHandlerRef handler = tmpl_handler_new(
             rl,
             sock2,
+            server_ref->process_request_function,
             on_handler_completion_cb,
             server_ref);
 

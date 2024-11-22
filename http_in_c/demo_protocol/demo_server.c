@@ -82,7 +82,6 @@ void demo_server_free(DemoServerRef this)
     assert(List_size(this->handler_list) ==0);
     List_free(this->handler_list);
     free(this);
-
 }
 
 void demo_server_listen(DemoServerRef sref)
@@ -90,16 +89,12 @@ void demo_server_listen(DemoServerRef sref)
     RBL_CHECK_TAG(DemoServer_TAG, sref)
     RBL_CHECK_END_TAG(DemoServer_TAG, sref)
     ASSERT_NOT_NULL(sref)
-//    pid_t tid = gettid();
-////    printf("demo_server_listen sref: %p tid: %d\n", sref, tid);
-//    int port = sref->port;
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
     RunloopListenerRef lw = sref->listening_watcher_ref;
     runloop_listener_register(lw, on_event_listening, sref);
     runloop_run(sref->runloop_ref, -1);
     RBL_LOG_FMT("DemoServer finishing");
-
 }
 
 void demo_server_terminate(DemoServerRef this)

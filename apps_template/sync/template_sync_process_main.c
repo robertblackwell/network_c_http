@@ -1,4 +1,4 @@
-#include "process_main.h"
+#include "tmpl_sync_process_main.h"
 
 #include <http_in_c/tmpl_protocol/tmpl_sync_socket.h>
 #include <http_in_c/tmpl_protocol/tmpl_message.h>
@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include<signal.h>
+#include "tmpl_common/tmpl_make_request_response.h"
 
 #define MAX_NBR_THREADS 10
 void* thread_function(void* arg);
@@ -76,7 +77,8 @@ void server_loop(int listen_socket)
             if((retcode < 0) || (request_ptr == NULL)) {
                 break;
             }
-            TmplMessageRef response_ptr = process_request(request_ptr);
+            TmplMessageRef response_ptr = tmpl_message_new();
+            tmpl_process_request(NULL, request_ptr, response_ptr);
             IOBufferRef iob_req = tmpl_message_serialize(request_ptr);
             IOBufferRef iob_resp = tmpl_message_serialize(response_ptr);
             IOBuffer_free(iob_req);
@@ -92,19 +94,4 @@ void server_loop(int listen_socket)
         tmpl_syncsocket_free(connection_ref);
     }
     RBL_LOG_FMT("Worker_main exited main loop %p, %d", wref, wref->id);
-}
-TmplMessageRef process_request(TmplMessageRef request)
-{
-    TmplMessageRef reply = tmpl_message_new();
-    tmpl_message_set_is_request(reply, false);
-    BufferChainRef request_body = tmpl_message_get_body(request);
-    IOBufferRef  iob = BufferChain_compact(request_body);
-    char opcode = *(char*)(IOBuffer_data(iob));
-    *(char*)(IOBuffer_data(iob)) = 'R';
-    BufferChainRef bc =  BufferChain_new();
-    BufferChain_append_IOBuffer(bc, iob);
-    IOBuffer_free(iob);
-//    BufferChain_append_bufferchain(bc, request_body);
-    tmpl_message_set_body(reply, bc);
-    return reply;
 }

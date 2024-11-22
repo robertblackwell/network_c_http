@@ -23,6 +23,7 @@ typedef struct TmplHandler_s {
     int               raw_socket;
     RunloopRef        runloop_ref;
     TmplConnectionRef tmpl_connection_ref;
+    TmplProcessRequestFunction request_handler;
     DH_Completion_CB  completion_callback;
     void*             server_ref;
     ListRef           input_list;
@@ -35,12 +36,14 @@ typedef struct TmplHandler_s {
 TmplHandlerRef tmpl_handler_new(
         RunloopRef runloop_ref,
         int socket,
+        DemoProcessRequestFunction request_handler,
         void(*completion_cb)(void*, TmplHandlerRef),
         void* completion_cb_arg);
 void tmpl_handler_init(
         TmplHandlerRef this,
         RunloopRef runloop_ref,
         int socket,
+        DemoProcessRequestFunction request_handler,
         void(*completion_cb)(void*, TmplHandlerRef),
         void* completion_cb_arg);
 void tmpl_handler_free(TmplHandlerRef this);

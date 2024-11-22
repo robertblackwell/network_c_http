@@ -1,5 +1,3 @@
-
-
 #include <rbl/macros.h>
 #include <rbl/check_tag.h>
 #include <http_in_c/runloop/runloop.h>
@@ -13,9 +11,7 @@
 #include <sys/epoll.h>
 #include <errno.h>
 #include <http_in_c/tmpl_protocol/tmpl_message.h>
-#include <http_in_c/tmpl_protocol/tmpl_process_request.h>
 
-//static TmplMessageRef process_request(TmplHandlerRef href, TmplMessageRef request);
 static void handle_request( void* href, TmplMessageRef msgref, int error_code);
 static void postable_write_start(RunloopRef reactor_ref, void* href);
 static void on_write_complete_cb(void* href, int status);
@@ -30,6 +26,7 @@ static void connection_completion_cb(void* href)
 TmplHandlerRef tmpl_handler_new(
         RunloopRef runloop_ref,
         int socket,
+        DemoProcessRequestFunction request_handler,
         void(*completion_cb)(void*, TmplHandlerRef),
         void* server_ref)
 {
@@ -41,6 +38,7 @@ void tmpl_handler_init(
         TmplHandlerRef this,
         RunloopRef runloop_ref,
         int socket,
+        DemoProcessRequestFunction request_handler,
         void(*completion_cb)(void*, TmplHandlerRef),
         void* server_ref)
 {
@@ -55,12 +53,14 @@ void tmpl_handler_init(
             connection_completion_cb,
             this
             );
+    this->request_handler = request_handler;
     this->runloop_ref = runloop_ref;
     this->completion_callback = completion_cb;
     this->server_ref = server_ref;
     this->input_list = List_new();
     this->output_list = List_new();
     this->active_response = NULL;
+    assert(this->request_handler != NULL);
 
     tmpl_connection_read(this->tmpl_connection_ref, &handle_request, this);
 }
@@ -82,7 +82,7 @@ void tmpl_handler_free(TmplHandlerRef this)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // main driver functon - keeps everything going
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-static void handle_request(void* href, TmplMessageRef msgref, int error_code)
+static void handle_request(void* href, TmplMessageRef request, int error_code)
 {
     RBL_LOG_FMT("handler handle_request \n");
     TmplHandlerRef handler_ref = href;
@@ -92,13 +92,14 @@ static void handle_request(void* href, TmplMessageRef msgref, int error_code)
     RBL_CHECK_TAG(TmplConnection_TAG, cref)
     RBL_CHECK_END_TAG(TmplConnection_TAG, cref)
 
-    TmplMessageRef response = NULL;
     if(error_code) {
         RBL_LOG_FMT("TmplHandler handler_request error_code %d\n", error_code);
         handler_ref->completion_callback(handler_ref->server_ref, handler_ref);
     } else {
-        response = process_request(handler_ref, msgref);
-        tmpl_message_free(msgref);
+        TmplMessageRef response_ref = tmpl_message_new();
+        assert(handler_ref->request_handler != NULL);
+        handler_ref->request_handler(handler_ref, request, resonse_ref);
+        tmpl_message_free(request);
         List_add_back(handler_ref->output_list, response);
         if(List_size(handler_ref->output_list) > 1) {
             assert(false);
@@ -107,20 +108,6 @@ static void handle_request(void* href, TmplMessageRef msgref, int error_code)
         } // why not else
     }
 }
-#if 0
-static TmplMessageRef process_request(TmplHandlerRef href, TmplMessageRef request)
-{
-    RBL_CHECK_TAG(TmplHandler_TAG, href)
-    RBL_CHECK_END_TAG(TmplHandler_TAG, href)
-    TmplMessageRef reply = tmpl_message_new();
-    tmpl_message_set_is_request(reply, false);
-    BufferChainRef request_body = tmpl_message_get_body(request);
-    BufferChainRef bc =  BufferChain_new();
-    BufferChain_append_bufferchain(bc, request_body);
-    tmpl_message_set_body(reply, bc);
-    return reply;
-}
-#endif
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // write sequence
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

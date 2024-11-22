@@ -54,7 +54,6 @@ typedef struct DemoConnection_s {
     void*                on_close_cb_arg;
     bool                 cleanup_done_flag;
     RBL_DECLARE_END_TAG;
-
 } DemoConnection, *DemoConnectionRef;
 
 DemoConnectionRef demo_connection_new(

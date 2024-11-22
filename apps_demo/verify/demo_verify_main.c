@@ -18,17 +18,6 @@
 #define MAX_ROUNDTRIPS_PER_THREAD (NBR_CONNECTIONS_PER_THREAD * NBR_ROUNDTRIPS_PER_CONNECTION)
 #define MAX_RESPONSE_TIMES (NBR_THREADS * MAX_ROUNDTRIPS_PER_THREAD)
 
-#if 0
-#define NBR_PROCCES 1
-#define nbr_threads 8
-#define nbr_connections_per_thread 3
-#define nbr_roundtriips_per_connection 30
-#define MAX_ROUNDTRIPS_PER_THREAD (nbr_connections_per_thread * nbr_roundtriips_per_connection)
-#define MAX_RESPONSE_TIMES (nbr_threads * MAX_ROUNDTRIPS_PER_THREAD)
-
-long nbr_round_trips_per_thread = nbr_connections_per_thread * nbr_roundtriips_per_connection;
-long nbr_round_trips = nbr_threads * MAX_ROUNDTRIPS_PER_THREAD;
-#endif
 void* threadfn(void* data);
 
 int main(int argc, char* argv[])
@@ -69,9 +58,6 @@ int main(int argc, char* argv[])
         pthread_join(workers[t], NULL);
 
         rta_append(all_readings, tctx[t]->response_times_ref);
-
-//        tot_time = tot_time + tctx[t]->total_time;
-//        append_thread_response_times(all, tctx[t]->resp_times, t);
     }
     /**
      * Analyse the results

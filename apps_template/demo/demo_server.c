@@ -11,6 +11,7 @@
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/common/socket_functions.h>
+#include "tmpl_handler.h"
 
 static DemoHandlerRef my_only_client;
 static void set_non_blocking(socket_handle_t socket);
@@ -45,7 +46,7 @@ static void on_handler_completion_cb(void* void_server_ref, DemoHandlerRef handl
     demo_handler_free(handler_ref);
     */
 }
-void demo_server_init(DemoServerRef sref, int port, char const * host, int listen_fd, DemoProcessRequestFunction* process_request)
+void demo_server_init(DemoServerRef sref, int port, char const * host, int listen_fd, DemoProcessRequestFunction process_request)
 {
     RBL_SET_TAG(DemoServer_TAG, sref)
     RBL_SET_END_TAG(DemoServer_TAG, sref)
@@ -81,7 +82,6 @@ void demo_server_free(DemoServerRef this)
     assert(List_size(this->handler_list) ==0);
     List_free(this->handler_list);
     free(this);
-
 }
 
 void demo_server_listen(DemoServerRef sref)
@@ -89,16 +89,12 @@ void demo_server_listen(DemoServerRef sref)
     RBL_CHECK_TAG(DemoServer_TAG, sref)
     RBL_CHECK_END_TAG(DemoServer_TAG, sref)
     ASSERT_NOT_NULL(sref)
-//    pid_t tid = gettid();
-////    printf("demo_server_listen sref: %p tid: %d\n", sref, tid);
-//    int port = sref->port;
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
     RunloopListenerRef lw = sref->listening_watcher_ref;
     runloop_listener_register(lw, on_event_listening, sref);
     runloop_run(sref->runloop_ref, -1);
     RBL_LOG_FMT("DemoServer finishing");
-
 }
 
 void demo_server_terminate(DemoServerRef this)
@@ -110,7 +106,6 @@ void demo_server_terminate(DemoServerRef this)
 }
 void on_event_listening(RunloopRef rl, void* arg_server_ref) // RunloopListenerRef listener_watcher_ref, uint64_t event)
 {
-
     DemoServerRef server_ref = arg_server_ref; //listener_watcher_ref->listen_postable_arg;
     RBL_CHECK_TAG(DemoServer_TAG, server_ref)
     RBL_CHECK_END_TAG(DemoServer_TAG, server_ref)
@@ -127,6 +122,7 @@ void on_event_listening(RunloopRef rl, void* arg_server_ref) // RunloopListenerR
     DemoHandlerRef handler = demo_handler_new(
             rl,
             sock2,
+            server_ref->process_request_function,
             on_handler_completion_cb,
             server_ref);
 

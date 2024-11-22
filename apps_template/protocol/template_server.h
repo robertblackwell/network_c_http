@@ -2,11 +2,10 @@
 #define c_tmpl_server_h
 #include <http_in_c/tmpl_protocol/tmpl_message.h>
 #include <http_in_c/tmpl_protocol/tmpl_connection.h>
-#include <http_in_c/tmpl_protocol/tmpl_handler.h>
 #include <http_in_c/common/socket_functions.h>
 #include <http_in_c/constants.h>
 #include <http_in_c/runloop/runloop.h>
-#define TmplServer_TAG "DmSRVR"
+#define TmplServer_TAG "TmplSRVR"
 #include <rbl/check_tag.h>
 
 #define XR_NBR_WORKERS 1

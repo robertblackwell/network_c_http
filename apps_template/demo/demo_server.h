@@ -2,7 +2,6 @@
 #define c_demo_server_h
 #include <http_in_c/demo_protocol/demo_message.h>
 #include <http_in_c/demo_protocol/demo_connection.h>
-#include <http_in_c/demo_protocol/demo_handler.h>
 #include <http_in_c/common/socket_functions.h>
 #include <http_in_c/constants.h>
 #include <http_in_c/runloop/runloop.h>

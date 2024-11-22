@@ -8,6 +8,7 @@
 #include "verify_getopt.h"
 #include "verify_statistics.h"
 #include "verify_thread_context.h"
+#include "../tmpl_common/tmpl_make_request_response.h"
 
 
 #define NBR_PROCCES 1
@@ -17,17 +18,6 @@
 #define MAX_ROUNDTRIPS_PER_THREAD (NBR_CONNECTIONS_PER_THREAD * NBR_ROUNDTRIPS_PER_CONNECTION)
 #define MAX_RESPONSE_TIMES (NBR_THREADS * MAX_ROUNDTRIPS_PER_THREAD)
 
-#if 0
-#define NBR_PROCCES 1
-#define nbr_threads 8
-#define nbr_connections_per_thread 3
-#define nbr_roundtriips_per_connection 30
-#define MAX_ROUNDTRIPS_PER_THREAD (nbr_connections_per_thread * nbr_roundtriips_per_connection)
-#define MAX_RESPONSE_TIMES (nbr_threads * MAX_ROUNDTRIPS_PER_THREAD)
-
-long nbr_round_trips_per_thread = nbr_connections_per_thread * nbr_roundtriips_per_connection;
-long nbr_round_trips = nbr_threads * MAX_ROUNDTRIPS_PER_THREAD;
-#endif
 void* threadfn(void* data);
 
 int main(int argc, char* argv[])
@@ -68,9 +58,6 @@ int main(int argc, char* argv[])
         pthread_join(workers[t], NULL);
 
         rta_append(all_readings, tctx[t]->response_times_ref);
-
-//        tot_time = tot_time + tctx[t]->total_time;
-//        append_thread_response_times(all, tctx[t]->resp_times, t);
     }
     /**
      * Analyse the results
@@ -97,7 +84,7 @@ void* threadfn(void* data)
         while(1) {
             struct timeval iter_start_time = get_time();
             Ctx_mk_uid(ctx);
-            TmplMessageRef request = mk_request(ctx);
+            TmplMessageRef request = tmpl_make_request(ctx);
             TmplMessageRef response = NULL;
             int rc1 = tmpl_syncsocket_write_message(client, request);
             if (rc1 != 0) break;
@@ -106,13 +93,14 @@ void* threadfn(void* data)
             IOBufferRef iob_req = tmpl_message_serialize(request);
             IOBufferRef iob_resp = tmpl_message_serialize(response);
             if (!verify_response(ctx, request, response)) {
-                printf("Verify response failed");
+                printf("Tmpl Verify response failed");
+            } else {
+                printf("Tmpl verify succeeded\n");
             }
             struct timeval iter_end_time = get_time();
 
             rta_add(ctx->response_times_ref, time_diff_ms(iter_end_time, iter_start_time));
 
-//            ctx->resp_times[ctx->total_roundtrips] =  time_diff_ms(iter_end_time, iter_start_time);
             ctx->roundtrip_per_connection_counter++;
             ctx->total_roundtrips++;
             if(ctx->roundtrip_per_connection_counter >= ctx->max_rountrips_per_connection) {

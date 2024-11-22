@@ -1,4 +1,4 @@
-#include "tmpl_process_main.h"
+#include "tmpl_async_process_main.h"
 
 #include <http_in_c/tmpl_protocol/tmpl_server.h>
 #include <http_in_c/tmpl_protocol/tmpl_message.h>
@@ -6,9 +6,11 @@
 #include <rbl/logger.h>
 #include <stdio.h>
 #include <mcheck.h>
+#include <pthread.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include<signal.h>
+#include "demo_common/demo_make_request_response.h"
 
 #define MAX_NBR_THREADS 10
 void* thread_function(void* arg);
