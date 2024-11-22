@@ -6,9 +6,11 @@
 #include <rbl/logger.h>
 #include <stdio.h>
 #include <mcheck.h>
+#include <pthread.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include<signal.h>
+#include "../demo_common/demo_make-request_response.h"
 
 #define MAX_NBR_THREADS 10
 void* thread_function(void* arg);
@@ -46,7 +48,7 @@ void* thread_function(void* arg)
     ThreadContext* ctx = arg;
     int listening_socket_fd = create_listener_socket(ctx->port, ctx->host);
     printf("thread pid: %d tid: %d host: %s port: %d ident: %d pthread_t: %lu listening_socket: %d\n", getpid(), gettid(), ctx->host, ctx->port, ctx->ident, ctx->thread, ctx->listening_socket);
-    ctx->server_ref = demo_server_new(ctx->port, ctx->host, listening_socket_fd, NULL);
+    ctx->server_ref = demo_server_new(ctx->port, ctx->host, listening_socket_fd, demo_process_request);
     demo_server_listen(ctx->server_ref);
     runloop_run(ctx->server_ref->runloop_ref, -1 /* infinite*/);
     demo_server_free(ctx->server_ref);

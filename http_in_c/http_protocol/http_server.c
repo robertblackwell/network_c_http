@@ -11,6 +11,7 @@
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/common/socket_functions.h>
+#include "http_handler.h"
 
 static HttpHandlerRef my_only_client;
 static void set_non_blocking(socket_handle_t socket);
@@ -45,7 +46,7 @@ static void on_handler_completion_cb(void* void_server_ref, HttpHandlerRef handl
     http_handler_free(handler_ref);
     */
 }
-void http_server_init(HttpServerRef sref, int port, char const * host, int listen_fd, HttpProcessRequestFunction* process_request)
+void http_server_init(HttpServerRef sref, int port, char const * host, int listen_fd, HttpProcessRequestFunction process_request_function)
 {
     RBL_SET_TAG(HttpServer_TAG, sref)
     RBL_SET_END_TAG(HttpServer_TAG, sref)
@@ -53,16 +54,16 @@ void http_server_init(HttpServerRef sref, int port, char const * host, int liste
     sref->host = host;
     socket_set_non_blocking(listen_fd);
     sref->listening_socket_fd = listen_fd;
-    sref->process_request_function = process_request;
-
+    sref->process_request_function = process_request_function;
+    assert(sref->process_request_function != NULL);
     sref->runloop_ref = runloop_new();
     sref->listening_watcher_ref = runloop_listener_new(sref->runloop_ref, sref->listening_socket_fd);
     sref->handler_list = List_new();
 }
-HttpServerRef http_server_new(int port, char const * host, int listen_fd, HttpProcessRequestFunction* process_request)
+HttpServerRef http_server_new(int port, char const * host, int listen_fd, HttpProcessRequestFunction process_request_function)
 {
     HttpServerRef sref = (HttpServerRef) eg_alloc(sizeof(HttpServer));
-    http_server_init(sref, port, host, listen_fd, process_request);
+    http_server_init(sref, port, host, listen_fd, process_request_function);
     return sref;
 }
 void http_server_free(HttpServerRef this)
@@ -127,6 +128,7 @@ void on_event_listening(RunloopRef rl, void* arg_server_ref) // RunloopListenerR
     HttpHandlerRef handler = http_handler_new(
             rl,
             sock2,
+            server_ref->process_request_function,
             on_handler_completion_cb,
             server_ref);
 

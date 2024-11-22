@@ -4,16 +4,14 @@ set(HEADER_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/http_connection.h
 	${CMAKE_CURRENT_SOURCE_DIR}/http_handler.h
 	${CMAKE_CURRENT_SOURCE_DIR}/http_server.h
-	${CMAKE_CURRENT_SOURCE_DIR}/http_process_request.h
-	${CMAKE_CURRENT_SOURCE_DIR}/http_sync_socket.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/http_sync_socket.h
 )
 set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/http_message.c
 	${CMAKE_CURRENT_SOURCE_DIR}/http_message_parser.c
 	${CMAKE_CURRENT_SOURCE_DIR}/http_connection.c
 	${CMAKE_CURRENT_SOURCE_DIR}/http_handler.c
-	${CMAKE_CURRENT_SOURCE_DIR}/http_process_request.c
-	${CMAKE_CURRENT_SOURCE_DIR}/http_server.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/http_server.c
 	${CMAKE_CURRENT_SOURCE_DIR}/http_sync_socket.c
 )
 

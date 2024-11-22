@@ -1,8 +1,8 @@
-#ifndef c_http_server_h
-#define c_http_server_h
+#ifndef c_http_http_server_h
+#define c_http_http_server_h
 #include <http_in_c/http_protocol/http_message.h>
 #include <http_in_c/http_protocol/http_connection.h>
-#include <http_in_c/http_protocol/http_handler.h>
+//#include <http_in_c/http_protocol/http_handler.h>
 #include <http_in_c/common/socket_functions.h>
 #include <http_in_c/constants.h>
 #include <http_in_c/runloop/runloop.h>
@@ -12,7 +12,7 @@
 #define XR_NBR_WORKERS 1
 typedef struct HttpHandler_s HttpHandler, *HttpHandlerRef;
 typedef struct  HttpServer_s HttpServer, *HttpServerRef;
-typedef void(HttpProcessRequestFunction)(HttpHandlerRef, HttpMessageRef, HttpMessageRef);
+typedef void(*HttpProcessRequestFunction)(void* handler_ref_arg, HttpMessageRef, HttpMessageRef);
 struct HttpServer_s {
     RBL_DECLARE_TAG;
     int                     port;
@@ -21,7 +21,7 @@ struct HttpServer_s {
     RunloopRef              runloop_ref;
     RunloopListenerRef      listening_watcher_ref;
     ListRef                 handler_list;
-    HttpProcessRequestFunction* process_request_function;
+    HttpProcessRequestFunction process_request_function;
     void(*completion_callback)(HttpServerRef, HttpHandlerRef);
     RBL_DECLARE_END_TAG;
 };
@@ -32,8 +32,8 @@ struct HttpServer_s {
  * \param handler  A function conforming to XrHandlerFunction (see aio_api/handler.h) which will be called to handle all requests that are parsed successfully.
  * \return
  */
-HttpServerRef http_server_new(int port, char const * host, int listen_fd, HttpProcessRequestFunction* process_request);
-void http_server_init(HttpServerRef sref, int port, char const * host, int listen_fd, HttpProcessRequestFunction* process_request);
+HttpServerRef http_server_new(int port, char const * host, int listen_fd, HttpProcessRequestFunction process_request);
+void http_server_init(HttpServerRef sref, int port, char const * host, int listen_fd, HttpProcessRequestFunction process_request);
 void http_server_free(HttpServerRef this);
 void http_server_listen(HttpServerRef server);
 void http_server_terminate(HttpServerRef this);

@@ -6,7 +6,15 @@
 
 HttpMessageRef http_make_request(char* url, bool keep_alive_flag);
 
-HttpMessageRef http_process_request(HttpMessageRef request);
+/**
+ * Turns a request into a response. The request and response message objects are owned
+ * by the caller and should not be free'd inside this function.
+ *
+ * @param handler   a void* pointer to the handler object
+ * @param request   HttpMessageRef the request message
+ * @param response  HttpMessageRef an empty message for the response to be filled in
+ */
+void http_process_request(void* handler, HttpMessageRef request, HttpMessageRef reply);
 
 bool http_verify_response(HttpMessageRef request, HttpMessageRef response);
 

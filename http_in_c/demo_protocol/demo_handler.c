@@ -13,7 +13,6 @@
 #include <sys/epoll.h>
 #include <errno.h>
 #include <http_in_c/demo_protocol/demo_message.h>
-#include <http_in_c/demo_protocol/demo_process_request.h>
 
 //static DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef request);
 static void handle_request( void* href, DemoMessageRef msgref, int error_code);
@@ -30,17 +29,19 @@ static void connection_completion_cb(void* href)
 DemoHandlerRef demo_handler_new(
         RunloopRef runloop_ref,
         int socket,
+        DemoProcessRequestFunction request_handler,
         void(*completion_cb)(void*, DemoHandlerRef),
         void* server_ref)
 {
     DemoHandlerRef this = malloc(sizeof(DemoHandler));
-    demo_handler_init(this, runloop_ref, socket, completion_cb, server_ref);
+    demo_handler_init(this, runloop_ref, socket, request_handler, completion_cb, server_ref);
     return this;
 }
 void demo_handler_init(
         DemoHandlerRef this,
         RunloopRef runloop_ref,
         int socket,
+        DemoProcessRequestFunction request_handler,
         void(*completion_cb)(void*, DemoHandlerRef),
         void* server_ref)
 {
@@ -55,6 +56,7 @@ void demo_handler_init(
             connection_completion_cb,
             this
             );
+    this->request_handler = request_handler;
     this->runloop_ref = runloop_ref;
     this->completion_callback = completion_cb;
     this->server_ref = server_ref;
@@ -82,7 +84,7 @@ void demo_handler_free(DemoHandlerRef this)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // main driver functon - keeps everything going
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-static void handle_request(void* href, DemoMessageRef msgref, int error_code)
+static void handle_request(void* href, DemoMessageRef request_ref, int error_code)
 {
     RBL_LOG_FMT("handler handle_request \n");
     DemoHandlerRef handler_ref = href;
@@ -92,14 +94,14 @@ static void handle_request(void* href, DemoMessageRef msgref, int error_code)
     RBL_CHECK_TAG(DemoConnection_TAG, cref)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
 
-    DemoMessageRef response = NULL;
     if(error_code) {
         RBL_LOG_FMT("DemoHandler handler_request error_code %d\n", error_code);
         handler_ref->completion_callback(handler_ref->server_ref, handler_ref);
     } else {
-        response = demo_process_request(handler_ref, msgref);
-        demo_message_free(msgref);
-        List_add_back(handler_ref->output_list, response);
+        DemoMessageRef response_ref = demo_message_new();
+        handler_ref->request_handler(handler_ref, request_ref, response_ref);
+        demo_message_free(request_ref);
+        List_add_back(handler_ref->output_list, response_ref);
         if(List_size(handler_ref->output_list) > 1) {
             assert(false);
         } else if (List_size(handler_ref->output_list) == 1) {

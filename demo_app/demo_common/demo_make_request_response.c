@@ -18,9 +18,8 @@ DemoMessageRef demo_make_request()
     demo_message_set_body(request, body);
     return request;
 }
-DemoMessageRef demo_process_request(DemoMessageRef request)
+void demo_process_request(void* handler, DemoMessageRef request, DemoMessageRef reply)
 {
-    DemoMessageRef reply = demo_message_new();
     demo_message_set_is_request(reply, false);
     BufferChainRef request_body = demo_message_get_body(request);
     IOBufferRef  iob = BufferChain_compact(request_body);
@@ -31,7 +30,6 @@ DemoMessageRef demo_process_request(DemoMessageRef request)
     IOBuffer_free(iob);
 //    BufferChain_append_bufferchain(bc, request_body);
     demo_message_set_body(reply, bc);
-    return reply;
 }
 /**
  * Verify that the response is correct based on the ctx->uid and request values

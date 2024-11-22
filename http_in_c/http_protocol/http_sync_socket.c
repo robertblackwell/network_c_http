@@ -27,10 +27,10 @@ struct HttpSyncSocket_s {
     ListRef output_message_list;
     RBL_DECLARE_END_TAG;
 };
-void on_new_message(void* ctx, HttpMessageRef msg)
+void on_new_message(void* client_ref_ctx, HttpMessageRef msg)
 {
-    HttpMessageParserRef pref = ctx;
-    HttpSyncSocketRef client_ref = pref->on_message_handler_context;
+//    HttpMessageParserRef pref = ctx;
+    HttpSyncSocketRef client_ref = client_ref_ctx;
     assert(msg != NULL);
     List_add_back(client_ref->input_message_list, msg);
 }

@@ -50,11 +50,11 @@ int main(int argc, char** argv) {
                  &nbr_threads,
                  &nbr_processes);
 //    g_sref = sref;
+    host = "127.0.0.1";
     printf("host: %s port: %d nbr_processes: %d nbr_threads: %d nbr_connections_per_thread: %d nbr_roundthrips_per_connection %d\n",
            host, port, nbr_processes, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection
            );
     int child_pid;
-    host = "127.0.0.1";
     for (int p = 0; p < nbr_processes; p++) {
         if ((child_pid = fork()) == 0) {
             process_main(host, port, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection);

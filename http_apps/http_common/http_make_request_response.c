@@ -39,9 +39,8 @@ HttpMessageRef http_make_request(char* url, bool keep_alive_flag)
     return request;
 }
 
-HttpMessageRef http_process_request(HttpMessageRef request)
+void http_process_request(void* handler, HttpMessageRef request, HttpMessageRef reply)
 {
-    HttpMessageRef reply = http_message_new();
     http_message_set_is_request(reply, false);
     http_message_set_status(reply, HTTP_STATUS_OK);
     http_message_set_reason(reply, "OK");
@@ -59,7 +58,6 @@ HttpMessageRef http_process_request(HttpMessageRef request)
 
     http_message_set_body(reply, response_body);
     IOBufferRef serialized_reply = http_message_serialize(reply);
-    return reply;
 }
 
 /**

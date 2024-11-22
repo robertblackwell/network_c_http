@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include<signal.h>
+#include "../demo_common/demo_make-request_response.h"
 
 #define MAX_NBR_THREADS 10
 void* thread_function(void* arg);
@@ -49,7 +50,7 @@ void* thread_function(void* arg)
 {
     ThreadContext* ctx = arg;
     int listening_socket_fd = create_listener_socket(ctx->port, ctx->host);
-    printf("thread pid: %d tid: %d host: %s port: %d ident: %d pthread_t: %lu listening_socket: %d\n", getpid(), gettid(), ctx->host, ctx->port, ctx->ident, ctx->thread, ctx->listening_socket);
+    printf("thread pid: %d tid: %d host: %s port: %d listening_socket: %d\n", getpid(), gettid(), ctx->host, ctx->port, listening_socket_fd);
 
     server_loop(listening_socket_fd);
 
@@ -76,7 +77,8 @@ void server_loop(int listen_socket)
             if((retcode < 0) || (request_ptr == NULL)) {
                 break;
             }
-            DemoMessageRef response_ptr = process_request(request_ptr);
+            DemoMessageRef response_ptr = demo_message_new();
+            demo_process_request(NULL, request_ptr, response_ptr);
             IOBufferRef iob_req = demo_message_serialize(request_ptr);
             IOBufferRef iob_resp = demo_message_serialize(response_ptr);
             IOBuffer_free(iob_req);

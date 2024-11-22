@@ -77,7 +77,8 @@ void server_loop(int listen_socket)
             if((retcode < 0) || (request_ptr == NULL)) {
                 break;
             }
-            HttpMessageRef response_ptr = http_process_request(request_ptr);
+            HttpMessageRef response_ptr = http_message_new();
+            http_process_request(NULL, request_ptr, response_ptr);
             IOBufferRef iob_req = http_message_serialize(request_ptr);
             IOBufferRef iob_resp = http_message_serialize(response_ptr);
             IOBuffer_free(iob_req);

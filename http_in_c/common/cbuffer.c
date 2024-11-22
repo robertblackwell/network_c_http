@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <assert.h>
 #include <string.h>
+#include <rbl/check_tag.h>
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/common/cbuffer.h>
@@ -52,6 +53,7 @@ typedef struct BufferStrategy_s {
 
 typedef struct Cbuffer_s
 {
+    RBL_DECLARE_TAG;
     char        m_tag[8];
     void*       m_memPtr;     /// points to the start of the memory slab managed by the instance
     char*       m_cPtr;       /// same as memPtr but makes it easier in debugger to see whats in the buffer
@@ -59,6 +61,7 @@ typedef struct Cbuffer_s
     size_t      m_capacity;  /// the capacity of the buffer, the value used for the eg_alloc call
     size_t      m_size;      /// size of the currently filled portion of the memory slab
     BufferStrategyRef m_strategy;
+    RBL_DECLARE_END_TAG;
 } Cbuffer;
 
 /**
@@ -103,7 +106,8 @@ BufferStrategy common_strategy = {.m_min_size=256, .m_max_size=1024*1024};
 CbufferRef Cbuffer_new()
 {
     CbufferRef cb_ptr = (CbufferRef)eg_alloc(sizeof(Cbuffer));
-    CB_SET_TAG(cb_ptr);
+    RBL_SET_TAG(CBUFFER_Tag, cb_ptr);
+    RBL_SET_END_TAG(CBUFFER_Tag, cb_ptr)
     cb_ptr->m_strategy=&common_strategy;
     size_t tmp_cap = cb_ptr->m_strategy->m_min_size;
     cb_ptr->m_memPtr = BufferStrategy_allocate(cb_ptr->m_strategy, tmp_cap);
@@ -126,7 +130,8 @@ CbufferRef Cbuffer_from_cstring(const char* c_str)
  */
 void Cbuffer_free(CbufferRef this)
 {
-    CB_CHECK_TAG_ONLY(this);
+    RBL_CHECK_TAG(CBUFFER_Tag, this);
+    RBL_CHECK_END_TAG(CBUFFER_Tag, this);
     assert(this != NULL);
     // this will allow success free of invalidated cbuffer
     if(this->m_memPtr != NULL) {
@@ -139,7 +144,8 @@ void Cbuffer_free(CbufferRef this)
  */
 void* Cbuffer_data(const CbufferRef cbuf)
 {
-    CB_CHECK_TAG(cbuf);
+    RBL_CHECK_TAG(CBUFFER_Tag, cbuf);
+    RBL_CHECK_END_TAG(CBUFFER_Tag, cbuf);
     return cbuf->m_memPtr;
 }
 /**
@@ -147,12 +153,14 @@ void* Cbuffer_data(const CbufferRef cbuf)
 */
 size_t Cbuffer_size(const CbufferRef cbuf)
 {
-    CB_CHECK_TAG(cbuf);
+    RBL_CHECK_TAG(CBUFFER_Tag, cbuf);
+    RBL_CHECK_END_TAG(CBUFFER_Tag, cbuf);
     return cbuf->m_length;
 }
 const char* Cbuffer_cstr(const CbufferRef this)
 {
-    CB_CHECK_TAG(this);
+    RBL_CHECK_TAG(CBUFFER_Tag, this);
+    RBL_CHECK_END_TAG(CBUFFER_Tag, this);
     assert(this->m_cPtr[this->m_size] == '\0');
     return this->m_cPtr;
 }
@@ -161,7 +169,8 @@ const char* Cbuffer_cstr(const CbufferRef this)
 */
 size_t Cbuffer_capacity(const CbufferRef cbuf)
 {
-    CB_CHECK_TAG(cbuf);
+    RBL_CHECK_TAG(CBUFFER_Tag, cbuf);
+    RBL_CHECK_END_TAG(CBUFFER_Tag, cbuf);
     return cbuf->m_capacity;
 }
 /**
@@ -169,7 +178,8 @@ size_t Cbuffer_capacity(const CbufferRef cbuf)
 */
 void* Cbuffer_next_available(const CbufferRef cbuf)
 {
-    CB_CHECK_TAG(cbuf);
+    RBL_CHECK_TAG(CBUFFER_Tag, cbuf);
+    RBL_CHECK_END_TAG(CBUFFER_Tag, cbuf);
     void* x = (void*) (cbuf->m_cPtr + cbuf->m_length);
     return x;
 }
@@ -178,13 +188,15 @@ void* Cbuffer_next_available(const CbufferRef cbuf)
  */
 void Cbuffer_clear(CbufferRef cbuf)
 {
-    CB_CHECK_TAG(cbuf);
+    RBL_CHECK_TAG(CBUFFER_Tag, cbuf);
+    RBL_CHECK_END_TAG(CBUFFER_Tag, cbuf);
     cbuf->m_length = 0; cbuf->m_length = 0; cbuf->m_cPtr[0] = (char)0;
 }
 
 void Cbuffer_append(CbufferRef cbuf, void* data, size_t len)
 {
-    CB_CHECK_TAG(cbuf);
+    RBL_CHECK_TAG(CBUFFER_Tag, cbuf);
+    RBL_CHECK_END_TAG(CBUFFER_Tag, cbuf);
     char* tmp = (char*)data;
     if(len == 0)
         return;
@@ -205,12 +217,14 @@ void Cbuffer_append(CbufferRef cbuf, void* data, size_t len)
 }
 void Cbuffer_append_cstr(CbufferRef cbuf, const char* cstr)
 {
-    CB_CHECK_TAG(cbuf);
+    RBL_CHECK_TAG(CBUFFER_Tag, cbuf);
+    RBL_CHECK_END_TAG(CBUFFER_Tag, cbuf);
     Cbuffer_append(cbuf, (void*)cstr, strlen(cstr));
 }
 void Cbuffer_setSize(CbufferRef cbuf, size_t n)
 {
-    CB_CHECK_TAG(cbuf);
+    RBL_CHECK_TAG(CBUFFER_Tag, cbuf);
+    RBL_CHECK_END_TAG(CBUFFER_Tag, cbuf);
     cbuf->m_length = n;
     cbuf->m_size = n;
 }
@@ -223,7 +237,8 @@ void Cbuffer_setSize(CbufferRef cbuf, size_t n)
  */
 char* Cbuffer_toString(const CbufferRef cbuf)
 {
-    CB_CHECK_TAG(cbuf);
+    RBL_CHECK_TAG(CBUFFER_Tag, cbuf);
+    RBL_CHECK_END_TAG(CBUFFER_Tag, cbuf);
     char* p = cbuf->m_cPtr;
     return p;
 }
@@ -232,8 +247,13 @@ void Cbuffer_move(CbufferRef dest, CbufferRef src)
 {
     ASSERT_NOT_NULL(src);
     ASSERT_NOT_NULL(dest);
-    CB_CHECK_TAG(dest);
-    CB_CHECK_TAG(src);
+
+    RBL_CHECK_TAG(CBUFFER_Tag, src);
+    RBL_CHECK_END_TAG(CBUFFER_Tag, src);
+
+    RBL_CHECK_TAG(CBUFFER_Tag, dest);
+    RBL_CHECK_END_TAG(CBUFFER_Tag, dest);
+
     Cbuffer_clear(dest);
 //    Cbuffer_append(dest, src->m_memPtr, src->m_length );
     Cbuffer tmp = *dest;
@@ -251,13 +271,15 @@ void Cbuffer_move(CbufferRef dest, CbufferRef src)
  */
 bool Cbuffer_contains_voidptr(const CbufferRef cbuf, void* ptr)
 {
-    CB_CHECK_TAG(cbuf);
+    RBL_CHECK_TAG(CBUFFER_Tag, cbuf);
+    RBL_CHECK_END_TAG(CBUFFER_Tag, cbuf);
     char* p = (char*) ptr;
     return Cbuffer_contains_charptr(cbuf, p);
 }
 bool Cbuffer_contains_charptr(const CbufferRef cbuf, char* ptr)
 {
-    CB_CHECK_TAG(cbuf);
+    RBL_CHECK_TAG(CBUFFER_Tag, cbuf);
+    RBL_CHECK_END_TAG(CBUFFER_Tag, cbuf);
     char* endPtr = cbuf->m_cPtr + (long)cbuf->m_capacity;
     char* sPtr = cbuf->m_cPtr;
     bool r = ( ptr <= endPtr && ptr >= sPtr);

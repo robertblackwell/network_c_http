@@ -5,6 +5,8 @@
 #include <stdlib.h> 
 #include <stdbool.h>
 
+
+#define CBUFFER_Tag  "CBUFFER"
 /**
  * @addtogroup group_cbuffer
  *  A Cbuffer is a contiguous memory allocation that can expand as required.

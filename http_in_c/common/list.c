@@ -184,7 +184,7 @@ void* List_first(const ListRef lref)
 // gets the item contained in the first list item AND removes that item
 void* List_remove_first(ListRef lref)
 {
-    ASSERT_NOT_NULL(lref);
+    assert(lref != NULL);
     if(lref->count == 0)
         return NULL;
     if(lref->count == 1) {

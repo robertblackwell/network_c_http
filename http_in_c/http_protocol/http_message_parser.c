@@ -69,7 +69,6 @@ void http_message_parser_free(HttpMessageParserRef this)
     if(this->m_url_buf != NULL) Cbuffer_free(this->m_url_buf);
     if(this->m_status_buf != NULL) Cbuffer_free(this->m_status_buf);
     if(this->m_value_buf != NULL) Cbuffer_free(this->m_value_buf);
-    if(this->m_name_buf != NULL) Cbuffer_free(this->m_name_buf);
     free(this);
 }
 int Parser_append_bytes(HttpMessageParserRef this, void *buffer, unsigned length)
@@ -104,6 +103,9 @@ llhttp_errno_t  http_message_parser_consume_buffer(HttpMessageParser *parser, IO
         llerrno = llhttp_finish(parser->m_llhttp_ptr);
     } else {
         llerrno = llhttp_execute(parser->m_llhttp_ptr, bufptr, buflength);
+    }
+    if(llerrno == HPE_OK) {
+        IOBuffer_consume(iobuffer_ref, buflength);
     }
     return llerrno;
 
@@ -402,7 +404,7 @@ int message_complete_cb(llhttp_t* parser)
     RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
     HttpMessageRef tmp = this->current_message_ptr;
     this->current_message_ptr = http_message_new();
-    this->on_message_handler(this, tmp);
+    this->on_message_handler(this->on_message_handler_context, tmp);
     return 0;
 }
 static

@@ -13,13 +13,11 @@
 #include <sys/epoll.h>
 #include <errno.h>
 #include <http_in_c/http_protocol/http_message.h>
-#include <http_in_c/http_protocol/http_process_request.h>
 
-//static HttpMessageRef process_request(HttpHandlerRef href, HttpMessageRef request);
-static void handle_request( void* href, HttpMessageRef msgref, int error_code);
-static void postable_write_start(RunloopRef reactor_ref, void* href);
+static void on_new_message_handler( void* href, HttpMessageRef request, int error_code);
+static void postable_write_start(RunloopRef runloop_ref, void* href);
 static void on_write_complete_cb(void* href, int status);
-static void handler_postable_read_start(RunloopRef reactor_ref, void* href);
+static void handler_postable_read_start(RunloopRef runloop_ref, void* href);
 
 static void connection_completion_cb(void* href)
 {
@@ -30,17 +28,19 @@ static void connection_completion_cb(void* href)
 HttpHandlerRef http_handler_new(
         RunloopRef runloop_ref,
         int socket,
+        HttpProcessRequestFunction handle_request,
         void(*completion_cb)(void*, HttpHandlerRef),
         void* server_ref)
 {
     HttpHandlerRef this = malloc(sizeof(HttpHandler));
-    http_handler_init(this, runloop_ref, socket, completion_cb, server_ref);
+    http_handler_init(this, runloop_ref, socket, handle_request, completion_cb, server_ref);
     return this;
 }
 void http_handler_init(
         HttpHandlerRef this,
         RunloopRef runloop_ref,
         int socket,
+        HttpProcessRequestFunction request_handler,
         void(*completion_cb)(void*, HttpHandlerRef),
         void* server_ref)
 {
@@ -61,8 +61,10 @@ void http_handler_init(
     this->input_list = List_new();
     this->output_list = List_new();
     this->active_response = NULL;
+    this->request_handler = request_handler;
+    assert(this->request_handler != NULL);
 
-    http_connection_read(this->http_connection_ref, &handle_request, this);
+    http_connection_read(this->http_connection_ref, on_new_message_handler, this);
 }
 
 void http_handler_free(HttpHandlerRef this)
@@ -82,7 +84,7 @@ void http_handler_free(HttpHandlerRef this)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // main driver functon - keeps everything going
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-static void handle_request(void* href, HttpMessageRef msgref, int error_code)
+static void on_new_message_handler(void* href, HttpMessageRef request, int error_code)
 {
     RBL_LOG_FMT("handler handle_request \n");
     HttpHandlerRef handler_ref = href;
@@ -92,13 +94,14 @@ static void handle_request(void* href, HttpMessageRef msgref, int error_code)
     RBL_CHECK_TAG(HttpConnection_TAG, cref)
     RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
 
-    HttpMessageRef response = NULL;
     if(error_code) {
         RBL_LOG_FMT("HttpHandler handler_request error_code %d\n", error_code);
         handler_ref->completion_callback(handler_ref->server_ref, handler_ref);
     } else {
-        response = process_request(handler_ref, msgref);
-        http_message_free(msgref);
+        HttpMessageRef response = http_message_new();
+        assert(handler_ref->request_handler != NULL);
+        handler_ref->request_handler(href, request, response);
+        http_message_free(request);
         List_add_back(handler_ref->output_list, response);
         if(List_size(handler_ref->output_list) > 1) {
             assert(false);
@@ -163,5 +166,5 @@ static void handler_postable_read_start(RunloopRef runloop_ref, void* href)
     HttpHandlerRef handler_ref = href;
     RBL_CHECK_TAG(HttpHandler_TAG, handler_ref)
     RBL_CHECK_END_TAG(HttpHandler_TAG, handler_ref)
-    http_connection_read(handler_ref->http_connection_ref, &handle_request, href);
+    http_connection_read(handler_ref->http_connection_ref, &on_new_message_handler, href);
 }

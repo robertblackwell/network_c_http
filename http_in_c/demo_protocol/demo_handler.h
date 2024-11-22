@@ -24,6 +24,7 @@ typedef struct DemoHandler_s {
     RunloopRef        runloop_ref;
     DemoConnectionRef demo_connection_ref;
     DH_Completion_CB  completion_callback;
+    DemoProcessRequestFunction request_handler;
     void*             server_ref;
     ListRef           input_list;
     ListRef           output_list; // List of DemoMessageRef - responses
@@ -35,12 +36,14 @@ typedef struct DemoHandler_s {
 DemoHandlerRef demo_handler_new(
         RunloopRef runloop_ref,
         int socket,
+        DemoProcessRequestFunction request_handler,
         void(*completion_cb)(void*, DemoHandlerRef),
         void* completion_cb_arg);
 void demo_handler_init(
         DemoHandlerRef this,
         RunloopRef runloop_ref,
         int socket,
+        DemoProcessRequestFunction request_handler,
         void(*completion_cb)(void*, DemoHandlerRef),
         void* completion_cb_arg);
 void demo_handler_free(DemoHandlerRef this);

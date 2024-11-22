@@ -5,8 +5,7 @@ set(HEADER_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/demo_message.h
         ${CMAKE_CURRENT_SOURCE_DIR}/demo_message_parser.h
 		${CMAKE_CURRENT_SOURCE_DIR}/demo_server.h
-		${CMAKE_CURRENT_SOURCE_DIR}/demo_process_request.h
-#		${CMAKE_CURRENT_SOURCE_DIR}/demo_sync_reader.h
+        #		${CMAKE_CURRENT_SOURCE_DIR}/demo_sync_reader.h
 #		${CMAKE_CURRENT_SOURCE_DIR}/demo_sync_reader_private.h
 #		${CMAKE_CURRENT_SOURCE_DIR}/demo_sync_writer.h
 )
@@ -16,8 +15,7 @@ set(SOURCE_FILES
 	${CMAKE_CURRENT_SOURCE_DIR}/demo_handler.c
 	${CMAKE_CURRENT_SOURCE_DIR}/demo_message.c
 		${CMAKE_CURRENT_SOURCE_DIR}/demo_message_parser.c
-	${CMAKE_CURRENT_SOURCE_DIR}/demo_process_request.c
-	${CMAKE_CURRENT_SOURCE_DIR}/demo_server.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/demo_server.c
 #	${CMAKE_CURRENT_SOURCE_DIR}/demo_parser_test.c
 #	${CMAKE_CURRENT_SOURCE_DIR}/demo_sync_reader.c
 #	${CMAKE_CURRENT_SOURCE_DIR}/demo_sync_writer.c

@@ -5,7 +5,7 @@
 #include <http_in_c/common/list.h>
 #include <http_in_c/common/iobuffer.h>
 #include <http_in_c/http_protocol/http_connection.h>
-#include <http_in_c/http_protocol/http_server.h>
+#include "http_server.h"
 
 #define HttpHandler_TAG "DmHDLR"
 #include <http_in_c/runloop/rl_checktag.h>
@@ -23,6 +23,7 @@ typedef struct HttpHandler_s {
     int               raw_socket;
     RunloopRef        runloop_ref;
     HttpConnectionRef http_connection_ref;
+    HttpProcessRequestFunction request_handler;
     DH_Completion_CB  completion_callback;
     void*             server_ref;
     ListRef           input_list;
@@ -35,12 +36,14 @@ typedef struct HttpHandler_s {
 HttpHandlerRef http_handler_new(
         RunloopRef runloop_ref,
         int socket,
+        HttpProcessRequestFunction request_handler,
         void(*completion_cb)(void*, HttpHandlerRef),
         void* completion_cb_arg);
 void http_handler_init(
         HttpHandlerRef this,
         RunloopRef runloop_ref,
         int socket,
+        HttpProcessRequestFunction request_handler,
         void(*completion_cb)(void*, HttpHandlerRef),
         void* completion_cb_arg);
 void http_handler_free(HttpHandlerRef this);

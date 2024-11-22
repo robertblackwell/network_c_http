@@ -11,6 +11,7 @@
 #include <http_in_c/common/alloc.h>
 #include <http_in_c/common/utils.h>
 #include <http_in_c/common/socket_functions.h>
+#include "demo_handler.h"
 
 static DemoHandlerRef my_only_client;
 static void set_non_blocking(socket_handle_t socket);
@@ -45,7 +46,7 @@ static void on_handler_completion_cb(void* void_server_ref, DemoHandlerRef handl
     demo_handler_free(handler_ref);
     */
 }
-void demo_server_init(DemoServerRef sref, int port, char const * host, int listen_fd, DemoProcessRequestFunction* process_request)
+void demo_server_init(DemoServerRef sref, int port, char const * host, int listen_fd, DemoProcessRequestFunction process_request)
 {
     RBL_SET_TAG(DemoServer_TAG, sref)
     RBL_SET_END_TAG(DemoServer_TAG, sref)
@@ -59,7 +60,7 @@ void demo_server_init(DemoServerRef sref, int port, char const * host, int liste
     sref->listening_watcher_ref = runloop_listener_new(sref->runloop_ref, sref->listening_socket_fd);
     sref->handler_list = List_new();
 }
-DemoServerRef demo_server_new(int port, char const * host, int listen_fd, DemoProcessRequestFunction* process_request)
+DemoServerRef demo_server_new(int port, char const * host, int listen_fd, DemoProcessRequestFunction process_request)
 {
     DemoServerRef sref = (DemoServerRef) eg_alloc(sizeof(DemoServer));
     demo_server_init(sref, port, host, listen_fd, process_request);
@@ -127,6 +128,7 @@ void on_event_listening(RunloopRef rl, void* arg_server_ref) // RunloopListenerR
     DemoHandlerRef handler = demo_handler_new(
             rl,
             sock2,
+            server_ref->process_request_function,
             on_handler_completion_cb,
             server_ref);
 
