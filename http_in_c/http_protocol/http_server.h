@@ -2,7 +2,6 @@
 #define c_http_http_server_h
 #include <http_in_c/http_protocol/http_message.h>
 #include <http_in_c/http_protocol/http_connection.h>
-//#include <http_in_c/http_protocol/http_handler.h>
 #include <http_in_c/common/socket_functions.h>
 #include <http_in_c/constants.h>
 #include <http_in_c/runloop/runloop.h>

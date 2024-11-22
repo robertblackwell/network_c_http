@@ -1,5 +1,3 @@
-
-
 #include <rbl/macros.h>
 #include <rbl/check_tag.h>
 #include <http_in_c/runloop/runloop.h>
@@ -14,8 +12,7 @@
 #include <errno.h>
 #include <http_in_c/demo_protocol/demo_message.h>
 
-//static DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef request);
-static void handle_request( void* href, DemoMessageRef msgref, int error_code);
+static void on_new_message_handler( void* href, DemoMessageRef msgref, int error_code);
 static void postable_write_start(RunloopRef reactor_ref, void* href);
 static void on_write_complete_cb(void* href, int status);
 static void handler_postable_read_start(RunloopRef reactor_ref, void* href);
@@ -63,8 +60,9 @@ void demo_handler_init(
     this->input_list = List_new();
     this->output_list = List_new();
     this->active_response = NULL;
+    assert(this->request_handler != NULL);
 
-    demo_connection_read(this->demo_connection_ref, &handle_request, this);
+    demo_connection_read(this->demo_connection_ref, &on_new_message_handler, this);
 }
 
 void demo_handler_free(DemoHandlerRef this)
@@ -84,7 +82,7 @@ void demo_handler_free(DemoHandlerRef this)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // main driver functon - keeps everything going
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-static void handle_request(void* href, DemoMessageRef request_ref, int error_code)
+static void on_new_message_handler(void* href, DemoMessageRef request_ref, int error_code)
 {
     RBL_LOG_FMT("handler handle_request \n");
     DemoHandlerRef handler_ref = href;
@@ -99,6 +97,7 @@ static void handle_request(void* href, DemoMessageRef request_ref, int error_cod
         handler_ref->completion_callback(handler_ref->server_ref, handler_ref);
     } else {
         DemoMessageRef response_ref = demo_message_new();
+        assert(handler_ref->request_handler != NULL);
         handler_ref->request_handler(handler_ref, request_ref, response_ref);
         demo_message_free(request_ref);
         List_add_back(handler_ref->output_list, response_ref);
@@ -109,20 +108,6 @@ static void handle_request(void* href, DemoMessageRef request_ref, int error_cod
         } // why not else
     }
 }
-#if 0
-static DemoMessageRef process_request(DemoHandlerRef href, DemoMessageRef request)
-{
-    RBL_CHECK_TAG(DemoHandler_TAG, href)
-    RBL_CHECK_END_TAG(DemoHandler_TAG, href)
-    DemoMessageRef reply = demo_message_new();
-    demo_message_set_is_request(reply, false);
-    BufferChainRef request_body = demo_message_get_body(request);
-    BufferChainRef bc =  BufferChain_new();
-    BufferChain_append_bufferchain(bc, request_body);
-    demo_message_set_body(reply, bc);
-    return reply;
-}
-#endif
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // write sequence
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,5 +150,5 @@ static void handler_postable_read_start(RunloopRef runloop_ref, void* href)
     DemoHandlerRef handler_ref = href;
     RBL_CHECK_TAG(DemoHandler_TAG, handler_ref)
     RBL_CHECK_END_TAG(DemoHandler_TAG, handler_ref)
-    demo_connection_read(handler_ref->demo_connection_ref, &handle_request, href);
+    demo_connection_read(handler_ref->demo_connection_ref, &on_new_message_handler, href);
 }

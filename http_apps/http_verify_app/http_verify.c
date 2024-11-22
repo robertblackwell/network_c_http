@@ -107,7 +107,7 @@ void* threadfn(void* data)
             IOBufferRef iob_req = http_message_serialize(request);
             IOBufferRef iob_resp = http_message_serialize(response);
             if (!http_verify_response(request, response)) {
-                printf("Verify response failed\n");
+                printf("Http Verify response failed\n");
             } else {
                 printf("Http verify succeeded\n");
             }

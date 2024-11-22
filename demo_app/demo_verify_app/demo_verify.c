@@ -97,6 +97,7 @@ void* threadfn(void* data)
         ctx->roundtrip_per_connection_counter = 0;
         while(1) {
             struct timeval iter_start_time = get_time();
+            bool last_round = ctx->roundtrip_per_connection_counter + 1 == ctx->max_rountrips_per_connection;
             DemoMessageRef request = demo_make_request();
             DemoMessageRef response = NULL;
             int rc1 = demo_syncsocket_write_message(client, request);
@@ -106,13 +107,14 @@ void* threadfn(void* data)
             IOBufferRef iob_req = demo_message_serialize(request);
             IOBufferRef iob_resp = demo_message_serialize(response);
             if (!demo_verify_response(request, response)) {
-                printf("Verify response failed");
+                printf("Demo Verify response failed");
+            } else {
+                printf("Demo verify succeeded\n");
             }
             struct timeval iter_end_time = get_time();
 
             rta_add(ctx->response_times_ref, time_diff_ms(iter_end_time, iter_start_time));
 
-//            ctx->resp_times[ctx->total_roundtrips] =  time_diff_ms(iter_end_time, iter_start_time);
             ctx->roundtrip_per_connection_counter++;
             ctx->total_roundtrips++;
             if(ctx->roundtrip_per_connection_counter >= ctx->max_rountrips_per_connection) {

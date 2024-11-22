@@ -19,13 +19,10 @@
 #define WRITE_STATE_STOP     24
 
 static void on_parser_new_message_complete(void* arg_ctx, HttpMessageRef msg);
-
 static void postable_writer(RunloopRef runloop_ref, void* arg);
 static void postable_write_call_cb(RunloopRef runloop_ref, void* arg);
 static void writer_cb(void* cref_arg, long bytes_written, int status);
-
 static void read_have_data_cb(void* cref_arg, long bytes_available, int err_status);
-
 static void call_on_write_cb(HttpConnectionRef cref, int status);
 static void call_on_read_cb(HttpConnectionRef cref, HttpMessageRef msgref, int status);
 

@@ -33,6 +33,11 @@ typedef struct DemoConnection_s {
     RBL_DECLARE_TAG;
     RunloopRef           runloop_ref;
     AsioStreamRef        asio_stream_ref;
+    /**
+     * handler_ref should be of type DemoHandlerRef but has been made
+     * anonymous to get around a circular dependency in header files
+     * between demo_connection.h and demo_handler.h
+     */
     void*                handler_ref;
     ListRef              input_message_list_ref;
     IOBufferRef          active_input_buffer_ref;

@@ -1,5 +1,3 @@
-
-
 #include <rbl/macros.h>
 #include <rbl/check_tag.h>
 #include <http_in_c/runloop/runloop.h>
@@ -110,20 +108,6 @@ static void on_new_message_handler(void* href, HttpMessageRef request, int error
         } // why not else
     }
 }
-#if 0
-static HttpMessageRef process_request(HttpHandlerRef href, HttpMessageRef request)
-{
-    RBL_CHECK_TAG(HttpHandler_TAG, href)
-    RBL_CHECK_END_TAG(HttpHandler_TAG, href)
-    HttpMessageRef reply = http_message_new();
-    http_message_set_is_request(reply, false);
-    BufferChainRef request_body = http_message_get_body(request);
-    BufferChainRef bc =  BufferChain_new();
-    BufferChain_append_bufferchain(bc, request_body);
-    http_message_set_body(reply, bc);
-    return reply;
-}
-#endif
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // write sequence
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

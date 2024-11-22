@@ -99,7 +99,7 @@ static void usage()
 }
 static void process_args(int argc, char* argv[], char** host_ip_p, int* port, int* nbr_roundtrips_per_connection_p, int* nbr_connections_per_thread_p, int* nbr_threads_p, int* nbr_processes_p) {
     int c;
-    char* host_ptr = NULL;
+    char* host_ptr = "localhost";
     int port_number = 9011;
     int nbr_processes = 1;
     int nbr_threads = 1;

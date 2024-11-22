@@ -23,8 +23,8 @@ typedef struct DemoHandler_s {
     int               raw_socket;
     RunloopRef        runloop_ref;
     DemoConnectionRef demo_connection_ref;
-    DH_Completion_CB  completion_callback;
     DemoProcessRequestFunction request_handler;
+    DH_Completion_CB  completion_callback;
     void*             server_ref;
     ListRef           input_list;
     ListRef           output_list; // List of DemoMessageRef - responses
