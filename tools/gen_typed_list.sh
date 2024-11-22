@@ -38,7 +38,7 @@ function replace_include() {
     fi
   done < "${1}"
 }
-# generate files for a template class
+# generate files for a apps_template class
 function generate() {
   echo This is ${2}_list.sh $(pwd)
 

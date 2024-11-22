@@ -226,8 +226,8 @@ add_subdirectory(tests)
 #add_subdirectory(sync_server_app)
 #add_subdirectory(verifier)
 #add_subdirectory(async-server-app)
- add_subdirectory(demo_app)
-add_subdirectory(http_apps)
+ add_subdirectory(apps_demo)
+add_subdirectory(apps_http)
 
 # Doxygen
 

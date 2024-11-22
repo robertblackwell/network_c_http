@@ -10,7 +10,7 @@ set(EXTSRC ${C_HTTP_VENDOR_SRCDIR})
 #add_custom_command(
 #	# generate mytypet list code
 #	COMMAND bash ${C_HTTP_TOOLS_DIR}/gen_typed_list.sh generate MyType MT
-#	DEPENDS list/template.h list/template.c mytype/hand_coded.h mytype/hand_coded.c
+#	DEPENDS list/apps_template.h list/apps_template.c mytype/hand_coded.h mytype/hand_coded.c
 #	OUTPUT ${C_HTTP_SOURCE_DIR}/mytype_list.h ${C_HTTP_SOURCE_DIR}/mytype_list.c
 #	COMMENT "Generating mytype_list.h mytype_list.c"
 #	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
@@ -18,7 +18,7 @@ set(EXTSRC ${C_HTTP_VENDOR_SRCDIR})
 #add_custom_command(
 #	# generate kvpair list code
 #	COMMAND bash ${C_HTTP_TOOLS_DIR}/gen_typed_list.sh generate KVPair HDR
-#	DEPENDS list/template.h list/template.c headerline/hand_coded.h headerline/hand_coded.c
+#	DEPENDS list/apps_template.h list/apps_template.c headerline/hand_coded.h headerline/hand_coded.c
 #	OUTPUT ${C_HTTP_SOURCE_DIR}/hdrlist.h ${C_HTTP_SOURCE_DIR}/hdrlist.c
 #	COMMENT "Generating kvpair_list.h kvpair_list.c"
 #	WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"

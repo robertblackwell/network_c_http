@@ -1,3 +1,0 @@
-add_subdirectory(http_async_app)
-add_subdirectory(http_sync_app)
-add_subdirectory(http_verify_app)
