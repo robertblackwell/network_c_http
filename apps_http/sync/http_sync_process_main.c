@@ -73,7 +73,9 @@ void server_loop(int listen_socket)
         HttpSyncSocketRef connection_ref = http_syncsocket_new_from_fd(sock2);
         HttpMessageRef request_ptr = NULL;
         while(1) {
+//            printf("http_sync about to read message\n");
             int retcode = http_syncsocket_read_message(connection_ref, &request_ptr);
+//            printf("http_sync read message done\n");
             if((retcode < 0) || (request_ptr == NULL)) {
                 break;
             }
@@ -86,7 +88,9 @@ void server_loop(int listen_socket)
             http_message_free(request_ptr);
             request_ptr = NULL;
             assert(response_ptr != NULL);
+            printf("http_sync about to write response\n");
             http_syncsocket_write_message(connection_ref, response_ptr);
+            printf("http_sync write response done\n");
             http_message_free(response_ptr);
             response_ptr = NULL;
         }

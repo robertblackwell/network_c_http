@@ -1,0 +1,23 @@
+\hypertarget{group__runloopevents}{}\doxysection{Runloop Events}
+\label{group__runloopevents}\index{Runloop Events@{Runloop Events}}
+\doxysubsubsection*{Runloop Events}
+
+There are 5 types of events that can be waited for using a Runloop. They are\+:
+\begin{DoxyItemize}
+\item timer, wait for it to expire
+\item socket/pipe, ready for read, ready for write, experienced an error
+\item socket, when acting as a server is ready for an accept() call. That is has a client waiting.
+\item a linux eventfd, wait for the fd to be triggered
+\item interthread queue, waiting for a new entry to be added
+\end{DoxyItemize}
+
+Each type of event is associated with a specific type of opaque object, they are\+:
+
+
+\begin{DoxyItemize}
+\item Runloop\+Timer, Runloop\+Stream, Runloop\+Listener, Runloop\+Event\+Fd, Interthread\+Queue
+\end{DoxyItemize}
+
+In order to wait for one of these events for a specific file descriptor, code using a runloop must acquire an instance of one of these types, configure it correctly and present it to the runloop togeth with a callback function. The runloop will call the calback function when the event is triggered.
+
+There is some common data and behaviour shared between these 5 opaque types. That common data and behaviour is represented by the type Runloop\+Watcher. Each of the 5 opaque watcher types includes an instance of Runloop\+Watcher. In other languages we would say that Runloop\+Watcher is the base type and the other 5 inherit that base type. 

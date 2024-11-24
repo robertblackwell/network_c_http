@@ -1,0 +1,155 @@
+\hypertarget{socket__functions_8c}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/common/socket\+\_\+functions.c File Reference}
+\label{socket__functions_8c}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/common/socket\_functions.c@{/home/robert/Projects/http\_in\_c/http\_in\_c/common/socket\_functions.c}}
+{\ttfamily \#include \char`\"{}socket\+\_\+functions.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$errno.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$fcntl.\+h$>$}\newline
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include $<$netdb.\+h$>$}\newline
+{\ttfamily \#include $<$netinet/in.\+h$>$}\newline
+{\ttfamily \#include $<$arpa/inet.\+h$>$}\newline
+{\ttfamily \#include $<$netinet/tcp.\+h$>$}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} \mbox{\hyperlink{socket__functions_8c_a2c62d08d16bfbe6d9cf69f70f5a9f8d8}{create\+\_\+listener\+\_\+socket}} (int port, const char $\ast$host)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{socket__functions_8c_ac800108865b6d7fe1d227346013c6c8a}{socket\+\_\+throw\+\_\+error}} (\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} socket, int errorno, const char $\ast$message)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{socket__functions_8c_a8367a5cf5efd5c7cb85b6a96fc6d2f89}{socket\+\_\+report\+\_\+error}} (const char $\ast$format,...)
+\item 
+\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} \mbox{\hyperlink{socket__functions_8c_a2742aa44776a7b1ac932dadae6c87fc9}{socket\+\_\+create\+\_\+listener\+\_\+on\+\_\+port}} (int port)
+\item 
+\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} \mbox{\hyperlink{socket__functions_8c_ac2ddf1a88d9ce956b68886523b51820c}{socket\+\_\+connect\+\_\+host\+\_\+port}} (char $\ast$hostname, unsigned short port, int $\ast$status)
+\item 
+bool \mbox{\hyperlink{socket__functions_8c_a7e5ceca58163672c66e8c07d009cd16c}{socket\+\_\+is\+\_\+blocking}} (\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} socket)
+\item 
+\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} \mbox{\hyperlink{socket__functions_8c_ad24067101ca679a640413068a7baeebe}{socket\+\_\+set\+\_\+blocking}} (\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} socket)
+\item 
+\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} \mbox{\hyperlink{socket__functions_8c_a9e57b63c2d4ec0ade5266c0ac6d4875c}{socket\+\_\+set\+\_\+non\+\_\+blocking}} (\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} socket)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{socket__functions_8c_a9bc5ce914495971360e8cd4f4da8098f}{socket\+\_\+shutdown\+\_\+read}} (\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} socket)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{socket__functions_8c_a3aea19070705be8246f54f4bcd19ba0b}{socket\+\_\+shutdown\+\_\+write}} (\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} socket)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{socket__functions_8c_a5b1767af1fa1372f8ac37de09169189b}{socket\+\_\+set\+\_\+option}} (\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} socket)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{socket__functions_8c_a0f3e29eb2ef0688cb44b6c621b674822}{socket\+\_\+set\+\_\+reuse\+\_\+addr}} (\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} socket)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{socket__functions_8c_a9ba22b198abafb23058dc71d9b8c9656}{socket\+\_\+set\+\_\+recvtimeout}} (\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} socket, int time\+\_\+interval\+\_\+seconds)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{socket__functions_8c_a66979b8b85b9ede1f8fc372be2c70dfa}{socket\+\_\+wait\+\_\+for\+\_\+write\+\_\+flush}} (\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} socket)
+\item 
+bool \mbox{\hyperlink{socket__functions_8c_aaa49a707b4933a2d9852538acbf57d3b}{socket\+\_\+write\+\_\+data}} (\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} socket, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$buffer, int buffer\+\_\+length, int $\ast$status)
+\item 
+int \mbox{\hyperlink{socket__functions_8c_a2c2ad6b9bcbcb7b910c16f2b339a02cd}{socket\+\_\+read\+\_\+data}} (\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} socket, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$buffer, int buffer\+\_\+length, int $\ast$status)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{socket__functions_8c_ade871e10c2396f305acdcc6118387320}{socket\+\_\+close}} (\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} socket)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{socket__functions_8c_a2c62d08d16bfbe6d9cf69f70f5a9f8d8}\label{socket__functions_8c_a2c62d08d16bfbe6d9cf69f70f5a9f8d8}} 
+\index{socket\_functions.c@{socket\_functions.c}!create\_listener\_socket@{create\_listener\_socket}}
+\index{create\_listener\_socket@{create\_listener\_socket}!socket\_functions.c@{socket\_functions.c}}
+\doxysubsubsection{\texorpdfstring{create\_listener\_socket()}{create\_listener\_socket()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} create\+\_\+listener\+\_\+socket (\begin{DoxyParamCaption}\item[{int}]{port,  }\item[{const char $\ast$}]{host }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{socket__functions_8c_ade871e10c2396f305acdcc6118387320}\label{socket__functions_8c_ade871e10c2396f305acdcc6118387320}} 
+\index{socket\_functions.c@{socket\_functions.c}!socket\_close@{socket\_close}}
+\index{socket\_close@{socket\_close}!socket\_functions.c@{socket\_functions.c}}
+\doxysubsubsection{\texorpdfstring{socket\_close()}{socket\_close()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} socket\+\_\+close (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}}}]{socket }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{socket__functions_8c_ac2ddf1a88d9ce956b68886523b51820c}\label{socket__functions_8c_ac2ddf1a88d9ce956b68886523b51820c}} 
+\index{socket\_functions.c@{socket\_functions.c}!socket\_connect\_host\_port@{socket\_connect\_host\_port}}
+\index{socket\_connect\_host\_port@{socket\_connect\_host\_port}!socket\_functions.c@{socket\_functions.c}}
+\doxysubsubsection{\texorpdfstring{socket\_connect\_host\_port()}{socket\_connect\_host\_port()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} socket\+\_\+connect\+\_\+host\+\_\+port (\begin{DoxyParamCaption}\item[{char $\ast$}]{hostname,  }\item[{unsigned short}]{port,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{socket__functions_8c_a2742aa44776a7b1ac932dadae6c87fc9}\label{socket__functions_8c_a2742aa44776a7b1ac932dadae6c87fc9}} 
+\index{socket\_functions.c@{socket\_functions.c}!socket\_create\_listener\_on\_port@{socket\_create\_listener\_on\_port}}
+\index{socket\_create\_listener\_on\_port@{socket\_create\_listener\_on\_port}!socket\_functions.c@{socket\_functions.c}}
+\doxysubsubsection{\texorpdfstring{socket\_create\_listener\_on\_port()}{socket\_create\_listener\_on\_port()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} socket\+\_\+create\+\_\+listener\+\_\+on\+\_\+port (\begin{DoxyParamCaption}\item[{int}]{port }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{socket__functions_8c_a7e5ceca58163672c66e8c07d009cd16c}\label{socket__functions_8c_a7e5ceca58163672c66e8c07d009cd16c}} 
+\index{socket\_functions.c@{socket\_functions.c}!socket\_is\_blocking@{socket\_is\_blocking}}
+\index{socket\_is\_blocking@{socket\_is\_blocking}!socket\_functions.c@{socket\_functions.c}}
+\doxysubsubsection{\texorpdfstring{socket\_is\_blocking()}{socket\_is\_blocking()}}
+{\footnotesize\ttfamily bool socket\+\_\+is\+\_\+blocking (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}}}]{socket }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{socket__functions_8c_a2c2ad6b9bcbcb7b910c16f2b339a02cd}\label{socket__functions_8c_a2c2ad6b9bcbcb7b910c16f2b339a02cd}} 
+\index{socket\_functions.c@{socket\_functions.c}!socket\_read\_data@{socket\_read\_data}}
+\index{socket\_read\_data@{socket\_read\_data}!socket\_functions.c@{socket\_functions.c}}
+\doxysubsubsection{\texorpdfstring{socket\_read\_data()}{socket\_read\_data()}}
+{\footnotesize\ttfamily int socket\+\_\+read\+\_\+data (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}}}]{socket,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{buffer,  }\item[{int}]{buffer\+\_\+length,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{socket__functions_8c_a8367a5cf5efd5c7cb85b6a96fc6d2f89}\label{socket__functions_8c_a8367a5cf5efd5c7cb85b6a96fc6d2f89}} 
+\index{socket\_functions.c@{socket\_functions.c}!socket\_report\_error@{socket\_report\_error}}
+\index{socket\_report\_error@{socket\_report\_error}!socket\_functions.c@{socket\_functions.c}}
+\doxysubsubsection{\texorpdfstring{socket\_report\_error()}{socket\_report\_error()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} socket\+\_\+report\+\_\+error (\begin{DoxyParamCaption}\item[{const char $\ast$}]{format,  }\item[{}]{... }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{socket__functions_8c_ad24067101ca679a640413068a7baeebe}\label{socket__functions_8c_ad24067101ca679a640413068a7baeebe}} 
+\index{socket\_functions.c@{socket\_functions.c}!socket\_set\_blocking@{socket\_set\_blocking}}
+\index{socket\_set\_blocking@{socket\_set\_blocking}!socket\_functions.c@{socket\_functions.c}}
+\doxysubsubsection{\texorpdfstring{socket\_set\_blocking()}{socket\_set\_blocking()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} socket\+\_\+set\+\_\+blocking (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}}}]{socket }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{socket__functions_8c_a9e57b63c2d4ec0ade5266c0ac6d4875c}\label{socket__functions_8c_a9e57b63c2d4ec0ade5266c0ac6d4875c}} 
+\index{socket\_functions.c@{socket\_functions.c}!socket\_set\_non\_blocking@{socket\_set\_non\_blocking}}
+\index{socket\_set\_non\_blocking@{socket\_set\_non\_blocking}!socket\_functions.c@{socket\_functions.c}}
+\doxysubsubsection{\texorpdfstring{socket\_set\_non\_blocking()}{socket\_set\_non\_blocking()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} socket\+\_\+set\+\_\+non\+\_\+blocking (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}}}]{socket }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{socket__functions_8c_a5b1767af1fa1372f8ac37de09169189b}\label{socket__functions_8c_a5b1767af1fa1372f8ac37de09169189b}} 
+\index{socket\_functions.c@{socket\_functions.c}!socket\_set\_option@{socket\_set\_option}}
+\index{socket\_set\_option@{socket\_set\_option}!socket\_functions.c@{socket\_functions.c}}
+\doxysubsubsection{\texorpdfstring{socket\_set\_option()}{socket\_set\_option()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} socket\+\_\+set\+\_\+option (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}}}]{socket }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{socket__functions_8c_a9ba22b198abafb23058dc71d9b8c9656}\label{socket__functions_8c_a9ba22b198abafb23058dc71d9b8c9656}} 
+\index{socket\_functions.c@{socket\_functions.c}!socket\_set\_recvtimeout@{socket\_set\_recvtimeout}}
+\index{socket\_set\_recvtimeout@{socket\_set\_recvtimeout}!socket\_functions.c@{socket\_functions.c}}
+\doxysubsubsection{\texorpdfstring{socket\_set\_recvtimeout()}{socket\_set\_recvtimeout()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} socket\+\_\+set\+\_\+recvtimeout (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}}}]{socket,  }\item[{int}]{time\+\_\+interval\+\_\+seconds }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{socket__functions_8c_a0f3e29eb2ef0688cb44b6c621b674822}\label{socket__functions_8c_a0f3e29eb2ef0688cb44b6c621b674822}} 
+\index{socket\_functions.c@{socket\_functions.c}!socket\_set\_reuse\_addr@{socket\_set\_reuse\_addr}}
+\index{socket\_set\_reuse\_addr@{socket\_set\_reuse\_addr}!socket\_functions.c@{socket\_functions.c}}
+\doxysubsubsection{\texorpdfstring{socket\_set\_reuse\_addr()}{socket\_set\_reuse\_addr()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} socket\+\_\+set\+\_\+reuse\+\_\+addr (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}}}]{socket }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{socket__functions_8c_a9bc5ce914495971360e8cd4f4da8098f}\label{socket__functions_8c_a9bc5ce914495971360e8cd4f4da8098f}} 
+\index{socket\_functions.c@{socket\_functions.c}!socket\_shutdown\_read@{socket\_shutdown\_read}}
+\index{socket\_shutdown\_read@{socket\_shutdown\_read}!socket\_functions.c@{socket\_functions.c}}
+\doxysubsubsection{\texorpdfstring{socket\_shutdown\_read()}{socket\_shutdown\_read()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} socket\+\_\+shutdown\+\_\+read (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}}}]{socket }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{socket__functions_8c_a3aea19070705be8246f54f4bcd19ba0b}\label{socket__functions_8c_a3aea19070705be8246f54f4bcd19ba0b}} 
+\index{socket\_functions.c@{socket\_functions.c}!socket\_shutdown\_write@{socket\_shutdown\_write}}
+\index{socket\_shutdown\_write@{socket\_shutdown\_write}!socket\_functions.c@{socket\_functions.c}}
+\doxysubsubsection{\texorpdfstring{socket\_shutdown\_write()}{socket\_shutdown\_write()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} socket\+\_\+shutdown\+\_\+write (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}}}]{socket }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{socket__functions_8c_ac800108865b6d7fe1d227346013c6c8a}\label{socket__functions_8c_ac800108865b6d7fe1d227346013c6c8a}} 
+\index{socket\_functions.c@{socket\_functions.c}!socket\_throw\_error@{socket\_throw\_error}}
+\index{socket\_throw\_error@{socket\_throw\_error}!socket\_functions.c@{socket\_functions.c}}
+\doxysubsubsection{\texorpdfstring{socket\_throw\_error()}{socket\_throw\_error()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} socket\+\_\+throw\+\_\+error (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}}}]{socket,  }\item[{int}]{errorno,  }\item[{const char $\ast$}]{message }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{socket__functions_8c_a66979b8b85b9ede1f8fc372be2c70dfa}\label{socket__functions_8c_a66979b8b85b9ede1f8fc372be2c70dfa}} 
+\index{socket\_functions.c@{socket\_functions.c}!socket\_wait\_for\_write\_flush@{socket\_wait\_for\_write\_flush}}
+\index{socket\_wait\_for\_write\_flush@{socket\_wait\_for\_write\_flush}!socket\_functions.c@{socket\_functions.c}}
+\doxysubsubsection{\texorpdfstring{socket\_wait\_for\_write\_flush()}{socket\_wait\_for\_write\_flush()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} socket\+\_\+wait\+\_\+for\+\_\+write\+\_\+flush (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}}}]{socket }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{socket__functions_8c_aaa49a707b4933a2d9852538acbf57d3b}\label{socket__functions_8c_aaa49a707b4933a2d9852538acbf57d3b}} 
+\index{socket\_functions.c@{socket\_functions.c}!socket\_write\_data@{socket\_write\_data}}
+\index{socket\_write\_data@{socket\_write\_data}!socket\_functions.c@{socket\_functions.c}}
+\doxysubsubsection{\texorpdfstring{socket\_write\_data()}{socket\_write\_data()}}
+{\footnotesize\ttfamily bool socket\+\_\+write\+\_\+data (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}}}]{socket,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{buffer,  }\item[{int}]{buffer\+\_\+length,  }\item[{int $\ast$}]{status }\end{DoxyParamCaption})}
+

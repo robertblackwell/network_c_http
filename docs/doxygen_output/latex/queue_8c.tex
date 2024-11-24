@@ -1,0 +1,129 @@
+\hypertarget{queue_8c}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/common/queue.c File Reference}
+\label{queue_8c}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/common/queue.c@{/home/robert/Projects/http\_in\_c/http\_in\_c/common/queue.c}}
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/queue.\+h$>$}\newline
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+{\ttfamily \#include $<$pthread.\+h$>$}\newline
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/alloc.\+h$>$}\newline
+{\ttfamily \#include $<$rbl/logger.\+h$>$}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structQueue__s}{Queue\+\_\+s}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{queue_8c_aa97fd363ca5facd787b223fc7ad4919f}{ENABLE\+\_\+\+LOGX}}
+\item 
+\#define \mbox{\hyperlink{queue_8c_a330b6599d378088fec0fa5f11630c1a4}{QUEUE\+\_\+\+DEFAULT\+\_\+\+SIZE}}~10000
+\item 
+\#define \mbox{\hyperlink{queue_8c_a5bd0f6cd937f5d9c4a54fcb768d5a206}{QUEUE\+\_\+\+CIRCULAR}}
+\item 
+\#define \mbox{\hyperlink{queue_8c_a6316b68e619672173d0bc2eec049e140}{QUEUE\+\_\+\+DYN\+\_\+\+CAPACITY}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static uint32\+\_\+t \mbox{\hyperlink{queue_8c_a190f95127695d3e571d5e888f8b5d353}{q\+\_\+size}} (\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} q)
+\item 
+static bool \mbox{\hyperlink{queue_8c_ad1ec171737461a25a8d036fa4131107f}{is\+\_\+full}} (\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} q)
+\item 
+static bool \mbox{\hyperlink{queue_8c_ac055b401f21b3f9bf39e6e2a4ca31cbd}{is\+\_\+empty}} (\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} q)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{queue_8c_aecb6d300b17d29247ae88c62aa0ec8e9}{advance\+\_\+next\+\_\+pointer}} (\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} q)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{queue_8c_a654e8b6f144187f5ef55c32e7fc270de}{advance\+\_\+first\+\_\+pointer}} (\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} q)
+\item 
+static bool \mbox{\hyperlink{queue_8c_ab65ee2ec502c9549fd606ef16f6f821e}{q\+\_\+full}} (\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} qref)
+\item 
+\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} \mbox{\hyperlink{group__group__queue_ga1ce55f04def88d50ff5249dd09a96ff6}{Queue\+\_\+new\+\_\+with\+\_\+capacity}} (size\+\_\+t capacity)
+\begin{DoxyCompactList}\small\item\em Create a new queue with a given capacity. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} \mbox{\hyperlink{group__group__queue_ga19e604e22d0943966ccebd57c5d6a3fb}{Queue\+\_\+new}} ()
+\begin{DoxyCompactList}\small\item\em Create a new queue with a default size. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{queue_8c_a4c47e6588ff56b145e7093ee25bb4210}{Queue\+\_\+xxdispose}} (\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} $\ast$qref\+\_\+ptr)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__queue_gad0efb2faf4bb4cf2b7103f57aed8f05e}{Queue\+\_\+free}} (\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} qref)
+\begin{DoxyCompactList}\small\item\em Free a Queue and its resources. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group__group__queue_gabac0ddde30043d8d6ccda5cad7cdd36b}{Socket\+FD}} \mbox{\hyperlink{group__group__queue_ga38d7f3fac6521a669ee5a91052cc7d09}{Queue\+\_\+remove}} (\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} qref)
+\begin{DoxyCompactList}\small\item\em Get the top entry from the Queue. Wait if Queue is empty. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__queue_ga091ba7d17a46539f39b414e8973a9782}{Queue\+\_\+add}} (\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} qref, \mbox{\hyperlink{group__group__queue_gabac0ddde30043d8d6ccda5cad7cdd36b}{Socket\+FD}} sock)
+\begin{DoxyCompactList}\small\item\em add an entry to the queue. Wait if Queue is full until there is space. \end{DoxyCompactList}\item 
+size\+\_\+t \mbox{\hyperlink{group__group__queue_ga1593afcd2107d2010e4e5805fc806d09}{Queue\+\_\+size}} (\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} this)
+\begin{DoxyCompactList}\small\item\em Return the current size (number of entries) of the queue. \end{DoxyCompactList}\item 
+size\+\_\+t \mbox{\hyperlink{group__group__queue_ga276ab8ed4a3c6f4265dc65739a9bfba1}{Queue\+\_\+capacity}} (\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} this)
+\begin{DoxyCompactList}\small\item\em Return the max capacity of the queue. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{queue_8c_aa97fd363ca5facd787b223fc7ad4919f}\label{queue_8c_aa97fd363ca5facd787b223fc7ad4919f}} 
+\index{queue.c@{queue.c}!ENABLE\_LOGX@{ENABLE\_LOGX}}
+\index{ENABLE\_LOGX@{ENABLE\_LOGX}!queue.c@{queue.c}}
+\doxysubsubsection{\texorpdfstring{ENABLE\_LOGX}{ENABLE\_LOGX}}
+{\footnotesize\ttfamily \#define ENABLE\+\_\+\+LOGX}
+
+\mbox{\Hypertarget{queue_8c_a5bd0f6cd937f5d9c4a54fcb768d5a206}\label{queue_8c_a5bd0f6cd937f5d9c4a54fcb768d5a206}} 
+\index{queue.c@{queue.c}!QUEUE\_CIRCULAR@{QUEUE\_CIRCULAR}}
+\index{QUEUE\_CIRCULAR@{QUEUE\_CIRCULAR}!queue.c@{queue.c}}
+\doxysubsubsection{\texorpdfstring{QUEUE\_CIRCULAR}{QUEUE\_CIRCULAR}}
+{\footnotesize\ttfamily \#define QUEUE\+\_\+\+CIRCULAR}
+
+\mbox{\Hypertarget{queue_8c_a330b6599d378088fec0fa5f11630c1a4}\label{queue_8c_a330b6599d378088fec0fa5f11630c1a4}} 
+\index{queue.c@{queue.c}!QUEUE\_DEFAULT\_SIZE@{QUEUE\_DEFAULT\_SIZE}}
+\index{QUEUE\_DEFAULT\_SIZE@{QUEUE\_DEFAULT\_SIZE}!queue.c@{queue.c}}
+\doxysubsubsection{\texorpdfstring{QUEUE\_DEFAULT\_SIZE}{QUEUE\_DEFAULT\_SIZE}}
+{\footnotesize\ttfamily \#define QUEUE\+\_\+\+DEFAULT\+\_\+\+SIZE~10000}
+
+\mbox{\Hypertarget{queue_8c_a6316b68e619672173d0bc2eec049e140}\label{queue_8c_a6316b68e619672173d0bc2eec049e140}} 
+\index{queue.c@{queue.c}!QUEUE\_DYN\_CAPACITY@{QUEUE\_DYN\_CAPACITY}}
+\index{QUEUE\_DYN\_CAPACITY@{QUEUE\_DYN\_CAPACITY}!queue.c@{queue.c}}
+\doxysubsubsection{\texorpdfstring{QUEUE\_DYN\_CAPACITY}{QUEUE\_DYN\_CAPACITY}}
+{\footnotesize\ttfamily \#define QUEUE\+\_\+\+DYN\+\_\+\+CAPACITY}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{queue_8c_a654e8b6f144187f5ef55c32e7fc270de}\label{queue_8c_a654e8b6f144187f5ef55c32e7fc270de}} 
+\index{queue.c@{queue.c}!advance\_first\_pointer@{advance\_first\_pointer}}
+\index{advance\_first\_pointer@{advance\_first\_pointer}!queue.c@{queue.c}}
+\doxysubsubsection{\texorpdfstring{advance\_first\_pointer()}{advance\_first\_pointer()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} advance\+\_\+first\+\_\+pointer (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}}}]{q }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{queue_8c_aecb6d300b17d29247ae88c62aa0ec8e9}\label{queue_8c_aecb6d300b17d29247ae88c62aa0ec8e9}} 
+\index{queue.c@{queue.c}!advance\_next\_pointer@{advance\_next\_pointer}}
+\index{advance\_next\_pointer@{advance\_next\_pointer}!queue.c@{queue.c}}
+\doxysubsubsection{\texorpdfstring{advance\_next\_pointer()}{advance\_next\_pointer()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} advance\+\_\+next\+\_\+pointer (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}}}]{q }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{queue_8c_ac055b401f21b3f9bf39e6e2a4ca31cbd}\label{queue_8c_ac055b401f21b3f9bf39e6e2a4ca31cbd}} 
+\index{queue.c@{queue.c}!is\_empty@{is\_empty}}
+\index{is\_empty@{is\_empty}!queue.c@{queue.c}}
+\doxysubsubsection{\texorpdfstring{is\_empty()}{is\_empty()}}
+{\footnotesize\ttfamily static bool is\+\_\+empty (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}}}]{q }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{queue_8c_ad1ec171737461a25a8d036fa4131107f}\label{queue_8c_ad1ec171737461a25a8d036fa4131107f}} 
+\index{queue.c@{queue.c}!is\_full@{is\_full}}
+\index{is\_full@{is\_full}!queue.c@{queue.c}}
+\doxysubsubsection{\texorpdfstring{is\_full()}{is\_full()}}
+{\footnotesize\ttfamily static bool is\+\_\+full (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}}}]{q }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{queue_8c_ab65ee2ec502c9549fd606ef16f6f821e}\label{queue_8c_ab65ee2ec502c9549fd606ef16f6f821e}} 
+\index{queue.c@{queue.c}!q\_full@{q\_full}}
+\index{q\_full@{q\_full}!queue.c@{queue.c}}
+\doxysubsubsection{\texorpdfstring{q\_full()}{q\_full()}}
+{\footnotesize\ttfamily static bool q\+\_\+full (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}}}]{qref }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{queue_8c_a190f95127695d3e571d5e888f8b5d353}\label{queue_8c_a190f95127695d3e571d5e888f8b5d353}} 
+\index{queue.c@{queue.c}!q\_size@{q\_size}}
+\index{q\_size@{q\_size}!queue.c@{queue.c}}
+\doxysubsubsection{\texorpdfstring{q\_size()}{q\_size()}}
+{\footnotesize\ttfamily static uint32\+\_\+t q\+\_\+size (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}}}]{q }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{queue_8c_a4c47e6588ff56b145e7093ee25bb4210}\label{queue_8c_a4c47e6588ff56b145e7093ee25bb4210}} 
+\index{queue.c@{queue.c}!Queue\_xxdispose@{Queue\_xxdispose}}
+\index{Queue\_xxdispose@{Queue\_xxdispose}!queue.c@{queue.c}}
+\doxysubsubsection{\texorpdfstring{Queue\_xxdispose()}{Queue\_xxdispose()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} Queue\+\_\+xxdispose (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} $\ast$}]{qref\+\_\+ptr }\end{DoxyParamCaption})}
+

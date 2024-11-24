@@ -1,0 +1,30 @@
+\hypertarget{queue_8h}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/common/queue.h File Reference}
+\label{queue_8h}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/common/queue.h@{/home/robert/Projects/http\_in\_c/http\_in\_c/common/queue.h}}
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include $<$stddef.\+h$>$}\newline
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef int32\+\_\+t \mbox{\hyperlink{group__group__queue_gabac0ddde30043d8d6ccda5cad7cdd36b}{Socket\+FD}}
+\item 
+typedef struct \mbox{\hyperlink{structQueue__s}{Queue\+\_\+s}} \mbox{\hyperlink{group__group__queue_ga8b410797541d61a9e60b98a6dfe01758}{Queue}}
+\item 
+typedef struct \mbox{\hyperlink{structQueue__s}{Queue\+\_\+s}} $\ast$ \mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} \mbox{\hyperlink{group__group__queue_ga1ce55f04def88d50ff5249dd09a96ff6}{Queue\+\_\+new\+\_\+with\+\_\+capacity}} (size\+\_\+t capacity)
+\begin{DoxyCompactList}\small\item\em Create a new queue with a given capacity. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} \mbox{\hyperlink{group__group__queue_ga19e604e22d0943966ccebd57c5d6a3fb}{Queue\+\_\+new}} ()
+\begin{DoxyCompactList}\small\item\em Create a new queue with a default size. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__queue_gad0efb2faf4bb4cf2b7103f57aed8f05e}{Queue\+\_\+free}} (\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} this)
+\begin{DoxyCompactList}\small\item\em Free a Queue and its resources. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group__group__queue_gabac0ddde30043d8d6ccda5cad7cdd36b}{Socket\+FD}} \mbox{\hyperlink{group__group__queue_ga38d7f3fac6521a669ee5a91052cc7d09}{Queue\+\_\+remove}} (\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} q)
+\begin{DoxyCompactList}\small\item\em Get the top entry from the Queue. Wait if Queue is empty. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__queue_ga091ba7d17a46539f39b414e8973a9782}{Queue\+\_\+add}} (\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} q, \mbox{\hyperlink{group__group__queue_gabac0ddde30043d8d6ccda5cad7cdd36b}{Socket\+FD}} socket)
+\begin{DoxyCompactList}\small\item\em add an entry to the queue. Wait if Queue is full until there is space. \end{DoxyCompactList}\item 
+size\+\_\+t \mbox{\hyperlink{group__group__queue_ga1593afcd2107d2010e4e5805fc806d09}{Queue\+\_\+size}} (\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} this)
+\begin{DoxyCompactList}\small\item\em Return the current size (number of entries) of the queue. \end{DoxyCompactList}\item 
+size\+\_\+t \mbox{\hyperlink{group__group__queue_ga276ab8ed4a3c6f4265dc65739a9bfba1}{Queue\+\_\+capacity}} (\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} this)
+\begin{DoxyCompactList}\small\item\em Return the max capacity of the queue. \end{DoxyCompactList}\end{DoxyCompactItemize}

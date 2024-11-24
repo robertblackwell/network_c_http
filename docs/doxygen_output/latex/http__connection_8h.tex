@@ -1,0 +1,157 @@
+\hypertarget{http__connection_8h}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/http\+\_\+protocol/http\+\_\+connection.h File Reference}
+\label{http__connection_8h}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/http\_protocol/http\_connection.h@{/home/robert/Projects/http\_in\_c/http\_in\_c/http\_protocol/http\_connection.h}}
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/runloop.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/list.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/iobuffer.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/http\+\_\+protocol/http\+\_\+message\+\_\+parser.\+h$>$}\newline
+{\ttfamily \#include $<$rbl/check\+\_\+tag.\+h$>$}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structHttpConnection__s}{Http\+Connection\+\_\+s}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{http__connection_8h_a98fd50ed135bc086e61b9f16843b37d0}{Http\+Connection\+\_\+\+TAG}}~\char`\"{}Dm\+CONN\char`\"{}
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \mbox{\hyperlink{structHttpConnection__s}{Http\+Connection\+\_\+s}} \mbox{\hyperlink{http__connection_8h_a5fb392642ebd5dcb642677ab16ee833c}{Http\+Connection}}
+\item 
+typedef struct \mbox{\hyperlink{structHttpConnection__s}{Http\+Connection\+\_\+s}} $\ast$ \mbox{\hyperlink{http__connection_8h_a855ee520beed6d6a33db910af4a8fa51}{Http\+Connection\+Ref}}
+\item 
+typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{http__connection_8h_a58f80e49a2aa6ad65fb2028db9bc3368}{DC\+\_\+\+Read\+\_\+\+CB}}) (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href, \mbox{\hyperlink{group__group__message_ga33b8e4c347991edbbe1d3d7d6f77c9a1}{Http\+Message\+Ref}}, int status)
+\item 
+typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{http__connection_8h_afa43fecee7ce289c175bf8dcdf5af9fe}{DC\+\_\+\+Write\+\_\+\+CB}}) (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href, int status)
+\item 
+typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{http__connection_8h_a34d0c09201f286361329f6bb3f9d30e7}{DC\+\_\+\+Close\+\_\+\+CB}}) (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href)
+\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{http__connection_8h_a68d545afa30a24f7cadcb1b2f3c71a40}{Http\+Connection\+Err\+Code}} \{ \mbox{\hyperlink{http__connection_8h_a68d545afa30a24f7cadcb1b2f3c71a40a53a4d287686ab664cd213f28be915e39}{Http\+Connection\+Err\+Code\+\_\+is\+\_\+closed}} = -\/31
+, \mbox{\hyperlink{http__connection_8h_a68d545afa30a24f7cadcb1b2f3c71a40a4730174716f9be1382fddd3aa8ccd2bd}{Http\+Connection\+Err\+Code\+\_\+io\+\_\+error}} = -\/32
+, \mbox{\hyperlink{http__connection_8h_a68d545afa30a24f7cadcb1b2f3c71a40a42c9917040c18638fb376cb78a558860}{Http\+Connection\+Err\+Code\+\_\+parse\+\_\+error}} = -\/33
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{http__connection_8h_a855ee520beed6d6a33db910af4a8fa51}{Http\+Connection\+Ref}} \mbox{\hyperlink{http__connection_8h_ad940ce9cd7166ae0847fe49f8b815e42}{http\+\_\+connection\+\_\+new}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref, int socket, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$\mbox{\hyperlink{http__handler_8c_a778ff9e1dac8a1517822c85688b27927}{connection\+\_\+completion\+\_\+cb}})(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href), \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$handler\+\_\+ref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{http__connection_8h_aba6c4e08af6d27d952d99b10d63099a7}{http\+\_\+connection\+\_\+init}} (\mbox{\hyperlink{http__connection_8h_a855ee520beed6d6a33db910af4a8fa51}{Http\+Connection\+Ref}} this, \mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref, int socket, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$\mbox{\hyperlink{http__handler_8c_a778ff9e1dac8a1517822c85688b27927}{connection\+\_\+completion\+\_\+cb}})(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href), \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$handler\+\_\+ref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{http__connection_8h_a42f5d53701947a1b6922856fcba7a8bb}{http\+\_\+connection\+\_\+free}} (\mbox{\hyperlink{http__connection_8h_a855ee520beed6d6a33db910af4a8fa51}{Http\+Connection\+Ref}} this)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{http__connection_8h_a28ce9c547177acfd0f268f70b7fb1cda}{http\+\_\+connection\+\_\+read}} (\mbox{\hyperlink{http__connection_8h_a855ee520beed6d6a33db910af4a8fa51}{Http\+Connection\+Ref}} connection\+\_\+ref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$on\+\_\+http\+\_\+read\+\_\+cb)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href, \mbox{\hyperlink{group__group__message_ga33b8e4c347991edbbe1d3d7d6f77c9a1}{Http\+Message\+Ref}}, int status), \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{http__connection_8h_a85a0f240ecdaa2f1afb77a741e636896}{http\+\_\+connection\+\_\+write}} (\mbox{\hyperlink{http__connection_8h_a855ee520beed6d6a33db910af4a8fa51}{Http\+Connection\+Ref}} connection\+\_\+ref, \mbox{\hyperlink{group__group__message_ga33b8e4c347991edbbe1d3d7d6f77c9a1}{Http\+Message\+Ref}}, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$on\+\_\+http\+\_\+write\+\_\+cb)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href, int status), \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{http__connection_8h_a5bb6d2d6a068a48cb674e635fdb37da1}{http\+\_\+connection\+\_\+close}} (\mbox{\hyperlink{http__connection_8h_a855ee520beed6d6a33db910af4a8fa51}{Http\+Connection\+Ref}} cref)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{http__connection_8h_a98fd50ed135bc086e61b9f16843b37d0}\label{http__connection_8h_a98fd50ed135bc086e61b9f16843b37d0}} 
+\index{http\_connection.h@{http\_connection.h}!HttpConnection\_TAG@{HttpConnection\_TAG}}
+\index{HttpConnection\_TAG@{HttpConnection\_TAG}!http\_connection.h@{http\_connection.h}}
+\doxysubsubsection{\texorpdfstring{HttpConnection\_TAG}{HttpConnection\_TAG}}
+{\footnotesize\ttfamily \#define Http\+Connection\+\_\+\+TAG~\char`\"{}Dm\+CONN\char`\"{}}
+
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{http__connection_8h_a34d0c09201f286361329f6bb3f9d30e7}\label{http__connection_8h_a34d0c09201f286361329f6bb3f9d30e7}} 
+\index{http\_connection.h@{http\_connection.h}!DC\_Close\_CB@{DC\_Close\_CB}}
+\index{DC\_Close\_CB@{DC\_Close\_CB}!http\_connection.h@{http\_connection.h}}
+\doxysubsubsection{\texorpdfstring{DC\_Close\_CB}{DC\_Close\_CB}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ DC\+\_\+\+Close\+\_\+\+CB) (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href)}
+
+DC\+\_\+\+Close\+\_\+\+CB is called by the connection when it is closing down \mbox{\Hypertarget{http__connection_8h_a58f80e49a2aa6ad65fb2028db9bc3368}\label{http__connection_8h_a58f80e49a2aa6ad65fb2028db9bc3368}} 
+\index{http\_connection.h@{http\_connection.h}!DC\_Read\_CB@{DC\_Read\_CB}}
+\index{DC\_Read\_CB@{DC\_Read\_CB}!http\_connection.h@{http\_connection.h}}
+\doxysubsubsection{\texorpdfstring{DC\_Read\_CB}{DC\_Read\_CB}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ DC\+\_\+\+Read\+\_\+\+CB) (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href, \mbox{\hyperlink{group__group__message_ga33b8e4c347991edbbe1d3d7d6f77c9a1}{Http\+Message\+Ref}}, int status)}
+
+In the following void$\ast$ href is aan anonymous reference passed to the connection at init time by the parent/sibling object that created the Http\+Connection object \mbox{\Hypertarget{http__connection_8h_afa43fecee7ce289c175bf8dcdf5af9fe}\label{http__connection_8h_afa43fecee7ce289c175bf8dcdf5af9fe}} 
+\index{http\_connection.h@{http\_connection.h}!DC\_Write\_CB@{DC\_Write\_CB}}
+\index{DC\_Write\_CB@{DC\_Write\_CB}!http\_connection.h@{http\_connection.h}}
+\doxysubsubsection{\texorpdfstring{DC\_Write\_CB}{DC\_Write\_CB}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ DC\+\_\+\+Write\+\_\+\+CB) (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href, int status)}
+
+\mbox{\Hypertarget{http__connection_8h_a5fb392642ebd5dcb642677ab16ee833c}\label{http__connection_8h_a5fb392642ebd5dcb642677ab16ee833c}} 
+\index{http\_connection.h@{http\_connection.h}!HttpConnection@{HttpConnection}}
+\index{HttpConnection@{HttpConnection}!http\_connection.h@{http\_connection.h}}
+\doxysubsubsection{\texorpdfstring{HttpConnection}{HttpConnection}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structHttpConnection__s}{Http\+Connection\+\_\+s}} \mbox{\hyperlink{http__connection_8h_a5fb392642ebd5dcb642677ab16ee833c}{Http\+Connection}}}
+
+\mbox{\Hypertarget{http__connection_8h_a855ee520beed6d6a33db910af4a8fa51}\label{http__connection_8h_a855ee520beed6d6a33db910af4a8fa51}} 
+\index{http\_connection.h@{http\_connection.h}!HttpConnectionRef@{HttpConnectionRef}}
+\index{HttpConnectionRef@{HttpConnectionRef}!http\_connection.h@{http\_connection.h}}
+\doxysubsubsection{\texorpdfstring{HttpConnectionRef}{HttpConnectionRef}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structHttpConnection__s}{Http\+Connection\+\_\+s}} $\ast$ \mbox{\hyperlink{http__connection_8h_a855ee520beed6d6a33db910af4a8fa51}{Http\+Connection\+Ref}}}
+
+
+
+\doxysubsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{http__connection_8h_a68d545afa30a24f7cadcb1b2f3c71a40}\label{http__connection_8h_a68d545afa30a24f7cadcb1b2f3c71a40}} 
+\index{http\_connection.h@{http\_connection.h}!HttpConnectionErrCode@{HttpConnectionErrCode}}
+\index{HttpConnectionErrCode@{HttpConnectionErrCode}!http\_connection.h@{http\_connection.h}}
+\doxysubsubsection{\texorpdfstring{HttpConnectionErrCode}{HttpConnectionErrCode}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{http__connection_8h_a68d545afa30a24f7cadcb1b2f3c71a40}{Http\+Connection\+Err\+Code}}}
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{HttpConnectionErrCode\_is\_closed@{HttpConnectionErrCode\_is\_closed}!http\_connection.h@{http\_connection.h}}\index{http\_connection.h@{http\_connection.h}!HttpConnectionErrCode\_is\_closed@{HttpConnectionErrCode\_is\_closed}}}\mbox{\Hypertarget{http__connection_8h_a68d545afa30a24f7cadcb1b2f3c71a40a53a4d287686ab664cd213f28be915e39}\label{http__connection_8h_a68d545afa30a24f7cadcb1b2f3c71a40a53a4d287686ab664cd213f28be915e39}} 
+Http\+Connection\+Err\+Code\+\_\+is\+\_\+closed&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{HttpConnectionErrCode\_io\_error@{HttpConnectionErrCode\_io\_error}!http\_connection.h@{http\_connection.h}}\index{http\_connection.h@{http\_connection.h}!HttpConnectionErrCode\_io\_error@{HttpConnectionErrCode\_io\_error}}}\mbox{\Hypertarget{http__connection_8h_a68d545afa30a24f7cadcb1b2f3c71a40a4730174716f9be1382fddd3aa8ccd2bd}\label{http__connection_8h_a68d545afa30a24f7cadcb1b2f3c71a40a4730174716f9be1382fddd3aa8ccd2bd}} 
+Http\+Connection\+Err\+Code\+\_\+io\+\_\+error&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{HttpConnectionErrCode\_parse\_error@{HttpConnectionErrCode\_parse\_error}!http\_connection.h@{http\_connection.h}}\index{http\_connection.h@{http\_connection.h}!HttpConnectionErrCode\_parse\_error@{HttpConnectionErrCode\_parse\_error}}}\mbox{\Hypertarget{http__connection_8h_a68d545afa30a24f7cadcb1b2f3c71a40a42c9917040c18638fb376cb78a558860}\label{http__connection_8h_a68d545afa30a24f7cadcb1b2f3c71a40a42c9917040c18638fb376cb78a558860}} 
+Http\+Connection\+Err\+Code\+\_\+parse\+\_\+error&\\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{http__connection_8h_a5bb6d2d6a068a48cb674e635fdb37da1}\label{http__connection_8h_a5bb6d2d6a068a48cb674e635fdb37da1}} 
+\index{http\_connection.h@{http\_connection.h}!http\_connection\_close@{http\_connection\_close}}
+\index{http\_connection\_close@{http\_connection\_close}!http\_connection.h@{http\_connection.h}}
+\doxysubsubsection{\texorpdfstring{http\_connection\_close()}{http\_connection\_close()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} http\+\_\+connection\+\_\+close (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__connection_8h_a855ee520beed6d6a33db910af4a8fa51}{Http\+Connection\+Ref}}}]{cref }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__connection_8h_a42f5d53701947a1b6922856fcba7a8bb}\label{http__connection_8h_a42f5d53701947a1b6922856fcba7a8bb}} 
+\index{http\_connection.h@{http\_connection.h}!http\_connection\_free@{http\_connection\_free}}
+\index{http\_connection\_free@{http\_connection\_free}!http\_connection.h@{http\_connection.h}}
+\doxysubsubsection{\texorpdfstring{http\_connection\_free()}{http\_connection\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} http\+\_\+connection\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__connection_8h_a855ee520beed6d6a33db910af4a8fa51}{Http\+Connection\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__connection_8h_aba6c4e08af6d27d952d99b10d63099a7}\label{http__connection_8h_aba6c4e08af6d27d952d99b10d63099a7}} 
+\index{http\_connection.h@{http\_connection.h}!http\_connection\_init@{http\_connection\_init}}
+\index{http\_connection\_init@{http\_connection\_init}!http\_connection.h@{http\_connection.h}}
+\doxysubsubsection{\texorpdfstring{http\_connection\_init()}{http\_connection\_init()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} http\+\_\+connection\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__connection_8h_a855ee520beed6d6a33db910af4a8fa51}{Http\+Connection\+Ref}}}]{this,  }\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop\+\_\+ref,  }\item[{int}]{socket,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href)}]{connection\+\_\+completion\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{handler\+\_\+ref }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__connection_8h_ad940ce9cd7166ae0847fe49f8b815e42}\label{http__connection_8h_ad940ce9cd7166ae0847fe49f8b815e42}} 
+\index{http\_connection.h@{http\_connection.h}!http\_connection\_new@{http\_connection\_new}}
+\index{http\_connection\_new@{http\_connection\_new}!http\_connection.h@{http\_connection.h}}
+\doxysubsubsection{\texorpdfstring{http\_connection\_new()}{http\_connection\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{http__connection_8h_a855ee520beed6d6a33db910af4a8fa51}{Http\+Connection\+Ref}} http\+\_\+connection\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop\+\_\+ref,  }\item[{int}]{socket,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href)}]{connection\+\_\+completion\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{handler\+\_\+ref }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__connection_8h_a28ce9c547177acfd0f268f70b7fb1cda}\label{http__connection_8h_a28ce9c547177acfd0f268f70b7fb1cda}} 
+\index{http\_connection.h@{http\_connection.h}!http\_connection\_read@{http\_connection\_read}}
+\index{http\_connection\_read@{http\_connection\_read}!http\_connection.h@{http\_connection.h}}
+\doxysubsubsection{\texorpdfstring{http\_connection\_read()}{http\_connection\_read()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} http\+\_\+connection\+\_\+read (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__connection_8h_a855ee520beed6d6a33db910af4a8fa51}{Http\+Connection\+Ref}}}]{connection\+\_\+ref,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href, \mbox{\hyperlink{group__group__message_ga33b8e4c347991edbbe1d3d7d6f77c9a1}{Http\+Message\+Ref}}, int status)}]{on\+\_\+http\+\_\+read\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{href }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__connection_8h_a85a0f240ecdaa2f1afb77a741e636896}\label{http__connection_8h_a85a0f240ecdaa2f1afb77a741e636896}} 
+\index{http\_connection.h@{http\_connection.h}!http\_connection\_write@{http\_connection\_write}}
+\index{http\_connection\_write@{http\_connection\_write}!http\_connection.h@{http\_connection.h}}
+\doxysubsubsection{\texorpdfstring{http\_connection\_write()}{http\_connection\_write()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} http\+\_\+connection\+\_\+write (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__connection_8h_a855ee520beed6d6a33db910af4a8fa51}{Http\+Connection\+Ref}}}]{connection\+\_\+ref,  }\item[{\mbox{\hyperlink{group__group__message_ga33b8e4c347991edbbe1d3d7d6f77c9a1}{Http\+Message\+Ref}}}]{response\+\_\+ref,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href, int status)}]{on\+\_\+http\+\_\+write\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{href }\end{DoxyParamCaption})}
+

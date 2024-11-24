@@ -1,0 +1,85 @@
+\hypertarget{demo__handler_8c}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/demo\+\_\+protocol/demo\+\_\+handler.c File Reference}
+\label{demo__handler_8c}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/demo\_protocol/demo\_handler.c@{/home/robert/Projects/http\_in\_c/http\_in\_c/demo\_protocol/demo\_handler.c}}
+{\ttfamily \#include $<$rbl/macros.\+h$>$}\newline
+{\ttfamily \#include $<$rbl/check\+\_\+tag.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/runloop.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/rl\+\_\+internal.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/demo\+\_\+protocol/demo\+\_\+handler.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$sys/types.\+h$>$}\newline
+{\ttfamily \#include $<$sys/socket.\+h$>$}\newline
+{\ttfamily \#include $<$sys/epoll.\+h$>$}\newline
+{\ttfamily \#include $<$errno.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/demo\+\_\+protocol/demo\+\_\+message.\+h$>$}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__handler_8c_a1d056fd6f32168961726c3dbd62e72db}{on\+\_\+new\+\_\+message\+\_\+handler}} (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href, \mbox{\hyperlink{demo__message_8h_aec10d21ff11457bc72579a0e845ae27d}{Demo\+Message\+Ref}} msgref, int error\+\_\+code)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__handler_8c_ab40f3a9942fc576d8b9a61f5d4b25887}{postable\+\_\+write\+\_\+start}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} reactor\+\_\+ref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__handler_8c_a809bf1387a068be935dc7a38b3e137ab}{on\+\_\+write\+\_\+complete\+\_\+cb}} (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href, int status)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__handler_8c_a6b6fd0969ba21f0617b21820d8bc0608}{handler\+\_\+postable\+\_\+read\+\_\+start}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} reactor\+\_\+ref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__handler_8c_a778ff9e1dac8a1517822c85688b27927}{connection\+\_\+completion\+\_\+cb}} (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href)
+\item 
+\mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}} \mbox{\hyperlink{demo__handler_8c_a3f04ea1e7cba1f9fa980c2e104d4c6d8}{demo\+\_\+handler\+\_\+new}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref, int socket, \mbox{\hyperlink{demo__server_8h_a87a7bd74bbb269cebd3f7de92853dc0d}{Demo\+Process\+Request\+Function}} request\+\_\+handler, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$completion\+\_\+cb)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$, \mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}}), \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$server\+\_\+ref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__handler_8c_aa6c2e9fe45049fb114dfb03514d16eba}{demo\+\_\+handler\+\_\+init}} (\mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}} this, \mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref, int socket, \mbox{\hyperlink{demo__server_8h_a87a7bd74bbb269cebd3f7de92853dc0d}{Demo\+Process\+Request\+Function}} request\+\_\+handler, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$completion\+\_\+cb)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$, \mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}}), \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$server\+\_\+ref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__handler_8c_a747e0e859cf0b2eb9848dbee2940cc12}{demo\+\_\+handler\+\_\+free}} (\mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}} this)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{demo__handler_8c_a778ff9e1dac8a1517822c85688b27927}\label{demo__handler_8c_a778ff9e1dac8a1517822c85688b27927}} 
+\index{demo\_handler.c@{demo\_handler.c}!connection\_completion\_cb@{connection\_completion\_cb}}
+\index{connection\_completion\_cb@{connection\_completion\_cb}!demo\_handler.c@{demo\_handler.c}}
+\doxysubsubsection{\texorpdfstring{connection\_completion\_cb()}{connection\_completion\_cb()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} connection\+\_\+completion\+\_\+cb (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{href }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{demo__handler_8c_a747e0e859cf0b2eb9848dbee2940cc12}\label{demo__handler_8c_a747e0e859cf0b2eb9848dbee2940cc12}} 
+\index{demo\_handler.c@{demo\_handler.c}!demo\_handler\_free@{demo\_handler\_free}}
+\index{demo\_handler\_free@{demo\_handler\_free}!demo\_handler.c@{demo\_handler.c}}
+\doxysubsubsection{\texorpdfstring{demo\_handler\_free()}{demo\_handler\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} demo\+\_\+handler\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__handler_8c_aa6c2e9fe45049fb114dfb03514d16eba}\label{demo__handler_8c_aa6c2e9fe45049fb114dfb03514d16eba}} 
+\index{demo\_handler.c@{demo\_handler.c}!demo\_handler\_init@{demo\_handler\_init}}
+\index{demo\_handler\_init@{demo\_handler\_init}!demo\_handler.c@{demo\_handler.c}}
+\doxysubsubsection{\texorpdfstring{demo\_handler\_init()}{demo\_handler\_init()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} demo\+\_\+handler\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}}}]{this,  }\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop\+\_\+ref,  }\item[{int}]{socket,  }\item[{\mbox{\hyperlink{demo__server_8h_a87a7bd74bbb269cebd3f7de92853dc0d}{Demo\+Process\+Request\+Function}}}]{request\+\_\+handler,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$, \mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}})}]{completion\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{server\+\_\+ref }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__handler_8c_a3f04ea1e7cba1f9fa980c2e104d4c6d8}\label{demo__handler_8c_a3f04ea1e7cba1f9fa980c2e104d4c6d8}} 
+\index{demo\_handler.c@{demo\_handler.c}!demo\_handler\_new@{demo\_handler\_new}}
+\index{demo\_handler\_new@{demo\_handler\_new}!demo\_handler.c@{demo\_handler.c}}
+\doxysubsubsection{\texorpdfstring{demo\_handler\_new()}{demo\_handler\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}} demo\+\_\+handler\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop\+\_\+ref,  }\item[{int}]{socket,  }\item[{\mbox{\hyperlink{demo__server_8h_a87a7bd74bbb269cebd3f7de92853dc0d}{Demo\+Process\+Request\+Function}}}]{request\+\_\+handler,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$, \mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}})}]{completion\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{server\+\_\+ref }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__handler_8c_a6b6fd0969ba21f0617b21820d8bc0608}\label{demo__handler_8c_a6b6fd0969ba21f0617b21820d8bc0608}} 
+\index{demo\_handler.c@{demo\_handler.c}!handler\_postable\_read\_start@{handler\_postable\_read\_start}}
+\index{handler\_postable\_read\_start@{handler\_postable\_read\_start}!demo\_handler.c@{demo\_handler.c}}
+\doxysubsubsection{\texorpdfstring{handler\_postable\_read\_start()}{handler\_postable\_read\_start()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} handler\+\_\+postable\+\_\+read\+\_\+start (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{reactor\+\_\+ref,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{href }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{demo__handler_8c_a1d056fd6f32168961726c3dbd62e72db}\label{demo__handler_8c_a1d056fd6f32168961726c3dbd62e72db}} 
+\index{demo\_handler.c@{demo\_handler.c}!on\_new\_message\_handler@{on\_new\_message\_handler}}
+\index{on\_new\_message\_handler@{on\_new\_message\_handler}!demo\_handler.c@{demo\_handler.c}}
+\doxysubsubsection{\texorpdfstring{on\_new\_message\_handler()}{on\_new\_message\_handler()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} on\+\_\+new\+\_\+message\+\_\+handler (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{href,  }\item[{\mbox{\hyperlink{demo__message_8h_aec10d21ff11457bc72579a0e845ae27d}{Demo\+Message\+Ref}}}]{msgref,  }\item[{int}]{error\+\_\+code }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{demo__handler_8c_a809bf1387a068be935dc7a38b3e137ab}\label{demo__handler_8c_a809bf1387a068be935dc7a38b3e137ab}} 
+\index{demo\_handler.c@{demo\_handler.c}!on\_write\_complete\_cb@{on\_write\_complete\_cb}}
+\index{on\_write\_complete\_cb@{on\_write\_complete\_cb}!demo\_handler.c@{demo\_handler.c}}
+\doxysubsubsection{\texorpdfstring{on\_write\_complete\_cb()}{on\_write\_complete\_cb()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} on\+\_\+write\+\_\+complete\+\_\+cb (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{href,  }\item[{int}]{status }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{demo__handler_8c_ab40f3a9942fc576d8b9a61f5d4b25887}\label{demo__handler_8c_ab40f3a9942fc576d8b9a61f5d4b25887}} 
+\index{demo\_handler.c@{demo\_handler.c}!postable\_write\_start@{postable\_write\_start}}
+\index{postable\_write\_start@{postable\_write\_start}!demo\_handler.c@{demo\_handler.c}}
+\doxysubsubsection{\texorpdfstring{postable\_write\_start()}{postable\_write\_start()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} postable\+\_\+write\+\_\+start (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{reactor\+\_\+ref,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{href }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+

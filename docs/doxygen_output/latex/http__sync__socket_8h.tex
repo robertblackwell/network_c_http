@@ -1,0 +1,37 @@
+\hypertarget{http__sync__socket_8h}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/http\+\_\+protocol/http\+\_\+sync\+\_\+socket.h File Reference}
+\label{http__sync__socket_8h}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/http\_protocol/http\_sync\_socket.h@{/home/robert/Projects/http\_in\_c/http\_in\_c/http\_protocol/http\_sync\_socket.h}}
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/http\+\_\+protocol/http\+\_\+message.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/http\+\_\+protocol/http\+\_\+message\+\_\+parser.\+h$>$}\newline
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$sys/types.\+h$>$}\newline
+{\ttfamily \#include $<$sys/socket.\+h$>$}\newline
+{\ttfamily \#include $<$netinet/in.\+h$>$}\newline
+{\ttfamily \#include $<$netdb.\+h$>$}\newline
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \mbox{\hyperlink{structHttpSyncSocket__s}{Http\+Sync\+Socket\+\_\+s}} \mbox{\hyperlink{group__group__client_ga1a7bf9137259ef0f2e00a720f5df601d}{Http\+Sync\+Socket}}
+\item 
+typedef struct \mbox{\hyperlink{structHttpSyncSocket__s}{Http\+Sync\+Socket\+\_\+s}} $\ast$ \mbox{\hyperlink{group__group__client_ga95275afa7267640422d66d53bac4af0e}{Http\+Sync\+Socket\+Ref}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{group__group__client_ga95275afa7267640422d66d53bac4af0e}{Http\+Sync\+Socket\+Ref}} \mbox{\hyperlink{group__group__client_gaeb2e2ae85295c8b38b1c65e2e69f45e2}{http\+\_\+syncsocket\+\_\+new}} ()
+\begin{DoxyCompactList}\small\item\em Create a new client instance. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__client_gab67ab1a9f2a585fbf918a22800b5979b}{http\+\_\+syncsocket\+\_\+init}} (\mbox{\hyperlink{group__group__client_ga95275afa7267640422d66d53bac4af0e}{Http\+Sync\+Socket\+Ref}} this)
+\item 
+\mbox{\hyperlink{group__group__client_ga95275afa7267640422d66d53bac4af0e}{Http\+Sync\+Socket\+Ref}} \mbox{\hyperlink{group__group__client_gab61587f490e29240da990e9cc2a9d7d5}{http\+\_\+syncsocket\+\_\+new\+\_\+from\+\_\+fd}} (int fd)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__client_gaee58fa8d3e7c1defa816e5365eaca8d9}{http\+\_\+syncsocket\+\_\+free}} (\mbox{\hyperlink{group__group__client_ga95275afa7267640422d66d53bac4af0e}{Http\+Sync\+Socket\+Ref}} this)
+\begin{DoxyCompactList}\small\item\em Free ca client instance and all it associated resources, including closing the socket connection to the server. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__client_gad332f042097885ae88ca095d77ea4de9}{http\+\_\+syncsocket\+\_\+connect}} (\mbox{\hyperlink{group__group__client_ga95275afa7267640422d66d53bac4af0e}{Http\+Sync\+Socket\+Ref}} this, char $\ast$host, int port)
+\begin{DoxyCompactList}\small\item\em Connecto the the given host and port. \end{DoxyCompactList}\item 
+int \mbox{\hyperlink{group__group__client_ga528e06146dd20a9a253f3a95941b734c}{http\+\_\+syncsocket\+\_\+read\+\_\+message}} (\mbox{\hyperlink{group__group__client_ga95275afa7267640422d66d53bac4af0e}{Http\+Sync\+Socket\+Ref}} client\+\_\+ref, \mbox{\hyperlink{group__group__message_ga33b8e4c347991edbbe1d3d7d6f77c9a1}{Http\+Message\+Ref}} $\ast$msg\+\_\+ref\+\_\+ptr)
+\item 
+int \mbox{\hyperlink{group__group__client_ga2b8914234c994d63d9009f3d471781a0}{http\+\_\+syncsocket\+\_\+write\+\_\+message}} (\mbox{\hyperlink{group__group__client_ga95275afa7267640422d66d53bac4af0e}{Http\+Sync\+Socket\+Ref}} client\+\_\+ref, \mbox{\hyperlink{group__group__message_ga33b8e4c347991edbbe1d3d7d6f77c9a1}{Http\+Message\+Ref}} msg\+\_\+ref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__client_ga22f315cde6d1305c81234372d6ca2930}{http\+\_\+syncsocket\+\_\+close}} (\mbox{\hyperlink{group__group__client_ga95275afa7267640422d66d53bac4af0e}{Http\+Sync\+Socket\+Ref}} this)
+\end{DoxyCompactItemize}

@@ -1,5 +1,3 @@
-#define RBL_LOG_ENABLED
-#define RBL_LOG_ALLOW_GLOBAL
 #include <http_in_c/http_protocol/http_connection.h>
 #include <http_in_c/runloop/rl_internal.h>
 #include <stdlib.h>

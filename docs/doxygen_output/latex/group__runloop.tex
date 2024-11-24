@@ -1,0 +1,161 @@
+\hypertarget{group__runloop}{}\doxysection{Runloop}
+\label{group__runloop}\index{Runloop@{Runloop}}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct Runloop\+\_\+s \mbox{\hyperlink{group__runloop_ga1a88ae0c5a63134f5553a08f686cfaaa}{Runloop}}
+\item 
+typedef struct Runloop\+\_\+s $\ast$ \mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}
+\item 
+typedef void($\ast$ \mbox{\hyperlink{group__runloop_ga86a1dcc3f557758fb51905ca405fab17}{Postable\+Callback}}) (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop, void $\ast$context\+\_\+arg)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} \mbox{\hyperlink{group__runloop_ga79ee07aed2b3ec022d34b48113a9dfd4}{runloop\+\_\+new}} (void)
+\item 
+void \mbox{\hyperlink{group__runloop_ga3d04fc2f2da95cf4a84ddd79cb3d0cd0}{runloop\+\_\+init}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} athis)
+\item 
+void \mbox{\hyperlink{group__runloop_gaf071ad880894c5eea7992af4c2bea4c2}{runloop\+\_\+deinit}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} athis)
+\item 
+void \mbox{\hyperlink{group__runloop_gab45049e45e9d38907d4f54b740bde012}{runloop\+\_\+free}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} athis)
+\item 
+int \mbox{\hyperlink{group__runloop_ga0fd1ed9a309a3136c2a6e6540ea37abe}{runloop\+\_\+run}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} athis, time\+\_\+t timeout)
+\item 
+void \mbox{\hyperlink{group__runloop_gac11185fea514d7b9880becab88dff9f0}{runloop\+\_\+post}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop, \mbox{\hyperlink{group__runloop_ga86a1dcc3f557758fb51905ca405fab17}{Postable\+Callback}} callback\+\_\+function, void $\ast$context\+\_\+arg)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+A runloop is a mechanism that provides two functions\+:
+
+\doxysubsubsection*{File descriptor events}
+
+Allows code to be notified when a file descriptor is ready for input(\+POLLIN) or output(\+POLLOUT) or experiences an error.
+
+This mechanism allows a single OS thread to handle input/output for multiple file descriptors simultaniously.
+
+Notification is through a callback mechanism.
+
+This is an example of the well known observer pattern.
+
+\doxysubsubsection*{Lightweight multi-\/threading}
+
+A runloop provides a mechanism where by blocks of code (in our case functions) can be added to a queue of waiting blocks and be executed in its turn. This mechanism provides a lightweight form of multi-\/threading inside a single OS thread.
+
+\doxysubsubsection*{Notes and warnings}
+
+An important point to understand is that a runloop is a forever loop, once you call \mbox{\hyperlink{group__runloop_ga0fd1ed9a309a3136c2a6e6540ea37abe}{runloop\+\_\+run()}} it never returns. Before calling \mbox{\hyperlink{group__runloop_ga0fd1ed9a309a3136c2a6e6540ea37abe}{runloop\+\_\+run()}} there must be some event handlers set up or callbacks scheduled on the runloop using \mbox{\hyperlink{group__runloop_gac11185fea514d7b9880becab88dff9f0}{runloop\+\_\+post()}} in order that stuff happens.
+
+These two features are found in well known libraries such as {\bfseries{libuv}}, {\bfseries{libevent}}, and {\bfseries{boost\+::asio}}.
+
+A runloop is implemented as an opaque type {\bfseries{Runloop}}, is almost always referenced via a {\bfseries{Runloop\+Ref}}.
+
+A single instance of a Runloop can only be used by a single OS threads. There is an exception to this restriction which will be discussed below. 
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{group__runloop_ga86a1dcc3f557758fb51905ca405fab17}\label{group__runloop_ga86a1dcc3f557758fb51905ca405fab17}} 
+\index{Runloop@{Runloop}!PostableCallback@{PostableCallback}}
+\index{PostableCallback@{PostableCallback}!Runloop@{Runloop}}
+\doxysubsubsection{\texorpdfstring{PostableCallback}{PostableCallback}}
+{\footnotesize\ttfamily typedef void($\ast$ Postable\+Callback) (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop, void $\ast$context\+\_\+arg)}
+
+The function \mbox{\hyperlink{group__runloop_gac11185fea514d7b9880becab88dff9f0}{runloop\+\_\+post()}} adds callbacks to a Runloop. The following typedef gives the signature of the kind of functions that can be posted as callbacks to a runloop. \mbox{\Hypertarget{group__runloop_ga1a88ae0c5a63134f5553a08f686cfaaa}\label{group__runloop_ga1a88ae0c5a63134f5553a08f686cfaaa}} 
+\index{Runloop@{Runloop}!Runloop@{Runloop}}
+\index{Runloop@{Runloop}!Runloop@{Runloop}}
+\doxysubsubsection{\texorpdfstring{Runloop}{Runloop}}
+{\footnotesize\ttfamily typedef struct Runloop\+\_\+s \mbox{\hyperlink{group__runloop_ga1a88ae0c5a63134f5553a08f686cfaaa}{Runloop}}}
+
+\mbox{\Hypertarget{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}\label{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}} 
+\index{Runloop@{Runloop}!RunloopRef@{RunloopRef}}
+\index{RunloopRef@{RunloopRef}!Runloop@{Runloop}}
+\doxysubsubsection{\texorpdfstring{RunloopRef}{RunloopRef}}
+{\footnotesize\ttfamily typedef struct Runloop\+\_\+s $\ast$ \mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{group__runloop_gaf071ad880894c5eea7992af4c2bea4c2}\label{group__runloop_gaf071ad880894c5eea7992af4c2bea4c2}} 
+\index{Runloop@{Runloop}!runloop\_deinit@{runloop\_deinit}}
+\index{runloop\_deinit@{runloop\_deinit}!Runloop@{Runloop}}
+\doxysubsubsection{\texorpdfstring{runloop\_deinit()}{runloop\_deinit()}}
+{\footnotesize\ttfamily void runloop\+\_\+deinit (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+A Runloop holds pointers to other dynamic objects and is responsible for the lifetime of some of those objects. Thus to avoid memory leaks a Runloop must be de-\/initialized correctly.
+
+The function \mbox{\hyperlink{group__runloop_gaf071ad880894c5eea7992af4c2bea4c2}{runloop\+\_\+deinit()}} will correctly free all the objects pointed at by a runloop instance but will not free the memory directly occupied by the runloop object.
+
+\mbox{\hyperlink{group__runloop_gab45049e45e9d38907d4f54b740bde012}{runloop\+\_\+free()}} will call \mbox{\hyperlink{group__runloop_gaf071ad880894c5eea7992af4c2bea4c2}{runloop\+\_\+deinit()}} and also free the memory occupied by the Runloop instance. \mbox{\Hypertarget{group__runloop_gab45049e45e9d38907d4f54b740bde012}\label{group__runloop_gab45049e45e9d38907d4f54b740bde012}} 
+\index{Runloop@{Runloop}!runloop\_free@{runloop\_free}}
+\index{runloop\_free@{runloop\_free}!Runloop@{Runloop}}
+\doxysubsubsection{\texorpdfstring{runloop\_free()}{runloop\_free()}}
+{\footnotesize\ttfamily void runloop\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{group__runloop_ga3d04fc2f2da95cf4a84ddd79cb3d0cd0}\label{group__runloop_ga3d04fc2f2da95cf4a84ddd79cb3d0cd0}} 
+\index{Runloop@{Runloop}!runloop\_init@{runloop\_init}}
+\index{runloop\_init@{runloop\_init}!Runloop@{Runloop}}
+\doxysubsubsection{\texorpdfstring{runloop\_init()}{runloop\_init()}}
+{\footnotesize\ttfamily void runloop\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{group__runloop_ga79ee07aed2b3ec022d34b48113a9dfd4}\label{group__runloop_ga79ee07aed2b3ec022d34b48113a9dfd4}} 
+\index{Runloop@{Runloop}!runloop\_new@{runloop\_new}}
+\index{runloop\_new@{runloop\_new}!Runloop@{Runloop}}
+\doxysubsubsection{\texorpdfstring{runloop\_new()}{runloop\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+new (\begin{DoxyParamCaption}\item[{void}]{ }\end{DoxyParamCaption})}
+
+A Runloop instance can be create in new dynamic memory with \mbox{\hyperlink{group__runloop_ga79ee07aed2b3ec022d34b48113a9dfd4}{runloop\+\_\+new()}}, or in already allocated memory with \mbox{\hyperlink{group__runloop_ga3d04fc2f2da95cf4a84ddd79cb3d0cd0}{runloop\+\_\+init()}}.
+
+In the case of \mbox{\hyperlink{group__runloop_ga3d04fc2f2da95cf4a84ddd79cb3d0cd0}{runloop\+\_\+init()}} it is the callers responsibility to ensure the memory pointed to by {\bfseries{athis}} is large enough. That greater than {\ttfamily sizeof(\+Runloop)}.
+
+The following is the recommended way to use \mbox{\hyperlink{group__runloop_ga3d04fc2f2da95cf4a84ddd79cb3d0cd0}{runloop\+\_\+init()}}\+: 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{\mbox{\hyperlink{group__runloop_ga1a88ae0c5a63134f5553a08f686cfaaa}{Runloop}} myrunloop;}
+\DoxyCodeLine{\mbox{\hyperlink{group__runloop_ga3d04fc2f2da95cf4a84ddd79cb3d0cd0}{runloop\_init}}(\&myrunloop);}
+
+\end{DoxyCode}
+
+
+The function \mbox{\hyperlink{group__runloop_gab45049e45e9d38907d4f54b740bde012}{runloop\+\_\+free()}} should only be called on a runloop instance created with \mbox{\hyperlink{group__runloop_ga79ee07aed2b3ec022d34b48113a9dfd4}{runloop\+\_\+new()}}. \mbox{\Hypertarget{group__runloop_gac11185fea514d7b9880becab88dff9f0}\label{group__runloop_gac11185fea514d7b9880becab88dff9f0}} 
+\index{Runloop@{Runloop}!runloop\_post@{runloop\_post}}
+\index{runloop\_post@{runloop\_post}!Runloop@{Runloop}}
+\doxysubsubsection{\texorpdfstring{runloop\_post()}{runloop\_post()}}
+{\footnotesize\ttfamily void runloop\+\_\+post (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop,  }\item[{\mbox{\hyperlink{group__runloop_ga86a1dcc3f557758fb51905ca405fab17}{Postable\+Callback}}}]{callback\+\_\+function,  }\item[{void $\ast$}]{context\+\_\+arg }\end{DoxyParamCaption})}
+
+Adds a function to a Runloop callback list. 
+\begin{DoxyParams}{Parameters}
+{\em runloop} & A Runloop\+Ref \\
+\hline
+{\em callback\+\_\+function} & A pointer to the callback function \\
+\hline
+{\em context\+\_\+arg} & This is a pointer used by the callback to gain access to its context. it can be a pointer to anything. It not used by the Runloop. \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{group__runloop_ga0fd1ed9a309a3136c2a6e6540ea37abe}\label{group__runloop_ga0fd1ed9a309a3136c2a6e6540ea37abe}} 
+\index{Runloop@{Runloop}!runloop\_run@{runloop\_run}}
+\index{runloop\_run@{runloop\_run}!Runloop@{Runloop}}
+\doxysubsubsection{\texorpdfstring{runloop\_run()}{runloop\_run()}}
+{\footnotesize\ttfamily int runloop\+\_\+run (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{athis,  }\item[{time\+\_\+t}]{timeout }\end{DoxyParamCaption})}
+
+Start a Runloop. A Runloop is always doing one of the following things\+:
+
+
+\begin{DoxyItemize}
+\item is inside a call to epoll\+\_\+wait() waiting for events to fire
+\item processing the file descriptors and events returned by epoll\+\_\+wait()
+\item running down its list of waiting callback functions and calling them one at a time.
+\end{DoxyItemize}
+
+The function \mbox{\hyperlink{group__runloop_ga0fd1ed9a309a3136c2a6e6540ea37abe}{runloop\+\_\+run()}} only returns when there are no file descriptors to epoll\+\_\+wait() on and no callbacks waiting to be called.
+
+Hence before calling \mbox{\hyperlink{group__runloop_ga0fd1ed9a309a3136c2a6e6540ea37abe}{runloop\+\_\+run()}} you must have some file descriptors being waited on for events and/or some callbacks that have been added to the Runloop to be called. Otherwise the \mbox{\hyperlink{group__runloop_ga0fd1ed9a309a3136c2a6e6540ea37abe}{runloop\+\_\+run()}} call will return immediately.
+
+
+\begin{DoxyParams}{Parameters}
+{\em athis} & Runloopref \\
+\hline
+{\em timeout} & time\+\_\+t a timeout interval the runloop will terminate when this timeout expires if -\/1 the runloop will run forever. In this project values other than -\/1 are only used in testing \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}

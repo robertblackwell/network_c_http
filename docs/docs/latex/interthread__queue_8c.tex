@@ -1,0 +1,67 @@
+\hypertarget{interthread__queue_8c}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/runloop/interthread\+\_\+queue.c File Reference}
+\label{interthread__queue_8c}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/runloop/interthread\_queue.c@{/home/robert/Projects/http\_in\_c/http\_in\_c/runloop/interthread\_queue.c}}
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$pthread.\+h$>$}\newline
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$sys/epoll.\+h$>$}\newline
+{\ttfamily \#include $<$rbl/macros.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/utils.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/runloop.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/rl\+\_\+internal.\+h$>$}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{interthread__queue_8c_a9ffd4dc849550de2ce6c3bc9a62a2705}{Inter\+Thread\+Q\+\_\+\+TYPE}}~\char`\"{}it\+Qu\char`\"{}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{interthread__queue_8c_a0f196221fd584005b20a9a6c8dddda21}{itqueue\+\_\+postable}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} rl, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$itq\+\_\+ref\+\_\+arg)
+\item 
+\mbox{\hyperlink{runloop_8h_a2b757ef5b5c789b49dc7b2be25991801}{Interthread\+Queue\+Ref}} \mbox{\hyperlink{interthread__queue_8c_aa3bc15755031f431f693587ad04b78c5}{itqueue\+\_\+new}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} rl)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{interthread__queue_8c_a58b09771064562aba40b16bb95649ab7}{itqueue\+\_\+add}} (\mbox{\hyperlink{runloop_8h_a2b757ef5b5c789b49dc7b2be25991801}{Interthread\+Queue\+Ref}} qref, \mbox{\hyperlink{rl__internal_8h_aeacde1bfd947ad8b6f347ceb6dff16ac}{Functor}} func)
+\item 
+\mbox{\hyperlink{rl__internal_8h_aeacde1bfd947ad8b6f347ceb6dff16ac}{Functor}} \mbox{\hyperlink{interthread__queue_8c_a54aa9090d65c18f562ac361a30ee9f91}{itqueue\+\_\+remove}} (\mbox{\hyperlink{runloop_8h_a2b757ef5b5c789b49dc7b2be25991801}{Interthread\+Queue\+Ref}} qref)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{interthread__queue_8c_a9ffd4dc849550de2ce6c3bc9a62a2705}\label{interthread__queue_8c_a9ffd4dc849550de2ce6c3bc9a62a2705}} 
+\index{interthread\_queue.c@{interthread\_queue.c}!InterThreadQ\_TYPE@{InterThreadQ\_TYPE}}
+\index{InterThreadQ\_TYPE@{InterThreadQ\_TYPE}!interthread\_queue.c@{interthread\_queue.c}}
+\doxysubsubsection{\texorpdfstring{InterThreadQ\_TYPE}{InterThreadQ\_TYPE}}
+{\footnotesize\ttfamily \#define Inter\+Thread\+Q\+\_\+\+TYPE~\char`\"{}it\+Qu\char`\"{}}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{interthread__queue_8c_a58b09771064562aba40b16bb95649ab7}\label{interthread__queue_8c_a58b09771064562aba40b16bb95649ab7}} 
+\index{interthread\_queue.c@{interthread\_queue.c}!itqueue\_add@{itqueue\_add}}
+\index{itqueue\_add@{itqueue\_add}!interthread\_queue.c@{interthread\_queue.c}}
+\doxysubsubsection{\texorpdfstring{itqueue\_add()}{itqueue\_add()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} itqueue\+\_\+add (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a2b757ef5b5c789b49dc7b2be25991801}{Interthread\+Queue\+Ref}}}]{qref,  }\item[{\mbox{\hyperlink{rl__internal_8h_aeacde1bfd947ad8b6f347ceb6dff16ac}{Functor}}}]{func }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{interthread__queue_8c_aa3bc15755031f431f693587ad04b78c5}\label{interthread__queue_8c_aa3bc15755031f431f693587ad04b78c5}} 
+\index{interthread\_queue.c@{interthread\_queue.c}!itqueue\_new@{itqueue\_new}}
+\index{itqueue\_new@{itqueue\_new}!interthread\_queue.c@{interthread\_queue.c}}
+\doxysubsubsection{\texorpdfstring{itqueue\_new()}{itqueue\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_a2b757ef5b5c789b49dc7b2be25991801}{Interthread\+Queue\+Ref}} itqueue\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{rl }\end{DoxyParamCaption})}
+
+A Runloop\+Interthread\+Queue is a second implementation of an Eventfd\+Queue with added functionality (as you can see from the fact that there are more functions). It is specialized to be part of a Runloop so that other threads can submit work to a Runloop. An instance of a Runloop\+Interthread\+Queue is used to implement the function
+
+runloop\+\_\+interthread\+\_\+post() \mbox{\Hypertarget{interthread__queue_8c_a0f196221fd584005b20a9a6c8dddda21}\label{interthread__queue_8c_a0f196221fd584005b20a9a6c8dddda21}} 
+\index{interthread\_queue.c@{interthread\_queue.c}!itqueue\_postable@{itqueue\_postable}}
+\index{itqueue\_postable@{itqueue\_postable}!interthread\_queue.c@{interthread\_queue.c}}
+\doxysubsubsection{\texorpdfstring{itqueue\_postable()}{itqueue\_postable()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} itqueue\+\_\+postable (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{rl,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{itq\+\_\+ref\+\_\+arg }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{interthread__queue_8c_a54aa9090d65c18f562ac361a30ee9f91}\label{interthread__queue_8c_a54aa9090d65c18f562ac361a30ee9f91}} 
+\index{interthread\_queue.c@{interthread\_queue.c}!itqueue\_remove@{itqueue\_remove}}
+\index{itqueue\_remove@{itqueue\_remove}!interthread\_queue.c@{interthread\_queue.c}}
+\doxysubsubsection{\texorpdfstring{itqueue\_remove()}{itqueue\_remove()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_aeacde1bfd947ad8b6f347ceb6dff16ac}{Functor}} itqueue\+\_\+remove (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a2b757ef5b5c789b49dc7b2be25991801}{Interthread\+Queue\+Ref}}}]{qref }\end{DoxyParamCaption})}
+

@@ -1,0 +1,92 @@
+\hypertarget{structAsyncServer__s}{}\doxysection{Async\+Server\+\_\+s Struct Reference}
+\label{structAsyncServer__s}\index{AsyncServer\_s@{AsyncServer\_s}}
+
+
+{\ttfamily \#include $<$async.\+h$>$}
+
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{structAsyncServer__s_a7725376b6f94bd12c0f773002498e814}{RBL\+\_\+\+DECLARE\+\_\+\+TAG}}
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{structAsyncServer__s_a07e9ddf4fc3976b54f4952826ed786ec}{handler\+\_\+complete}} )(\mbox{\hyperlink{async_8h_aa2dffdb66273f9a25f9e23ca2d2a93fb}{Async\+Server\+Ref}}, \mbox{\hyperlink{async_8h_a0c7b3ab54cddeb06a3d86747fccf08e3}{Async\+Handler\+Ref}})
+\item 
+\mbox{\hyperlink{async_8h_acd39035147bdfa4d30a1c5e6dc9db037}{Async\+Process\+Request\+Function}} \mbox{\hyperlink{structAsyncServer__s_a538aa6b65f9925917ba2fb908e874ac7}{process\+\_\+request}}
+\item 
+const char $\ast$ \mbox{\hyperlink{structAsyncServer__s_ac21f86b8182159292a43a3b1cbbbd66c}{host}}
+\item 
+int \mbox{\hyperlink{structAsyncServer__s_a10008e3ffb28b0a5e7c95530a501a8f1}{port}}
+\item 
+int \mbox{\hyperlink{structAsyncServer__s_a63bc7d90c1e50658ee93b4dbd1c4f543}{listening\+\_\+socket\+\_\+fd}}
+\item 
+\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} \mbox{\hyperlink{structAsyncServer__s_a14081e8524bbcc02ef38d3d896ad21d8}{reactor\+\_\+ref}}
+\item 
+\mbox{\hyperlink{group__runloop_ga33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} \mbox{\hyperlink{structAsyncServer__s_a0448601374d20fcf7b7670eb1ba783d0}{listening\+\_\+watcher\+\_\+ref}}
+\item 
+\mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} \mbox{\hyperlink{structAsyncServer__s_ab8ae19eb0cc79e2319ba881f74470e4d}{handler\+\_\+list}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+============================================================================= Async\+Server api There is one Async\+Server instance for each thread in a async server app \doxysubsection*{Each Async\+Server can manage more than one connection }
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{structAsyncServer__s_a07e9ddf4fc3976b54f4952826ed786ec}\label{structAsyncServer__s_a07e9ddf4fc3976b54f4952826ed786ec}} 
+\index{AsyncServer\_s@{AsyncServer\_s}!handler\_complete@{handler\_complete}}
+\index{handler\_complete@{handler\_complete}!AsyncServer\_s@{AsyncServer\_s}}
+\doxysubsubsection{\texorpdfstring{handler\_complete}{handler\_complete}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ Async\+Server\+\_\+s\+::handler\+\_\+complete) (\mbox{\hyperlink{async_8h_aa2dffdb66273f9a25f9e23ca2d2a93fb}{Async\+Server\+Ref}}, \mbox{\hyperlink{async_8h_a0c7b3ab54cddeb06a3d86747fccf08e3}{Async\+Handler\+Ref}})}
+
+\mbox{\Hypertarget{structAsyncServer__s_ab8ae19eb0cc79e2319ba881f74470e4d}\label{structAsyncServer__s_ab8ae19eb0cc79e2319ba881f74470e4d}} 
+\index{AsyncServer\_s@{AsyncServer\_s}!handler\_list@{handler\_list}}
+\index{handler\_list@{handler\_list}!AsyncServer\_s@{AsyncServer\_s}}
+\doxysubsubsection{\texorpdfstring{handler\_list}{handler\_list}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} Async\+Server\+\_\+s\+::handler\+\_\+list}
+
+List of handler servicing client connections \mbox{\Hypertarget{structAsyncServer__s_ac21f86b8182159292a43a3b1cbbbd66c}\label{structAsyncServer__s_ac21f86b8182159292a43a3b1cbbbd66c}} 
+\index{AsyncServer\_s@{AsyncServer\_s}!host@{host}}
+\index{host@{host}!AsyncServer\_s@{AsyncServer\_s}}
+\doxysubsubsection{\texorpdfstring{host}{host}}
+{\footnotesize\ttfamily const char$\ast$ Async\+Server\+\_\+s\+::host}
+
+\mbox{\Hypertarget{structAsyncServer__s_a63bc7d90c1e50658ee93b4dbd1c4f543}\label{structAsyncServer__s_a63bc7d90c1e50658ee93b4dbd1c4f543}} 
+\index{AsyncServer\_s@{AsyncServer\_s}!listening\_socket\_fd@{listening\_socket\_fd}}
+\index{listening\_socket\_fd@{listening\_socket\_fd}!AsyncServer\_s@{AsyncServer\_s}}
+\doxysubsubsection{\texorpdfstring{listening\_socket\_fd}{listening\_socket\_fd}}
+{\footnotesize\ttfamily int Async\+Server\+\_\+s\+::listening\+\_\+socket\+\_\+fd}
+
+\mbox{\Hypertarget{structAsyncServer__s_a0448601374d20fcf7b7670eb1ba783d0}\label{structAsyncServer__s_a0448601374d20fcf7b7670eb1ba783d0}} 
+\index{AsyncServer\_s@{AsyncServer\_s}!listening\_watcher\_ref@{listening\_watcher\_ref}}
+\index{listening\_watcher\_ref@{listening\_watcher\_ref}!AsyncServer\_s@{AsyncServer\_s}}
+\doxysubsubsection{\texorpdfstring{listening\_watcher\_ref}{listening\_watcher\_ref}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__runloop_ga33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} Async\+Server\+\_\+s\+::listening\+\_\+watcher\+\_\+ref}
+
+\mbox{\Hypertarget{structAsyncServer__s_a10008e3ffb28b0a5e7c95530a501a8f1}\label{structAsyncServer__s_a10008e3ffb28b0a5e7c95530a501a8f1}} 
+\index{AsyncServer\_s@{AsyncServer\_s}!port@{port}}
+\index{port@{port}!AsyncServer\_s@{AsyncServer\_s}}
+\doxysubsubsection{\texorpdfstring{port}{port}}
+{\footnotesize\ttfamily int Async\+Server\+\_\+s\+::port}
+
+\mbox{\Hypertarget{structAsyncServer__s_a538aa6b65f9925917ba2fb908e874ac7}\label{structAsyncServer__s_a538aa6b65f9925917ba2fb908e874ac7}} 
+\index{AsyncServer\_s@{AsyncServer\_s}!process\_request@{process\_request}}
+\index{process\_request@{process\_request}!AsyncServer\_s@{AsyncServer\_s}}
+\doxysubsubsection{\texorpdfstring{process\_request}{process\_request}}
+{\footnotesize\ttfamily \mbox{\hyperlink{async_8h_acd39035147bdfa4d30a1c5e6dc9db037}{Async\+Process\+Request\+Function}} Async\+Server\+\_\+s\+::process\+\_\+request}
+
+\mbox{\Hypertarget{structAsyncServer__s_a7725376b6f94bd12c0f773002498e814}\label{structAsyncServer__s_a7725376b6f94bd12c0f773002498e814}} 
+\index{AsyncServer\_s@{AsyncServer\_s}!RBL\_DECLARE\_TAG@{RBL\_DECLARE\_TAG}}
+\index{RBL\_DECLARE\_TAG@{RBL\_DECLARE\_TAG}!AsyncServer\_s@{AsyncServer\_s}}
+\doxysubsubsection{\texorpdfstring{RBL\_DECLARE\_TAG}{RBL\_DECLARE\_TAG}}
+{\footnotesize\ttfamily Async\+Server\+\_\+s\+::\+RBL\+\_\+\+DECLARE\+\_\+\+TAG}
+
+\mbox{\Hypertarget{structAsyncServer__s_a14081e8524bbcc02ef38d3d896ad21d8}\label{structAsyncServer__s_a14081e8524bbcc02ef38d3d896ad21d8}} 
+\index{AsyncServer\_s@{AsyncServer\_s}!reactor\_ref@{reactor\_ref}}
+\index{reactor\_ref@{reactor\_ref}!AsyncServer\_s@{AsyncServer\_s}}
+\doxysubsubsection{\texorpdfstring{reactor\_ref}{reactor\_ref}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} Async\+Server\+\_\+s\+::reactor\+\_\+ref}
+
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/async-\/old/\mbox{\hyperlink{async_8h}{async.\+h}}\end{DoxyCompactItemize}

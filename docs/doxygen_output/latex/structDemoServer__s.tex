@@ -1,0 +1,97 @@
+\hypertarget{structDemoServer__s}{}\doxysection{Demo\+Server\+\_\+s Struct Reference}
+\label{structDemoServer__s}\index{DemoServer\_s@{DemoServer\_s}}
+
+
+{\ttfamily \#include $<$demo\+\_\+server.\+h$>$}
+
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{structDemoServer__s_a9241b0a849ef0a53ce76cc1a4adafdeb}{RBL\+\_\+\+DECLARE\+\_\+\+TAG}}
+\item 
+int \mbox{\hyperlink{structDemoServer__s_ac3e164b01a7cef291c1bca0123e99c31}{port}}
+\item 
+char const  $\ast$ \mbox{\hyperlink{structDemoServer__s_acc2e88502f475568d74f233c0cc296ed}{host}}
+\item 
+\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} \mbox{\hyperlink{structDemoServer__s_acb121ca33e435fd9c86727cdb68da903}{listening\+\_\+socket\+\_\+fd}}
+\item 
+\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} \mbox{\hyperlink{structDemoServer__s_af3c8f904ddb82d96ff73cfedea9aa320}{runloop\+\_\+ref}}
+\item 
+\mbox{\hyperlink{group__runloop_ga33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} \mbox{\hyperlink{structDemoServer__s_a77bdcc75547cc11b3d7657eb93aa8d00}{listening\+\_\+watcher\+\_\+ref}}
+\item 
+\mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} \mbox{\hyperlink{structDemoServer__s_a16147ea1b195db6f729f8a498b455eea}{handler\+\_\+list}}
+\item 
+\mbox{\hyperlink{demo__server_8h_a87a7bd74bbb269cebd3f7de92853dc0d}{Demo\+Process\+Request\+Function}} \mbox{\hyperlink{structDemoServer__s_a377eb49949791c8fb0030be6b3e1e8e5}{process\+\_\+request\+\_\+function}}
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{structDemoServer__s_a428cba9893f29c4e5a9177695433485c}{completion\+\_\+callback}} )(\mbox{\hyperlink{demo__server_8h_a4db6a9ea0ba3d4d27aa1bbf5c4da546c}{Demo\+Server\+Ref}}, \mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}})
+\item 
+\mbox{\hyperlink{structDemoServer__s_a06feef6f340b622c587128593d360554}{RBL\+\_\+\+DECLARE\+\_\+\+END\+\_\+\+TAG}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{structDemoServer__s_a428cba9893f29c4e5a9177695433485c}\label{structDemoServer__s_a428cba9893f29c4e5a9177695433485c}} 
+\index{DemoServer\_s@{DemoServer\_s}!completion\_callback@{completion\_callback}}
+\index{completion\_callback@{completion\_callback}!DemoServer\_s@{DemoServer\_s}}
+\doxysubsubsection{\texorpdfstring{completion\_callback}{completion\_callback}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ Demo\+Server\+\_\+s\+::completion\+\_\+callback) (\mbox{\hyperlink{demo__server_8h_a4db6a9ea0ba3d4d27aa1bbf5c4da546c}{Demo\+Server\+Ref}}, \mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}})}
+
+\mbox{\Hypertarget{structDemoServer__s_a16147ea1b195db6f729f8a498b455eea}\label{structDemoServer__s_a16147ea1b195db6f729f8a498b455eea}} 
+\index{DemoServer\_s@{DemoServer\_s}!handler\_list@{handler\_list}}
+\index{handler\_list@{handler\_list}!DemoServer\_s@{DemoServer\_s}}
+\doxysubsubsection{\texorpdfstring{handler\_list}{handler\_list}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} Demo\+Server\+\_\+s\+::handler\+\_\+list}
+
+\mbox{\Hypertarget{structDemoServer__s_acc2e88502f475568d74f233c0cc296ed}\label{structDemoServer__s_acc2e88502f475568d74f233c0cc296ed}} 
+\index{DemoServer\_s@{DemoServer\_s}!host@{host}}
+\index{host@{host}!DemoServer\_s@{DemoServer\_s}}
+\doxysubsubsection{\texorpdfstring{host}{host}}
+{\footnotesize\ttfamily char const$\ast$ Demo\+Server\+\_\+s\+::host}
+
+\mbox{\Hypertarget{structDemoServer__s_acb121ca33e435fd9c86727cdb68da903}\label{structDemoServer__s_acb121ca33e435fd9c86727cdb68da903}} 
+\index{DemoServer\_s@{DemoServer\_s}!listening\_socket\_fd@{listening\_socket\_fd}}
+\index{listening\_socket\_fd@{listening\_socket\_fd}!DemoServer\_s@{DemoServer\_s}}
+\doxysubsubsection{\texorpdfstring{listening\_socket\_fd}{listening\_socket\_fd}}
+{\footnotesize\ttfamily \mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} Demo\+Server\+\_\+s\+::listening\+\_\+socket\+\_\+fd}
+
+\mbox{\Hypertarget{structDemoServer__s_a77bdcc75547cc11b3d7657eb93aa8d00}\label{structDemoServer__s_a77bdcc75547cc11b3d7657eb93aa8d00}} 
+\index{DemoServer\_s@{DemoServer\_s}!listening\_watcher\_ref@{listening\_watcher\_ref}}
+\index{listening\_watcher\_ref@{listening\_watcher\_ref}!DemoServer\_s@{DemoServer\_s}}
+\doxysubsubsection{\texorpdfstring{listening\_watcher\_ref}{listening\_watcher\_ref}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__runloop_ga33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} Demo\+Server\+\_\+s\+::listening\+\_\+watcher\+\_\+ref}
+
+\mbox{\Hypertarget{structDemoServer__s_ac3e164b01a7cef291c1bca0123e99c31}\label{structDemoServer__s_ac3e164b01a7cef291c1bca0123e99c31}} 
+\index{DemoServer\_s@{DemoServer\_s}!port@{port}}
+\index{port@{port}!DemoServer\_s@{DemoServer\_s}}
+\doxysubsubsection{\texorpdfstring{port}{port}}
+{\footnotesize\ttfamily int Demo\+Server\+\_\+s\+::port}
+
+\mbox{\Hypertarget{structDemoServer__s_a377eb49949791c8fb0030be6b3e1e8e5}\label{structDemoServer__s_a377eb49949791c8fb0030be6b3e1e8e5}} 
+\index{DemoServer\_s@{DemoServer\_s}!process\_request\_function@{process\_request\_function}}
+\index{process\_request\_function@{process\_request\_function}!DemoServer\_s@{DemoServer\_s}}
+\doxysubsubsection{\texorpdfstring{process\_request\_function}{process\_request\_function}}
+{\footnotesize\ttfamily \mbox{\hyperlink{demo__server_8h_a87a7bd74bbb269cebd3f7de92853dc0d}{Demo\+Process\+Request\+Function}} Demo\+Server\+\_\+s\+::process\+\_\+request\+\_\+function}
+
+\mbox{\Hypertarget{structDemoServer__s_a06feef6f340b622c587128593d360554}\label{structDemoServer__s_a06feef6f340b622c587128593d360554}} 
+\index{DemoServer\_s@{DemoServer\_s}!RBL\_DECLARE\_END\_TAG@{RBL\_DECLARE\_END\_TAG}}
+\index{RBL\_DECLARE\_END\_TAG@{RBL\_DECLARE\_END\_TAG}!DemoServer\_s@{DemoServer\_s}}
+\doxysubsubsection{\texorpdfstring{RBL\_DECLARE\_END\_TAG}{RBL\_DECLARE\_END\_TAG}}
+{\footnotesize\ttfamily Demo\+Server\+\_\+s\+::\+RBL\+\_\+\+DECLARE\+\_\+\+END\+\_\+\+TAG}
+
+\mbox{\Hypertarget{structDemoServer__s_a9241b0a849ef0a53ce76cc1a4adafdeb}\label{structDemoServer__s_a9241b0a849ef0a53ce76cc1a4adafdeb}} 
+\index{DemoServer\_s@{DemoServer\_s}!RBL\_DECLARE\_TAG@{RBL\_DECLARE\_TAG}}
+\index{RBL\_DECLARE\_TAG@{RBL\_DECLARE\_TAG}!DemoServer\_s@{DemoServer\_s}}
+\doxysubsubsection{\texorpdfstring{RBL\_DECLARE\_TAG}{RBL\_DECLARE\_TAG}}
+{\footnotesize\ttfamily Demo\+Server\+\_\+s\+::\+RBL\+\_\+\+DECLARE\+\_\+\+TAG}
+
+\mbox{\Hypertarget{structDemoServer__s_af3c8f904ddb82d96ff73cfedea9aa320}\label{structDemoServer__s_af3c8f904ddb82d96ff73cfedea9aa320}} 
+\index{DemoServer\_s@{DemoServer\_s}!runloop\_ref@{runloop\_ref}}
+\index{runloop\_ref@{runloop\_ref}!DemoServer\_s@{DemoServer\_s}}
+\doxysubsubsection{\texorpdfstring{runloop\_ref}{runloop\_ref}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} Demo\+Server\+\_\+s\+::runloop\+\_\+ref}
+
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/demo\+\_\+protocol/\mbox{\hyperlink{demo__server_8h}{demo\+\_\+server.\+h}}\end{DoxyCompactItemize}

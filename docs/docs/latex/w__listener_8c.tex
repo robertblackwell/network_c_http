@@ -1,0 +1,121 @@
+\hypertarget{w__listener_8c}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/runloop/w\+\_\+listener.c File Reference}
+\label{w__listener_8c}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/runloop/w\_listener.c@{/home/robert/Projects/http\_in\_c/http\_in\_c/runloop/w\_listener.c}}
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/runloop.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c//runloop/rl\+\_\+internal.\+h$>$}\newline
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$sys/epoll.\+h$>$}\newline
+{\ttfamily \#include $<$errno.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__listener_8c_afb76350cb59fd4a3c52022cbee02968f}{handler}} (\mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}} watcher, uint64\+\_\+t event)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__listener_8c_a2bc6db3e11fce6671ddce5d3d84f5a09}{anonymous\+\_\+free}} (\mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}} p)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__listener_8c_acfdc20fdc6aa21250c959995f3f04cc4}{runloop\+\_\+listener\+\_\+init}} (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} athis, \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop, int fd)
+\item 
+\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} \mbox{\hyperlink{w__listener_8c_abb4198901ffe94806c581beb6fea1608}{runloop\+\_\+listener\+\_\+new}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop, int fd)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__listener_8c_ac41ebfd5eee0af9eb60b835549cf0e48}{runloop\+\_\+listener\+\_\+free}} (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__listener_8c_a530597ca7cc4c16ae86abbac423039a7}{runloop\+\_\+listener\+\_\+register}} (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} athis, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} postable, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$postable\+\_\+arg)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__listener_8c_a6ee426958f4a25d811fa534656bb61f5}{runloop\+\_\+listener\+\_\+deregister}} (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__listener_8c_acee0f1780a6bc2bf1bddb39e84b22ca8}{runloop\+\_\+listener\+\_\+arm}} (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} athis, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} postable, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$postable\+\_\+arg)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__listener_8c_a7fe8bf4996ddb4bb85701e30f3bce016}{WListener\+Fd\+\_\+disarm}} (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} athis)
+\item 
+\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} \mbox{\hyperlink{w__listener_8c_af45fad752581ab82d907b4ef3edc9659}{runloop\+\_\+listener\+\_\+get\+\_\+runloop}} (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} athis)
+\item 
+int \mbox{\hyperlink{w__listener_8c_a311b3ade0e424e55c46e623aaef9778e}{runloop\+\_\+listener\+\_\+get\+\_\+fd}} (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} this)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__listener_8c_a09de9aa0c03bd919a8d2281e93e6a8ec}{runloop\+\_\+listener\+\_\+verify}} (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} r)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{w__listener_8c_a2bc6db3e11fce6671ddce5d3d84f5a09}\label{w__listener_8c_a2bc6db3e11fce6671ddce5d3d84f5a09}} 
+\index{w\_listener.c@{w\_listener.c}!anonymous\_free@{anonymous\_free}}
+\index{anonymous\_free@{anonymous\_free}!w\_listener.c@{w\_listener.c}}
+\doxysubsubsection{\texorpdfstring{anonymous\_free()}{anonymous\_free()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} anonymous\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}}}]{p }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{w__listener_8c_afb76350cb59fd4a3c52022cbee02968f}\label{w__listener_8c_afb76350cb59fd4a3c52022cbee02968f}} 
+\index{w\_listener.c@{w\_listener.c}!handler@{handler}}
+\index{handler@{handler}!w\_listener.c@{w\_listener.c}}
+\doxysubsubsection{\texorpdfstring{handler()}{handler()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} handler (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}}}]{watcher,  }\item[{uint64\+\_\+t}]{event }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Called whenever an fd associated with an WListener receives an fd event. Should dispatch the read\+\_\+evhandler and/or write\+\_\+evhandler depending on whether those events (read events and write events) are armed. 
+\begin{DoxyParams}{Parameters}
+{\em ctx} & void$\ast$ \\
+\hline
+{\em fd} & int \\
+\hline
+{\em event} & uint64\+\_\+t \\
+\hline
+\end{DoxyParams}
+This should be posted not called\mbox{\Hypertarget{w__listener_8c_acee0f1780a6bc2bf1bddb39e84b22ca8}\label{w__listener_8c_acee0f1780a6bc2bf1bddb39e84b22ca8}} 
+\index{w\_listener.c@{w\_listener.c}!runloop\_listener\_arm@{runloop\_listener\_arm}}
+\index{runloop\_listener\_arm@{runloop\_listener\_arm}!w\_listener.c@{w\_listener.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_arm()}{runloop\_listener\_arm()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+listener\+\_\+arm (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{postable,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{postable\+\_\+arg }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{w__listener_8c_a6ee426958f4a25d811fa534656bb61f5}\label{w__listener_8c_a6ee426958f4a25d811fa534656bb61f5}} 
+\index{w\_listener.c@{w\_listener.c}!runloop\_listener\_deregister@{runloop\_listener\_deregister}}
+\index{runloop\_listener\_deregister@{runloop\_listener\_deregister}!w\_listener.c@{w\_listener.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_deregister()}{runloop\_listener\_deregister()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+listener\+\_\+deregister (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{w__listener_8c_ac41ebfd5eee0af9eb60b835549cf0e48}\label{w__listener_8c_ac41ebfd5eee0af9eb60b835549cf0e48}} 
+\index{w\_listener.c@{w\_listener.c}!runloop\_listener\_free@{runloop\_listener\_free}}
+\index{runloop\_listener\_free@{runloop\_listener\_free}!w\_listener.c@{w\_listener.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_free()}{runloop\_listener\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+listener\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{w__listener_8c_a311b3ade0e424e55c46e623aaef9778e}\label{w__listener_8c_a311b3ade0e424e55c46e623aaef9778e}} 
+\index{w\_listener.c@{w\_listener.c}!runloop\_listener\_get\_fd@{runloop\_listener\_get\_fd}}
+\index{runloop\_listener\_get\_fd@{runloop\_listener\_get\_fd}!w\_listener.c@{w\_listener.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_get\_fd()}{runloop\_listener\_get\_fd()}}
+{\footnotesize\ttfamily int runloop\+\_\+listener\+\_\+get\+\_\+fd (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{w__listener_8c_af45fad752581ab82d907b4ef3edc9659}\label{w__listener_8c_af45fad752581ab82d907b4ef3edc9659}} 
+\index{w\_listener.c@{w\_listener.c}!runloop\_listener\_get\_runloop@{runloop\_listener\_get\_runloop}}
+\index{runloop\_listener\_get\_runloop@{runloop\_listener\_get\_runloop}!w\_listener.c@{w\_listener.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_get\_runloop()}{runloop\_listener\_get\_runloop()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+listener\+\_\+get\+\_\+runloop (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{w__listener_8c_acfdc20fdc6aa21250c959995f3f04cc4}\label{w__listener_8c_acfdc20fdc6aa21250c959995f3f04cc4}} 
+\index{w\_listener.c@{w\_listener.c}!runloop\_listener\_init@{runloop\_listener\_init}}
+\index{runloop\_listener\_init@{runloop\_listener\_init}!w\_listener.c@{w\_listener.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_init()}{runloop\_listener\_init()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+listener\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop,  }\item[{int}]{fd }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{w__listener_8c_abb4198901ffe94806c581beb6fea1608}\label{w__listener_8c_abb4198901ffe94806c581beb6fea1608}} 
+\index{w\_listener.c@{w\_listener.c}!runloop\_listener\_new@{runloop\_listener\_new}}
+\index{runloop\_listener\_new@{runloop\_listener\_new}!w\_listener.c@{w\_listener.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_new()}{runloop\_listener\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} runloop\+\_\+listener\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop,  }\item[{int}]{fd }\end{DoxyParamCaption})}
+
+Runloop\+Listener is a special kind of Runloop\+Watcher that is intended spcifically for situations where code is a server of sometype waiting for a listen() call to return signalling a new connection. \mbox{\Hypertarget{w__listener_8c_a530597ca7cc4c16ae86abbac423039a7}\label{w__listener_8c_a530597ca7cc4c16ae86abbac423039a7}} 
+\index{w\_listener.c@{w\_listener.c}!runloop\_listener\_register@{runloop\_listener\_register}}
+\index{runloop\_listener\_register@{runloop\_listener\_register}!w\_listener.c@{w\_listener.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_register()}{runloop\_listener\_register()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+listener\+\_\+register (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{postable,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{postable\+\_\+arg }\end{DoxyParamCaption})}
+
+NOTE the EPOLLEXCLUSIVE -\/ prevents the thundering herd problem. Defaults to level triggered\mbox{\Hypertarget{w__listener_8c_a09de9aa0c03bd919a8d2281e93e6a8ec}\label{w__listener_8c_a09de9aa0c03bd919a8d2281e93e6a8ec}} 
+\index{w\_listener.c@{w\_listener.c}!runloop\_listener\_verify@{runloop\_listener\_verify}}
+\index{runloop\_listener\_verify@{runloop\_listener\_verify}!w\_listener.c@{w\_listener.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_verify()}{runloop\_listener\_verify()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+listener\+\_\+verify (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}]{r }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{w__listener_8c_a7fe8bf4996ddb4bb85701e30f3bce016}\label{w__listener_8c_a7fe8bf4996ddb4bb85701e30f3bce016}} 
+\index{w\_listener.c@{w\_listener.c}!WListenerFd\_disarm@{WListenerFd\_disarm}}
+\index{WListenerFd\_disarm@{WListenerFd\_disarm}!w\_listener.c@{w\_listener.c}}
+\doxysubsubsection{\texorpdfstring{WListenerFd\_disarm()}{WListenerFd\_disarm()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} WListener\+Fd\+\_\+disarm (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}]{athis }\end{DoxyParamCaption})}
+

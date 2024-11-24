@@ -1,0 +1,62 @@
+\hypertarget{url_8h}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/common/url.h File Reference}
+\label{url_8h}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/common/url.h@{/home/robert/Projects/http\_in\_c/http\_in\_c/common/url.h}}
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/cbuffer.\+h$>$}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structUrl__s}{Url\+\_\+s}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \mbox{\hyperlink{structUrl__s}{Url\+\_\+s}} \mbox{\hyperlink{url_8h_aeb172d4bfc6a90297a3f9a40d2a1c26c}{Url\+\_\+t}}
+\item 
+typedef struct \mbox{\hyperlink{structUrl__s}{Url\+\_\+s}} \mbox{\hyperlink{url_8h_a5725869e2c5c85c5d2c85b8dc710595d}{Url}}
+\item 
+typedef struct \mbox{\hyperlink{structUrl__s}{Url\+\_\+s}} $\ast$ \mbox{\hyperlink{url_8h_a5d0623efaa38d1958c15c3e23c6da7d6}{Url\+Ref}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{url_8h_a5d0623efaa38d1958c15c3e23c6da7d6}{Url\+Ref}} \mbox{\hyperlink{url_8h_a445f510f1c3bb06b14e02faa2e21a2e6}{Url\+\_\+new}} (char $\ast$url)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{url_8h_a4446654e03ced4bbd3c6da9225fbfc69}{Url\+\_\+dispose}} (\mbox{\hyperlink{url_8h_a5d0623efaa38d1958c15c3e23c6da7d6}{Url\+Ref}} $\ast$this\+\_\+ptr)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{url_8h_a5725869e2c5c85c5d2c85b8dc710595d}\label{url_8h_a5725869e2c5c85c5d2c85b8dc710595d}} 
+\index{url.h@{url.h}!Url@{Url}}
+\index{Url@{Url}!url.h@{url.h}}
+\doxysubsubsection{\texorpdfstring{Url}{Url}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structUrl__s}{Url\+\_\+s}} \mbox{\hyperlink{url_8h_a5725869e2c5c85c5d2c85b8dc710595d}{Url}}}
+
+\mbox{\Hypertarget{url_8h_aeb172d4bfc6a90297a3f9a40d2a1c26c}\label{url_8h_aeb172d4bfc6a90297a3f9a40d2a1c26c}} 
+\index{url.h@{url.h}!Url\_t@{Url\_t}}
+\index{Url\_t@{Url\_t}!url.h@{url.h}}
+\doxysubsubsection{\texorpdfstring{Url\_t}{Url\_t}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structUrl__s}{Url\+\_\+s}} \mbox{\hyperlink{url_8h_aeb172d4bfc6a90297a3f9a40d2a1c26c}{Url\+\_\+t}}}
+
+\mbox{\Hypertarget{url_8h_a5d0623efaa38d1958c15c3e23c6da7d6}\label{url_8h_a5d0623efaa38d1958c15c3e23c6da7d6}} 
+\index{url.h@{url.h}!UrlRef@{UrlRef}}
+\index{UrlRef@{UrlRef}!url.h@{url.h}}
+\doxysubsubsection{\texorpdfstring{UrlRef}{UrlRef}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structUrl__s}{Url\+\_\+s}} $\ast$ \mbox{\hyperlink{url_8h_a5d0623efaa38d1958c15c3e23c6da7d6}{Url\+Ref}}}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{url_8h_a4446654e03ced4bbd3c6da9225fbfc69}\label{url_8h_a4446654e03ced4bbd3c6da9225fbfc69}} 
+\index{url.h@{url.h}!Url\_dispose@{Url\_dispose}}
+\index{Url\_dispose@{Url\_dispose}!url.h@{url.h}}
+\doxysubsubsection{\texorpdfstring{Url\_dispose()}{Url\_dispose()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} Url\+\_\+dispose (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{url_8h_a5d0623efaa38d1958c15c3e23c6da7d6}{Url\+Ref}} $\ast$}]{this\+\_\+ptr }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{url_8h_a445f510f1c3bb06b14e02faa2e21a2e6}\label{url_8h_a445f510f1c3bb06b14e02faa2e21a2e6}} 
+\index{url.h@{url.h}!Url\_new@{Url\_new}}
+\index{Url\_new@{Url\_new}!url.h@{url.h}}
+\doxysubsubsection{\texorpdfstring{Url\_new()}{Url\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{url_8h_a5d0623efaa38d1958c15c3e23c6da7d6}{Url\+Ref}} Url\+\_\+new (\begin{DoxyParamCaption}\item[{char $\ast$}]{url }\end{DoxyParamCaption})}
+

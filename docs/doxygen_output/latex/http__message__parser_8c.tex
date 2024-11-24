@@ -1,0 +1,316 @@
+\hypertarget{http__message__parser_8c}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/http\+\_\+protocol/http\+\_\+message\+\_\+parser.c File Reference}
+\label{http__message__parser_8c}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/http\_protocol/http\_message\_parser.c@{/home/robert/Projects/http\_in\_c/http\_in\_c/http\_protocol/http\_message\_parser.c}}
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/alloc.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/http\+\_\+protocol/http\+\_\+message\+\_\+parser.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/utils.\+h$>$}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_a34283d3f9cd72e831a73c6a85bc337fe}{message\+\_\+begin\+\_\+cb}} (llhttp\+\_\+t $\ast$parser)
+\begin{DoxyCompactList}\small\item\em forward declares \end{DoxyCompactList}\item 
+static int \mbox{\hyperlink{http__message__parser_8c_abcbef2cee91bf177acb808a24de5925a}{url\+\_\+data\+\_\+cb}} (llhttp\+\_\+t $\ast$parser, const char $\ast$at, size\+\_\+t length)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_a5e7f1b9b4a279acd5d0a899123c1f5b6}{status\+\_\+data\+\_\+cb}} (llhttp\+\_\+t $\ast$parser, const char $\ast$at, size\+\_\+t length)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_a5e9e1767f6a17fb770312fb2822710df}{method\+\_\+data\+\_\+cb}} (llhttp\+\_\+t $\ast$parser, const char $\ast$at, size\+\_\+t length)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_a5790dab3f92de92d4647fb80c38872eb}{version\+\_\+data\+\_\+cb}} (llhttp\+\_\+t $\ast$parser, const char $\ast$at, size\+\_\+t length)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_ada94afb405c03cb92d625edfc1dff8f4}{header\+\_\+field\+\_\+data\+\_\+cb}} (llhttp\+\_\+t $\ast$parser, const char $\ast$at, size\+\_\+t length)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_a9925616b5db4704f618caf69cd122c46}{header\+\_\+value\+\_\+data\+\_\+cb}} (llhttp\+\_\+t $\ast$parser, const char $\ast$at, size\+\_\+t length)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_a1023e1e30a58574fdb301e4072e61bfd}{chunk\+\_\+extension\+\_\+name\+\_\+cb}} (llhttp\+\_\+t $\ast$parser, const char $\ast$at, size\+\_\+t length)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_a3880d1b4dad11991aaa613bfef9097bb}{chunk\+\_\+extension\+\_\+value\+\_\+cb}} (llhttp\+\_\+t $\ast$parser, const char $\ast$at, size\+\_\+t length)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_adfdeaa82b9caaf7077e5bae736796d83}{headers\+\_\+complete\+\_\+cb}} (llhttp\+\_\+t $\ast$parser)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_aa3d2dc5f4180162bddb94f209c97f7f2}{body\+\_\+data\+\_\+cb}} (llhttp\+\_\+t $\ast$parser, const char $\ast$at, size\+\_\+t length)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_a7650b52989cf3883ecca3bf5d6d8a554}{message\+\_\+complete\+\_\+cb}} (llhttp\+\_\+t $\ast$parser)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_a461b2b97f224d2b35754b6d350daad95}{on\+\_\+url\+\_\+complete\+\_\+cb}} (llhttp\+\_\+t $\ast$parser)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_a99e2719e6e96284bc29d0d0006443472}{on\+\_\+status\+\_\+complete\+\_\+cb}} (llhttp\+\_\+t $\ast$parser)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_a26dd90906f7e866494b73143f524907e}{on\+\_\+method\+\_\+complete\+\_\+cb}} (llhttp\+\_\+t $\ast$parser)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_a01eb85a8c81dcf78bf2b12da877ab3b6}{on\+\_\+version\+\_\+complete\+\_\+cb}} (llhttp\+\_\+t $\ast$parser)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_a407fbbac052f4db70d38d244143fc573}{on\+\_\+header\+\_\+field\+\_\+complete\+\_\+cb}} (llhttp\+\_\+t $\ast$parser)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_a0d9ff3345a76068be732c2ca72e729cd}{on\+\_\+header\+\_\+value\+\_\+complete\+\_\+cb}} (llhttp\+\_\+t $\ast$parser)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_abe297a75a92691599c1f0b972ba1e8ce}{on\+\_\+chunk\+\_\+extension\+\_\+name\+\_\+complete\+\_\+cb}} (llhttp\+\_\+t $\ast$parser)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_af02523e07c6a64d8656cd14f3e7aa30b}{on\+\_\+chunk\+\_\+extension\+\_\+value\+\_\+complete\+\_\+cb}} (llhttp\+\_\+t $\ast$parser)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_a7624a6a6fdea0a7530d76fbcb084d438}{chunk\+\_\+header\+\_\+cb}} (llhttp\+\_\+t $\ast$parser)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_acbb0e3fdfc526540d14b5eb92c738586}{chunk\+\_\+complete\+\_\+cb}} (llhttp\+\_\+t $\ast$parser)
+\item 
+static int \mbox{\hyperlink{http__message__parser_8c_a99214c4a9346e9eefe31667557f60719}{on\+\_\+reset\+\_\+cb}} (llhttp\+\_\+t $\ast$parser)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{http__message__parser_8c_a13832fdf006cb362ea63d5c97cb95563}{Http\+Parser\+\_\+initialize}} (\mbox{\hyperlink{http__message__parser_8h_a7c6daa43ca02a2545dc62db4f7f1bbe9}{Http\+Message\+Parser}} $\ast$this)
+\item 
+\mbox{\hyperlink{http__message__parser_8h_a63f768e8707f441b72ba5c4160e4706b}{Http\+Message\+Parser\+Ref}} \mbox{\hyperlink{http__message__parser_8c_a4897b5ded05df0986d918d8dece335a3}{http\+\_\+message\+\_\+parser\+\_\+new}} (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$on\+\_\+new\+\_\+message\+\_\+cb)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ctx, \mbox{\hyperlink{group__group__message_ga33b8e4c347991edbbe1d3d7d6f77c9a1}{Http\+Message\+Ref}} new\+\_\+msg\+\_\+ref), \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$handler\+\_\+context)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{http__message__parser_8c_ac48a9f557c32af4e056f4d50da6c3010}{Http\+Parser\+\_\+reset}} (\mbox{\hyperlink{http__message__parser_8h_a7c6daa43ca02a2545dc62db4f7f1bbe9}{Http\+Message\+Parser}} $\ast$)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{http__message__parser_8c_a47b5d95a00e6fdbc452ded308d899ba6}{http\+\_\+message\+\_\+parser\+\_\+free}} (\mbox{\hyperlink{http__message__parser_8h_a63f768e8707f441b72ba5c4160e4706b}{Http\+Message\+Parser\+Ref}} this)
+\item 
+int \mbox{\hyperlink{http__message__parser_8c_a4b5d6375f805fce6732c7185c5f7df37}{Parser\+\_\+append\+\_\+bytes}} (\mbox{\hyperlink{http__message__parser_8h_a63f768e8707f441b72ba5c4160e4706b}{Http\+Message\+Parser\+Ref}} this, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$buffer, unsigned length)
+\item 
+llhttp\+\_\+errno\+\_\+t \mbox{\hyperlink{http__message__parser_8c_aca384d2eeb6275888ce4046eaf28f0e7}{http\+\_\+message\+\_\+parser\+\_\+consume}} (\mbox{\hyperlink{http__message__parser_8h_a7c6daa43ca02a2545dc62db4f7f1bbe9}{Http\+Message\+Parser}} $\ast$parser, const \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$buffer, int length)
+\begin{DoxyCompactList}\small\item\em The guts of the http message parsing process. \end{DoxyCompactList}\item 
+llhttp\+\_\+errno\+\_\+t \mbox{\hyperlink{http__message__parser_8c_a473040c1bb0536dc2580198bb04b00d8}{http\+\_\+message\+\_\+parser\+\_\+consume\+\_\+buffer}} (\mbox{\hyperlink{http__message__parser_8h_a7c6daa43ca02a2545dc62db4f7f1bbe9}{Http\+Message\+Parser}} $\ast$parser, \mbox{\hyperlink{iobuffer_8c_a373e47346d4021180e79668c7afcc0f5}{IOBuffer\+Ref}} iobuffer\+\_\+ref)
+\item 
+llhttp\+\_\+errno\+\_\+t \mbox{\hyperlink{http__message__parser_8c_acb736b83d6cf1064257c589808374129}{http\+\_\+message\+\_\+parser\+\_\+consume\+\_\+eof}} (\mbox{\hyperlink{http__message__parser_8h_a7c6daa43ca02a2545dc62db4f7f1bbe9}{Http\+Message\+Parser}} $\ast$parser)
+\item 
+llhttp\+\_\+errno\+\_\+t \mbox{\hyperlink{http__message__parser_8c_a4c72632c04e4642aa4a06111cbf1d0eb}{http\+\_\+message\+\_\+parser\+\_\+get\+\_\+errno}} (\mbox{\hyperlink{http__message__parser_8h_a7c6daa43ca02a2545dc62db4f7f1bbe9}{Http\+Message\+Parser}} $\ast$parser)
+\item 
+const \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{http__message__parser_8c_afec757373f8510e4d67e9276a633ccf7}{http\+\_\+message\+\_\+parser\+\_\+last\+\_\+byte\+\_\+parsed}} (\mbox{\hyperlink{http__message__parser_8h_a7c6daa43ca02a2545dc62db4f7f1bbe9}{Http\+Message\+Parser}} $\ast$this)
+\item 
+\mbox{\hyperlink{http__message__parser_8h_a0cb9b586ffde0d72db2f2be4fada0f45}{http\+\_\+parser\+\_\+error\+\_\+t}} \mbox{\hyperlink{http__message__parser_8c_a2ce7c387937dc8b2233cbf2bbc2ab88d}{http\+\_\+message\+\_\+parser\+\_\+get\+\_\+error}} (\mbox{\hyperlink{http__message__parser_8h_a7c6daa43ca02a2545dc62db4f7f1bbe9}{Http\+Message\+Parser}} $\ast$parser)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{http__message__parser_8c_aa3d2dc5f4180162bddb94f209c97f7f2}\label{http__message__parser_8c_aa3d2dc5f4180162bddb94f209c97f7f2}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!body\_data\_cb@{body\_data\_cb}}
+\index{body\_data\_cb@{body\_data\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{body\_data\_cb()}{body\_data\_cb()}}
+{\footnotesize\ttfamily static int body\+\_\+data\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser,  }\item[{const char $\ast$}]{at,  }\item[{size\+\_\+t}]{length }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_acbb0e3fdfc526540d14b5eb92c738586}\label{http__message__parser_8c_acbb0e3fdfc526540d14b5eb92c738586}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!chunk\_complete\_cb@{chunk\_complete\_cb}}
+\index{chunk\_complete\_cb@{chunk\_complete\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{chunk\_complete\_cb()}{chunk\_complete\_cb()}}
+{\footnotesize\ttfamily static int chunk\+\_\+complete\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_a1023e1e30a58574fdb301e4072e61bfd}\label{http__message__parser_8c_a1023e1e30a58574fdb301e4072e61bfd}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!chunk\_extension\_name\_cb@{chunk\_extension\_name\_cb}}
+\index{chunk\_extension\_name\_cb@{chunk\_extension\_name\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{chunk\_extension\_name\_cb()}{chunk\_extension\_name\_cb()}}
+{\footnotesize\ttfamily static int chunk\+\_\+extension\+\_\+name\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser,  }\item[{const char $\ast$}]{at,  }\item[{size\+\_\+t}]{length }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_a3880d1b4dad11991aaa613bfef9097bb}\label{http__message__parser_8c_a3880d1b4dad11991aaa613bfef9097bb}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!chunk\_extension\_value\_cb@{chunk\_extension\_value\_cb}}
+\index{chunk\_extension\_value\_cb@{chunk\_extension\_value\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{chunk\_extension\_value\_cb()}{chunk\_extension\_value\_cb()}}
+{\footnotesize\ttfamily static int chunk\+\_\+extension\+\_\+value\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser,  }\item[{const char $\ast$}]{at,  }\item[{size\+\_\+t}]{length }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_a7624a6a6fdea0a7530d76fbcb084d438}\label{http__message__parser_8c_a7624a6a6fdea0a7530d76fbcb084d438}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!chunk\_header\_cb@{chunk\_header\_cb}}
+\index{chunk\_header\_cb@{chunk\_header\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{chunk\_header\_cb()}{chunk\_header\_cb()}}
+{\footnotesize\ttfamily static int chunk\+\_\+header\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_ada94afb405c03cb92d625edfc1dff8f4}\label{http__message__parser_8c_ada94afb405c03cb92d625edfc1dff8f4}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!header\_field\_data\_cb@{header\_field\_data\_cb}}
+\index{header\_field\_data\_cb@{header\_field\_data\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{header\_field\_data\_cb()}{header\_field\_data\_cb()}}
+{\footnotesize\ttfamily static int header\+\_\+field\+\_\+data\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser,  }\item[{const char $\ast$}]{at,  }\item[{size\+\_\+t}]{length }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_a9925616b5db4704f618caf69cd122c46}\label{http__message__parser_8c_a9925616b5db4704f618caf69cd122c46}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!header\_value\_data\_cb@{header\_value\_data\_cb}}
+\index{header\_value\_data\_cb@{header\_value\_data\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{header\_value\_data\_cb()}{header\_value\_data\_cb()}}
+{\footnotesize\ttfamily static int header\+\_\+value\+\_\+data\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser,  }\item[{const char $\ast$}]{at,  }\item[{size\+\_\+t}]{length }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_adfdeaa82b9caaf7077e5bae736796d83}\label{http__message__parser_8c_adfdeaa82b9caaf7077e5bae736796d83}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!headers\_complete\_cb@{headers\_complete\_cb}}
+\index{headers\_complete\_cb@{headers\_complete\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{headers\_complete\_cb()}{headers\_complete\_cb()}}
+{\footnotesize\ttfamily static int headers\+\_\+complete\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_aca384d2eeb6275888ce4046eaf28f0e7}\label{http__message__parser_8c_aca384d2eeb6275888ce4046eaf28f0e7}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!http\_message\_parser\_consume@{http\_message\_parser\_consume}}
+\index{http\_message\_parser\_consume@{http\_message\_parser\_consume}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{http\_message\_parser\_consume()}{http\_message\_parser\_consume()}}
+{\footnotesize\ttfamily llhttp\+\_\+errno\+\_\+t http\+\_\+message\+\_\+parser\+\_\+consume (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__message__parser_8h_a7c6daa43ca02a2545dc62db4f7f1bbe9}{Http\+Message\+Parser}} $\ast$}]{parser,  }\item[{const \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{buffer,  }\item[{int}]{length }\end{DoxyParamCaption})}
+
+
+
+The guts of the http message parsing process. 
+
+Call this function repeatedly with successive buffers of data. These successive buffers may represent one or more messages and a single buffer is permitted to hold the end of one message and the start of the successive message.
+
+When a full message is complete the parser will call the \textquotesingle{}message\+\_\+complete\+\_\+handler\textquotesingle{}. This function should process the message and send the reply before returning. This will suspend the parser until the processing of the message is complete. And if necessary will continue with the next message
+
+The \mbox{\hyperlink{http__message__parser_8h_aca384d2eeb6275888ce4046eaf28f0e7}{http\+\_\+message\+\_\+parser\+\_\+consume()}} function will only return if\+:
+
+
+\begin{DoxyItemize}
+\item it has consumed all the data. So read some more and give it to consume.
+\item an error was encountered. Either a parse error, or an io error -\/ This should be treated as fatal and the connection closed.
+\item in a situation where a messsage does not contain a message length value the parser may need to be given an End-\/\+Of\+\_\+\+File signal in the form of a call to http\+\_\+message\+\_\+parser\+\_\+consume with a zero length buffer. This need for this will be signalled by llhttp\+\_\+message\+\_\+needs\+\_\+eof(parser-\/$>$m\+\_\+llhttp\+\_\+ptr) returning true
+\end{DoxyItemize}
+
+
+\begin{DoxyParams}{Parameters}
+{\em parser} & Http\+Message\+Parser\+Ref \\
+\hline
+{\em buffer} & A buffer of data presumable read from a tcp connectin \\
+\hline
+{\em length} & Length of the data buffer \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+llhttp\+\_\+errno\+\_\+t 
+\end{DoxyReturn}
+\mbox{\Hypertarget{http__message__parser_8c_a473040c1bb0536dc2580198bb04b00d8}\label{http__message__parser_8c_a473040c1bb0536dc2580198bb04b00d8}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!http\_message\_parser\_consume\_buffer@{http\_message\_parser\_consume\_buffer}}
+\index{http\_message\_parser\_consume\_buffer@{http\_message\_parser\_consume\_buffer}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{http\_message\_parser\_consume\_buffer()}{http\_message\_parser\_consume\_buffer()}}
+{\footnotesize\ttfamily llhttp\+\_\+errno\+\_\+t http\+\_\+message\+\_\+parser\+\_\+consume\+\_\+buffer (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__message__parser_8h_a7c6daa43ca02a2545dc62db4f7f1bbe9}{Http\+Message\+Parser}} $\ast$}]{parser,  }\item[{\mbox{\hyperlink{iobuffer_8c_a373e47346d4021180e79668c7afcc0f5}{IOBuffer\+Ref}}}]{iobuffer\+\_\+ref }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__message__parser_8c_acb736b83d6cf1064257c589808374129}\label{http__message__parser_8c_acb736b83d6cf1064257c589808374129}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!http\_message\_parser\_consume\_eof@{http\_message\_parser\_consume\_eof}}
+\index{http\_message\_parser\_consume\_eof@{http\_message\_parser\_consume\_eof}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{http\_message\_parser\_consume\_eof()}{http\_message\_parser\_consume\_eof()}}
+{\footnotesize\ttfamily llhttp\+\_\+errno\+\_\+t http\+\_\+message\+\_\+parser\+\_\+consume\+\_\+eof (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__message__parser_8h_a7c6daa43ca02a2545dc62db4f7f1bbe9}{Http\+Message\+Parser}} $\ast$}]{parser }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__message__parser_8c_a47b5d95a00e6fdbc452ded308d899ba6}\label{http__message__parser_8c_a47b5d95a00e6fdbc452ded308d899ba6}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!http\_message\_parser\_free@{http\_message\_parser\_free}}
+\index{http\_message\_parser\_free@{http\_message\_parser\_free}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{http\_message\_parser\_free()}{http\_message\_parser\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} http\+\_\+message\+\_\+parser\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__message__parser_8h_a63f768e8707f441b72ba5c4160e4706b}{Http\+Message\+Parser\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__message__parser_8c_a4c72632c04e4642aa4a06111cbf1d0eb}\label{http__message__parser_8c_a4c72632c04e4642aa4a06111cbf1d0eb}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!http\_message\_parser\_get\_errno@{http\_message\_parser\_get\_errno}}
+\index{http\_message\_parser\_get\_errno@{http\_message\_parser\_get\_errno}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{http\_message\_parser\_get\_errno()}{http\_message\_parser\_get\_errno()}}
+{\footnotesize\ttfamily llhttp\+\_\+errno\+\_\+t http\+\_\+message\+\_\+parser\+\_\+get\+\_\+errno (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__message__parser_8h_a7c6daa43ca02a2545dc62db4f7f1bbe9}{Http\+Message\+Parser}} $\ast$}]{parser }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__message__parser_8c_a2ce7c387937dc8b2233cbf2bbc2ab88d}\label{http__message__parser_8c_a2ce7c387937dc8b2233cbf2bbc2ab88d}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!http\_message\_parser\_get\_error@{http\_message\_parser\_get\_error}}
+\index{http\_message\_parser\_get\_error@{http\_message\_parser\_get\_error}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{http\_message\_parser\_get\_error()}{http\_message\_parser\_get\_error()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{http__message__parser_8h_a0cb9b586ffde0d72db2f2be4fada0f45}{http\+\_\+parser\+\_\+error\+\_\+t}} http\+\_\+message\+\_\+parser\+\_\+get\+\_\+error (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__message__parser_8h_a7c6daa43ca02a2545dc62db4f7f1bbe9}{Http\+Message\+Parser}} $\ast$}]{parser }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__message__parser_8c_afec757373f8510e4d67e9276a633ccf7}\label{http__message__parser_8c_afec757373f8510e4d67e9276a633ccf7}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!http\_message\_parser\_last\_byte\_parsed@{http\_message\_parser\_last\_byte\_parsed}}
+\index{http\_message\_parser\_last\_byte\_parsed@{http\_message\_parser\_last\_byte\_parsed}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{http\_message\_parser\_last\_byte\_parsed()}{http\_message\_parser\_last\_byte\_parsed()}}
+{\footnotesize\ttfamily const \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}$\ast$ http\+\_\+message\+\_\+parser\+\_\+last\+\_\+byte\+\_\+parsed (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__message__parser_8h_a7c6daa43ca02a2545dc62db4f7f1bbe9}{Http\+Message\+Parser}} $\ast$}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__message__parser_8c_a4897b5ded05df0986d918d8dece335a3}\label{http__message__parser_8c_a4897b5ded05df0986d918d8dece335a3}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!http\_message\_parser\_new@{http\_message\_parser\_new}}
+\index{http\_message\_parser\_new@{http\_message\_parser\_new}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{http\_message\_parser\_new()}{http\_message\_parser\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{http__message__parser_8h_a63f768e8707f441b72ba5c4160e4706b}{Http\+Message\+Parser\+Ref}} http\+\_\+message\+\_\+parser\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ctx, \mbox{\hyperlink{group__group__message_ga33b8e4c347991edbbe1d3d7d6f77c9a1}{Http\+Message\+Ref}} new\+\_\+msg\+\_\+ref)}]{on\+\_\+new\+\_\+message\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{handler\+\_\+context }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__message__parser_8c_a13832fdf006cb362ea63d5c97cb95563}\label{http__message__parser_8c_a13832fdf006cb362ea63d5c97cb95563}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!HttpParser\_initialize@{HttpParser\_initialize}}
+\index{HttpParser\_initialize@{HttpParser\_initialize}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{HttpParser\_initialize()}{HttpParser\_initialize()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} Http\+Parser\+\_\+initialize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__message__parser_8h_a7c6daa43ca02a2545dc62db4f7f1bbe9}{Http\+Message\+Parser}} $\ast$}]{this }\end{DoxyParamCaption})}
+
+a link back from the C parser to this class\mbox{\Hypertarget{http__message__parser_8c_ac48a9f557c32af4e056f4d50da6c3010}\label{http__message__parser_8c_ac48a9f557c32af4e056f4d50da6c3010}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!HttpParser\_reset@{HttpParser\_reset}}
+\index{HttpParser\_reset@{HttpParser\_reset}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{HttpParser\_reset()}{HttpParser\_reset()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} Http\+Parser\+\_\+reset (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__message__parser_8h_a7c6daa43ca02a2545dc62db4f7f1bbe9}{Http\+Message\+Parser}} $\ast$}]{ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__message__parser_8c_a34283d3f9cd72e831a73c6a85bc337fe}\label{http__message__parser_8c_a34283d3f9cd72e831a73c6a85bc337fe}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!message\_begin\_cb@{message\_begin\_cb}}
+\index{message\_begin\_cb@{message\_begin\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{message\_begin\_cb()}{message\_begin\_cb()}}
+{\footnotesize\ttfamily static int message\+\_\+begin\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+forward declares 
+
+\mbox{\Hypertarget{http__message__parser_8c_a7650b52989cf3883ecca3bf5d6d8a554}\label{http__message__parser_8c_a7650b52989cf3883ecca3bf5d6d8a554}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!message\_complete\_cb@{message\_complete\_cb}}
+\index{message\_complete\_cb@{message\_complete\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{message\_complete\_cb()}{message\_complete\_cb()}}
+{\footnotesize\ttfamily static int message\+\_\+complete\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_a5e9e1767f6a17fb770312fb2822710df}\label{http__message__parser_8c_a5e9e1767f6a17fb770312fb2822710df}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!method\_data\_cb@{method\_data\_cb}}
+\index{method\_data\_cb@{method\_data\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{method\_data\_cb()}{method\_data\_cb()}}
+{\footnotesize\ttfamily static int method\+\_\+data\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser,  }\item[{const char $\ast$}]{at,  }\item[{size\+\_\+t}]{length }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_abe297a75a92691599c1f0b972ba1e8ce}\label{http__message__parser_8c_abe297a75a92691599c1f0b972ba1e8ce}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!on\_chunk\_extension\_name\_complete\_cb@{on\_chunk\_extension\_name\_complete\_cb}}
+\index{on\_chunk\_extension\_name\_complete\_cb@{on\_chunk\_extension\_name\_complete\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{on\_chunk\_extension\_name\_complete\_cb()}{on\_chunk\_extension\_name\_complete\_cb()}}
+{\footnotesize\ttfamily static int on\+\_\+chunk\+\_\+extension\+\_\+name\+\_\+complete\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_af02523e07c6a64d8656cd14f3e7aa30b}\label{http__message__parser_8c_af02523e07c6a64d8656cd14f3e7aa30b}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!on\_chunk\_extension\_value\_complete\_cb@{on\_chunk\_extension\_value\_complete\_cb}}
+\index{on\_chunk\_extension\_value\_complete\_cb@{on\_chunk\_extension\_value\_complete\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{on\_chunk\_extension\_value\_complete\_cb()}{on\_chunk\_extension\_value\_complete\_cb()}}
+{\footnotesize\ttfamily static int on\+\_\+chunk\+\_\+extension\+\_\+value\+\_\+complete\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_a407fbbac052f4db70d38d244143fc573}\label{http__message__parser_8c_a407fbbac052f4db70d38d244143fc573}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!on\_header\_field\_complete\_cb@{on\_header\_field\_complete\_cb}}
+\index{on\_header\_field\_complete\_cb@{on\_header\_field\_complete\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{on\_header\_field\_complete\_cb()}{on\_header\_field\_complete\_cb()}}
+{\footnotesize\ttfamily static int on\+\_\+header\+\_\+field\+\_\+complete\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_a0d9ff3345a76068be732c2ca72e729cd}\label{http__message__parser_8c_a0d9ff3345a76068be732c2ca72e729cd}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!on\_header\_value\_complete\_cb@{on\_header\_value\_complete\_cb}}
+\index{on\_header\_value\_complete\_cb@{on\_header\_value\_complete\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{on\_header\_value\_complete\_cb()}{on\_header\_value\_complete\_cb()}}
+{\footnotesize\ttfamily static int on\+\_\+header\+\_\+value\+\_\+complete\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_a26dd90906f7e866494b73143f524907e}\label{http__message__parser_8c_a26dd90906f7e866494b73143f524907e}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!on\_method\_complete\_cb@{on\_method\_complete\_cb}}
+\index{on\_method\_complete\_cb@{on\_method\_complete\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{on\_method\_complete\_cb()}{on\_method\_complete\_cb()}}
+{\footnotesize\ttfamily static int on\+\_\+method\+\_\+complete\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_a99214c4a9346e9eefe31667557f60719}\label{http__message__parser_8c_a99214c4a9346e9eefe31667557f60719}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!on\_reset\_cb@{on\_reset\_cb}}
+\index{on\_reset\_cb@{on\_reset\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{on\_reset\_cb()}{on\_reset\_cb()}}
+{\footnotesize\ttfamily static int on\+\_\+reset\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_a99e2719e6e96284bc29d0d0006443472}\label{http__message__parser_8c_a99e2719e6e96284bc29d0d0006443472}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!on\_status\_complete\_cb@{on\_status\_complete\_cb}}
+\index{on\_status\_complete\_cb@{on\_status\_complete\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{on\_status\_complete\_cb()}{on\_status\_complete\_cb()}}
+{\footnotesize\ttfamily static int on\+\_\+status\+\_\+complete\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_a461b2b97f224d2b35754b6d350daad95}\label{http__message__parser_8c_a461b2b97f224d2b35754b6d350daad95}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!on\_url\_complete\_cb@{on\_url\_complete\_cb}}
+\index{on\_url\_complete\_cb@{on\_url\_complete\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{on\_url\_complete\_cb()}{on\_url\_complete\_cb()}}
+{\footnotesize\ttfamily static int on\+\_\+url\+\_\+complete\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_a01eb85a8c81dcf78bf2b12da877ab3b6}\label{http__message__parser_8c_a01eb85a8c81dcf78bf2b12da877ab3b6}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!on\_version\_complete\_cb@{on\_version\_complete\_cb}}
+\index{on\_version\_complete\_cb@{on\_version\_complete\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{on\_version\_complete\_cb()}{on\_version\_complete\_cb()}}
+{\footnotesize\ttfamily static int on\+\_\+version\+\_\+complete\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_a4b5d6375f805fce6732c7185c5f7df37}\label{http__message__parser_8c_a4b5d6375f805fce6732c7185c5f7df37}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!Parser\_append\_bytes@{Parser\_append\_bytes}}
+\index{Parser\_append\_bytes@{Parser\_append\_bytes}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{Parser\_append\_bytes()}{Parser\_append\_bytes()}}
+{\footnotesize\ttfamily int Parser\+\_\+append\+\_\+bytes (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__message__parser_8h_a63f768e8707f441b72ba5c4160e4706b}{Http\+Message\+Parser\+Ref}}}]{this,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{buffer,  }\item[{unsigned}]{length }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__message__parser_8c_a5e7f1b9b4a279acd5d0a899123c1f5b6}\label{http__message__parser_8c_a5e7f1b9b4a279acd5d0a899123c1f5b6}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!status\_data\_cb@{status\_data\_cb}}
+\index{status\_data\_cb@{status\_data\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{status\_data\_cb()}{status\_data\_cb()}}
+{\footnotesize\ttfamily static int status\+\_\+data\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser,  }\item[{const char $\ast$}]{at,  }\item[{size\+\_\+t}]{length }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_abcbef2cee91bf177acb808a24de5925a}\label{http__message__parser_8c_abcbef2cee91bf177acb808a24de5925a}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!url\_data\_cb@{url\_data\_cb}}
+\index{url\_data\_cb@{url\_data\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{url\_data\_cb()}{url\_data\_cb()}}
+{\footnotesize\ttfamily static int url\+\_\+data\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser,  }\item[{const char $\ast$}]{at,  }\item[{size\+\_\+t}]{length }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{http__message__parser_8c_a5790dab3f92de92d4647fb80c38872eb}\label{http__message__parser_8c_a5790dab3f92de92d4647fb80c38872eb}} 
+\index{http\_message\_parser.c@{http\_message\_parser.c}!version\_data\_cb@{version\_data\_cb}}
+\index{version\_data\_cb@{version\_data\_cb}!http\_message\_parser.c@{http\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{version\_data\_cb()}{version\_data\_cb()}}
+{\footnotesize\ttfamily static int version\+\_\+data\+\_\+cb (\begin{DoxyParamCaption}\item[{llhttp\+\_\+t $\ast$}]{parser,  }\item[{const char $\ast$}]{at,  }\item[{size\+\_\+t}]{length }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+

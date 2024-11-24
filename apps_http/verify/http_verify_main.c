@@ -100,9 +100,13 @@ void* threadfn(void* data)
             bool last_round = ctx->roundtrip_per_connection_counter + 1 == ctx->max_rountrips_per_connection;
             HttpMessageRef request = http_make_request("/echo", last_round);
             HttpMessageRef response = NULL;
+//            printf("verify about to write message\n");
             int rc1 = http_syncsocket_write_message(client, request);
+//            printf("verify write message done\n");
             if (rc1 != 0) break;
+//            printf("verify about to read message\n");
             int rc2 = http_syncsocket_read_message(client, &response);
+//            printf("verify read message done\n");
             if (rc2 != 0) break;
             IOBufferRef iob_req = http_message_serialize(request);
             IOBufferRef iob_resp = http_message_serialize(response);

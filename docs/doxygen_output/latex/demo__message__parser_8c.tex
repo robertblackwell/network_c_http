@@ -1,0 +1,228 @@
+\hypertarget{demo__message__parser_8c}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/demo\+\_\+protocol/demo\+\_\+message\+\_\+parser.c File Reference}
+\label{demo__message__parser_8c}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/demo\_protocol/demo\_message\_parser.c@{/home/robert/Projects/http\_in\_c/http\_in\_c/demo\_protocol/demo\_message\_parser.c}}
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/demo\+\_\+protocol/demo\+\_\+message\+\_\+parser.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/utils.\+h$>$}\newline
+{\ttfamily \#include $<$ctype.\+h$>$}\newline
+{\ttfamily \#include $<$rbl/logger.\+h$>$}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{demo__message__parser_8c_a0c2587432e4dc14a0687f1c954b1cac3}{CH\+\_\+\+SOH}}~0x01
+\item 
+\#define \mbox{\hyperlink{demo__message__parser_8c_af67689cbdef7f5bbc71bdc07dfdf2ac8}{CH\+\_\+\+STX}}~0x02
+\item 
+\#define \mbox{\hyperlink{demo__message__parser_8c_a6fa3ec78d898fbaa33cf05bc8d5bf229}{CH\+\_\+\+ETX}}~0x03
+\item 
+\#define \mbox{\hyperlink{demo__message__parser_8c_a440c761baa92fc07536cd58731aed1b7}{CH\+\_\+\+EOT}}~0x04
+\item 
+\#define \mbox{\hyperlink{demo__message__parser_8c_a775f35ece5b9689ee8c97c987d3c1a72}{is\+\_\+ascii}}(ch)~(isascii(ch))
+\item 
+\#define \mbox{\hyperlink{demo__message__parser_8c_ac7d9fff1c0b743b835eb1e38efcc2b8d}{PARSE\+\_\+\+ERROR\+\_\+\+CB}}(THIS,  BYTES,  ERRC)
+\item 
+\#define \mbox{\hyperlink{demo__message__parser_8c_a40f84bcc198d2976c71faddeb6d917e0}{SET\+\_\+\+IS\+\_\+\+REQUEST}}(THIS,  V)~(Demo\+Message\+\_\+set\+\_\+is\+\_\+request(THIS-\/$>$m\+\_\+current\+\_\+message\+\_\+ptr, V)
+\item 
+\#define \mbox{\hyperlink{demo__message__parser_8c_a7c14748f5dc12906db9005c0827e0fdc}{ADD\+\_\+\+TO\+\_\+\+BODY}}(THIS,  CH)~()
+\item 
+\#define \mbox{\hyperlink{demo__message__parser_8c_ae4703cc3203e963f1a59258aa6a67a82}{FINALIZE\+\_\+\+BODY}}(THIS)
+\end{DoxyCompactItemize}
+\doxysubsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+enum \mbox{\hyperlink{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8}{State}} \{ \newline
+\mbox{\hyperlink{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8aaade5e53e88cf231292cd1142cce2afe}{STATE\+\_\+\+IDLE}}
+, \mbox{\hyperlink{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8a2a83e56598c12b4d418b5dafa336b07a}{STATE\+\_\+\+SOH\+\_\+\+WAIT}}
+, \mbox{\hyperlink{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8a067302f5590a128cd57e9d491ee83e50}{STATE\+\_\+\+OPCODE}}
+, \mbox{\hyperlink{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8a7dda316ba245e097734fe569e43a3670}{STATE\+\_\+\+STX\+\_\+\+WAIT}}
+, \newline
+\mbox{\hyperlink{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8ab1990b7df35c1e45e0ecdfe97e2266d7}{STATE\+\_\+\+BODY}}
+, \mbox{\hyperlink{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8a1e97622b6e1af15e20e5ae67d1178ec8}{STATE\+\_\+\+EXT\+\_\+\+WAIT}}
+, \mbox{\hyperlink{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8a811332397dad0b3cb8d472b58046a5e2}{STATE\+\_\+\+LRC}}
+, \mbox{\hyperlink{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8ab4aed3d7d147b5a368a602ded1e7cb9c}{STATE\+\_\+\+EOT\+\_\+\+WAIT}}
+, \newline
+\mbox{\hyperlink{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8a88566e8918eb1ef76bdb5aecae69e7ec}{STATE\+\_\+\+ERROR\+\_\+\+RECOVERY}}
+ \}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__message__parser_8c_a17e542f9eb3fed2bc453a391d6156c61}{Demo\+Parser\+\_\+initialize}} (\mbox{\hyperlink{demo__message__parser_8h_a32f77886b29cb3dc1d0f89a05a749898}{Demo\+Message\+Parser\+Ref}} this)
+\item 
+\mbox{\hyperlink{demo__message__parser_8h_a32f77886b29cb3dc1d0f89a05a749898}{Demo\+Message\+Parser\+Ref}} \mbox{\hyperlink{demo__message__parser_8c_aef69f5e344304b4a918b82afdc8dcb1b}{demo\+\_\+message\+\_\+parser\+\_\+new}} (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$on\+\_\+message\+\_\+complete\+\_\+cb)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$, \mbox{\hyperlink{demo__message_8h_aec10d21ff11457bc72579a0e845ae27d}{Demo\+Message\+Ref}}), \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$on\+\_\+new\+\_\+message\+\_\+ctx)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__message__parser_8c_ae9674a329b4a4d3dc0bebcb692cbba9a}{demo\+\_\+message\+\_\+parser\+\_\+free}} (\mbox{\hyperlink{demo__message__parser_8h_a32f77886b29cb3dc1d0f89a05a749898}{Demo\+Message\+Parser\+Ref}} this)
+\item 
+\mbox{\hyperlink{demo__message_8h_aec10d21ff11457bc72579a0e845ae27d}{Demo\+Message\+Ref}} \mbox{\hyperlink{demo__message__parser_8c_a1f2d3646bd534d4e7ef027170d9759d1}{Demo\+Parser\+\_\+current\+\_\+message}} (\mbox{\hyperlink{demo__message__parser_8h_a32f77886b29cb3dc1d0f89a05a749898}{Demo\+Message\+Parser\+Ref}} this)
+\item 
+int \mbox{\hyperlink{demo__message__parser_8c_adda17b1c33244dddaf1388967ce58818}{Demo\+Parser\+\_\+append\+\_\+bytes}} (\mbox{\hyperlink{demo__message__parser_8h_a32f77886b29cb3dc1d0f89a05a749898}{Demo\+Message\+Parser\+Ref}} this, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$buffer, unsigned length)
+\item 
+int \mbox{\hyperlink{demo__message__parser_8c_a2591c432d3c1992421a3d1408f0f5f52}{demo\+\_\+message\+\_\+parser\+\_\+consume}} (\mbox{\hyperlink{demo__message__parser_8h_a32f77886b29cb3dc1d0f89a05a749898}{Demo\+Message\+Parser\+Ref}} parser, \mbox{\hyperlink{iobuffer_8c_a373e47346d4021180e79668c7afcc0f5}{IOBuffer\+Ref}} iobuffer\+\_\+ref)
+\item 
+int \mbox{\hyperlink{demo__message__parser_8c_acf5f3163729a4f46f949358c4fd5290e}{Demo\+Parser\+\_\+get\+\_\+errno}} (\mbox{\hyperlink{demo__message__parser_8h_a32f77886b29cb3dc1d0f89a05a749898}{Demo\+Message\+Parser\+Ref}} this)
+\item 
+\mbox{\hyperlink{demo__message__parser_8h_a394bf4bfe8dbcd270ce665577c83ff4c}{Demo\+Parser\+Error}} \mbox{\hyperlink{demo__message__parser_8c_a737087bb5cb576ca5b196e711e86e5bb}{Demo\+Parser\+\_\+get\+\_\+error}} (\mbox{\hyperlink{demo__message__parser_8h_a32f77886b29cb3dc1d0f89a05a749898}{Demo\+Message\+Parser\+Ref}} this)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{demo__message__parser_8c_a7c14748f5dc12906db9005c0827e0fdc}\label{demo__message__parser_8c_a7c14748f5dc12906db9005c0827e0fdc}} 
+\index{demo\_message\_parser.c@{demo\_message\_parser.c}!ADD\_TO\_BODY@{ADD\_TO\_BODY}}
+\index{ADD\_TO\_BODY@{ADD\_TO\_BODY}!demo\_message\_parser.c@{demo\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{ADD\_TO\_BODY}{ADD\_TO\_BODY}}
+{\footnotesize\ttfamily \#define ADD\+\_\+\+TO\+\_\+\+BODY(\begin{DoxyParamCaption}\item[{}]{THIS,  }\item[{}]{CH }\end{DoxyParamCaption})~()}
+
+\mbox{\Hypertarget{demo__message__parser_8c_a440c761baa92fc07536cd58731aed1b7}\label{demo__message__parser_8c_a440c761baa92fc07536cd58731aed1b7}} 
+\index{demo\_message\_parser.c@{demo\_message\_parser.c}!CH\_EOT@{CH\_EOT}}
+\index{CH\_EOT@{CH\_EOT}!demo\_message\_parser.c@{demo\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{CH\_EOT}{CH\_EOT}}
+{\footnotesize\ttfamily \#define CH\+\_\+\+EOT~0x04}
+
+\mbox{\Hypertarget{demo__message__parser_8c_a6fa3ec78d898fbaa33cf05bc8d5bf229}\label{demo__message__parser_8c_a6fa3ec78d898fbaa33cf05bc8d5bf229}} 
+\index{demo\_message\_parser.c@{demo\_message\_parser.c}!CH\_ETX@{CH\_ETX}}
+\index{CH\_ETX@{CH\_ETX}!demo\_message\_parser.c@{demo\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{CH\_ETX}{CH\_ETX}}
+{\footnotesize\ttfamily \#define CH\+\_\+\+ETX~0x03}
+
+\mbox{\Hypertarget{demo__message__parser_8c_a0c2587432e4dc14a0687f1c954b1cac3}\label{demo__message__parser_8c_a0c2587432e4dc14a0687f1c954b1cac3}} 
+\index{demo\_message\_parser.c@{demo\_message\_parser.c}!CH\_SOH@{CH\_SOH}}
+\index{CH\_SOH@{CH\_SOH}!demo\_message\_parser.c@{demo\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{CH\_SOH}{CH\_SOH}}
+{\footnotesize\ttfamily \#define CH\+\_\+\+SOH~0x01}
+
+\mbox{\Hypertarget{demo__message__parser_8c_af67689cbdef7f5bbc71bdc07dfdf2ac8}\label{demo__message__parser_8c_af67689cbdef7f5bbc71bdc07dfdf2ac8}} 
+\index{demo\_message\_parser.c@{demo\_message\_parser.c}!CH\_STX@{CH\_STX}}
+\index{CH\_STX@{CH\_STX}!demo\_message\_parser.c@{demo\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{CH\_STX}{CH\_STX}}
+{\footnotesize\ttfamily \#define CH\+\_\+\+STX~0x02}
+
+\mbox{\Hypertarget{demo__message__parser_8c_ae4703cc3203e963f1a59258aa6a67a82}\label{demo__message__parser_8c_ae4703cc3203e963f1a59258aa6a67a82}} 
+\index{demo\_message\_parser.c@{demo\_message\_parser.c}!FINALIZE\_BODY@{FINALIZE\_BODY}}
+\index{FINALIZE\_BODY@{FINALIZE\_BODY}!demo\_message\_parser.c@{demo\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{FINALIZE\_BODY}{FINALIZE\_BODY}}
+{\footnotesize\ttfamily \#define FINALIZE\+\_\+\+BODY(\begin{DoxyParamCaption}\item[{}]{THIS }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__message__parser_8c_a775f35ece5b9689ee8c97c987d3c1a72}\label{demo__message__parser_8c_a775f35ece5b9689ee8c97c987d3c1a72}} 
+\index{demo\_message\_parser.c@{demo\_message\_parser.c}!is\_ascii@{is\_ascii}}
+\index{is\_ascii@{is\_ascii}!demo\_message\_parser.c@{demo\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{is\_ascii}{is\_ascii}}
+{\footnotesize\ttfamily \#define is\+\_\+ascii(\begin{DoxyParamCaption}\item[{}]{ch }\end{DoxyParamCaption})~(isascii(ch))}
+
+\mbox{\Hypertarget{demo__message__parser_8c_ac7d9fff1c0b743b835eb1e38efcc2b8d}\label{demo__message__parser_8c_ac7d9fff1c0b743b835eb1e38efcc2b8d}} 
+\index{demo\_message\_parser.c@{demo\_message\_parser.c}!PARSE\_ERROR\_CB@{PARSE\_ERROR\_CB}}
+\index{PARSE\_ERROR\_CB@{PARSE\_ERROR\_CB}!demo\_message\_parser.c@{demo\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{PARSE\_ERROR\_CB}{PARSE\_ERROR\_CB}}
+{\footnotesize\ttfamily \#define PARSE\+\_\+\+ERROR\+\_\+\+CB(\begin{DoxyParamCaption}\item[{}]{THIS,  }\item[{}]{BYTES,  }\item[{}]{ERRC }\end{DoxyParamCaption})}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{    \textcolor{keywordflow}{do}\{ \(\backslash\)}
+\DoxyCodeLine{    IOBuffer\_consume(iobuffer\_ref, BYTES);                                        \(\backslash\)}
+\DoxyCodeLine{    DemoParserPrivateReturnValue rv = \{.error\_code = (ERRC)\}; \(\backslash\)}
+\DoxyCodeLine{    THIS-\/>on\_read\_parser\_error\_cb(THIS-\/>on\_read\_ctx, ERRC\#\#\_message);                                        \(\backslash\)}
+\DoxyCodeLine{    \textcolor{comment}{/*return rv;*/}               \(\backslash\)}
+\DoxyCodeLine{\}\textcolor{keywordflow}{while}(0);}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{demo__message__parser_8c_a40f84bcc198d2976c71faddeb6d917e0}\label{demo__message__parser_8c_a40f84bcc198d2976c71faddeb6d917e0}} 
+\index{demo\_message\_parser.c@{demo\_message\_parser.c}!SET\_IS\_REQUEST@{SET\_IS\_REQUEST}}
+\index{SET\_IS\_REQUEST@{SET\_IS\_REQUEST}!demo\_message\_parser.c@{demo\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{SET\_IS\_REQUEST}{SET\_IS\_REQUEST}}
+{\footnotesize\ttfamily \#define SET\+\_\+\+IS\+\_\+\+REQUEST(\begin{DoxyParamCaption}\item[{}]{THIS,  }\item[{}]{V }\end{DoxyParamCaption})~(Demo\+Message\+\_\+set\+\_\+is\+\_\+request(THIS-\/$>$m\+\_\+current\+\_\+message\+\_\+ptr, V)}
+
+
+
+\doxysubsection{Enumeration Type Documentation}
+\mbox{\Hypertarget{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8}\label{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8}} 
+\index{demo\_message\_parser.c@{demo\_message\_parser.c}!State@{State}}
+\index{State@{State}!demo\_message\_parser.c@{demo\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{State}{State}}
+{\footnotesize\ttfamily enum \mbox{\hyperlink{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8}{State}}}
+
+\begin{DoxyEnumFields}{Enumerator}
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_IDLE@{STATE\_IDLE}!demo\_message\_parser.c@{demo\_message\_parser.c}}\index{demo\_message\_parser.c@{demo\_message\_parser.c}!STATE\_IDLE@{STATE\_IDLE}}}\mbox{\Hypertarget{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8aaade5e53e88cf231292cd1142cce2afe}\label{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8aaade5e53e88cf231292cd1142cce2afe}} 
+STATE\+\_\+\+IDLE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_SOH\_WAIT@{STATE\_SOH\_WAIT}!demo\_message\_parser.c@{demo\_message\_parser.c}}\index{demo\_message\_parser.c@{demo\_message\_parser.c}!STATE\_SOH\_WAIT@{STATE\_SOH\_WAIT}}}\mbox{\Hypertarget{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8a2a83e56598c12b4d418b5dafa336b07a}\label{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8a2a83e56598c12b4d418b5dafa336b07a}} 
+STATE\+\_\+\+SOH\+\_\+\+WAIT&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_OPCODE@{STATE\_OPCODE}!demo\_message\_parser.c@{demo\_message\_parser.c}}\index{demo\_message\_parser.c@{demo\_message\_parser.c}!STATE\_OPCODE@{STATE\_OPCODE}}}\mbox{\Hypertarget{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8a067302f5590a128cd57e9d491ee83e50}\label{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8a067302f5590a128cd57e9d491ee83e50}} 
+STATE\+\_\+\+OPCODE&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_STX\_WAIT@{STATE\_STX\_WAIT}!demo\_message\_parser.c@{demo\_message\_parser.c}}\index{demo\_message\_parser.c@{demo\_message\_parser.c}!STATE\_STX\_WAIT@{STATE\_STX\_WAIT}}}\mbox{\Hypertarget{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8a7dda316ba245e097734fe569e43a3670}\label{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8a7dda316ba245e097734fe569e43a3670}} 
+STATE\+\_\+\+STX\+\_\+\+WAIT&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_BODY@{STATE\_BODY}!demo\_message\_parser.c@{demo\_message\_parser.c}}\index{demo\_message\_parser.c@{demo\_message\_parser.c}!STATE\_BODY@{STATE\_BODY}}}\mbox{\Hypertarget{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8ab1990b7df35c1e45e0ecdfe97e2266d7}\label{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8ab1990b7df35c1e45e0ecdfe97e2266d7}} 
+STATE\+\_\+\+BODY&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_EXT\_WAIT@{STATE\_EXT\_WAIT}!demo\_message\_parser.c@{demo\_message\_parser.c}}\index{demo\_message\_parser.c@{demo\_message\_parser.c}!STATE\_EXT\_WAIT@{STATE\_EXT\_WAIT}}}\mbox{\Hypertarget{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8a1e97622b6e1af15e20e5ae67d1178ec8}\label{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8a1e97622b6e1af15e20e5ae67d1178ec8}} 
+STATE\+\_\+\+EXT\+\_\+\+WAIT&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_LRC@{STATE\_LRC}!demo\_message\_parser.c@{demo\_message\_parser.c}}\index{demo\_message\_parser.c@{demo\_message\_parser.c}!STATE\_LRC@{STATE\_LRC}}}\mbox{\Hypertarget{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8a811332397dad0b3cb8d472b58046a5e2}\label{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8a811332397dad0b3cb8d472b58046a5e2}} 
+STATE\+\_\+\+LRC&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_EOT\_WAIT@{STATE\_EOT\_WAIT}!demo\_message\_parser.c@{demo\_message\_parser.c}}\index{demo\_message\_parser.c@{demo\_message\_parser.c}!STATE\_EOT\_WAIT@{STATE\_EOT\_WAIT}}}\mbox{\Hypertarget{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8ab4aed3d7d147b5a368a602ded1e7cb9c}\label{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8ab4aed3d7d147b5a368a602ded1e7cb9c}} 
+STATE\+\_\+\+EOT\+\_\+\+WAIT&\\
+\hline
+
+\raisebox{\heightof{T}}[0pt][0pt]{\index{STATE\_ERROR\_RECOVERY@{STATE\_ERROR\_RECOVERY}!demo\_message\_parser.c@{demo\_message\_parser.c}}\index{demo\_message\_parser.c@{demo\_message\_parser.c}!STATE\_ERROR\_RECOVERY@{STATE\_ERROR\_RECOVERY}}}\mbox{\Hypertarget{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8a88566e8918eb1ef76bdb5aecae69e7ec}\label{demo__message__parser_8c_a5d74787dedbc4e11c1ab15bf487e61f8a88566e8918eb1ef76bdb5aecae69e7ec}} 
+STATE\+\_\+\+ERROR\+\_\+\+RECOVERY&\\
+\hline
+
+\end{DoxyEnumFields}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{demo__message__parser_8c_a2591c432d3c1992421a3d1408f0f5f52}\label{demo__message__parser_8c_a2591c432d3c1992421a3d1408f0f5f52}} 
+\index{demo\_message\_parser.c@{demo\_message\_parser.c}!demo\_message\_parser\_consume@{demo\_message\_parser\_consume}}
+\index{demo\_message\_parser\_consume@{demo\_message\_parser\_consume}!demo\_message\_parser.c@{demo\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{demo\_message\_parser\_consume()}{demo\_message\_parser\_consume()}}
+{\footnotesize\ttfamily int demo\+\_\+message\+\_\+parser\+\_\+consume (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__message__parser_8h_a32f77886b29cb3dc1d0f89a05a749898}{Demo\+Message\+Parser\+Ref}}}]{parser,  }\item[{\mbox{\hyperlink{iobuffer_8c_a373e47346d4021180e79668c7afcc0f5}{IOBuffer\+Ref}}}]{iobuffer\+\_\+ref }\end{DoxyParamCaption})}
+
+Come to this state after a parse error -\/ search for SOH until end of buffer. If not found the terminate the read operation with an error\mbox{\Hypertarget{demo__message__parser_8c_ae9674a329b4a4d3dc0bebcb692cbba9a}\label{demo__message__parser_8c_ae9674a329b4a4d3dc0bebcb692cbba9a}} 
+\index{demo\_message\_parser.c@{demo\_message\_parser.c}!demo\_message\_parser\_free@{demo\_message\_parser\_free}}
+\index{demo\_message\_parser\_free@{demo\_message\_parser\_free}!demo\_message\_parser.c@{demo\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{demo\_message\_parser\_free()}{demo\_message\_parser\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} demo\+\_\+message\+\_\+parser\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__message__parser_8h_a32f77886b29cb3dc1d0f89a05a749898}{Demo\+Message\+Parser\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__message__parser_8c_aef69f5e344304b4a918b82afdc8dcb1b}\label{demo__message__parser_8c_aef69f5e344304b4a918b82afdc8dcb1b}} 
+\index{demo\_message\_parser.c@{demo\_message\_parser.c}!demo\_message\_parser\_new@{demo\_message\_parser\_new}}
+\index{demo\_message\_parser\_new@{demo\_message\_parser\_new}!demo\_message\_parser.c@{demo\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{demo\_message\_parser\_new()}{demo\_message\_parser\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{demo__message__parser_8h_a32f77886b29cb3dc1d0f89a05a749898}{Demo\+Message\+Parser\+Ref}} demo\+\_\+message\+\_\+parser\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$, \mbox{\hyperlink{demo__message_8h_aec10d21ff11457bc72579a0e845ae27d}{Demo\+Message\+Ref}})}]{on\+\_\+message\+\_\+complete\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{on\+\_\+new\+\_\+message\+\_\+ctx }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__message__parser_8c_adda17b1c33244dddaf1388967ce58818}\label{demo__message__parser_8c_adda17b1c33244dddaf1388967ce58818}} 
+\index{demo\_message\_parser.c@{demo\_message\_parser.c}!DemoParser\_append\_bytes@{DemoParser\_append\_bytes}}
+\index{DemoParser\_append\_bytes@{DemoParser\_append\_bytes}!demo\_message\_parser.c@{demo\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{DemoParser\_append\_bytes()}{DemoParser\_append\_bytes()}}
+{\footnotesize\ttfamily int Demo\+Parser\+\_\+append\+\_\+bytes (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__message__parser_8h_a32f77886b29cb3dc1d0f89a05a749898}{Demo\+Message\+Parser\+Ref}}}]{this,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{buffer,  }\item[{unsigned}]{length }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__message__parser_8c_a1f2d3646bd534d4e7ef027170d9759d1}\label{demo__message__parser_8c_a1f2d3646bd534d4e7ef027170d9759d1}} 
+\index{demo\_message\_parser.c@{demo\_message\_parser.c}!DemoParser\_current\_message@{DemoParser\_current\_message}}
+\index{DemoParser\_current\_message@{DemoParser\_current\_message}!demo\_message\_parser.c@{demo\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{DemoParser\_current\_message()}{DemoParser\_current\_message()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{demo__message_8h_aec10d21ff11457bc72579a0e845ae27d}{Demo\+Message\+Ref}} Demo\+Parser\+\_\+current\+\_\+message (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__message__parser_8h_a32f77886b29cb3dc1d0f89a05a749898}{Demo\+Message\+Parser\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__message__parser_8c_acf5f3163729a4f46f949358c4fd5290e}\label{demo__message__parser_8c_acf5f3163729a4f46f949358c4fd5290e}} 
+\index{demo\_message\_parser.c@{demo\_message\_parser.c}!DemoParser\_get\_errno@{DemoParser\_get\_errno}}
+\index{DemoParser\_get\_errno@{DemoParser\_get\_errno}!demo\_message\_parser.c@{demo\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{DemoParser\_get\_errno()}{DemoParser\_get\_errno()}}
+{\footnotesize\ttfamily int Demo\+Parser\+\_\+get\+\_\+errno (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__message__parser_8h_a32f77886b29cb3dc1d0f89a05a749898}{Demo\+Message\+Parser\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__message__parser_8c_a737087bb5cb576ca5b196e711e86e5bb}\label{demo__message__parser_8c_a737087bb5cb576ca5b196e711e86e5bb}} 
+\index{demo\_message\_parser.c@{demo\_message\_parser.c}!DemoParser\_get\_error@{DemoParser\_get\_error}}
+\index{DemoParser\_get\_error@{DemoParser\_get\_error}!demo\_message\_parser.c@{demo\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{DemoParser\_get\_error()}{DemoParser\_get\_error()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{demo__message__parser_8h_a394bf4bfe8dbcd270ce665577c83ff4c}{Demo\+Parser\+Error}} Demo\+Parser\+\_\+get\+\_\+error (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__message__parser_8h_a32f77886b29cb3dc1d0f89a05a749898}{Demo\+Message\+Parser\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__message__parser_8c_a17e542f9eb3fed2bc453a391d6156c61}\label{demo__message__parser_8c_a17e542f9eb3fed2bc453a391d6156c61}} 
+\index{demo\_message\_parser.c@{demo\_message\_parser.c}!DemoParser\_initialize@{DemoParser\_initialize}}
+\index{DemoParser\_initialize@{DemoParser\_initialize}!demo\_message\_parser.c@{demo\_message\_parser.c}}
+\doxysubsubsection{\texorpdfstring{DemoParser\_initialize()}{DemoParser\_initialize()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} Demo\+Parser\+\_\+initialize (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__message__parser_8h_a32f77886b29cb3dc1d0f89a05a749898}{Demo\+Message\+Parser\+Ref}}}]{this }\end{DoxyParamCaption})}
+

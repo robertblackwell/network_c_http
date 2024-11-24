@@ -1,0 +1,60 @@
+\hypertarget{list_8h}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/common/list.h File Reference}
+\label{list_8h}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/common/list.h@{/home/robert/Projects/http\_in\_c/http\_in\_c/common/list.h}}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{group__group__list_ga0238824d7c931932904158df27e94976}{List\+Item}}
+\item 
+typedef struct \mbox{\hyperlink{structList__s}{List\+\_\+s}} \mbox{\hyperlink{group__group__list_ga870763d9640d972dd0054290556de611}{List}}
+\item 
+typedef struct \mbox{\hyperlink{structList__s}{List\+\_\+s}} $\ast$ \mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}}
+\item 
+typedef struct \mbox{\hyperlink{structListNode__s}{List\+Node\+\_\+s}} \mbox{\hyperlink{group__group__list_ga2808b9756803cb294795dc7d4db1e142}{List\+Node}}
+\item 
+typedef \mbox{\hyperlink{group__group__list_ga2808b9756803cb294795dc7d4db1e142}{List\+Node}} $\ast$ \mbox{\hyperlink{group__group__list_ga5b1d540ae33aec0a3fc12e0e90d2c3b3}{List\+Iterator}}
+\item 
+typedef \mbox{\hyperlink{group__group__list_ga2808b9756803cb294795dc7d4db1e142}{List\+Node}} $\ast$ \mbox{\hyperlink{group__group__list_ga9095abb831229cfbd7b8d22fe68f956d}{List\+Iter}}
+\item 
+typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{group__group__list_ga98d06af7e58d9e605be508b3ee0c02e2}{List\+Item\+Deallocator}}) (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$$\ast$)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} \mbox{\hyperlink{group__group__list_ga97048ff5d5c2bb0593fba7b1a9e2add1}{List\+\_\+new}} ()
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__list_ga1e8808f2a9778508f511b9d26a32efcf}{List\+\_\+init}} (\mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} lref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__list_ga601a4baaa8253ab8096d6674c671be81}{List\+\_\+safe\+\_\+deinit}} (\mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} lref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$free\+\_\+item)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$))
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__list_ga25195b35b700a9d4c749149d0b522781}{List\+\_\+safe\+\_\+free}} (\mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} lref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$free\+\_\+item)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$))
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__list_ga6427eaff3423caa5ca15e53170c58d26}{List\+\_\+free}} (\mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} this)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__list_gad4c7b2c75370a37759da8d2cb5a23bc7}{List\+\_\+dispose}} (\mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} $\ast$lref\+\_\+adr)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__list_ga47205baa1f4e8a8e1948d0f175a6e9aa}{List\+\_\+display}} (const \mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} this)
+\item 
+int \mbox{\hyperlink{group__group__list_ga39101ee841dd50cbe119d813914b12ca}{List\+\_\+size}} (const \mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} lref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__list_ga18b17a16e38da4d89c3a5047f1b85563}{List\+\_\+add\+\_\+back}} (\mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} lref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$item)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__list_ga730ca73ce32fd4d7429ad1d5afaf58ed}{List\+\_\+add\+\_\+front}} (\mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} lref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$item)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{group__group__list_ga4acc81c6816be0bd9726292841007270}{List\+\_\+first}} (const \mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} lref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{group__group__list_ga3e6eaf337a4ba643a5d5c0c40f0bac33}{List\+\_\+remove\+\_\+first}} (\mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} lref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{group__group__list_ga27d14bc5b2a378c21949efb2ade052be}{List\+\_\+last}} (const \mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} lref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{group__group__list_ga0b638223c7968e4252e2735802ec8b8d}{List\+\_\+remove\+\_\+last}} (\mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} lref)
+\item 
+\mbox{\hyperlink{group__group__list_ga5b1d540ae33aec0a3fc12e0e90d2c3b3}{List\+Iterator}} \mbox{\hyperlink{group__group__list_gab3d5aebb1bf4978b68a33ef93ef14482}{List\+\_\+iterator}} (const \mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} lref)
+\item 
+\mbox{\hyperlink{group__group__list_ga5b1d540ae33aec0a3fc12e0e90d2c3b3}{List\+Iterator}} \mbox{\hyperlink{group__group__list_gaeacceab6348a8e9b7a5c25a8dfa3f97a}{List\+\_\+itr\+\_\+next}} (const \mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} lref, const \mbox{\hyperlink{group__group__list_ga5b1d540ae33aec0a3fc12e0e90d2c3b3}{List\+Iterator}} itr)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__list_ga3a220c8579aebdb1056b5404e265ba2b}{List\+\_\+itr\+\_\+remove}} (\mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} lref, \mbox{\hyperlink{group__group__list_ga5b1d540ae33aec0a3fc12e0e90d2c3b3}{List\+Iterator}} $\ast$itr\+\_\+adr)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{group__group__list_ga01adca22c8bf940c47796aa5fda9fe19}{List\+\_\+itr\+\_\+unpack}} (\mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} lref, \mbox{\hyperlink{group__group__list_ga5b1d540ae33aec0a3fc12e0e90d2c3b3}{List\+Iterator}} itr)
+\item 
+\mbox{\hyperlink{group__group__list_ga5b1d540ae33aec0a3fc12e0e90d2c3b3}{List\+Iterator}} \mbox{\hyperlink{group__group__list_gac67ff104709123eafcf76fa78fe0a262}{List\+\_\+find}} (\mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} lref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$needle)
+\end{DoxyCompactItemize}

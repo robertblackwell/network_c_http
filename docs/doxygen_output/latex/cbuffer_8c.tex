@@ -1,0 +1,232 @@
+\hypertarget{cbuffer_8c}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/common/cbuffer.c File Reference}
+\label{cbuffer_8c}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/common/cbuffer.c@{/home/robert/Projects/http\_in\_c/http\_in\_c/common/cbuffer.c}}
+{\ttfamily \#include $<$stddef.\+h$>$}\newline
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$rbl/check\+\_\+tag.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/alloc.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/utils.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/cbuffer.\+h$>$}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structBufferStrategy__s}{Buffer\+Strategy\+\_\+s}}
+\item 
+struct \mbox{\hyperlink{structCbuffer__s}{Cbuffer\+\_\+s}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{cbuffer_8c_a9b25ebcdbc079ac865ad0740a9bf83ea}{CBUFFER\+\_\+\+MAX\+\_\+\+CAPACITY}}~10000
+\item 
+\#define \mbox{\hyperlink{cbuffer_8c_ae0b9f1b18b8c2b2a056aa5a30638ef83}{CBUFFER\+\_\+\+MIN\+\_\+\+CAPACITY}}~1000
+\item 
+\#define \mbox{\hyperlink{cbuffer_8c_a66538675dc26ef19c41b2942394e318d}{CB\+\_\+\+SET\+\_\+\+TAG}}(p)
+\item 
+\#define \mbox{\hyperlink{cbuffer_8c_a4caa723907b560e1f98b1c4d706d71d8}{CB\+\_\+\+CHECK\+\_\+\+TAG\+\_\+\+ONLY}}(p)
+\item 
+\#define \mbox{\hyperlink{cbuffer_8c_a3abad6449affbc9893fa231dbfd22286}{CB\+\_\+\+CHECK\+\_\+\+TAG}}(p)
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \mbox{\hyperlink{structBufferStrategy__s}{Buffer\+Strategy\+\_\+s}} \mbox{\hyperlink{cbuffer_8c_ad869b604943e2fc71dcf892be9dfbed8}{Buffer\+Strategy}}
+\item 
+typedef struct \mbox{\hyperlink{structBufferStrategy__s}{Buffer\+Strategy\+\_\+s}} $\ast$ \mbox{\hyperlink{cbuffer_8c_a426a3969e3533e7acf582b2f46047d80}{Buffer\+Strategy\+Ref}}
+\item 
+typedef struct \mbox{\hyperlink{structCbuffer__s}{Cbuffer\+\_\+s}} \mbox{\hyperlink{cbuffer_8c_a4ff5454d7edfe353006df52b70ea6772}{Cbuffer}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+size\+\_\+t \mbox{\hyperlink{cbuffer_8c_a35552d6e2add49b3624e9f378ffe4e25}{max\+\_\+of\+\_\+two}} (size\+\_\+t a, size\+\_\+t b)
+\item 
+size\+\_\+t \mbox{\hyperlink{cbuffer_8c_a4ec77ebbf6ba500d3c2fcc9050ce64d1}{min\+\_\+of\+\_\+two}} (size\+\_\+t a, size\+\_\+t b)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{cbuffer_8c_a349cad2e9395388c2af4797361a6074b}{Buffer\+Strategy\+\_\+allocate}} (\mbox{\hyperlink{cbuffer_8c_a426a3969e3533e7acf582b2f46047d80}{Buffer\+Strategy\+Ref}} bsref, size\+\_\+t required\+\_\+size)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{cbuffer_8c_a9cc3b80d69e6dbcc79752113babe6cbd}{Buffer\+Strategy\+\_\+deallocate}} (\mbox{\hyperlink{cbuffer_8c_a426a3969e3533e7acf582b2f46047d80}{Buffer\+Strategy\+Ref}} bsref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$dataptr)
+\item 
+size\+\_\+t \mbox{\hyperlink{cbuffer_8c_a5f9a39184ce19fcd2d8eb39bee66130e}{Buffer\+Strategy\+\_\+reallocate\+\_\+size}} (\mbox{\hyperlink{cbuffer_8c_a426a3969e3533e7acf582b2f46047d80}{Buffer\+Strategy\+Ref}} bsref, size\+\_\+t current\+\_\+capacity, size\+\_\+t requested\+\_\+new\+\_\+size)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{cbuffer_8c_abbaa1d05214609731c880ad970cc761a}{Buffer\+Strategy\+\_\+reallocate}} (\mbox{\hyperlink{cbuffer_8c_a426a3969e3533e7acf582b2f46047d80}{Buffer\+Strategy\+Ref}} bsref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$current\+\_\+memptr, size\+\_\+t new\+\_\+size)
+\item 
+\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} \mbox{\hyperlink{group__group__cbuffer_ga3c9e663ed065fcd706a94d80a43f9bd3}{Cbuffer\+\_\+new}} ()
+\item 
+\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} \mbox{\hyperlink{group__group__cbuffer_gaeeb9967a22cf25835883f0ffceacccc2}{Cbuffer\+\_\+from\+\_\+cstring}} (const char $\ast$c\+\_\+str)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__cbuffer_ga25c5e584aae36f95aaf64dbb6b021448}{Cbuffer\+\_\+free}} (\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} this)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{group__group__cbuffer_ga22458d15d3c523ca65d94ef1970292af}{Cbuffer\+\_\+data}} (const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf)
+\begin{DoxyCompactList}\small\item\em Gets a void$\ast$ pointer to the start of the used portion of memory area. \end{DoxyCompactList}\item 
+size\+\_\+t \mbox{\hyperlink{group__group__cbuffer_gad03bb642e5777dd332fbe1cccdf50d30}{Cbuffer\+\_\+size}} (const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf)
+\begin{DoxyCompactList}\small\item\em Gets the size of used portion of the buffer. \end{DoxyCompactList}\item 
+const char $\ast$ \mbox{\hyperlink{group__group__cbuffer_gab26fbc35a40479fd2df1f172203a9ae9}{Cbuffer\+\_\+cstr}} (const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} this)
+\begin{DoxyCompactList}\small\item\em Gets a char$\ast$ pointer to the start of the used portion of memory area, the first byte after the used portion is always \textquotesingle{}\textbackslash{}0\textquotesingle{} so that the pointer returned by this function is a valid c strin. \end{DoxyCompactList}\item 
+size\+\_\+t \mbox{\hyperlink{group__group__cbuffer_ga4642beff13ca198e9ac0a4c67483e2aa}{Cbuffer\+\_\+capacity}} (const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf)
+\begin{DoxyCompactList}\small\item\em Gets the current capacity of the buffer -\/ max value of size, but. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{group__group__cbuffer_gaa39f2caaeec39de2835d36c40902b1a4}{Cbuffer\+\_\+next\+\_\+available}} (const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf)
+\begin{DoxyCompactList}\small\item\em Returns a pointer to the next available unused position in the buffer, which is always the \textquotesingle{}\textbackslash{}0\textquotesingle{} terminator. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__cbuffer_ga2d71a06566eabad7af13e276575b2aca}{Cbuffer\+\_\+clear}} (\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf)
+\begin{DoxyCompactList}\small\item\em Resets the buffer so that it is again an empty buffer. Does not release the manage memory area. If it has been expanded by previous usage pattern the larger memory area will be retained. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__cbuffer_gaf940ab747ab5ce42d52d24c9a86f1d42}{Cbuffer\+\_\+append}} (\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$data, size\+\_\+t len)
+\begin{DoxyCompactList}\small\item\em Append a block of data pointed at by a void$\ast$ and of given the length to the used portion of the managed memory area. Expand the memory area using realloc if required. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__cbuffer_ga69e99094e4005de89df141f380ffae65}{Cbuffer\+\_\+append\+\_\+cstr}} (\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf, const char $\ast$cstr)
+\begin{DoxyCompactList}\small\item\em Append the data represented by the cstr argument to the used portion of the managed memory area. Expand the memory area using realloc if required. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{cbuffer_8c_a8e10635137e21af4c764e6c8bb38dccf}{Cbuffer\+\_\+set\+Size}} (\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf, size\+\_\+t n)
+\item 
+char $\ast$ \mbox{\hyperlink{cbuffer_8c_a87b20b0b10364caaa79fd2dd1c05d8f8}{Cbuffer\+\_\+to\+String}} (const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__cbuffer_ga214b4f22758d066f686b3e2f5b5f6d98}{Cbuffer\+\_\+move}} (\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} dest, \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} src)
+\begin{DoxyCompactList}\small\item\em Moves the content of one Cbuffer instance to another by using move semantics. The internal pointers and counters of src are moved to dest. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{group__group__cbuffer_ga75d2be3cabfca3d16f4acb9469a1c6ad}{Cbuffer\+\_\+contains\+\_\+voidptr}} (const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ptr)
+\begin{DoxyCompactList}\small\item\em Detremines if an address value (pointer) is within the address range of the the buffer ie. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{group__group__cbuffer_ga099759843ffecae3d2138fca0cd89914}{Cbuffer\+\_\+contains\+\_\+charptr}} (const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf, char $\ast$ptr)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{cbuffer_8c_ad869b604943e2fc71dcf892be9dfbed8}{Buffer\+Strategy}} \mbox{\hyperlink{cbuffer_8c_a3094586b0d1bee58124b10758ac49320}{common\+\_\+strategy}} = \{.m\+\_\+min\+\_\+size=256, .m\+\_\+max\+\_\+size=1024$\ast$1024\}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{cbuffer_8c_a3abad6449affbc9893fa231dbfd22286}\label{cbuffer_8c_a3abad6449affbc9893fa231dbfd22286}} 
+\index{cbuffer.c@{cbuffer.c}!CB\_CHECK\_TAG@{CB\_CHECK\_TAG}}
+\index{CB\_CHECK\_TAG@{CB\_CHECK\_TAG}!cbuffer.c@{cbuffer.c}}
+\doxysubsubsection{\texorpdfstring{CB\_CHECK\_TAG}{CB\_CHECK\_TAG}}
+{\footnotesize\ttfamily \#define CB\+\_\+\+CHECK\+\_\+\+TAG(\begin{DoxyParamCaption}\item[{}]{p }\end{DoxyParamCaption})}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{    \textcolor{keywordflow}{do} \{ \(\backslash\)}
+\DoxyCodeLine{    if(strcmp((p)-\/>m\_tag, \textcolor{stringliteral}{"{}CBUF"{}}) != 0) \{ \(\backslash\)}
+\DoxyCodeLine{        assert(\textcolor{keyword}{false}); \(\backslash\)}
+\DoxyCodeLine{    \} \(\backslash\)}
+\DoxyCodeLine{    if( (p)-\/>m\_memPtr == NULL) \{ \(\backslash\)}
+\DoxyCodeLine{        assert(\textcolor{keyword}{false});                          \(\backslash\)}
+\DoxyCodeLine{    \}   \(\backslash\)}
+\DoxyCodeLine{\} \textcolor{keywordflow}{while}(0);}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{cbuffer_8c_a4caa723907b560e1f98b1c4d706d71d8}\label{cbuffer_8c_a4caa723907b560e1f98b1c4d706d71d8}} 
+\index{cbuffer.c@{cbuffer.c}!CB\_CHECK\_TAG\_ONLY@{CB\_CHECK\_TAG\_ONLY}}
+\index{CB\_CHECK\_TAG\_ONLY@{CB\_CHECK\_TAG\_ONLY}!cbuffer.c@{cbuffer.c}}
+\doxysubsubsection{\texorpdfstring{CB\_CHECK\_TAG\_ONLY}{CB\_CHECK\_TAG\_ONLY}}
+{\footnotesize\ttfamily \#define CB\+\_\+\+CHECK\+\_\+\+TAG\+\_\+\+ONLY(\begin{DoxyParamCaption}\item[{}]{p }\end{DoxyParamCaption})}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{    \textcolor{keywordflow}{do} \{ \(\backslash\)}
+\DoxyCodeLine{    if(strcmp((p)-\/>m\_tag, \textcolor{stringliteral}{"{}CBUF"{}}) != 0) \{ \(\backslash\)}
+\DoxyCodeLine{        assert(\textcolor{keyword}{false}); \(\backslash\)}
+\DoxyCodeLine{    \} \(\backslash\)}
+\DoxyCodeLine{\} \textcolor{keywordflow}{while}(0)}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{cbuffer_8c_a66538675dc26ef19c41b2942394e318d}\label{cbuffer_8c_a66538675dc26ef19c41b2942394e318d}} 
+\index{cbuffer.c@{cbuffer.c}!CB\_SET\_TAG@{CB\_SET\_TAG}}
+\index{CB\_SET\_TAG@{CB\_SET\_TAG}!cbuffer.c@{cbuffer.c}}
+\doxysubsubsection{\texorpdfstring{CB\_SET\_TAG}{CB\_SET\_TAG}}
+{\footnotesize\ttfamily \#define CB\+\_\+\+SET\+\_\+\+TAG(\begin{DoxyParamCaption}\item[{}]{p }\end{DoxyParamCaption})}
+
+{\bfseries Value\+:}
+\begin{DoxyCode}{0}
+\DoxyCodeLine{    \textcolor{keywordflow}{do} \{ \(\backslash\)}
+\DoxyCodeLine{    sprintf((p)-\/>m\_tag, \textcolor{stringliteral}{"{}CBUF"{}}); \(\backslash\)}
+\DoxyCodeLine{\} \textcolor{keywordflow}{while}(0);}
+
+\end{DoxyCode}
+\mbox{\Hypertarget{cbuffer_8c_a9b25ebcdbc079ac865ad0740a9bf83ea}\label{cbuffer_8c_a9b25ebcdbc079ac865ad0740a9bf83ea}} 
+\index{cbuffer.c@{cbuffer.c}!CBUFFER\_MAX\_CAPACITY@{CBUFFER\_MAX\_CAPACITY}}
+\index{CBUFFER\_MAX\_CAPACITY@{CBUFFER\_MAX\_CAPACITY}!cbuffer.c@{cbuffer.c}}
+\doxysubsubsection{\texorpdfstring{CBUFFER\_MAX\_CAPACITY}{CBUFFER\_MAX\_CAPACITY}}
+{\footnotesize\ttfamily \#define CBUFFER\+\_\+\+MAX\+\_\+\+CAPACITY~10000}
+
+\mbox{\Hypertarget{cbuffer_8c_ae0b9f1b18b8c2b2a056aa5a30638ef83}\label{cbuffer_8c_ae0b9f1b18b8c2b2a056aa5a30638ef83}} 
+\index{cbuffer.c@{cbuffer.c}!CBUFFER\_MIN\_CAPACITY@{CBUFFER\_MIN\_CAPACITY}}
+\index{CBUFFER\_MIN\_CAPACITY@{CBUFFER\_MIN\_CAPACITY}!cbuffer.c@{cbuffer.c}}
+\doxysubsubsection{\texorpdfstring{CBUFFER\_MIN\_CAPACITY}{CBUFFER\_MIN\_CAPACITY}}
+{\footnotesize\ttfamily \#define CBUFFER\+\_\+\+MIN\+\_\+\+CAPACITY~1000}
+
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{cbuffer_8c_ad869b604943e2fc71dcf892be9dfbed8}\label{cbuffer_8c_ad869b604943e2fc71dcf892be9dfbed8}} 
+\index{cbuffer.c@{cbuffer.c}!BufferStrategy@{BufferStrategy}}
+\index{BufferStrategy@{BufferStrategy}!cbuffer.c@{cbuffer.c}}
+\doxysubsubsection{\texorpdfstring{BufferStrategy}{BufferStrategy}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structBufferStrategy__s}{Buffer\+Strategy\+\_\+s}} \mbox{\hyperlink{cbuffer_8c_ad869b604943e2fc71dcf892be9dfbed8}{Buffer\+Strategy}}}
+
+This struct implements a strategy for growing contiguous buffers Cbuffer instances can be parameterized with different strategies \mbox{\Hypertarget{cbuffer_8c_a426a3969e3533e7acf582b2f46047d80}\label{cbuffer_8c_a426a3969e3533e7acf582b2f46047d80}} 
+\index{cbuffer.c@{cbuffer.c}!BufferStrategyRef@{BufferStrategyRef}}
+\index{BufferStrategyRef@{BufferStrategyRef}!cbuffer.c@{cbuffer.c}}
+\doxysubsubsection{\texorpdfstring{BufferStrategyRef}{BufferStrategyRef}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structBufferStrategy__s}{Buffer\+Strategy\+\_\+s}} $\ast$ \mbox{\hyperlink{cbuffer_8c_a426a3969e3533e7acf582b2f46047d80}{Buffer\+Strategy\+Ref}}}
+
+\mbox{\Hypertarget{cbuffer_8c_a4ff5454d7edfe353006df52b70ea6772}\label{cbuffer_8c_a4ff5454d7edfe353006df52b70ea6772}} 
+\index{cbuffer.c@{cbuffer.c}!Cbuffer@{Cbuffer}}
+\index{Cbuffer@{Cbuffer}!cbuffer.c@{cbuffer.c}}
+\doxysubsubsection{\texorpdfstring{Cbuffer}{Cbuffer}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structCbuffer__s}{Cbuffer\+\_\+s}} \mbox{\hyperlink{cbuffer_8c_a4ff5454d7edfe353006df52b70ea6772}{Cbuffer}}}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{cbuffer_8c_a349cad2e9395388c2af4797361a6074b}\label{cbuffer_8c_a349cad2e9395388c2af4797361a6074b}} 
+\index{cbuffer.c@{cbuffer.c}!BufferStrategy\_allocate@{BufferStrategy\_allocate}}
+\index{BufferStrategy\_allocate@{BufferStrategy\_allocate}!cbuffer.c@{cbuffer.c}}
+\doxysubsubsection{\texorpdfstring{BufferStrategy\_allocate()}{BufferStrategy\_allocate()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}$\ast$ Buffer\+Strategy\+\_\+allocate (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{cbuffer_8c_a426a3969e3533e7acf582b2f46047d80}{Buffer\+Strategy\+Ref}}}]{bsref,  }\item[{size\+\_\+t}]{required\+\_\+size }\end{DoxyParamCaption})}
+
+Allocates memory -\/ Buffer\+Strategy\+Ref determines how big the memory block is based on the requested size and its own internal strategy \mbox{\Hypertarget{cbuffer_8c_a9cc3b80d69e6dbcc79752113babe6cbd}\label{cbuffer_8c_a9cc3b80d69e6dbcc79752113babe6cbd}} 
+\index{cbuffer.c@{cbuffer.c}!BufferStrategy\_deallocate@{BufferStrategy\_deallocate}}
+\index{BufferStrategy\_deallocate@{BufferStrategy\_deallocate}!cbuffer.c@{cbuffer.c}}
+\doxysubsubsection{\texorpdfstring{BufferStrategy\_deallocate()}{BufferStrategy\_deallocate()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} Buffer\+Strategy\+\_\+deallocate (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{cbuffer_8c_a426a3969e3533e7acf582b2f46047d80}{Buffer\+Strategy\+Ref}}}]{bsref,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{dataptr }\end{DoxyParamCaption})}
+
+Apply a buffer strategy to deallocation -\/ provision for recording allocation/deallocation history \mbox{\Hypertarget{cbuffer_8c_abbaa1d05214609731c880ad970cc761a}\label{cbuffer_8c_abbaa1d05214609731c880ad970cc761a}} 
+\index{cbuffer.c@{cbuffer.c}!BufferStrategy\_reallocate@{BufferStrategy\_reallocate}}
+\index{BufferStrategy\_reallocate@{BufferStrategy\_reallocate}!cbuffer.c@{cbuffer.c}}
+\doxysubsubsection{\texorpdfstring{BufferStrategy\_reallocate()}{BufferStrategy\_reallocate()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}$\ast$ Buffer\+Strategy\+\_\+reallocate (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{cbuffer_8c_a426a3969e3533e7acf582b2f46047d80}{Buffer\+Strategy\+Ref}}}]{bsref,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{current\+\_\+memptr,  }\item[{size\+\_\+t}]{new\+\_\+size }\end{DoxyParamCaption})}
+
+Perform a reallocation of the current\+\_\+memptr to new\+\_\+size Assert is too big \mbox{\Hypertarget{cbuffer_8c_a5f9a39184ce19fcd2d8eb39bee66130e}\label{cbuffer_8c_a5f9a39184ce19fcd2d8eb39bee66130e}} 
+\index{cbuffer.c@{cbuffer.c}!BufferStrategy\_reallocate\_size@{BufferStrategy\_reallocate\_size}}
+\index{BufferStrategy\_reallocate\_size@{BufferStrategy\_reallocate\_size}!cbuffer.c@{cbuffer.c}}
+\doxysubsubsection{\texorpdfstring{BufferStrategy\_reallocate\_size()}{BufferStrategy\_reallocate\_size()}}
+{\footnotesize\ttfamily size\+\_\+t Buffer\+Strategy\+\_\+reallocate\+\_\+size (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{cbuffer_8c_a426a3969e3533e7acf582b2f46047d80}{Buffer\+Strategy\+Ref}}}]{bsref,  }\item[{size\+\_\+t}]{current\+\_\+capacity,  }\item[{size\+\_\+t}]{requested\+\_\+new\+\_\+size }\end{DoxyParamCaption})}
+
+Strategy determines size of memory reallocation based on current and requested sizes assert is would be too big \mbox{\Hypertarget{cbuffer_8c_a8e10635137e21af4c764e6c8bb38dccf}\label{cbuffer_8c_a8e10635137e21af4c764e6c8bb38dccf}} 
+\index{cbuffer.c@{cbuffer.c}!Cbuffer\_setSize@{Cbuffer\_setSize}}
+\index{Cbuffer\_setSize@{Cbuffer\_setSize}!cbuffer.c@{cbuffer.c}}
+\doxysubsubsection{\texorpdfstring{Cbuffer\_setSize()}{Cbuffer\_setSize()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} Cbuffer\+\_\+set\+Size (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}}}]{cbuf,  }\item[{size\+\_\+t}]{n }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{cbuffer_8c_a87b20b0b10364caaa79fd2dd1c05d8f8}\label{cbuffer_8c_a87b20b0b10364caaa79fd2dd1c05d8f8}} 
+\index{cbuffer.c@{cbuffer.c}!Cbuffer\_toString@{Cbuffer\_toString}}
+\index{Cbuffer\_toString@{Cbuffer\_toString}!cbuffer.c@{cbuffer.c}}
+\doxysubsubsection{\texorpdfstring{Cbuffer\_toString()}{Cbuffer\_toString()}}
+{\footnotesize\ttfamily char$\ast$ Cbuffer\+\_\+to\+String (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}}}]{cbuf }\end{DoxyParamCaption})}
+
+Returns a string that has the same value as the used portion of the buffer This is a reference to an internal string so dont free or change it there is a bug here as no zero on the end The return value is still owned by the buffer \mbox{\Hypertarget{cbuffer_8c_a35552d6e2add49b3624e9f378ffe4e25}\label{cbuffer_8c_a35552d6e2add49b3624e9f378ffe4e25}} 
+\index{cbuffer.c@{cbuffer.c}!max\_of\_two@{max\_of\_two}}
+\index{max\_of\_two@{max\_of\_two}!cbuffer.c@{cbuffer.c}}
+\doxysubsubsection{\texorpdfstring{max\_of\_two()}{max\_of\_two()}}
+{\footnotesize\ttfamily size\+\_\+t max\+\_\+of\+\_\+two (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{a,  }\item[{size\+\_\+t}]{b }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{cbuffer_8c_a4ec77ebbf6ba500d3c2fcc9050ce64d1}\label{cbuffer_8c_a4ec77ebbf6ba500d3c2fcc9050ce64d1}} 
+\index{cbuffer.c@{cbuffer.c}!min\_of\_two@{min\_of\_two}}
+\index{min\_of\_two@{min\_of\_two}!cbuffer.c@{cbuffer.c}}
+\doxysubsubsection{\texorpdfstring{min\_of\_two()}{min\_of\_two()}}
+{\footnotesize\ttfamily size\+\_\+t min\+\_\+of\+\_\+two (\begin{DoxyParamCaption}\item[{size\+\_\+t}]{a,  }\item[{size\+\_\+t}]{b }\end{DoxyParamCaption})}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{cbuffer_8c_a3094586b0d1bee58124b10758ac49320}\label{cbuffer_8c_a3094586b0d1bee58124b10758ac49320}} 
+\index{cbuffer.c@{cbuffer.c}!common\_strategy@{common\_strategy}}
+\index{common\_strategy@{common\_strategy}!cbuffer.c@{cbuffer.c}}
+\doxysubsubsection{\texorpdfstring{common\_strategy}{common\_strategy}}
+{\footnotesize\ttfamily \mbox{\hyperlink{cbuffer_8c_ad869b604943e2fc71dcf892be9dfbed8}{Buffer\+Strategy}} common\+\_\+strategy = \{.m\+\_\+min\+\_\+size=256, .m\+\_\+max\+\_\+size=1024$\ast$1024\}}
+

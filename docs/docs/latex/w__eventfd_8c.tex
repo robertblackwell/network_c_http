@@ -1,0 +1,170 @@
+\hypertarget{w__eventfd_8c}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/runloop/w\+\_\+eventfd.c File Reference}
+\label{w__eventfd_8c}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/runloop/w\_eventfd.c@{/home/robert/Projects/http\_in\_c/http\_in\_c/runloop/w\_eventfd.c}}
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/runloop.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/rl\+\_\+internal.\+h$>$}\newline
+{\ttfamily \#include $<$rbl/macros.\+h$>$}\newline
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$errno.\+h$>$}\newline
+{\ttfamily \#include $<$sys/epoll.\+h$>$}\newline
+{\ttfamily \#include $<$sys/eventfd.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{w__eventfd_8c_a92054b1b16c95d3c95296968c0c22f85}{RUNLOOP\+\_\+\+EVENTFD\+\_\+\+SEMAPHORE}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__eventfd_8c_ab6dada278ee932b41b98a13c4bcdaf23}{handler}} (\mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}} fdevent\+\_\+ref, uint64\+\_\+t event)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__eventfd_8c_a2bc6db3e11fce6671ddce5d3d84f5a09}{anonymous\+\_\+free}} (\mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}} p)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__eventfd_8c_abfd25f20e26b2837cbaa410bbc1b7f10}{runloop\+\_\+eventfd\+\_\+init}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} this, \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop)
+\item 
+\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} \mbox{\hyperlink{w__eventfd_8c_a0e5365b7ffef8d3dd8cddbd9d91eee44}{runloop\+\_\+eventfd\+\_\+new}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__eventfd_8c_a4b264cf23e4dd219789cb5bde6944848}{runloop\+\_\+eventfd\+\_\+free}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__eventfd_8c_a142d0654cd162191798d08481a16f3e7}{runloop\+\_\+eventfd\+\_\+register}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__eventfd_8c_a34b1eaba1e42b0c64e24b90091425a12}{runloop\+\_\+eventfd\+\_\+change\+\_\+watch}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} postable, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg, uint64\+\_\+t watch\+\_\+what)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__eventfd_8c_a316a8ec01541c29bc919b645f250a889}{runloop\+\_\+eventfd\+\_\+deregister}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__eventfd_8c_a6c4fea5c4cb6afd42150ac8dbf55530a}{runloop\+\_\+eventfd\+\_\+arm}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} postable, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__eventfd_8c_a190ae28dcb833c286c5d08be29bf180e}{runloop\+\_\+eventfd\+\_\+disarm}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__eventfd_8c_a0970d7a5af2b842f836f716faa9c6615}{runloop\+\_\+eventfd\+\_\+fire}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__eventfd_8c_a555317789ec1acc07cdd59d69a017bcf}{runloop\+\_\+eventfd\+\_\+clear\+\_\+one\+\_\+event}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__eventfd_8c_af68217d0a0c3e63410d69606798e4df4}{runloop\+\_\+eventfd\+\_\+clear\+\_\+all\+\_\+events}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis)
+\item 
+\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} \mbox{\hyperlink{w__eventfd_8c_a94c2c3385090801d8415aa7d67c12d04}{runloop\+\_\+eventfd\+\_\+get\+\_\+reactor}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis)
+\item 
+int \mbox{\hyperlink{w__eventfd_8c_a81a8a0c87572e0199d203c7381e612d7}{runloop\+\_\+eventfd\+\_\+get\+\_\+fd}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} this)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__eventfd_8c_ab109da96ac9aaf314b13d5f8a56fe5c0}{runloop\+\_\+eventfd\+\_\+verify}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} r)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{w__eventfd_8c_a92054b1b16c95d3c95296968c0c22f85}\label{w__eventfd_8c_a92054b1b16c95d3c95296968c0c22f85}} 
+\index{w\_eventfd.c@{w\_eventfd.c}!RUNLOOP\_EVENTFD\_SEMAPHORE@{RUNLOOP\_EVENTFD\_SEMAPHORE}}
+\index{RUNLOOP\_EVENTFD\_SEMAPHORE@{RUNLOOP\_EVENTFD\_SEMAPHORE}!w\_eventfd.c@{w\_eventfd.c}}
+\doxysubsubsection{\texorpdfstring{RUNLOOP\_EVENTFD\_SEMAPHORE}{RUNLOOP\_EVENTFD\_SEMAPHORE}}
+{\footnotesize\ttfamily \#define RUNLOOP\+\_\+\+EVENTFD\+\_\+\+SEMAPHORE}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{w__eventfd_8c_a2bc6db3e11fce6671ddce5d3d84f5a09}\label{w__eventfd_8c_a2bc6db3e11fce6671ddce5d3d84f5a09}} 
+\index{w\_eventfd.c@{w\_eventfd.c}!anonymous\_free@{anonymous\_free}}
+\index{anonymous\_free@{anonymous\_free}!w\_eventfd.c@{w\_eventfd.c}}
+\doxysubsubsection{\texorpdfstring{anonymous\_free()}{anonymous\_free()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} anonymous\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}}}]{p }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{w__eventfd_8c_ab6dada278ee932b41b98a13c4bcdaf23}\label{w__eventfd_8c_ab6dada278ee932b41b98a13c4bcdaf23}} 
+\index{w\_eventfd.c@{w\_eventfd.c}!handler@{handler}}
+\index{handler@{handler}!w\_eventfd.c@{w\_eventfd.c}}
+\doxysubsubsection{\texorpdfstring{handler()}{handler()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} handler (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}}}]{fdevent\+\_\+ref,  }\item[{uint64\+\_\+t}]{event }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \\
+\hline
+{\em fd} & \\
+\hline
+{\em event} & \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{w__eventfd_8c_a6c4fea5c4cb6afd42150ac8dbf55530a}\label{w__eventfd_8c_a6c4fea5c4cb6afd42150ac8dbf55530a}} 
+\index{w\_eventfd.c@{w\_eventfd.c}!runloop\_eventfd\_arm@{runloop\_eventfd\_arm}}
+\index{runloop\_eventfd\_arm@{runloop\_eventfd\_arm}!w\_eventfd.c@{w\_eventfd.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_arm()}{runloop\_eventfd\_arm()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+arm (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{postable,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{arg }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{w__eventfd_8c_a34b1eaba1e42b0c64e24b90091425a12}\label{w__eventfd_8c_a34b1eaba1e42b0c64e24b90091425a12}} 
+\index{w\_eventfd.c@{w\_eventfd.c}!runloop\_eventfd\_change\_watch@{runloop\_eventfd\_change\_watch}}
+\index{runloop\_eventfd\_change\_watch@{runloop\_eventfd\_change\_watch}!w\_eventfd.c@{w\_eventfd.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_change\_watch()}{runloop\_eventfd\_change\_watch()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+change\+\_\+watch (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{postable,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{arg,  }\item[{uint64\+\_\+t}]{watch\+\_\+what }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{w__eventfd_8c_af68217d0a0c3e63410d69606798e4df4}\label{w__eventfd_8c_af68217d0a0c3e63410d69606798e4df4}} 
+\index{w\_eventfd.c@{w\_eventfd.c}!runloop\_eventfd\_clear\_all\_events@{runloop\_eventfd\_clear\_all\_events}}
+\index{runloop\_eventfd\_clear\_all\_events@{runloop\_eventfd\_clear\_all\_events}!w\_eventfd.c@{w\_eventfd.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_clear\_all\_events()}{runloop\_eventfd\_clear\_all\_events()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+clear\+\_\+all\+\_\+events (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{w__eventfd_8c_a555317789ec1acc07cdd59d69a017bcf}\label{w__eventfd_8c_a555317789ec1acc07cdd59d69a017bcf}} 
+\index{w\_eventfd.c@{w\_eventfd.c}!runloop\_eventfd\_clear\_one\_event@{runloop\_eventfd\_clear\_one\_event}}
+\index{runloop\_eventfd\_clear\_one\_event@{runloop\_eventfd\_clear\_one\_event}!w\_eventfd.c@{w\_eventfd.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_clear\_one\_event()}{runloop\_eventfd\_clear\_one\_event()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+clear\+\_\+one\+\_\+event (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{w__eventfd_8c_a316a8ec01541c29bc919b645f250a889}\label{w__eventfd_8c_a316a8ec01541c29bc919b645f250a889}} 
+\index{w\_eventfd.c@{w\_eventfd.c}!runloop\_eventfd\_deregister@{runloop\_eventfd\_deregister}}
+\index{runloop\_eventfd\_deregister@{runloop\_eventfd\_deregister}!w\_eventfd.c@{w\_eventfd.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_deregister()}{runloop\_eventfd\_deregister()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+deregister (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{w__eventfd_8c_a190ae28dcb833c286c5d08be29bf180e}\label{w__eventfd_8c_a190ae28dcb833c286c5d08be29bf180e}} 
+\index{w\_eventfd.c@{w\_eventfd.c}!runloop\_eventfd\_disarm@{runloop\_eventfd\_disarm}}
+\index{runloop\_eventfd\_disarm@{runloop\_eventfd\_disarm}!w\_eventfd.c@{w\_eventfd.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_disarm()}{runloop\_eventfd\_disarm()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+disarm (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{w__eventfd_8c_a0970d7a5af2b842f836f716faa9c6615}\label{w__eventfd_8c_a0970d7a5af2b842f836f716faa9c6615}} 
+\index{w\_eventfd.c@{w\_eventfd.c}!runloop\_eventfd\_fire@{runloop\_eventfd\_fire}}
+\index{runloop\_eventfd\_fire@{runloop\_eventfd\_fire}!w\_eventfd.c@{w\_eventfd.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_fire()}{runloop\_eventfd\_fire()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+fire (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{w__eventfd_8c_a4b264cf23e4dd219789cb5bde6944848}\label{w__eventfd_8c_a4b264cf23e4dd219789cb5bde6944848}} 
+\index{w\_eventfd.c@{w\_eventfd.c}!runloop\_eventfd\_free@{runloop\_eventfd\_free}}
+\index{runloop\_eventfd\_free@{runloop\_eventfd\_free}!w\_eventfd.c@{w\_eventfd.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_free()}{runloop\_eventfd\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{w__eventfd_8c_a81a8a0c87572e0199d203c7381e612d7}\label{w__eventfd_8c_a81a8a0c87572e0199d203c7381e612d7}} 
+\index{w\_eventfd.c@{w\_eventfd.c}!runloop\_eventfd\_get\_fd@{runloop\_eventfd\_get\_fd}}
+\index{runloop\_eventfd\_get\_fd@{runloop\_eventfd\_get\_fd}!w\_eventfd.c@{w\_eventfd.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_get\_fd()}{runloop\_eventfd\_get\_fd()}}
+{\footnotesize\ttfamily int runloop\+\_\+eventfd\+\_\+get\+\_\+fd (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{w__eventfd_8c_a94c2c3385090801d8415aa7d67c12d04}\label{w__eventfd_8c_a94c2c3385090801d8415aa7d67c12d04}} 
+\index{w\_eventfd.c@{w\_eventfd.c}!runloop\_eventfd\_get\_reactor@{runloop\_eventfd\_get\_reactor}}
+\index{runloop\_eventfd\_get\_reactor@{runloop\_eventfd\_get\_reactor}!w\_eventfd.c@{w\_eventfd.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_get\_reactor()}{runloop\_eventfd\_get\_reactor()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+eventfd\+\_\+get\+\_\+reactor (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{w__eventfd_8c_abfd25f20e26b2837cbaa410bbc1b7f10}\label{w__eventfd_8c_abfd25f20e26b2837cbaa410bbc1b7f10}} 
+\index{w\_eventfd.c@{w\_eventfd.c}!runloop\_eventfd\_init@{runloop\_eventfd\_init}}
+\index{runloop\_eventfd\_init@{runloop\_eventfd\_init}!w\_eventfd.c@{w\_eventfd.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_init()}{runloop\_eventfd\_init()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{this,  }\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{w__eventfd_8c_a0e5365b7ffef8d3dd8cddbd9d91eee44}\label{w__eventfd_8c_a0e5365b7ffef8d3dd8cddbd9d91eee44}} 
+\index{w\_eventfd.c@{w\_eventfd.c}!runloop\_eventfd\_new@{runloop\_eventfd\_new}}
+\index{runloop\_eventfd\_new@{runloop\_eventfd\_new}!w\_eventfd.c@{w\_eventfd.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_new()}{runloop\_eventfd\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} runloop\+\_\+eventfd\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop }\end{DoxyParamCaption})}
+
+epoll provides a facility to create a file descriptor that is not attached to any file/pipe/device and to \char`\"{}fire\char`\"{} events on that file descriptor that can be waited for using the epoll call. This facility provides a mechanism to create and wait on arbitary event sources. \mbox{\Hypertarget{w__eventfd_8c_a142d0654cd162191798d08481a16f3e7}\label{w__eventfd_8c_a142d0654cd162191798d08481a16f3e7}} 
+\index{w\_eventfd.c@{w\_eventfd.c}!runloop\_eventfd\_register@{runloop\_eventfd\_register}}
+\index{runloop\_eventfd\_register@{runloop\_eventfd\_register}!w\_eventfd.c@{w\_eventfd.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_register()}{runloop\_eventfd\_register()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+register (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+Make sure this call enabled level triggering of events on this fd\mbox{\Hypertarget{w__eventfd_8c_ab109da96ac9aaf314b13d5f8a56fe5c0}\label{w__eventfd_8c_ab109da96ac9aaf314b13d5f8a56fe5c0}} 
+\index{w\_eventfd.c@{w\_eventfd.c}!runloop\_eventfd\_verify@{runloop\_eventfd\_verify}}
+\index{runloop\_eventfd\_verify@{runloop\_eventfd\_verify}!w\_eventfd.c@{w\_eventfd.c}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_verify()}{runloop\_eventfd\_verify()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+verify (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{r }\end{DoxyParamCaption})}
+

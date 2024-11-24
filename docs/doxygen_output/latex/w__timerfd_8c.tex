@@ -1,0 +1,97 @@
+\hypertarget{w__timerfd_8c}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/runloop/w\+\_\+timerfd.c File Reference}
+\label{w__timerfd_8c}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/runloop/w\_timerfd.c@{/home/robert/Projects/http\_in\_c/http\_in\_c/runloop/w\_timerfd.c}}
+{\ttfamily \#include $<$rbl/macros.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/runloop.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/rl\+\_\+internal.\+h$>$}\newline
+{\ttfamily \#include $<$time.\+h$>$}\newline
+{\ttfamily \#include $<$sys/timerfd.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include $<$sys/epoll.\+h$>$}\newline
+{\ttfamily \#include $<$errno.\+h$>$}\newline
+{\ttfamily \#include $<$rbl/logger.\+h$>$}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static struct timespec \mbox{\hyperlink{w__timerfd_8c_abf6f42eb14a9ac83d33eb202e2fae7bf}{current\+\_\+time}} ()
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__timerfd_8c_a01378a4dc996fa8d0e3fb8075fec4885}{print\+\_\+current\+\_\+tme}} (char $\ast$prefix)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__timerfd_8c_afb76350cb59fd4a3c52022cbee02968f}{handler}} (\mbox{\hyperlink{group__runloop_ga84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}} watcher, uint64\+\_\+t event)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{w__timerfd_8c_a2bc6db3e11fce6671ddce5d3d84f5a09}{anonymous\+\_\+free}} (\mbox{\hyperlink{group__runloop_ga84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}} p)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__runloop_ga3c4f3c4886fa08d12093ace7927268b7}{runloop\+\_\+timer\+\_\+init}} (\mbox{\hyperlink{group__runloop_gab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} this, \mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop)
+\item 
+\mbox{\hyperlink{group__runloop_gab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} \mbox{\hyperlink{group__runloop_ga2d195c5cf7caaa3a79c933239ef9d5af}{runloop\+\_\+timer\+\_\+new}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__runloop_gae94e3ab786f45fec5d1f83fe30599ce5}{runloop\+\_\+timer\+\_\+free}} (\mbox{\hyperlink{group__runloop_gab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} athis)
+\item 
+struct itimerspec \mbox{\hyperlink{w__timerfd_8c_a0e3fb97147a32cff4131c9b901d45395}{WTimer\+Fd\+\_\+update\+\_\+interval}} (\mbox{\hyperlink{group__runloop_gab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} this, uint64\+\_\+t interval\+\_\+ms, bool repeating)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__runloop_ga62c2846373f22447ba828e9859ddb879}{runloop\+\_\+timer\+\_\+register}} (\mbox{\hyperlink{group__runloop_gab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} athis, \mbox{\hyperlink{group__runloop_gaed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} cb, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ctx, uint64\+\_\+t interval\+\_\+ms, bool repeating)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__runloop_gae480cf7c3c71f608ce0a6122f77ffce1}{runloop\+\_\+timer\+\_\+update}} (\mbox{\hyperlink{group__runloop_gab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} athis, uint64\+\_\+t interval\+\_\+ms, bool repeating)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__runloop_gabd1d590c73af0d23a7634847cb39f983}{runloop\+\_\+timer\+\_\+disarm}} (\mbox{\hyperlink{group__runloop_gab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__runloop_ga6ff7fbe14e552c50a8caa027218695b2}{runloop\+\_\+timer\+\_\+rearm\+\_\+old}} (\mbox{\hyperlink{group__runloop_gab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} athis, \mbox{\hyperlink{group__runloop_gaed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} cb, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ctx, uint64\+\_\+t interval\+\_\+ms, bool repeating)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__runloop_ga10497ecff5ddcfde9b3ba795c1b55206}{runloop\+\_\+timer\+\_\+rearm}} (\mbox{\hyperlink{group__runloop_gab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__runloop_ga9c60cf832c6e140e63bb6c10a3c99602}{runloop\+\_\+timer\+\_\+deregister}} (\mbox{\hyperlink{group__runloop_gab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} athis)
+\item 
+\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} \mbox{\hyperlink{group__runloop_ga7bbefdfcebad982294f61eb7f77a4e9b}{runloop\+\_\+timer\+\_\+get\+\_\+reactor}} (\mbox{\hyperlink{group__runloop_gab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} athis)
+\item 
+int \mbox{\hyperlink{group__runloop_ga6eb9db3944dcd5cfc2924c20bcba0bab}{runloop\+\_\+timer\+\_\+get\+\_\+fd}} (\mbox{\hyperlink{group__runloop_gab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} this)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__runloop_ga137836ce63d6e8840f9566959140ec30}{WTimer\+Fd\+\_\+verify}} (\mbox{\hyperlink{group__runloop_gab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} this)
+\item 
+\mbox{\hyperlink{group__runloop_gab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} \mbox{\hyperlink{group__runloop_ga0caca38ef2f474916f68ab71df881c46}{runloop\+\_\+timer\+\_\+set}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} rl, \mbox{\hyperlink{group__runloop_gaed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} cb, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ctx, uint64\+\_\+t interval\+\_\+ms, bool repeating)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__runloop_gaac5fdf9c9c5329cef767093a33f53178}{runloop\+\_\+timer\+\_\+clear}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} rl, \mbox{\hyperlink{group__runloop_gab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} timerref)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{w__timerfd_8c_a2bc6db3e11fce6671ddce5d3d84f5a09}\label{w__timerfd_8c_a2bc6db3e11fce6671ddce5d3d84f5a09}} 
+\index{w\_timerfd.c@{w\_timerfd.c}!anonymous\_free@{anonymous\_free}}
+\index{anonymous\_free@{anonymous\_free}!w\_timerfd.c@{w\_timerfd.c}}
+\doxysubsubsection{\texorpdfstring{anonymous\_free()}{anonymous\_free()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} anonymous\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_ga84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}}}]{p }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{w__timerfd_8c_abf6f42eb14a9ac83d33eb202e2fae7bf}\label{w__timerfd_8c_abf6f42eb14a9ac83d33eb202e2fae7bf}} 
+\index{w\_timerfd.c@{w\_timerfd.c}!current\_time@{current\_time}}
+\index{current\_time@{current\_time}!w\_timerfd.c@{w\_timerfd.c}}
+\doxysubsubsection{\texorpdfstring{current\_time()}{current\_time()}}
+{\footnotesize\ttfamily static struct timespec current\+\_\+time (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{w__timerfd_8c_afb76350cb59fd4a3c52022cbee02968f}\label{w__timerfd_8c_afb76350cb59fd4a3c52022cbee02968f}} 
+\index{w\_timerfd.c@{w\_timerfd.c}!handler@{handler}}
+\index{handler@{handler}!w\_timerfd.c@{w\_timerfd.c}}
+\doxysubsubsection{\texorpdfstring{handler()}{handler()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} handler (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_ga84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}}}]{watcher,  }\item[{uint64\+\_\+t}]{event }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+First level fd event handler -\/ provided in the base/common part of an event source object. Called directly from the select/epoll\+\_\+wait loop 
+\begin{DoxyParams}{Parameters}
+{\em ctx} & \\
+\hline
+{\em fd} & \\
+\hline
+{\em event} & \\
+\hline
+\end{DoxyParams}
+Have to read from the fd to reset the EPOLLIN event\mbox{\Hypertarget{w__timerfd_8c_a01378a4dc996fa8d0e3fb8075fec4885}\label{w__timerfd_8c_a01378a4dc996fa8d0e3fb8075fec4885}} 
+\index{w\_timerfd.c@{w\_timerfd.c}!print\_current\_tme@{print\_current\_tme}}
+\index{print\_current\_tme@{print\_current\_tme}!w\_timerfd.c@{w\_timerfd.c}}
+\doxysubsubsection{\texorpdfstring{print\_current\_tme()}{print\_current\_tme()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} print\+\_\+current\+\_\+tme (\begin{DoxyParamCaption}\item[{char $\ast$}]{prefix }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{w__timerfd_8c_a0e3fb97147a32cff4131c9b901d45395}\label{w__timerfd_8c_a0e3fb97147a32cff4131c9b901d45395}} 
+\index{w\_timerfd.c@{w\_timerfd.c}!WTimerFd\_update\_interval@{WTimerFd\_update\_interval}}
+\index{WTimerFd\_update\_interval@{WTimerFd\_update\_interval}!w\_timerfd.c@{w\_timerfd.c}}
+\doxysubsubsection{\texorpdfstring{WTimerFd\_update\_interval()}{WTimerFd\_update\_interval()}}
+{\footnotesize\ttfamily struct itimerspec WTimer\+Fd\+\_\+update\+\_\+interval (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_gab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}}}]{this,  }\item[{uint64\+\_\+t}]{interval\+\_\+ms,  }\item[{bool}]{repeating }\end{DoxyParamCaption})}
+

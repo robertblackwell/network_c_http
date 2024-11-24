@@ -1,0 +1,65 @@
+\hypertarget{functor_8c}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/runloop/functor.c File Reference}
+\label{functor_8c}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/runloop/functor.c@{/home/robert/Projects/http\_in\_c/http\_in\_c/runloop/functor.c}}
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/runloop.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/rl\+\_\+internal.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{rl__internal_8h_aa6cc8dac063fdd959332507bb7a76fef}{Functor\+Ref}} \mbox{\hyperlink{functor_8c_a8e8af55f5b60d754da259a70aa47d7c2}{Functor\+\_\+new}} (\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} f, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg)
+\begin{DoxyCompactList}\small\item\em $\ast$$\ast$ \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{functor_8c_a9face4c4dbe4350b3b9514ebb885bc33}{Functor\+\_\+init}} (\mbox{\hyperlink{rl__internal_8h_aa6cc8dac063fdd959332507bb7a76fef}{Functor\+Ref}} this, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} f, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{functor_8c_a6c753b0452f80211abf1c296ecef4994}{Functor\+\_\+free}} (\mbox{\hyperlink{rl__internal_8h_aa6cc8dac063fdd959332507bb7a76fef}{Functor\+Ref}} this)
+\item 
+bool \mbox{\hyperlink{functor_8c_a324a7bb1ab91ce484d563ec711d42fb1}{Functor\+\_\+is\+\_\+empty}} (\mbox{\hyperlink{rl__internal_8h_aa6cc8dac063fdd959332507bb7a76fef}{Functor\+Ref}} this)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{functor_8c_ad2f2393db4a96cabefe105209fe8e2b1}{Functor\+\_\+call}} (\mbox{\hyperlink{rl__internal_8h_aa6cc8dac063fdd959332507bb7a76fef}{Functor\+Ref}} this, \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{functor_8c_aec11827c344fe348dadcfca9213aaffe}{Functor\+\_\+dealloc}} (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$$\ast$ptr)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{functor_8c_ad2f2393db4a96cabefe105209fe8e2b1}\label{functor_8c_ad2f2393db4a96cabefe105209fe8e2b1}} 
+\index{functor.c@{functor.c}!Functor\_call@{Functor\_call}}
+\index{Functor\_call@{Functor\_call}!functor.c@{functor.c}}
+\doxysubsubsection{\texorpdfstring{Functor\_call()}{Functor\_call()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} Functor\+\_\+call (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_aa6cc8dac063fdd959332507bb7a76fef}{Functor\+Ref}}}]{this,  }\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop\+\_\+ref }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{functor_8c_aec11827c344fe348dadcfca9213aaffe}\label{functor_8c_aec11827c344fe348dadcfca9213aaffe}} 
+\index{functor.c@{functor.c}!Functor\_dealloc@{Functor\_dealloc}}
+\index{Functor\_dealloc@{Functor\_dealloc}!functor.c@{functor.c}}
+\doxysubsubsection{\texorpdfstring{Functor\_dealloc()}{Functor\_dealloc()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} Functor\+\_\+dealloc (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$$\ast$}]{ptr }\end{DoxyParamCaption})}
+
+The runlist -\/ is a list of Functor -\/ these are functions that are ready to run. \mbox{\Hypertarget{functor_8c_a6c753b0452f80211abf1c296ecef4994}\label{functor_8c_a6c753b0452f80211abf1c296ecef4994}} 
+\index{functor.c@{functor.c}!Functor\_free@{Functor\_free}}
+\index{Functor\_free@{Functor\_free}!functor.c@{functor.c}}
+\doxysubsubsection{\texorpdfstring{Functor\_free()}{Functor\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} Functor\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_aa6cc8dac063fdd959332507bb7a76fef}{Functor\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{functor_8c_a9face4c4dbe4350b3b9514ebb885bc33}\label{functor_8c_a9face4c4dbe4350b3b9514ebb885bc33}} 
+\index{functor.c@{functor.c}!Functor\_init@{Functor\_init}}
+\index{Functor\_init@{Functor\_init}!functor.c@{functor.c}}
+\doxysubsubsection{\texorpdfstring{Functor\_init()}{Functor\_init()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} Functor\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_aa6cc8dac063fdd959332507bb7a76fef}{Functor\+Ref}}}]{this,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{f,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{arg }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{functor_8c_a324a7bb1ab91ce484d563ec711d42fb1}\label{functor_8c_a324a7bb1ab91ce484d563ec711d42fb1}} 
+\index{functor.c@{functor.c}!Functor\_is\_empty@{Functor\_is\_empty}}
+\index{Functor\_is\_empty@{Functor\_is\_empty}!functor.c@{functor.c}}
+\doxysubsubsection{\texorpdfstring{Functor\_is\_empty()}{Functor\_is\_empty()}}
+{\footnotesize\ttfamily bool Functor\+\_\+is\+\_\+empty (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_aa6cc8dac063fdd959332507bb7a76fef}{Functor\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{functor_8c_a8e8af55f5b60d754da259a70aa47d7c2}\label{functor_8c_a8e8af55f5b60d754da259a70aa47d7c2}} 
+\index{functor.c@{functor.c}!Functor\_new@{Functor\_new}}
+\index{Functor\_new@{Functor\_new}!functor.c@{functor.c}}
+\doxysubsubsection{\texorpdfstring{Functor\_new()}{Functor\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_aa6cc8dac063fdd959332507bb7a76fef}{Functor\+Ref}} Functor\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{f,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{arg }\end{DoxyParamCaption})}
+
+
+
+$\ast$$\ast$ 
+

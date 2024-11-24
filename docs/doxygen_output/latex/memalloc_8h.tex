@@ -1,0 +1,54 @@
+\hypertarget{memalloc_8h}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/runloop/memalloc.h File Reference}
+\label{memalloc_8h}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/runloop/memalloc.h@{/home/robert/Projects/http\_in\_c/http\_in\_c/runloop/memalloc.h}}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{memalloc_8h_afb69a1d08bfce24c9b0d39ce06b3340d}{runloop\+\_\+\+MALLOC\+\_\+\+TRACE}}
+\item 
+\#define \mbox{\hyperlink{memalloc_8h_ab1619d8dac4d68ef120d0b106b8c78ee}{runloop\+\_\+malloc}}(size)~\mbox{\hyperlink{memalloc_8h_afd3ce6997b91587759c04e1444e05cd0}{runloop\+\_\+mem\+\_\+alloc}}(size, \+\_\+\+\_\+\+FILE\+\_\+\+\_\+, \+\_\+\+\_\+\+LINE\+\_\+\+\_\+)
+\item 
+\#define \mbox{\hyperlink{memalloc_8h_a7ba8429cfa3a4381e915dc5568f2fdc3}{runloop\+\_\+free}}(p)~free(p, \+\_\+\+\_\+\+FILE\+\_\+\+\_\+, \+\_\+\+\_\+\+LINE\+\_\+\+\_\+)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{memalloc_8h_afd3ce6997b91587759c04e1444e05cd0}{runloop\+\_\+mem\+\_\+alloc}} (int size, char $\ast$file, int line)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{memalloc_8h_a0456089a586d04af25361a4a3aed4cef}{runloop\+\_\+mem\+\_\+free}} (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$p, char $\ast$file, int line)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{memalloc_8h_a7ba8429cfa3a4381e915dc5568f2fdc3}\label{memalloc_8h_a7ba8429cfa3a4381e915dc5568f2fdc3}} 
+\index{memalloc.h@{memalloc.h}!runloop\_free@{runloop\_free}}
+\index{runloop\_free@{runloop\_free}!memalloc.h@{memalloc.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_free}{runloop\_free}}
+{\footnotesize\ttfamily \#define runloop\+\_\+free(\begin{DoxyParamCaption}\item[{}]{p }\end{DoxyParamCaption})~free(p, \+\_\+\+\_\+\+FILE\+\_\+\+\_\+, \+\_\+\+\_\+\+LINE\+\_\+\+\_\+)}
+
+\mbox{\Hypertarget{memalloc_8h_ab1619d8dac4d68ef120d0b106b8c78ee}\label{memalloc_8h_ab1619d8dac4d68ef120d0b106b8c78ee}} 
+\index{memalloc.h@{memalloc.h}!runloop\_malloc@{runloop\_malloc}}
+\index{runloop\_malloc@{runloop\_malloc}!memalloc.h@{memalloc.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_malloc}{runloop\_malloc}}
+{\footnotesize\ttfamily \#define runloop\+\_\+malloc(\begin{DoxyParamCaption}\item[{}]{size }\end{DoxyParamCaption})~\mbox{\hyperlink{memalloc_8h_afd3ce6997b91587759c04e1444e05cd0}{runloop\+\_\+mem\+\_\+alloc}}(size, \+\_\+\+\_\+\+FILE\+\_\+\+\_\+, \+\_\+\+\_\+\+LINE\+\_\+\+\_\+)}
+
+\mbox{\Hypertarget{memalloc_8h_afb69a1d08bfce24c9b0d39ce06b3340d}\label{memalloc_8h_afb69a1d08bfce24c9b0d39ce06b3340d}} 
+\index{memalloc.h@{memalloc.h}!runloop\_MALLOC\_TRACE@{runloop\_MALLOC\_TRACE}}
+\index{runloop\_MALLOC\_TRACE@{runloop\_MALLOC\_TRACE}!memalloc.h@{memalloc.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_MALLOC\_TRACE}{runloop\_MALLOC\_TRACE}}
+{\footnotesize\ttfamily \#define runloop\+\_\+\+MALLOC\+\_\+\+TRACE}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{memalloc_8h_afd3ce6997b91587759c04e1444e05cd0}\label{memalloc_8h_afd3ce6997b91587759c04e1444e05cd0}} 
+\index{memalloc.h@{memalloc.h}!runloop\_mem\_alloc@{runloop\_mem\_alloc}}
+\index{runloop\_mem\_alloc@{runloop\_mem\_alloc}!memalloc.h@{memalloc.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_mem\_alloc()}{runloop\_mem\_alloc()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}$\ast$ runloop\+\_\+mem\+\_\+alloc (\begin{DoxyParamCaption}\item[{int}]{size,  }\item[{char $\ast$}]{file,  }\item[{int}]{line }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{memalloc_8h_a0456089a586d04af25361a4a3aed4cef}\label{memalloc_8h_a0456089a586d04af25361a4a3aed4cef}} 
+\index{memalloc.h@{memalloc.h}!runloop\_mem\_free@{runloop\_mem\_free}}
+\index{runloop\_mem\_free@{runloop\_mem\_free}!memalloc.h@{memalloc.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_mem\_free()}{runloop\_mem\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+mem\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{p,  }\item[{char $\ast$}]{file,  }\item[{int}]{line }\end{DoxyParamCaption})}
+

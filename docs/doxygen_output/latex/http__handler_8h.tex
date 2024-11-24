@@ -1,0 +1,88 @@
+\hypertarget{http__handler_8h}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/http\+\_\+protocol/http\+\_\+handler.h File Reference}
+\label{http__handler_8h}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/http\_protocol/http\_handler.h@{/home/robert/Projects/http\_in\_c/http\_in\_c/http\_protocol/http\_handler.h}}
+{\ttfamily \#include $<$rbl/check\+\_\+tag.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/rl\+\_\+internal.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/list.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/iobuffer.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/http\+\_\+protocol/http\+\_\+connection.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}http\+\_\+server.\+h\char`\"{}}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/rl\+\_\+checktag.\+h$>$}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structHttpHandler__s}{Http\+Handler\+\_\+s}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{http__handler_8h_afe8eeb087a5eb841ee9e7a843bd19ec2}{Http\+Handler\+\_\+\+TAG}}~\char`\"{}Dm\+HDLR\char`\"{}
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \mbox{\hyperlink{structHttpHandler__s}{Http\+Handler\+\_\+s}} \mbox{\hyperlink{http__handler_8h_a36674d94eb8a609516dadb52f3356d20}{Http\+Handler}}
+\item 
+typedef struct \mbox{\hyperlink{structHttpHandler__s}{Http\+Handler\+\_\+s}} $\ast$ \mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}}
+\item 
+typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{http__handler_8h_aa23ce77343b1ab62047725641b5dcacd}{DH\+\_\+\+Completion\+\_\+\+CB}}) (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$server\+\_\+ref, \mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}} href)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}} \mbox{\hyperlink{http__handler_8h_ac248a47b90034e0769e29058b48f48b0}{http\+\_\+handler\+\_\+new}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref, int socket, \mbox{\hyperlink{http__server_8h_ac03bc722065a8bfe647fc3c32d1649b1}{Http\+Process\+Request\+Function}} request\+\_\+handler, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$completion\+\_\+cb)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$, \mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}}), \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$completion\+\_\+cb\+\_\+arg)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{http__handler_8h_ac392685d27d46978652e7477ca598054}{http\+\_\+handler\+\_\+init}} (\mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}} this, \mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref, int socket, \mbox{\hyperlink{http__server_8h_ac03bc722065a8bfe647fc3c32d1649b1}{Http\+Process\+Request\+Function}} request\+\_\+handler, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$completion\+\_\+cb)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$, \mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}}), \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$completion\+\_\+cb\+\_\+arg)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{http__handler_8h_a4ea4bb32e80bfb4e42dcba99849bf8a7}{http\+\_\+handler\+\_\+free}} (\mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}} this)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{http__handler_8h_afe8eeb087a5eb841ee9e7a843bd19ec2}\label{http__handler_8h_afe8eeb087a5eb841ee9e7a843bd19ec2}} 
+\index{http\_handler.h@{http\_handler.h}!HttpHandler\_TAG@{HttpHandler\_TAG}}
+\index{HttpHandler\_TAG@{HttpHandler\_TAG}!http\_handler.h@{http\_handler.h}}
+\doxysubsubsection{\texorpdfstring{HttpHandler\_TAG}{HttpHandler\_TAG}}
+{\footnotesize\ttfamily \#define Http\+Handler\+\_\+\+TAG~\char`\"{}Dm\+HDLR\char`\"{}}
+
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{http__handler_8h_aa23ce77343b1ab62047725641b5dcacd}\label{http__handler_8h_aa23ce77343b1ab62047725641b5dcacd}} 
+\index{http\_handler.h@{http\_handler.h}!DH\_Completion\_CB@{DH\_Completion\_CB}}
+\index{DH\_Completion\_CB@{DH\_Completion\_CB}!http\_handler.h@{http\_handler.h}}
+\doxysubsubsection{\texorpdfstring{DH\_Completion\_CB}{DH\_Completion\_CB}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ DH\+\_\+\+Completion\+\_\+\+CB) (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$server\+\_\+ref, \mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}} href)}
+
+Instance of a Http\+Hamdler calls this CB when it is closing down. void$\ast$ server\+\_\+ref is an anonymous reference passed at handler creation by its parent object \mbox{\Hypertarget{http__handler_8h_a36674d94eb8a609516dadb52f3356d20}\label{http__handler_8h_a36674d94eb8a609516dadb52f3356d20}} 
+\index{http\_handler.h@{http\_handler.h}!HttpHandler@{HttpHandler}}
+\index{HttpHandler@{HttpHandler}!http\_handler.h@{http\_handler.h}}
+\doxysubsubsection{\texorpdfstring{HttpHandler}{HttpHandler}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structHttpHandler__s}{Http\+Handler\+\_\+s}} \mbox{\hyperlink{http__handler_8h_a36674d94eb8a609516dadb52f3356d20}{Http\+Handler}}}
+
+\mbox{\Hypertarget{http__handler_8h_a6e590355f61204a055e8bedc2877530f}\label{http__handler_8h_a6e590355f61204a055e8bedc2877530f}} 
+\index{http\_handler.h@{http\_handler.h}!HttpHandlerRef@{HttpHandlerRef}}
+\index{HttpHandlerRef@{HttpHandlerRef}!http\_handler.h@{http\_handler.h}}
+\doxysubsubsection{\texorpdfstring{HttpHandlerRef}{HttpHandlerRef}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structHttpHandler__s}{Http\+Handler\+\_\+s}} $\ast$ \mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}}}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{http__handler_8h_a4ea4bb32e80bfb4e42dcba99849bf8a7}\label{http__handler_8h_a4ea4bb32e80bfb4e42dcba99849bf8a7}} 
+\index{http\_handler.h@{http\_handler.h}!http\_handler\_free@{http\_handler\_free}}
+\index{http\_handler\_free@{http\_handler\_free}!http\_handler.h@{http\_handler.h}}
+\doxysubsubsection{\texorpdfstring{http\_handler\_free()}{http\_handler\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} http\+\_\+handler\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__handler_8h_ac392685d27d46978652e7477ca598054}\label{http__handler_8h_ac392685d27d46978652e7477ca598054}} 
+\index{http\_handler.h@{http\_handler.h}!http\_handler\_init@{http\_handler\_init}}
+\index{http\_handler\_init@{http\_handler\_init}!http\_handler.h@{http\_handler.h}}
+\doxysubsubsection{\texorpdfstring{http\_handler\_init()}{http\_handler\_init()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} http\+\_\+handler\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}}}]{this,  }\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop\+\_\+ref,  }\item[{int}]{socket,  }\item[{\mbox{\hyperlink{http__server_8h_ac03bc722065a8bfe647fc3c32d1649b1}{Http\+Process\+Request\+Function}}}]{request\+\_\+handler,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$, \mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}})}]{completion\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{completion\+\_\+cb\+\_\+arg }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__handler_8h_ac248a47b90034e0769e29058b48f48b0}\label{http__handler_8h_ac248a47b90034e0769e29058b48f48b0}} 
+\index{http\_handler.h@{http\_handler.h}!http\_handler\_new@{http\_handler\_new}}
+\index{http\_handler\_new@{http\_handler\_new}!http\_handler.h@{http\_handler.h}}
+\doxysubsubsection{\texorpdfstring{http\_handler\_new()}{http\_handler\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}} http\+\_\+handler\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop\+\_\+ref,  }\item[{int}]{socket,  }\item[{\mbox{\hyperlink{http__server_8h_ac03bc722065a8bfe647fc3c32d1649b1}{Http\+Process\+Request\+Function}}}]{request\+\_\+handler,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$, \mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}})}]{completion\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{completion\+\_\+cb\+\_\+arg }\end{DoxyParamCaption})}
+

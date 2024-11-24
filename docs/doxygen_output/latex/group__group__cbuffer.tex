@@ -1,0 +1,286 @@
+\hypertarget{group__group__cbuffer}{}\doxysection{Group\+\_\+cbuffer}
+\label{group__group__cbuffer}\index{Group\_cbuffer@{Group\_cbuffer}}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \mbox{\hyperlink{structCbuffer__s}{Cbuffer\+\_\+s}} $\ast$ \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} \mbox{\hyperlink{group__group__cbuffer_ga3c9e663ed065fcd706a94d80a43f9bd3}{Cbuffer\+\_\+new}} ()
+\item 
+\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} \mbox{\hyperlink{group__group__cbuffer_gaeeb9967a22cf25835883f0ffceacccc2}{Cbuffer\+\_\+from\+\_\+cstring}} (const char $\ast$cstr)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__cbuffer_ga25c5e584aae36f95aaf64dbb6b021448}{Cbuffer\+\_\+free}} (\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{group__group__cbuffer_ga22458d15d3c523ca65d94ef1970292af}{Cbuffer\+\_\+data}} (const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} this)
+\begin{DoxyCompactList}\small\item\em Gets a void$\ast$ pointer to the start of the used portion of memory area. \end{DoxyCompactList}\item 
+const char $\ast$ \mbox{\hyperlink{group__group__cbuffer_gab26fbc35a40479fd2df1f172203a9ae9}{Cbuffer\+\_\+cstr}} (const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} this)
+\begin{DoxyCompactList}\small\item\em Gets a char$\ast$ pointer to the start of the used portion of memory area, the first byte after the used portion is always \textquotesingle{}\textbackslash{}0\textquotesingle{} so that the pointer returned by this function is a valid c strin. \end{DoxyCompactList}\item 
+size\+\_\+t \mbox{\hyperlink{group__group__cbuffer_gad03bb642e5777dd332fbe1cccdf50d30}{Cbuffer\+\_\+size}} (const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf)
+\begin{DoxyCompactList}\small\item\em Gets the size of used portion of the buffer. \end{DoxyCompactList}\item 
+size\+\_\+t \mbox{\hyperlink{group__group__cbuffer_ga4642beff13ca198e9ac0a4c67483e2aa}{Cbuffer\+\_\+capacity}} (const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf)
+\begin{DoxyCompactList}\small\item\em Gets the current capacity of the buffer -\/ max value of size, but. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{group__group__cbuffer_gaa39f2caaeec39de2835d36c40902b1a4}{Cbuffer\+\_\+next\+\_\+available}} (const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf)
+\begin{DoxyCompactList}\small\item\em Returns a pointer to the next available unused position in the buffer, which is always the \textquotesingle{}\textbackslash{}0\textquotesingle{} terminator. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__cbuffer_ga2d71a06566eabad7af13e276575b2aca}{Cbuffer\+\_\+clear}} (\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} this)
+\begin{DoxyCompactList}\small\item\em Resets the buffer so that it is again an empty buffer. Does not release the manage memory area. If it has been expanded by previous usage pattern the larger memory area will be retained. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__cbuffer_gaf940ab747ab5ce42d52d24c9a86f1d42}{Cbuffer\+\_\+append}} (\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$data, size\+\_\+t len)
+\begin{DoxyCompactList}\small\item\em Append a block of data pointed at by a void$\ast$ and of given the length to the used portion of the managed memory area. Expand the memory area using realloc if required. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__cbuffer_ga69e99094e4005de89df141f380ffae65}{Cbuffer\+\_\+append\+\_\+cstr}} (\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf, const char $\ast$cstr)
+\begin{DoxyCompactList}\small\item\em Append the data represented by the cstr argument to the used portion of the managed memory area. Expand the memory area using realloc if required. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__cbuffer_gae8b8f93552c4444ef0a29c9386cd1e4c}{Cbuffer\+\_\+set\+\_\+size}} (\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf, size\+\_\+t n)
+\begin{DoxyCompactList}\small\item\em Force the used size of the buffer to the given value. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__cbuffer_ga214b4f22758d066f686b3e2f5b5f6d98}{Cbuffer\+\_\+move}} (\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} dest, \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} src)
+\begin{DoxyCompactList}\small\item\em Moves the content of one Cbuffer instance to another by using move semantics. The internal pointers and counters of src are moved to dest. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{group__group__cbuffer_ga75d2be3cabfca3d16f4acb9469a1c6ad}{Cbuffer\+\_\+contains\+\_\+voidptr}} (const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ptr)
+\begin{DoxyCompactList}\small\item\em Detremines if an address value (pointer) is within the address range of the the buffer ie. \end{DoxyCompactList}\item 
+bool \mbox{\hyperlink{group__group__cbuffer_ga099759843ffecae3d2138fca0cd89914}{Cbuffer\+\_\+contains\+\_\+charptr}} (const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} cbuf, char $\ast$ptr)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+A Cbuffer is a contiguous memory allocation that can expand as required. It maintains\+:
+\begin{DoxyItemize}
+\item the length of the total memory allocation,
+\item the length of the used part of the memory allocation
+\item always terminates the used portion with a \textquotesingle{}\textbackslash{}0\textquotesingle{} which is not counted as part of the used portion so that the used portion is always a valid cstr 
+\end{DoxyItemize}
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}\label{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}} 
+\index{Group\_cbuffer@{Group\_cbuffer}!CbufferRef@{CbufferRef}}
+\index{CbufferRef@{CbufferRef}!Group\_cbuffer@{Group\_cbuffer}}
+\doxysubsubsection{\texorpdfstring{CbufferRef}{CbufferRef}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structCbuffer__s}{Cbuffer\+\_\+s}}$\ast$ \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}}}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{group__group__cbuffer_gaf940ab747ab5ce42d52d24c9a86f1d42}\label{group__group__cbuffer_gaf940ab747ab5ce42d52d24c9a86f1d42}} 
+\index{Group\_cbuffer@{Group\_cbuffer}!Cbuffer\_append@{Cbuffer\_append}}
+\index{Cbuffer\_append@{Cbuffer\_append}!Group\_cbuffer@{Group\_cbuffer}}
+\doxysubsubsection{\texorpdfstring{Cbuffer\_append()}{Cbuffer\_append()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} Cbuffer\+\_\+append (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}}}]{cbuf,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{data,  }\item[{size\+\_\+t}]{len }\end{DoxyParamCaption})}
+
+
+
+Append a block of data pointed at by a void$\ast$ and of given the length to the used portion of the managed memory area. Expand the memory area using realloc if required. 
+
+@\+WARNING -\/ THIS FUNCTION ALLOCATES MEMORY
+
+The data being appended is copied so that the called retains ownership of and responsibility for the memory pointed to by the data argument.
+
+
+\begin{DoxyParams}{Parameters}
+{\em cbuf} & Cbuffer\+Ref \\
+\hline
+{\em data} & void$\ast$ \\
+\hline
+{\em len} & size\+\_\+t \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{group__group__cbuffer_ga69e99094e4005de89df141f380ffae65}\label{group__group__cbuffer_ga69e99094e4005de89df141f380ffae65}} 
+\index{Group\_cbuffer@{Group\_cbuffer}!Cbuffer\_append\_cstr@{Cbuffer\_append\_cstr}}
+\index{Cbuffer\_append\_cstr@{Cbuffer\_append\_cstr}!Group\_cbuffer@{Group\_cbuffer}}
+\doxysubsubsection{\texorpdfstring{Cbuffer\_append\_cstr()}{Cbuffer\_append\_cstr()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} Cbuffer\+\_\+append\+\_\+cstr (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}}}]{cbuf,  }\item[{const char $\ast$}]{cstr }\end{DoxyParamCaption})}
+
+
+
+Append the data represented by the cstr argument to the used portion of the managed memory area. Expand the memory area using realloc if required. 
+
+WARNING -\/ THIS FUNCTION ALLOCATES MEMORY
+
+The cstr must be a valid c string terminated by \textquotesingle{}\textbackslash{}0\textquotesingle{}. The cstr is copied so that the called retains ownership of and responsibility for the memory pointed to by the cstr argument.
+
+
+\begin{DoxyParams}{Parameters}
+{\em cbuf} & Cbuffer\+Ref \\
+\hline
+{\em data} & void$\ast$ \\
+\hline
+{\em len} & size\+\_\+t \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{group__group__cbuffer_ga4642beff13ca198e9ac0a4c67483e2aa}\label{group__group__cbuffer_ga4642beff13ca198e9ac0a4c67483e2aa}} 
+\index{Group\_cbuffer@{Group\_cbuffer}!Cbuffer\_capacity@{Cbuffer\_capacity}}
+\index{Cbuffer\_capacity@{Cbuffer\_capacity}!Group\_cbuffer@{Group\_cbuffer}}
+\doxysubsubsection{\texorpdfstring{Cbuffer\_capacity()}{Cbuffer\_capacity()}}
+{\footnotesize\ttfamily size\+\_\+t Cbuffer\+\_\+capacity (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}}}]{cbuf }\end{DoxyParamCaption})}
+
+
+
+Gets the current capacity of the buffer -\/ max value of size, but. 
+
+@\+Note\+: Cbuffer can be extended via realloc so the returned value of this function is not a constant
+
+
+\begin{DoxyParams}{Parameters}
+{\em cbuf} & Cbuffer\+Ref \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+size\+\_\+t
+\end{DoxyReturn}
+capacity of the buffer -\/ max value of size \mbox{\Hypertarget{group__group__cbuffer_ga2d71a06566eabad7af13e276575b2aca}\label{group__group__cbuffer_ga2d71a06566eabad7af13e276575b2aca}} 
+\index{Group\_cbuffer@{Group\_cbuffer}!Cbuffer\_clear@{Cbuffer\_clear}}
+\index{Cbuffer\_clear@{Cbuffer\_clear}!Group\_cbuffer@{Group\_cbuffer}}
+\doxysubsubsection{\texorpdfstring{Cbuffer\_clear()}{Cbuffer\_clear()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} Cbuffer\+\_\+clear (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}}}]{cbuf }\end{DoxyParamCaption})}
+
+
+
+Resets the buffer so that it is again an empty buffer. Does not release the manage memory area. If it has been expanded by previous usage pattern the larger memory area will be retained. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em this} & Cbuffer\+Ref\\
+\hline
+\end{DoxyParams}
+Resets the buffer so that it is again an empty buffer \mbox{\Hypertarget{group__group__cbuffer_ga099759843ffecae3d2138fca0cd89914}\label{group__group__cbuffer_ga099759843ffecae3d2138fca0cd89914}} 
+\index{Group\_cbuffer@{Group\_cbuffer}!Cbuffer\_contains\_charptr@{Cbuffer\_contains\_charptr}}
+\index{Cbuffer\_contains\_charptr@{Cbuffer\_contains\_charptr}!Group\_cbuffer@{Group\_cbuffer}}
+\doxysubsubsection{\texorpdfstring{Cbuffer\_contains\_charptr()}{Cbuffer\_contains\_charptr()}}
+{\footnotesize\ttfamily bool Cbuffer\+\_\+contains\+\_\+charptr (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}}}]{cbuf,  }\item[{char $\ast$}]{ptr }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{group__group__cbuffer_ga75d2be3cabfca3d16f4acb9469a1c6ad}\label{group__group__cbuffer_ga75d2be3cabfca3d16f4acb9469a1c6ad}} 
+\index{Group\_cbuffer@{Group\_cbuffer}!Cbuffer\_contains\_voidptr@{Cbuffer\_contains\_voidptr}}
+\index{Cbuffer\_contains\_voidptr@{Cbuffer\_contains\_voidptr}!Group\_cbuffer@{Group\_cbuffer}}
+\doxysubsubsection{\texorpdfstring{Cbuffer\_contains\_voidptr()}{Cbuffer\_contains\_voidptr()}}
+{\footnotesize\ttfamily bool Cbuffer\+\_\+contains\+\_\+voidptr (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}}}]{cbuf,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{ptr }\end{DoxyParamCaption})}
+
+
+
+Detremines if an address value (pointer) is within the address range of the the buffer ie. 
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{    buffer.data() < = ptr < buffer.data() + buffer.capacity();}
+\DoxyCodeLine{or, should it be}
+\DoxyCodeLine{    buffer.data() < = ptr < buffer.data() + buffer.size();}
+
+\end{DoxyCode}
+
+
+Detremines if an address value (pointer) is within the address range of the the buffer ie buffer.\+dada() $<$ = ptr $<$ buffer.\+data() + buffer.\+capacity(); or, should it be buffer.\+dada() $<$ = ptr $<$ buffer.\+data() + buffer.\+size(); \mbox{\Hypertarget{group__group__cbuffer_gab26fbc35a40479fd2df1f172203a9ae9}\label{group__group__cbuffer_gab26fbc35a40479fd2df1f172203a9ae9}} 
+\index{Group\_cbuffer@{Group\_cbuffer}!Cbuffer\_cstr@{Cbuffer\_cstr}}
+\index{Cbuffer\_cstr@{Cbuffer\_cstr}!Group\_cbuffer@{Group\_cbuffer}}
+\doxysubsubsection{\texorpdfstring{Cbuffer\_cstr()}{Cbuffer\_cstr()}}
+{\footnotesize\ttfamily const char$\ast$ Cbuffer\+\_\+cstr (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+
+
+Gets a char$\ast$ pointer to the start of the used portion of memory area, the first byte after the used portion is always \textquotesingle{}\textbackslash{}0\textquotesingle{} so that the pointer returned by this function is a valid c strin. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em this} & Cbuffer\+Ref The buffer, cannot be NULL \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void$\ast$ POinter to start of used portion of the managed memory area 
+\end{DoxyReturn}
+\mbox{\Hypertarget{group__group__cbuffer_ga22458d15d3c523ca65d94ef1970292af}\label{group__group__cbuffer_ga22458d15d3c523ca65d94ef1970292af}} 
+\index{Group\_cbuffer@{Group\_cbuffer}!Cbuffer\_data@{Cbuffer\_data}}
+\index{Cbuffer\_data@{Cbuffer\_data}!Group\_cbuffer@{Group\_cbuffer}}
+\doxysubsubsection{\texorpdfstring{Cbuffer\_data()}{Cbuffer\_data()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}$\ast$ Cbuffer\+\_\+data (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}}}]{cbuf }\end{DoxyParamCaption})}
+
+
+
+Gets a void$\ast$ pointer to the start of the used portion of memory area. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em this} & Cbuffer\+Ref The buffer, cannot be NULL \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void$\ast$ POinter to start of used portion of the managed memory area
+\end{DoxyReturn}
+gets a pointer to the start of the memory slab being managed by the instance \mbox{\Hypertarget{group__group__cbuffer_ga25c5e584aae36f95aaf64dbb6b021448}\label{group__group__cbuffer_ga25c5e584aae36f95aaf64dbb6b021448}} 
+\index{Group\_cbuffer@{Group\_cbuffer}!Cbuffer\_free@{Cbuffer\_free}}
+\index{Cbuffer\_free@{Cbuffer\_free}!Group\_cbuffer@{Group\_cbuffer}}
+\doxysubsubsection{\texorpdfstring{Cbuffer\_free()}{Cbuffer\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} Cbuffer\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+This is the only method that can operate on an invalidated Cbuffer That is one who has had their memory stolen \mbox{\Hypertarget{group__group__cbuffer_gaeeb9967a22cf25835883f0ffceacccc2}\label{group__group__cbuffer_gaeeb9967a22cf25835883f0ffceacccc2}} 
+\index{Group\_cbuffer@{Group\_cbuffer}!Cbuffer\_from\_cstring@{Cbuffer\_from\_cstring}}
+\index{Cbuffer\_from\_cstring@{Cbuffer\_from\_cstring}!Group\_cbuffer@{Group\_cbuffer}}
+\doxysubsubsection{\texorpdfstring{Cbuffer\_from\_cstring()}{Cbuffer\_from\_cstring()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} Cbuffer\+\_\+from\+\_\+cstring (\begin{DoxyParamCaption}\item[{const char $\ast$}]{cstr }\end{DoxyParamCaption})}
+
+WARNING -\/ THIS FUNCTION ALLOCATES MEMORY \mbox{\Hypertarget{group__group__cbuffer_ga214b4f22758d066f686b3e2f5b5f6d98}\label{group__group__cbuffer_ga214b4f22758d066f686b3e2f5b5f6d98}} 
+\index{Group\_cbuffer@{Group\_cbuffer}!Cbuffer\_move@{Cbuffer\_move}}
+\index{Cbuffer\_move@{Cbuffer\_move}!Group\_cbuffer@{Group\_cbuffer}}
+\doxysubsubsection{\texorpdfstring{Cbuffer\_move()}{Cbuffer\_move()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} Cbuffer\+\_\+move (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}}}]{dest,  }\item[{\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}}}]{src }\end{DoxyParamCaption})}
+
+
+
+Moves the content of one Cbuffer instance to another by using move semantics. The internal pointers and counters of src are moved to dest. 
+
+src argument is reset to an empty buffer 
+\begin{DoxyParams}{Parameters}
+{\em dest} & Cbuffer\+Ref \\
+\hline
+{\em src} & Cbuffer\+Ref \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{group__group__cbuffer_ga3c9e663ed065fcd706a94d80a43f9bd3}\label{group__group__cbuffer_ga3c9e663ed065fcd706a94d80a43f9bd3}} 
+\index{Group\_cbuffer@{Group\_cbuffer}!Cbuffer\_new@{Cbuffer\_new}}
+\index{Cbuffer\_new@{Cbuffer\_new}!Group\_cbuffer@{Group\_cbuffer}}
+\doxysubsubsection{\texorpdfstring{Cbuffer\_new()}{Cbuffer\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} Cbuffer\+\_\+new (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+WARNING -\/ THIS FUNCTION ALLOCATES MEMORY \mbox{\Hypertarget{group__group__cbuffer_gaa39f2caaeec39de2835d36c40902b1a4}\label{group__group__cbuffer_gaa39f2caaeec39de2835d36c40902b1a4}} 
+\index{Group\_cbuffer@{Group\_cbuffer}!Cbuffer\_next\_available@{Cbuffer\_next\_available}}
+\index{Cbuffer\_next\_available@{Cbuffer\_next\_available}!Group\_cbuffer@{Group\_cbuffer}}
+\doxysubsubsection{\texorpdfstring{Cbuffer\_next\_available()}{Cbuffer\_next\_available()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}$\ast$ Cbuffer\+\_\+next\+\_\+available (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}}}]{cbuf }\end{DoxyParamCaption})}
+
+
+
+Returns a pointer to the next available unused position in the buffer, which is always the \textquotesingle{}\textbackslash{}0\textquotesingle{} terminator. 
+
+Should not be used other than by Cbuffer functions.
+
+
+\begin{DoxyParams}{Parameters}
+{\em cbuf} & Cbuffer\+Ref \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+void$\ast$
+\end{DoxyReturn}
+returns a pointer to the next available unused position in the buffer \mbox{\Hypertarget{group__group__cbuffer_gae8b8f93552c4444ef0a29c9386cd1e4c}\label{group__group__cbuffer_gae8b8f93552c4444ef0a29c9386cd1e4c}} 
+\index{Group\_cbuffer@{Group\_cbuffer}!Cbuffer\_set\_size@{Cbuffer\_set\_size}}
+\index{Cbuffer\_set\_size@{Cbuffer\_set\_size}!Group\_cbuffer@{Group\_cbuffer}}
+\doxysubsubsection{\texorpdfstring{Cbuffer\_set\_size()}{Cbuffer\_set\_size()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} Cbuffer\+\_\+set\+\_\+size (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}}}]{cbuf,  }\item[{size\+\_\+t}]{n }\end{DoxyParamCaption})}
+
+
+
+Force the used size of the buffer to the given value. 
+
+Reserved for Cbuffer internal use. \mbox{\Hypertarget{group__group__cbuffer_gad03bb642e5777dd332fbe1cccdf50d30}\label{group__group__cbuffer_gad03bb642e5777dd332fbe1cccdf50d30}} 
+\index{Group\_cbuffer@{Group\_cbuffer}!Cbuffer\_size@{Cbuffer\_size}}
+\index{Cbuffer\_size@{Cbuffer\_size}!Group\_cbuffer@{Group\_cbuffer}}
+\doxysubsubsection{\texorpdfstring{Cbuffer\_size()}{Cbuffer\_size()}}
+{\footnotesize\ttfamily size\+\_\+t Cbuffer\+\_\+size (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}}}]{cbuf }\end{DoxyParamCaption})}
+
+
+
+Gets the size of used portion of the buffer. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em cbuf} & Cbuffer\+Ref \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+size\+\_\+t
+\end{DoxyReturn}
+gets the size of used portion of the buffer 

@@ -1,0 +1,88 @@
+\hypertarget{demo__handler_8h}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/demo\+\_\+protocol/demo\+\_\+handler.h File Reference}
+\label{demo__handler_8h}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/demo\_protocol/demo\_handler.h@{/home/robert/Projects/http\_in\_c/http\_in\_c/demo\_protocol/demo\_handler.h}}
+{\ttfamily \#include $<$rbl/check\+\_\+tag.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/rl\+\_\+internal.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/list.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/iobuffer.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/demo\+\_\+protocol/demo\+\_\+connection.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/demo\+\_\+protocol/demo\+\_\+server.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/rl\+\_\+checktag.\+h$>$}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structDemoHandler__s}{Demo\+Handler\+\_\+s}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{demo__handler_8h_a819dc1bf99a2e7e9a0400a2a669c8c45}{Demo\+Handler\+\_\+\+TAG}}~\char`\"{}Dm\+HDLR\char`\"{}
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \mbox{\hyperlink{structDemoHandler__s}{Demo\+Handler\+\_\+s}} \mbox{\hyperlink{demo__handler_8h_a235a3fc0644fb9af6d3103c3405a9f07}{Demo\+Handler}}
+\item 
+typedef struct \mbox{\hyperlink{structDemoHandler__s}{Demo\+Handler\+\_\+s}} $\ast$ \mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}}
+\item 
+typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{demo__handler_8h_a6226bc965f062cb6ca074d2c730873e6}{DH\+\_\+\+Completion\+\_\+\+CB}}) (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$server\+\_\+ref, \mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}} href)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}} \mbox{\hyperlink{demo__handler_8h_a30d371dc1ce81b767c585abe3ea73fba}{demo\+\_\+handler\+\_\+new}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref, int socket, \mbox{\hyperlink{demo__server_8h_a87a7bd74bbb269cebd3f7de92853dc0d}{Demo\+Process\+Request\+Function}} request\+\_\+handler, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$completion\+\_\+cb)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$, \mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}}), \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$completion\+\_\+cb\+\_\+arg)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__handler_8h_a594dea75cf4ff5ef88be89d6c79cbe6e}{demo\+\_\+handler\+\_\+init}} (\mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}} this, \mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref, int socket, \mbox{\hyperlink{demo__server_8h_a87a7bd74bbb269cebd3f7de92853dc0d}{Demo\+Process\+Request\+Function}} request\+\_\+handler, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$completion\+\_\+cb)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$, \mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}}), \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$completion\+\_\+cb\+\_\+arg)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__handler_8h_a747e0e859cf0b2eb9848dbee2940cc12}{demo\+\_\+handler\+\_\+free}} (\mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}} this)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{demo__handler_8h_a819dc1bf99a2e7e9a0400a2a669c8c45}\label{demo__handler_8h_a819dc1bf99a2e7e9a0400a2a669c8c45}} 
+\index{demo\_handler.h@{demo\_handler.h}!DemoHandler\_TAG@{DemoHandler\_TAG}}
+\index{DemoHandler\_TAG@{DemoHandler\_TAG}!demo\_handler.h@{demo\_handler.h}}
+\doxysubsubsection{\texorpdfstring{DemoHandler\_TAG}{DemoHandler\_TAG}}
+{\footnotesize\ttfamily \#define Demo\+Handler\+\_\+\+TAG~\char`\"{}Dm\+HDLR\char`\"{}}
+
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{demo__handler_8h_a235a3fc0644fb9af6d3103c3405a9f07}\label{demo__handler_8h_a235a3fc0644fb9af6d3103c3405a9f07}} 
+\index{demo\_handler.h@{demo\_handler.h}!DemoHandler@{DemoHandler}}
+\index{DemoHandler@{DemoHandler}!demo\_handler.h@{demo\_handler.h}}
+\doxysubsubsection{\texorpdfstring{DemoHandler}{DemoHandler}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structDemoHandler__s}{Demo\+Handler\+\_\+s}} \mbox{\hyperlink{demo__handler_8h_a235a3fc0644fb9af6d3103c3405a9f07}{Demo\+Handler}}}
+
+\mbox{\Hypertarget{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}\label{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}} 
+\index{demo\_handler.h@{demo\_handler.h}!DemoHandlerRef@{DemoHandlerRef}}
+\index{DemoHandlerRef@{DemoHandlerRef}!demo\_handler.h@{demo\_handler.h}}
+\doxysubsubsection{\texorpdfstring{DemoHandlerRef}{DemoHandlerRef}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structDemoHandler__s}{Demo\+Handler\+\_\+s}} $\ast$ \mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}}}
+
+\mbox{\Hypertarget{demo__handler_8h_a6226bc965f062cb6ca074d2c730873e6}\label{demo__handler_8h_a6226bc965f062cb6ca074d2c730873e6}} 
+\index{demo\_handler.h@{demo\_handler.h}!DH\_Completion\_CB@{DH\_Completion\_CB}}
+\index{DH\_Completion\_CB@{DH\_Completion\_CB}!demo\_handler.h@{demo\_handler.h}}
+\doxysubsubsection{\texorpdfstring{DH\_Completion\_CB}{DH\_Completion\_CB}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ DH\+\_\+\+Completion\+\_\+\+CB) (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$server\+\_\+ref, \mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}} href)}
+
+Instance of a Demo\+Hamdler calls this CB when it is closing down. void$\ast$ server\+\_\+ref is an anonymous reference passed at handler creation by its parent object 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{demo__handler_8h_a747e0e859cf0b2eb9848dbee2940cc12}\label{demo__handler_8h_a747e0e859cf0b2eb9848dbee2940cc12}} 
+\index{demo\_handler.h@{demo\_handler.h}!demo\_handler\_free@{demo\_handler\_free}}
+\index{demo\_handler\_free@{demo\_handler\_free}!demo\_handler.h@{demo\_handler.h}}
+\doxysubsubsection{\texorpdfstring{demo\_handler\_free()}{demo\_handler\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} demo\+\_\+handler\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__handler_8h_a594dea75cf4ff5ef88be89d6c79cbe6e}\label{demo__handler_8h_a594dea75cf4ff5ef88be89d6c79cbe6e}} 
+\index{demo\_handler.h@{demo\_handler.h}!demo\_handler\_init@{demo\_handler\_init}}
+\index{demo\_handler\_init@{demo\_handler\_init}!demo\_handler.h@{demo\_handler.h}}
+\doxysubsubsection{\texorpdfstring{demo\_handler\_init()}{demo\_handler\_init()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} demo\+\_\+handler\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}}}]{this,  }\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop\+\_\+ref,  }\item[{int}]{socket,  }\item[{\mbox{\hyperlink{demo__server_8h_a87a7bd74bbb269cebd3f7de92853dc0d}{Demo\+Process\+Request\+Function}}}]{request\+\_\+handler,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$, \mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}})}]{completion\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{completion\+\_\+cb\+\_\+arg }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__handler_8h_a30d371dc1ce81b767c585abe3ea73fba}\label{demo__handler_8h_a30d371dc1ce81b767c585abe3ea73fba}} 
+\index{demo\_handler.h@{demo\_handler.h}!demo\_handler\_new@{demo\_handler\_new}}
+\index{demo\_handler\_new@{demo\_handler\_new}!demo\_handler.h@{demo\_handler.h}}
+\doxysubsubsection{\texorpdfstring{demo\_handler\_new()}{demo\_handler\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}} demo\+\_\+handler\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop\+\_\+ref,  }\item[{int}]{socket,  }\item[{\mbox{\hyperlink{demo__server_8h_a87a7bd74bbb269cebd3f7de92853dc0d}{Demo\+Process\+Request\+Function}}}]{request\+\_\+handler,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$, \mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}})}]{completion\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{completion\+\_\+cb\+\_\+arg }\end{DoxyParamCaption})}
+

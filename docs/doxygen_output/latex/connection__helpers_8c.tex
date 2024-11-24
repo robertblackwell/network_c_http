@@ -1,0 +1,41 @@
+\hypertarget{connection__helpers_8c}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/async-\/old/connection\+\_\+helpers.c File Reference}
+\label{connection__helpers_8c}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/async-\/old/connection\_helpers.c@{/home/robert/Projects/http\_in\_c/http\_in\_c/async-\/old/connection\_helpers.c}}
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/async/connection\+\_\+internal.\+h$>$}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{connection__helpers_8c_a6d075a6bc7674f520a6b97261edd8616}{async\+\_\+post\+\_\+to\+\_\+reactor}} (\mbox{\hyperlink{async_8h_a1271587294661ca6b7386f293ba37794}{Async\+Connection\+Ref}} connection\+\_\+ref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$postable\+\_\+function)(\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$))
+\item 
+const char $\ast$ \mbox{\hyperlink{connection__helpers_8c_ae990c939a6f388c5232e30a6a35e2ac1}{async\+\_\+read\+\_\+state\+\_\+str}} (int \mbox{\hyperlink{url__parser_8c_adc6e5733fc3c22f0a7b2914188c49c90}{state}})
+\item 
+const char $\ast$ \mbox{\hyperlink{connection__helpers_8c_a2611dde026db0ea0993459acecfa0147}{async\+\_\+write\+\_\+state\+\_\+str}} (int \mbox{\hyperlink{url__parser_8c_adc6e5733fc3c22f0a7b2914188c49c90}{state}})
+\item 
+const char $\ast$ \mbox{\hyperlink{connection__helpers_8c_a1842a8830b40fe7c8cd0deb33bed2669}{async\+\_\+epoll\+\_\+event\+\_\+str}} (int event)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{connection__helpers_8c_a1842a8830b40fe7c8cd0deb33bed2669}\label{connection__helpers_8c_a1842a8830b40fe7c8cd0deb33bed2669}} 
+\index{connection\_helpers.c@{connection\_helpers.c}!async\_epoll\_event\_str@{async\_epoll\_event\_str}}
+\index{async\_epoll\_event\_str@{async\_epoll\_event\_str}!connection\_helpers.c@{connection\_helpers.c}}
+\doxysubsubsection{\texorpdfstring{async\_epoll\_event\_str()}{async\_epoll\_event\_str()}}
+{\footnotesize\ttfamily const char$\ast$ async\+\_\+epoll\+\_\+event\+\_\+str (\begin{DoxyParamCaption}\item[{int}]{event }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{connection__helpers_8c_a6d075a6bc7674f520a6b97261edd8616}\label{connection__helpers_8c_a6d075a6bc7674f520a6b97261edd8616}} 
+\index{connection\_helpers.c@{connection\_helpers.c}!async\_post\_to\_reactor@{async\_post\_to\_reactor}}
+\index{async\_post\_to\_reactor@{async\_post\_to\_reactor}!connection\_helpers.c@{connection\_helpers.c}}
+\doxysubsubsection{\texorpdfstring{async\_post\_to\_reactor()}{async\_post\_to\_reactor()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} async\+\_\+post\+\_\+to\+\_\+reactor (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{async_8h_a1271587294661ca6b7386f293ba37794}{Async\+Connection\+Ref}}}]{connection\+\_\+ref,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$)(\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$)}]{postable\+\_\+function }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{connection__helpers_8c_ae990c939a6f388c5232e30a6a35e2ac1}\label{connection__helpers_8c_ae990c939a6f388c5232e30a6a35e2ac1}} 
+\index{connection\_helpers.c@{connection\_helpers.c}!async\_read\_state\_str@{async\_read\_state\_str}}
+\index{async\_read\_state\_str@{async\_read\_state\_str}!connection\_helpers.c@{connection\_helpers.c}}
+\doxysubsubsection{\texorpdfstring{async\_read\_state\_str()}{async\_read\_state\_str()}}
+{\footnotesize\ttfamily const char$\ast$ async\+\_\+read\+\_\+state\+\_\+str (\begin{DoxyParamCaption}\item[{int}]{state }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{connection__helpers_8c_a2611dde026db0ea0993459acecfa0147}\label{connection__helpers_8c_a2611dde026db0ea0993459acecfa0147}} 
+\index{connection\_helpers.c@{connection\_helpers.c}!async\_write\_state\_str@{async\_write\_state\_str}}
+\index{async\_write\_state\_str@{async\_write\_state\_str}!connection\_helpers.c@{connection\_helpers.c}}
+\doxysubsubsection{\texorpdfstring{async\_write\_state\_str()}{async\_write\_state\_str()}}
+{\footnotesize\ttfamily const char$\ast$ async\+\_\+write\+\_\+state\+\_\+str (\begin{DoxyParamCaption}\item[{int}]{state }\end{DoxyParamCaption})}
+

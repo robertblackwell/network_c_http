@@ -1,0 +1,1023 @@
+\hypertarget{runloop_8h}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/runloop/runloop.h File Reference}
+\label{runloop_8h}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/runloop/runloop.h@{/home/robert/Projects/http\_in\_c/http\_in\_c/runloop/runloop.h}}
+{\ttfamily \#include $<$stdint.\+h$>$}\newline
+{\ttfamily \#include $<$time.\+h$>$}\newline
+{\ttfamily \#include $<$stdbool.\+h$>$}\newline
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \mbox{\hyperlink{structRunloop__s}{Runloop\+\_\+s}} \mbox{\hyperlink{runloop_8h_a1a88ae0c5a63134f5553a08f686cfaaa}{Runloop}}
+\item 
+typedef struct \mbox{\hyperlink{structRunloop__s}{Runloop\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}
+\item 
+typedef struct \mbox{\hyperlink{structRunloopWatcher__s}{Runloop\+Watcher\+\_\+s}} \mbox{\hyperlink{runloop_8h_aa4325dbb5c14aa784dea966cfd652f72}{Runloop\+Watcher}}
+\item 
+typedef struct \mbox{\hyperlink{structRunloopWatcher__s}{Runloop\+Watcher\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}}
+\item 
+typedef struct \mbox{\hyperlink{structRunloopTimer__s}{Runloop\+Timer\+\_\+s}} \mbox{\hyperlink{runloop_8h_a998b1cfba2db74755abad7d0d39a94ab}{Runloop\+Timer}}
+\item 
+typedef struct \mbox{\hyperlink{structRunloopTimer__s}{Runloop\+Timer\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}}
+\item 
+typedef struct \mbox{\hyperlink{structRunloopStream__s}{Runloop\+Stream\+\_\+s}} \mbox{\hyperlink{runloop_8h_a07a8f48919fa1a5238db796a030ff39a}{Runloop\+Stream}}
+\item 
+typedef struct \mbox{\hyperlink{structRunloopStream__s}{Runloop\+Stream\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}}
+\item 
+typedef struct \mbox{\hyperlink{structAsioStream__s}{Asio\+Stream\+\_\+s}} \mbox{\hyperlink{runloop_8h_a71729bae8426d9e917c4e8e8d737e7b9}{Asio\+Stream}}
+\item 
+typedef struct \mbox{\hyperlink{structAsioStream__s}{Asio\+Stream\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}}
+\item 
+typedef struct \mbox{\hyperlink{structRunloopQueueWatcher__s}{Runloop\+Queue\+Watcher\+\_\+s}} \mbox{\hyperlink{runloop_8h_a0435b9497269629916ef4ead03f647fe}{Runloop\+Queue\+Watcher}}
+\item 
+typedef struct \mbox{\hyperlink{structRunloopQueueWatcher__s}{Runloop\+Queue\+Watcher\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}}
+\item 
+typedef struct \mbox{\hyperlink{structRunloopListener__s}{Runloop\+Listener\+\_\+s}} \mbox{\hyperlink{runloop_8h_a27fcb014683bb501f5cd6d6fbe650ec2}{Runloop\+Listener}}
+\item 
+typedef struct \mbox{\hyperlink{structRunloopListener__s}{Runloop\+Listener\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}
+\item 
+typedef struct \mbox{\hyperlink{structRunloopEventfd__s}{Runloop\+Eventfd\+\_\+s}} \mbox{\hyperlink{runloop_8h_ae52f3eec54888fde97957ac9af9e07e0}{Runloop\+Eventfd}}
+\item 
+typedef struct \mbox{\hyperlink{structRunloopEventfd__s}{Runloop\+Eventfd\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}
+\item 
+typedef struct \mbox{\hyperlink{structEventfdQueue__s}{Eventfd\+Queue\+\_\+s}} \mbox{\hyperlink{runloop_8h_a02d37bce2f9fc4a10e1410044e58a1e0}{Eventfd\+Queue}}
+\item 
+typedef struct \mbox{\hyperlink{structEventfdQueue__s}{Eventfd\+Queue\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_a6ef563d6fb5ad8c3212d5f6deb16bf93}{Eventfd\+Queue\+Ref}}
+\item 
+typedef struct \mbox{\hyperlink{structFunctor__s}{Functor\+\_\+s}} \mbox{\hyperlink{runloop_8h_aeacde1bfd947ad8b6f347ceb6dff16ac}{Functor}}
+\item 
+typedef struct \mbox{\hyperlink{structInterthreadQueue__s}{Interthread\+Queue\+\_\+s}} \mbox{\hyperlink{runloop_8h_a81776928c364c45c209c60f785a006fb}{Interthread\+Queue}}
+\item 
+typedef struct \mbox{\hyperlink{structInterthreadQueue__s}{Interthread\+Queue\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_a2b757ef5b5c789b49dc7b2be25991801}{Interthread\+Queue\+Ref}}
+\item 
+typedef uint64\+\_\+t \mbox{\hyperlink{runloop_8h_a1b946c739da2d113719c75f8cd68bb6a}{Event\+Mask}}
+\item 
+typedef uint64\+\_\+t \mbox{\hyperlink{runloop_8h_ad2874bfd54f20a58dcee24bf2d1ccc74}{Runloop\+Timer\+Event}}
+\item 
+typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}) (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg)
+\item 
+typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{runloop_8h_a083f41dda3e67ba5e3c64f3680955808}{Watcher\+Callback}}) (\mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}} wref, uint64\+\_\+t events)
+\item 
+typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{runloop_8h_a4d00928dece5369bf0391bb1bc610e66}{Watcher\+Event\+Handler}}) (\mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}} wref, uint64\+\_\+t events)
+\item 
+typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{runloop_8h_aa6745adb525b387e2dcfe4012d400c35}{Timer\+Event\+Handler}}) (\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} timer\+\_\+watcher\+\_\+ref, uint64\+\_\+t events)
+\item 
+typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{runloop_8h_a8bb8706e06b1d7ca6b86d7ff0f692542}{Socket\+Event\+Handler}}) (\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}} socket\+\_\+watcher\+\_\+ref, uint64\+\_\+t events)
+\item 
+typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{runloop_8h_a170a0f40154f4c20512c5ba686379f5a}{Fd\+Event\+Handler}}) (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} fd\+\_\+event\+\_\+ref, uint64\+\_\+t events)
+\item 
+typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{runloop_8h_a855bb03a3df54c2dc36d1f05535f5bca}{Queue\+Event\+Handler}}) (\mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}} qref, uint64\+\_\+t events)
+\item 
+typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{runloop_8h_ac12cdfb651af0c6a90e6fbc7bda4f01f}{Listener\+Event\+Handler}}) (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} listener\+\_\+ref, uint64\+\_\+t events)
+\item 
+typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{runloop_8h_a2ff56b783332d89e9348761ca18da378}{Asio\+Readcallback}}) (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg, long length, int error\+\_\+number)
+\item 
+typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{runloop_8h_af0460293f7cf513ece96de52b33806d9}{Asio\+Writecallback}}) (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg, long length, int error\+\_\+number)
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} \mbox{\hyperlink{runloop_8h_a593ca4375678d654024ada9c1b702c44}{runloop\+\_\+get\+\_\+threads\+\_\+reactor}} ()
+\item 
+\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} \mbox{\hyperlink{runloop_8h_a79ee07aed2b3ec022d34b48113a9dfd4}{runloop\+\_\+new}} (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}})
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a046b68a9484e04053e2feb1078b7fb5a}{runloop\+\_\+close}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a3d04fc2f2da95cf4a84ddd79cb3d0cd0}{runloop\+\_\+init}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_ab45049e45e9d38907d4f54b740bde012}{runloop\+\_\+free}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} athis)
+\item 
+int \mbox{\hyperlink{runloop_8h_a7d358bab7e447cdc639cfcda010e1731}{runloop\+\_\+register}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} athis, int fd, uint32\+\_\+t interest, \mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}} wref)
+\item 
+int \mbox{\hyperlink{runloop_8h_a47b8f0a2baebe014bf4edafac0c4755c}{runloop\+\_\+deregister}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} athis, int fd)
+\item 
+int \mbox{\hyperlink{runloop_8h_a1aa35435f63ba125c575c45b346e3f71}{runloop\+\_\+reregister}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} athis, int fd, uint32\+\_\+t interest, \mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}} wref)
+\item 
+int \mbox{\hyperlink{runloop_8h_a0fd1ed9a309a3136c2a6e6540ea37abe}{runloop\+\_\+run}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} athis, time\+\_\+t timeout)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a6bb348ca0c8036d0a92812a2c91539e1}{runloop\+\_\+post}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} athis, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} cb, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a9d0c48efa8ad1294d4c40a4d29f83df2}{runloop\+\_\+delete}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} athis, int fd)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a1caba38bf4430fd8388a6ec2a3cb15c3}{runloop\+\_\+verify}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} r)
+\item 
+\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} \mbox{\hyperlink{runloop_8h_a2535fead161438ab93552d53f70dd30a}{Watcher\+\_\+get\+\_\+reactor}} (\mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}} athis)
+\item 
+int \mbox{\hyperlink{runloop_8h_a900f94c64e6b44a98cc794a94cdf8a8e}{Watcher\+\_\+get\+\_\+fd}} (\mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}} this)
+\item 
+\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} \mbox{\hyperlink{runloop_8h_a2d195c5cf7caaa3a79c933239ef9d5af}{runloop\+\_\+timer\+\_\+new}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a3c4f3c4886fa08d12093ace7927268b7}{runloop\+\_\+timer\+\_\+init}} (\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} this, \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_ae94e3ab786f45fec5d1f83fe30599ce5}{runloop\+\_\+timer\+\_\+free}} (\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a62c2846373f22447ba828e9859ddb879}{runloop\+\_\+timer\+\_\+register}} (\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} athis, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} cb, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ctx, uint64\+\_\+t interval\+\_\+ms, bool repeating)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_ae480cf7c3c71f608ce0a6122f77ffce1}{runloop\+\_\+timer\+\_\+update}} (\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} athis, uint64\+\_\+t interval\+\_\+ms, bool repeating)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_abd1d590c73af0d23a7634847cb39f983}{runloop\+\_\+timer\+\_\+disarm}} (\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a6ff7fbe14e552c50a8caa027218695b2}{runloop\+\_\+timer\+\_\+rearm\+\_\+old}} (\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} athis, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} cb, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ctx, uint64\+\_\+t interval\+\_\+ms, bool repeating)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a10497ecff5ddcfde9b3ba795c1b55206}{runloop\+\_\+timer\+\_\+rearm}} (\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a9c60cf832c6e140e63bb6c10a3c99602}{runloop\+\_\+timer\+\_\+deregister}} (\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a137836ce63d6e8840f9566959140ec30}{WTimer\+Fd\+\_\+verify}} (\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} r)
+\item 
+\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} \mbox{\hyperlink{runloop_8h_a7bbefdfcebad982294f61eb7f77a4e9b}{runloop\+\_\+timer\+\_\+get\+\_\+reactor}} (\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} athis)
+\item 
+int \mbox{\hyperlink{runloop_8h_a6eb9db3944dcd5cfc2924c20bcba0bab}{runloop\+\_\+timer\+\_\+get\+\_\+fd}} (\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} this)
+\item 
+\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} \mbox{\hyperlink{runloop_8h_a0caca38ef2f474916f68ab71df881c46}{runloop\+\_\+timer\+\_\+set}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} rl, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} cb, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ctx, uint64\+\_\+t interval\+\_\+ms, bool repeating)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_aac5fdf9c9c5329cef767093a33f53178}{runloop\+\_\+timer\+\_\+clear}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} rl, \mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} timerref)
+\item 
+\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} \mbox{\hyperlink{runloop_8h_abb4198901ffe94806c581beb6fea1608}{runloop\+\_\+listener\+\_\+new}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop, int fd)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_acfdc20fdc6aa21250c959995f3f04cc4}{runloop\+\_\+listener\+\_\+init}} (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} athis, \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop, int fd)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_ac41ebfd5eee0af9eb60b835549cf0e48}{runloop\+\_\+listener\+\_\+free}} (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a530597ca7cc4c16ae86abbac423039a7}{runloop\+\_\+listener\+\_\+register}} (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} athis, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} postable, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$postable\+\_\+arg)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a6ee426958f4a25d811fa534656bb61f5}{runloop\+\_\+listener\+\_\+deregister}} (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_acee0f1780a6bc2bf1bddb39e84b22ca8}{runloop\+\_\+listener\+\_\+arm}} (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} athis, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} postable, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$postable\+\_\+arg)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a9efd32ac37acc06a15d60e1e23ad1856}{runloop\+\_\+listener\+\_\+disarm}} (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a09de9aa0c03bd919a8d2281e93e6a8ec}{runloop\+\_\+listener\+\_\+verify}} (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} r)
+\item 
+\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} \mbox{\hyperlink{runloop_8h_af45fad752581ab82d907b4ef3edc9659}{runloop\+\_\+listener\+\_\+get\+\_\+runloop}} (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} athis)
+\item 
+int \mbox{\hyperlink{runloop_8h_a311b3ade0e424e55c46e623aaef9778e}{runloop\+\_\+listener\+\_\+get\+\_\+fd}} (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} this)
+\item 
+\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}} \mbox{\hyperlink{runloop_8h_a27873aeb9a58e303e756409a630956b2}{runloop\+\_\+stream\+\_\+new}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop, int fd)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a169d815564d034379674a861d090773f}{runloop\+\_\+stream\+\_\+init}} (\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}} athis, \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop, int fd)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_ab17ee09165ad75792845c4cbe3e7d583}{runloop\+\_\+stream\+\_\+free}} (\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_ad74b99e555b1ac9e1bae86cc110de461}{runloop\+\_\+stream\+\_\+register}} (\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a36c0c2cca48745ee28c7b528e2a99984}{runloop\+\_\+stream\+\_\+deregister}} (\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a85dfd6a1da8d231966f353af4a1c342f}{runloop\+\_\+stream\+\_\+arm\+\_\+both}} (\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}} athis, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} read\+\_\+postable\+\_\+cb, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$read\+\_\+arg, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} write\+\_\+postable\+\_\+cb, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$write\+\_\+arg)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a7f231b64110e47b0444588f186f85c0a}{runloop\+\_\+stream\+\_\+arm\+\_\+read}} (\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}} athis, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} postable\+\_\+callback, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a393472772679ae011a4ddd3e915fa86a}{runloop\+\_\+stream\+\_\+arm\+\_\+write}} (\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}} athis, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} postable\+\_\+callback, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a5c0f06d91c863880072061b07d2b55cf}{runloop\+\_\+stream\+\_\+disarm\+\_\+read}} (\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a118a4fccf0d4d96b28e6e06dcc95b6ba}{runloop\+\_\+stream\+\_\+disarm\+\_\+write}} (\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a151653e185ab6e5e5d458c3c75429555}{runloop\+\_\+stream\+\_\+verify}} (\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}} r)
+\item 
+\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} \mbox{\hyperlink{runloop_8h_a8a18b88c0fc6ea3cf3100111a3d527aa}{runloop\+\_\+stream\+\_\+get\+\_\+reactor}} (\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}} athis)
+\item 
+int \mbox{\hyperlink{runloop_8h_a203f3d88e14ba34a197cc647953fcaf0}{runloop\+\_\+stream\+\_\+get\+\_\+fd}} (\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}} this)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}} \mbox{\hyperlink{runloop_8h_a24df3674da91da0a7cc276c74368480d}{asio\+\_\+stream\+\_\+new}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref, int socket)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a95b5a663af6c085f8ccf4c3b73b10b93}{asio\+\_\+stream\+\_\+init}} (\mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}} this, \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref, int fd)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_ae2a3b91d267004ea6ef53824f00194f8}{asio\+\_\+stream\+\_\+free}} (\mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}} this)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a9808ffcd2b40d016e72f6eed2c2d2db6}{asio\+\_\+stream\+\_\+destroy}} (\mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}} cref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_aa443580fbe28a70dfa7ef4a2646d905d}{asio\+\_\+stream\+\_\+read}} (\mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}} stream\+\_\+ref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$buffer, long max\+\_\+length, \mbox{\hyperlink{runloop_8h_a2ff56b783332d89e9348761ca18da378}{Asio\+Readcallback}} cb, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_ad48fc5780ad963a116e095d6a00505f3}{asio\+\_\+stream\+\_\+write}} (\mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}} stream\+\_\+ref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$buffer, long length, \mbox{\hyperlink{runloop_8h_af0460293f7cf513ece96de52b33806d9}{Asio\+Writecallback}} cb, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a47df6f252444d5b91a5fcdcf11bacf44}{asio\+\_\+stream\+\_\+close}} (\mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}} cref)
+\item 
+\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} \mbox{\hyperlink{runloop_8h_a3e1dc44c8a1baf552a01292c4574d738}{asio\+\_\+stream\+\_\+get\+\_\+runloop}} (\mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}} asio\+\_\+stream\+\_\+ref)
+\item 
+\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} \mbox{\hyperlink{runloop_8h_a0e5365b7ffef8d3dd8cddbd9d91eee44}{runloop\+\_\+eventfd\+\_\+new}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a1f8ba645346496fbad8871d889d28e85}{runloop\+\_\+eventfd\+\_\+init}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis, \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a4b264cf23e4dd219789cb5bde6944848}{runloop\+\_\+eventfd\+\_\+free}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a142d0654cd162191798d08481a16f3e7}{runloop\+\_\+eventfd\+\_\+register}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a34b1eaba1e42b0c64e24b90091425a12}{runloop\+\_\+eventfd\+\_\+change\+\_\+watch}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} postable, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg, uint64\+\_\+t watch\+\_\+what)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a6c4fea5c4cb6afd42150ac8dbf55530a}{runloop\+\_\+eventfd\+\_\+arm}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} postable, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a190ae28dcb833c286c5d08be29bf180e}{runloop\+\_\+eventfd\+\_\+disarm}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a0970d7a5af2b842f836f716faa9c6615}{runloop\+\_\+eventfd\+\_\+fire}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a555317789ec1acc07cdd59d69a017bcf}{runloop\+\_\+eventfd\+\_\+clear\+\_\+one\+\_\+event}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_af68217d0a0c3e63410d69606798e4df4}{runloop\+\_\+eventfd\+\_\+clear\+\_\+all\+\_\+events}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a316a8ec01541c29bc919b645f250a889}{runloop\+\_\+eventfd\+\_\+deregister}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_ab109da96ac9aaf314b13d5f8a56fe5c0}{runloop\+\_\+eventfd\+\_\+verify}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} r)
+\item 
+\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} \mbox{\hyperlink{runloop_8h_a94c2c3385090801d8415aa7d67c12d04}{runloop\+\_\+eventfd\+\_\+get\+\_\+reactor}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} athis)
+\item 
+int \mbox{\hyperlink{runloop_8h_a81a8a0c87572e0199d203c7381e612d7}{runloop\+\_\+eventfd\+\_\+get\+\_\+fd}} (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} this)
+\item 
+\mbox{\hyperlink{runloop_8h_a6ef563d6fb5ad8c3212d5f6deb16bf93}{Eventfd\+Queue\+Ref}} \mbox{\hyperlink{runloop_8h_a8046ae97ac99a0003eda23830281777e}{runloop\+\_\+eventfd\+\_\+queue\+\_\+new}} ()
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a86cc8047c3ba718351b25cfe1f30b98a}{runloop\+\_\+eventfd\+\_\+queue\+\_\+free}} (\mbox{\hyperlink{runloop_8h_a6ef563d6fb5ad8c3212d5f6deb16bf93}{Eventfd\+Queue\+Ref}} athis)
+\item 
+int \mbox{\hyperlink{runloop_8h_aeaf223dcfe49e2fc5986d801aa4972a2}{runloop\+\_\+eventfd\+\_\+queue\+\_\+readfd}} (\mbox{\hyperlink{runloop_8h_a6ef563d6fb5ad8c3212d5f6deb16bf93}{Eventfd\+Queue\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a82b680631af163f86958436b4ab9ca9d}{runloop\+\_\+eventfd\+\_\+queue\+\_\+add}} (\mbox{\hyperlink{runloop_8h_a6ef563d6fb5ad8c3212d5f6deb16bf93}{Eventfd\+Queue\+Ref}} athis, \mbox{\hyperlink{rl__internal_8h_aeacde1bfd947ad8b6f347ceb6dff16ac}{Functor}} item)
+\item 
+\mbox{\hyperlink{rl__internal_8h_aeacde1bfd947ad8b6f347ceb6dff16ac}{Functor}} \mbox{\hyperlink{runloop_8h_a5893ed70f0d3e472d89020651b55eeeb}{runloop\+\_\+eventfd\+\_\+queue\+\_\+remove}} (\mbox{\hyperlink{runloop_8h_a6ef563d6fb5ad8c3212d5f6deb16bf93}{Eventfd\+Queue\+Ref}} athis)
+\item 
+\mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}} \mbox{\hyperlink{runloop_8h_a56c7fec79c10f053e47378e0af746bae}{runloop\+\_\+queue\+\_\+watcher\+\_\+new}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop, \mbox{\hyperlink{runloop_8h_a6ef563d6fb5ad8c3212d5f6deb16bf93}{Eventfd\+Queue\+Ref}} qref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a13e92b5c313503c1120f447e4e497226}{runloop\+\_\+queue\+\_\+watcher\+\_\+free}} (\mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}} this)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a142f03ed3ec2b4163774886d00ffffdb}{runloop\+\_\+queue\+\_\+watcher\+\_\+register}} (\mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}} athis, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} postable\+\_\+cb, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$postable\+\_\+arg)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a94f64ba78b7b7078dfb1444602f49009}{runloop\+\_\+queue\+\_\+watcher\+\_\+change\+\_\+watch}} (\mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}} athis, \mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}} postable\+\_\+cb, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg, uint64\+\_\+t watch\+\_\+what)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a6cfc179bb844a535709498d89688e5cd}{runloop\+\_\+queue\+\_\+watcher\+\_\+deregister}} (\mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}} athis)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_af82aeb592e02b8959e0d3eab671962c5}{runloop\+\_\+queue\+\_\+watcher\+\_\+verify}} (\mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}} r)
+\item 
+\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} \mbox{\hyperlink{runloop_8h_a42a8acd1d78cb765d461ad41b44de5e9}{runloop\+\_\+queue\+\_\+watcher\+\_\+get\+\_\+reactor}} (\mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}} athis)
+\item 
+int \mbox{\hyperlink{runloop_8h_a03f713c37e03704eed588f97f9bf2f17}{runloop\+\_\+queue\+\_\+watcher\+\_\+get\+\_\+fd}} (\mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}} this)
+\item 
+\mbox{\hyperlink{runloop_8h_a2b757ef5b5c789b49dc7b2be25991801}{Interthread\+Queue\+Ref}} \mbox{\hyperlink{runloop_8h_aa3bc15755031f431f693587ad04b78c5}{itqueue\+\_\+new}} (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} rl)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a820c53dd626f603965da7b43ed9e56da}{itqueue\+\_\+free}} (\mbox{\hyperlink{runloop_8h_a2b757ef5b5c789b49dc7b2be25991801}{Interthread\+Queue\+Ref}} this)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{runloop_8h_a58b09771064562aba40b16bb95649ab7}{itqueue\+\_\+add}} (\mbox{\hyperlink{runloop_8h_a2b757ef5b5c789b49dc7b2be25991801}{Interthread\+Queue\+Ref}} qref, \mbox{\hyperlink{rl__internal_8h_aeacde1bfd947ad8b6f347ceb6dff16ac}{Functor}} func)
+\item 
+\mbox{\hyperlink{rl__internal_8h_aeacde1bfd947ad8b6f347ceb6dff16ac}{Functor}} \mbox{\hyperlink{runloop_8h_a54aa9090d65c18f562ac361a30ee9f91}{itqueue\+\_\+remove}} (\mbox{\hyperlink{runloop_8h_a2b757ef5b5c789b49dc7b2be25991801}{Interthread\+Queue\+Ref}} qref)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{runloop_8h_a2ff56b783332d89e9348761ca18da378}\label{runloop_8h_a2ff56b783332d89e9348761ca18da378}} 
+\index{runloop.h@{runloop.h}!AsioReadcallback@{AsioReadcallback}}
+\index{AsioReadcallback@{AsioReadcallback}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{AsioReadcallback}{AsioReadcallback}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ Asio\+Readcallback) (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg, long length, int error\+\_\+number)}
+
+\mbox{\Hypertarget{runloop_8h_a71729bae8426d9e917c4e8e8d737e7b9}\label{runloop_8h_a71729bae8426d9e917c4e8e8d737e7b9}} 
+\index{runloop.h@{runloop.h}!AsioStream@{AsioStream}}
+\index{AsioStream@{AsioStream}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{AsioStream}{AsioStream}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structAsioStream__s}{Asio\+Stream\+\_\+s}} \mbox{\hyperlink{rl__internal_8h_a71729bae8426d9e917c4e8e8d737e7b9}{Asio\+Stream}}}
+
+\mbox{\Hypertarget{runloop_8h_a5d9a5a9bcae35aaac48a276783d622ac}\label{runloop_8h_a5d9a5a9bcae35aaac48a276783d622ac}} 
+\index{runloop.h@{runloop.h}!AsioStreamRef@{AsioStreamRef}}
+\index{AsioStreamRef@{AsioStreamRef}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{AsioStreamRef}{AsioStreamRef}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structAsioStream__s}{Asio\+Stream\+\_\+s}} $\ast$ \mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}}}
+
+\mbox{\Hypertarget{runloop_8h_af0460293f7cf513ece96de52b33806d9}\label{runloop_8h_af0460293f7cf513ece96de52b33806d9}} 
+\index{runloop.h@{runloop.h}!AsioWritecallback@{AsioWritecallback}}
+\index{AsioWritecallback@{AsioWritecallback}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{AsioWritecallback}{AsioWritecallback}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ Asio\+Writecallback) (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg, long length, int error\+\_\+number)}
+
+\mbox{\Hypertarget{runloop_8h_a02d37bce2f9fc4a10e1410044e58a1e0}\label{runloop_8h_a02d37bce2f9fc4a10e1410044e58a1e0}} 
+\index{runloop.h@{runloop.h}!EventfdQueue@{EventfdQueue}}
+\index{EventfdQueue@{EventfdQueue}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{EventfdQueue}{EventfdQueue}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structEventfdQueue__s}{Eventfd\+Queue\+\_\+s}} \mbox{\hyperlink{rl__internal_8h_a02d37bce2f9fc4a10e1410044e58a1e0}{Eventfd\+Queue}}}
+
+\mbox{\Hypertarget{runloop_8h_a6ef563d6fb5ad8c3212d5f6deb16bf93}\label{runloop_8h_a6ef563d6fb5ad8c3212d5f6deb16bf93}} 
+\index{runloop.h@{runloop.h}!EventfdQueueRef@{EventfdQueueRef}}
+\index{EventfdQueueRef@{EventfdQueueRef}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{EventfdQueueRef}{EventfdQueueRef}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structEventfdQueue__s}{Eventfd\+Queue\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_a6ef563d6fb5ad8c3212d5f6deb16bf93}{Eventfd\+Queue\+Ref}}}
+
+\mbox{\Hypertarget{runloop_8h_a1b946c739da2d113719c75f8cd68bb6a}\label{runloop_8h_a1b946c739da2d113719c75f8cd68bb6a}} 
+\index{runloop.h@{runloop.h}!EventMask@{EventMask}}
+\index{EventMask@{EventMask}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{EventMask}{EventMask}}
+{\footnotesize\ttfamily typedef uint64\+\_\+t \mbox{\hyperlink{runloop_8h_a1b946c739da2d113719c75f8cd68bb6a}{Event\+Mask}}}
+
+\mbox{\Hypertarget{runloop_8h_a170a0f40154f4c20512c5ba686379f5a}\label{runloop_8h_a170a0f40154f4c20512c5ba686379f5a}} 
+\index{runloop.h@{runloop.h}!FdEventHandler@{FdEventHandler}}
+\index{FdEventHandler@{FdEventHandler}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{FdEventHandler}{FdEventHandler}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ Fd\+Event\+Handler) (\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} fd\+\_\+event\+\_\+ref, uint64\+\_\+t events)}
+
+\mbox{\Hypertarget{runloop_8h_aeacde1bfd947ad8b6f347ceb6dff16ac}\label{runloop_8h_aeacde1bfd947ad8b6f347ceb6dff16ac}} 
+\index{runloop.h@{runloop.h}!Functor@{Functor}}
+\index{Functor@{Functor}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{Functor}{Functor}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structFunctor__s}{Functor\+\_\+s}} \mbox{\hyperlink{rl__internal_8h_aeacde1bfd947ad8b6f347ceb6dff16ac}{Functor}}}
+
+\mbox{\Hypertarget{runloop_8h_a81776928c364c45c209c60f785a006fb}\label{runloop_8h_a81776928c364c45c209c60f785a006fb}} 
+\index{runloop.h@{runloop.h}!InterthreadQueue@{InterthreadQueue}}
+\index{InterthreadQueue@{InterthreadQueue}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{InterthreadQueue}{InterthreadQueue}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structInterthreadQueue__s}{Interthread\+Queue\+\_\+s}} \mbox{\hyperlink{runloop_8h_a81776928c364c45c209c60f785a006fb}{Interthread\+Queue}}}
+
+\mbox{\Hypertarget{runloop_8h_a2b757ef5b5c789b49dc7b2be25991801}\label{runloop_8h_a2b757ef5b5c789b49dc7b2be25991801}} 
+\index{runloop.h@{runloop.h}!InterthreadQueueRef@{InterthreadQueueRef}}
+\index{InterthreadQueueRef@{InterthreadQueueRef}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{InterthreadQueueRef}{InterthreadQueueRef}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structInterthreadQueue__s}{Interthread\+Queue\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_a2b757ef5b5c789b49dc7b2be25991801}{Interthread\+Queue\+Ref}}}
+
+\mbox{\Hypertarget{runloop_8h_ac12cdfb651af0c6a90e6fbc7bda4f01f}\label{runloop_8h_ac12cdfb651af0c6a90e6fbc7bda4f01f}} 
+\index{runloop.h@{runloop.h}!ListenerEventHandler@{ListenerEventHandler}}
+\index{ListenerEventHandler@{ListenerEventHandler}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{ListenerEventHandler}{ListenerEventHandler}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ Listener\+Event\+Handler) (\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} listener\+\_\+ref, uint64\+\_\+t events)}
+
+\mbox{\Hypertarget{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}\label{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}} 
+\index{runloop.h@{runloop.h}!PostableFunction@{PostableFunction}}
+\index{PostableFunction@{PostableFunction}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{PostableFunction}{PostableFunction}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ Postable\+Function) (\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg)}
+
+\mbox{\Hypertarget{runloop_8h_a855bb03a3df54c2dc36d1f05535f5bca}\label{runloop_8h_a855bb03a3df54c2dc36d1f05535f5bca}} 
+\index{runloop.h@{runloop.h}!QueueEventHandler@{QueueEventHandler}}
+\index{QueueEventHandler@{QueueEventHandler}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{QueueEventHandler}{QueueEventHandler}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ Queue\+Event\+Handler) (\mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}} qref, uint64\+\_\+t events)}
+
+\mbox{\Hypertarget{runloop_8h_a1a88ae0c5a63134f5553a08f686cfaaa}\label{runloop_8h_a1a88ae0c5a63134f5553a08f686cfaaa}} 
+\index{runloop.h@{runloop.h}!Runloop@{Runloop}}
+\index{Runloop@{Runloop}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{Runloop}{Runloop}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structRunloop__s}{Runloop\+\_\+s}} \mbox{\hyperlink{runloop_8h_a1a88ae0c5a63134f5553a08f686cfaaa}{Runloop}}}
+
+\mbox{\Hypertarget{runloop_8h_ae52f3eec54888fde97957ac9af9e07e0}\label{runloop_8h_ae52f3eec54888fde97957ac9af9e07e0}} 
+\index{runloop.h@{runloop.h}!RunloopEventfd@{RunloopEventfd}}
+\index{RunloopEventfd@{RunloopEventfd}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{RunloopEventfd}{RunloopEventfd}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structRunloopEventfd__s}{Runloop\+Eventfd\+\_\+s}} \mbox{\hyperlink{runloop_8h_ae52f3eec54888fde97957ac9af9e07e0}{Runloop\+Eventfd}}}
+
+\mbox{\Hypertarget{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}\label{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}} 
+\index{runloop.h@{runloop.h}!RunloopEventfdRef@{RunloopEventfdRef}}
+\index{RunloopEventfdRef@{RunloopEventfdRef}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{RunloopEventfdRef}{RunloopEventfdRef}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structRunloopEventfd__s}{Runloop\+Eventfd\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}
+
+\mbox{\Hypertarget{runloop_8h_a27fcb014683bb501f5cd6d6fbe650ec2}\label{runloop_8h_a27fcb014683bb501f5cd6d6fbe650ec2}} 
+\index{runloop.h@{runloop.h}!RunloopListener@{RunloopListener}}
+\index{RunloopListener@{RunloopListener}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{RunloopListener}{RunloopListener}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structRunloopListener__s}{Runloop\+Listener\+\_\+s}} \mbox{\hyperlink{rl__internal_8h_a27fcb014683bb501f5cd6d6fbe650ec2}{Runloop\+Listener}}}
+
+\mbox{\Hypertarget{runloop_8h_a33649f8d6f9805855ed793236cd5365e}\label{runloop_8h_a33649f8d6f9805855ed793236cd5365e}} 
+\index{runloop.h@{runloop.h}!RunloopListenerRef@{RunloopListenerRef}}
+\index{RunloopListenerRef@{RunloopListenerRef}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{RunloopListenerRef}{RunloopListenerRef}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structRunloopListener__s}{Runloop\+Listener\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}
+
+\mbox{\Hypertarget{runloop_8h_a0435b9497269629916ef4ead03f647fe}\label{runloop_8h_a0435b9497269629916ef4ead03f647fe}} 
+\index{runloop.h@{runloop.h}!RunloopQueueWatcher@{RunloopQueueWatcher}}
+\index{RunloopQueueWatcher@{RunloopQueueWatcher}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{RunloopQueueWatcher}{RunloopQueueWatcher}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structRunloopQueueWatcher__s}{Runloop\+Queue\+Watcher\+\_\+s}} \mbox{\hyperlink{runloop_8h_a0435b9497269629916ef4ead03f647fe}{Runloop\+Queue\+Watcher}}}
+
+\mbox{\Hypertarget{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}\label{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}} 
+\index{runloop.h@{runloop.h}!RunloopQueueWatcherRef@{RunloopQueueWatcherRef}}
+\index{RunloopQueueWatcherRef@{RunloopQueueWatcherRef}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{RunloopQueueWatcherRef}{RunloopQueueWatcherRef}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structRunloopQueueWatcher__s}{Runloop\+Queue\+Watcher\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}}}
+
+\mbox{\Hypertarget{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}\label{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}} 
+\index{runloop.h@{runloop.h}!RunloopRef@{RunloopRef}}
+\index{RunloopRef@{RunloopRef}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{RunloopRef}{RunloopRef}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structRunloop__s}{Runloop\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}
+
+\mbox{\Hypertarget{runloop_8h_a07a8f48919fa1a5238db796a030ff39a}\label{runloop_8h_a07a8f48919fa1a5238db796a030ff39a}} 
+\index{runloop.h@{runloop.h}!RunloopStream@{RunloopStream}}
+\index{RunloopStream@{RunloopStream}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{RunloopStream}{RunloopStream}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structRunloopStream__s}{Runloop\+Stream\+\_\+s}} \mbox{\hyperlink{runloop_8h_a07a8f48919fa1a5238db796a030ff39a}{Runloop\+Stream}}}
+
+\mbox{\Hypertarget{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}\label{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}} 
+\index{runloop.h@{runloop.h}!RunloopStreamRef@{RunloopStreamRef}}
+\index{RunloopStreamRef@{RunloopStreamRef}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{RunloopStreamRef}{RunloopStreamRef}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structRunloopStream__s}{Runloop\+Stream\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}}}
+
+\mbox{\Hypertarget{runloop_8h_a998b1cfba2db74755abad7d0d39a94ab}\label{runloop_8h_a998b1cfba2db74755abad7d0d39a94ab}} 
+\index{runloop.h@{runloop.h}!RunloopTimer@{RunloopTimer}}
+\index{RunloopTimer@{RunloopTimer}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{RunloopTimer}{RunloopTimer}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structRunloopTimer__s}{Runloop\+Timer\+\_\+s}} \mbox{\hyperlink{runloop_8h_a998b1cfba2db74755abad7d0d39a94ab}{Runloop\+Timer}}}
+
+\mbox{\Hypertarget{runloop_8h_ad2874bfd54f20a58dcee24bf2d1ccc74}\label{runloop_8h_ad2874bfd54f20a58dcee24bf2d1ccc74}} 
+\index{runloop.h@{runloop.h}!RunloopTimerEvent@{RunloopTimerEvent}}
+\index{RunloopTimerEvent@{RunloopTimerEvent}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{RunloopTimerEvent}{RunloopTimerEvent}}
+{\footnotesize\ttfamily typedef uint64\+\_\+t \mbox{\hyperlink{rl__internal_8h_ad2874bfd54f20a58dcee24bf2d1ccc74}{Runloop\+Timer\+Event}}}
+
+\mbox{\Hypertarget{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}\label{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}} 
+\index{runloop.h@{runloop.h}!RunloopTimerRef@{RunloopTimerRef}}
+\index{RunloopTimerRef@{RunloopTimerRef}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{RunloopTimerRef}{RunloopTimerRef}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structRunloopTimer__s}{Runloop\+Timer\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}}}
+
+\mbox{\Hypertarget{runloop_8h_aa4325dbb5c14aa784dea966cfd652f72}\label{runloop_8h_aa4325dbb5c14aa784dea966cfd652f72}} 
+\index{runloop.h@{runloop.h}!RunloopWatcher@{RunloopWatcher}}
+\index{RunloopWatcher@{RunloopWatcher}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{RunloopWatcher}{RunloopWatcher}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structRunloopWatcher__s}{Runloop\+Watcher\+\_\+s}} \mbox{\hyperlink{runloop_8h_aa4325dbb5c14aa784dea966cfd652f72}{Runloop\+Watcher}}}
+
+\mbox{\Hypertarget{runloop_8h_a84676a401590989d16ead04a50ae36f2}\label{runloop_8h_a84676a401590989d16ead04a50ae36f2}} 
+\index{runloop.h@{runloop.h}!RunloopWatcherRef@{RunloopWatcherRef}}
+\index{RunloopWatcherRef@{RunloopWatcherRef}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{RunloopWatcherRef}{RunloopWatcherRef}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structRunloopWatcher__s}{Runloop\+Watcher\+\_\+s}} $\ast$ \mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}}}
+
+\mbox{\Hypertarget{runloop_8h_a8bb8706e06b1d7ca6b86d7ff0f692542}\label{runloop_8h_a8bb8706e06b1d7ca6b86d7ff0f692542}} 
+\index{runloop.h@{runloop.h}!SocketEventHandler@{SocketEventHandler}}
+\index{SocketEventHandler@{SocketEventHandler}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{SocketEventHandler}{SocketEventHandler}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ Socket\+Event\+Handler) (\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}} socket\+\_\+watcher\+\_\+ref, uint64\+\_\+t events)}
+
+\mbox{\Hypertarget{runloop_8h_aa6745adb525b387e2dcfe4012d400c35}\label{runloop_8h_aa6745adb525b387e2dcfe4012d400c35}} 
+\index{runloop.h@{runloop.h}!TimerEventHandler@{TimerEventHandler}}
+\index{TimerEventHandler@{TimerEventHandler}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{TimerEventHandler}{TimerEventHandler}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ Timer\+Event\+Handler) (\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} timer\+\_\+watcher\+\_\+ref, uint64\+\_\+t events)}
+
+\mbox{\Hypertarget{runloop_8h_a083f41dda3e67ba5e3c64f3680955808}\label{runloop_8h_a083f41dda3e67ba5e3c64f3680955808}} 
+\index{runloop.h@{runloop.h}!WatcherCallback@{WatcherCallback}}
+\index{WatcherCallback@{WatcherCallback}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{WatcherCallback}{WatcherCallback}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ Watcher\+Callback) (\mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}} wref, uint64\+\_\+t events)}
+
+\mbox{\Hypertarget{runloop_8h_a4d00928dece5369bf0391bb1bc610e66}\label{runloop_8h_a4d00928dece5369bf0391bb1bc610e66}} 
+\index{runloop.h@{runloop.h}!WatcherEventHandler@{WatcherEventHandler}}
+\index{WatcherEventHandler@{WatcherEventHandler}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{WatcherEventHandler}{WatcherEventHandler}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ Watcher\+Event\+Handler) (\mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}} wref, uint64\+\_\+t events)}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{runloop_8h_a47df6f252444d5b91a5fcdcf11bacf44}\label{runloop_8h_a47df6f252444d5b91a5fcdcf11bacf44}} 
+\index{runloop.h@{runloop.h}!asio\_stream\_close@{asio\_stream\_close}}
+\index{asio\_stream\_close@{asio\_stream\_close}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{asio\_stream\_close()}{asio\_stream\_close()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} asio\+\_\+stream\+\_\+close (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}}}]{cref }\end{DoxyParamCaption})}
+
+@\+TODO -\/ is this right runloop\+\_\+stream\+\_\+deregister(cref-\/$>$runloop\+\_\+stream\+\_\+ref);\mbox{\Hypertarget{runloop_8h_a9808ffcd2b40d016e72f6eed2c2d2db6}\label{runloop_8h_a9808ffcd2b40d016e72f6eed2c2d2db6}} 
+\index{runloop.h@{runloop.h}!asio\_stream\_destroy@{asio\_stream\_destroy}}
+\index{asio\_stream\_destroy@{asio\_stream\_destroy}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{asio\_stream\_destroy()}{asio\_stream\_destroy()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} asio\+\_\+stream\+\_\+destroy (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}}}]{cref }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_ae2a3b91d267004ea6ef53824f00194f8}\label{runloop_8h_ae2a3b91d267004ea6ef53824f00194f8}} 
+\index{runloop.h@{runloop.h}!asio\_stream\_free@{asio\_stream\_free}}
+\index{asio\_stream\_free@{asio\_stream\_free}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{asio\_stream\_free()}{asio\_stream\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} asio\+\_\+stream\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a3e1dc44c8a1baf552a01292c4574d738}\label{runloop_8h_a3e1dc44c8a1baf552a01292c4574d738}} 
+\index{runloop.h@{runloop.h}!asio\_stream\_get\_runloop@{asio\_stream\_get\_runloop}}
+\index{asio\_stream\_get\_runloop@{asio\_stream\_get\_runloop}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{asio\_stream\_get\_runloop()}{asio\_stream\_get\_runloop()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} asio\+\_\+stream\+\_\+get\+\_\+runloop (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}}}]{asio\+\_\+stream\+\_\+ref }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a95b5a663af6c085f8ccf4c3b73b10b93}\label{runloop_8h_a95b5a663af6c085f8ccf4c3b73b10b93}} 
+\index{runloop.h@{runloop.h}!asio\_stream\_init@{asio\_stream\_init}}
+\index{asio\_stream\_init@{asio\_stream\_init}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{asio\_stream\_init()}{asio\_stream\_init()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} asio\+\_\+stream\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}}}]{this,  }\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop\+\_\+ref,  }\item[{int}]{fd }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a24df3674da91da0a7cc276c74368480d}\label{runloop_8h_a24df3674da91da0a7cc276c74368480d}} 
+\index{runloop.h@{runloop.h}!asio\_stream\_new@{asio\_stream\_new}}
+\index{asio\_stream\_new@{asio\_stream\_new}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{asio\_stream\_new()}{asio\_stream\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}} asio\+\_\+stream\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop\+\_\+ref,  }\item[{int}]{socket }\end{DoxyParamCaption})}
+
+Async io is a more convenient interface for reading and writing data to fd\textquotesingle{}s like sockets.
+
+It is a proactor interface rather than the reactor provided by the runloop\+\_\+stream interface above \mbox{\Hypertarget{runloop_8h_aa443580fbe28a70dfa7ef4a2646d905d}\label{runloop_8h_aa443580fbe28a70dfa7ef4a2646d905d}} 
+\index{runloop.h@{runloop.h}!asio\_stream\_read@{asio\_stream\_read}}
+\index{asio\_stream\_read@{asio\_stream\_read}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{asio\_stream\_read()}{asio\_stream\_read()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} asio\+\_\+stream\+\_\+read (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}}}]{stream\+\_\+ref,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{buffer,  }\item[{long}]{max\+\_\+length,  }\item[{\mbox{\hyperlink{runloop_8h_a2ff56b783332d89e9348761ca18da378}{Asio\+Readcallback}}}]{cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{arg }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_ad48fc5780ad963a116e095d6a00505f3}\label{runloop_8h_ad48fc5780ad963a116e095d6a00505f3}} 
+\index{runloop.h@{runloop.h}!asio\_stream\_write@{asio\_stream\_write}}
+\index{asio\_stream\_write@{asio\_stream\_write}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{asio\_stream\_write()}{asio\_stream\_write()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} asio\+\_\+stream\+\_\+write (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}}}]{stream\+\_\+ref,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{buffer,  }\item[{long}]{length,  }\item[{\mbox{\hyperlink{runloop_8h_af0460293f7cf513ece96de52b33806d9}{Asio\+Writecallback}}}]{cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{arg }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a58b09771064562aba40b16bb95649ab7}\label{runloop_8h_a58b09771064562aba40b16bb95649ab7}} 
+\index{runloop.h@{runloop.h}!itqueue\_add@{itqueue\_add}}
+\index{itqueue\_add@{itqueue\_add}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{itqueue\_add()}{itqueue\_add()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} itqueue\+\_\+add (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a2b757ef5b5c789b49dc7b2be25991801}{Interthread\+Queue\+Ref}}}]{qref,  }\item[{\mbox{\hyperlink{rl__internal_8h_aeacde1bfd947ad8b6f347ceb6dff16ac}{Functor}}}]{func }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a820c53dd626f603965da7b43ed9e56da}\label{runloop_8h_a820c53dd626f603965da7b43ed9e56da}} 
+\index{runloop.h@{runloop.h}!itqueue\_free@{itqueue\_free}}
+\index{itqueue\_free@{itqueue\_free}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{itqueue\_free()}{itqueue\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} itqueue\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a2b757ef5b5c789b49dc7b2be25991801}{Interthread\+Queue\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_aa3bc15755031f431f693587ad04b78c5}\label{runloop_8h_aa3bc15755031f431f693587ad04b78c5}} 
+\index{runloop.h@{runloop.h}!itqueue\_new@{itqueue\_new}}
+\index{itqueue\_new@{itqueue\_new}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{itqueue\_new()}{itqueue\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_a2b757ef5b5c789b49dc7b2be25991801}{Interthread\+Queue\+Ref}} itqueue\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{rl }\end{DoxyParamCaption})}
+
+A Runloop\+Interthread\+Queue is a second implementation of an Eventfd\+Queue with added functionality (as you can see from the fact that there are more functions). It is specialized to be part of a Runloop so that other threads can submit work to a Runloop. An instance of a Runloop\+Interthread\+Queue is used to implement the function
+
+runloop\+\_\+interthread\+\_\+post() \mbox{\Hypertarget{runloop_8h_a54aa9090d65c18f562ac361a30ee9f91}\label{runloop_8h_a54aa9090d65c18f562ac361a30ee9f91}} 
+\index{runloop.h@{runloop.h}!itqueue\_remove@{itqueue\_remove}}
+\index{itqueue\_remove@{itqueue\_remove}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{itqueue\_remove()}{itqueue\_remove()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_aeacde1bfd947ad8b6f347ceb6dff16ac}{Functor}} itqueue\+\_\+remove (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a2b757ef5b5c789b49dc7b2be25991801}{Interthread\+Queue\+Ref}}}]{qref }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a046b68a9484e04053e2feb1078b7fb5a}\label{runloop_8h_a046b68a9484e04053e2feb1078b7fb5a}} 
+\index{runloop.h@{runloop.h}!runloop\_close@{runloop\_close}}
+\index{runloop\_close@{runloop\_close}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_close()}{runloop\_close()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+close (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a9d0c48efa8ad1294d4c40a4d29f83df2}\label{runloop_8h_a9d0c48efa8ad1294d4c40a4d29f83df2}} 
+\index{runloop.h@{runloop.h}!runloop\_delete@{runloop\_delete}}
+\index{runloop\_delete@{runloop\_delete}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_delete()}{runloop\_delete()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+delete (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{athis,  }\item[{int}]{fd }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a47b8f0a2baebe014bf4edafac0c4755c}\label{runloop_8h_a47b8f0a2baebe014bf4edafac0c4755c}} 
+\index{runloop.h@{runloop.h}!runloop\_deregister@{runloop\_deregister}}
+\index{runloop\_deregister@{runloop\_deregister}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_deregister()}{runloop\_deregister()}}
+{\footnotesize\ttfamily int runloop\+\_\+deregister (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{athis,  }\item[{int}]{fd }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a6c4fea5c4cb6afd42150ac8dbf55530a}\label{runloop_8h_a6c4fea5c4cb6afd42150ac8dbf55530a}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_arm@{runloop\_eventfd\_arm}}
+\index{runloop\_eventfd\_arm@{runloop\_eventfd\_arm}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_arm()}{runloop\_eventfd\_arm()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+arm (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{postable,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{arg }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a34b1eaba1e42b0c64e24b90091425a12}\label{runloop_8h_a34b1eaba1e42b0c64e24b90091425a12}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_change\_watch@{runloop\_eventfd\_change\_watch}}
+\index{runloop\_eventfd\_change\_watch@{runloop\_eventfd\_change\_watch}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_change\_watch()}{runloop\_eventfd\_change\_watch()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+change\+\_\+watch (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{postable,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{arg,  }\item[{uint64\+\_\+t}]{watch\+\_\+what }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_af68217d0a0c3e63410d69606798e4df4}\label{runloop_8h_af68217d0a0c3e63410d69606798e4df4}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_clear\_all\_events@{runloop\_eventfd\_clear\_all\_events}}
+\index{runloop\_eventfd\_clear\_all\_events@{runloop\_eventfd\_clear\_all\_events}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_clear\_all\_events()}{runloop\_eventfd\_clear\_all\_events()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+clear\+\_\+all\+\_\+events (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a555317789ec1acc07cdd59d69a017bcf}\label{runloop_8h_a555317789ec1acc07cdd59d69a017bcf}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_clear\_one\_event@{runloop\_eventfd\_clear\_one\_event}}
+\index{runloop\_eventfd\_clear\_one\_event@{runloop\_eventfd\_clear\_one\_event}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_clear\_one\_event()}{runloop\_eventfd\_clear\_one\_event()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+clear\+\_\+one\+\_\+event (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a316a8ec01541c29bc919b645f250a889}\label{runloop_8h_a316a8ec01541c29bc919b645f250a889}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_deregister@{runloop\_eventfd\_deregister}}
+\index{runloop\_eventfd\_deregister@{runloop\_eventfd\_deregister}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_deregister()}{runloop\_eventfd\_deregister()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+deregister (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a190ae28dcb833c286c5d08be29bf180e}\label{runloop_8h_a190ae28dcb833c286c5d08be29bf180e}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_disarm@{runloop\_eventfd\_disarm}}
+\index{runloop\_eventfd\_disarm@{runloop\_eventfd\_disarm}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_disarm()}{runloop\_eventfd\_disarm()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+disarm (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a0970d7a5af2b842f836f716faa9c6615}\label{runloop_8h_a0970d7a5af2b842f836f716faa9c6615}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_fire@{runloop\_eventfd\_fire}}
+\index{runloop\_eventfd\_fire@{runloop\_eventfd\_fire}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_fire()}{runloop\_eventfd\_fire()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+fire (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a4b264cf23e4dd219789cb5bde6944848}\label{runloop_8h_a4b264cf23e4dd219789cb5bde6944848}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_free@{runloop\_eventfd\_free}}
+\index{runloop\_eventfd\_free@{runloop\_eventfd\_free}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_free()}{runloop\_eventfd\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a81a8a0c87572e0199d203c7381e612d7}\label{runloop_8h_a81a8a0c87572e0199d203c7381e612d7}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_get\_fd@{runloop\_eventfd\_get\_fd}}
+\index{runloop\_eventfd\_get\_fd@{runloop\_eventfd\_get\_fd}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_get\_fd()}{runloop\_eventfd\_get\_fd()}}
+{\footnotesize\ttfamily int runloop\+\_\+eventfd\+\_\+get\+\_\+fd (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a94c2c3385090801d8415aa7d67c12d04}\label{runloop_8h_a94c2c3385090801d8415aa7d67c12d04}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_get\_reactor@{runloop\_eventfd\_get\_reactor}}
+\index{runloop\_eventfd\_get\_reactor@{runloop\_eventfd\_get\_reactor}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_get\_reactor()}{runloop\_eventfd\_get\_reactor()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+eventfd\+\_\+get\+\_\+reactor (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a1f8ba645346496fbad8871d889d28e85}\label{runloop_8h_a1f8ba645346496fbad8871d889d28e85}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_init@{runloop\_eventfd\_init}}
+\index{runloop\_eventfd\_init@{runloop\_eventfd\_init}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_init()}{runloop\_eventfd\_init()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a0e5365b7ffef8d3dd8cddbd9d91eee44}\label{runloop_8h_a0e5365b7ffef8d3dd8cddbd9d91eee44}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_new@{runloop\_eventfd\_new}}
+\index{runloop\_eventfd\_new@{runloop\_eventfd\_new}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_new()}{runloop\_eventfd\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}} runloop\+\_\+eventfd\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop }\end{DoxyParamCaption})}
+
+epoll provides a facility to create a file descriptor that is not attached to any file/pipe/device and to \char`\"{}fire\char`\"{} events on that file descriptor that can be waited for using the epoll call. This facility provides a mechanism to create and wait on arbitary event sources. \mbox{\Hypertarget{runloop_8h_a82b680631af163f86958436b4ab9ca9d}\label{runloop_8h_a82b680631af163f86958436b4ab9ca9d}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_queue\_add@{runloop\_eventfd\_queue\_add}}
+\index{runloop\_eventfd\_queue\_add@{runloop\_eventfd\_queue\_add}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_queue\_add()}{runloop\_eventfd\_queue\_add()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+queue\+\_\+add (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a6ef563d6fb5ad8c3212d5f6deb16bf93}{Eventfd\+Queue\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{rl__internal_8h_aeacde1bfd947ad8b6f347ceb6dff16ac}{Functor}}}]{item }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a86cc8047c3ba718351b25cfe1f30b98a}\label{runloop_8h_a86cc8047c3ba718351b25cfe1f30b98a}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_queue\_free@{runloop\_eventfd\_queue\_free}}
+\index{runloop\_eventfd\_queue\_free@{runloop\_eventfd\_queue\_free}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_queue\_free()}{runloop\_eventfd\_queue\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+queue\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a6ef563d6fb5ad8c3212d5f6deb16bf93}{Eventfd\+Queue\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a8046ae97ac99a0003eda23830281777e}\label{runloop_8h_a8046ae97ac99a0003eda23830281777e}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_queue\_new@{runloop\_eventfd\_queue\_new}}
+\index{runloop\_eventfd\_queue\_new@{runloop\_eventfd\_queue\_new}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_queue\_new()}{runloop\_eventfd\_queue\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_a6ef563d6fb5ad8c3212d5f6deb16bf93}{Eventfd\+Queue\+Ref}} runloop\+\_\+eventfd\+\_\+queue\+\_\+new (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+An eventfd\+\_\+queue is a queue intended between threads where the act of adding an element triggers an epoll eventfd to the receiving thread.
+
+The queue is protected by a condition variable and mutex \mbox{\Hypertarget{runloop_8h_aeaf223dcfe49e2fc5986d801aa4972a2}\label{runloop_8h_aeaf223dcfe49e2fc5986d801aa4972a2}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_queue\_readfd@{runloop\_eventfd\_queue\_readfd}}
+\index{runloop\_eventfd\_queue\_readfd@{runloop\_eventfd\_queue\_readfd}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_queue\_readfd()}{runloop\_eventfd\_queue\_readfd()}}
+{\footnotesize\ttfamily int runloop\+\_\+eventfd\+\_\+queue\+\_\+readfd (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a6ef563d6fb5ad8c3212d5f6deb16bf93}{Eventfd\+Queue\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a5893ed70f0d3e472d89020651b55eeeb}\label{runloop_8h_a5893ed70f0d3e472d89020651b55eeeb}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_queue\_remove@{runloop\_eventfd\_queue\_remove}}
+\index{runloop\_eventfd\_queue\_remove@{runloop\_eventfd\_queue\_remove}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_queue\_remove()}{runloop\_eventfd\_queue\_remove()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_aeacde1bfd947ad8b6f347ceb6dff16ac}{Functor}} runloop\+\_\+eventfd\+\_\+queue\+\_\+remove (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a6ef563d6fb5ad8c3212d5f6deb16bf93}{Eventfd\+Queue\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a142d0654cd162191798d08481a16f3e7}\label{runloop_8h_a142d0654cd162191798d08481a16f3e7}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_register@{runloop\_eventfd\_register}}
+\index{runloop\_eventfd\_register@{runloop\_eventfd\_register}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_register()}{runloop\_eventfd\_register()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+register (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+Make sure this call enabled level triggering of events on this fd\mbox{\Hypertarget{runloop_8h_ab109da96ac9aaf314b13d5f8a56fe5c0}\label{runloop_8h_ab109da96ac9aaf314b13d5f8a56fe5c0}} 
+\index{runloop.h@{runloop.h}!runloop\_eventfd\_verify@{runloop\_eventfd\_verify}}
+\index{runloop\_eventfd\_verify@{runloop\_eventfd\_verify}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_eventfd\_verify()}{runloop\_eventfd\_verify()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+eventfd\+\_\+verify (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a0fb34e89e6b7c4b841b6609934c27b43}{Runloop\+Eventfd\+Ref}}}]{r }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_ab45049e45e9d38907d4f54b740bde012}\label{runloop_8h_ab45049e45e9d38907d4f54b740bde012}} 
+\index{runloop.h@{runloop.h}!runloop\_free@{runloop\_free}}
+\index{runloop\_free@{runloop\_free}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_free()}{runloop\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a593ca4375678d654024ada9c1b702c44}\label{runloop_8h_a593ca4375678d654024ada9c1b702c44}} 
+\index{runloop.h@{runloop.h}!runloop\_get\_threads\_reactor@{runloop\_get\_threads\_reactor}}
+\index{runloop\_get\_threads\_reactor@{runloop\_get\_threads\_reactor}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_get\_threads\_reactor()}{runloop\_get\_threads\_reactor()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+get\+\_\+threads\+\_\+reactor (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+A reactor is a device that\+:
+\begin{DoxyItemize}
+\item uses Linux epoll to allow client code to watch for events on file descriptors, and
+\item to schedule callback functions (via \mbox{\hyperlink{runloop_8h_a6bb348ca0c8036d0a92812a2c91539e1}{runloop\+\_\+post()}}) to be run at some point in the future
+\end{DoxyItemize}
+
+The key feature of the device is that many file descriptors can be monitored simultaiously, and many callbacks can be waiting for execution. In this regard a reactor is like a lightweight task scheduler
+
+To watch or observe a file descriptor for events an object of type Runloop\+Watcher (or derived from Runloop\+Watcher) must be created and passed to the reactor.
+
+The Runloop\+Watcher holds at least 2 pieces of information\+:
+\begin{DoxyItemize}
+\item a function to be called when an event of interest happens
+\item optionally a context pointer for the callback function in this sense the various watchers are generalizations of a callback closure
+\end{DoxyItemize}
+
+For convenience a number of special purposes watchers/observers have been provided. \mbox{\Hypertarget{runloop_8h_a3d04fc2f2da95cf4a84ddd79cb3d0cd0}\label{runloop_8h_a3d04fc2f2da95cf4a84ddd79cb3d0cd0}} 
+\index{runloop.h@{runloop.h}!runloop\_init@{runloop\_init}}
+\index{runloop\_init@{runloop\_init}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_init()}{runloop\_init()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_acee0f1780a6bc2bf1bddb39e84b22ca8}\label{runloop_8h_acee0f1780a6bc2bf1bddb39e84b22ca8}} 
+\index{runloop.h@{runloop.h}!runloop\_listener\_arm@{runloop\_listener\_arm}}
+\index{runloop\_listener\_arm@{runloop\_listener\_arm}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_arm()}{runloop\_listener\_arm()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+listener\+\_\+arm (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{postable,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{postable\+\_\+arg }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a6ee426958f4a25d811fa534656bb61f5}\label{runloop_8h_a6ee426958f4a25d811fa534656bb61f5}} 
+\index{runloop.h@{runloop.h}!runloop\_listener\_deregister@{runloop\_listener\_deregister}}
+\index{runloop\_listener\_deregister@{runloop\_listener\_deregister}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_deregister()}{runloop\_listener\_deregister()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+listener\+\_\+deregister (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a9efd32ac37acc06a15d60e1e23ad1856}\label{runloop_8h_a9efd32ac37acc06a15d60e1e23ad1856}} 
+\index{runloop.h@{runloop.h}!runloop\_listener\_disarm@{runloop\_listener\_disarm}}
+\index{runloop\_listener\_disarm@{runloop\_listener\_disarm}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_disarm()}{runloop\_listener\_disarm()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+listener\+\_\+disarm (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_ac41ebfd5eee0af9eb60b835549cf0e48}\label{runloop_8h_ac41ebfd5eee0af9eb60b835549cf0e48}} 
+\index{runloop.h@{runloop.h}!runloop\_listener\_free@{runloop\_listener\_free}}
+\index{runloop\_listener\_free@{runloop\_listener\_free}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_free()}{runloop\_listener\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+listener\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a311b3ade0e424e55c46e623aaef9778e}\label{runloop_8h_a311b3ade0e424e55c46e623aaef9778e}} 
+\index{runloop.h@{runloop.h}!runloop\_listener\_get\_fd@{runloop\_listener\_get\_fd}}
+\index{runloop\_listener\_get\_fd@{runloop\_listener\_get\_fd}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_get\_fd()}{runloop\_listener\_get\_fd()}}
+{\footnotesize\ttfamily int runloop\+\_\+listener\+\_\+get\+\_\+fd (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_af45fad752581ab82d907b4ef3edc9659}\label{runloop_8h_af45fad752581ab82d907b4ef3edc9659}} 
+\index{runloop.h@{runloop.h}!runloop\_listener\_get\_runloop@{runloop\_listener\_get\_runloop}}
+\index{runloop\_listener\_get\_runloop@{runloop\_listener\_get\_runloop}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_get\_runloop()}{runloop\_listener\_get\_runloop()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+listener\+\_\+get\+\_\+runloop (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_acfdc20fdc6aa21250c959995f3f04cc4}\label{runloop_8h_acfdc20fdc6aa21250c959995f3f04cc4}} 
+\index{runloop.h@{runloop.h}!runloop\_listener\_init@{runloop\_listener\_init}}
+\index{runloop\_listener\_init@{runloop\_listener\_init}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_init()}{runloop\_listener\_init()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+listener\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop,  }\item[{int}]{fd }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_abb4198901ffe94806c581beb6fea1608}\label{runloop_8h_abb4198901ffe94806c581beb6fea1608}} 
+\index{runloop.h@{runloop.h}!runloop\_listener\_new@{runloop\_listener\_new}}
+\index{runloop\_listener\_new@{runloop\_listener\_new}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_new()}{runloop\_listener\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} runloop\+\_\+listener\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop,  }\item[{int}]{fd }\end{DoxyParamCaption})}
+
+Runloop\+Listener is a special kind of Runloop\+Watcher that is intended spcifically for situations where code is a server of sometype waiting for a listen() call to return signalling a new connection. \mbox{\Hypertarget{runloop_8h_a530597ca7cc4c16ae86abbac423039a7}\label{runloop_8h_a530597ca7cc4c16ae86abbac423039a7}} 
+\index{runloop.h@{runloop.h}!runloop\_listener\_register@{runloop\_listener\_register}}
+\index{runloop\_listener\_register@{runloop\_listener\_register}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_register()}{runloop\_listener\_register()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+listener\+\_\+register (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{postable,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{postable\+\_\+arg }\end{DoxyParamCaption})}
+
+NOTE the EPOLLEXCLUSIVE -\/ prevents the thundering herd problem. Defaults to level triggered\mbox{\Hypertarget{runloop_8h_a09de9aa0c03bd919a8d2281e93e6a8ec}\label{runloop_8h_a09de9aa0c03bd919a8d2281e93e6a8ec}} 
+\index{runloop.h@{runloop.h}!runloop\_listener\_verify@{runloop\_listener\_verify}}
+\index{runloop\_listener\_verify@{runloop\_listener\_verify}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_listener\_verify()}{runloop\_listener\_verify()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+listener\+\_\+verify (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}}}]{r }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a79ee07aed2b3ec022d34b48113a9dfd4}\label{runloop_8h_a79ee07aed2b3ec022d34b48113a9dfd4}} 
+\index{runloop.h@{runloop.h}!runloop\_new@{runloop\_new}}
+\index{runloop\_new@{runloop\_new}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_new()}{runloop\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}}]{ }\end{DoxyParamCaption})}
+
+Create a new reactor runloop. Should only be one per thread @\+NOTE -\/ this implementation only works for Linux and uses epoll \mbox{\Hypertarget{runloop_8h_a6bb348ca0c8036d0a92812a2c91539e1}\label{runloop_8h_a6bb348ca0c8036d0a92812a2c91539e1}} 
+\index{runloop.h@{runloop.h}!runloop\_post@{runloop\_post}}
+\index{runloop\_post@{runloop\_post}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_post()}{runloop\_post()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+post (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{arg }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a94f64ba78b7b7078dfb1444602f49009}\label{runloop_8h_a94f64ba78b7b7078dfb1444602f49009}} 
+\index{runloop.h@{runloop.h}!runloop\_queue\_watcher\_change\_watch@{runloop\_queue\_watcher\_change\_watch}}
+\index{runloop\_queue\_watcher\_change\_watch@{runloop\_queue\_watcher\_change\_watch}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_queue\_watcher\_change\_watch()}{runloop\_queue\_watcher\_change\_watch()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+queue\+\_\+watcher\+\_\+change\+\_\+watch (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{postable\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{arg,  }\item[{uint64\+\_\+t}]{watch\+\_\+what }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a6cfc179bb844a535709498d89688e5cd}\label{runloop_8h_a6cfc179bb844a535709498d89688e5cd}} 
+\index{runloop.h@{runloop.h}!runloop\_queue\_watcher\_deregister@{runloop\_queue\_watcher\_deregister}}
+\index{runloop\_queue\_watcher\_deregister@{runloop\_queue\_watcher\_deregister}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_queue\_watcher\_deregister()}{runloop\_queue\_watcher\_deregister()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+queue\+\_\+watcher\+\_\+deregister (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a13e92b5c313503c1120f447e4e497226}\label{runloop_8h_a13e92b5c313503c1120f447e4e497226}} 
+\index{runloop.h@{runloop.h}!runloop\_queue\_watcher\_free@{runloop\_queue\_watcher\_free}}
+\index{runloop\_queue\_watcher\_free@{runloop\_queue\_watcher\_free}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_queue\_watcher\_free()}{runloop\_queue\_watcher\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+queue\+\_\+watcher\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a03f713c37e03704eed588f97f9bf2f17}\label{runloop_8h_a03f713c37e03704eed588f97f9bf2f17}} 
+\index{runloop.h@{runloop.h}!runloop\_queue\_watcher\_get\_fd@{runloop\_queue\_watcher\_get\_fd}}
+\index{runloop\_queue\_watcher\_get\_fd@{runloop\_queue\_watcher\_get\_fd}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_queue\_watcher\_get\_fd()}{runloop\_queue\_watcher\_get\_fd()}}
+{\footnotesize\ttfamily int runloop\+\_\+queue\+\_\+watcher\+\_\+get\+\_\+fd (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a42a8acd1d78cb765d461ad41b44de5e9}\label{runloop_8h_a42a8acd1d78cb765d461ad41b44de5e9}} 
+\index{runloop.h@{runloop.h}!runloop\_queue\_watcher\_get\_reactor@{runloop\_queue\_watcher\_get\_reactor}}
+\index{runloop\_queue\_watcher\_get\_reactor@{runloop\_queue\_watcher\_get\_reactor}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_queue\_watcher\_get\_reactor()}{runloop\_queue\_watcher\_get\_reactor()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+queue\+\_\+watcher\+\_\+get\+\_\+reactor (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a56c7fec79c10f053e47378e0af746bae}\label{runloop_8h_a56c7fec79c10f053e47378e0af746bae}} 
+\index{runloop.h@{runloop.h}!runloop\_queue\_watcher\_new@{runloop\_queue\_watcher\_new}}
+\index{runloop\_queue\_watcher\_new@{runloop\_queue\_watcher\_new}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_queue\_watcher\_new()}{runloop\_queue\_watcher\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}} runloop\+\_\+queue\+\_\+watcher\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop,  }\item[{\mbox{\hyperlink{runloop_8h_a6ef563d6fb5ad8c3212d5f6deb16bf93}{Eventfd\+Queue\+Ref}}}]{qref }\end{DoxyParamCaption})}
+
+A runloop\+\_\+queue\+\_\+watcher is the mechanism a thread uses to recieve an event whenever a new entry is added to the queue by the same or a different thread. \mbox{\Hypertarget{runloop_8h_a142f03ed3ec2b4163774886d00ffffdb}\label{runloop_8h_a142f03ed3ec2b4163774886d00ffffdb}} 
+\index{runloop.h@{runloop.h}!runloop\_queue\_watcher\_register@{runloop\_queue\_watcher\_register}}
+\index{runloop\_queue\_watcher\_register@{runloop\_queue\_watcher\_register}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_queue\_watcher\_register()}{runloop\_queue\_watcher\_register()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+queue\+\_\+watcher\+\_\+register (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{postable\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{postable\+\_\+arg }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_af82aeb592e02b8959e0d3eab671962c5}\label{runloop_8h_af82aeb592e02b8959e0d3eab671962c5}} 
+\index{runloop.h@{runloop.h}!runloop\_queue\_watcher\_verify@{runloop\_queue\_watcher\_verify}}
+\index{runloop\_queue\_watcher\_verify@{runloop\_queue\_watcher\_verify}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_queue\_watcher\_verify()}{runloop\_queue\_watcher\_verify()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+queue\+\_\+watcher\+\_\+verify (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ad397b19ba9cd5e9e51729c08990a02d6}{Runloop\+Queue\+Watcher\+Ref}}}]{r }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a7d358bab7e447cdc639cfcda010e1731}\label{runloop_8h_a7d358bab7e447cdc639cfcda010e1731}} 
+\index{runloop.h@{runloop.h}!runloop\_register@{runloop\_register}}
+\index{runloop\_register@{runloop\_register}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_register()}{runloop\_register()}}
+{\footnotesize\ttfamily int runloop\+\_\+register (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{athis,  }\item[{int}]{fd,  }\item[{uint32\+\_\+t}]{interest,  }\item[{\mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}}}]{wref }\end{DoxyParamCaption})}
+
+Register a Runloop\+Watcher (actuallyr one of its derivatives) and its associated file descriptor with the epoll instance. Specify the types of events the watcher is interested in \mbox{\Hypertarget{runloop_8h_a1aa35435f63ba125c575c45b346e3f71}\label{runloop_8h_a1aa35435f63ba125c575c45b346e3f71}} 
+\index{runloop.h@{runloop.h}!runloop\_reregister@{runloop\_reregister}}
+\index{runloop\_reregister@{runloop\_reregister}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_reregister()}{runloop\_reregister()}}
+{\footnotesize\ttfamily int runloop\+\_\+reregister (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{athis,  }\item[{int}]{fd,  }\item[{uint32\+\_\+t}]{interest,  }\item[{\mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}}}]{wref }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a0fd1ed9a309a3136c2a6e6540ea37abe}\label{runloop_8h_a0fd1ed9a309a3136c2a6e6540ea37abe}} 
+\index{runloop.h@{runloop.h}!runloop\_run@{runloop\_run}}
+\index{runloop\_run@{runloop\_run}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_run()}{runloop\_run()}}
+{\footnotesize\ttfamily int runloop\+\_\+run (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{athis,  }\item[{time\+\_\+t}]{timeout }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a85dfd6a1da8d231966f353af4a1c342f}\label{runloop_8h_a85dfd6a1da8d231966f353af4a1c342f}} 
+\index{runloop.h@{runloop.h}!runloop\_stream\_arm\_both@{runloop\_stream\_arm\_both}}
+\index{runloop\_stream\_arm\_both@{runloop\_stream\_arm\_both}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_stream\_arm\_both()}{runloop\_stream\_arm\_both()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+stream\+\_\+arm\+\_\+both (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{read\+\_\+postable\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{read\+\_\+arg,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{write\+\_\+postable\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{write\+\_\+arg }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a7f231b64110e47b0444588f186f85c0a}\label{runloop_8h_a7f231b64110e47b0444588f186f85c0a}} 
+\index{runloop.h@{runloop.h}!runloop\_stream\_arm\_read@{runloop\_stream\_arm\_read}}
+\index{runloop\_stream\_arm\_read@{runloop\_stream\_arm\_read}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_stream\_arm\_read()}{runloop\_stream\_arm\_read()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+stream\+\_\+arm\+\_\+read (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{postable\+\_\+callback,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{arg }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a393472772679ae011a4ddd3e915fa86a}\label{runloop_8h_a393472772679ae011a4ddd3e915fa86a}} 
+\index{runloop.h@{runloop.h}!runloop\_stream\_arm\_write@{runloop\_stream\_arm\_write}}
+\index{runloop\_stream\_arm\_write@{runloop\_stream\_arm\_write}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_stream\_arm\_write()}{runloop\_stream\_arm\_write()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+stream\+\_\+arm\+\_\+write (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{postable\+\_\+callback,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{arg }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a36c0c2cca48745ee28c7b528e2a99984}\label{runloop_8h_a36c0c2cca48745ee28c7b528e2a99984}} 
+\index{runloop.h@{runloop.h}!runloop\_stream\_deregister@{runloop\_stream\_deregister}}
+\index{runloop\_stream\_deregister@{runloop\_stream\_deregister}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_stream\_deregister()}{runloop\_stream\_deregister()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+stream\+\_\+deregister (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a5c0f06d91c863880072061b07d2b55cf}\label{runloop_8h_a5c0f06d91c863880072061b07d2b55cf}} 
+\index{runloop.h@{runloop.h}!runloop\_stream\_disarm\_read@{runloop\_stream\_disarm\_read}}
+\index{runloop\_stream\_disarm\_read@{runloop\_stream\_disarm\_read}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_stream\_disarm\_read()}{runloop\_stream\_disarm\_read()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+stream\+\_\+disarm\+\_\+read (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a118a4fccf0d4d96b28e6e06dcc95b6ba}\label{runloop_8h_a118a4fccf0d4d96b28e6e06dcc95b6ba}} 
+\index{runloop.h@{runloop.h}!runloop\_stream\_disarm\_write@{runloop\_stream\_disarm\_write}}
+\index{runloop\_stream\_disarm\_write@{runloop\_stream\_disarm\_write}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_stream\_disarm\_write()}{runloop\_stream\_disarm\_write()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+stream\+\_\+disarm\+\_\+write (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_ab17ee09165ad75792845c4cbe3e7d583}\label{runloop_8h_ab17ee09165ad75792845c4cbe3e7d583}} 
+\index{runloop.h@{runloop.h}!runloop\_stream\_free@{runloop\_stream\_free}}
+\index{runloop\_stream\_free@{runloop\_stream\_free}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_stream\_free()}{runloop\_stream\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+stream\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a203f3d88e14ba34a197cc647953fcaf0}\label{runloop_8h_a203f3d88e14ba34a197cc647953fcaf0}} 
+\index{runloop.h@{runloop.h}!runloop\_stream\_get\_fd@{runloop\_stream\_get\_fd}}
+\index{runloop\_stream\_get\_fd@{runloop\_stream\_get\_fd}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_stream\_get\_fd()}{runloop\_stream\_get\_fd()}}
+{\footnotesize\ttfamily int runloop\+\_\+stream\+\_\+get\+\_\+fd (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a8a18b88c0fc6ea3cf3100111a3d527aa}\label{runloop_8h_a8a18b88c0fc6ea3cf3100111a3d527aa}} 
+\index{runloop.h@{runloop.h}!runloop\_stream\_get\_reactor@{runloop\_stream\_get\_reactor}}
+\index{runloop\_stream\_get\_reactor@{runloop\_stream\_get\_reactor}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_stream\_get\_reactor()}{runloop\_stream\_get\_reactor()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+stream\+\_\+get\+\_\+reactor (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a169d815564d034379674a861d090773f}\label{runloop_8h_a169d815564d034379674a861d090773f}} 
+\index{runloop.h@{runloop.h}!runloop\_stream\_init@{runloop\_stream\_init}}
+\index{runloop\_stream\_init@{runloop\_stream\_init}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_stream\_init()}{runloop\_stream\_init()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+stream\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop,  }\item[{int}]{fd }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a27873aeb9a58e303e756409a630956b2}\label{runloop_8h_a27873aeb9a58e303e756409a630956b2}} 
+\index{runloop.h@{runloop.h}!runloop\_stream\_new@{runloop\_stream\_new}}
+\index{runloop\_stream\_new@{runloop\_stream\_new}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_stream\_new()}{runloop\_stream\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}} runloop\+\_\+stream\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop,  }\item[{int}]{fd }\end{DoxyParamCaption})}
+
+Runloop\+Stream\+Ref is a special type of watcher designed to watch stream style file descriptors (such a sockets and pipes) to detect when such an fd is ready to perform a read operation or ready to perform a write operation without BLOCKING. This type of watcher is intended for situations where a single thread may be performing both read and write operations on the same fd and on multiple file descriptors. \mbox{\Hypertarget{runloop_8h_ad74b99e555b1ac9e1bae86cc110de461}\label{runloop_8h_ad74b99e555b1ac9e1bae86cc110de461}} 
+\index{runloop.h@{runloop.h}!runloop\_stream\_register@{runloop\_stream\_register}}
+\index{runloop\_stream\_register@{runloop\_stream\_register}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_stream\_register()}{runloop\_stream\_register()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+stream\+\_\+register (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a151653e185ab6e5e5d458c3c75429555}\label{runloop_8h_a151653e185ab6e5e5d458c3c75429555}} 
+\index{runloop.h@{runloop.h}!runloop\_stream\_verify@{runloop\_stream\_verify}}
+\index{runloop\_stream\_verify@{runloop\_stream\_verify}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_stream\_verify()}{runloop\_stream\_verify()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+stream\+\_\+verify (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ac8e4f0c7c845c2f0b4198dffa7e772e7}{Runloop\+Stream\+Ref}}}]{r }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_aac5fdf9c9c5329cef767093a33f53178}\label{runloop_8h_aac5fdf9c9c5329cef767093a33f53178}} 
+\index{runloop.h@{runloop.h}!runloop\_timer\_clear@{runloop\_timer\_clear}}
+\index{runloop\_timer\_clear@{runloop\_timer\_clear}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_timer\_clear()}{runloop\_timer\_clear()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+timer\+\_\+clear (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{rl,  }\item[{\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}}}]{timerref }\end{DoxyParamCaption})}
+
+After the call to runloop\+\_\+timer\+\_\+clear the timerref is invalid and muts not be ised \mbox{\Hypertarget{runloop_8h_a9c60cf832c6e140e63bb6c10a3c99602}\label{runloop_8h_a9c60cf832c6e140e63bb6c10a3c99602}} 
+\index{runloop.h@{runloop.h}!runloop\_timer\_deregister@{runloop\_timer\_deregister}}
+\index{runloop\_timer\_deregister@{runloop\_timer\_deregister}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_timer\_deregister()}{runloop\_timer\_deregister()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+timer\+\_\+deregister (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_abd1d590c73af0d23a7634847cb39f983}\label{runloop_8h_abd1d590c73af0d23a7634847cb39f983}} 
+\index{runloop.h@{runloop.h}!runloop\_timer\_disarm@{runloop\_timer\_disarm}}
+\index{runloop\_timer\_disarm@{runloop\_timer\_disarm}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_timer\_disarm()}{runloop\_timer\_disarm()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+timer\+\_\+disarm (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_ae94e3ab786f45fec5d1f83fe30599ce5}\label{runloop_8h_ae94e3ab786f45fec5d1f83fe30599ce5}} 
+\index{runloop.h@{runloop.h}!runloop\_timer\_free@{runloop\_timer\_free}}
+\index{runloop\_timer\_free@{runloop\_timer\_free}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_timer\_free()}{runloop\_timer\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+timer\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a6eb9db3944dcd5cfc2924c20bcba0bab}\label{runloop_8h_a6eb9db3944dcd5cfc2924c20bcba0bab}} 
+\index{runloop.h@{runloop.h}!runloop\_timer\_get\_fd@{runloop\_timer\_get\_fd}}
+\index{runloop\_timer\_get\_fd@{runloop\_timer\_get\_fd}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_timer\_get\_fd()}{runloop\_timer\_get\_fd()}}
+{\footnotesize\ttfamily int runloop\+\_\+timer\+\_\+get\+\_\+fd (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a7bbefdfcebad982294f61eb7f77a4e9b}\label{runloop_8h_a7bbefdfcebad982294f61eb7f77a4e9b}} 
+\index{runloop.h@{runloop.h}!runloop\_timer\_get\_reactor@{runloop\_timer\_get\_reactor}}
+\index{runloop\_timer\_get\_reactor@{runloop\_timer\_get\_reactor}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_timer\_get\_reactor()}{runloop\_timer\_get\_reactor()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+timer\+\_\+get\+\_\+reactor (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a3c4f3c4886fa08d12093ace7927268b7}\label{runloop_8h_a3c4f3c4886fa08d12093ace7927268b7}} 
+\index{runloop.h@{runloop.h}!runloop\_timer\_init@{runloop\_timer\_init}}
+\index{runloop\_timer\_init@{runloop\_timer\_init}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_timer\_init()}{runloop\_timer\_init()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+timer\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}}}]{this,  }\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a2d195c5cf7caaa3a79c933239ef9d5af}\label{runloop_8h_a2d195c5cf7caaa3a79c933239ef9d5af}} 
+\index{runloop.h@{runloop.h}!runloop\_timer\_new@{runloop\_timer\_new}}
+\index{runloop\_timer\_new@{runloop\_timer\_new}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_timer\_new()}{runloop\_timer\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} runloop\+\_\+timer\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop\+\_\+ref }\end{DoxyParamCaption})}
+
+A Runloop\+Timer is a spcial type of Runloop\+Watcher that make it easy to use a Runloop to implement single shot and repeating timers. \mbox{\Hypertarget{runloop_8h_a10497ecff5ddcfde9b3ba795c1b55206}\label{runloop_8h_a10497ecff5ddcfde9b3ba795c1b55206}} 
+\index{runloop.h@{runloop.h}!runloop\_timer\_rearm@{runloop\_timer\_rearm}}
+\index{runloop\_timer\_rearm@{runloop\_timer\_rearm}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_timer\_rearm()}{runloop\_timer\_rearm()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+timer\+\_\+rearm (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a6ff7fbe14e552c50a8caa027218695b2}\label{runloop_8h_a6ff7fbe14e552c50a8caa027218695b2}} 
+\index{runloop.h@{runloop.h}!runloop\_timer\_rearm\_old@{runloop\_timer\_rearm\_old}}
+\index{runloop\_timer\_rearm\_old@{runloop\_timer\_rearm\_old}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_timer\_rearm\_old()}{runloop\_timer\_rearm\_old()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+timer\+\_\+rearm\+\_\+old (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{ctx,  }\item[{uint64\+\_\+t}]{interval\+\_\+ms,  }\item[{bool}]{repeating }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a62c2846373f22447ba828e9859ddb879}\label{runloop_8h_a62c2846373f22447ba828e9859ddb879}} 
+\index{runloop.h@{runloop.h}!runloop\_timer\_register@{runloop\_timer\_register}}
+\index{runloop\_timer\_register@{runloop\_timer\_register}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_timer\_register()}{runloop\_timer\_register()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+timer\+\_\+register (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}}}]{athis,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{ctx,  }\item[{uint64\+\_\+t}]{interval\+\_\+ms,  }\item[{bool}]{repeating }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a0caca38ef2f474916f68ab71df881c46}\label{runloop_8h_a0caca38ef2f474916f68ab71df881c46}} 
+\index{runloop.h@{runloop.h}!runloop\_timer\_set@{runloop\_timer\_set}}
+\index{runloop\_timer\_set@{runloop\_timer\_set}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_timer\_set()}{runloop\_timer\_set()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}} runloop\+\_\+timer\+\_\+set (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{rl,  }\item[{\mbox{\hyperlink{runloop_8h_aed4f9ddf8cb4289162773695ea3945f2}{Postable\+Function}}}]{cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{ctx,  }\item[{uint64\+\_\+t}]{interval\+\_\+ms,  }\item[{bool}]{repeating }\end{DoxyParamCaption})}
+
+Convenience intrface for timers \mbox{\Hypertarget{runloop_8h_ae480cf7c3c71f608ce0a6122f77ffce1}\label{runloop_8h_ae480cf7c3c71f608ce0a6122f77ffce1}} 
+\index{runloop.h@{runloop.h}!runloop\_timer\_update@{runloop\_timer\_update}}
+\index{runloop\_timer\_update@{runloop\_timer\_update}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_timer\_update()}{runloop\_timer\_update()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+timer\+\_\+update (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}}}]{athis,  }\item[{uint64\+\_\+t}]{interval\+\_\+ms,  }\item[{bool}]{repeating }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a1caba38bf4430fd8388a6ec2a3cb15c3}\label{runloop_8h_a1caba38bf4430fd8388a6ec2a3cb15c3}} 
+\index{runloop.h@{runloop.h}!runloop\_verify@{runloop\_verify}}
+\index{runloop\_verify@{runloop\_verify}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{runloop\_verify()}{runloop\_verify()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} runloop\+\_\+verify (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{r }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a900f94c64e6b44a98cc794a94cdf8a8e}\label{runloop_8h_a900f94c64e6b44a98cc794a94cdf8a8e}} 
+\index{runloop.h@{runloop.h}!Watcher\_get\_fd@{Watcher\_get\_fd}}
+\index{Watcher\_get\_fd@{Watcher\_get\_fd}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{Watcher\_get\_fd()}{Watcher\_get\_fd()}}
+{\footnotesize\ttfamily int Watcher\+\_\+get\+\_\+fd (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a2535fead161438ab93552d53f70dd30a}\label{runloop_8h_a2535fead161438ab93552d53f70dd30a}} 
+\index{runloop.h@{runloop.h}!Watcher\_get\_reactor@{Watcher\_get\_reactor}}
+\index{Watcher\_get\_reactor@{Watcher\_get\_reactor}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{Watcher\_get\_reactor()}{Watcher\_get\_reactor()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{runloop_8h_a3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} Watcher\+\_\+get\+\_\+reactor (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_a84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}}}]{athis }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{runloop_8h_a137836ce63d6e8840f9566959140ec30}\label{runloop_8h_a137836ce63d6e8840f9566959140ec30}} 
+\index{runloop.h@{runloop.h}!WTimerFd\_verify@{WTimerFd\_verify}}
+\index{WTimerFd\_verify@{WTimerFd\_verify}!runloop.h@{runloop.h}}
+\doxysubsubsection{\texorpdfstring{WTimerFd\_verify()}{WTimerFd\_verify()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} WTimer\+Fd\+\_\+verify (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{runloop_8h_ab92d1450a7654fee0fb3d281b49e64fb}{Runloop\+Timer\+Ref}}}]{r }\end{DoxyParamCaption})}
+

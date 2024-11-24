@@ -132,6 +132,7 @@ int http_syncsocket_read_message(HttpSyncSocketRef client_ref, HttpMessageRef* m
                 IOBuffer_commit(iob, (int) bytes_read);
                 RBL_LOG_FMT("response raw: %s \n", IOBuffer_cstr(iob));
                 int rc = http_message_parser_consume_buffer(client_ref->parser_ref, iob);
+                int x = llhttp_message_needs_eof(client_ref->parser_ref->m_llhttp_ptr);
                 if(rc != 0) {
                     return -1;
                 }

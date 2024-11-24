@@ -1,0 +1,118 @@
+\hypertarget{http__server_8c}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/http\+\_\+protocol/http\+\_\+server.c File Reference}
+\label{http__server_8c}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/http\_protocol/http\_server.c@{/home/robert/Projects/http\_in\_c/http\_in\_c/http\_protocol/http\_server.c}}
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/http\+\_\+protocol/http\+\_\+server.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$assert.\+h$>$}\newline
+{\ttfamily \#include $<$errno.\+h$>$}\newline
+{\ttfamily \#include $<$fcntl.\+h$>$}\newline
+{\ttfamily \#include $<$sys/epoll.\+h$>$}\newline
+{\ttfamily \#include $<$rbl/logger.\+h$>$}\newline
+{\ttfamily \#include $<$rbl/check\+\_\+tag.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/alloc.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/utils.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/socket\+\_\+functions.\+h$>$}\newline
+{\ttfamily \#include \char`\"{}http\+\_\+handler.\+h\char`\"{}}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{http__server_8c_a360e6a7814e44dc98e27029384d9f1b5}{set\+\_\+non\+\_\+blocking}} (\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} socket)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{http__server_8c_a811d2189090f34fce6fac9dc89598226}{on\+\_\+event\+\_\+listening}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} rl, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg\+\_\+server\+\_\+ref)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{http__server_8c_abe5c7a30ef62033b46a1efea31e71b95}{on\+\_\+handler\+\_\+completion\+\_\+cb}} (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$void\+\_\+server\+\_\+ref, \mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}} handler\+\_\+ref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{http__server_8c_a2fc1f6fedee5bf51b48f49a4c6170bce}{http\+\_\+server\+\_\+init}} (\mbox{\hyperlink{http__server_8h_a4962e21d5be38c71b1f8eb1abe758068}{Http\+Server\+Ref}} sref, int port, char const $\ast$host, int listen\+\_\+fd, \mbox{\hyperlink{http__server_8h_ac03bc722065a8bfe647fc3c32d1649b1}{Http\+Process\+Request\+Function}} process\+\_\+request\+\_\+function)
+\item 
+\mbox{\hyperlink{http__server_8h_a4962e21d5be38c71b1f8eb1abe758068}{Http\+Server\+Ref}} \mbox{\hyperlink{http__server_8c_a7e21abf81ab15d9a650a15e23cd25073}{http\+\_\+server\+\_\+new}} (int port, char const $\ast$host, int listen\+\_\+fd, \mbox{\hyperlink{http__server_8h_ac03bc722065a8bfe647fc3c32d1649b1}{Http\+Process\+Request\+Function}} process\+\_\+request\+\_\+function)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{http__server_8c_a32ba5c19a581c557993ebe4129ed65d3}{http\+\_\+server\+\_\+free}} (\mbox{\hyperlink{http__server_8h_a4962e21d5be38c71b1f8eb1abe758068}{Http\+Server\+Ref}} this)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{http__server_8c_ada46bc229400aace676432604e0a7a95}{http\+\_\+server\+\_\+listen}} (\mbox{\hyperlink{http__server_8h_a4962e21d5be38c71b1f8eb1abe758068}{Http\+Server\+Ref}} sref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{http__server_8c_a117203b03d48f898bbabf264fc7b6a37}{http\+\_\+server\+\_\+terminate}} (\mbox{\hyperlink{http__server_8h_a4962e21d5be38c71b1f8eb1abe758068}{Http\+Server\+Ref}} this)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}} \mbox{\hyperlink{http__server_8c_ac0c6f1e880615004ab0f3257e487efb8}{my\+\_\+only\+\_\+client}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{http__server_8c_a32ba5c19a581c557993ebe4129ed65d3}\label{http__server_8c_a32ba5c19a581c557993ebe4129ed65d3}} 
+\index{http\_server.c@{http\_server.c}!http\_server\_free@{http\_server\_free}}
+\index{http\_server\_free@{http\_server\_free}!http\_server.c@{http\_server.c}}
+\doxysubsubsection{\texorpdfstring{http\_server\_free()}{http\_server\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} http\+\_\+server\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__server_8h_a4962e21d5be38c71b1f8eb1abe758068}{Http\+Server\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__server_8c_a2fc1f6fedee5bf51b48f49a4c6170bce}\label{http__server_8c_a2fc1f6fedee5bf51b48f49a4c6170bce}} 
+\index{http\_server.c@{http\_server.c}!http\_server\_init@{http\_server\_init}}
+\index{http\_server\_init@{http\_server\_init}!http\_server.c@{http\_server.c}}
+\doxysubsubsection{\texorpdfstring{http\_server\_init()}{http\_server\_init()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} http\+\_\+server\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__server_8h_a4962e21d5be38c71b1f8eb1abe758068}{Http\+Server\+Ref}}}]{sref,  }\item[{int}]{port,  }\item[{char const $\ast$}]{host,  }\item[{int}]{listen\+\_\+fd,  }\item[{\mbox{\hyperlink{http__server_8h_ac03bc722065a8bfe647fc3c32d1649b1}{Http\+Process\+Request\+Function}}}]{process\+\_\+request\+\_\+function }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__server_8c_ada46bc229400aace676432604e0a7a95}\label{http__server_8c_ada46bc229400aace676432604e0a7a95}} 
+\index{http\_server.c@{http\_server.c}!http\_server\_listen@{http\_server\_listen}}
+\index{http\_server\_listen@{http\_server\_listen}!http\_server.c@{http\_server.c}}
+\doxysubsubsection{\texorpdfstring{http\_server\_listen()}{http\_server\_listen()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} http\+\_\+server\+\_\+listen (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__server_8h_a4962e21d5be38c71b1f8eb1abe758068}{Http\+Server\+Ref}}}]{sref }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__server_8c_a7e21abf81ab15d9a650a15e23cd25073}\label{http__server_8c_a7e21abf81ab15d9a650a15e23cd25073}} 
+\index{http\_server.c@{http\_server.c}!http\_server\_new@{http\_server\_new}}
+\index{http\_server\_new@{http\_server\_new}!http\_server.c@{http\_server.c}}
+\doxysubsubsection{\texorpdfstring{http\_server\_new()}{http\_server\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{http__server_8h_a4962e21d5be38c71b1f8eb1abe758068}{Http\+Server\+Ref}} http\+\_\+server\+\_\+new (\begin{DoxyParamCaption}\item[{int}]{port,  }\item[{char const $\ast$}]{host,  }\item[{int}]{listen\+\_\+fd,  }\item[{\mbox{\hyperlink{http__server_8h_ac03bc722065a8bfe647fc3c32d1649b1}{Http\+Process\+Request\+Function}}}]{process\+\_\+request }\end{DoxyParamCaption})}
+
+Create a new server object. 
+\begin{DoxyParams}{Parameters}
+{\em port} & The localhost\+:port on which the server will listen \\
+\hline
+{\em handler} & A function conforming to Xr\+Handler\+Function (see aio\+\_\+api/handler.\+h) which will be called to handle all requests that are parsed successfully. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{http__server_8c_a117203b03d48f898bbabf264fc7b6a37}\label{http__server_8c_a117203b03d48f898bbabf264fc7b6a37}} 
+\index{http\_server.c@{http\_server.c}!http\_server\_terminate@{http\_server\_terminate}}
+\index{http\_server\_terminate@{http\_server\_terminate}!http\_server.c@{http\_server.c}}
+\doxysubsubsection{\texorpdfstring{http\_server\_terminate()}{http\_server\_terminate()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} http\+\_\+server\+\_\+terminate (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{http__server_8h_a4962e21d5be38c71b1f8eb1abe758068}{Http\+Server\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__server_8c_a811d2189090f34fce6fac9dc89598226}\label{http__server_8c_a811d2189090f34fce6fac9dc89598226}} 
+\index{http\_server.c@{http\_server.c}!on\_event\_listening@{on\_event\_listening}}
+\index{on\_event\_listening@{on\_event\_listening}!http\_server.c@{http\_server.c}}
+\doxysubsubsection{\texorpdfstring{on\_event\_listening()}{on\_event\_listening()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} on\+\_\+event\+\_\+listening (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{rl,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{arg\+\_\+server\+\_\+ref }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{http__server_8c_abe5c7a30ef62033b46a1efea31e71b95}\label{http__server_8c_abe5c7a30ef62033b46a1efea31e71b95}} 
+\index{http\_server.c@{http\_server.c}!on\_handler\_completion\_cb@{on\_handler\_completion\_cb}}
+\index{on\_handler\_completion\_cb@{on\_handler\_completion\_cb}!http\_server.c@{http\_server.c}}
+\doxysubsubsection{\texorpdfstring{on\_handler\_completion\_cb()}{on\_handler\_completion\_cb()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} on\+\_\+handler\+\_\+completion\+\_\+cb (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{void\+\_\+server\+\_\+ref,  }\item[{\mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}}}]{handler\+\_\+ref }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+remove the departing handle from the handler\+\_\+list
+
+BEWARE -\/ the list remove call also free()\textquotesingle{}s the handle object
+
+For the moment this fixed the following TODO
+
+@\+TODO -\/ this needs fixing -\/ FIXED pass NULL as dispose function in http\+\_\+server\+\_\+init
+
+http\+\_\+handler\+\_\+free(handler\+\_\+ref);\mbox{\Hypertarget{http__server_8c_a360e6a7814e44dc98e27029384d9f1b5}\label{http__server_8c_a360e6a7814e44dc98e27029384d9f1b5}} 
+\index{http\_server.c@{http\_server.c}!set\_non\_blocking@{set\_non\_blocking}}
+\index{set\_non\_blocking@{set\_non\_blocking}!http\_server.c@{http\_server.c}}
+\doxysubsubsection{\texorpdfstring{set\_non\_blocking()}{set\_non\_blocking()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} set\+\_\+non\+\_\+blocking (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}}}]{socket }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{http__server_8c_ac0c6f1e880615004ab0f3257e487efb8}\label{http__server_8c_ac0c6f1e880615004ab0f3257e487efb8}} 
+\index{http\_server.c@{http\_server.c}!my\_only\_client@{my\_only\_client}}
+\index{my\_only\_client@{my\_only\_client}!http\_server.c@{http\_server.c}}
+\doxysubsubsection{\texorpdfstring{my\_only\_client}{my\_only\_client}}
+{\footnotesize\ttfamily \mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}} my\+\_\+only\+\_\+client\hspace{0.3cm}{\ttfamily [static]}}
+

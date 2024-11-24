@@ -13,7 +13,7 @@ static BufferChainRef make_reply_body_from_request(HttpMessageRef request);
  * \param ctx
  * \return HttpMessageRef with ownership
  */
-HttpMessageRef http_make_request(char* url, bool keep_alive_flag)
+HttpMessageRef http_make_request(char* url, bool last_request_flag)
 {
     url = "/echo";
     char uuid_buffer[100];
@@ -28,14 +28,15 @@ HttpMessageRef http_make_request(char* url, bool keep_alive_flag)
 
     http_message_add_header_cstring(request, HEADER_HOST, "ahost");
     http_message_add_header_cstring(request, "User-agent", "x15:x15-soundtrip client");
-    if(keep_alive_flag) {
-        http_message_add_header_cstring(request, HEADER_CONNECTION_KEY, "Keep-Alive");
+    if(last_request_flag) {
+        http_message_add_header_cstring(request, HEADER_CONNECTION_KEY, "Close");
     } else {
-        http_message_add_header_cstring(request, HEADER_CONNECTION_KEY, "close");
+        http_message_add_header_cstring(request, HEADER_CONNECTION_KEY, "Keep-Alive");//"Close");
     }
     http_message_add_header_cstring(request, HEADER_CONTENT_LENGTH, content_length);
     http_message_add_header_cstring(request, HEADER_ECHO_ID, uuid_ptr);
     http_message_set_body(request, BufferChain_new());
+    IOBufferRef ib = http_message_serialize(request);
     return request;
 }
 

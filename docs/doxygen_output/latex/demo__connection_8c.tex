@@ -1,0 +1,234 @@
+\hypertarget{demo__connection_8c}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/demo\+\_\+protocol/demo\+\_\+connection.c File Reference}
+\label{demo__connection_8c}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/demo\_protocol/demo\_connection.c@{/home/robert/Projects/http\_in\_c/http\_in\_c/demo\_protocol/demo\_connection.c}}
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/demo\+\_\+protocol/demo\+\_\+connection.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/rl\+\_\+internal.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$stdio.\+h$>$}\newline
+{\ttfamily \#include $<$unistd.\+h$>$}\newline
+{\ttfamily \#include $<$rbl/macros.\+h$>$}\newline
+{\ttfamily \#include $<$rbl/logger.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/runloop.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/demo\+\_\+protocol/demo\+\_\+message.\+h$>$}\newline
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{demo__connection_8c_a83555d866af2520b170583667fd03fd1}{RBL\+\_\+\+LOG\+\_\+\+ENABLED}}
+\item 
+\#define \mbox{\hyperlink{demo__connection_8c_ae771e3829983acca71951920f96d4ec8}{RBL\+\_\+\+LOG\+\_\+\+ALLOW\+\_\+\+GLOBAL}}
+\item 
+\#define \mbox{\hyperlink{demo__connection_8c_a4cd41692635d29d6b918c60b939e989d}{READ\+\_\+\+STATE\+\_\+\+IDLE}}~11
+\item 
+\#define \mbox{\hyperlink{demo__connection_8c_aa929aa64da8db02d9ba4fc1f46ca0b68}{READ\+\_\+\+STATE\+\_\+\+ACTIVE}}~13
+\item 
+\#define \mbox{\hyperlink{demo__connection_8c_a1cbb181b4fd70632c91f8784580c74b8}{READ\+\_\+\+STATE\+\_\+\+STOP}}~14
+\item 
+\#define \mbox{\hyperlink{demo__connection_8c_a72c04c5c911a5ab6b48fcf2708349503}{WRITE\+\_\+\+STATE\+\_\+\+IDLE}}~21
+\item 
+\#define \mbox{\hyperlink{demo__connection_8c_a628be3c49e5a252556589975af9f1b55}{WRITE\+\_\+\+STATE\+\_\+\+ACTIVE}}~23
+\item 
+\#define \mbox{\hyperlink{demo__connection_8c_a3f8d377e7713393273e892b5d65a8b8d}{WRITE\+\_\+\+STATE\+\_\+\+STOP}}~24
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__connection_8c_a658cc2f91eaf427d43492fe7b8c4539f}{on\+\_\+parser\+\_\+new\+\_\+message\+\_\+complete}} (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg\+\_\+ctx, \mbox{\hyperlink{demo__message_8h_aec10d21ff11457bc72579a0e845ae27d}{Demo\+Message\+Ref}} msg)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__connection_8c_aa6a9f96ba3948bc2e9cd0bfbb3ba030d}{postable\+\_\+writer}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__connection_8c_aba41c64e1c4c372b49f1b610fc50c49d}{postable\+\_\+write\+\_\+call\+\_\+cb}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__connection_8c_a3cc51073f6c389018bc1fa0ad0c60def}{writer\+\_\+cb}} (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$cref\+\_\+arg, long bytes\+\_\+written, int status)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__connection_8c_acd68bec589493ca9005e3e51d7ebf451}{read\+\_\+have\+\_\+data\+\_\+cb}} (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$cref\+\_\+arg, long bytes\+\_\+available, int err\+\_\+status)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__connection_8c_af0afc21971d7c1d11a7dcbc809dd06ca}{call\+\_\+on\+\_\+write\+\_\+cb}} (\mbox{\hyperlink{demo__connection_8h_ab6018d52123bc170181cbb915e4b6e68}{Demo\+Connection\+Ref}} cref, int status)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__connection_8c_a817fc5ae1afce0908f502c569f1dd85a}{call\+\_\+on\+\_\+read\+\_\+cb}} (\mbox{\hyperlink{demo__connection_8h_ab6018d52123bc170181cbb915e4b6e68}{Demo\+Connection\+Ref}} cref, \mbox{\hyperlink{demo__message_8h_aec10d21ff11457bc72579a0e845ae27d}{Demo\+Message\+Ref}} msgref, int status)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__connection_8c_af529613733ea824012716c71978747ee}{post\+\_\+to\+\_\+runloop}} (\mbox{\hyperlink{demo__connection_8h_ab6018d52123bc170181cbb915e4b6e68}{Demo\+Connection\+Ref}} cref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$postable\+\_\+function)(\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$))
+\item 
+\mbox{\hyperlink{demo__connection_8h_ab6018d52123bc170181cbb915e4b6e68}{Demo\+Connection\+Ref}} \mbox{\hyperlink{demo__connection_8c_a99969c9f8e28245edecd84abe22b8f4b}{demo\+\_\+connection\+\_\+new}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref, int socket, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$\mbox{\hyperlink{http__handler_8c_a778ff9e1dac8a1517822c85688b27927}{connection\+\_\+completion\+\_\+cb}})(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href), \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$handler\+\_\+ref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__connection_8c_acd2ef8d37dee86140b0c7a6f3d0575e3}{demo\+\_\+connection\+\_\+init}} (\mbox{\hyperlink{demo__connection_8h_ab6018d52123bc170181cbb915e4b6e68}{Demo\+Connection\+Ref}} this, \mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref, int socket, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$\mbox{\hyperlink{http__handler_8c_a778ff9e1dac8a1517822c85688b27927}{connection\+\_\+completion\+\_\+cb}})(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href), \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$handler\+\_\+ref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__connection_8c_a381c10f416e628d795713754721f0b9a}{demo\+\_\+connection\+\_\+close}} (\mbox{\hyperlink{demo__connection_8h_ab6018d52123bc170181cbb915e4b6e68}{Demo\+Connection\+Ref}} cref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__connection_8c_a775487dcc6e5bf00260becdb229b9e4b}{demo\+\_\+connection\+\_\+free}} (\mbox{\hyperlink{demo__connection_8h_ab6018d52123bc170181cbb915e4b6e68}{Demo\+Connection\+Ref}} this)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__connection_8c_af56eb2b5112f606cc640850abbb4987a}{demo\+\_\+connection\+\_\+read}} (\mbox{\hyperlink{demo__connection_8h_ab6018d52123bc170181cbb915e4b6e68}{Demo\+Connection\+Ref}} cref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$on\+\_\+demo\+\_\+read\+\_\+cb)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href, \mbox{\hyperlink{demo__message_8h_aec10d21ff11457bc72579a0e845ae27d}{Demo\+Message\+Ref}}, int status), \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href)
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__connection_8c_aa03b13b5e56c49bcb897d734cdc5a232}{postable\+\_\+call\+\_\+on\+\_\+read\+\_\+cb}} (\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} runloop\+\_\+ref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$arg\+\_\+cref)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__connection_8c_a0c68382b3f73720a2d195ad22877c61e}{demo\+\_\+connection\+\_\+write}} (\mbox{\hyperlink{demo__connection_8h_ab6018d52123bc170181cbb915e4b6e68}{Demo\+Connection\+Ref}} cref, \mbox{\hyperlink{demo__message_8h_aec10d21ff11457bc72579a0e845ae27d}{Demo\+Message\+Ref}} response\+\_\+ref, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$on\+\_\+demo\+\_\+write\+\_\+cb)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href, int status), \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{demo__connection_8c_ae771e3829983acca71951920f96d4ec8}\label{demo__connection_8c_ae771e3829983acca71951920f96d4ec8}} 
+\index{demo\_connection.c@{demo\_connection.c}!RBL\_LOG\_ALLOW\_GLOBAL@{RBL\_LOG\_ALLOW\_GLOBAL}}
+\index{RBL\_LOG\_ALLOW\_GLOBAL@{RBL\_LOG\_ALLOW\_GLOBAL}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{RBL\_LOG\_ALLOW\_GLOBAL}{RBL\_LOG\_ALLOW\_GLOBAL}}
+{\footnotesize\ttfamily \#define RBL\+\_\+\+LOG\+\_\+\+ALLOW\+\_\+\+GLOBAL}
+
+\mbox{\Hypertarget{demo__connection_8c_a83555d866af2520b170583667fd03fd1}\label{demo__connection_8c_a83555d866af2520b170583667fd03fd1}} 
+\index{demo\_connection.c@{demo\_connection.c}!RBL\_LOG\_ENABLED@{RBL\_LOG\_ENABLED}}
+\index{RBL\_LOG\_ENABLED@{RBL\_LOG\_ENABLED}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{RBL\_LOG\_ENABLED}{RBL\_LOG\_ENABLED}}
+{\footnotesize\ttfamily \#define RBL\+\_\+\+LOG\+\_\+\+ENABLED}
+
+\mbox{\Hypertarget{demo__connection_8c_aa929aa64da8db02d9ba4fc1f46ca0b68}\label{demo__connection_8c_aa929aa64da8db02d9ba4fc1f46ca0b68}} 
+\index{demo\_connection.c@{demo\_connection.c}!READ\_STATE\_ACTIVE@{READ\_STATE\_ACTIVE}}
+\index{READ\_STATE\_ACTIVE@{READ\_STATE\_ACTIVE}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{READ\_STATE\_ACTIVE}{READ\_STATE\_ACTIVE}}
+{\footnotesize\ttfamily \#define READ\+\_\+\+STATE\+\_\+\+ACTIVE~13}
+
+\mbox{\Hypertarget{demo__connection_8c_a4cd41692635d29d6b918c60b939e989d}\label{demo__connection_8c_a4cd41692635d29d6b918c60b939e989d}} 
+\index{demo\_connection.c@{demo\_connection.c}!READ\_STATE\_IDLE@{READ\_STATE\_IDLE}}
+\index{READ\_STATE\_IDLE@{READ\_STATE\_IDLE}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{READ\_STATE\_IDLE}{READ\_STATE\_IDLE}}
+{\footnotesize\ttfamily \#define READ\+\_\+\+STATE\+\_\+\+IDLE~11}
+
+\mbox{\Hypertarget{demo__connection_8c_a1cbb181b4fd70632c91f8784580c74b8}\label{demo__connection_8c_a1cbb181b4fd70632c91f8784580c74b8}} 
+\index{demo\_connection.c@{demo\_connection.c}!READ\_STATE\_STOP@{READ\_STATE\_STOP}}
+\index{READ\_STATE\_STOP@{READ\_STATE\_STOP}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{READ\_STATE\_STOP}{READ\_STATE\_STOP}}
+{\footnotesize\ttfamily \#define READ\+\_\+\+STATE\+\_\+\+STOP~14}
+
+\mbox{\Hypertarget{demo__connection_8c_a628be3c49e5a252556589975af9f1b55}\label{demo__connection_8c_a628be3c49e5a252556589975af9f1b55}} 
+\index{demo\_connection.c@{demo\_connection.c}!WRITE\_STATE\_ACTIVE@{WRITE\_STATE\_ACTIVE}}
+\index{WRITE\_STATE\_ACTIVE@{WRITE\_STATE\_ACTIVE}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{WRITE\_STATE\_ACTIVE}{WRITE\_STATE\_ACTIVE}}
+{\footnotesize\ttfamily \#define WRITE\+\_\+\+STATE\+\_\+\+ACTIVE~23}
+
+\mbox{\Hypertarget{demo__connection_8c_a72c04c5c911a5ab6b48fcf2708349503}\label{demo__connection_8c_a72c04c5c911a5ab6b48fcf2708349503}} 
+\index{demo\_connection.c@{demo\_connection.c}!WRITE\_STATE\_IDLE@{WRITE\_STATE\_IDLE}}
+\index{WRITE\_STATE\_IDLE@{WRITE\_STATE\_IDLE}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{WRITE\_STATE\_IDLE}{WRITE\_STATE\_IDLE}}
+{\footnotesize\ttfamily \#define WRITE\+\_\+\+STATE\+\_\+\+IDLE~21}
+
+\mbox{\Hypertarget{demo__connection_8c_a3f8d377e7713393273e892b5d65a8b8d}\label{demo__connection_8c_a3f8d377e7713393273e892b5d65a8b8d}} 
+\index{demo\_connection.c@{demo\_connection.c}!WRITE\_STATE\_STOP@{WRITE\_STATE\_STOP}}
+\index{WRITE\_STATE\_STOP@{WRITE\_STATE\_STOP}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{WRITE\_STATE\_STOP}{WRITE\_STATE\_STOP}}
+{\footnotesize\ttfamily \#define WRITE\+\_\+\+STATE\+\_\+\+STOP~24}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{demo__connection_8c_a817fc5ae1afce0908f502c569f1dd85a}\label{demo__connection_8c_a817fc5ae1afce0908f502c569f1dd85a}} 
+\index{demo\_connection.c@{demo\_connection.c}!call\_on\_read\_cb@{call\_on\_read\_cb}}
+\index{call\_on\_read\_cb@{call\_on\_read\_cb}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{call\_on\_read\_cb()}{call\_on\_read\_cb()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} call\+\_\+on\+\_\+read\+\_\+cb (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__connection_8h_ab6018d52123bc170181cbb915e4b6e68}{Demo\+Connection\+Ref}}}]{cref,  }\item[{\mbox{\hyperlink{demo__message_8h_aec10d21ff11457bc72579a0e845ae27d}{Demo\+Message\+Ref}}}]{msgref,  }\item[{int}]{status }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{demo__connection_8c_af0afc21971d7c1d11a7dcbc809dd06ca}\label{demo__connection_8c_af0afc21971d7c1d11a7dcbc809dd06ca}} 
+\index{demo\_connection.c@{demo\_connection.c}!call\_on\_write\_cb@{call\_on\_write\_cb}}
+\index{call\_on\_write\_cb@{call\_on\_write\_cb}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{call\_on\_write\_cb()}{call\_on\_write\_cb()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} call\+\_\+on\+\_\+write\+\_\+cb (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__connection_8h_ab6018d52123bc170181cbb915e4b6e68}{Demo\+Connection\+Ref}}}]{cref,  }\item[{int}]{status }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{demo__connection_8c_a381c10f416e628d795713754721f0b9a}\label{demo__connection_8c_a381c10f416e628d795713754721f0b9a}} 
+\index{demo\_connection.c@{demo\_connection.c}!demo\_connection\_close@{demo\_connection\_close}}
+\index{demo\_connection\_close@{demo\_connection\_close}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{demo\_connection\_close()}{demo\_connection\_close()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} demo\+\_\+connection\+\_\+close (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__connection_8h_ab6018d52123bc170181cbb915e4b6e68}{Demo\+Connection\+Ref}}}]{cref }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__connection_8c_a775487dcc6e5bf00260becdb229b9e4b}\label{demo__connection_8c_a775487dcc6e5bf00260becdb229b9e4b}} 
+\index{demo\_connection.c@{demo\_connection.c}!demo\_connection\_free@{demo\_connection\_free}}
+\index{demo\_connection\_free@{demo\_connection\_free}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{demo\_connection\_free()}{demo\_connection\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} demo\+\_\+connection\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__connection_8h_ab6018d52123bc170181cbb915e4b6e68}{Demo\+Connection\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__connection_8c_acd2ef8d37dee86140b0c7a6f3d0575e3}\label{demo__connection_8c_acd2ef8d37dee86140b0c7a6f3d0575e3}} 
+\index{demo\_connection.c@{demo\_connection.c}!demo\_connection\_init@{demo\_connection\_init}}
+\index{demo\_connection\_init@{demo\_connection\_init}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{demo\_connection\_init()}{demo\_connection\_init()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} demo\+\_\+connection\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__connection_8h_ab6018d52123bc170181cbb915e4b6e68}{Demo\+Connection\+Ref}}}]{this,  }\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop\+\_\+ref,  }\item[{int}]{socket,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href)}]{connection\+\_\+completion\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{handler\+\_\+ref }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__connection_8c_a99969c9f8e28245edecd84abe22b8f4b}\label{demo__connection_8c_a99969c9f8e28245edecd84abe22b8f4b}} 
+\index{demo\_connection.c@{demo\_connection.c}!demo\_connection\_new@{demo\_connection\_new}}
+\index{demo\_connection\_new@{demo\_connection\_new}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{demo\_connection\_new()}{demo\_connection\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{demo__connection_8h_ab6018d52123bc170181cbb915e4b6e68}{Demo\+Connection\+Ref}} demo\+\_\+connection\+\_\+new (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop\+\_\+ref,  }\item[{int}]{socket,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href)}]{connection\+\_\+completion\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{handler\+\_\+ref }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__connection_8c_af56eb2b5112f606cc640850abbb4987a}\label{demo__connection_8c_af56eb2b5112f606cc640850abbb4987a}} 
+\index{demo\_connection.c@{demo\_connection.c}!demo\_connection\_read@{demo\_connection\_read}}
+\index{demo\_connection\_read@{demo\_connection\_read}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{demo\_connection\_read()}{demo\_connection\_read()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} demo\+\_\+connection\+\_\+read (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__connection_8h_ab6018d52123bc170181cbb915e4b6e68}{Demo\+Connection\+Ref}}}]{cref,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href, \mbox{\hyperlink{demo__message_8h_aec10d21ff11457bc72579a0e845ae27d}{Demo\+Message\+Ref}}, int status)}]{on\+\_\+demo\+\_\+read\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{href }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__connection_8c_a0c68382b3f73720a2d195ad22877c61e}\label{demo__connection_8c_a0c68382b3f73720a2d195ad22877c61e}} 
+\index{demo\_connection.c@{demo\_connection.c}!demo\_connection\_write@{demo\_connection\_write}}
+\index{demo\_connection\_write@{demo\_connection\_write}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{demo\_connection\_write()}{demo\_connection\_write()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} demo\+\_\+connection\+\_\+write (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__connection_8h_ab6018d52123bc170181cbb915e4b6e68}{Demo\+Connection\+Ref}}}]{cref,  }\item[{\mbox{\hyperlink{demo__message_8h_aec10d21ff11457bc72579a0e845ae27d}{Demo\+Message\+Ref}}}]{response\+\_\+ref,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$)(\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$href, int status)}]{on\+\_\+demo\+\_\+write\+\_\+cb,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{href }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__connection_8c_a658cc2f91eaf427d43492fe7b8c4539f}\label{demo__connection_8c_a658cc2f91eaf427d43492fe7b8c4539f}} 
+\index{demo\_connection.c@{demo\_connection.c}!on\_parser\_new\_message\_complete@{on\_parser\_new\_message\_complete}}
+\index{on\_parser\_new\_message\_complete@{on\_parser\_new\_message\_complete}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{on\_parser\_new\_message\_complete()}{on\_parser\_new\_message\_complete()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} on\+\_\+parser\+\_\+new\+\_\+message\+\_\+complete (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{arg\+\_\+ctx,  }\item[{\mbox{\hyperlink{demo__message_8h_aec10d21ff11457bc72579a0e845ae27d}{Demo\+Message\+Ref}}}]{msg\+\_\+ref }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+This function is called by the underlying parser when a new message is complete. The new message is added to the connection input message queue(input\+\_\+message\+\_\+list\+\_\+ref) \mbox{\Hypertarget{demo__connection_8c_af529613733ea824012716c71978747ee}\label{demo__connection_8c_af529613733ea824012716c71978747ee}} 
+\index{demo\_connection.c@{demo\_connection.c}!post\_to\_runloop@{post\_to\_runloop}}
+\index{post\_to\_runloop@{post\_to\_runloop}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{post\_to\_runloop()}{post\_to\_runloop()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} post\+\_\+to\+\_\+runloop (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__connection_8h_ab6018d52123bc170181cbb915e4b6e68}{Demo\+Connection\+Ref}}}]{cref,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$)(\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}, \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$)}]{postable\+\_\+function }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Utility function that wraps all \mbox{\hyperlink{runloop_8c_a6bb348ca0c8036d0a92812a2c91539e1}{runloop\+\_\+post()}} calls so this module can keep track of outstanding pending function calls \mbox{\Hypertarget{demo__connection_8c_aa03b13b5e56c49bcb897d734cdc5a232}\label{demo__connection_8c_aa03b13b5e56c49bcb897d734cdc5a232}} 
+\index{demo\_connection.c@{demo\_connection.c}!postable\_call\_on\_read\_cb@{postable\_call\_on\_read\_cb}}
+\index{postable\_call\_on\_read\_cb@{postable\_call\_on\_read\_cb}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{postable\_call\_on\_read\_cb()}{postable\_call\_on\_read\_cb()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} postable\+\_\+call\+\_\+on\+\_\+read\+\_\+cb (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop\+\_\+ref,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{arg\+\_\+cref }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{demo__connection_8c_aba41c64e1c4c372b49f1b610fc50c49d}\label{demo__connection_8c_aba41c64e1c4c372b49f1b610fc50c49d}} 
+\index{demo\_connection.c@{demo\_connection.c}!postable\_write\_call\_cb@{postable\_write\_call\_cb}}
+\index{postable\_write\_call\_cb@{postable\_write\_call\_cb}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{postable\_write\_call\_cb()}{postable\_write\_call\_cb()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} postable\+\_\+write\+\_\+call\+\_\+cb (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop\+\_\+ref,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{arg }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{demo__connection_8c_aa6a9f96ba3948bc2e9cd0bfbb3ba030d}\label{demo__connection_8c_aa6a9f96ba3948bc2e9cd0bfbb3ba030d}} 
+\index{demo\_connection.c@{demo\_connection.c}!postable\_writer@{postable\_writer}}
+\index{postable\_writer@{postable\_writer}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{postable\_writer()}{postable\_writer()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} postable\+\_\+writer (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}}}]{runloop\+\_\+ref,  }\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{arg }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+\mbox{\Hypertarget{demo__connection_8c_acd68bec589493ca9005e3e51d7ebf451}\label{demo__connection_8c_acd68bec589493ca9005e3e51d7ebf451}} 
+\index{demo\_connection.c@{demo\_connection.c}!read\_have\_data\_cb@{read\_have\_data\_cb}}
+\index{read\_have\_data\_cb@{read\_have\_data\_cb}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{read\_have\_data\_cb()}{read\_have\_data\_cb()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} read\+\_\+have\+\_\+data\+\_\+cb (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{cref\+\_\+arg,  }\item[{long}]{bytes\+\_\+available,  }\item[{int}]{err\+\_\+status }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+Expects\+:
+\begin{DoxyItemize}
+\item read state READ\+\_\+\+STATE\+\_\+\+ACTIVE
+\item active\+\_\+input\+\_\+buffer\+\_\+ref != NULL
+\item if err\+\_\+status == 0
+\item bytes\+\_\+available $>$= 0
+\item else
+\item bytes\+\_\+available $<$ 0 
+\end{DoxyItemize}bytes\+\_\+available == 0 signals the client closed the connection. Clients are not permitted to end a valid message in this way so treat this the same as an IO error. Abandon all waiting input messages and Close the connection
+
+The next function call will put any new messages onto the input message queue(cref-\/$>$input\+\_\+message\+\_\+list\+\_\+ref)
+
+Further more the call will consume all of the buffer unless there is a parsing error
+
+A parsing error will be treated as an IO error and returned to caller.
+
+Hence
+\begin{DoxyItemize}
+\item If the return value is 0 dispose the buffer, set READ\+\_\+\+STATE\+\_\+\+IDLE and call the read callback
+\item if there is an error dispose the buffer(we will not need it), set READ\+\_\+\+STATE\+\_\+\+STOP and start error processing.
+\begin{DoxyItemize}
+\item there is an alternative approach, namely
+\begin{DoxyItemize}
+\item set READ\+\_\+\+STATE\+\_\+\+IDLE,
+\item pass the error code back to the caller and let them decide how to proceed.
+\end{DoxyItemize}
+\end{DoxyItemize}
+\end{DoxyItemize}\mbox{\Hypertarget{demo__connection_8c_a3cc51073f6c389018bc1fa0ad0c60def}\label{demo__connection_8c_a3cc51073f6c389018bc1fa0ad0c60def}} 
+\index{demo\_connection.c@{demo\_connection.c}!writer\_cb@{writer\_cb}}
+\index{writer\_cb@{writer\_cb}!demo\_connection.c@{demo\_connection.c}}
+\doxysubsubsection{\texorpdfstring{writer\_cb()}{writer\_cb()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} writer\+\_\+cb (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{cref\+\_\+arg,  }\item[{long}]{bytes\+\_\+written,  }\item[{int}]{status }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+

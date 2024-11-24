@@ -1,0 +1,169 @@
+\hypertarget{structDemoConnection__s}{}\doxysection{Demo\+Connection\+\_\+s Struct Reference}
+\label{structDemoConnection__s}\index{DemoConnection\_s@{DemoConnection\_s}}
+
+
+{\ttfamily \#include $<$demo\+\_\+connection.\+h$>$}
+
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{structDemoConnection__s_a9651fbbf32699514195d6fc42d5069f8}{RBL\+\_\+\+DECLARE\+\_\+\+TAG}}
+\item 
+\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} \mbox{\hyperlink{structDemoConnection__s_a573de63cfb3974d98f840766e1f6e219}{runloop\+\_\+ref}}
+\item 
+\mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}} \mbox{\hyperlink{structDemoConnection__s_ab6d8617239f25349cf4d13a29a8eee11}{asio\+\_\+stream\+\_\+ref}}
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{structDemoConnection__s_aff70959ccb1cfed39721e185a1039890}{handler\+\_\+ref}}
+\item 
+\mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} \mbox{\hyperlink{structDemoConnection__s_abe050b5b9315ea370ca38fad6147023c}{input\+\_\+message\+\_\+list\+\_\+ref}}
+\item 
+\mbox{\hyperlink{iobuffer_8c_a373e47346d4021180e79668c7afcc0f5}{IOBuffer\+Ref}} \mbox{\hyperlink{structDemoConnection__s_a0525d6af8fa9ebe6c675bbbce446fedd}{active\+\_\+input\+\_\+buffer\+\_\+ref}}
+\item 
+long \mbox{\hyperlink{structDemoConnection__s_aee156729de8c986bc899a93795421081}{read\+\_\+buffer\+\_\+size}}
+\item 
+\mbox{\hyperlink{iobuffer_8c_a373e47346d4021180e79668c7afcc0f5}{IOBuffer\+Ref}} \mbox{\hyperlink{structDemoConnection__s_ae789b998ce3c3b8acc90f6dbf82b47a9}{active\+\_\+output\+\_\+buffer\+\_\+ref}}
+\item 
+\mbox{\hyperlink{demo__message__parser_8h_a32f77886b29cb3dc1d0f89a05a749898}{Demo\+Message\+Parser\+Ref}} \mbox{\hyperlink{structDemoConnection__s_a73d37ed3c74815813a9d74c640863895}{parser\+\_\+ref}}
+\item 
+int \mbox{\hyperlink{structDemoConnection__s_a5a6b2b4d514e039a3994cc224b6938dd}{read\+\_\+state}}
+\item 
+int \mbox{\hyperlink{structDemoConnection__s_ad025822d835219e511852b09c422ba2a}{write\+\_\+state}}
+\item 
+\mbox{\hyperlink{http__connection_8h_a58f80e49a2aa6ad65fb2028db9bc3368}{DC\+\_\+\+Read\+\_\+\+CB}} \mbox{\hyperlink{structDemoConnection__s_a14d90e38f8e1afe9aa913ce2b47f18f0}{on\+\_\+read\+\_\+cb}}
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{structDemoConnection__s_a9493401048ae9978d6b85f65e9431ad7}{on\+\_\+read\+\_\+cb\+\_\+arg}}
+\item 
+\mbox{\hyperlink{http__connection_8h_afa43fecee7ce289c175bf8dcdf5af9fe}{DC\+\_\+\+Write\+\_\+\+CB}} \mbox{\hyperlink{structDemoConnection__s_a09e81db23ce0dedf34ded87ccfead539}{on\+\_\+write\+\_\+cb}}
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{structDemoConnection__s_a4c8bc963d3e3adfc95372d82cdc32dd0}{on\+\_\+write\+\_\+cb\+\_\+arg}}
+\item 
+\mbox{\hyperlink{http__connection_8h_a34d0c09201f286361329f6bb3f9d30e7}{DC\+\_\+\+Close\+\_\+\+CB}} \mbox{\hyperlink{structDemoConnection__s_a79ef2620100a3048afe1e7659ae2395c}{on\+\_\+close\+\_\+cb}}
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{structDemoConnection__s_a12c71bbd3cec1210eee99a6b79840be4}{on\+\_\+close\+\_\+cb\+\_\+arg}}
+\item 
+bool \mbox{\hyperlink{structDemoConnection__s_a8a2635fc9b4f27cd7dd387c9c9292942}{cleanup\+\_\+done\+\_\+flag}}
+\item 
+\mbox{\hyperlink{structDemoConnection__s_a22250ef555618d8cac654d35889ace75}{RBL\+\_\+\+DECLARE\+\_\+\+END\+\_\+\+TAG}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{structDemoConnection__s_a0525d6af8fa9ebe6c675bbbce446fedd}\label{structDemoConnection__s_a0525d6af8fa9ebe6c675bbbce446fedd}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!active\_input\_buffer\_ref@{active\_input\_buffer\_ref}}
+\index{active\_input\_buffer\_ref@{active\_input\_buffer\_ref}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{active\_input\_buffer\_ref}{active\_input\_buffer\_ref}}
+{\footnotesize\ttfamily \mbox{\hyperlink{iobuffer_8c_a373e47346d4021180e79668c7afcc0f5}{IOBuffer\+Ref}} Demo\+Connection\+\_\+s\+::active\+\_\+input\+\_\+buffer\+\_\+ref}
+
+\mbox{\Hypertarget{structDemoConnection__s_ae789b998ce3c3b8acc90f6dbf82b47a9}\label{structDemoConnection__s_ae789b998ce3c3b8acc90f6dbf82b47a9}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!active\_output\_buffer\_ref@{active\_output\_buffer\_ref}}
+\index{active\_output\_buffer\_ref@{active\_output\_buffer\_ref}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{active\_output\_buffer\_ref}{active\_output\_buffer\_ref}}
+{\footnotesize\ttfamily \mbox{\hyperlink{iobuffer_8c_a373e47346d4021180e79668c7afcc0f5}{IOBuffer\+Ref}} Demo\+Connection\+\_\+s\+::active\+\_\+output\+\_\+buffer\+\_\+ref}
+
+\mbox{\Hypertarget{structDemoConnection__s_ab6d8617239f25349cf4d13a29a8eee11}\label{structDemoConnection__s_ab6d8617239f25349cf4d13a29a8eee11}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!asio\_stream\_ref@{asio\_stream\_ref}}
+\index{asio\_stream\_ref@{asio\_stream\_ref}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{asio\_stream\_ref}{asio\_stream\_ref}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a5d9a5a9bcae35aaac48a276783d622ac}{Asio\+Stream\+Ref}} Demo\+Connection\+\_\+s\+::asio\+\_\+stream\+\_\+ref}
+
+\mbox{\Hypertarget{structDemoConnection__s_a8a2635fc9b4f27cd7dd387c9c9292942}\label{structDemoConnection__s_a8a2635fc9b4f27cd7dd387c9c9292942}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!cleanup\_done\_flag@{cleanup\_done\_flag}}
+\index{cleanup\_done\_flag@{cleanup\_done\_flag}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{cleanup\_done\_flag}{cleanup\_done\_flag}}
+{\footnotesize\ttfamily bool Demo\+Connection\+\_\+s\+::cleanup\+\_\+done\+\_\+flag}
+
+\mbox{\Hypertarget{structDemoConnection__s_aff70959ccb1cfed39721e185a1039890}\label{structDemoConnection__s_aff70959ccb1cfed39721e185a1039890}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!handler\_ref@{handler\_ref}}
+\index{handler\_ref@{handler\_ref}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{handler\_ref}{handler\_ref}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}$\ast$ Demo\+Connection\+\_\+s\+::handler\+\_\+ref}
+
+handler\+\_\+ref should be of type Demo\+Handler\+Ref but has been made anonymous to get around a circular dependency in header files between \mbox{\hyperlink{demo__connection_8h}{demo\+\_\+connection.\+h}} and \mbox{\hyperlink{demo__handler_8h}{demo\+\_\+handler.\+h}} \mbox{\Hypertarget{structDemoConnection__s_abe050b5b9315ea370ca38fad6147023c}\label{structDemoConnection__s_abe050b5b9315ea370ca38fad6147023c}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!input\_message\_list\_ref@{input\_message\_list\_ref}}
+\index{input\_message\_list\_ref@{input\_message\_list\_ref}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{input\_message\_list\_ref}{input\_message\_list\_ref}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} Demo\+Connection\+\_\+s\+::input\+\_\+message\+\_\+list\+\_\+ref}
+
+\mbox{\Hypertarget{structDemoConnection__s_a79ef2620100a3048afe1e7659ae2395c}\label{structDemoConnection__s_a79ef2620100a3048afe1e7659ae2395c}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!on\_close\_cb@{on\_close\_cb}}
+\index{on\_close\_cb@{on\_close\_cb}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{on\_close\_cb}{on\_close\_cb}}
+{\footnotesize\ttfamily \mbox{\hyperlink{http__connection_8h_a34d0c09201f286361329f6bb3f9d30e7}{DC\+\_\+\+Close\+\_\+\+CB}} Demo\+Connection\+\_\+s\+::on\+\_\+close\+\_\+cb}
+
+\mbox{\Hypertarget{structDemoConnection__s_a12c71bbd3cec1210eee99a6b79840be4}\label{structDemoConnection__s_a12c71bbd3cec1210eee99a6b79840be4}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!on\_close\_cb\_arg@{on\_close\_cb\_arg}}
+\index{on\_close\_cb\_arg@{on\_close\_cb\_arg}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{on\_close\_cb\_arg}{on\_close\_cb\_arg}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}$\ast$ Demo\+Connection\+\_\+s\+::on\+\_\+close\+\_\+cb\+\_\+arg}
+
+\mbox{\Hypertarget{structDemoConnection__s_a14d90e38f8e1afe9aa913ce2b47f18f0}\label{structDemoConnection__s_a14d90e38f8e1afe9aa913ce2b47f18f0}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!on\_read\_cb@{on\_read\_cb}}
+\index{on\_read\_cb@{on\_read\_cb}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{on\_read\_cb}{on\_read\_cb}}
+{\footnotesize\ttfamily \mbox{\hyperlink{http__connection_8h_a58f80e49a2aa6ad65fb2028db9bc3368}{DC\+\_\+\+Read\+\_\+\+CB}} Demo\+Connection\+\_\+s\+::on\+\_\+read\+\_\+cb}
+
+\mbox{\Hypertarget{structDemoConnection__s_a9493401048ae9978d6b85f65e9431ad7}\label{structDemoConnection__s_a9493401048ae9978d6b85f65e9431ad7}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!on\_read\_cb\_arg@{on\_read\_cb\_arg}}
+\index{on\_read\_cb\_arg@{on\_read\_cb\_arg}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{on\_read\_cb\_arg}{on\_read\_cb\_arg}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}$\ast$ Demo\+Connection\+\_\+s\+::on\+\_\+read\+\_\+cb\+\_\+arg}
+
+\mbox{\Hypertarget{structDemoConnection__s_a09e81db23ce0dedf34ded87ccfead539}\label{structDemoConnection__s_a09e81db23ce0dedf34ded87ccfead539}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!on\_write\_cb@{on\_write\_cb}}
+\index{on\_write\_cb@{on\_write\_cb}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{on\_write\_cb}{on\_write\_cb}}
+{\footnotesize\ttfamily \mbox{\hyperlink{http__connection_8h_afa43fecee7ce289c175bf8dcdf5af9fe}{DC\+\_\+\+Write\+\_\+\+CB}} Demo\+Connection\+\_\+s\+::on\+\_\+write\+\_\+cb}
+
+\mbox{\Hypertarget{structDemoConnection__s_a4c8bc963d3e3adfc95372d82cdc32dd0}\label{structDemoConnection__s_a4c8bc963d3e3adfc95372d82cdc32dd0}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!on\_write\_cb\_arg@{on\_write\_cb\_arg}}
+\index{on\_write\_cb\_arg@{on\_write\_cb\_arg}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{on\_write\_cb\_arg}{on\_write\_cb\_arg}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}$\ast$ Demo\+Connection\+\_\+s\+::on\+\_\+write\+\_\+cb\+\_\+arg}
+
+\mbox{\Hypertarget{structDemoConnection__s_a73d37ed3c74815813a9d74c640863895}\label{structDemoConnection__s_a73d37ed3c74815813a9d74c640863895}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!parser\_ref@{parser\_ref}}
+\index{parser\_ref@{parser\_ref}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{parser\_ref}{parser\_ref}}
+{\footnotesize\ttfamily \mbox{\hyperlink{demo__message__parser_8h_a32f77886b29cb3dc1d0f89a05a749898}{Demo\+Message\+Parser\+Ref}} Demo\+Connection\+\_\+s\+::parser\+\_\+ref}
+
+\mbox{\Hypertarget{structDemoConnection__s_a22250ef555618d8cac654d35889ace75}\label{structDemoConnection__s_a22250ef555618d8cac654d35889ace75}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!RBL\_DECLARE\_END\_TAG@{RBL\_DECLARE\_END\_TAG}}
+\index{RBL\_DECLARE\_END\_TAG@{RBL\_DECLARE\_END\_TAG}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{RBL\_DECLARE\_END\_TAG}{RBL\_DECLARE\_END\_TAG}}
+{\footnotesize\ttfamily Demo\+Connection\+\_\+s\+::\+RBL\+\_\+\+DECLARE\+\_\+\+END\+\_\+\+TAG}
+
+\mbox{\Hypertarget{structDemoConnection__s_a9651fbbf32699514195d6fc42d5069f8}\label{structDemoConnection__s_a9651fbbf32699514195d6fc42d5069f8}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!RBL\_DECLARE\_TAG@{RBL\_DECLARE\_TAG}}
+\index{RBL\_DECLARE\_TAG@{RBL\_DECLARE\_TAG}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{RBL\_DECLARE\_TAG}{RBL\_DECLARE\_TAG}}
+{\footnotesize\ttfamily Demo\+Connection\+\_\+s\+::\+RBL\+\_\+\+DECLARE\+\_\+\+TAG}
+
+\mbox{\Hypertarget{structDemoConnection__s_aee156729de8c986bc899a93795421081}\label{structDemoConnection__s_aee156729de8c986bc899a93795421081}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!read\_buffer\_size@{read\_buffer\_size}}
+\index{read\_buffer\_size@{read\_buffer\_size}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{read\_buffer\_size}{read\_buffer\_size}}
+{\footnotesize\ttfamily long Demo\+Connection\+\_\+s\+::read\+\_\+buffer\+\_\+size}
+
+\mbox{\Hypertarget{structDemoConnection__s_a5a6b2b4d514e039a3994cc224b6938dd}\label{structDemoConnection__s_a5a6b2b4d514e039a3994cc224b6938dd}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!read\_state@{read\_state}}
+\index{read\_state@{read\_state}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{read\_state}{read\_state}}
+{\footnotesize\ttfamily int Demo\+Connection\+\_\+s\+::read\+\_\+state}
+
+\mbox{\Hypertarget{structDemoConnection__s_a573de63cfb3974d98f840766e1f6e219}\label{structDemoConnection__s_a573de63cfb3974d98f840766e1f6e219}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!runloop\_ref@{runloop\_ref}}
+\index{runloop\_ref@{runloop\_ref}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{runloop\_ref}{runloop\_ref}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} Demo\+Connection\+\_\+s\+::runloop\+\_\+ref}
+
+\mbox{\Hypertarget{structDemoConnection__s_ad025822d835219e511852b09c422ba2a}\label{structDemoConnection__s_ad025822d835219e511852b09c422ba2a}} 
+\index{DemoConnection\_s@{DemoConnection\_s}!write\_state@{write\_state}}
+\index{write\_state@{write\_state}!DemoConnection\_s@{DemoConnection\_s}}
+\doxysubsubsection{\texorpdfstring{write\_state}{write\_state}}
+{\footnotesize\ttfamily int Demo\+Connection\+\_\+s\+::write\+\_\+state}
+
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/demo\+\_\+protocol/\mbox{\hyperlink{demo__connection_8h}{demo\+\_\+connection.\+h}}\end{DoxyCompactItemize}

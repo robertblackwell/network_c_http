@@ -1,0 +1,197 @@
+\hypertarget{group__group__kvp}{}\doxysection{Group\+\_\+kvp}
+\label{group__group__kvp}\index{Group\_kvp@{Group\_kvp}}
+
+
+Abstract type for a key/value pair with both elements strings.  
+
+
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structCStrPair}{CStr\+Pair}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \mbox{\hyperlink{structKVPair__s}{KVPair\+\_\+s}} \mbox{\hyperlink{group__group__kvp_gae219896c0915bbace8e116258b0b336d}{KVPair}}
+\item 
+typedef \mbox{\hyperlink{group__group__kvp_gae219896c0915bbace8e116258b0b336d}{KVPair}} $\ast$ \mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}}
+\item 
+typedef struct \mbox{\hyperlink{structCStrPair}{CStr\+Pair}} \mbox{\hyperlink{group__group__kvp_gac9d1635881cc352c46ef59747caa5065}{CStr\+Pair}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} \mbox{\hyperlink{group__group__kvp_gabaae4c77409693fc0e6319938ae3e331}{KVPair\+\_\+new}} (const char $\ast$labptr, int lablen, const char $\ast$valptr, size\+\_\+t valsize)
+\begin{DoxyCompactList}\small\item\em Create a new KV pair from two ptr+len strings. Returns NULL on failure. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} \mbox{\hyperlink{group__group__kvp_ga6a439ed86ef01db175e4bd23a04c920d}{KVPair\+\_\+from\+\_\+cstrs}} (const char $\ast$key, const char $\ast$value)
+\begin{DoxyCompactList}\small\item\em Create a new KVPair from two c-\/strings. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} \mbox{\hyperlink{group__group__kvp_ga449748173d575f9479c48e2e8b7ff163}{KVPair\+\_\+from\+\_\+cstrpair}} (\mbox{\hyperlink{structCStrPair}{CStr\+Pair}} cstrp)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__kvp_ga7f975006c1fb39e52a94c45bc21056e1}{KVPair\+\_\+free}} (\mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} hlref)
+\begin{DoxyCompactList}\small\item\em Release a KVPair freeing all held resources. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__kvp_ga465a069ae72c41a658d8bfdc5762a175}{KVPair\+\_\+dealloc}} (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ptr)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__kvp_ga20affe91535646a847495b37c8e758ee}{KVPair\+\_\+set\+\_\+value}} (\mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} hlref, const char $\ast$valptr, size\+\_\+t vallen)
+\begin{DoxyCompactList}\small\item\em Set the value string in an existing KVPair. \end{DoxyCompactList}\item 
+char $\ast$ \mbox{\hyperlink{group__group__kvp_gaa59b1d5f37461d3778573af2d0d37a8a}{KVPair\+\_\+label}} (\mbox{\hyperlink{group__group__kvp_gae219896c0915bbace8e116258b0b336d}{KVPair}} const $\ast$hlref)
+\begin{DoxyCompactList}\small\item\em Returns the key or label value for an existing KVPair. \end{DoxyCompactList}\item 
+char $\ast$ \mbox{\hyperlink{group__group__kvp_ga99111be82c73864d67e04326935a5638}{KVPair\+\_\+value}} (\mbox{\hyperlink{group__group__kvp_gae219896c0915bbace8e116258b0b336d}{KVPair}} const $\ast$hlref)
+\begin{DoxyCompactList}\small\item\em Returns the value string for an existing KVPair. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+Abstract type for a key/value pair with both elements strings. 
+
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{group__group__kvp_gac9d1635881cc352c46ef59747caa5065}\label{group__group__kvp_gac9d1635881cc352c46ef59747caa5065}} 
+\index{Group\_kvp@{Group\_kvp}!CStrPair@{CStrPair}}
+\index{CStrPair@{CStrPair}!Group\_kvp@{Group\_kvp}}
+\doxysubsubsection{\texorpdfstring{CStrPair}{CStrPair}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structCStrPair}{CStr\+Pair}} \mbox{\hyperlink{structCStrPair}{CStr\+Pair}}}
+
+\mbox{\Hypertarget{group__group__kvp_gae219896c0915bbace8e116258b0b336d}\label{group__group__kvp_gae219896c0915bbace8e116258b0b336d}} 
+\index{Group\_kvp@{Group\_kvp}!KVPair@{KVPair}}
+\index{KVPair@{KVPair}!Group\_kvp@{Group\_kvp}}
+\doxysubsubsection{\texorpdfstring{KVPair}{KVPair}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structKVPair__s}{KVPair\+\_\+s}} \mbox{\hyperlink{group__group__kvp_gae219896c0915bbace8e116258b0b336d}{KVPair}}}
+
+\mbox{\Hypertarget{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}\label{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}} 
+\index{Group\_kvp@{Group\_kvp}!KVPairRef@{KVPairRef}}
+\index{KVPairRef@{KVPairRef}!Group\_kvp@{Group\_kvp}}
+\doxysubsubsection{\texorpdfstring{KVPairRef}{KVPairRef}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{group__group__kvp_gae219896c0915bbace8e116258b0b336d}{KVPair}}$\ast$ \mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}}}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{group__group__kvp_ga465a069ae72c41a658d8bfdc5762a175}\label{group__group__kvp_ga465a069ae72c41a658d8bfdc5762a175}} 
+\index{Group\_kvp@{Group\_kvp}!KVPair\_dealloc@{KVPair\_dealloc}}
+\index{KVPair\_dealloc@{KVPair\_dealloc}!Group\_kvp@{Group\_kvp}}
+\doxysubsubsection{\texorpdfstring{KVPair\_dealloc()}{KVPair\_dealloc()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} KVPair\+\_\+dealloc (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{ptr }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{group__group__kvp_ga7f975006c1fb39e52a94c45bc21056e1}\label{group__group__kvp_ga7f975006c1fb39e52a94c45bc21056e1}} 
+\index{Group\_kvp@{Group\_kvp}!KVPair\_free@{KVPair\_free}}
+\index{KVPair\_free@{KVPair\_free}!Group\_kvp@{Group\_kvp}}
+\doxysubsubsection{\texorpdfstring{KVPair\_free()}{KVPair\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} KVPair\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}}}]{hlref }\end{DoxyParamCaption})}
+
+
+
+Release a KVPair freeing all held resources. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em hlref\+\_\+ptr} & \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{group__group__kvp_ga449748173d575f9479c48e2e8b7ff163}\label{group__group__kvp_ga449748173d575f9479c48e2e8b7ff163}} 
+\index{Group\_kvp@{Group\_kvp}!KVPair\_from\_cstrpair@{KVPair\_from\_cstrpair}}
+\index{KVPair\_from\_cstrpair@{KVPair\_from\_cstrpair}!Group\_kvp@{Group\_kvp}}
+\doxysubsubsection{\texorpdfstring{KVPair\_from\_cstrpair()}{KVPair\_from\_cstrpair()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} KVPair\+\_\+from\+\_\+cstrpair (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{structCStrPair}{CStr\+Pair}}}]{cstrp }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{group__group__kvp_ga6a439ed86ef01db175e4bd23a04c920d}\label{group__group__kvp_ga6a439ed86ef01db175e4bd23a04c920d}} 
+\index{Group\_kvp@{Group\_kvp}!KVPair\_from\_cstrs@{KVPair\_from\_cstrs}}
+\index{KVPair\_from\_cstrs@{KVPair\_from\_cstrs}!Group\_kvp@{Group\_kvp}}
+\doxysubsubsection{\texorpdfstring{KVPair\_from\_cstrs()}{KVPair\_from\_cstrs()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} KVPair\+\_\+from\+\_\+cstrs (\begin{DoxyParamCaption}\item[{const char $\ast$}]{key,  }\item[{const char $\ast$}]{value }\end{DoxyParamCaption})}
+
+
+
+Create a new KVPair from two c-\/strings. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em key} & char$\ast$ c string null terminated. Function copies the string so caller retains responsibility for memory. Is converted to upper case. \\
+\hline
+{\em value} & char$\ast$ c string null terminated. Function copies the string so caller retains responsibility for memory \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+KVPair\+Ref or NULL on failure 
+\end{DoxyReturn}
+\mbox{\Hypertarget{group__group__kvp_gaa59b1d5f37461d3778573af2d0d37a8a}\label{group__group__kvp_gaa59b1d5f37461d3778573af2d0d37a8a}} 
+\index{Group\_kvp@{Group\_kvp}!KVPair\_label@{KVPair\_label}}
+\index{KVPair\_label@{KVPair\_label}!Group\_kvp@{Group\_kvp}}
+\doxysubsubsection{\texorpdfstring{KVPair\_label()}{KVPair\_label()}}
+{\footnotesize\ttfamily char$\ast$ KVPair\+\_\+label (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__group__kvp_gae219896c0915bbace8e116258b0b336d}{KVPair}} const $\ast$}]{hlref }\end{DoxyParamCaption})}
+
+
+
+Returns the key or label value for an existing KVPair. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em hlref} & KVPair\+Ref \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+char$\ast$ Null terminated c string. this is a reference to the value held inside the KVPair\+Ref so ownership is retained in the KVPair\+Ref hlref 
+\end{DoxyReturn}
+\mbox{\Hypertarget{group__group__kvp_gabaae4c77409693fc0e6319938ae3e331}\label{group__group__kvp_gabaae4c77409693fc0e6319938ae3e331}} 
+\index{Group\_kvp@{Group\_kvp}!KVPair\_new@{KVPair\_new}}
+\index{KVPair\_new@{KVPair\_new}!Group\_kvp@{Group\_kvp}}
+\doxysubsubsection{\texorpdfstring{KVPair\_new()}{KVPair\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} KVPair\+\_\+new (\begin{DoxyParamCaption}\item[{const char $\ast$}]{labptr,  }\item[{int}]{lablen,  }\item[{const char $\ast$}]{valptr,  }\item[{size\+\_\+t}]{valsize }\end{DoxyParamCaption})}
+
+
+
+Create a new KV pair from two ptr+len strings. Returns NULL on failure. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em labptr} & char$\ast$ pointer to start of string that is to be label or key. does not assume null terminated. This string will be copied. So caller retains responsibility for memory \\
+\hline
+{\em lablen} & size\+\_\+t len of the string to be label/key \\
+\hline
+{\em valptr} & pointer to start of memory holding string value. does not assume null terminated. This string is copied So caller retains responsibility for memory. \\
+\hline
+{\em valsize} & Length of value str \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+KVPair\+Ref or NULL on failure 
+\end{DoxyReturn}
+Note NULL termination
+
+Note NULL termination\mbox{\Hypertarget{group__group__kvp_ga20affe91535646a847495b37c8e758ee}\label{group__group__kvp_ga20affe91535646a847495b37c8e758ee}} 
+\index{Group\_kvp@{Group\_kvp}!KVPair\_set\_value@{KVPair\_set\_value}}
+\index{KVPair\_set\_value@{KVPair\_set\_value}!Group\_kvp@{Group\_kvp}}
+\doxysubsubsection{\texorpdfstring{KVPair\_set\_value()}{KVPair\_set\_value()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} KVPair\+\_\+set\+\_\+value (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}}}]{hlref,  }\item[{const char $\ast$}]{valptr,  }\item[{size\+\_\+t}]{vallen }\end{DoxyParamCaption})}
+
+
+
+Set the value string in an existing KVPair. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em hlref} & KVPair\+Ref \\
+\hline
+{\em valptr} & pointer to string holding new value. Not a c string not null terminated. The value is copied. \\
+\hline
+{\em vallen} & length of value string \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{group__group__kvp_ga99111be82c73864d67e04326935a5638}\label{group__group__kvp_ga99111be82c73864d67e04326935a5638}} 
+\index{Group\_kvp@{Group\_kvp}!KVPair\_value@{KVPair\_value}}
+\index{KVPair\_value@{KVPair\_value}!Group\_kvp@{Group\_kvp}}
+\doxysubsubsection{\texorpdfstring{KVPair\_value()}{KVPair\_value()}}
+{\footnotesize\ttfamily char$\ast$ KVPair\+\_\+value (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{group__group__kvp_gae219896c0915bbace8e116258b0b336d}{KVPair}} const $\ast$}]{hlref }\end{DoxyParamCaption})}
+
+
+
+Returns the value string for an existing KVPair. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em hlref} & KVPair\+Ref \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+char$\ast$ Null terminated c string. this is a reference to the value held inside the KVPair\+Ref so ownership is retained in the KVPair\+Ref hlref 
+\end{DoxyReturn}

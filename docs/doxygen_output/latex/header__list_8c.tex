@@ -1,0 +1,73 @@
+\hypertarget{header__list_8c}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/http/header\+\_\+list.c File Reference}
+\label{header__list_8c}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/http/header\_list.c@{/home/robert/Projects/http\_in\_c/http\_in\_c/http/header\_list.c}}
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/http/kvpair.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/http/header\+\_\+list.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/utils.\+h$>$}\newline
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{header__list_8c_a40e92743d548faa2b42923b1ac8eded3}{kvp\+\_\+free}} (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ptr)
+\item 
+\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} \mbox{\hyperlink{group__group__hdrlist_gacef5b03d2e97e8d26756a9adf9b97563}{Hdr\+List\+\_\+new}} ()
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__hdrlist_gad5a515777512ce56c268cf5aeefd14bc}{Hdr\+List\+\_\+safe\+\_\+free}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} lref)
+\item 
+int \mbox{\hyperlink{group__group__hdrlist_gada80f698b91858ab38bbe5d9914994ae}{Hdr\+List\+\_\+size}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} lref)
+\item 
+\mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} \mbox{\hyperlink{group__group__hdrlist_gaed058ca7bb1ae0416fd18a37e52f2c59}{Hdr\+List\+\_\+first}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} lref)
+\item 
+\mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} \mbox{\hyperlink{group__group__hdrlist_gaef2011c45ccb96e827ac74b0c4549f88}{Hdr\+List\+\_\+last}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} lref)
+\item 
+\mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} \mbox{\hyperlink{group__group__hdrlist_ga4ea9761a12609b304773217ef904e69b}{Hdr\+List\+\_\+remove\+\_\+first}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} lref)
+\item 
+\mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} \mbox{\hyperlink{group__group__hdrlist_ga58c12ec01ee2f75a39905fad28d462e4}{Hdr\+List\+\_\+remove\+\_\+last}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} lref)
+\item 
+\mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} \mbox{\hyperlink{group__group__hdrlist_ga5836dc0e1961c1a5b26ad6e5cc238664}{Hdr\+List\+\_\+itr\+\_\+unpack}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} lref, \mbox{\hyperlink{group__group__hdrlist_ga2083cce289b04b37625637994ee3c647}{Hdr\+List\+Iter}} iter)
+\item 
+\mbox{\hyperlink{group__group__hdrlist_ga2083cce289b04b37625637994ee3c647}{Hdr\+List\+Iter}} \mbox{\hyperlink{group__group__hdrlist_gae7558197196177c42c53284e87de8c20}{Hdr\+List\+\_\+iterator}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} lref)
+\item 
+\mbox{\hyperlink{group__group__hdrlist_ga2083cce289b04b37625637994ee3c647}{Hdr\+List\+Iter}} \mbox{\hyperlink{group__group__hdrlist_ga85a463a1c3d1ec12c6d9495a53da57b6}{Hdr\+List\+\_\+itr\+\_\+next}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} lref, \mbox{\hyperlink{group__group__hdrlist_ga2083cce289b04b37625637994ee3c647}{Hdr\+List\+Iter}} iter)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__hdrlist_ga40df9547f2fffaa867dee36c9d9a0f62}{Hdr\+List\+\_\+itr\+\_\+remove}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} lref, \mbox{\hyperlink{group__group__hdrlist_ga2083cce289b04b37625637994ee3c647}{Hdr\+List\+Iter}} $\ast$iter)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__hdrlist_ga043d221cbcb017c99d92fb864747444d}{Hdr\+List\+\_\+add\+\_\+back}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} lref, \mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} item)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__hdrlist_gab1d6aa1436c185a22fe35d06fa0cb0a8}{Hdr\+List\+\_\+add\+\_\+front}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} lref, \mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} item)
+\item 
+\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} \mbox{\hyperlink{group__group__hdrlist_gac06fd00f4e7ea04039cd89d8ec4137e8}{Hdr\+List\+\_\+from\+\_\+array}} (const char $\ast$ar\mbox{[}$\,$\mbox{]}\mbox{[}2\mbox{]})
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__hdrlist_gaa465a97c38898ea00541647a0b9172c9}{Hdr\+List\+\_\+add\+\_\+arr}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} this, const char $\ast$ar\mbox{[}$\,$\mbox{]}\mbox{[}2\mbox{]})
+\item 
+\mbox{\hyperlink{group__group__hdrlist_ga2083cce289b04b37625637994ee3c647}{Hdr\+List\+Iter}} \mbox{\hyperlink{header__list_8c_a3912b48684eef1c41afb0cd1af4f5227}{Hdr\+List\+\_\+find\+\_\+iter}} (const \mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} hlref, const char $\ast$key)
+\item 
+\mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} \mbox{\hyperlink{group__group__hdrlist_ga2b90b760cd4fdf451a140773633186e4}{Hdr\+List\+\_\+find}} (const \mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} hlref, const char $\ast$key)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__hdrlist_ga51667665964f969a9310905201dfa569}{Hdr\+List\+\_\+remove}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} hlref, const char $\ast$key)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__hdrlist_ga63039e70c82746ddbe95adefdf00e074}{Hdr\+List\+\_\+add\+\_\+cbuf}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} this, const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} key, const \mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} value)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__hdrlist_ga7630d4da13971db30929a537a4717708}{Hdr\+List\+\_\+add\+\_\+line}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} this, const char $\ast$label, int lablen, const char $\ast$value, int vallen)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__hdrlist_gaaeb85c5dd203e54fe63d5d6f9bc52df9}{Hdr\+List\+\_\+add\+\_\+cstr}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} this, const char $\ast$label, const char $\ast$value)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__hdrlist_gacaff0613d66ce6ad4f4ed0e3741013b2}{Hdr\+List\+\_\+add\+\_\+many}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} this, \mbox{\hyperlink{structCStrPair}{CStr\+Pair}} $\ast$pairs\mbox{[}$\,$\mbox{]})
+\item 
+\mbox{\hyperlink{group__group__cbuffer_gaec47cab3b4ddb0a70cdd57c84dd096e4}{Cbuffer\+Ref}} \mbox{\hyperlink{group__group__hdrlist_ga12e11fc93592130e46caf78e316c32f2}{Hdr\+List\+\_\+serialize}} (\mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}} this)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{header__list_8c_a3912b48684eef1c41afb0cd1af4f5227}\label{header__list_8c_a3912b48684eef1c41afb0cd1af4f5227}} 
+\index{header\_list.c@{header\_list.c}!HdrList\_find\_iter@{HdrList\_find\_iter}}
+\index{HdrList\_find\_iter@{HdrList\_find\_iter}!header\_list.c@{header\_list.c}}
+\doxysubsubsection{\texorpdfstring{HdrList\_find\_iter()}{HdrList\_find\_iter()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__group__hdrlist_ga2083cce289b04b37625637994ee3c647}{Hdr\+List\+Iter}} Hdr\+List\+\_\+find\+\_\+iter (\begin{DoxyParamCaption}\item[{const \mbox{\hyperlink{group__group__hdrlist_gafbc733b999c2b97d562dd3df4dfc0fd5}{Hdr\+List\+Ref}}}]{hlref,  }\item[{const char $\ast$}]{key }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{header__list_8c_a40e92743d548faa2b42923b1ac8eded3}\label{header__list_8c_a40e92743d548faa2b42923b1ac8eded3}} 
+\index{header\_list.c@{header\_list.c}!kvp\_free@{kvp\_free}}
+\index{kvp\_free@{kvp\_free}!header\_list.c@{header\_list.c}}
+\doxysubsubsection{\texorpdfstring{kvp\_free()}{kvp\_free()}}
+{\footnotesize\ttfamily static \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} kvp\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$}]{ptr }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}}
+
+WARNING The content between these block comments is generated code and will be over written at the next build 

@@ -1,0 +1,31 @@
+\hypertarget{kvpair_8c}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/http/kvpair.c File Reference}
+\label{kvpair_8c}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/http/kvpair.c@{/home/robert/Projects/http\_in\_c/http\_in\_c/http/kvpair.c}}
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/http/kvpair.\+h$>$}\newline
+{\ttfamily \#include $<$stdlib.\+h$>$}\newline
+{\ttfamily \#include $<$string.\+h$>$}\newline
+{\ttfamily \#include $<$ctype.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/alloc.\+h$>$}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structKVPair__s}{KVPair\+\_\+s}}
+\begin{DoxyCompactList}\small\item\em key value pair with string key and string value \end{DoxyCompactList}\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} \mbox{\hyperlink{group__group__kvp_gabaae4c77409693fc0e6319938ae3e331}{KVPair\+\_\+new}} (const char $\ast$labptr, int lablen, const char $\ast$valptr, size\+\_\+t vallen)
+\begin{DoxyCompactList}\small\item\em Create a new KV pair from two ptr+len strings. Returns NULL on failure. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} \mbox{\hyperlink{group__group__kvp_ga6a439ed86ef01db175e4bd23a04c920d}{KVPair\+\_\+from\+\_\+cstrs}} (const char $\ast$key, const char $\ast$value)
+\begin{DoxyCompactList}\small\item\em Create a new KVPair from two c-\/strings. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} \mbox{\hyperlink{group__group__kvp_ga449748173d575f9479c48e2e8b7ff163}{KVPair\+\_\+from\+\_\+cstrpair}} (\mbox{\hyperlink{structCStrPair}{CStr\+Pair}} cstrp)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__kvp_ga7f975006c1fb39e52a94c45bc21056e1}{KVPair\+\_\+free}} (\mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} hlref)
+\begin{DoxyCompactList}\small\item\em Release a KVPair freeing all held resources. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__kvp_ga465a069ae72c41a658d8bfdc5762a175}{KVPair\+\_\+dealloc}} (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ptr)
+\item 
+char $\ast$ \mbox{\hyperlink{group__group__kvp_gaa59b1d5f37461d3778573af2d0d37a8a}{KVPair\+\_\+label}} (\mbox{\hyperlink{group__group__kvp_gae219896c0915bbace8e116258b0b336d}{KVPair}} const $\ast$hlref)
+\begin{DoxyCompactList}\small\item\em Returns the key or label value for an existing KVPair. \end{DoxyCompactList}\item 
+char $\ast$ \mbox{\hyperlink{group__group__kvp_ga99111be82c73864d67e04326935a5638}{KVPair\+\_\+value}} (\mbox{\hyperlink{group__group__kvp_gae219896c0915bbace8e116258b0b336d}{KVPair}} const $\ast$hlref)
+\begin{DoxyCompactList}\small\item\em Returns the value string for an existing KVPair. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{group__group__kvp_ga20affe91535646a847495b37c8e758ee}{KVPair\+\_\+set\+\_\+value}} (\mbox{\hyperlink{group__group__kvp_ga31e3e7795e4eeedd99ea2ee63e1f9e42}{KVPair\+Ref}} hlref, const char $\ast$valptr, size\+\_\+t vallen)
+\begin{DoxyCompactList}\small\item\em Set the value string in an existing KVPair. \end{DoxyCompactList}\end{DoxyCompactItemize}

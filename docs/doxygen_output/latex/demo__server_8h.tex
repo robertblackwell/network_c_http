@@ -1,0 +1,137 @@
+\hypertarget{demo__server_8h}{}\doxysection{/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/demo\+\_\+protocol/demo\+\_\+server.h File Reference}
+\label{demo__server_8h}\index{/home/robert/Projects/http\_in\_c/http\_in\_c/demo\_protocol/demo\_server.h@{/home/robert/Projects/http\_in\_c/http\_in\_c/demo\_protocol/demo\_server.h}}
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/demo\+\_\+protocol/demo\+\_\+message.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/demo\+\_\+protocol/demo\+\_\+connection.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/common/socket\+\_\+functions.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/constants.\+h$>$}\newline
+{\ttfamily \#include $<$http\+\_\+in\+\_\+c/runloop/runloop.\+h$>$}\newline
+{\ttfamily \#include $<$rbl/check\+\_\+tag.\+h$>$}\newline
+\doxysubsection*{Classes}
+\begin{DoxyCompactItemize}
+\item 
+struct \mbox{\hyperlink{structDemoServer__s}{Demo\+Server\+\_\+s}}
+\end{DoxyCompactItemize}
+\doxysubsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\#define \mbox{\hyperlink{demo__server_8h_ac06d87458eaef4c4c188c81cb4bb4cac}{Demo\+Server\+\_\+\+TAG}}~\char`\"{}Dm\+SRVR\char`\"{}
+\item 
+\#define \mbox{\hyperlink{demo__server_8h_a91a12dc1335402d3d7113d5380736a42}{XR\+\_\+\+NBR\+\_\+\+WORKERS}}~1
+\end{DoxyCompactItemize}
+\doxysubsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \mbox{\hyperlink{structDemoHandler__s}{Demo\+Handler\+\_\+s}} \mbox{\hyperlink{demo__server_8h_a235a3fc0644fb9af6d3103c3405a9f07}{Demo\+Handler}}
+\item 
+typedef struct \mbox{\hyperlink{structDemoHandler__s}{Demo\+Handler\+\_\+s}} $\ast$ \mbox{\hyperlink{demo__server_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}}
+\item 
+typedef struct \mbox{\hyperlink{structDemoServer__s}{Demo\+Server\+\_\+s}} \mbox{\hyperlink{demo__server_8h_af234cea009811e81b3d23e5a389ae12c}{Demo\+Server}}
+\item 
+typedef struct \mbox{\hyperlink{structDemoServer__s}{Demo\+Server\+\_\+s}} $\ast$ \mbox{\hyperlink{demo__server_8h_a4db6a9ea0ba3d4d27aa1bbf5c4da546c}{Demo\+Server\+Ref}}
+\item 
+typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{demo__server_8h_a87a7bd74bbb269cebd3f7de92853dc0d}{Demo\+Process\+Request\+Function}}) (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$\mbox{\hyperlink{w__timerfd_8c_afb76350cb59fd4a3c52022cbee02968f}{handler}}, \mbox{\hyperlink{demo__message_8h_aec10d21ff11457bc72579a0e845ae27d}{Demo\+Message\+Ref}}, \mbox{\hyperlink{demo__message_8h_aec10d21ff11457bc72579a0e845ae27d}{Demo\+Message\+Ref}})
+\end{DoxyCompactItemize}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{demo__server_8h_a4db6a9ea0ba3d4d27aa1bbf5c4da546c}{Demo\+Server\+Ref}} \mbox{\hyperlink{demo__server_8h_a05debfda3674472063410df0d1f20913}{demo\+\_\+server\+\_\+new}} (int port, char const $\ast$host, int listen\+\_\+fd, \mbox{\hyperlink{demo__server_8h_a87a7bd74bbb269cebd3f7de92853dc0d}{Demo\+Process\+Request\+Function}} process\+\_\+request)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__server_8h_aa497831e33430c966f5027c59c4f09ec}{demo\+\_\+server\+\_\+init}} (\mbox{\hyperlink{demo__server_8h_a4db6a9ea0ba3d4d27aa1bbf5c4da546c}{Demo\+Server\+Ref}} sref, int port, char const $\ast$host, int listen\+\_\+fd, \mbox{\hyperlink{demo__server_8h_a87a7bd74bbb269cebd3f7de92853dc0d}{Demo\+Process\+Request\+Function}} process\+\_\+request)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__server_8h_ab85c53252d957fc55533bab91106efad}{demo\+\_\+server\+\_\+free}} (\mbox{\hyperlink{demo__server_8h_a4db6a9ea0ba3d4d27aa1bbf5c4da546c}{Demo\+Server\+Ref}} this)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__server_8h_a21cf2c244cc13f4a68bcdfa6c030c698}{demo\+\_\+server\+\_\+listen}} (\mbox{\hyperlink{demo__server_8h_a4db6a9ea0ba3d4d27aa1bbf5c4da546c}{Demo\+Server\+Ref}} server)
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} \mbox{\hyperlink{demo__server_8h_a798ef57140963818a8f12d7cd5d69c15}{demo\+\_\+server\+\_\+terminate}} (\mbox{\hyperlink{demo__server_8h_a4db6a9ea0ba3d4d27aa1bbf5c4da546c}{Demo\+Server\+Ref}} this)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Macro Definition Documentation}
+\mbox{\Hypertarget{demo__server_8h_ac06d87458eaef4c4c188c81cb4bb4cac}\label{demo__server_8h_ac06d87458eaef4c4c188c81cb4bb4cac}} 
+\index{demo\_server.h@{demo\_server.h}!DemoServer\_TAG@{DemoServer\_TAG}}
+\index{DemoServer\_TAG@{DemoServer\_TAG}!demo\_server.h@{demo\_server.h}}
+\doxysubsubsection{\texorpdfstring{DemoServer\_TAG}{DemoServer\_TAG}}
+{\footnotesize\ttfamily \#define Demo\+Server\+\_\+\+TAG~\char`\"{}Dm\+SRVR\char`\"{}}
+
+\mbox{\Hypertarget{demo__server_8h_a91a12dc1335402d3d7113d5380736a42}\label{demo__server_8h_a91a12dc1335402d3d7113d5380736a42}} 
+\index{demo\_server.h@{demo\_server.h}!XR\_NBR\_WORKERS@{XR\_NBR\_WORKERS}}
+\index{XR\_NBR\_WORKERS@{XR\_NBR\_WORKERS}!demo\_server.h@{demo\_server.h}}
+\doxysubsubsection{\texorpdfstring{XR\_NBR\_WORKERS}{XR\_NBR\_WORKERS}}
+{\footnotesize\ttfamily \#define XR\+\_\+\+NBR\+\_\+\+WORKERS~1}
+
+
+
+\doxysubsection{Typedef Documentation}
+\mbox{\Hypertarget{demo__server_8h_a235a3fc0644fb9af6d3103c3405a9f07}\label{demo__server_8h_a235a3fc0644fb9af6d3103c3405a9f07}} 
+\index{demo\_server.h@{demo\_server.h}!DemoHandler@{DemoHandler}}
+\index{DemoHandler@{DemoHandler}!demo\_server.h@{demo\_server.h}}
+\doxysubsubsection{\texorpdfstring{DemoHandler}{DemoHandler}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structDemoHandler__s}{Demo\+Handler\+\_\+s}} \mbox{\hyperlink{demo__handler_8h_a235a3fc0644fb9af6d3103c3405a9f07}{Demo\+Handler}}}
+
+\mbox{\Hypertarget{demo__server_8h_a4d48a634822511a3654867fe256e50a2}\label{demo__server_8h_a4d48a634822511a3654867fe256e50a2}} 
+\index{demo\_server.h@{demo\_server.h}!DemoHandlerRef@{DemoHandlerRef}}
+\index{DemoHandlerRef@{DemoHandlerRef}!demo\_server.h@{demo\_server.h}}
+\doxysubsubsection{\texorpdfstring{DemoHandlerRef}{DemoHandlerRef}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structDemoHandler__s}{Demo\+Handler\+\_\+s}} $\ast$ \mbox{\hyperlink{demo__handler_8h_a4d48a634822511a3654867fe256e50a2}{Demo\+Handler\+Ref}}}
+
+\mbox{\Hypertarget{demo__server_8h_a87a7bd74bbb269cebd3f7de92853dc0d}\label{demo__server_8h_a87a7bd74bbb269cebd3f7de92853dc0d}} 
+\index{demo\_server.h@{demo\_server.h}!DemoProcessRequestFunction@{DemoProcessRequestFunction}}
+\index{DemoProcessRequestFunction@{DemoProcessRequestFunction}!demo\_server.h@{demo\_server.h}}
+\doxysubsubsection{\texorpdfstring{DemoProcessRequestFunction}{DemoProcessRequestFunction}}
+{\footnotesize\ttfamily typedef \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ Demo\+Process\+Request\+Function) (\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$\mbox{\hyperlink{w__timerfd_8c_afb76350cb59fd4a3c52022cbee02968f}{handler}}, \mbox{\hyperlink{demo__message_8h_aec10d21ff11457bc72579a0e845ae27d}{Demo\+Message\+Ref}}, \mbox{\hyperlink{demo__message_8h_aec10d21ff11457bc72579a0e845ae27d}{Demo\+Message\+Ref}})}
+
+\mbox{\Hypertarget{demo__server_8h_af234cea009811e81b3d23e5a389ae12c}\label{demo__server_8h_af234cea009811e81b3d23e5a389ae12c}} 
+\index{demo\_server.h@{demo\_server.h}!DemoServer@{DemoServer}}
+\index{DemoServer@{DemoServer}!demo\_server.h@{demo\_server.h}}
+\doxysubsubsection{\texorpdfstring{DemoServer}{DemoServer}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structDemoServer__s}{Demo\+Server\+\_\+s}} \mbox{\hyperlink{demo__server_8h_af234cea009811e81b3d23e5a389ae12c}{Demo\+Server}}}
+
+\mbox{\Hypertarget{demo__server_8h_a4db6a9ea0ba3d4d27aa1bbf5c4da546c}\label{demo__server_8h_a4db6a9ea0ba3d4d27aa1bbf5c4da546c}} 
+\index{demo\_server.h@{demo\_server.h}!DemoServerRef@{DemoServerRef}}
+\index{DemoServerRef@{DemoServerRef}!demo\_server.h@{demo\_server.h}}
+\doxysubsubsection{\texorpdfstring{DemoServerRef}{DemoServerRef}}
+{\footnotesize\ttfamily typedef struct \mbox{\hyperlink{structDemoServer__s}{Demo\+Server\+\_\+s}} $\ast$ \mbox{\hyperlink{demo__server_8h_a4db6a9ea0ba3d4d27aa1bbf5c4da546c}{Demo\+Server\+Ref}}}
+
+
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{demo__server_8h_ab85c53252d957fc55533bab91106efad}\label{demo__server_8h_ab85c53252d957fc55533bab91106efad}} 
+\index{demo\_server.h@{demo\_server.h}!demo\_server\_free@{demo\_server\_free}}
+\index{demo\_server\_free@{demo\_server\_free}!demo\_server.h@{demo\_server.h}}
+\doxysubsubsection{\texorpdfstring{demo\_server\_free()}{demo\_server\_free()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} demo\+\_\+server\+\_\+free (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__server_8h_a4db6a9ea0ba3d4d27aa1bbf5c4da546c}{Demo\+Server\+Ref}}}]{this }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__server_8h_aa497831e33430c966f5027c59c4f09ec}\label{demo__server_8h_aa497831e33430c966f5027c59c4f09ec}} 
+\index{demo\_server.h@{demo\_server.h}!demo\_server\_init@{demo\_server\_init}}
+\index{demo\_server\_init@{demo\_server\_init}!demo\_server.h@{demo\_server.h}}
+\doxysubsubsection{\texorpdfstring{demo\_server\_init()}{demo\_server\_init()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} demo\+\_\+server\+\_\+init (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__server_8h_a4db6a9ea0ba3d4d27aa1bbf5c4da546c}{Demo\+Server\+Ref}}}]{sref,  }\item[{int}]{port,  }\item[{char const $\ast$}]{host,  }\item[{int}]{listen\+\_\+fd,  }\item[{\mbox{\hyperlink{demo__server_8h_a87a7bd74bbb269cebd3f7de92853dc0d}{Demo\+Process\+Request\+Function}}}]{process\+\_\+request }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__server_8h_a21cf2c244cc13f4a68bcdfa6c030c698}\label{demo__server_8h_a21cf2c244cc13f4a68bcdfa6c030c698}} 
+\index{demo\_server.h@{demo\_server.h}!demo\_server\_listen@{demo\_server\_listen}}
+\index{demo\_server\_listen@{demo\_server\_listen}!demo\_server.h@{demo\_server.h}}
+\doxysubsubsection{\texorpdfstring{demo\_server\_listen()}{demo\_server\_listen()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} demo\+\_\+server\+\_\+listen (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__server_8h_a4db6a9ea0ba3d4d27aa1bbf5c4da546c}{Demo\+Server\+Ref}}}]{server }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{demo__server_8h_a05debfda3674472063410df0d1f20913}\label{demo__server_8h_a05debfda3674472063410df0d1f20913}} 
+\index{demo\_server.h@{demo\_server.h}!demo\_server\_new@{demo\_server\_new}}
+\index{demo\_server\_new@{demo\_server\_new}!demo\_server.h@{demo\_server.h}}
+\doxysubsubsection{\texorpdfstring{demo\_server\_new()}{demo\_server\_new()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{demo__server_8h_a4db6a9ea0ba3d4d27aa1bbf5c4da546c}{Demo\+Server\+Ref}} demo\+\_\+server\+\_\+new (\begin{DoxyParamCaption}\item[{int}]{port,  }\item[{char const $\ast$}]{host,  }\item[{int}]{listen\+\_\+fd,  }\item[{\mbox{\hyperlink{demo__server_8h_a87a7bd74bbb269cebd3f7de92853dc0d}{Demo\+Process\+Request\+Function}}}]{process\+\_\+request }\end{DoxyParamCaption})}
+
+Create a new server object. 
+\begin{DoxyParams}{Parameters}
+{\em port} & The localhost\+:port on which the server will listen \\
+\hline
+{\em handler} & A function conforming to Xr\+Handler\+Function (see aio\+\_\+api/handler.\+h) which will be called to handle all requests that are parsed successfully. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+
+\end{DoxyReturn}
+\mbox{\Hypertarget{demo__server_8h_a798ef57140963818a8f12d7cd5d69c15}\label{demo__server_8h_a798ef57140963818a8f12d7cd5d69c15}} 
+\index{demo\_server.h@{demo\_server.h}!demo\_server\_terminate@{demo\_server\_terminate}}
+\index{demo\_server\_terminate@{demo\_server\_terminate}!demo\_server.h@{demo\_server.h}}
+\doxysubsubsection{\texorpdfstring{demo\_server\_terminate()}{demo\_server\_terminate()}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} demo\+\_\+server\+\_\+terminate (\begin{DoxyParamCaption}\item[{\mbox{\hyperlink{demo__server_8h_a4db6a9ea0ba3d4d27aa1bbf5c4da546c}{Demo\+Server\+Ref}}}]{this }\end{DoxyParamCaption})}
+

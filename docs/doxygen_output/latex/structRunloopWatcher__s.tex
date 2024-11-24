@@ -1,0 +1,83 @@
+\hypertarget{structRunloopWatcher__s}{}\doxysection{Runloop\+Watcher\+\_\+s Struct Reference}
+\label{structRunloopWatcher__s}\index{RunloopWatcher\_s@{RunloopWatcher\_s}}
+
+
+{\ttfamily \#include $<$rl\+\_\+internal.\+h$>$}
+
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{structRunloopWatcher__s_a15f7838ec569f92c053551ccd4283ac8}{RBL\+\_\+\+DECLARE\+\_\+\+TAG}}
+\item 
+\mbox{\hyperlink{rl__internal_8h_aa025135452b1839d6a431e3041827350}{Watcher\+Type}} \mbox{\hyperlink{structRunloopWatcher__s_aae752b0acdabd08d3861b57ff986966e}{type}}
+\item 
+\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} \mbox{\hyperlink{structRunloopWatcher__s_ad0538ee79a8c0f192c96015827fff4f1}{runloop}}
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}} $\ast$ \mbox{\hyperlink{structRunloopWatcher__s_a7398ac797b911c44ad1cec65c7a7fbe3}{context}}
+\item 
+int \mbox{\hyperlink{structRunloopWatcher__s_ac09374bb59bca13f47358dfa1e88b60d}{fd}}
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{structRunloopWatcher__s_af3c41d9010a956edcd660ee958f8ffd9}{free}} )(\mbox{\hyperlink{group__runloop_ga84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}})
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{structRunloopWatcher__s_afa248ac73df2dc40e68d4bdddbd6eeed}{handler}} )(\mbox{\hyperlink{group__runloop_ga84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}} watcher\+\_\+ref, uint64\+\_\+t event)
+\item 
+\mbox{\hyperlink{structRunloopWatcher__s_a293b03874819431f7445c96ea16359f4}{RBL\+\_\+\+DECLARE\+\_\+\+END\+\_\+\+TAG}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{structRunloopWatcher__s_a7398ac797b911c44ad1cec65c7a7fbe3}\label{structRunloopWatcher__s_a7398ac797b911c44ad1cec65c7a7fbe3}} 
+\index{RunloopWatcher\_s@{RunloopWatcher\_s}!context@{context}}
+\index{context@{context}!RunloopWatcher\_s@{RunloopWatcher\_s}}
+\doxysubsubsection{\texorpdfstring{context}{context}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}$\ast$ Runloop\+Watcher\+\_\+s\+::context}
+
+\mbox{\Hypertarget{structRunloopWatcher__s_ac09374bb59bca13f47358dfa1e88b60d}\label{structRunloopWatcher__s_ac09374bb59bca13f47358dfa1e88b60d}} 
+\index{RunloopWatcher\_s@{RunloopWatcher\_s}!fd@{fd}}
+\index{fd@{fd}!RunloopWatcher\_s@{RunloopWatcher\_s}}
+\doxysubsubsection{\texorpdfstring{fd}{fd}}
+{\footnotesize\ttfamily int Runloop\+Watcher\+\_\+s\+::fd}
+
+\mbox{\Hypertarget{structRunloopWatcher__s_af3c41d9010a956edcd660ee958f8ffd9}\label{structRunloopWatcher__s_af3c41d9010a956edcd660ee958f8ffd9}} 
+\index{RunloopWatcher\_s@{RunloopWatcher\_s}!free@{free}}
+\index{free@{free}!RunloopWatcher\_s@{RunloopWatcher\_s}}
+\doxysubsubsection{\texorpdfstring{free}{free}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ Runloop\+Watcher\+\_\+s\+::free) (\mbox{\hyperlink{group__runloop_ga84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}})}
+
+function that knows how to free the specific sub type of watcher from a general ref. each derived type must provide this function when an instance is created or initializez. In the case of timerfd and event fd watchers must also close the fd \mbox{\Hypertarget{structRunloopWatcher__s_afa248ac73df2dc40e68d4bdddbd6eeed}\label{structRunloopWatcher__s_afa248ac73df2dc40e68d4bdddbd6eeed}} 
+\index{RunloopWatcher\_s@{RunloopWatcher\_s}!handler@{handler}}
+\index{handler@{handler}!RunloopWatcher\_s@{RunloopWatcher\_s}}
+\doxysubsubsection{\texorpdfstring{handler}{handler}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ Runloop\+Watcher\+\_\+s\+::handler) (\mbox{\hyperlink{group__runloop_ga84676a401590989d16ead04a50ae36f2}{Runloop\+Watcher\+Ref}} watcher\+\_\+ref, uint64\+\_\+t event)}
+
+first level handler function each derived type provides thier own type specific handler when an instance is created or initialized and must cast the first parameter to their own specific type of watcher inside the handler.
+
+This handler will be calledd directly from the epoll\+\_\+wait code inside \mbox{\hyperlink{runloop_8c}{runloop.\+c}} \mbox{\Hypertarget{structRunloopWatcher__s_a293b03874819431f7445c96ea16359f4}\label{structRunloopWatcher__s_a293b03874819431f7445c96ea16359f4}} 
+\index{RunloopWatcher\_s@{RunloopWatcher\_s}!RBL\_DECLARE\_END\_TAG@{RBL\_DECLARE\_END\_TAG}}
+\index{RBL\_DECLARE\_END\_TAG@{RBL\_DECLARE\_END\_TAG}!RunloopWatcher\_s@{RunloopWatcher\_s}}
+\doxysubsubsection{\texorpdfstring{RBL\_DECLARE\_END\_TAG}{RBL\_DECLARE\_END\_TAG}}
+{\footnotesize\ttfamily Runloop\+Watcher\+\_\+s\+::\+RBL\+\_\+\+DECLARE\+\_\+\+END\+\_\+\+TAG}
+
+\mbox{\Hypertarget{structRunloopWatcher__s_a15f7838ec569f92c053551ccd4283ac8}\label{structRunloopWatcher__s_a15f7838ec569f92c053551ccd4283ac8}} 
+\index{RunloopWatcher\_s@{RunloopWatcher\_s}!RBL\_DECLARE\_TAG@{RBL\_DECLARE\_TAG}}
+\index{RBL\_DECLARE\_TAG@{RBL\_DECLARE\_TAG}!RunloopWatcher\_s@{RunloopWatcher\_s}}
+\doxysubsubsection{\texorpdfstring{RBL\_DECLARE\_TAG}{RBL\_DECLARE\_TAG}}
+{\footnotesize\ttfamily Runloop\+Watcher\+\_\+s\+::\+RBL\+\_\+\+DECLARE\+\_\+\+TAG}
+
+\mbox{\Hypertarget{structRunloopWatcher__s_ad0538ee79a8c0f192c96015827fff4f1}\label{structRunloopWatcher__s_ad0538ee79a8c0f192c96015827fff4f1}} 
+\index{RunloopWatcher\_s@{RunloopWatcher\_s}!runloop@{runloop}}
+\index{runloop@{runloop}!RunloopWatcher\_s@{RunloopWatcher\_s}}
+\doxysubsubsection{\texorpdfstring{runloop}{runloop}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} Runloop\+Watcher\+\_\+s\+::runloop}
+
+\mbox{\Hypertarget{structRunloopWatcher__s_aae752b0acdabd08d3861b57ff986966e}\label{structRunloopWatcher__s_aae752b0acdabd08d3861b57ff986966e}} 
+\index{RunloopWatcher\_s@{RunloopWatcher\_s}!type@{type}}
+\index{type@{type}!RunloopWatcher\_s@{RunloopWatcher\_s}}
+\doxysubsubsection{\texorpdfstring{type}{type}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_aa025135452b1839d6a431e3041827350}{Watcher\+Type}} Runloop\+Watcher\+\_\+s\+::type}
+
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/runloop/\mbox{\hyperlink{rl__internal_8h}{rl\+\_\+internal.\+h}}\end{DoxyCompactItemize}

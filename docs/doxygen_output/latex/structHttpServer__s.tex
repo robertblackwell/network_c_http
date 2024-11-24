@@ -1,0 +1,97 @@
+\hypertarget{structHttpServer__s}{}\doxysection{Http\+Server\+\_\+s Struct Reference}
+\label{structHttpServer__s}\index{HttpServer\_s@{HttpServer\_s}}
+
+
+{\ttfamily \#include $<$http\+\_\+server.\+h$>$}
+
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{structHttpServer__s_a92f3a0f17723de98ee1511bc6a761246}{RBL\+\_\+\+DECLARE\+\_\+\+TAG}}
+\item 
+int \mbox{\hyperlink{structHttpServer__s_a97347240076908c0f3b604b22138bc3c}{port}}
+\item 
+char const  $\ast$ \mbox{\hyperlink{structHttpServer__s_a98d71df1fabf3e4f11d629b44eec79cc}{host}}
+\item 
+\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} \mbox{\hyperlink{structHttpServer__s_ac4e19ed48acf5328467184d512ad9b81}{listening\+\_\+socket\+\_\+fd}}
+\item 
+\mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} \mbox{\hyperlink{structHttpServer__s_acd95081000cf01cbd7ba4bc55b93ae44}{runloop\+\_\+ref}}
+\item 
+\mbox{\hyperlink{group__runloop_ga33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} \mbox{\hyperlink{structHttpServer__s_ada8d6216cda8b498c6af9269382db13b}{listening\+\_\+watcher\+\_\+ref}}
+\item 
+\mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} \mbox{\hyperlink{structHttpServer__s_a327668cdbda6471be59861ef56d3b329}{handler\+\_\+list}}
+\item 
+\mbox{\hyperlink{http__server_8h_ac03bc722065a8bfe647fc3c32d1649b1}{Http\+Process\+Request\+Function}} \mbox{\hyperlink{structHttpServer__s_a260598e3b2c5e5ac2b0289760976aeb0}{process\+\_\+request\+\_\+function}}
+\item 
+\mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ \mbox{\hyperlink{structHttpServer__s_a7dbe707c30fc22a04e82bedc01fcd185}{completion\+\_\+callback}} )(\mbox{\hyperlink{http__server_8h_a4962e21d5be38c71b1f8eb1abe758068}{Http\+Server\+Ref}}, \mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}})
+\item 
+\mbox{\hyperlink{structHttpServer__s_ad97bfd53e44ce30f2a2c98ae2f7defe2}{RBL\+\_\+\+DECLARE\+\_\+\+END\+\_\+\+TAG}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{structHttpServer__s_a7dbe707c30fc22a04e82bedc01fcd185}\label{structHttpServer__s_a7dbe707c30fc22a04e82bedc01fcd185}} 
+\index{HttpServer\_s@{HttpServer\_s}!completion\_callback@{completion\_callback}}
+\index{completion\_callback@{completion\_callback}!HttpServer\_s@{HttpServer\_s}}
+\doxysubsubsection{\texorpdfstring{completion\_callback}{completion\_callback}}
+{\footnotesize\ttfamily \mbox{\hyperlink{rl__internal_8h_a691e4d5de4b427a20b12e6a256b5406e}{void}}($\ast$ Http\+Server\+\_\+s\+::completion\+\_\+callback) (\mbox{\hyperlink{http__server_8h_a4962e21d5be38c71b1f8eb1abe758068}{Http\+Server\+Ref}}, \mbox{\hyperlink{http__handler_8h_a6e590355f61204a055e8bedc2877530f}{Http\+Handler\+Ref}})}
+
+\mbox{\Hypertarget{structHttpServer__s_a327668cdbda6471be59861ef56d3b329}\label{structHttpServer__s_a327668cdbda6471be59861ef56d3b329}} 
+\index{HttpServer\_s@{HttpServer\_s}!handler\_list@{handler\_list}}
+\index{handler\_list@{handler\_list}!HttpServer\_s@{HttpServer\_s}}
+\doxysubsubsection{\texorpdfstring{handler\_list}{handler\_list}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__group__list_gacc7480c41fd3b76f0b4fce65ff2d3abc}{List\+Ref}} Http\+Server\+\_\+s\+::handler\+\_\+list}
+
+\mbox{\Hypertarget{structHttpServer__s_a98d71df1fabf3e4f11d629b44eec79cc}\label{structHttpServer__s_a98d71df1fabf3e4f11d629b44eec79cc}} 
+\index{HttpServer\_s@{HttpServer\_s}!host@{host}}
+\index{host@{host}!HttpServer\_s@{HttpServer\_s}}
+\doxysubsubsection{\texorpdfstring{host}{host}}
+{\footnotesize\ttfamily char const$\ast$ Http\+Server\+\_\+s\+::host}
+
+\mbox{\Hypertarget{structHttpServer__s_ac4e19ed48acf5328467184d512ad9b81}\label{structHttpServer__s_ac4e19ed48acf5328467184d512ad9b81}} 
+\index{HttpServer\_s@{HttpServer\_s}!listening\_socket\_fd@{listening\_socket\_fd}}
+\index{listening\_socket\_fd@{listening\_socket\_fd}!HttpServer\_s@{HttpServer\_s}}
+\doxysubsubsection{\texorpdfstring{listening\_socket\_fd}{listening\_socket\_fd}}
+{\footnotesize\ttfamily \mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} Http\+Server\+\_\+s\+::listening\+\_\+socket\+\_\+fd}
+
+\mbox{\Hypertarget{structHttpServer__s_ada8d6216cda8b498c6af9269382db13b}\label{structHttpServer__s_ada8d6216cda8b498c6af9269382db13b}} 
+\index{HttpServer\_s@{HttpServer\_s}!listening\_watcher\_ref@{listening\_watcher\_ref}}
+\index{listening\_watcher\_ref@{listening\_watcher\_ref}!HttpServer\_s@{HttpServer\_s}}
+\doxysubsubsection{\texorpdfstring{listening\_watcher\_ref}{listening\_watcher\_ref}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__runloop_ga33649f8d6f9805855ed793236cd5365e}{Runloop\+Listener\+Ref}} Http\+Server\+\_\+s\+::listening\+\_\+watcher\+\_\+ref}
+
+\mbox{\Hypertarget{structHttpServer__s_a97347240076908c0f3b604b22138bc3c}\label{structHttpServer__s_a97347240076908c0f3b604b22138bc3c}} 
+\index{HttpServer\_s@{HttpServer\_s}!port@{port}}
+\index{port@{port}!HttpServer\_s@{HttpServer\_s}}
+\doxysubsubsection{\texorpdfstring{port}{port}}
+{\footnotesize\ttfamily int Http\+Server\+\_\+s\+::port}
+
+\mbox{\Hypertarget{structHttpServer__s_a260598e3b2c5e5ac2b0289760976aeb0}\label{structHttpServer__s_a260598e3b2c5e5ac2b0289760976aeb0}} 
+\index{HttpServer\_s@{HttpServer\_s}!process\_request\_function@{process\_request\_function}}
+\index{process\_request\_function@{process\_request\_function}!HttpServer\_s@{HttpServer\_s}}
+\doxysubsubsection{\texorpdfstring{process\_request\_function}{process\_request\_function}}
+{\footnotesize\ttfamily \mbox{\hyperlink{http__server_8h_ac03bc722065a8bfe647fc3c32d1649b1}{Http\+Process\+Request\+Function}} Http\+Server\+\_\+s\+::process\+\_\+request\+\_\+function}
+
+\mbox{\Hypertarget{structHttpServer__s_ad97bfd53e44ce30f2a2c98ae2f7defe2}\label{structHttpServer__s_ad97bfd53e44ce30f2a2c98ae2f7defe2}} 
+\index{HttpServer\_s@{HttpServer\_s}!RBL\_DECLARE\_END\_TAG@{RBL\_DECLARE\_END\_TAG}}
+\index{RBL\_DECLARE\_END\_TAG@{RBL\_DECLARE\_END\_TAG}!HttpServer\_s@{HttpServer\_s}}
+\doxysubsubsection{\texorpdfstring{RBL\_DECLARE\_END\_TAG}{RBL\_DECLARE\_END\_TAG}}
+{\footnotesize\ttfamily Http\+Server\+\_\+s\+::\+RBL\+\_\+\+DECLARE\+\_\+\+END\+\_\+\+TAG}
+
+\mbox{\Hypertarget{structHttpServer__s_a92f3a0f17723de98ee1511bc6a761246}\label{structHttpServer__s_a92f3a0f17723de98ee1511bc6a761246}} 
+\index{HttpServer\_s@{HttpServer\_s}!RBL\_DECLARE\_TAG@{RBL\_DECLARE\_TAG}}
+\index{RBL\_DECLARE\_TAG@{RBL\_DECLARE\_TAG}!HttpServer\_s@{HttpServer\_s}}
+\doxysubsubsection{\texorpdfstring{RBL\_DECLARE\_TAG}{RBL\_DECLARE\_TAG}}
+{\footnotesize\ttfamily Http\+Server\+\_\+s\+::\+RBL\+\_\+\+DECLARE\+\_\+\+TAG}
+
+\mbox{\Hypertarget{structHttpServer__s_acd95081000cf01cbd7ba4bc55b93ae44}\label{structHttpServer__s_acd95081000cf01cbd7ba4bc55b93ae44}} 
+\index{HttpServer\_s@{HttpServer\_s}!runloop\_ref@{runloop\_ref}}
+\index{runloop\_ref@{runloop\_ref}!HttpServer\_s@{HttpServer\_s}}
+\doxysubsubsection{\texorpdfstring{runloop\_ref}{runloop\_ref}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__runloop_ga3be36d97cf9a7f7b4180b71d95cde72e}{Runloop\+Ref}} Http\+Server\+\_\+s\+::runloop\+\_\+ref}
+
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/http\+\_\+protocol/\mbox{\hyperlink{http__server_8h}{http\+\_\+server.\+h}}\end{DoxyCompactItemize}

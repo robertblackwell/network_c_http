@@ -1,0 +1,81 @@
+\hypertarget{structsync__server__s}{}\doxysection{sync\+\_\+server\+\_\+s Struct Reference}
+\label{structsync__server__s}\index{sync\_server\_s@{sync\_server\_s}}
+
+
+{\ttfamily \#include $<$sync\+\_\+internal.\+h$>$}
+
+\doxysubsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{structsync__server__s_a1fdf80ea6ba363b417cb32565ba718d0}{RBL\+\_\+\+DECLARE\+\_\+\+TAG}}
+\item 
+int \mbox{\hyperlink{structsync__server__s_a5617f886703a4fef9e5cedf838685ede}{port}}
+\item 
+size\+\_\+t \mbox{\hyperlink{structsync__server__s_a8959a7a774055ad8f433c3a74c88591b}{read\+\_\+buffer\+\_\+size}}
+\item 
+\mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} \mbox{\hyperlink{structsync__server__s_ae3c4f1eb5bdec04cba8c5c20694bbc1b}{socket\+\_\+fd}}
+\item 
+int \mbox{\hyperlink{structsync__server__s_a807e737d31befdc44f243c5db949e23a}{nbr\+\_\+workers}}
+\item 
+\mbox{\hyperlink{sync_8h_ac3206246f99ad03084983d477968c826}{Sync\+App\+Message\+Handler}} \mbox{\hyperlink{structsync__server__s_a204a62177b2c9357222ab02b959289d5}{app\+\_\+handler}}
+\item 
+\mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} \mbox{\hyperlink{structsync__server__s_a43225057c5ff3d73e8b1e99c127e6801}{qref}}
+\item 
+\mbox{\hyperlink{sync_8h_a752ab692df8a861d059e73584677055e}{sync\+\_\+worker\+\_\+r}} \mbox{\hyperlink{structsync__server__s_a53237c09d96e901e28f5b6d05718c78a}{worker\+\_\+tab}} \mbox{[}\mbox{\hyperlink{sync__server_8c_a8b5173357adb02a86c027316e0acdfa0}{MAX\+\_\+\+THREADS}}\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Member Data Documentation}
+\mbox{\Hypertarget{structsync__server__s_a204a62177b2c9357222ab02b959289d5}\label{structsync__server__s_a204a62177b2c9357222ab02b959289d5}} 
+\index{sync\_server\_s@{sync\_server\_s}!app\_handler@{app\_handler}}
+\index{app\_handler@{app\_handler}!sync\_server\_s@{sync\_server\_s}}
+\doxysubsubsection{\texorpdfstring{app\_handler}{app\_handler}}
+{\footnotesize\ttfamily \mbox{\hyperlink{sync_8h_ac3206246f99ad03084983d477968c826}{Sync\+App\+Message\+Handler}} sync\+\_\+server\+\_\+s\+::app\+\_\+handler}
+
+\mbox{\Hypertarget{structsync__server__s_a807e737d31befdc44f243c5db949e23a}\label{structsync__server__s_a807e737d31befdc44f243c5db949e23a}} 
+\index{sync\_server\_s@{sync\_server\_s}!nbr\_workers@{nbr\_workers}}
+\index{nbr\_workers@{nbr\_workers}!sync\_server\_s@{sync\_server\_s}}
+\doxysubsubsection{\texorpdfstring{nbr\_workers}{nbr\_workers}}
+{\footnotesize\ttfamily int sync\+\_\+server\+\_\+s\+::nbr\+\_\+workers}
+
+\mbox{\Hypertarget{structsync__server__s_a5617f886703a4fef9e5cedf838685ede}\label{structsync__server__s_a5617f886703a4fef9e5cedf838685ede}} 
+\index{sync\_server\_s@{sync\_server\_s}!port@{port}}
+\index{port@{port}!sync\_server\_s@{sync\_server\_s}}
+\doxysubsubsection{\texorpdfstring{port}{port}}
+{\footnotesize\ttfamily int sync\+\_\+server\+\_\+s\+::port}
+
+\mbox{\Hypertarget{structsync__server__s_a43225057c5ff3d73e8b1e99c127e6801}\label{structsync__server__s_a43225057c5ff3d73e8b1e99c127e6801}} 
+\index{sync\_server\_s@{sync\_server\_s}!qref@{qref}}
+\index{qref@{qref}!sync\_server\_s@{sync\_server\_s}}
+\doxysubsubsection{\texorpdfstring{qref}{qref}}
+{\footnotesize\ttfamily \mbox{\hyperlink{group__group__queue_ga27ebf5fe21ffc8852176ff444ba1a217}{Queue\+Ref}} sync\+\_\+server\+\_\+s\+::qref}
+
+\mbox{\Hypertarget{structsync__server__s_a1fdf80ea6ba363b417cb32565ba718d0}\label{structsync__server__s_a1fdf80ea6ba363b417cb32565ba718d0}} 
+\index{sync\_server\_s@{sync\_server\_s}!RBL\_DECLARE\_TAG@{RBL\_DECLARE\_TAG}}
+\index{RBL\_DECLARE\_TAG@{RBL\_DECLARE\_TAG}!sync\_server\_s@{sync\_server\_s}}
+\doxysubsubsection{\texorpdfstring{RBL\_DECLARE\_TAG}{RBL\_DECLARE\_TAG}}
+{\footnotesize\ttfamily sync\+\_\+server\+\_\+s\+::\+RBL\+\_\+\+DECLARE\+\_\+\+TAG}
+
+\mbox{\Hypertarget{structsync__server__s_a8959a7a774055ad8f433c3a74c88591b}\label{structsync__server__s_a8959a7a774055ad8f433c3a74c88591b}} 
+\index{sync\_server\_s@{sync\_server\_s}!read\_buffer\_size@{read\_buffer\_size}}
+\index{read\_buffer\_size@{read\_buffer\_size}!sync\_server\_s@{sync\_server\_s}}
+\doxysubsubsection{\texorpdfstring{read\_buffer\_size}{read\_buffer\_size}}
+{\footnotesize\ttfamily size\+\_\+t sync\+\_\+server\+\_\+s\+::read\+\_\+buffer\+\_\+size}
+
+\mbox{\Hypertarget{structsync__server__s_ae3c4f1eb5bdec04cba8c5c20694bbc1b}\label{structsync__server__s_ae3c4f1eb5bdec04cba8c5c20694bbc1b}} 
+\index{sync\_server\_s@{sync\_server\_s}!socket\_fd@{socket\_fd}}
+\index{socket\_fd@{socket\_fd}!sync\_server\_s@{sync\_server\_s}}
+\doxysubsubsection{\texorpdfstring{socket\_fd}{socket\_fd}}
+{\footnotesize\ttfamily \mbox{\hyperlink{socket__functions_8h_a9fc51c768239c2b2154e02ea796a6115}{socket\+\_\+handle\+\_\+t}} sync\+\_\+server\+\_\+s\+::socket\+\_\+fd}
+
+\mbox{\Hypertarget{structsync__server__s_a53237c09d96e901e28f5b6d05718c78a}\label{structsync__server__s_a53237c09d96e901e28f5b6d05718c78a}} 
+\index{sync\_server\_s@{sync\_server\_s}!worker\_tab@{worker\_tab}}
+\index{worker\_tab@{worker\_tab}!sync\_server\_s@{sync\_server\_s}}
+\doxysubsubsection{\texorpdfstring{worker\_tab}{worker\_tab}}
+{\footnotesize\ttfamily \mbox{\hyperlink{sync_8h_a752ab692df8a861d059e73584677055e}{sync\+\_\+worker\+\_\+r}} sync\+\_\+server\+\_\+s\+::worker\+\_\+tab\mbox{[}\mbox{\hyperlink{sync__server_8c_a8b5173357adb02a86c027316e0acdfa0}{MAX\+\_\+\+THREADS}}\mbox{]}}
+
+
+
+The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+/home/robert/\+Projects/http\+\_\+in\+\_\+c/http\+\_\+in\+\_\+c/sync/\mbox{\hyperlink{sync__internal_8h}{sync\+\_\+internal.\+h}}\end{DoxyCompactItemize}
