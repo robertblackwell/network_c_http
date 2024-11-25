@@ -50,7 +50,7 @@ static int *int_in_heap(int key) {
  */
 static void runloop_epoll_ctl(RunloopRef athis, int op, int fd, uint64_t interest, void* watcher)
 {
-    REACTOR_CHECK_TAG(athis)
+    RUNLOOP_CHECK_TAG(athis)
     struct epoll_event epev = {
         .events = interest,
         .data = {
@@ -87,7 +87,7 @@ void runloop_init(RunloopRef athis) {
 
     RunloopRef runloop = athis;
 
-    REACTOR_SET_TAG(runloop)
+    RUNLOOP_SET_TAG(runloop)
     runloop->tid = gettid();
     runloop->epoll_fd = epoll_create1(0);
     runloop->closed_flag = false;
@@ -99,7 +99,7 @@ void runloop_init(RunloopRef athis) {
 }
 void runloop_close(RunloopRef athis)
 {
-    REACTOR_CHECK_TAG(athis)
+    RUNLOOP_CHECK_TAG(athis)
 //    CHECK_THREAD(athis)
     athis->closed_flag = true;
     int status = close(athis->epoll_fd);
@@ -114,7 +114,7 @@ void runloop_close(RunloopRef athis)
 
 void runloop_free(RunloopRef athis)
 {
-    REACTOR_CHECK_TAG(athis)
+    RUNLOOP_CHECK_TAG(athis)
 //    CHECK_THREAD(athis)
     if(! athis->closed_flag) {
         runloop_close(athis);
@@ -125,12 +125,12 @@ void runloop_free(RunloopRef athis)
 }
 
 /**
- * Register a RunloopWatcher (actuallyr one of its derivatives) and its associated file descriptor
+ * Register a RunloopWatcherBase (actuallyr one of its derivatives) and its associated file descriptor
  * with the epoll instance. Specify the types of events the watcher is interested in
  */
-int runloop_register(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherRef wref)
+int runloop_register(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref)
 {
-    REACTOR_CHECK_TAG(athis)
+    RUNLOOP_CHECK_TAG(athis)
 //    CHECK_THREAD(athis)
     RBL_LOG_FMT("fd : %d  for events %d", fd, interest);
     runloop_epoll_ctl(athis, EPOLL_CTL_ADD, fd, interest, wref);
@@ -139,7 +139,7 @@ int runloop_register(RunloopRef athis, int fd, uint32_t interest, RunloopWatcher
 }
 int runloop_deregister(RunloopRef athis, int fd)
 {
-    REACTOR_CHECK_TAG(athis)
+    RUNLOOP_CHECK_TAG(athis)
 //    CHECK_THREAD(athis)
     RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
     runloop_epoll_ctl(athis, EPOLL_CTL_DEL, fd, EPOLLEXCLUSIVE | EPOLLIN, NULL);
@@ -147,18 +147,18 @@ int runloop_deregister(RunloopRef athis, int fd)
     return 0;
 }
 
-int runloop_reregister(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherRef wref) {
-    REACTOR_CHECK_TAG(athis)
+int runloop_reregister(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref) {
+    RUNLOOP_CHECK_TAG(athis)
 //    CHECK_THREAD(athis)
     RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
     runloop_epoll_ctl(athis, EPOLL_CTL_MOD, fd, interest, wref);
-    RunloopWatcherRef wref_tmp = FdTable_lookup(athis->table, fd);
+    RunloopWatcherBaseRef wref_tmp = FdTable_lookup(athis->table, fd);
     assert(wref == wref_tmp);
     return 0;
 }
 void runloop_delete(RunloopRef athis, int fd)
 {
-    REACTOR_CHECK_TAG(athis)
+    RUNLOOP_CHECK_TAG(athis)
 //    CHECK_THREAD(athis)
     RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
     FdTable_remove(athis->table, fd);
@@ -171,7 +171,7 @@ void print_events(struct epoll_event events[], int count)
     }
 }
 int runloop_run(RunloopRef athis, time_t timeout) {
-    REACTOR_CHECK_TAG(athis)
+    RUNLOOP_CHECK_TAG(athis)
 //    CHECK_THREAD(athis)
     athis->tid = gettid();
     int result;
@@ -180,7 +180,7 @@ int runloop_run(RunloopRef athis, time_t timeout) {
     time_t start = time(NULL);
 
     while (true) {
-        REACTOR_CHECK_TAG(athis)
+        RUNLOOP_CHECK_TAG(athis)
         time_t passed = time(NULL) - start;
 
         if((FdTable_size(athis->table) == 0) &&((functor_list_size(athis->ready_list) == 0))) {
@@ -217,9 +217,9 @@ int runloop_run(RunloopRef athis, time_t timeout) {
                     goto cleanup;
                 default: {
                     for (int i = 0; i < nfds; i++) {
-                        REACTOR_CHECK_TAG(athis)
+                        RUNLOOP_CHECK_TAG(athis)
 #if 1
-                        RunloopWatcherRef wr = events[i].data.ptr;
+                        RunloopWatcherBaseRef wr = events[i].data.ptr;
                         int fd = wr->fd;
 #else
                         int fd = events[i].data.fd;
@@ -227,19 +227,19 @@ int runloop_run(RunloopRef athis, time_t timeout) {
 #endif
                         int mask = events[i].events;
                         RBL_LOG_FMT("runloop_run loop fd: %d events: %x", fd, mask);
-                        RunloopWatcherRef wref = FdTable_lookup(athis->table, fd);
+                        RunloopWatcherBaseRef wref = FdTable_lookup(athis->table, fd);
                         assert(wr == wref);
                         wref->handler(wref, events[i].events);
                         RBL_LOG_FMT("fd: %d", fd);
                         // call handler
-                        REACTOR_CHECK_TAG(athis)
+                        RUNLOOP_CHECK_TAG(athis)
                     }
                 }
             }
         } else {
             FunctorRef fnc;
             while (1) {
-                REACTOR_CHECK_TAG(athis)
+                RUNLOOP_CHECK_TAG(athis)
                 if (functor_list_size(athis->ready_list) == 0) {
                     break;
                 }
@@ -247,7 +247,7 @@ int runloop_run(RunloopRef athis, time_t timeout) {
                 athis->runloop_executing = true;
                 func.f(athis, func.arg);
                 athis->runloop_executing = false;
-                REACTOR_CHECK_TAG(athis)
+                RUNLOOP_CHECK_TAG(athis)
                 if (functor_list_size(athis->ready_list) == 0) {
                     RBL_LOG_FMT("reactor runlist loop  break functor_list_size: %d func: %p arg: %p",
                                 functor_list_size(athis->ready_list), func.f, func.arg);
@@ -263,7 +263,7 @@ cleanup:
 
 void runloop_post(RunloopRef athis, PostableFunction cb, void* arg)
 {
-    REACTOR_CHECK_TAG(athis)
+    RUNLOOP_CHECK_TAG(athis)
     assert(athis->tid == gettid());
     RBL_LOG_FMT("runloop_post entered functor_list_size: %d funct: %p arg: %p runloop_executing: %d", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
     assert(cb != NULL);

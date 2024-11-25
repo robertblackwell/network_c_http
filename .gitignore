@@ -45,6 +45,7 @@ build/
 cmake-debug-build/
 cmake-build-debug/
 cmake-build-debug-event-trace/
+docs/
 xcode-build/
 xcode-build
 obj/

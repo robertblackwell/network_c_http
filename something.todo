@@ -2,6 +2,9 @@ Finsh off demo:
   ☐ valgrind for memory leaks
   ☐ profile to find  bottle necks
   ☐ record some async vs sync comparison times
+  ☐ briing asio_listener into the main code
+  ☐ interthread queue is unclear fix it and make it asio compliant
+  ☐ documentation
 
 Pickup http:
   ☐ get parse tests working and review parser in light of how its done in demo

@@ -29,9 +29,9 @@ struct FdTable_s;
 typedef struct FdTable_s FdTable, *FdTableRef;
 FdTableRef FdTable_new();
 void       FdTable_free(FdTableRef athis);
-void       FdTable_insert(FdTableRef athis, RunloopWatcherRef wref, int fd);
+void       FdTable_insert(FdTableRef athis, RunloopWatcherBaseRef wref, int fd);
 void       FdTable_remove(FdTableRef athis, int fd);
-RunloopWatcherRef FdTable_lookup(FdTableRef athis, int fd);
+RunloopWatcherBaseRef FdTable_lookup(FdTableRef athis, int fd);
 int        FdTable_iterator(FdTableRef athis);
 int        FdTable_next_iterator(FdTableRef athis, int iter);
 uint64_t   FdTable_size(FdTableRef athis);
@@ -53,7 +53,7 @@ bool Functor_is_empty(FunctorRef f);
 void Functor_dealloc(void **p);
 struct Functor_s
 {
-//    RunloopWatcherRef wref; // this is borrowed do not free
+//    RunloopWatcherBaseRef wref; // this is borrowed do not free
     PostableFunction f;
     void *arg;
 };
@@ -93,7 +93,7 @@ struct Runloop_s {
     RBL_DECLARE_END_TAG;
 };
 /**
- * RunloopWatcher - a generic observer object
+ * RunloopWatcherBase - a generic observer object
  */
 typedef enum WatcherType {
     RUNLOOP_WATCHER_SOCKET = 11,
@@ -104,27 +104,27 @@ typedef enum WatcherType {
 } WatcherType;
 
 
-struct RunloopWatcher_s {
+struct RunloopWatcherBase_s {
     RBL_DECLARE_TAG;
     WatcherType           type;
     RunloopRef            runloop;
     void*                 context;
     int                   fd;
     /**
-     * function that knows how to free the specific sub type of watcher from a general ref.
-     * each derived type must provide this function when an instance is created or initializez.
-     * In the case of timerfd and event fd watchers must also close the fd
+     * function that knows how to free the specific sub type of RunloopWatcherBase from a general ref.
+     * Each derived type must provide this function when an instance is created or initializez.
+     * In the case of RunloopTimerfd and RunloopEventfd watchers must also close the fd
      */
-    void(*free)(RunloopWatcherRef);
+    void(*free)(RunloopWatcherBaseRef);
     /**
      * first level handler function
      * each derived type provides thier own type specific handler when an instance is created
      * or initialized and must cast the first parameter to their own specific type of watcher
      * inside the handler.
-     * 
+     *
      * This handler will be calledd directly from the epoll_wait code inside runloop.c
     */
-    void(*handler)(RunloopWatcherRef watcher_ref, uint64_t event);
+    void(*handler)(RunloopWatcherBaseRef watcher_ref, uint64_t event);
     RBL_DECLARE_END_TAG;
 };
 
@@ -143,7 +143,7 @@ typedef struct EventfdQueue_s {
 
 typedef uint64_t WEventFdMask;
 struct RunloopEventfd_s {
-    struct RunloopWatcher_s;
+    struct RunloopWatcherBase_s;
     PostableFunction    fdevent_postable;
     void*               fdevent_postable_arg;
     int                 write_fd;
@@ -153,7 +153,7 @@ struct RunloopEventfd_s {
  * RunloopStream
  */
 struct RunloopStream_s {
-    struct RunloopWatcher_s;
+    struct RunloopWatcherBase_s;
     uint64_t                 event_mask;
 
     PostableFunction         read_postable_cb;
@@ -187,7 +187,7 @@ typedef struct AsioStream_s {
  * WListener
  */
 typedef struct RunloopListener_s {
-    struct RunloopWatcher_s;
+    struct RunloopWatcherBase_s;
     PostableFunction         listen_postable;
     void*                    listen_postable_arg;
 } RunloopListener;
@@ -198,7 +198,7 @@ typedef struct RunloopListener_s {
 typedef uint64_t RunloopQueueEvent;
 typedef void(RunloopQueuetWatcherCallerback(void* ctx));
 struct RunloopQueueWatcher_s {
-    struct RunloopWatcher_s;
+    struct RunloopWatcherBase_s;
     EventfdQueueRef            queue;
     // reactor cb and arg
     PostableFunction       queue_postable;
@@ -233,7 +233,7 @@ struct InterthreadQueue_s {
  */
 typedef uint64_t RunloopTimerEvent;
 struct RunloopTimer_s {
-    struct RunloopWatcher_s;
+    struct RunloopWatcherBase_s;
     time_t                  expiry_time;
     uint64_t                interval;
     bool                    repeating;

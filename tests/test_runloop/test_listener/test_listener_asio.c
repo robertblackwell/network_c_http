@@ -24,6 +24,7 @@
 
 void* listener_thread_func(void* arg)
 {
+
     ListenerCtxRef server_ref = (ListenerCtxRef) arg;
     printf("Listener thread server: %p \n", server_ref);
     listener_ctx_listen(server_ref);
@@ -54,13 +55,9 @@ int test_listeners()
      *
      * */
 
-    int fd = create_listener_socket(9001, "localhost");
-    socket_set_non_blocking(fd);
+    ListenerCtxRef server1 = listener_ctx_new2(9001, "localhost");
+    ListenerCtxRef server2 = listener_ctx_new2(9001, "localhost");
 
-    tclient.listen_fd = fd;
-
-    ListenerCtxRef server1 = listener_ctx_new(fd);
-    ListenerCtxRef server2 = listener_ctx_new(fd);
     printf("Sizeof \n");
     int r1 = pthread_create(&listener_thread_1, NULL, &listener_thread_func, server1);
     int r2 = pthread_create(&listener_thread_2, NULL, &listener_thread_func, server2);
@@ -69,7 +66,7 @@ int test_listeners()
     pthread_join(connector_thread, NULL);
     pthread_join(listener_thread_1, NULL);
     pthread_join(listener_thread_2, NULL);
-    printf("test_listener all threads hace joined \n");
+    printf("test_listener_asio all threads hace joined \n");
     /**
      * Test that each listener got some of the connections and that
      * all connections were recorded

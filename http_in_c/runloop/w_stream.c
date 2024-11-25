@@ -15,7 +15,7 @@
  * @param fd        int
  * @param event     uint64_t
  */
-static void handler(RunloopWatcherRef watcher, uint64_t event)
+static void handler(RunloopWatcherBaseRef watcher, uint64_t event)
 {
     RunloopStreamRef rl_stream = (RunloopStreamRef)watcher;
     RunloopRef rl = watcher->runloop;
@@ -36,7 +36,7 @@ static void handler(RunloopWatcherRef watcher, uint64_t event)
     }
 }
 
-static void anonymous_free(RunloopWatcherRef p)
+static void anonymous_free(RunloopWatcherBaseRef p)
 {
     RunloopStreamRef twp = (RunloopStreamRef)p;
     runloop_stream_free(twp);
@@ -70,7 +70,7 @@ void runloop_stream_register(RunloopStreamRef athis)
 {
     SOCKW_CHECK_TAG(athis)
     uint32_t interest = 0;
-    int res = runloop_register(athis->runloop, athis->fd, 0L, (RunloopWatcherRef) (athis));
+    int res = runloop_register(athis->runloop, athis->fd, 0L, (RunloopWatcherBaseRef) (athis));
     assert(res ==0);
 }
 //void WIoFd_change_watch(RunloopStreamRef this, SocketEventHandler cb, void* arg, uint64_t watch_what)
@@ -83,7 +83,7 @@ void runloop_stream_register(RunloopStreamRef athis)
 //    if (arg != NULL) {
 //        this->cb_ctx = arg;
 //    }
-//    int res = runloop_reregister(this->runloop, this->fd, interest, (RunloopWatcherRef)this);
+//    int res = runloop_reregister(this->runloop, this->fd, interest, (RunloopWatcherBaseRef)this);
 //    assert(res == 0);
 //}
 void runloop_stream_deregister(RunloopStreamRef athis)
@@ -111,7 +111,7 @@ void runloop_stream_arm_both(RunloopStreamRef athis,
     if (write_arg != NULL) {
         athis->write_postable_arg = write_arg;
     }
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
     assert(res == 0);
 }
 
@@ -126,7 +126,7 @@ void runloop_stream_arm_read(RunloopStreamRef athis, PostableFunction postable_c
     if (arg != NULL) {
         athis->read_postable_arg = arg;
     }
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
     assert(res == 0);
 }
 void runloop_stream_arm_write(RunloopStreamRef athis, PostableFunction postable_cb, void* arg)
@@ -140,7 +140,7 @@ void runloop_stream_arm_write(RunloopStreamRef athis, PostableFunction postable_
     if (arg != NULL) {
         athis->write_postable_arg = arg;
     }
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
     assert(res == 0);
 }
 void runloop_stream_disarm_read(RunloopStreamRef athis)
@@ -149,7 +149,7 @@ void runloop_stream_disarm_read(RunloopStreamRef athis)
     SOCKW_CHECK_TAG(athis)
     athis->read_postable_cb = NULL;
     athis->read_postable_arg = NULL;
-    int res = runloop_reregister(athis->runloop, athis->fd, athis->event_mask, (RunloopWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, athis->event_mask, (RunloopWatcherBaseRef) athis);
     assert(res == 0);
 }
 void runloop_stream_disarm_write(RunloopStreamRef athis)
@@ -158,10 +158,10 @@ void runloop_stream_disarm_write(RunloopStreamRef athis)
     SOCKW_CHECK_TAG(athis)
     athis->write_postable_cb = NULL;
     athis->write_postable_arg = NULL;
-    int res = runloop_reregister(athis->runloop, athis->fd, athis->event_mask, (RunloopWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, athis->event_mask, (RunloopWatcherBaseRef) athis);
     assert(res == 0);
 }
-RunloopRef runloop_stream_get_reactor(RunloopStreamRef athis)
+RunloopRef runloop_stream_get_runloop(RunloopStreamRef athis)
 {
     return athis->runloop;
 }

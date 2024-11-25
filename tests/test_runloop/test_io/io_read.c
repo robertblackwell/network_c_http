@@ -72,7 +72,7 @@ void read_callback(RunloopRef rl, void* read_ctx_ref_arg)
 {
     ReadCtx* ctx = (ReadCtx*)read_ctx_ref_arg;
     RunloopStreamRef stream = ctx->swatcher;
-    RunloopRef runloop_ref = runloop_stream_get_reactor(stream);
+    RunloopRef runloop_ref = runloop_stream_get_runloop(stream);
     char buf[100000];
     int x = sizeof(buf);
     memset(buf, 0, sizeof(buf));

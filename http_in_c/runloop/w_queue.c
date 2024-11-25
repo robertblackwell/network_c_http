@@ -6,7 +6,7 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 
-static void handler(RunloopWatcherRef watcher, uint64_t event)
+static void handler(RunloopWatcherBaseRef watcher, uint64_t event)
 {
     RunloopQueueWatcherRef queue_watcher_ref = (RunloopQueueWatcherRef)watcher;
     WQUEUE_CHECK_TAG(queue_watcher_ref)
@@ -45,7 +45,7 @@ void runloop_queue_watcher_register(RunloopQueueWatcherRef athis, PostableFuncti
 //    uint32_t interest = watch_what;
     athis->queue_postable = postable_cb;
     athis->queue_postable_arg = postable_arg;
-    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherRef) (athis));
+    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
     assert(res ==0);
 }
 void runloop_queue_watcher_change_watch(RunloopQueueWatcherRef athis, PostableFunction cb, void* arg, uint64_t watch_what)
@@ -58,7 +58,7 @@ void runloop_queue_watcher_change_watch(RunloopQueueWatcherRef athis, PostableFu
     if (arg != NULL) {
         athis->queue_postable_arg = arg;
     }
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
     assert(res == 0);
 }
 void runloop_queue_watcher_deregister(RunloopQueueWatcherRef athis)

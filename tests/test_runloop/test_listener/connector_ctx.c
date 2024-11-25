@@ -1,8 +1,4 @@
-
-#define XR_TRACE_ENABLE
 #include "connector_ctx.h"
-//#include <http_in_c/async/types.h>
-#include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>

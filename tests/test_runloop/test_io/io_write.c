@@ -96,7 +96,7 @@ static void wrtr_cb(RunloopRef rl, void* write_ctx_p_arg)
 {
     WriteCtx* ctx = write_ctx_p_arg;
     RunloopStreamRef stream = ctx->stream_ref;
-    RunloopRef reactor = runloop_stream_get_reactor(stream);
+    RunloopRef reactor = runloop_stream_get_runloop(stream);
     runloop_stream_verify(stream);
     int fd = runloop_stream_get_fd(stream);
 #if 0

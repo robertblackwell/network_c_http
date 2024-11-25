@@ -16,7 +16,6 @@
 #include <http_in_c/common/socket_functions.h>
 #include <http_in_c/sync/sync_client.h>
 #include <http_in_c/runloop/runloop.h>
-#include "asio_listener.h"
 
 typedef int socket_handle_t;
 
@@ -30,6 +29,8 @@ typedef int socket_handle_t;
  * 
  */
 struct ListenerCtx_s {
+    int                     port;
+    const char*             host;
     socket_handle_t         listening_socket_fd;
     RunloopRef              runloop_ref;
     RunloopListenerRef      listening_watcher_ref;
@@ -42,12 +43,16 @@ typedef struct  ListenerCtx_s TestServer, *ListenerCtxRef;
 
 
 ListenerCtxRef listener_ctx_new(int listen_fd);
-ListenerCtxRef listener_ctx_init(ListenerCtxRef sref, int listen_fd);
+void listener_ctx_init(ListenerCtxRef sref, int listen_fd);
+
+ListenerCtxRef listener_ctx_new2(int port, const char* host);
+void listener_ctx_init2(ListenerCtxRef sref, int port, const char* host);
+
+
 void listener_ctx_free(ListenerCtxRef *sref);
 void listener_ctx_listen(ListenerCtxRef sref);
 
-socket_handle_t local_create_listener_socket(int port, const char *host);
-void set_non_blocking(socket_handle_t socket);
+int local_create_bound_socket(int port, const char* host);
 
 
 #endif

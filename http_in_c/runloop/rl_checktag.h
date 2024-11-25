@@ -4,10 +4,10 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define Reactor_TAG     "XREACT"
-#define WEventFd_TAG    "XRFDEV"
-#define WIoFd_TAG       "XRWIOS"
-#define WListenerFd_TAG "XRLSTNR"
+#define Runloop_TAG     "RUNLOOP"
+#define WEventFd_TAG    "EVENTFD"
+#define WIoFd_TAG       "STREAM"
+#define WListenerFd_TAG "LISTNR"
 #define WQueue_TAG      "XRQUE"
 #define WTimerFd_TAG    "XRTIMER"
 #define ITQueue_TAG     "ITQUEUE"
@@ -21,8 +21,8 @@
  * REACTOR tag macros
  */
 #define REACTOR_DECLARE_TAG RBL_DECLARE_TAG(Reactor_TAG)
-#define REACTOR_CHECK_TAG(p) RBL_CHECK_TAG(Reactor_TAG, p)
-#define REACTOR_SET_TAG(p) RBL_SET_TAG(Reactor_TAG, p)
+#define RUNLOOP_CHECK_TAG(p) RBL_CHECK_TAG(Runloop_TAG, p)
+#define RUNLOOP_SET_TAG(p) RBL_SET_TAG(Runloop_TAG, p)
 
 #define REACTOR_DECLARE_END_TAG RBL_DECLARE_END_TAG(Reactor_TAG)
 #define REACTOR_CHECK_END_TAG(p) RBL_CHECK_END_TAG(Reactor_TAG, p)

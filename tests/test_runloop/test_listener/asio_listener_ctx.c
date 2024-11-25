@@ -1,3 +1,4 @@
+#include "listener_ctx.h"
 #include <http_in_c/runloop/runloop.h>
 #include <http_in_c/runloop/rl_internal.h>
 #include "listener_ctx.h"
@@ -12,24 +13,15 @@
 #include <http_in_c/common/socket_functions.h>
 
 static void on_timer(RunloopRef rl, void* arg);
-static void on_event_listening(RunloopRef rl, void* listener_ref_arg);
+static void on_accept(void* arg, int fd, int status);
+
 
 ListenerCtxRef listener_ctx_new(int listen_fd)
 {
     ListenerCtxRef sref = malloc(sizeof(TestServer));
-    sref->listening_socket_fd = listen_fd;
-    sref->listen_counter = 0;
-    sref->accept_count = 0;
-    printf("listener_ctx_new %p   listen fd: %d\n", sref, listen_fd);
+    listener_ctx_init(sref, listen_fd);
     return sref;
 }
-ListenerCtxRef listener_ctx_new2(int port, const char* host)
-{
-    ListenerCtxRef sref = malloc(sizeof(TestServer));
-    listener_ctx_init2(sref, port, host);
-    return sref;
-}
-
 void listener_ctx_init(ListenerCtxRef sref, int listen_fd)
 {
     sref->listening_socket_fd = listen_fd;
@@ -37,26 +29,21 @@ void listener_ctx_init(ListenerCtxRef sref, int listen_fd)
     sref->accept_count = 0;
     printf("listener_ctx_init %p   listen fd: %d\n", sref, listen_fd);
 }
+
+ListenerCtxRef listener_ctx_new2(int port, const char* host)
+{
+    ListenerCtxRef sref = malloc(sizeof(TestServer));
+    listener_ctx_init2(sref, port, host);
+    return sref;
+}
 void listener_ctx_init2(ListenerCtxRef sref, int port, const char* host)
 {
     sref->port = port;
     sref->host = host;
     sref->listen_counter = 0;
     sref->accept_count = 0;
-#if 0
-    int listen_fd = local_create_bound_socket(port, host);
-    socket_set_non_blocking(listen_fd);
-
-    sref->listening_socket_fd = listen_fd;
-    int result;
-    if((result = listen(listen_fd, SOMAXCONN)) != 0) {
-        printf("listen call failed with errno %d \n", errno);
-        assert(0);
-    }
-
-    printf("listener_ctx_init %p   listen fd: %d\n", sref, listen_fd);
-#endif
 }
+
 
 void listener_ctx_free(ListenerCtxRef *sref)
 {
@@ -69,41 +56,48 @@ void listener_ctx_listen(ListenerCtxRef listener_ctx_ref)
     ASSERT_NOT_NULL(listener_ctx_ref)
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
-    listener_ctx_ref->runloop_ref = runloop_new();
-    listener_ctx_ref->listening_watcher_ref = runloop_listener_new(listener_ctx_ref->runloop_ref, listener_ctx_ref->listening_socket_fd);
-    RunloopListenerRef lw = listener_ctx_ref->listening_watcher_ref;
 
-    runloop_listener_register(lw, on_event_listening, listener_ctx_ref);
-    printf("listener_ctx_listen reactor: %p listen sock: %d  lw: %p\n", listener_ctx_ref->runloop_ref, listener_ctx_ref->listening_socket_fd, lw);
-    listener_ctx_ref->timer_ref = runloop_timer_new(listener_ctx_ref->runloop_ref);
-    runloop_timer_register(listener_ctx_ref->timer_ref, &on_timer, (void *) listener_ctx_ref, 5000, false);
+    listener_ctx_ref->runloop_ref = runloop_new();
+#if 1
+    int fd = local_create_bound_socket(listener_ctx_ref->port, listener_ctx_ref->host);
+    socket_set_non_blocking(fd);
+    listener_ctx_ref->listening_socket_fd = fd;
+    int result;
+    if((result = listen(fd, SOMAXCONN)) != 0) {
+        printf("listen call failed with errno %d \n", errno);
+        assert(0);
+    }
+    listener_ctx_ref->asio_listener_ref = asio_listener_new(listener_ctx_ref->runloop_ref, listener_ctx_ref->listening_socket_fd);
+#else
+//    listener_ctx_ref->asio_listener_ref = asio_listener_new_from_port_host(listener_ctx_ref->runloop_ref, listener_ctx_ref->port, listener_ctx_ref->host);
+#endif
+
+    listener_ctx_ref->timer_ref = runloop_timer_set(listener_ctx_ref->runloop_ref, on_timer, listener_ctx_ref, 5000, false);
+
+    asio_accept(listener_ctx_ref->asio_listener_ref, &on_accept, listener_ctx_ref);
     runloop_run(listener_ctx_ref->runloop_ref, -1);
     printf("Listener reactor ended \n");
     runloop_free(listener_ctx_ref->runloop_ref);
 }
-static void on_event_listening(RunloopRef rl, void* listener_ref_arg)
+void start_accept_again(ListenerCtxRef listener_ctx_ref)
 {
-    printf("listening_hander \n");
-    struct sockaddr_in peername;
-    unsigned int addr_length = (unsigned int) sizeof(peername);
-
-    ListenerCtxRef listener_ref  = listener_ref_arg;
-    int sock2 = accept(listener_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
-    if(sock2 <= 0) {
-        int errno_saved = errno;
-        RBL_LOG_FMT("%s %d %d %s", "Listener thread :: accept failed terminating sock2 : ", sock2, errno, strerror(errno_saved));
-    } else {
-        printf("Sock2 successfull sock: %d server_ref %p listen_ref: %p  listen_count: %d\n", sock2, listener_ref, listener_ref, listener_ref->listen_counter);
-        if(listener_ref->listen_counter == 0) {
-            // pretend to be busy
-            sleep(1);
-        }
-        listener_ref->listen_counter++;
-        sleep(0.6);
-    }
-    close(sock2);
-    printf("on_event_listen new socket is : %d\n", sock2);
+    asio_accept(listener_ctx_ref->asio_listener_ref, &on_accept, listener_ctx_ref);
 }
+static void on_accept(void* ctx_arg, int accept_fd, int status)
+{
+    pid_t tid = gettid();
+    ListenerCtxRef lctx_ref  = ctx_arg;
+    printf("on_accept thread: %d ctx_arg: %p, fd: %d accept count: %d status: %d\n", tid, ctx_arg, accept_fd, lctx_ref->accept_count, status);
+    if(lctx_ref->accept_count ==0) {
+        sleep(1);
+    } else {
+        usleep(1000 * 500);
+    }
+    lctx_ref->listen_counter++;
+    lctx_ref->accept_count++;
+    start_accept_again(lctx_ref);
+}
+
 /**
  * When the timer fires it is time to kill the listener.
  */
@@ -115,7 +109,6 @@ static void on_timer(RunloopRef rl, void* listener_ref_arg)
     runloop_close(listener_ref->runloop_ref);
 //    runloop_free(listener_ref->reactor_ref);
 }
-
 int local_create_bound_socket(int port, const char *host)
 {
     struct sockaddr_in sin;
@@ -132,10 +125,6 @@ int local_create_bound_socket(int port, const char *host)
         assert(0);
     }
     if((result = setsockopt(tmp_socket, SOL_SOCKET, SO_REUSEPORT  , &yes, sizeof(yes))) != 0) {
-        printf("setsockopt call failed with errno %d \n", errno);
-        assert(0);
-    }
-    if((result = setsockopt(tmp_socket, SOL_SOCKET, SO_REUSEADDR  , &yes, sizeof(yes))) != 0) {
         printf("setsockopt call failed with errno %d \n", errno);
         assert(0);
     }

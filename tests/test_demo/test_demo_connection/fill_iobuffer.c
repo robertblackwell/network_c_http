@@ -7,7 +7,7 @@ IOBufferRef fill_iobuffer(char* line, size_t max_len, size_t required_data_lengt
     IOBufferRef iob = IOBuffer_new_with_capacity((int)max_len);
     char* buffer = IOBuffer_space(iob);
     ulong line_length = strlen(line);
-    IOBuffer_data_add(iob, "\x02", 1);
+//    IOBuffer_data_add(iob, "\x02", 1);
     int line_len = (int)strlen(line);
     while(true) {
         IOBuffer_data_add(iob, line, line_len);
@@ -15,7 +15,7 @@ IOBufferRef fill_iobuffer(char* line, size_t max_len, size_t required_data_lengt
             break;
         }
     }
-    IOBuffer_data_add(iob, "\x03", 1);
+//    IOBuffer_data_add(iob, "\x03", 1);
 
     return iob;
 }

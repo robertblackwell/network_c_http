@@ -29,7 +29,7 @@ static void print_current_tme(char* prefix)
  * @param fd
  * @param event
  */
-static void handler(RunloopWatcherRef watcher, uint64_t event)
+static void handler(RunloopWatcherBaseRef watcher, uint64_t event)
 {
     struct timespec ts;
     struct itimerspec its;
@@ -55,7 +55,7 @@ static void handler(RunloopWatcherRef watcher, uint64_t event)
     RBL_ASSERT((timer_watcher->timer_postable != NULL), "timer_handler should not be NULL");
     timer_watcher->timer_postable(timer_watcher->runloop, timer_watcher->timer_postable_arg);
 }
-static void anonymous_free(RunloopWatcherRef p)
+static void anonymous_free(RunloopWatcherBaseRef p)
 {
     RunloopTimerRef twp = (RunloopTimerRef)p;
     runloop_timer_free(twp);
@@ -138,7 +138,7 @@ void runloop_timer_register(RunloopTimerRef athis, PostableFunction cb, void* ct
     print_current_tme("runloop_timer_register");
     RBL_LOG_FMT("runloop_timer_register its.it_value secs %ld nsecs: %ld ", its.it_value.tv_sec, its.it_value.tv_nsec);
     RBL_LOG_FMT("runloop_timer_register its.it_interval secs %ld nsecs: %ld", its.it_interval.tv_sec, its.it_interval.tv_nsec);
-    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherRef) (athis));
+    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
     assert(res ==0);
 }
 void runloop_timer_update(RunloopTimerRef athis, uint64_t interval_ms, bool repeating)
@@ -149,7 +149,7 @@ void runloop_timer_update(RunloopTimerRef athis, uint64_t interval_ms, bool repe
     int flags = 0;
     int rc = timerfd_settime(athis->fd, flags, &its, NULL);
     assert(rc == 0);
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
     assert(res == 0);
 }
 void runloop_timer_disarm(RunloopTimerRef athis)

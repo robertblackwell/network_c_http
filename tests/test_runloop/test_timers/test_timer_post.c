@@ -30,7 +30,7 @@ static void posted_from_post_cb(RunloopRef runloop_ref, void* arg)
         ctx_p->counter++;
     }
 }
-//static void post_cb(RunloopWatcherRef w, void* arg, uint64_t event)
+//static void post_cb(RunloopWatcherBaseRef w, void* arg, uint64_t event)
 //{
 //    TestCtx* ctx_p = arg;
 //    RunloopTimerRef tw = (RunloopTimerRef)w;

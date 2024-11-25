@@ -10,7 +10,7 @@
 struct FdTable_s {
     RBL_DECLARE_TAG;
     uint64_t        count;
-	RunloopWatcher*    entries[runloop_FDTABLE_MAX];
+	RunloopWatcherBase*    entries[runloop_FDTABLE_MAX];
     RBL_DECLARE_END_TAG;
 };
 
@@ -42,7 +42,7 @@ void FdTable_free(FdTableRef this)
 	}
 	free((void*)this);
 }
-void FdTable_insert(FdTableRef this, RunloopWatcherRef watcher, int fd)
+void FdTable_insert(FdTableRef this, RunloopWatcherBaseRef watcher, int fd)
 {
     RBL_CHECK_TAG(FdTable_TAG, this);
     RBL_CHECK_END_TAG(FdTable_TAG, this)
@@ -58,12 +58,12 @@ void FdTable_remove(FdTableRef athis, int fd)
     RBL_CHECK_TAG(FdTable_TAG, athis);
     RBL_CHECK_END_TAG(FdTable_TAG, athis)
 	assert(athis->entries[fd] != NULL);
-	RunloopWatcherRef wr = (athis->entries[fd]);
+	RunloopWatcherBaseRef wr = (athis->entries[fd]);
 //	wr->free(wr);
 	athis->entries[fd] = NULL;
 	athis->count--;
 }
-RunloopWatcherRef FdTable_lookup(FdTableRef this, int fd)
+RunloopWatcherBaseRef FdTable_lookup(FdTableRef this, int fd)
 {
     RBL_CHECK_TAG(FdTable_TAG, this);
     RBL_CHECK_END_TAG(FdTable_TAG, this)

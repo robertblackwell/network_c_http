@@ -1,6 +1,6 @@
 
-//#define RBL_LOG_ENABLED
-//#define RBL_LOG_ALLOW_GLOBAL
+#define RBL_LOG_ENABLED
+#define RBL_LOG_ALLOW_GLOBAL
 
 #include "demo_read.h"
 #include <assert.h>
@@ -74,6 +74,11 @@ void start_read(RunloopRef rl, void* ctx_arg);
 void on_read_message(void* href, DemoMessageRef msg, int status)
 {
     ReadCtxRef ctx = href;
+    if(status != 0) {
+        RBL_LOG_FMT("status: %d", status);
+        demo_connection_close(ctx->demo_conn_ref);
+        return;
+    }
     RBL_LOG_FMT("connection_ref: %p count: %d status: %d msg: %s", ctx->demo_conn_ref, ctx->read_count, status, IOBuffer_cstr(demo_message_serialize(msg)));
     ctx->read_count++;
     List_add_back(ctx->input_list_ref, msg);
@@ -84,6 +89,7 @@ void start_read(RunloopRef rl, void* ctx_arg)
 {
     ReadCtxRef ctx = ctx_arg;
     DemoConnectionRef cref = ctx->demo_conn_ref;
+    RBL_LOG_FMT("ctx_arg: %p  fd: %d", ctx_arg, cref->asio_stream_ref->fd)
     demo_connection_read(cref, on_read_message, ctx);
 }
 static void on_connection_complete(void* arg)

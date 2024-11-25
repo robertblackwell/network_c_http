@@ -10,9 +10,6 @@
 #include <sys/epoll.h>
 #include <sys/eventfd.h>
 #include <unistd.h>
-//#include <http_in_c/async/types.h>
-
-//#define RUNLOOP_EVENTFD_TWO_PIPE_TRICK
 #define RUNLOOP_EVENTFD_SEMAPHORE
 
 /**
@@ -21,7 +18,7 @@
  * @param fd
  * @param event
  */
-static void handler(RunloopWatcherRef fdevent_ref, uint64_t event)
+static void handler(RunloopWatcherBaseRef fdevent_ref, uint64_t event)
 {
     RunloopEventfdRef fdev = (RunloopEventfdRef)fdevent_ref;
     FDEV_CHECK_TAG(fdev)
@@ -33,7 +30,7 @@ static void handler(RunloopWatcherRef fdevent_ref, uint64_t event)
 
     }
 }
-static void anonymous_free(RunloopWatcherRef p)
+static void anonymous_free(RunloopWatcherBaseRef p)
 {
     RunloopEventfdRef fdevp = (RunloopEventfdRef)p;
     FDEV_CHECK_TAG(fdevp)
@@ -89,7 +86,7 @@ void runloop_eventfd_register(RunloopEventfdRef athis)
     /**
      * Make sure this call enabled level triggering of events on this fd
      */
-    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherRef) (athis));
+    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
     assert(res ==0);
 }
 void runloop_eventfd_change_watch(RunloopEventfdRef athis, PostableFunction postable, void* arg, uint64_t watch_what)
@@ -102,7 +99,7 @@ void runloop_eventfd_change_watch(RunloopEventfdRef athis, PostableFunction post
     if (arg != NULL) {
         athis->fdevent_postable_arg = arg;
     }
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
     assert(res == 0);
 }
 void runloop_eventfd_deregister(RunloopEventfdRef athis)
@@ -121,13 +118,13 @@ void runloop_eventfd_arm(RunloopEventfdRef athis, PostableFunction postable, voi
     if (arg != NULL) {
         athis->fdevent_postable_arg = arg;
     }
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
     assert(res == 0);
 }
 void runloop_eventfd_disarm(RunloopEventfdRef athis)
 {
     FDEV_CHECK_TAG(athis)
-    int res = runloop_reregister(athis->runloop, athis->fd, 0, (RunloopWatcherRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, 0, (RunloopWatcherBaseRef) athis);
 }
 void runloop_eventfd_fire(RunloopEventfdRef athis)
 {
