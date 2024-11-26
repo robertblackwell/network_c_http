@@ -22,7 +22,7 @@ set(RUNLOOP_SOURCE_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/runloop.c
 		${CMAKE_CURRENT_SOURCE_DIR}/w_eventfd.c
 		${CMAKE_CURRENT_SOURCE_DIR}/w_listener.c
-		${CMAKE_CURRENT_SOURCE_DIR}/w_queue.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/w_queue_watcher.c
 		${CMAKE_CURRENT_SOURCE_DIR}/w_stream.c
 		${CMAKE_CURRENT_SOURCE_DIR}/w_timerfd.c
 		${CMAKE_CURRENT_SOURCE_DIR}/w_watcher_base.c

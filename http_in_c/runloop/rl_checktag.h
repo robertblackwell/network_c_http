@@ -4,73 +4,74 @@
 #include <stdbool.h>
 #include <string.h>
 
-#define Runloop_TAG     "RUNLOOP"
-#define WEventFd_TAG    "EVENTFD"
-#define WIoFd_TAG       "STREAM"
-#define WListenerFd_TAG "LISTNR"
-#define WQueue_TAG      "XRQUE"
-#define WTimerFd_TAG    "XRTIMER"
-#define ITQueue_TAG     "ITQUEUE"
-#define FdTable_TAG     "FDTABL"
-#define FunctorList_TAG "FUNCLST"
-#define AsioStream_TAG "AsioSTRM"
+#define Runloop_TAG       "RUNLOOP"
+#define EventFd_TAG       "EVENTFD"
+#define STREAM_TAG        "STREAM"
+#define Listener_TAG      "LISTNR"
+#define QueueWatcher_TAG  "QWatcher"
+#define Timer_TAG         "Timer"
+#define ITQueue_TAG       "ITQUEUE"
+#define FdTable_TAG       "FDTABL"
+#define FunctorList_TAG   "FUNCLST"
+#define AsioStream_TAG    "AsioSTRM"
 
 #define WATCHER_DECLARE_TAG RBL_DECLARE_TAG(Watcher)
 
 /**
  * REACTOR tag macros
  */
-#define REACTOR_DECLARE_TAG RBL_DECLARE_TAG(Reactor_TAG)
+#define REACTOR_DECLARE_TAG RBL_DECLARE_TAG(Runloop_TAG)
 #define RUNLOOP_CHECK_TAG(p) RBL_CHECK_TAG(Runloop_TAG, p)
 #define RUNLOOP_SET_TAG(p) RBL_SET_TAG(Runloop_TAG, p)
 
-#define REACTOR_DECLARE_END_TAG RBL_DECLARE_END_TAG(Reactor_TAG)
-#define REACTOR_CHECK_END_TAG(p) RBL_CHECK_END_TAG(Reactor_TAG, p)
-#define REACTOR_SET_END_TAG(p) RBL_SET_TAG(Reactor_TAG, p)
+#define RUNLOOP_DECLARE_END_TAG RBL_DECLARE_END_TAG(Runloop_TAG)
+#define RUNLOOP_CHECK_END_TAG(p) RBL_CHECK_END_TAG(Runloop_TAG, p)
+#define RUNLOOP_SET_END_TAG(p) RBL_SET_END_TAG(Runloop_TAG, p)
 
 /**
  * eventfd tag macros
  */
-#define FDEV_DECLARE_TAG RBL_DECLARE_TAG(WEventFd_TAG)
-#define FDEV_CHECK_TAG(p) RBL_CHECK_TAG(WEventFd_TAG, p)
-#define FDEV_SET_TAG(p) RBL_SET_TAG(WEventFd_TAG, p)
+#define EVENTFD_DECLARE_TAG RBL_DECLARE_TAG(EventFd_TAG)
+#define EVENTFD_CHECK_TAG(p) RBL_CHECK_TAG(EventFd_TAG, p)
+#define EVENTFD_SET_TAG(p) RBL_SET_TAG(EventFd_TAG, p)
 
-#define FDEV_DECLARE_END_TAG RBL_DECLARE_END_TAG(WEventFd_TAG)
-#define FDEV_CHECK_END_TAG(p) RBL_CHECK_END_TAG(WEventFd_TAG, p)
-#define FDEV_SET_END_TAG(p) RBL_SET_END_TAG(WEventFd_TAG, p)
+#define EVENTFD_DECLARE_END_TAG RBL_DECLARE_END_TAG(EventFd_TAG)
+#define EVENTFD_CHECK_END_TAG(p) RBL_CHECK_END_TAG(EventFd_TAG, p)
+#define EVENTFD_SET_END_TAG(p) RBL_SET_END_TAG(EventFd_TAG, p)
 
 /**
  * RunloopStream
  */
-#define SOCKW_DECLARE_TAG RBL_DECLARE_TAG(WIoFd_TAG)
-#define SOCKW_CHECK_TAG(p) RBL_CHECK_TAG(WIoFd_TAG, p)
-#define SOCKW_SET_TAG(p) RBL_SET_TAG(WIoFd_TAG, p)
+#define SOCKW_DECLARE_TAG RBL_DECLARE_TAG(STREAM_TAG)
+#define SOCKW_CHECK_TAG(p) RBL_CHECK_TAG(STREAM_TAG, p)
+#define SOCKW_SET_TAG(p) RBL_SET_TAG(STREAM_TAG, p)
 
-#define SOCKW_DECLARE_END_TAG RBL_DECLARE_END_TAG(WIoFd_TAG)
-#define SOCKW_CHECK_END_TAG(p) RBL_CHECK_END_TAG(WIoFd_TAG, p)
-#define SOCKW_SET_END_TAG(p) RBL_SET_END_TAG(WIoFd_TAG, p)
+#define SOCKW_DECLARE_END_TAG RBL_DECLARE_END_TAG(STREAM_TAG)
+#define SOCKW_CHECK_END_TAG(p) RBL_CHECK_END_TAG(STREAM_TAG, p)
+#define SOCKW_SET_END_TAG(p) RBL_SET_END_TAG(STREAM_TAG, p)
 
 /**
  * WListener
  */
-#define LISTNER_DECLARE_TAG RBL_DECLARE_TAG(WListenerFd_TAG)
-#define LISTNER_CHECK_TAG(p) RBL_CHECK_TAG(WListenerFd_TAG, p)
-#define LISTNER_SET_TAG(p) RBL_SET_TAG(WListenerFd_TAG, p)
+#define LISTNER_DECLARE_TAG RBL_DECLARE_TAG(Listener_TAG)
+#define LISTNER_CHECK_TAG(p) RBL_CHECK_TAG(Listener_TAG, p)
+#define LISTNER_SET_TAG(p) RBL_SET_TAG(Listener_TAG, p)
 
-#define LISTNER_DECLARE_END_TAG RBL_DECLARE_END_TAG(WListenerFd_TAG)
-#define LISTNER_CHECK_END_TAG(p) RBL_CHECK_END_TAG(WListenerFd_TAG, p)
-#define LISTNER_SET_END_TAG(p) RBL_SET_END_TAG(WListenerFd_TAG, p)
+#define LISTNER_DECLARE_END_TAG RBL_DECLARE_END_TAG(Listener_TAG)
+#define LISTNER_CHECK_END_TAG(p) RBL_CHECK_END_TAG(Listener_TAG, p)
+#define LISTNER_SET_END_TAG(p) RBL_SET_END_TAG(Listener_TAG, p)
 
 /**
  * RunloopQueueWatcher
  */
-#define WQUEUE_DECLARE_TAG RBL_DECLARE_TAG(WQueue_TAG)
-#define WQUEUE_CHECK_TAG(p) RBL_CHECK_TAG(WQueue_TAG, p)
-#define WQUEUE_SET_TAG(p) RBL_SET_TAG(WQueue_TAG, p)
+#define QUEUE_WATCHER_DECLARE_TAG RBL_DECLARE_TAG(QueueWatcher_TAG)
+#define QUEUE_WATCHER_CHECK_TAG(p) RBL_CHECK_TAG(QueueWatcher_TAG, p)
+#define QUEUE_WATCHER_SET_TAG(p) RBL_SET_TAG(QueueWatcher_TAG, p)
 
-#define WQUEUE_DECLARE_END_TAG RBL_DECLARE_END_TAG(WQueue_TAG)
-#define WQUEUE_CHECK_END_TAG(p) RBL_CHECK_END_TAG(WQueue_TAG, p)
-#define WQUEUE_SET_END_TAG(p) RBL_SET_END_TAG(WQueue_TAG, p)
+#define QUEUE_WATCHER_DECLARE_END_TAG RBL_DECLARE_END_TAG(QueueWatcher_TAG)
+#define QUEUE_WATCHER_CHECK_END_TAG(p) RBL_CHECK_END_TAG(QueueWatcher_TAG, p)
+#define QUEUE_WATCHER_SET_END_TAG(p) RBL_SET_END_TAG(QueueWatcher_TAG, p)
+#define QUEUE_WATCHER_SET_END_TAG(p) RBL_SET_END_TAG(QueueWatcher_TAG, p)
 
 /**
  * ITQueue
@@ -86,13 +87,13 @@
 /**
  * RunloopTimer
  */
-#define WTIMER_DECLARE_TAG RBL_DECLARE_TAG(WTimerFd_TAG)
-#define WTIMER_CHECK_TAG(p) RBL_CHECK_TAG(WTimerFd_TAG, p)
-#define WTIMER_SET_TAG(p) RBL_SET_TAG(WTimerFd_TAG, p)
+#define WTIMER_DECLARE_TAG RBL_DECLARE_TAG(Timer_TAG)
+#define WTIMER_CHECK_TAG(p) RBL_CHECK_TAG(Timer_TAG, p)
+#define WTIMER_SET_TAG(p) RBL_SET_TAG(Timer_TAG, p)
 
-#define WTIMER_DECLARE_END_TAG RBL_DECLARE_EMD_TAG(WTimerFd_TAG)
-#define WTIMER_CHECK_END_TAG(p) RBL_CHECK_END_TAG(WTimerFd_TAG, p)
-#define WTIMER_SET_END_TAG(p) RBL_SET_END_TAG(WTimerFd_TAG, p)
+#define WTIMER_DECLARE_END_TAG RBL_DECLARE_EMD_TAG(Timer_TAG)
+#define WTIMER_CHECK_END_TAG(p) RBL_CHECK_END_TAG(Timer_TAG, p)
+#define WTIMER_SET_END_TAG(p) RBL_SET_END_TAG(Timer_TAG, p)
 
 /**
  * FdTable

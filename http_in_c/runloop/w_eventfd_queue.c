@@ -38,8 +38,9 @@ static void mk_fds(EventfdQueueRef athis)
     assert(errno == EAGAIN);
 
 }
-void Evfdq_init(EventfdQueueRef athis)
+void runloop_eventfd_queue_init(EventfdQueueRef athis)
 {
+    EVENTFD_SET_TAG(athis)
     EvfQueuePtr me = (EvfQueuePtr)athis;
     me->list = functor_list_new(runloop_MAX_FDS);
     pthread_mutex_init(&(me->queue_mutex), NULL);
@@ -48,7 +49,7 @@ void Evfdq_init(EventfdQueueRef athis)
 EventfdQueueRef runloop_eventfd_queue_new()
 {
     EventfdQueueRef tmp = malloc(sizeof(EventfdQueue));
-    Evfdq_init(tmp);
+    runloop_eventfd_queue_init(tmp);
     return tmp;
 }
 void runloop_eventfd_queue_free(EventfdQueueRef athis)

@@ -5,6 +5,7 @@ Finsh off demo:
   ☐ briing asio_listener into the main code
   ☐ interthread queue is unclear fix it and make it asio compliant
   ☐ documentation
+  ☐ review how tags work for watcher objects
 
 Pickup http:
   ☐ get parse tests working and review parser in light of how its done in demo

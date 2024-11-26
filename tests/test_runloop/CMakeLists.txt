@@ -22,11 +22,11 @@ target_include_directories(test_q PUBLIC ${TEST_INCLUDE_DIRS})
 target_link_libraries(test_q PUBLIC ${TEST_LINK_LIBS})
 add_test(test_q test_q)
 
-# test interthread queue
-#add_executable(test_itq test_itq.c )
-#target_include_directories(test_itq PUBLIC ${TEST_INCLUDE_dirS})
-#target_link_libraries(test_itq PUBLIC ${TEST_LINK_LIBS})
-#add_test(test_itq test_itq)
+# test_q_asio
+add_executable(test_q_asio test_q_asio.c )
+target_include_directories(test_q_asio PUBLIC ${TEST_INCLUDE_dirS})
+target_link_libraries(test_q_asio PUBLIC ${TEST_LINK_LIBS})
+add_test(test_q_asio test_q_asio)
 
 if(off)
 endif()

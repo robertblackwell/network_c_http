@@ -9,7 +9,7 @@ in the 'C' language without the use of external libraries (see below for the one
 in order to understand what is required at the socket and epoll level, and to get more experience with
 structuring code and data structures in 'C'.
 
-## the library exception
+## The "no library" exception
 
 As it turns out one of the more complicated aspects of http servers is the parsing of http messages
 (requests and responses).
@@ -30,62 +30,74 @@ As a user of these libraries I found the former library [https://github.com/node
 easier to deal with where as I find the more recent versions of [https://github.com/nodejs/llhttp](https://github.com/nodejs/llhttp)
 less amenable to my use case.
 
-## sync_server_app
+## Http 
 
-The executable `sync_server_app` implements a multithreaded http server that uses synchronous or blocking IO.
+### Http Synchronous Server
+
+The application whose main function source code is in  `apps_http/sync/http_sync_app` implements a 
+multithreaded http server that uses synchronous or blocking IO.
 
 It only responds to a small set of __GET__ requests and at the time of writing does not perform
 any disk IO to make responses messages.
 
-This is the classic way of implementing a server before the days of event loops similar technologies.
+This app starts a fixed number of processes each with a fixed number of threads. Each thread performs synchronous IO 
+and hence services a single request at a time. Thus the maximum number of request that can be serviced 
+concurrently is n(number of processes) * (t) number of threads per process. The `n` and `t` parameters
+can be set on the command line of this app. 
 
-There are two versions of this server selected by the build options __SYNC_WORKER_QUEUE__.
+This app relies on a feature of Linux whereby if multiple processes/threads call listen() and accept() on a socket
+bound to the same host/port combination the OS will only present one of those processes/threads with a socket for a
+single newly connecting client. This is an efficient round robbin scheduling of accept() calls.
 
-When this option is added to the CCFLAGS as -DSYNC_WORKER_QUEUE in the top level CmakeList.txt
-only the the main performs `accept()` calls and the client connections/sockets from such calls
-are fed to worker threads by a queue.
+### Http Asynchronous Server
 
-When this option is absent each worker thread issues accept() calls on a common listening socket created by the main
-thread before creating the worker threads. The Linux operating system allocates new incoming connections between the
-different `accept()` callers in a manner that only wakes one `accept()` caller for each new connection.
+The app with source in `apps_http/async/http_async_app` implements an event based server that performs all IO
+in a non blocking or async manner. Like the http sync server the -n and -t command line options control
+the number of processes and threads that are started by this server. With each thread running identical server
+code and with essentially no interaction between processes and threads.
 
-## async_server_app
+In this server each thread can handle __multiple concurrent requests per thread_ with (currently) no limit on 
+this number. 
 
-The executable `async_server_ap` implements an event based single threaded server that performs all IO
-in a non blocking or async manner.
+The allocation of incoming connections to threads is achieved using the Linux facility described above in
+the section of __http_sync_app__.
 
-It uses a home grown event mechanism based on linux `epoll` which can be found in the directory `<project>/http_in_c/runloop`.
+It uses a home grown event mechanism called a __runloop_ which is based on linux `epoll` and which can be found in the 
+directory `<project>/http_in_c/runloop`.
 
 At the time of writing the event mechanism has no thread pool or other mechanism for the server to perform
 disk IO efficiently. 
 
-Thats a future enhancement.
+That is a future enhancement; but the mechanism for doing this is already present in the runloop code
+in the form of the types RunloopEventfdQueue and RunloopQueueWatcher and their associated functions.
 
-This server has two modes of operating that are selected by a build options __ASYNC_SINGLE_THREAD:
+### Multi processes Multi-threads
 
-When this option is set the server runs as a single thread.
+Both the servers described above sets its listening socket to __SO_REUSEADDR__ and __SO_REUSEPORT__.
 
-When this option is not set the server will try to start multiple threads, sharing a common listening sockets
-and having a run loop for each thread. 
+The second of these is necessary to achieve the round robbin allocation of incoming connections described
+in the previous sections.
 
-WE WARNED - there is a bug that causes crashes in the multi-threaded version.
+### Http Verifier App
 
-### Multi processes
+The source of an app christened a "verifier app" lives in `app_http/verify` and is a __C__ client app that can be 
+used to exercise or stress both of the server apps described above. 
 
-The `async_server_app` sets its listening socket to __SO_REUSEADDR__ and __SO_REUSEPORT__.
+This app has a number of command line options that allow a user to control the total number of requests,
+and how many are concurrent. Its main output is an analysis of respopnse times for a request/response cycle
+averaged over a number of cycles.
 
-As a result one can start any number of instances of `async_server_app` simultaniously to get the benefit
-of multiple servers without having to solve the problem caused by the multi-thread bug mentioned above.
+## The Demo Protocol
+ 
+Analogous to the 3 apps described above for the http1.1 protocol, three apps `demo_sync_app`, `demo_async_app`, and
+`demo_verify_app` have been implemented for a very simple protocol that I named __demo__. These apps can be found
+in the folder `<project_folder>/apps_demo`.
 
-The only downside of this is how to kill all the processes that are started.
+The `demo` protocol is simple a string of printable characters enclosed between a STX (0x02) character and a ETX(0x03)
+character.
 
-## verifier app and python_client
-
-The `verifier_app` is a __C__ client app that can be used to exercise both of the server apps described above.
-
-There is also a `python_client/client.py` app that is a second way to exercise the servers.
-
-In the directory
+These 3 apps were implemented to delineate the issues related to the http1.1 protocol as compared to
+issues related to asynchornous io. 
 
 ## Installation
 
@@ -122,10 +134,16 @@ directory.
 
 The project uses CMake for building. The build outputs are:
 
--   a static library    __cmake_debug_build/c_http/libc_http_library.a__ 
--   a binary executable __cmake_debug_build/sync-server-app/c_http/sync-server-app__ 
--   a binary executable __cmake_debug_build/async_server_appc_http/async-server-app__ 
--   a binary executable __cmake_debug_build/verifier/verifier_client__ 
+-   a static library    __cmake_debug_build/http_in_c/libc_http_library.a__
+- 
+-   a binary executable __cmake_debug_build/apps_http/async/http_async_app__ 
+-   a binary executable __cmake_debug_build/apps_http/sync/http_sync_app__
+-   a binary executable __cmake_debug_build/apps_http/verify/http_verify_app__
+-   
+-   a binary executable __cmake_debug_build/apps_demo/async/demo_async_app__ 
+-   a binary executable __cmake_debug_build/apps_demo/sync/demo_sync_app__
+-   a binary executable __cmake_debug_build/apps_demo/verify/demo_verify_app__
+-   
 -   a python3 script    __python_client/client.py__ 
 
 ## Usage 
@@ -138,7 +156,7 @@ All executables have a simplistic getopts interface, so when in doubt try:
     <program> -h
 ```
 
-The `verify_client` app will track response times and print a brief report. 
+The `verify` apps will track response times and print a brief report. 
 
 
 ## Contributing
