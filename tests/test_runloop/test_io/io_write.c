@@ -79,11 +79,11 @@ static void wrtr_wait_timer_fired(RunloopRef rl, void* arg);
 static void fill_buffer(char* line, char* buffer, int max_len, int required_data_length)
 {
     memset(buffer, '?', max_len);
-    ulong line_length = strlen(line);
+    size_t line_length = strlen(line);
     char* stopping = &(buffer[required_data_length]);
     char* p = buffer;
     while(true) {
-        ulong x = sprintf(p, "%s", line);
+        size_t x = sprintf(p, "%s", line);
         p = p + x;
         if((p - buffer) > required_data_length) {
             *p = (char)0;
@@ -119,16 +119,16 @@ static void wrtr_cb(RunloopRef rl, void* write_ctx_p_arg)
     RBL_LOG_FMT("index: %d fd: %d nread: %d errno: %d write_count %d\n", ctx->writer_index, fd, nwrite, errno, ctx->write_count);
     ctx->write_count++;
     if(ctx->write_count > ctx->max_write_count) {
-        runloop_deregister(reactor, ctx->stream_ref->fd);
-        runloop_deregister(reactor, ctx->timer_ref->fd);
+        runloop_deregister(reactor, runloop_stream_get_fd(ctx->stream_ref));
+        runloop_deregister(reactor, runloop_timer_get_fd(ctx->timer_ref));
         return;
     }
     // disarm writeable events on this fd
     runloop_stream_disarm_write(stream);
     RBL_CHECK_TAG(WriteCtx_ATG, ctx)
     RBL_CHECK_END_TAG(WriteCtx_ATG, ctx)
-    SOCKW_CHECK_TAG(ctx->stream_ref)
-    WTIMER_CHECK_TAG(ctx->timer_ref)
+    runloop_stream_checktag(ctx->stream_ref);
+    runloop_timer_checktag(ctx->timer_ref);
     // rearm the timer
     runloop_timer_rearm(ctx->timer_ref);
 }
@@ -136,14 +136,14 @@ static void wrtr_wait_timer_fired(RunloopRef rl, void* ctx_p_arg)
 {
     RBL_LOG_FMT("test_io: Socket watcher wrtr_wait\n");
     WriteCtx* ctx = ctx_p_arg;
-    RunloopRef runloop_ref = ctx->stream_ref->runloop;
+    RunloopRef runloop_ref = runloop_stream_get_runloop(ctx->stream_ref);
     RunloopStreamRef stream_ref = ctx->stream_ref;
     RunloopTimerRef timer_ref = ctx->timer_ref;
-    int fd = stream_ref->fd;
+    int fd = runloop_stream_get_fd(stream_ref);
     RBL_CHECK_TAG(WriteCtx_ATG, ctx)
     RBL_CHECK_END_TAG(WriteCtx_ATG, ctx)
-    SOCKW_CHECK_TAG(ctx->stream_ref)
-    WTIMER_CHECK_TAG(ctx->timer_ref)
+    runloop_stream_checktag(ctx->stream_ref);
+    runloop_timer_checktag(ctx->timer_ref);
     RBL_LOG_FMT("test_io: Socket watcher wrtr_wait_timer_fired write_fd: %d", ctx->writefd);
 
     int write_here = 0;
@@ -172,8 +172,8 @@ void* writer_thread_func(void* arg)
 
         RBL_CHECK_TAG(WriteCtx_ATG, ctx)
         RBL_CHECK_END_TAG(WriteCtx_ATG, ctx)
-        WTIMER_CHECK_TAG(ctx->timer_ref);
-        SOCKW_CHECK_TAG(ctx->stream_ref);
+        runloop_timer_checktag(ctx->timer_ref);
+        runloop_stream_checktag(ctx->stream_ref);
 
         RunloopStreamRef sw = wrtr->ctx_table[i].stream_ref;
 

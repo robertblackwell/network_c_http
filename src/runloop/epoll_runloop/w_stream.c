@@ -188,5 +188,11 @@ void runloop_stream_verify(RunloopStreamRef athis)
     SOCKW_SET_TAG(athis);
     SOCKW_SET_END_TAG(athis);
 }
+void runloop_stream_checktag(RunloopStreamRef athis)
+{
+    SOCKW_SET_TAG(athis);
+    SOCKW_SET_END_TAG(athis);
+}
+
 
 

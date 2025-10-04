@@ -117,6 +117,28 @@ void       runloop_verify(RunloopRef r);
 /** @} */
 
 /**
+ * A Functor is a generic callback - a function pointer (of type PostableFunction) and single anonymous argument.
+ *
+ * The significant thing is that the function pointer, points to a function that has the correct
+ * signature for the RunList
+ *
+*/
+ struct Functor_s;
+typedef struct Functor_s Functor, *FunctorRef;
+FunctorRef Functor_new(PostableFunction f, void* arg);
+void Functor_init(FunctorRef funref, PostableFunction f, void* arg);
+void Functor_free(FunctorRef athis);
+void Functor_call(FunctorRef athis, RunloopRef runloop_ref);
+bool Functor_is_empty(FunctorRef f);
+void Functor_dealloc(void **p);
+struct Functor_s
+{
+//    RunloopWatcherBaseRef wref; // this is borrowed do not free
+    PostableFunction f;
+    void *arg;
+};
+
+/**
  * The following include files provide the API for their specific type of event.
  *
  * The first of these RunloopWatcherBase in w_watcher_base.h is meant to be the common element of all event
@@ -154,7 +176,7 @@ void       runloop_verify(RunloopRef r);
  * The details are all in one file because of the dependencies between the data structures which include struct
  * definitions not required to give the event object API.
  */
-#include "rl_internal.h"
+// #include "rl_internal.h"
 /**
  * When coding in the C language, particularly using callback style it is very easy to misinterpret the data type
  * at the end of a pointer. In order to have runtime checking that points reference the type of object I think they

@@ -40,7 +40,7 @@ void runloop_stream_verify(RunloopStreamRef r);
 
 RunloopRef runloop_stream_get_runloop(RunloopStreamRef athis);
 int runloop_stream_get_fd(RunloopStreamRef this);
-
+void runloop_stream_checktag(RunloopStreamRef athis);
 
 /**
  * Async io is a more convenient interface for reading and writing data to fd's like sockets.
@@ -56,6 +56,8 @@ void asio_stream_read(AsioStreamRef stream_ref, void* buffer, long max_length, A
 void asio_stream_write(AsioStreamRef stream_ref, void* buffer, long length, AsioWritecallback cb, void*  arg);
 void asio_stream_close(AsioStreamRef cref);
 RunloopRef asio_stream_get_runloop(AsioStreamRef asio_stream_ref);
-int asia_stream_get_fd(AsioStreamRef asio_stream_ref);
+int asio_stream_get_fd(AsioStreamRef asio_stream_ref);
+RunloopStreamRef asio_stream_get_runloop_stream(AsioStreamRef asio_stream_ref);
+
 /** @} */
 #endif //C_HTTP_runloop_W_STREAM_H

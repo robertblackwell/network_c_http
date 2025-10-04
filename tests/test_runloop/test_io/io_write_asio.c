@@ -49,7 +49,7 @@ void WriteCtx_set_stream_ref(WriteCtx* ctx, RunloopRef rl, int fd)
     ctx->asiostream_ref = NULL;
 #else
     ctx->asiostream_ref = asio_stream_new(rl, fd);
-    ctx->stream_ref = ctx->asiostream_ref->runloop_stream_ref;
+    ctx->stream_ref = asio_stream_get_runloop_stream(ctx->asiostream_ref);
 #endif
 }
 
@@ -87,11 +87,11 @@ static void wrtr_wait_timer_fired(RunloopRef rl, void* arg);
 static size_t fill_buffer(char* line, char* buffer, int max_len, int required_data_length)
 {
     memset(buffer, '?', max_len);
-    ulong line_length = strlen(line);
+    size_t line_length = strlen(line);
     char* stopping = &(buffer[required_data_length]);
     char* p = buffer;
     while(true) {
-        ulong x = sprintf(p, "%s", line);
+        size_t x = sprintf(p, "%s", line);
         p = p + x;
         if((p - buffer) > required_data_length) {
             *p = (char)0;
@@ -114,8 +114,8 @@ static void wrtr_wait_timer_fired(RunloopRef rl, void* ctx_p_arg)
     RunloopStreamRef stream_ref = ctx->stream_ref;
     RBL_CHECK_TAG(WriteCtx_ATG, ctx)
     RBL_CHECK_END_TAG(WriteCtx_ATG, ctx)
-    SOCKW_CHECK_TAG(ctx->stream_ref)
-    WTIMER_CHECK_TAG(ctx->timer_ref)
+    runloop_stream_checktag(ctx->stream_ref);
+    runloop_timer_checktag(ctx->timer_ref);
     RBL_LOG_FMT("test_io: Socket watcher wrtr_wait_timer_fired write_fd: %d", ctx->writefd);
     if(ctx->write_count > ctx->max_write_count) {
         asio_stream_close(ctx->asiostream_ref);
@@ -146,8 +146,8 @@ void* writer_thread_func(void* arg)
 
         RBL_CHECK_TAG(WriteCtx_ATG, ctx)
         RBL_CHECK_END_TAG(WriteCtx_ATG, ctx)
-        WTIMER_CHECK_TAG(ctx->timer_ref);
-        SOCKW_CHECK_TAG(ctx->stream_ref);
+        runloop_stream_checktag(ctx->stream_ref);
+        runloop_timer_checktag(ctx->timer_ref);
     }
     runloop_run(runloop_ref, 10000000);
     return NULL;

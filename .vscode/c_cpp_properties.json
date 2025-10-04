@@ -4,6 +4,7 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
+                "${workspaceFolder}/src",
                 "${workspaceFolder}/src/**",
                 "${workspaceFolder}/apps_http/**",
                 "${workspaceFolder}/tests/**",
@@ -11,7 +12,7 @@
                 "${workspaceFolder}/vendor/src/**"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/clang",
+            "compilerPath": "/usr/bin/cc",
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "linux-gcc-x64",

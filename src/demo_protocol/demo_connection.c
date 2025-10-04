@@ -84,7 +84,7 @@ void demo_connection_free(DemoConnectionRef this)
 {
     RBL_CHECK_TAG(DemoConnection_TAG, this)
     RBL_CHECK_END_TAG(DemoConnection_TAG, this)
-    int fd = this->asio_stream_ref->fd;
+    int fd = asio_stream_get_fd(this->asio_stream_ref);
     close(fd);
     asio_stream_free(this->asio_stream_ref);
     this->asio_stream_ref = NULL;
@@ -107,7 +107,7 @@ void demo_connection_read(DemoConnectionRef cref, void(*on_demo_read_cb)(void* h
 {
     RBL_CHECK_TAG(DemoConnection_TAG, cref)
     RBL_CHECK_END_TAG(DemoConnection_TAG, cref)
-    RBL_LOG_FMT("demo_connect_read fd: %d", cref->asio_stream_ref->runloop_stream_ref->fd);
+    RBL_LOG_FMT("demo_connect_read fd: %d", asio_stream_get_fd(cref->asio_stream_ref));
     assert(on_demo_read_cb != NULL);
 
     // should be in READ_STATE_IDLE - check the variable values for state

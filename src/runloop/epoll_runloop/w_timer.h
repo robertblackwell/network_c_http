@@ -21,7 +21,7 @@ void runloop_timer_rearm_old(RunloopTimerRef athis, PostableFunction cb, void* c
 void runloop_timer_rearm(RunloopTimerRef athis);
 void runloop_timer_deregister(RunloopTimerRef athis);
 void WTimerFd_verify(RunloopTimerRef r);
-RunloopRef runloop_timer_get_reactor(RunloopTimerRef athis);
+RunloopRef runloop_timer_get_runloop(RunloopTimerRef athis);
 int runloop_timer_get_fd(RunloopTimerRef this);
 //#define runloop_timer_get_reactor(p) Watcher_get_reactor((RunloopWatcherBaseRef)p)
 /**
@@ -32,6 +32,6 @@ RunloopTimerRef runloop_timer_set(RunloopRef rl, PostableFunction cb, void* ctx,
  * After the call to runloop_timer_clear the timerref is invalid and muts not be ised
  */
 void runloop_timer_clear(RunloopRef rl, RunloopTimerRef timerref);
-
+void runloop_timer_checktag(RunloopTimerRef athis);
 /** @} */
 #endif //C_HTTP_runloop_W_TIMER_H

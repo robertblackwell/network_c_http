@@ -136,9 +136,17 @@ void asio_stream_write(AsioStreamRef connection_ref, void* buffer, long length, 
     connection_ref->write_state = WRITE_STATE_ACTIVE;
     try_write(connection_ref);
 }
+RunloopStreamRef asio_stream_get_runloop_stream(AsioStreamRef asio_stream_ref)
+{
+    return asio_stream_ref->runloop_stream_ref;
+}
 RunloopRef asio_stream_get_runloop(AsioStreamRef asio_stream_ref)
 {
     return asio_stream_ref->runloop_stream_ref->runloop;
+}
+int asio_stream_get_fd(AsioStreamRef athis)
+{
+    return athis->runloop_stream_ref->fd;
 }
 static void try_read(AsioStreamRef cref)
 {

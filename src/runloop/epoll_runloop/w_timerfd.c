@@ -230,3 +230,9 @@ void runloop_timer_clear(RunloopRef rl, RunloopTimerRef timerref)
     runloop_timer_deregister(timerref);
     runloop_timer_free(timerref);
 }
+void runloop_timer_checktag(RunloopTimerRef athis)
+{
+    WTIMER_CHECK_TAG(athis)
+    WTIMER_CHECK_END_TAG(athis)
+
+}

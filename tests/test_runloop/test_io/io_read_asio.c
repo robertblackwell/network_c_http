@@ -49,7 +49,7 @@ void ReadCtx_set_stream_ref(ReadCtx* ctx, RunloopRef rl, int fd)
     ctx->asiostream_ref = NULL;
 #else
     ctx->asiostream_ref = asio_stream_new(rl, fd);
-    ctx->stream_ref = ctx->asiostream_ref->runloop_stream_ref;
+    ctx->stream_ref = asio_stream_get_runloop(ctx->asiostream_ref);
 #endif
 }
 
