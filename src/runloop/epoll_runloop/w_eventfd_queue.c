@@ -22,7 +22,7 @@ static void mk_fds(EventfdQueueRef athis)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
 #ifdef runloop_eventfd_ENABLE
-    int fd = eventfd(0, O_NONBLOCK | O_CLOEXEC);
+    int fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
     me->readfd = fd;
     me->writefd = fd;
 #else
