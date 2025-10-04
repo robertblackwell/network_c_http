@@ -5,8 +5,8 @@
              /* See feature_test_macros(7) */
 #include <string.h>
 #include <rbl/unittest.h>
-#include <http_in_c/common/utils.h>
-#include <http_in_c/common/socket_functions.h>
+#include <src/common/utils.h>
+#include <src/common/socket_functions.h>
 #include "listener_ctx.h"
 #include "connector_ctx.h"
 

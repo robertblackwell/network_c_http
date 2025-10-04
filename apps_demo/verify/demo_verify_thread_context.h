@@ -1,7 +1,7 @@
 #ifndef C_HTTP_Demo_VERIFY_THREAD_CONTEXT_H
 #define C_HTTP_Demo_VERIFY_THREAD_CONTEXT_H
-#include <http_in_c/common/verify_statistics.h>
-#include <http_in_c/demo_protocol/demo_message.h>
+#include <src/common/verify_statistics.h>
+#include <src/demo_protocol/demo_message.h>
 
 struct VerifyThreadContext_s {
     char* url;

@@ -1,8 +1,8 @@
 #include <rbl/macros.h>
 #include <rbl/check_tag.h>
-#include <http_in_c/runloop/runloop.h>
-#include <http_in_c/runloop/rl_internal.h>
-#include <http_in_c/tmpl_protocol/tmpl_handler.h>
+#include <src/runloop/runloop.h>
+#include <src/runloop/rl_internal.h>
+#include <src/tmpl_protocol/tmpl_handler.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -10,7 +10,7 @@
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <errno.h>
-#include <http_in_c/tmpl_protocol/tmpl_message.h>
+#include <src/tmpl_protocol/tmpl_message.h>
 
 static void handle_request( void* href, TmplMessageRef msgref, int error_code);
 static void postable_write_start(RunloopRef reactor_ref, void* href);

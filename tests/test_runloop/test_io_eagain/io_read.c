@@ -12,8 +12,8 @@
 
 #include <sys/epoll.h>
 #include <rbl/logger.h>
-#include <http_in_c/common/utils.h>
-#include <http_in_c/runloop/runloop.h>
+#include <src/common/utils.h>
+#include <src/runloop/runloop.h>
 
 void async_socket_set_nonblocking(int socket);
 

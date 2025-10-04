@@ -1,4 +1,4 @@
-#include <http_in_c/http_protocol/http_server.h>
+#include <src/http_protocol/http_server.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -8,9 +8,9 @@
 #include <sys/epoll.h>
 #include <rbl/logger.h>
 #include <rbl/check_tag.h>
-#include <http_in_c/common/alloc.h>
-#include <http_in_c/common/utils.h>
-#include <http_in_c/common/socket_functions.h>
+#include <src/common/alloc.h>
+#include <src/common/utils.h>
+#include <src/common/socket_functions.h>
 
 static HttpHandlerRef my_only_client;
 static void set_non_blocking(socket_handle_t socket);

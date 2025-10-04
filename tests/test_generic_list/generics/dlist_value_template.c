@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
-#include <http_in_c/common/list.h>
-#include <http_in_c/common/utils.h>
+#include <src/common/list.h>
+#include <src/common/utils.h>
 
 struct PREFIX(Node_s) {
     PREFIX(Node)* forward;

@@ -1,14 +1,14 @@
 #define RBL_LOG_ENABLED
 #define RBL_LOG_ALLOW_GLOBAL
-#include <http_in_c/tmpl_protocol/tmpl_connection.h>
-#include <http_in_c/runloop/rl_internal.h>
+#include <src/tmpl_protocol/tmpl_connection.h>
+#include <src/runloop/rl_internal.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <rbl/macros.h>
 #include <rbl/logger.h>
-#include <http_in_c/runloop/runloop.h>
-#include <http_in_c/tmpl_protocol/tmpl_message.h>
+#include <src/runloop/runloop.h>
+#include <src/tmpl_protocol/tmpl_message.h>
 
 #define READ_STATE_IDLE     11
 #define READ_STATE_ACTIVE   13

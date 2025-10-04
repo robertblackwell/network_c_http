@@ -1,9 +1,9 @@
 #ifndef chttp_tmpl_connection_h
 #define chttp_tmpl_connection_h
-#include <http_in_c/runloop/runloop.h>
-#include <http_in_c/common/list.h>
-#include <http_in_c/common/iobuffer.h>
-#include <http_in_c/tmpl_protocol/tmpl_message_parser.h>
+#include <src/runloop/runloop.h>
+#include <src/common/list.h>
+#include <src/common/iobuffer.h>
+#include <src/tmpl_protocol/tmpl_message_parser.h>
 #include <rbl/check_tag.h>
 
 #define TmplConnection_TAG "DmCONN"

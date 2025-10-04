@@ -1,10 +1,10 @@
 #ifndef c_tmpl_server_h
 #define c_tmpl_server_h
-#include <http_in_c/tmpl_protocol/tmpl_message.h>
-#include <http_in_c/tmpl_protocol/tmpl_connection.h>
-#include <http_in_c/common/socket_functions.h>
-#include <http_in_c/constants.h>
-#include <http_in_c/runloop/runloop.h>
+#include <src/tmpl_protocol/tmpl_message.h>
+#include <src/tmpl_protocol/tmpl_connection.h>
+#include <src/common/socket_functions.h>
+#include <src/constants.h>
+#include <src/runloop/runloop.h>
 #define TmplServer_TAG "TmplSRVR"
 #include <rbl/check_tag.h>
 

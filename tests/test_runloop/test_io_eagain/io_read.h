@@ -15,8 +15,8 @@
 #include <sys/epoll.h>
 #include <math.h>
 #include <rbl/check_tag.h>
-#include <http_in_c/common/utils.h>
-#include <http_in_c/runloop/runloop.h>
+#include <src/common/utils.h>
+#include <src/runloop/runloop.h>
 
 #define Reader_TAG "RDTag"
 #define ReadCtx_TAG "RDRCtx"

@@ -14,9 +14,9 @@
 
 #include <sys/epoll.h>
 #include <math.h>
-#include <http_in_c/common/utils.h>
-#include <http_in_c/runloop/runloop.h>
-#include <http_in_c/runloop/rl_internal.h>
+#include <src/common/utils.h>
+#include <src/runloop/runloop.h>
+//#include <src/runloop/rl_internal.h>
 #include <rbl/check_tag.h>
 
 #define WriterTable_TAG "WrtTbl"

@@ -3,12 +3,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <rbl/unittest.h>
-#include <http_in_c/common/cbuffer.h>
+#include <src/common/cbuffer.h>
 #include <rbl/logger.h>
-#include <http_in_c/common/list.h>
-#include <http_in_c/http/kvpair.h>
-#include <http_in_c/http/header_list.h>
-#include <http_in_c/http_protocol/http_message.h>
+#include <src/common/list.h>
+#include <src/http/kvpair.h>
+#include <src/http/header_list.h>
+#include <src/http_protocol/http_message.h>
 
 
 #ifdef HDRXX

@@ -1,8 +1,8 @@
 #include "demo_sync_process_main.h"
 
-#include <http_in_c/demo_protocol/demo_sync_socket.h>
-#include <http_in_c/demo_protocol/demo_message.h>
-#include <http_in_c/common/socket_functions.h>
+#include <src/demo_protocol/demo_sync_socket.h>
+#include <src/demo_protocol/demo_message.h>
+#include <src/common/socket_functions.h>
 #include <rbl/logger.h>
 #include <rbl/macros.h>
 #include <stdio.h>

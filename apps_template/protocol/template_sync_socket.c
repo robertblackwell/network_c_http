@@ -1,8 +1,8 @@
-#include <http_in_c/tmpl_protocol/tmpl_sync_socket.h>
-#include <http_in_c/common/alloc.h>
-#include <http_in_c/common/cbuffer.h>
+#include <src/tmpl_protocol/tmpl_sync_socket.h>
+#include <src/common/alloc.h>
+#include <src/common/cbuffer.h>
 #include <rbl/logger.h>
-#include <http_in_c/common/list.h>
+#include <src/common/list.h>
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>

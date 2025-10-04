@@ -10,9 +10,9 @@
 #include <sys/epoll.h>
 #include <rbl/unittest.h>
 #include <rbl/macros.h>
-#include <http_in_c/common/utils.h>
-#include <http_in_c/runloop/runloop.h>
-#include <http_in_c/runloop/rl_internal.h>
+#include <src/common/utils.h>
+#include <src/runloop/runloop.h>
+// #include <src/runloop/rl_internal.h>
 
 typedef struct QReader_s {
     RunloopRef      rdr_runloop_ref;

@@ -4,8 +4,8 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "${workspaceFolder}/apps/**",
-                "${workspaceFolder}/marvin/**",
+                "${workspaceFolder}/src/**",
+                "${workspaceFolder}/apps_http/**",
                 "${workspaceFolder}/tests/**",
                 "${workspaceFolder}/vendor/include/**",
                 "${workspaceFolder}/vendor/src/**"
@@ -14,7 +14,10 @@
             "compilerPath": "/usr/bin/clang",
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "clang-x64"
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerArgs": [
+                "-fms-extensions"
+            ]
         }
     ],
     "version": 4

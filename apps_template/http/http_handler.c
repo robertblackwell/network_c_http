@@ -2,9 +2,9 @@
 
 #include <rbl/macros.h>
 #include <rbl/check_tag.h>
-#include <http_in_c/runloop/runloop.h>
-#include <http_in_c/runloop/rl_internal.h>
-#include <http_in_c/http_protocol/http_handler.h>
+#include <src/runloop/runloop.h>
+#include <src/runloop/rl_internal.h>
+#include <src/http_protocol/http_handler.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -12,8 +12,8 @@
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <errno.h>
-#include <http_in_c/http_protocol/http_message.h>
-#include <http_in_c/http_protocol/http_process_request.h>
+#include <src/http_protocol/http_message.h>
+#include <src/http_protocol/http_process_request.h>
 
 //static HttpMessageRef process_request(HttpHandlerRef href, HttpMessageRef request);
 static void handle_request( void* href, HttpMessageRef msgref, int error_code);

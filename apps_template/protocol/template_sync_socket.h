@@ -1,8 +1,8 @@
 #ifndef c_http_tmpl_syncsocket_h
 #define c_http_tmpl_syncsocket_h
 
-#include <http_in_c/tmpl_protocol/tmpl_message.h>
-#include <http_in_c/tmpl_protocol/tmpl_message_parser.h>
+#include <src/tmpl_protocol/tmpl_message.h>
+#include <src/tmpl_protocol/tmpl_message_parser.h>
 
 #include <assert.h>
 #include <stdio.h>

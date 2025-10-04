@@ -1,10 +1,10 @@
 #ifndef c_demo_server_h
 #define c_demo_server_h
-#include <http_in_c/demo_protocol/demo_message.h>
-#include <http_in_c/demo_protocol/demo_connection.h>
-#include <http_in_c/common/socket_functions.h>
-#include <http_in_c/constants.h>
-#include <http_in_c/runloop/runloop.h>
+#include <src/demo_protocol/demo_message.h>
+#include <src/demo_protocol/demo_connection.h>
+#include <src/common/socket_functions.h>
+#include <src/constants.h>
+#include <src/runloop/runloop.h>
 #define DemoServer_TAG "DmSRVR"
 #include <rbl/check_tag.h>
 

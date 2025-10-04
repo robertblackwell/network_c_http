@@ -1,7 +1,7 @@
 #ifndef C_HTTP_Tmpl_VERIFY_THREAD_CONTEXT_H
 #define C_HTTP_Tmpl_VERIFY_THREAD_CONTEXT_H
 #include "verify_statistics.h"
-#include <http_in_c/tmpl_protocol/tmpl_message.h>
+#include <src/tmpl_protocol/tmpl_message.h>
 
 struct VerifyThreadContext_s {
     char* url;

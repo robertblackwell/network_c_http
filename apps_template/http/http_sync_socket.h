@@ -1,8 +1,8 @@
 #ifndef c_http_http_syncsocket_h
 #define c_http_http_syncsocket_h
 
-#include <http_in_c/http_protocol/http_message.h>
-#include <http_in_c/http_protocol/http_message_parser.h>
+#include <src/http_protocol/http_message.h>
+#include <src/http_protocol/http_message_parser.h>
 
 #include <assert.h>
 #include <stdio.h>

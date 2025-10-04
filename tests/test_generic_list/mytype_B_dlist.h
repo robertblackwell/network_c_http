@@ -8,7 +8,7 @@
 #define TYPE MyTypeB
 #define TYPED(THING) MyTypeB##THING
 #define PREFIX(THING) MyTypeBChain##THING
-#include <http_in_c/common/generics/dlist_template.h>
+#include <src/common/generics/dlist_template.h>
 //#include "dlist_template.h"
 
 

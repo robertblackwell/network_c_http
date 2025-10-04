@@ -1,7 +1,7 @@
 #ifndef C_HTTP_Http_VERIFY_THREAD_CONTEXT_H
 #define C_HTTP_Http_VERIFY_THREAD_CONTEXT_H
-#include "http_in_c/common/verify_statistics.h"
-#include <http_in_c/http_protocol/http_message.h>
+#include <src/common/verify_statistics.h>
+#include <src/http_protocol/http_message.h>
 
 struct VerifyThreadContext_s {
     char* url;

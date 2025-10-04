@@ -2,9 +2,9 @@
 #include <assert.h>
 #include <stdio.h>
 #include <rbl/unittest.h>
-#include <http_in_c/common/cbuffer.h>
+#include <src/common/cbuffer.h>
 #include <rbl/logger.h>
-#include <http_in_c/common/list.h>
+#include <src/common/list.h>
 
 typedef struct DummyObj_s {
     long value;

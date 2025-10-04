@@ -1,5 +1,5 @@
 
-#include <http_in_c/common/alloc.h>
+#include <src/common/alloc.h>
 #include <rbl/unittest.h>
 
 #include <assert.h>
