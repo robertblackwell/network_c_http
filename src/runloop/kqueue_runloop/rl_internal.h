@@ -22,7 +22,7 @@
 // enables use of eventfd rather than two pipe trick
 #define  runloop_eventfd_ENABLE
 
-
+#if 0
 struct FdTable_s;
 //===============
 // #define CBTABLE_MAX 4096
@@ -36,7 +36,7 @@ RunloopWatcherBaseRef FdTable_lookup(FdTableRef athis, int fd);
 int        FdTable_iterator(FdTableRef athis);
 int        FdTable_next_iterator(FdTableRef athis, int iter);
 uint64_t   FdTable_size(FdTableRef athis);
-
+#endif
 // /**
 //  * A Functor is a generic callback - a function pointer (of type PostableFunction) and single anonymous argument.
 //  *
@@ -82,7 +82,7 @@ struct Runloop_s {
     bool                    closed_flag;
     bool                    runloop_executing;
     pthread_t               tid;
-    FdTableRef              table; // (int, CallbackData)
+    // FdTableRef              table; // (int, CallbackData)
     void*                   event_allocator;
     struct kevent           change[runloop_MAX_EVENTS];
     int                     change_max;

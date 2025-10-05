@@ -16,6 +16,15 @@
                 "test_timer_multithread"
             ],
             "default": "test_timer_non_repeating"
+        },
+        {
+            "id":"anytest",
+            "type":"pickString",
+            "description": "Select the time test to run",
+            "options": [
+                "test_event_allocator/test_event_allocator",
+            ],
+            "default": "test_event_allocator/test_event_allocator"
         }
 
     ],
@@ -52,10 +61,10 @@
             ]
         },
         {
-            "name": "(gdb) timer_single_repeating",
+            "name": "test ",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/build/tests/test_runloop/test_timers/test_timer_single_repeating",
+            "program": "${workspaceFolder}/build/tests/${input:anytest}",
             "args": ["stop", "-c"],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",

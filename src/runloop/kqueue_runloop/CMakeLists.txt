@@ -15,7 +15,7 @@ set(kq_RUNLOOP_SOURCE_FILES
 		${CMAKE_CURRENT_SOURCE_DIR}/asio_stream.c
 		# ${CMAKE_CURRENT_SOURCE_DIR}/user_event_queue.c
 		${CMAKE_CURRENT_SOURCE_DIR}/fd_map.c
-		${CMAKE_CURRENT_SOURCE_DIR}/fdtable.c
+		# ${CMAKE_CURRENT_SOURCE_DIR}/fdtable.c
 		${CMAKE_CURRENT_SOURCE_DIR}/functor.c
 		${CMAKE_CURRENT_SOURCE_DIR}/functor_list.c
 		# ${CMAKE_CURRENT_SOURCE_DIR}/interthread_queue.c

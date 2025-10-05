@@ -7,36 +7,43 @@
 #include <assert.h>
 #include <stdbool.h>
 
-void freelist_init(FreeListRef fl, uint16_t max)
+void freelist_init(FreeListRef fl)
 {
     fl->count = 0;
     fl->rdix = 0;
     fl->wrix = 0;
-    fl->max = max;
-    for(int i = 0; i < max - 1; i++) {
+    fl->max_entries = EVT_MAX;
+    fl->modulo_max = EVT_MAX+1;
+    for(int i = 0; i < fl->max_entries; i++) {
         freelist_add(fl, i);
     }
 }
 bool freelist_is_full(FreeListRef fl)
 {
-    return ((fl->wrix + 1) % fl->max) == fl->rdix;
+    return fl->count == (fl->max_entries);
 }
 bool freelist_is_empty(FreeListRef fl)
 {
-    return (fl->rdix == fl->wrix);
+    return (fl->count == 0);
 }
 void freelist_add(FreeListRef fl, uint16_t element)
 {
     assert(!freelist_is_full(fl));
+    fl->count++;
     fl->buffer[fl->wrix] = element;
-    fl->wrix = (fl->wrix + 1) % fl->max; 
+    fl->wrix = (fl->wrix + 1) % fl->modulo_max; 
 }
 uint16_t freelist_get(FreeListRef fl)
 {
     assert(!freelist_is_empty(fl));
     uint16_t v = fl->buffer[fl->rdix];
-    fl->rdix = (fl->rdix + 1) % fl->max;
+    fl->count--;
+    fl->rdix = (fl->rdix + 1) % fl->modulo_max;
     return v;
+}
+size_t freelist_size(FreeListRef fl)
+{
+    return fl->count;
 }
 EventTable* event_allocator_new()
 {
@@ -47,7 +54,7 @@ EventTable* event_allocator_new()
 }
 void event_allocator_init(EventTableRef ot)
 {
-    freelist_init(&(ot->free_list), runloop_MAX_EVENTS);
+    freelist_init(&(ot->free_list));
 }
 void* event_allocator_alloc(EventTableRef ot)
 {
@@ -62,7 +69,15 @@ void event_allocator_free(EventTableRef ot, void* p)
     uint16_t ix = (mp->m).my_index;
     freelist_add(&(ot->free_list), ix);
 }
-bool event_allocator_has_outstanding_events(EventTableRef ot)
+size_t event_allocator_number_in_use(EventTableRef et)
 {
-    return ! freelist_is_full(&(ot->free_list));
+
+    FreeListRef fl = &(et->free_list);
+    int fl_unused = freelist_size(fl);
+    size_t fl_used = (fl->max_entries) - fl_unused;
+    return fl_used;
+}
+bool event_allocator_has_outstanding_events(EventTableRef et)
+{
+    return ! freelist_is_full(&(et->free_list));
 }

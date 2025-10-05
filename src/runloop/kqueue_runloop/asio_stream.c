@@ -76,6 +76,7 @@ void asio_stream_destroy(AsioStreamRef this)
     if(fd > 0) {
         asio_stream_close(this);
     }
+    event_allocator_free(asio_stream_get_runloop(this)->event_allocator, this);
     free(this->runloop_stream_ref);
     this->runloop_stream_ref = NULL;
     RBL_LOG_FMT("asio_stream_free close socket: %d", fd)
@@ -92,7 +93,8 @@ void asio_stream_close(AsioStreamRef cref)
      * @TODO - is this right
     runloop_stream_deregister(cref->runloop_stream_ref);
     */
-    FdTable_remove(cref->runloop_stream_ref->runloop->table, cref->fd);
+    // FdTable_remove(cref->runloop_stream_ref->runloop->table, cref->fd);
+
     close(cref->fd);
     cref->fd = -1;
     cref->runloop_stream_ref->stream.fd = -1;

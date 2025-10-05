@@ -106,7 +106,7 @@ void runloop_init(RunloopRef athis) {
     runloop->runloop_executing = false;
     RBL_ASSERT((runloop->kqueue_fd != -1), "kqueue create failed");
     RBL_LOG_FMT("runloop_new kqueue_fd %d", runloop->kqueue_fd);
-    runloop->table = FdTable_new();
+    // runloop->table = FdTable_new();
     runloop->event_allocator = event_allocator_new();
     runloop->ready_list = functor_list_new(runloop_READY_LIST_MAX);
     runloop->change_count = 0;
@@ -122,11 +122,11 @@ void runloop_close(RunloopRef athis)
     int status = close(athis->kqueue_fd);
     RBL_LOG_FMT("runloop_close status: %d errno: %d", status, errno);
     RBL_ASSERT((status != -1), "close kqueue_fd failed");
-    int next_fd = FdTable_iterator(athis->table);
-    while (next_fd  != -1) {
-        close(next_fd);
-        next_fd = FdTable_next_iterator(athis->table, next_fd);
-    }
+    // int next_fd = FdTable_iterator(athis->table);
+    // while (next_fd  != -1) {
+    //     close(next_fd);
+    //     next_fd = FdTable_next_iterator(athis->table, next_fd);
+    // }
 }
 
 void runloop_free(RunloopRef athis)
@@ -136,7 +136,8 @@ void runloop_free(RunloopRef athis)
     if(! athis->closed_flag) {
         runloop_close(athis);
     }
-    FdTable_free(athis->table);
+    // what to do about event_allocator_free(athis->event_allocator);
+    // FdTable_free(athis->table);
     functor_list_free(athis->ready_list);
     free(athis);
 }
@@ -192,32 +193,32 @@ int runloop_register(RunloopRef athis, int fd, uint32_t interest, RunloopWatcher
     // FdTable_insert(athis->table, wref, fd);
     return 0;
 }
-int runloop_deregister(RunloopRef athis, int fd)
-{
-    RUNLOOP_CHECK_TAG(athis)
-    RUNLOOP_CHECK_END_TAG(athis)
-    RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
-    // runloop_epoll_ctl(athis, EPOLL_CTL_DEL, fd, EPOLLEXCLUSIVE | EPOLLIN, NULL);
-    // FdTable_remove(athis->table, fd);
-    return 0;
-}
+// int runloop_deregister(RunloopRef athis, int fd)
+// {
+//     RUNLOOP_CHECK_TAG(athis)
+//     RUNLOOP_CHECK_END_TAG(athis)
+//     RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
+//     // runloop_epoll_ctl(athis, EPOLL_CTL_DEL, fd, EPOLLEXCLUSIVE | EPOLLIN, NULL);
+//     // FdTable_remove(athis->table, fd);
+//     return 0;
+// }
 
-int runloop_reregister(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref) {
-    RUNLOOP_CHECK_TAG(athis)
-    RUNLOOP_CHECK_END_TAG(athis)
-    RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
-    // runloop_epoll_ctl(athis, EPOLL_CTL_MOD, fd, interest, wref);
-    RunloopWatcherBaseRef wref_tmp = FdTable_lookup(athis->table, fd);
-    assert(wref == wref_tmp);
-    return 0;
-}
-void runloop_delete(RunloopRef athis, int fd)
-{
-    RUNLOOP_CHECK_TAG(athis)
-    RUNLOOP_CHECK_END_TAG(athis)
-    RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
-    FdTable_remove(athis->table, fd);
-}
+// // int runloop_reregister(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref) {
+// //     RUNLOOP_CHECK_TAG(athis)
+// //     RUNLOOP_CHECK_END_TAG(athis)
+// //     RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
+// //     // runloop_epoll_ctl(athis, EPOLL_CTL_MOD, fd, interest, wref);
+// //     RunloopWatcherBaseRef wref_tmp = FdTable_lookup(athis->table, fd);
+// //     assert(wref == wref_tmp);
+// //     return 0;
+// // }
+// void runloop_delete(RunloopRef athis, int fd)
+// {
+//     RUNLOOP_CHECK_TAG(athis)
+//     RUNLOOP_CHECK_END_TAG(athis)
+//     RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
+//     FdTable_remove(athis->table, fd);
+// }
 void print_events(struct kevent events[], int count)
 {
     for(int i = 0; i < count; i++) {
@@ -239,8 +240,9 @@ int runloop_run(RunloopRef athis, time_t timeout_ms) {
         RUNLOOP_CHECK_END_TAG(athis)
         time_t passed = time(NULL) - start;
 
-        if((FdTable_size(athis->table) == 0) 
-            && ((functor_list_size(athis->ready_list) == 0))
+        if(
+            // (FdTable_size(athis->table) == 0) && 
+            ((functor_list_size(athis->ready_list) == 0))
             && (! event_allocator_has_outstanding_events(athis->event_allocator))
         ) {
             // no more work to do - clean exit
@@ -259,9 +261,9 @@ int runloop_run(RunloopRef athis, time_t timeout_ms) {
             struct kevent* events = runloop_get_fresh_event_table(athis);
             int max_events = runloop_get_max_events(athis);
             int nev = kevent(athis->kqueue_fd, change, change_n, events, max_events, timeout);
-            RBL_LOG_FMT("runloop keventreturned nev: %d fd[0]: %lu fds active: %llu  ready_list_size:%d",
+            RBL_LOG_FMT("runloop keventreturned nev: %d fd[0]: %lu events active: %zu  ready_list_size:%d",
                         nev, events[0].ident,
-                        FdTable_size(athis->table), functor_list_size(athis->ready_list));
+                        event_allocator_number_in_use(athis->event_allocator), functor_list_size(athis->ready_list));
             time_t currtime = time(NULL);
             switch (nev) {
                 case -1:
