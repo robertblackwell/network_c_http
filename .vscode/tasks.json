@@ -4,10 +4,14 @@
     "version": "2.0.0",
     "inputs":[
         {
-            "type": "promptString",
+            "type": "pickString",
             "id": "buildDir",
             "description": "Build directory",
-            "default": "cmake-build-debug"
+            "options":[
+                "build",
+                "cmake-build-debug",
+            ],
+            "default": "build"
           }
     ],
     "tasks": [
@@ -46,17 +50,13 @@
         },
         {
             "type": "shell",
-            "label": "mymake",
-            "command": "make",
+            "label": "mymake_clean",
+            "command": "make clean",
             "args": [
-                "-j8"
             ],
             "options": {
                 "cwd": "${workspaceRoot}/${input:buildDir}"
             },
-            "dependsOn": [
-                "cmake"
-            ],
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -67,15 +67,24 @@
         },
         {
             "type": "shell",
-            "label": "myclean",
+            "label": "mymake",
             "command": "make",
+            "args": [
+                "-j8"
+            ],
             "options": {
                 "cwd": "${workspaceRoot}/${input:buildDir}"
             },
-            "dependsOn": [
-                "cmake"
+            "dependsOn":[
+                "mymake_clean"
             ],
-            "problemMatcher": []
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ]
         },
         {
             "type": "shell",

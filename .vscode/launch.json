@@ -12,7 +12,8 @@
                 "test_timer_non_repeating",
                 "test_timer_post",
                 "test_timer_single_repeating",
-                "test_timer_multiple_repeating"
+                "test_timer_multiple_repeating",
+                "test_timer_multithread"
             ],
             "default": "test_timer_non_repeating"
         }
@@ -20,7 +21,7 @@
     ],
     "configurations": [
         {
-            "name": "(gdb) test_timer",
+            "name": "c/cpp test_timer",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/tests/test_runloop/test_timers/${input:myTimerTest}",
@@ -41,6 +42,7 @@
             "linux":{
                 "MIMode": "gdb",
             },
+            "preLaunchTask": "mymake",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
