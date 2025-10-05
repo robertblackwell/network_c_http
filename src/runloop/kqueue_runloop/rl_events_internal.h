@@ -1,7 +1,8 @@
-#ifndef C_HTTP_RL_EVENTS_INTERNAL_H
-#define C_HTTP_RL_EVENTS_INTERNAL_H
-#include "runloop.h"
-#include "rl_checktag.h"
+#ifndef C_HTTP_KQRL_EVENTS_INTERNAL_H
+#define C_HTTP_KQRL_EVENTS_INTERNAL_H
+#include <kqueue_runloop/runloop.h>
+#include <kqueue_runloop/rl_internal.h>
+#include <kqueue_runloop/rl_checktag.h>
 
 #include <pthread.h>
 #include <stdbool.h>

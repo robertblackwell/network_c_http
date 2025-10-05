@@ -5,7 +5,8 @@
 #include <src/common/socket_functions.h>
 #include <rbl/logger.h>
 #include <stdio.h>
-#include <mcheck.h>
+#include <unistd.h>
+// #include <mcheck.h>
 #include <pthread.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -30,7 +31,7 @@ void demo_process_main(char* host, int port, int nbr_threads, int nbr_connection
 {
     ThreadContext thread_table[nbr_threads];
     assert(nbr_threads <= MAX_NBR_THREADS);
-    printf("Process starting pid: %d\n", getpid());
+    printf("Process starting pid: %p\n", pthread_self());
     for(int i = 0; i < nbr_threads; i++) {
         ThreadContext* ctx = &(thread_table[i]);
         ctx->ident = i;
@@ -47,7 +48,7 @@ void* thread_function(void* arg)
 {
     ThreadContext* ctx = arg;
     int listening_socket_fd = create_listener_socket(ctx->port, ctx->host);
-    printf("thread pid: %d tid: %d host: %s port: %d ident: %d pthread_t: %lu listening_socket: %d\n", getpid(), gettid(), ctx->host, ctx->port, ctx->ident, ctx->thread, ctx->listening_socket);
+    printf("thread pid: %d tid: %p host: %s port: %d ident: %d pthread_t: %p listening_socket: %d\n", getpid(), pthread_self(), ctx->host, ctx->port, ctx->ident, ctx->thread, ctx->listening_socket);
     ctx->server_ref = demo_server_new(ctx->port, ctx->host, listening_socket_fd, demo_process_request);
     demo_server_listen(ctx->server_ref);
     runloop_run(ctx->server_ref->runloop_ref, -1 /* infinite*/);

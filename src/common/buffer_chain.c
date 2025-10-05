@@ -16,6 +16,7 @@ BufferChainRef BufferChain_new()
     BufferChainRef tmp = eg_alloc(sizeof(BufferChain));
     tmp->m_chain = List_new();
     tmp->m_size = 0;
+    return tmp;
 }
 void BufferChain_free(BufferChainRef this)
 {

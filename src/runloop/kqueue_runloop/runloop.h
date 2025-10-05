@@ -1,5 +1,5 @@
-#ifndef C_HTTP_EPOLL_RUNLOOP_H
-#define C_HTTP_EPOLL_RUNLOOP_H
+#ifndef C_HTTP_KQ_RUNLOOP_H
+#define C_HTTP_KQ_RUNLOOP_H
 
 #include <stdint.h>
 #include <time.h>
@@ -63,21 +63,25 @@ struct RunloopWatcherBase_s;
 */
 typedef struct RunloopWatcherBase_s RunloopWatcherBase, *RunloopWatcherBaseRef;       // Base object for objects that wait for an fd event
 
-struct Functor_s;
-typedef struct Functor_s Functor;
-
-typedef uint64_t EventMask, RunloopTimerEvent;
-
 /**
  * PostableFunction defines the call signature of functions that can be added to a runloops queue of
  * functions to be called. As such they represent the next step in an ongoing computation of a lightweight
  * "thread".
  */
 typedef void (*PostableFunction) (RunloopRef runloop_ref, void* arg);
-
 typedef void(*AsioReadcallback)(void* arg, long length, int error_number);
 typedef void(*AsioWritecallback)(void* arg, long length, int error_number);
-RunloopRef runloop_get_threads_reactor();
+
+typedef struct Functor_s
+{
+//    RunloopWatcherBaseRef wref; // this is borrowed do not free
+    PostableFunction f;
+    void *arg;
+} Functor, *FunctorRef;
+
+typedef uint64_t EventMask, RunloopTimerEvent;
+
+RunloopRef runloop_get_threads_runloop();
 /**
  * Create a new instance of a Runloop.
  *
@@ -116,27 +120,6 @@ void       runloop_delete(RunloopRef athis, int fd);
 void       runloop_verify(RunloopRef r);
 /** @} */
 
-/**
- * A Functor is a generic callback - a function pointer (of type PostableFunction) and single anonymous argument.
- *
- * The significant thing is that the function pointer, points to a function that has the correct
- * signature for the RunList
- *
-*/
- struct Functor_s;
-typedef struct Functor_s Functor, *FunctorRef;
-FunctorRef Functor_new(PostableFunction f, void* arg);
-void Functor_init(FunctorRef funref, PostableFunction f, void* arg);
-void Functor_free(FunctorRef athis);
-void Functor_call(FunctorRef athis, RunloopRef runloop_ref);
-bool Functor_is_empty(FunctorRef f);
-void Functor_dealloc(void **p);
-struct Functor_s
-{
-//    RunloopWatcherBaseRef wref; // this is borrowed do not free
-    PostableFunction f;
-    void *arg;
-};
 
 /**
  * The following include files provide the API for their specific type of event.

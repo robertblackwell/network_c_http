@@ -8,8 +8,9 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <pthread.h>
+#include <inttypes.h>
 
-static BufferChainRef simple_response_body(char* message, socket_handle_t socket, int pthread_self_value)
+static BufferChainRef simple_response_body(char* message, socket_handle_t socket, uint64_t pthread_self_value)
 {
     time_t t = time(NULL);
     struct tm *tm = localtime(&t);
@@ -23,7 +24,7 @@ static BufferChainRef simple_response_body(char* message, socket_handle_t socket
                  "%s"
                  "<p>Date/Time is %s</p>"
                  "<p>socket: %d</p>"
-                 "<p>p_thread_self %ld</p>"
+                 "<p>p_thread_self " PRIu64  "</p>"
                  "</body>"
                  "</html>";
 
@@ -75,7 +76,7 @@ HttpMessageRef app_handler_example(HttpMessageRef request, sync_worker_r wref)
         body_chain = echo_body_buffer_chain(request);
     } else {
 
-        body_chain = simple_response_body(msg, sync_worker_socketfd(wref), sync_worker_pthread(wref));
+        body_chain = simple_response_body(msg, sync_worker_socketfd(wref), (uint64_t)sync_worker_pthread(wref));
     }
     http_message_set_status(response, HTTP_STATUS_OK);
     http_message_set_reason(response, "OK");

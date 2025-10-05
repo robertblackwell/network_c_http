@@ -5,7 +5,10 @@ if(LINUX_FLAG)
 	message("Includeing epoll_runloop")
 	add_subdirectory(epoll_runloop)
 endif()
-
+if(APPLE)
+	message("Includeing kqueue_runloop")
+	add_subdirectory(kqueue_runloop)
+endif()
 set(C_HTTP_LIBRARY_SOURCE_FILES ${C_HTTP_LIBRARY_SOURCE_FILES} ${RUNLOOP_SOURCE_FILES} PARENT_SCOPE)
 set(C_HTTP_LIBRARY_HEADER_FILES ${C_HTTP_LIBRARY_HEADER_FILES} ${RUNLOOP_HEADER_FILES} PARENT_SCOPE)
 

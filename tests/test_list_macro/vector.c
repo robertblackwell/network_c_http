@@ -24,6 +24,7 @@
     vec->capacity = vector_MIN_CAP;                                            \
     vec->buf = malloc(sizeof(T) * vec->capacity);                              \
     vec->size = 0;                                                             \
+    return vec;                                                                \
   }
 
 

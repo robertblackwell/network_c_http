@@ -3,7 +3,6 @@
              /* See feature_test_macros(7) */
 #include <fcntl.h>
 #include <stdint.h>
-#include <sys/epoll.h>
 #include <math.h>
 #include <rbl/logger.h>
 #include <rbl/unittest.h>

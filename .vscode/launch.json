@@ -8,6 +8,7 @@
         "type":"pickString",
         "description": "Select the test to debug",
         "options": [
+            "test_runloop/test_timers/test_timer_non_repeating",
             "test_doctest/test_doctest",
             "test_streambuf/test_streambuf",
             "test_subcommands/test_subcommands",
@@ -36,10 +37,10 @@
     }],
     "configurations": [
         {
-            "name": "(gdb) test_q",
+            "name": "(gdb) test_timer",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/cmake-build-debug/tests/test_reactor/test_q",
+            "program": "${workspaceFolder}/build/tests/test_runloop/test_timers/test_timer_non_repeating",
             "args": [],
             "stopAtEntry": true,
             "cwd": "${workspaceFolder}",
@@ -50,7 +51,7 @@
                 }
             ],
             "externalConsole": false,
-            "MIMode": "gdb",
+            "MIMode": "lldb",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",

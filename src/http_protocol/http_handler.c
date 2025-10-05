@@ -8,8 +8,8 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/epoll.h>
 #include <errno.h>
+#include <pthread.h>
 #include <http_protocol/http_message.h>
 
 static void on_new_message_handler( void* href, HttpMessageRef request, int error_code);
@@ -116,8 +116,13 @@ static void postable_write_start(RunloopRef runloop_ref, void* href)
     HttpHandlerRef handler_ref = href;
     RBL_CHECK_TAG(HttpHandler_TAG, handler_ref)
     RBL_CHECK_END_TAG(HttpHandler_TAG, handler_ref)
-    pid_t tid = gettid();
-    RBL_LOG_FMT("postable_write_start tid: %d active_response:%p fd:%d  write_state: %d\n", tid, handler_ref->active_response, handler_ref->http_connection_ref->asio_stream_ref->fd, handler_ref->http_connection_ref->write_state);
+    #ifdef __APPLE__
+        pthread_t tid = pthread_self()
+    #elif defined(__linux__)
+        pid_t tid = gettid();
+    #else
+    #endif
+    RBL_LOG_FMT("postable_write_start tid: %p active_response:%p fd:%d  write_state: %d\n", tid, handler_ref->active_response, handler_ref->http_connection_ref->asio_stream_ref->fd, handler_ref->http_connection_ref->write_state);
     if(handler_ref->active_response != NULL) {
         return;
     }

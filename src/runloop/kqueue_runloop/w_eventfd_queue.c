@@ -1,6 +1,6 @@
 
-#include "runloop.h"
-#include "rl_internal.h"
+#include <kqueue_runloop/runloop.h>
+#include <kqueue_runloop/rl_internal.h>
 
 #include <assert.h>
 #include <pthread.h>
@@ -9,7 +9,6 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <errno.h>
-#include <sys/eventfd.h>
 #include <rbl/logger.h>
 #include <common/list.h>
 
@@ -22,7 +21,7 @@ static void mk_fds(EventfdQueueRef athis)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
 #ifdef runloop_eventfd_ENABLE
-    int fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+    int fd = -2;//eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
     me->readfd = fd;
     me->writefd = fd;
 #else

@@ -10,7 +10,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/epoll.h>
 #include <rbl/logger.h>
 #include <src/common/utils.h>
 #include <src/runloop/runloop.h>

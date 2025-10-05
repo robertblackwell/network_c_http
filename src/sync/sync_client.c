@@ -26,6 +26,7 @@ sync_client_t* sync_client_new(size_t read_buffer_size)
     RBL_SET_TAG(sync_client_TAG, this)
     this->connection_ptr = NULL;
     this->user_ptr = NULL;
+    return this;
 }
 void sync_client_init(sync_client_t* this, size_t read_buffer_size)
 {
@@ -115,7 +116,7 @@ static void connection_helper(sync_client_t* this, char* host, int portno)
         RBL_LOG_ERROR("getaddrinfo : %s", gai_strerror(errc));
         exit(-1);
     }
-    for(rp = result; rp != NULL; rp->ai_next) {
+    for(rp = result; rp != NULL; rp = rp->ai_next) {
         sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
         if(sfd == -1) {
             continue;

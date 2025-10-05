@@ -46,7 +46,7 @@ static char get_body_first_char(DemoMessageRef msg_ref)
     char first_byte = (char)(*(char*)(IOBuffer_data(iob)));
     return first_byte;
 }
-static char set_body_first_char(DemoMessageRef msg_ref, char first_byte)
+static void set_body_first_char(DemoMessageRef msg_ref, char first_byte)
 {
     assert(BufferChain_size(msg_ref->body));
     IOBufferRef iob = BufferChain_front(msg_ref->body);
@@ -102,6 +102,7 @@ bool demo_message_get_is_request(DemoMessageRef this)
 {
     RBL_CHECK_TAG(DemoMessage_TAG, this);
     RBL_CHECK_END_TAG(DemoMessage_TAG, this);
+    return get_body_first_char(this) == 'R';
 }
 void demo_message_set_is_request(DemoMessageRef this, bool yn)
 {

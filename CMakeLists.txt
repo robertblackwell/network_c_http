@@ -4,7 +4,9 @@ cmake_minimum_required(VERSION 3.16)
 ##
 ## That is - knows nothing about installing this project
 ##
-
+# if(APPLE)
+# 	set(CMAKE_C_COMPILER "gcc-15")
+# endif()
 ##
 ## Project 
 ## name  version
@@ -51,6 +53,11 @@ SET(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 ##=============================================================================
 # project C compile options
 ##=============================================================================
+# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -nodefaultlibs")
+
+# set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -x c")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -std=c11 ")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}  -Wno-gnu-anonymous-struct -Wno-microsoft-anon-tag")
 
 # -fms-extensions enables a Microsoft extension that allows merging anonymous struct into a struct
 # used extensively in the runloop type definitions. Its a form of inheritence
@@ -144,10 +151,12 @@ set(C_HTTP_PROJECT_DIR       ${C_HTTP_SOURCE_DIR})
 ## location of project header and source files
 set(C_HTTP_SOURCE_NAME       src)
 set(C_HTTP_INCLUDE_NAME      src)
+set(C_HTTP_RUNLOOP_NAME      src/runloop)
 set(C_HTTP_TOOLS_NAME        tools)
 set(C_HTTP_LIB_NAME          c_http_library)
 set(C_HTTP_SOURCE_DIR        ${C_HTTP_PROJECT_DIR}/${C_HTTP_SOURCE_NAME})
 set(C_HTTP_INCLUDE_DIR       ${C_HTTP_PROJECT_DIR}/${C_HTTP_INCLUDE_NAME})
+set(C_HTTP_RUNLOOP_DIR       ${C_HTTP_PROJECT_DIR}/${C_HTTP_RUNLOOP_NAME})
 set(C_HTTP_TOOLS_DIR         ${C_HTTP_PROJECT_DIR}/${C_HTTP_TOOLS_NAME})
 ## location of other/3rd party headers, src and libs
 set(C_HTTP_VENDOR_NAME		 vendor)
@@ -166,6 +175,7 @@ set(C_HTTP_INCLUDE_PATHS
 	${C_HTTP_PROJECT_DIR}
 	${C_HTTP_INCLUDE_DIR}
 	${C_HTTP_SOURCE_DIR}
+	${C_HTTP_RUNLOOP_DIR}
 	${C_HTTP_VENDOR_INCLUDEDIR}
 	${C_HTTP_VENDOR_SRCDIR}
 )
@@ -204,6 +214,7 @@ if (C_HTTP_Verbose)
 	message("C_HTTP_PROJECT_DIR                ${C_HTTP_PROJECT_DIR}")
 	message("C_HTTP_SOURCE_DIR                 ${C_HTTP_SOURCE_DIR}")
 	message("C_HTTP_INCLUDE_DIR                ${C_HTTP_INCLUDE_DIR}")
+	message("C_HTTP_RUNLOOP_DIR                ${C_HTTP_RUNLOOP_DIR}")
 	message("C_HTTP_VENDOR_NAME                ${C_HTTP_VENDOR_NAME}")
 	message("C_HTTP_VENOR_DIR                  ${C_HTTP_VENDOR_DIR}")
 	message("C_HTTP_VENDOR_INCLUDEDIR          ${C_HTTP_VENDOR_INCLUDEDIR}")
@@ -230,8 +241,8 @@ add_subdirectory(tests)
 #add_subdirectory(sync_server_app)
 #add_subdirectory(verifier)
 #add_subdirectory(async-server-app)
- add_subdirectory(apps_demo)
-add_subdirectory(apps_http)
+#  add_subdirectory(apps_demo)
+# add_subdirectory(apps_http)
 
 # Doxygen
 

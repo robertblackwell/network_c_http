@@ -277,7 +277,7 @@ void http_message_set_reason(HttpMessageRef this, const char* reason_cstr)
 const char* http_message_get_reason(HttpMessageRef this)
 {
     RBL_CHECK_TAG(HttpMessage_TAG, this)
-    (const char*)Cbuffer_cstr(this->reason);
+    return (const char*)Cbuffer_cstr(this->reason);
 }
 CbufferRef http_message_get_reason_cbuffer(HttpMessageRef this)
 {

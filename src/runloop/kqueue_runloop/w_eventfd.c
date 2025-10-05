@@ -1,5 +1,5 @@
-#include "runloop.h"
-#include "rl_internal.h"
+#include <kqueue_runloop/runloop.h>
+#include <kqueue_runloop/rl_internal.h>
 #include <rbl/macros.h>
 #include <assert.h>
 #include <stdio.h>
@@ -7,8 +7,6 @@
 #include <stdlib.h>
 #include <errno.h>
 
-#include <sys/epoll.h>
-#include <sys/eventfd.h>
 #include <unistd.h>
 #define RUNLOOP_EVENTFD_SEMAPHORE
 
@@ -58,7 +56,7 @@ void runloop_eventfd_init(RunloopEventfdRef this, RunloopRef runloop)
 #else
     #ifdef RUNLOOP_EVENTFD_SEMAPHORE
         RBL_LOG_FMT("two pipe trick disabled semaphore enabled")
-        this->fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC | EFD_SEMAPHORE);
+        // this->fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC | EFD_SEMAPHORE);
     #else
     RBL_LOG_FMT("two pipe trick disabled semaphore disabled")
         this->fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
@@ -120,7 +118,7 @@ void runloop_eventfd_arm(RunloopEventfdRef athis, PostableFunction postable, voi
 {
     EVENTFD_SET_TAG(athis);
     EVENTFD_CHECK_TAG(athis)
-    uint32_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP;
+    uint32_t interest = 0;//EPOLLIN | EPOLLERR | EPOLLRDHUP;
     if( postable != NULL) {
         athis->fdevent_postable = postable;
     }

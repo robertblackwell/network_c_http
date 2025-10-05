@@ -1,10 +1,9 @@
-#include "runloop.h"
-#include "rl_internal.h"
+#include <kqueue_runloop/runloop.h>
+#include <kqueue_runloop/rl_internal.h>
 #include <rbl/logger.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/epoll.h>
 #include <unistd.h>
 
 /**
@@ -22,16 +21,16 @@ static void handler(RunloopWatcherBaseRef watcher, uint64_t event)
     /*
      * These should be posted not called
      */
-    if(rl_stream->event_mask & EPOLLIN) {
+    if(rl_stream->event_mask /*& EPOLLIN*/) {
         RBL_LOG_FMT("handler runloop_stream POLLIN fd: %d \n", rl_stream->fd);
     }
-    if(rl_stream->event_mask & EPOLLOUT) {
+    if(rl_stream->event_mask /*& EPOLLOUT*/) {
         RBL_LOG_FMT("handler runloop_stream POLLOUT fd: %d \n", rl_stream->fd);
     }
-    if((rl_stream->event_mask & EPOLLIN) && (rl_stream->read_postable_cb)) {
+    if((rl_stream->event_mask /*& EPOLLIN*/) && (rl_stream->read_postable_cb)) {
         rl_stream->read_postable_cb(rl, rl_stream->read_postable_arg);
     }
-    if((rl_stream->event_mask & EPOLLOUT) && (rl_stream->write_postable_cb)) {
+    if((rl_stream->event_mask /*& EPOLLOUT*/) && (rl_stream->write_postable_cb)) {
         rl_stream->write_postable_cb(rl, rl_stream->write_postable_arg);
     }
 }
@@ -100,7 +99,7 @@ void runloop_stream_arm_both(RunloopStreamRef athis,
                              PostableFunction read_postable_cb, void* read_arg,
                              PostableFunction write_postable_cb, void* write_arg)
 {
-    uint64_t interest = EPOLLET | EPOLLOUT | EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | athis->event_mask;
+    uint64_t interest = 0;//EPOLLET | EPOLLOUT | EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | athis->event_mask;
     athis->event_mask = interest;
     SOCKW_SET_TAG(athis);
     SOCKW_SET_END_TAG(athis);
@@ -122,7 +121,7 @@ void runloop_stream_arm_both(RunloopStreamRef athis,
 
 void runloop_stream_arm_read(RunloopStreamRef athis, PostableFunction postable_cb, void* arg)
 {
-    uint64_t interest = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | athis->event_mask;
+    uint64_t interest = 0;//EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | athis->event_mask;
     athis->event_mask = interest;
     SOCKW_SET_TAG(athis);
     SOCKW_SET_END_TAG(athis);
@@ -137,7 +136,7 @@ void runloop_stream_arm_read(RunloopStreamRef athis, PostableFunction postable_c
 }
 void runloop_stream_arm_write(RunloopStreamRef athis, PostableFunction postable_cb, void* arg)
 {
-    uint64_t interest = EPOLLOUT | EPOLLERR | EPOLLHUP | EPOLLRDHUP | athis->event_mask;
+    uint64_t interest = 0;//EPOLLOUT | EPOLLERR | EPOLLHUP | EPOLLRDHUP | athis->event_mask;
     athis->event_mask = interest;
     SOCKW_SET_TAG(athis);
     SOCKW_SET_END_TAG(athis);
@@ -152,7 +151,7 @@ void runloop_stream_arm_write(RunloopStreamRef athis, PostableFunction postable_
 }
 void runloop_stream_disarm_read(RunloopStreamRef athis)
 {
-    athis->event_mask &= ~EPOLLIN;
+    athis->event_mask &= 0;//~EPOLLIN;
     SOCKW_SET_TAG(athis);
     SOCKW_SET_END_TAG(athis);
     athis->read_postable_cb = NULL;
@@ -162,7 +161,7 @@ void runloop_stream_disarm_read(RunloopStreamRef athis)
 }
 void runloop_stream_disarm_write(RunloopStreamRef athis)
 {
-    athis->event_mask = ~EPOLLOUT & athis->event_mask;
+    athis->event_mask = 0;//~EPOLLOUT & athis->event_mask;
     SOCKW_SET_TAG(athis);
     SOCKW_SET_END_TAG(athis);
     athis->write_postable_cb = NULL;

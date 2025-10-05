@@ -1,9 +1,8 @@
-#include "runloop.h"
-#include "rl_internal.h"
+#include <kqueue_runloop/runloop.h>
+#include <kqueue_runloop/rl_internal.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/epoll.h>
 #include <unistd.h>
 
 static void on_read_ready_postable(RunloopRef rl, void* qw_arg)
@@ -68,7 +67,7 @@ void runloop_queue_watcher_register(RunloopQueueWatcherRef athis, PostableFuncti
 {
     QUEUE_WATCHER_CHECK_TAG(athis)
     QUEUE_WATCHER_CHECK_END_TAG(athis)
-    uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
+    uint64_t interest = 0;//EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
 
 //    uint32_t interest = watch_what;
     athis->queue_postable = postable_cb;

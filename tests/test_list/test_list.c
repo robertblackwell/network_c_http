@@ -14,6 +14,7 @@ DummyObj* DummyObj_new(long val)
 {
     DummyObj* dref = malloc(sizeof(DummyObj));
     dref->value = val;
+    return dref;
 }
 void DummyObj_free(DummyObj* dref)
 {
@@ -227,10 +228,10 @@ int test_list_remove_backx()
     DummyObj* oref1 = (DummyObj*)List_remove_last(lref);
     DummyObj* oref2 = (DummyObj*)List_remove_last(lref);
     DummyObj* oref3 = (DummyObj*)List_remove_last(lref);
-    UT_EQUAL_INT((List_size(lref)), 0);
-    UT_EQUAL_INT((oref1->value), 333);
-    UT_EQUAL_INT((oref2->value), 222);
-    UT_EQUAL_INT((oref3->value), 111);
+    UT_EQUAL_LONG(((long)(List_size(lref))), 0L);
+    UT_EQUAL_LONG(((long)(oref1->value)), 333L);
+    UT_EQUAL_LONG(((long)(oref2->value)), 222L);
+    UT_EQUAL_LONG((long)(oref3->value), 111L);
     List_safe_free(lref, dealloc);
     lref=NULL;
     UT_EQUAL_PTR(lref, NULL);

@@ -77,7 +77,11 @@
         "variant": "cpp",
         "any": "cpp",
         "hash_map": "cpp",
-        "hash_set": "cpp"
+        "hash_set": "cpp",
+        "io_read_asio.h": "c",
+        "utils.h": "c",
+        "runloop.h": "c"
     },
-    "workbench.tree.indent": 24
+    "workbench.tree.indent": 24,
+    "C_Cpp.default.compilerPath": "/usr/bin/cc"
 }

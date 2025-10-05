@@ -1,13 +1,13 @@
 #include <rbl/macros.h>
-#include <runloop/epoll_runloop/runloop.h>
-#include <runloop/epoll_runloop/rl_internal.h>
+#include <kqueue_runloop/runloop.h>
+#include <kqueue_runloop/rl_internal.h>
 #include <time.h>
-#include <sys/timerfd.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include <sys/epoll.h>
+// #include <sys/timerfd.h>
+// #include <sys/epoll.h>
 #include <errno.h>
 #include <rbl/logger.h>
 
@@ -32,8 +32,8 @@ static void print_current_tme(char* prefix)
 static void handler(RunloopWatcherBaseRef watcher, uint64_t event)
 {
     struct timespec ts;
-    struct itimerspec its;
-    struct itimerspec its_old;
+    // struct itimerspec its;
+    // struct itimerspec its_old;
 
     int r = clock_gettime(CLOCK_REALTIME, &ts);
     uint64_t tns = ts.tv_sec * 1000000 + ts.tv_nsec;
@@ -41,13 +41,13 @@ static void handler(RunloopWatcherBaseRef watcher, uint64_t event)
     RunloopTimerRef timer_watcher = (RunloopTimerRef)watcher;
     WTIMER_CHECK_TAG(timer_watcher)
 
-    int r2 = timerfd_gettime(timer_watcher->fd, &its_old);
+    // int r2 = timerfd_gettime(timer_watcher->fd, &its_old);
     /**
      * Have to read from the fd to reset the EPOLLIN event
      */
     uint64_t ret;
-    int nread = read(timer_watcher->fd, &ret, sizeof(ret));
-    RBL_LOG_FMT("read() returned %d, res=%lx n", nread, ret);
+    // int nread = read(timer_watcher->fd, &ret, sizeof(ret));
+    // RBL_LOG_FMT("read() returned %d, res=%lx n", nread, ret);
 
     if(!timer_watcher->repeating) {
         runloop_timer_deregister(timer_watcher);
@@ -73,12 +73,13 @@ void runloop_timer_init(RunloopTimerRef this, RunloopRef runloop)
     this->timer_postable_arg = NULL;
     this->interval = 0;
     this->repeating = false;
-    this->fd = timerfd_create(CLOCK_REALTIME, TFD_CLOEXEC | TFD_NONBLOCK);
+    // this->fd = timerfd_create(CLOCK_REALTIME, TFD_CLOEXEC | TFD_NONBLOCK);
     RBL_LOG_FMT("runloop_timer_init fd: %d ", this->fd);
 }
 RunloopTimerRef runloop_timer_new(RunloopRef runloop_ref)
 {
-    RunloopTimerRef this = malloc(sizeof(RunloopTimer));
+    // RunloopTimerRef this = malloc(sizeof(RunloopTimer));
+    RunloopTimerRef this = event_allocator_alloc(runloop_ref->event_allocator);
     runloop_timer_init(this, runloop_ref);
     return this;
 }
@@ -86,9 +87,11 @@ void runloop_timer_free(RunloopTimerRef athis)
 {
     WTIMER_CHECK_TAG(athis)
     WTIMER_CHECK_END_TAG(athis)
-    close(athis->fd);
-    free((void*)athis);
+    // close(athis->fd);
+    event_allocator_free(athis->runloop->event_allocator, athis);
+    // free((void*)athis);
 }
+#if 0
 struct itimerspec WTimerFd_update_interval(RunloopTimerRef this, uint64_t interval_ms, bool repeating)
 {
     WTIMER_CHECK_TAG(this)
@@ -121,6 +124,47 @@ struct itimerspec WTimerFd_update_interval(RunloopTimerRef this, uint64_t interv
     }
     return its;
 }
+    #endif
+static int register_timer(RunloopRef rl, void* ctx, uint64_t id, bool one_shot, uint64_t milli_secs)
+{
+    int flags = EV_ADD | EV_ENABLE | EV_RECEIPT | (one_shot ? EV_ONESHOT : 0); 
+    struct kevent change;
+    struct kevent* change_ptr;
+    int nev;
+    #ifdef RL_KQ_BATCH_CHANGES
+        change_ptr = runloop_change_next(rl)
+        EV_SET(&change, id, EVFILT_TIMER, flags, 0, milli_secs, 0);
+    #else
+        change_ptr = &change;
+        EV_SET(&change, id, EVFILT_TIMER, flags, 0, milli_secs, ctx);
+        nev = kevent(rl->kqueue_fd, &change, 1, NULL, 0, NULL);
+    #endif
+
+    // check the data field of both change and event
+    return 0;
+}
+static int cancel_timer(RunloopRef rl, uint64_t id)
+{
+    int flags = EV_DELETE | EV_RECEIPT; 
+    struct kevent change;
+    struct kevent* change_ptr;
+    int nev;
+    // int flags = EV_DELETE | EV_RECEIPT; 
+    // EV_SET(&change, id, EVFILT_TIMER, flags, 0, 0, 0);
+    // nev = kevent(kq, &change, 1, NULL, 0, NULL);
+
+    #ifdef RL_KQ_BATCH_CHANGES
+        change_ptr = runloop_change_next(rl)
+        EV_SET(&change, id, EVFILT_TIMER, flags, 0, milli_secs, 0);
+    #else
+        change_ptr = &change;
+        EV_SET(&change, id, EVFILT_TIMER, flags, 0, 0, 0);
+        nev = kevent(rl->kqueue_fd, &change, 1, NULL, 0, NULL);
+    #endif
+
+    return 0;
+}
+
 void runloop_timer_register(RunloopTimerRef athis, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating)
 {
     RBL_ASSERT((athis != NULL), "");
@@ -133,61 +177,63 @@ void runloop_timer_register(RunloopTimerRef athis, PostableFunction cb, void* ct
     athis->timer_postable = cb;
     athis->timer_postable_arg = ctx;
     athis->context = ctx;
-    struct itimerspec its = WTimerFd_update_interval(athis, interval_ms, repeating);
-    int flags = 0;
-    int rc = timerfd_settime(athis->fd, flags, &its, NULL);
-    int er = errno;
-    assert(rc == 0);
-    uint32_t interest = EPOLLIN | EPOLLERR;
+    int res = register_timer(athis->runloop, (void*)athis, (uint64_t)athis, !repeating, interval_ms);
+
+    // struct itimerspec its = WTimerFd_update_interval(athis, interval_ms, repeating);
+    // int flags = 0;
+    // int rc = timerfd_settime(athis->fd, flags, &its, NULL);
+    // int er = errno;
+    // assert(rc == 0);
+    // uint32_t interest = EPOLLIN | EPOLLERR;
     print_current_tme("runloop_timer_register");
     RBL_LOG_FMT("runloop_timer_register its.it_value secs %ld nsecs: %ld ", its.it_value.tv_sec, its.it_value.tv_nsec);
     RBL_LOG_FMT("runloop_timer_register its.it_interval secs %ld nsecs: %ld", its.it_interval.tv_sec, its.it_interval.tv_nsec);
-    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
+    // int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
     assert(res ==0);
 }
 void runloop_timer_update(RunloopTimerRef athis, uint64_t interval_ms, bool repeating)
 {
-    WTIMER_CHECK_TAG(athis)
-    WTIMER_CHECK_END_TAG(athis)
-    uint32_t interest = 0;
-    struct itimerspec its = WTimerFd_update_interval(athis, interval_ms, repeating);
-    int flags = 0;
-    int rc = timerfd_settime(athis->fd, flags, &its, NULL);
-    assert(rc == 0);
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
-    assert(res == 0);
+    // WTIMER_CHECK_TAG(athis)
+    // WTIMER_CHECK_END_TAG(athis)
+    // uint32_t interest = 0;
+    // struct itimerspec its = WTimerFd_update_interval(athis, interval_ms, repeating);
+    // int flags = 0;
+    // int rc = timerfd_settime(athis->fd, flags, &its, NULL);
+    // assert(rc == 0);
+    // int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
+    // assert(res == 0);
 }
 void runloop_timer_disarm(RunloopTimerRef athis)
 {
-    WTIMER_CHECK_TAG(athis)
-    WTIMER_CHECK_END_TAG(athis)
-    struct itimerspec its = WTimerFd_update_interval(athis, athis->interval, athis->repeating);
-    int flags = 0;
-    int rc = timerfd_settime(athis->fd, flags, &its, NULL);
-    assert(rc == 0);
+    // WTIMER_CHECK_TAG(athis)
+    // WTIMER_CHECK_END_TAG(athis)
+    // struct itimerspec its = WTimerFd_update_interval(athis, athis->interval, athis->repeating);
+    // int flags = 0;
+    // int rc = timerfd_settime(athis->fd, flags, &its, NULL);
+    // assert(rc == 0);
 }
-void runloop_timer_rearm_old(RunloopTimerRef athis, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating)
-{
-    WTIMER_CHECK_TAG(athis)
-    WTIMER_CHECK_END_TAG(athis)
-    athis->repeating = repeating;
-    athis->timer_postable = cb;
-    athis->timer_postable_arg = ctx;
-    struct itimerspec its = WTimerFd_update_interval(athis, interval_ms, repeating);
-    int flags = 0;
-    int rc = timerfd_settime(athis->fd, flags, &its, NULL);
-    assert(rc == 0);
-}
+// void runloop_timer_rearm_old(RunloopTimerRef athis, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating)
+// {
+//     WTIMER_CHECK_TAG(athis)
+//     WTIMER_CHECK_END_TAG(athis)
+//     athis->repeating = repeating;
+//     athis->timer_postable = cb;
+//     athis->timer_postable_arg = ctx;
+//     struct itimerspec its = WTimerFd_update_interval(athis, interval_ms, repeating);
+//     int flags = 0;
+//     int rc = timerfd_settime(athis->fd, flags, &its, NULL);
+//     assert(rc == 0);
+// }
 void runloop_timer_rearm(RunloopTimerRef athis)
 {
-    WTIMER_CHECK_TAG(athis)
-    WTIMER_CHECK_END_TAG(athis)
-    uint64_t interval_ms = athis->interval;
-    bool repeating = athis->repeating;
-    struct itimerspec its = WTimerFd_update_interval(athis, interval_ms, repeating);
-    int flags = 0;
-    int rc = timerfd_settime(athis->fd, flags, &its, NULL);
-    assert(rc == 0);
+    // WTIMER_CHECK_TAG(athis)
+    // WTIMER_CHECK_END_TAG(athis)
+    // uint64_t interval_ms = athis->interval;
+    // bool repeating = athis->repeating;
+    // struct itimerspec its = WTimerFd_update_interval(athis, interval_ms, repeating);
+    // int flags = 0;
+    // int rc = timerfd_settime(athis->fd, flags, &its, NULL);
+    // assert(rc == 0);
 }
 
 void runloop_timer_deregister(RunloopTimerRef athis)
@@ -195,7 +241,7 @@ void runloop_timer_deregister(RunloopTimerRef athis)
     WTIMER_CHECK_TAG(athis)
     WTIMER_CHECK_END_TAG(athis)
     RBL_LOG_FMT("runloop_timer_deregister this->fd : %d", athis->fd);
-    int res = runloop_deregister(athis->runloop, athis->fd);
+    int res = cancel_timer(athis->runloop, (uint64_t)athis);
     if(res != 0) {
         RBL_LOG_FMT("runloop_timer_deregister res: %d errno: %d", res, errno);
     }

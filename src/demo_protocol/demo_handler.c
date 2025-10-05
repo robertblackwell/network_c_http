@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/epoll.h>
+#include <pthread.h>
 #include <errno.h>
 #include <src/demo_protocol/demo_message.h>
 
@@ -116,7 +116,12 @@ static void postable_write_start(RunloopRef runloop_ref, void* href)
     DemoHandlerRef handler_ref = href;
     RBL_CHECK_TAG(DemoHandler_TAG, handler_ref)
     RBL_CHECK_END_TAG(DemoHandler_TAG, handler_ref)
-    pid_t tid = gettid();
+    #ifdef __APPLE__
+        pthread_t tid = pthread_self()
+    #elif defined(__linux__)
+        pid_t tid = gettid();
+    #else
+    #endif
     RBL_LOG_FMT("postable_write_start tid: %d active_response:%p fd:%d  write_state: %d\n", tid, handler_ref->active_response, handler_ref->demo_connection_ref->asio_stream_ref->fd, handler_ref->demo_connection_ref->write_state);
     if(handler_ref->active_response != NULL) {
         return;

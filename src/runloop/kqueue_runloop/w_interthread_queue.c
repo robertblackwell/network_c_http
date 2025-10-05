@@ -7,11 +7,10 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <sys/epoll.h>
 #include <rbl/macros.h>
 #include <common/utils.h>
-#include "runloop.h"
-#include "rl_internal.h"
+#include <kqueue_runloop/runloop.h>
+#include <kqueue_runloop/rl_internal.h>
 //struct InterthreadQueue_s;
 //typedef struct InterthreadQueue_s InterthreadQueue, *InterthreadQueueRef;
 //InterthreadQueueRef itqueue_new(RunloopRef rl);

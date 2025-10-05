@@ -4,7 +4,6 @@
              /* See feature_test_macros(7) */
 #include <fcntl.h>
 #include <stdint.h>
-#include <sys/epoll.h>
 #include <math.h>
 #include <rbl/logger.h>
 #include <rbl/unittest.h>
@@ -30,6 +29,8 @@ static void callback_non_repeating(RunloopRef runloop, void* test_ctx_arg)
     double percent_error = fabs(100.0*(((double)(interval) - gap)/((double)(interval))));
     gap = percent_error;
     ctx_p->counter++;
+    RunloopTimerRef tr = ctx_p->watcher;
+    runloop_timer_free(tr);
     RBL_LOG_FMT("counter : %d  gap: %f ", ctx_p->counter, gap);
 }
 /**
@@ -51,8 +52,8 @@ int test_timer_non_repeating()
 
     TestCtx* test_ctx_p_1 = TestCtx_new(runloop_ref, tw_1, 1, 5, 100);
 
-    runloop_timer_register(tw_1, &callback_non_repeating, test_ctx_p_1, 100, false);
-    runloop_run(runloop_ref, 10000);
+    runloop_timer_register(tw_1, &callback_non_repeating, test_ctx_p_1, 5000, false);
+    runloop_run(runloop_ref, 100000);
     /*We should only get here when there are no more timers or other events pending in the runloop*/
     runloop_free(runloop_ref);
     /* prove callback_non_repeating was called exactly once */

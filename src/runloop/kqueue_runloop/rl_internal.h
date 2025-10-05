@@ -1,8 +1,8 @@
-#ifndef C_HTTP_RL_INTERNAL_H
-#define C_HTTP_RL_INTERNAL_H
-#include <runloop/epoll_runloop/runloop.h>
-#include <runloop/epoll_runloop/rl_checktag.h>
-
+#ifndef C_HTTP_KQRL_INTERNAL_H
+#define C_HTTP_KQRL_INTERNAL_H
+#include <runloop/kqueue_runloop/runloop.h>
+#include <runloop/kqueue_runloop/rl_checktag.h>
+#include <sys/event.h>
 #include <pthread.h>
 #include <stdbool.h>
 #include <string.h>
@@ -13,7 +13,8 @@
 #define runloop_MAX_ITQ            256
 #define runloop_MAX_WATCHERS       runloop_MAX_FDS
 #define runloop_FUNCTOR_LIST_MAX   runloop_MAX_ITQ
-#define runloop_MAX_EPOLL_FDS      runloop_MAX_FDS
+#define runloop_MAX_KQ_FDS         runloop_MAX_FDS
+#define runloop_MAX_EVENTS         runloop_MAX_FDS*2
 #define CBTABLE_MAX                runloop_MAX_FDS
 #define runloop_FDTABLE_MAX        runloop_MAX_FDS
 #define runloop_READY_LIST_MAX     (2 * runloop_MAX_FDS)
@@ -41,22 +42,15 @@ uint64_t   FdTable_size(FdTableRef athis);
 //  *
 //  * The significant thing is that the function pointer, points to a function that has the correct
 //  * signature for the RunList
-//  *
+//  * TYpes defined in runloop.h
 // */
-//  struct Functor_s;
-// typedef struct Functor_s Functor, *FunctorRef;
-// FunctorRef Functor_new(PostableFunction f, void* arg);
-// void Functor_init(FunctorRef funref, PostableFunction f, void* arg);
-// void Functor_free(FunctorRef athis);
-// void Functor_call(FunctorRef athis, RunloopRef runloop_ref);
-// bool Functor_is_empty(FunctorRef f);
-// void Functor_dealloc(void **p);
-// struct Functor_s
-// {
-// //    RunloopWatcherBaseRef wref; // this is borrowed do not free
-//     PostableFunction f;
-//     void *arg;
-// };
+FunctorRef Functor_new(PostableFunction f, void* arg);
+void Functor_init(FunctorRef funref, PostableFunction f, void* arg);
+void Functor_free(FunctorRef athis);
+void Functor_call(FunctorRef athis, RunloopRef runloop_ref);
+bool Functor_is_empty(FunctorRef f);
+void Functor_dealloc(void **p);
+
 typedef struct FunctorList_s {
 //    char       tag[RBL_TAG_LENGTH];
     RBL_DECLARE_TAG;
@@ -84,11 +78,18 @@ bool fd_map_set(int j);
 
 struct Runloop_s {
     RBL_DECLARE_TAG;
-    int                     epoll_fd;
+    int                     kqueue_fd;
     bool                    closed_flag;
     bool                    runloop_executing;
-    pid_t                   tid;
+    pthread_t               tid;
     FdTableRef              table; // (int, CallbackData)
+    void*                   event_allocator;
+    struct kevent           change[runloop_MAX_EVENTS];
+    int                     change_max;
+    int                     change_count;
+    struct kevent           events[runloop_MAX_EVENTS];
+    int                     events_max;
+    int                     events_count;
     FunctorListRef          ready_list;
     RBL_DECLARE_END_TAG;
 };
@@ -135,6 +136,7 @@ typedef struct AsioStream_s {
     void*               write_callback_arg;
     RBL_DECLARE_END_TAG;
 } AsioStream, *AsioStreamRef;
+#include <kqueue_runloop/event_allocator.h>
 
 #if 0
 /**

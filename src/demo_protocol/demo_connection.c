@@ -263,7 +263,7 @@ void demo_connection_write(
     RBL_ASSERT((cref->active_output_buffer_ref == NULL),"something wrong active output buffer should be null")
     cref->on_write_cb = on_demo_write_cb;
     cref->on_write_cb_arg = href;
-    cref->write_state == WRITE_STATE_ACTIVE;
+    cref->write_state = WRITE_STATE_ACTIVE;
     cref->active_output_buffer_ref = demo_message_serialize(response_ref);
     if(cref->write_state == WRITE_STATE_STOP) {
         call_on_write_cb(cref, DemoConnectionErrCode_is_closed);

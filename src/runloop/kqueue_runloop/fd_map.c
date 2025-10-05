@@ -1,4 +1,5 @@
-#include "rl_internal.h"
+#include <kqueue_runloop/runloop.h>
+#include <kqueue_runloop/rl_internal.h>
 #include <assert.h>
 
 bool fd_map[runloop_MAX_FDS];

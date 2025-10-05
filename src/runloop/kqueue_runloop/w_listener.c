@@ -1,10 +1,9 @@
-#include "runloop.h"
-#include "rl_internal.h"
+#include <kqueue_runloop/runloop.h>
+#include <kqueue_runloop/rl_internal.h>
 #include <common/socket_functions.h>
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/epoll.h>
 #include <errno.h>
 #include <unistd.h>
 #include <sys/socket.h>
@@ -88,7 +87,7 @@ void runloop_listener_register(RunloopListenerRef athis, PostableFunction postab
     /**
      * NOTE the EPOLLEXCLUSIVE - prevents the thundering herd problem. Defaults to level triggered
      */
-    uint32_t interest =  EPOLLIN | EPOLLEXCLUSIVE;
+    uint32_t interest =  0;//EPOLLIN | EPOLLEXCLUSIVE;
     int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
 
     if(res != 0) {
@@ -112,7 +111,7 @@ void runloop_listener_arm(RunloopListenerRef athis, PostableFunction postable, v
     if (postable_arg != NULL) {
         athis->listen_postable_arg = postable_arg;
     }
-    uint32_t interest = EPOLLIN; // | EPOLLEXCLUSIVE ;
+    uint32_t interest = 0;//EPOLLIN; // | EPOLLEXCLUSIVE ;
 
     int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
     if(res != 0) {

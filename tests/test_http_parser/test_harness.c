@@ -52,6 +52,7 @@ test_output_r test_output_new(HttpMessageRef msg, int rc)
     test_output_r rdref = eg_alloc(sizeof(test_output_t));
     rdref->message = msg;
     rdref->rc = rc;
+    return rdref;
 }
 void test_output_dispose(test_output_r* this_ptr)
 {

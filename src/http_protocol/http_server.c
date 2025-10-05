@@ -5,7 +5,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <sys/epoll.h>
 #include <rbl/logger.h>
 #include <rbl/check_tag.h>
 #include <src/common/alloc.h>
