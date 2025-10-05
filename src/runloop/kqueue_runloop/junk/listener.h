@@ -1,23 +1,6 @@
 #ifndef C_HTTP_runloop_W_LISTENER_H
 #define C_HTTP_runloop_W_LISTENER_H
 #include "runloop.h"
-/** \defgroup listener RunloopListener
- * @{
- * ## RunloopListener
- *
- * RunloopListener is a special kind of RunloopWatcherBase that is intended spcifically for situations
- * where a server of sometype has called listen() on a socket and is waiting for notification that
- * an accept() call will succeed because a client has connected.
- * a new connection.
- *
- */
-struct RunloopListener_s;
-typedef struct RunloopListener_s RunloopListener, * RunloopListenerRef;   // Special event for socket listen()
-
-typedef void(*AcceptCallback)(void* arg, int accepted_fd, int errno);
-
-struct AsioListener_s;
-typedef struct AsioListener_s AsioListener, *AsioListenerRef;
 /**
  * This function must be called on the same thread that is going to call
  * runloop_run(rlref)

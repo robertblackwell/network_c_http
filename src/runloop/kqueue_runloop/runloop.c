@@ -26,6 +26,7 @@ static void drain_callback(void* arg)
 }
 static void interthread_queue_handler(RunloopQueueWatcherRef watcher, uint64_t event)
 {
+    #if 0
     printf("interthread_queue_handler\n");
     return;
     RunloopRef rx = runloop_queue_watcher_get_reactor(watcher);
@@ -44,6 +45,7 @@ static int *int_in_heap(int key) {
         abort();
     *result = key;
     return result;
+    #endif
 }
 struct kevent* runloop_get_change_table(RunloopRef athis);
 int runloop_get_change_table_size(RunloopRef athis);
@@ -67,12 +69,13 @@ static void runloop_kevent(RunloopRef athis, int op, int fd, uint64_t interest, 
     // };
     // // note epev.data is a union so the next line overites .fd = fd
     // epev.data.ptr = watcher;
+    int status = 0;
     // int status = epoll_ctl(athis->epoll_fd, op, fd, &(epev));
     // if (status != 0) {
     //     int errno_saved = errno;
     //     RBL_LOG_ERROR("runloop_epoll_ctl epoll_fd: %d fd: %d status : %d errno : %d %s", athis->epoll_fd, fd, status, errno_saved, strerror(errno_saved));
     // }
-    RBL_LOG_FMT("runloop_epoll_ctl epoll_fd: %d status : %d errno : %d", athis->epoll_fd, status, errno);
+    RBL_LOG_FMT("runloop_epoll_ctl epoll_fd: %d status : %d errno : %d", athis->kqueue_fd, status, errno);
     // RBL_ASSERT((status == 0), "epoll ctl call failed");
 }
 
@@ -222,7 +225,7 @@ void print_events(struct kevent events[], int count)
         printf("\n");
     }
 }
-int runloop_run(RunloopRef athis, time_t timeout) {
+int runloop_run(RunloopRef athis, time_t timeout_ms) {
     RUNLOOP_CHECK_TAG(athis)
     RUNLOOP_CHECK_END_TAG(athis)
     #if 1
@@ -247,13 +250,17 @@ int runloop_run(RunloopRef athis, time_t timeout) {
         int max_events = runloop_MAX_EVENTS;
         if(functor_list_size(athis->ready_list) == 0) {
             struct timespec *timeout = NULL;
+            struct timespec t = { .tv_sec = timeout_ms / 1000 , .tv_nsec= 1000 *(timeout_ms % 1000)};
+            if(timeout_ms > 0) {
+                timeout = &t;
+            }
             struct  kevent* change = runloop_get_change_table(athis);
             int change_n = runloop_get_change_table_size(athis);
             struct kevent* events = runloop_get_fresh_event_table(athis);
             int max_events = runloop_get_max_events(athis);
             int nev = kevent(athis->kqueue_fd, change, change_n, events, max_events, timeout);
-            RBL_LOG_FMT("runloop keventreturned nev: %d fd[0]: %d fds active: %ld  ready_list_size:%d",
-                        nfds, events[0].data.fd,
+            RBL_LOG_FMT("runloop keventreturned nev: %d fd[0]: %lu fds active: %llu  ready_list_size:%d",
+                        nev, events[0].ident,
                         FdTable_size(athis->table), functor_list_size(athis->ready_list));
             time_t currtime = time(NULL);
             switch (nev) {
@@ -284,18 +291,17 @@ int runloop_run(RunloopRef athis, time_t timeout) {
                         struct kevent ee = athis->events[i];
                         void* pp = (void*)ee.ident;
                         RunloopWatcherBaseRef tr = pp;
-                        RunloopWatcherBaseRef wr = athis->events[i].udata;
-                        int fd = wr->fd;
+                        RunloopEventRef wr = athis->events[i].udata;
+                        // int fd = wr->fd;
 #else
                         int fd = events[i].data.fd;
                         void *arg = events[i].data.ptr;
 #endif
                         int mask = athis->events[i].filter;
-                        RBL_LOG_FMT("runloop_run loop fd: %d events: %x", fd, mask);
+                        RBL_LOG_FMT("runloop_run loop ident: %lu udata: %p events: %x", ee.ident ,wr , mask);
                         // RunloopWatcherBaseRef wref = FdTable_lookup(athis->table, fd);
                         // assert(wr == wref);
                         wr->handler(wr, athis->events[i].filter);
-                        RBL_LOG_FMT("fd: %d", fd);
                         // call handler
                         RUNLOOP_CHECK_TAG(athis)
                     }

@@ -31,7 +31,7 @@ typedef struct TestCtx_s  {
     pthread_t thread;
     struct timespec     start_time;  //  the time at which the timer was first scheduled
     RunloopRef          runloop_ref; //  the reactor being used for the timer
-    RunloopTimerRef     watcher;     //  the timer being used for this experiment
+    RunloopEventRef     watcher;     //  the timer being used for this experiment
 } TestCtx;
 
 
@@ -51,7 +51,7 @@ double time_diff(struct timespec a, struct timespec b)
     return rdouble;
 }
 
-TestCtx* TestCtx_new(RunloopRef rl, RunloopTimerRef timer_ref,  int counter_init, int counter_max, long interval_ms)
+TestCtx* TestCtx_new(RunloopRef rl, RunloopEventRef timer_ref,  int counter_init, int counter_max, long interval_ms)
 {
     TestCtx* tmp = malloc(sizeof(TestCtx));
     tmp->interval_ms = interval_ms;

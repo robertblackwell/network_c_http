@@ -73,8 +73,6 @@
  * For an example of this working see test_q_asio and test_q
  *
  */
-struct EventfdQueue_s;
-typedef struct EventfdQueue_s EventfdQueue, * EventfdQueueRef;
 
 /**
  * Allocate the memory for an EventfdQueue and initialize that memory.

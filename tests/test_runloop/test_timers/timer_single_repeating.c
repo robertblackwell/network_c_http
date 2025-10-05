@@ -24,7 +24,7 @@ static void callback_repeating(RunloopRef runloop_ref, void* test_ctx_arg)
 {
     TestCtx* ctx_p = (TestCtx*) test_ctx_arg;
     long interval = ctx_p->interval_ms;
-    RunloopTimerRef watcher = ctx_p->watcher;
+    RunloopEventRef watcher = ctx_p->watcher;
     struct timespec tnow = current_time();
     double gap = time_diff(tnow, ctx_p->start_time);
     ctx_p->start_time = tnow;
@@ -45,7 +45,7 @@ int test_timer_single_repeating()
     long interval_ms = 100;
     RunloopRef runloop_ref = runloop_new();
 
-    RunloopTimerRef tw_1 = runloop_timer_new(runloop_ref);
+    RunloopEventRef tw_1 = runloop_timer_new(runloop_ref);
     TestCtx* test_ctx_p = TestCtx_new(runloop_ref, tw_1, 0, 5, interval_ms);
     runloop_timer_register(tw_1, &callback_repeating, (void *) test_ctx_p, 100, true);
     runloop_run(runloop_ref, 10000);

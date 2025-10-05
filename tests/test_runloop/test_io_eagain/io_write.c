@@ -25,7 +25,7 @@ void async_socket_set_nonblocking(int socket);
  *  rearm the timer
  *
  */
-void WriteCtx_init(WriteCtx* this, int fd, RunloopStreamRef swatcher, RunloopTimerRef twatcher, int max)
+void WriteCtx_init(WriteCtx* this, int fd, RunloopStreamRef swatcher, RunloopEventRef twatcher, int max)
 {
     RBL_SET_TAG(WriteCtx_TAG, this);
     this->id = "WRITE";
@@ -110,7 +110,7 @@ static void wrtr_wait_timer_fired(RunloopRef rl, void* ctx_p_arg)
     RunloopRef runloop_ref = ctx->swatcher->runloop;
 
     RunloopStreamRef stream_ref = ctx->swatcher;
-    RunloopTimerRef timer_ref = ctx->twatcher;
+    RunloopEventRef timer_ref = ctx->twatcher;
     AsioStreamRef asio_stream_ref = ctx->asio_stream_ref;
     int fd = stream_ref->fd;
     SOCKW_CHECK_TAG(ctx->swatcher)

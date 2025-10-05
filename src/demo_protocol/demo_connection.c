@@ -1,5 +1,3 @@
-#define RBL_LOG_ENABLED
-#define RBL_LOG_ALLOW_GLOBAL
 #include <src/demo_protocol/demo_connection.h>
 // #include <src/runloop/rl_internal.h>
 #include <stdlib.h>

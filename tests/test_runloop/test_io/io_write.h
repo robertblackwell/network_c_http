@@ -35,10 +35,10 @@ typedef struct WriteCtx_s {
     int                 outbuffer_length;
     RunloopStreamRef    stream_ref;
     AsioStreamRef       asio_stream_ref;
-    RunloopTimerRef     timer_ref;
+    RunloopEventRef     timer_ref;
     RBL_DECLARE_END_TAG;
 } WriteCtx;
-void WriteCtx_init(WriteCtx* this, int fd, RunloopStreamRef swatcher, RunloopTimerRef twatcher, int max);
+void WriteCtx_init(WriteCtx* this, int fd, RunloopStreamRef swatcher, RunloopEventRef twatcher, int max);
 
 
 typedef struct WriterTable_s {

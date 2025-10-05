@@ -24,13 +24,13 @@ typedef struct TestCtx_s  {
     int                 max_count;
     struct timespec     start_time;
     RunloopRef          runloop_ref;
-    RunloopTimerRef     timer_ref;
+    RunloopEventRef     timer_ref;
     RunloopEventfdRef   fdevent_ref;
     int                 fdevent_counter;
     RBL_DECLARE_END_TAG;
 } TestCtx;
 
-TestCtx* TestCtx_new(RunloopRef rl, RunloopTimerRef timer_ref, RunloopEventfdRef eventfd_ref, int counter_init, int counter_max);
+TestCtx* TestCtx_new(RunloopRef rl, RunloopEventRef timer_ref, RunloopEventfdRef eventfd_ref, int counter_init, int counter_max);
 
 //
 // single repeating timer
@@ -59,7 +59,7 @@ int test_fdevent_1()
 {
 
     RunloopRef runloop_ref = runloop_new();
-    RunloopTimerRef tw_1 = runloop_timer_new(runloop_ref);
+    RunloopEventRef tw_1 = runloop_timer_new(runloop_ref);
     RunloopEventfdRef fdev = runloop_eventfd_new(runloop_ref);
 
     TestCtx* test_ctx_p = TestCtx_new(runloop_ref, tw_1, fdev, 0, NBR_TIMES_FIRE);
@@ -86,11 +86,11 @@ int test_fdevent_multiple()
 {
 
     RunloopRef runloop_ref = runloop_new();
-    RunloopTimerRef tw_1 = runloop_timer_new(runloop_ref);
+    RunloopEventRef tw_1 = runloop_timer_new(runloop_ref);
     RunloopEventfdRef fdev = runloop_eventfd_new(runloop_ref);
 
     TestCtx* test_ctx_p_1 = TestCtx_new(runloop_ref, tw_1, fdev, 0, 5);
-    RunloopTimerRef tw_2 = runloop_timer_new(runloop_ref);
+    RunloopEventRef tw_2 = runloop_timer_new(runloop_ref);
     TestCtx* test_ctx_p_2 = TestCtx_new(runloop_ref, tw_2, fdev, 0, 6);
 
     runloop_eventfd_register(fdev);
@@ -143,7 +143,7 @@ void fdevent_postable(RunloopRef rl, void* test_ctx_arg)
     RBL_LOG_FMT("w: %p arg: %p fdevent_counter % d", test_ctx_p->fdevent_ref , test_ctx_arg, test_ctx_p->fdevent_counter);
 }
 
-TestCtx* TestCtx_new(RunloopRef rl, RunloopTimerRef timer_ref, RunloopEventfdRef eventfd_ref,int counter_init, int counter_max)
+TestCtx* TestCtx_new(RunloopRef rl, RunloopEventRef timer_ref, RunloopEventfdRef eventfd_ref,int counter_init, int counter_max)
 {
     TestCtx* tmp = malloc(sizeof(TestCtx));
     RBL_SET_TAG(TestCtx_TYPE, tmp)

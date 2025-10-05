@@ -45,7 +45,7 @@ struct DisarmTestCtx_s {
     bool                was_disarmed;
     bool                rearm_other;
     struct timespec     start_time;
-    RunloopTimerRef   other_tw;
+    RunloopEventRef   other_tw;
     DisarmTestCtx*      other_ctx;
     long                interval_ms;
 
@@ -61,7 +61,7 @@ DisarmTestCtx* DisarmTestCtx_new(int counter_init, int counter_max)
     return tmp;
 }
 // disarms itself on first call. If called subsequently and reaches its max then cancel both timers
-static void callback_disarm_clear(RunloopTimerRef watcher, RunloopTimerEvent event)
+static void callback_disarm_clear(RunloopEventRef watcher, RunloopTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
@@ -85,7 +85,7 @@ static void callback_disarm_clear(RunloopTimerRef watcher, RunloopTimerEvent eve
     }
 }
 // after being called max_count times rearm the other
-static void callback_rearm_other(RunloopTimerRef watcher, RunloopTimerEvent event)
+static void callback_rearm_other(RunloopEventRef watcher, RunloopTimerEvent event)
 {
     uint64_t epollin = EPOLLIN & event;
     uint64_t error = EPOLLERR & event;
@@ -121,10 +121,10 @@ int test_timer_disarm_rearm()
 
     RunloopRef runloop_ref = runloop_new();
 
-    RunloopTimerRef tw_1 = runloop_timer_new(runloop_ref);
+    RunloopEventRef tw_1 = runloop_timer_new(runloop_ref);
     runloop_timer_register(tw_1, &callback_disarm_clear, test_ctx_p_1, test_ctx_p_1->interval_ms, true);
 
-    RunloopTimerRef tw_2 = runloop_timer_new(runloop_ref);
+    RunloopEventRef tw_2 = runloop_timer_new(runloop_ref);
     runloop_timer_register(tw_2, &callback_rearm_other, test_ctx_p_2, test_ctx_p_2->interval_ms, true);
 
     // timer 1 callback will disarm itself on the first timer event

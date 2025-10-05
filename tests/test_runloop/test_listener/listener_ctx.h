@@ -34,7 +34,7 @@ struct ListenerCtx_s {
     socket_handle_t         listening_socket_fd;
     RunloopRef              runloop_ref;
     RunloopListenerRef      listening_watcher_ref;
-    RunloopTimerRef         timer_ref;
+    RunloopEventRef         timer_ref;
     AsioListenerRef         asio_listener_ref;
     int                     listen_counter;
     int                     accept_count;

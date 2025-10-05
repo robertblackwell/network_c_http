@@ -42,22 +42,8 @@ struct RunloopWatcherBase_s {
     RunloopRef            runloop;
     void*                 context;
     int                   fd;
-    /**
-     * function that knows how to free the specific sub type of RunloopWatcherBase from a general ref.
-     * Each derived type must provide this function when an instance is created or initializez.
-     * In the case of RunloopTimerfd and RunloopEventfd watchers must also close the fd
-     */
-    void(*free)(RunloopWatcherBaseRef);
-    /**
-     * first level handler function
-     * each derived type provides thier own type specific handler when an instance is created
-     * or initialized and must cast the first parameter to their own specific type of watcher
-     * inside the handler.
-     *
-     * This handler will be called directly from the epoll_wait code inside runloop.c
-     * its job is to decode the event and call the client code handle(s) for each event type
-    */
-    void(*handler)(RunloopWatcherBaseRef watcher_ref, uint64_t event);
+    void(*free)(RunloopEventRef);
+    void(*handler)(RunloopEventRef rlevent, uint64_t event);
 };
 /**
  * eventfd is the way epoll provides custom events. Create a special file descriptor using eventfd() call
@@ -95,14 +81,14 @@ struct RunloopStream_s {
 /**
  * WListener
  */
-typedef struct RunloopListener_s {
-    /** The start tag is declared in the base struct
-    RBL_DECLARE_TAG; */
-    struct RunloopWatcherBase_s;
-    PostableFunction         listen_postable;
-    void*                    listen_postable_arg;
-    RBL_DECLARE_END_TAG;
-} RunloopListener;
+// typedef struct RunloopListener_s {
+//     /** The start tag is declared in the base struct
+//     RBL_DECLARE_TAG; */
+//     struct RunloopWatcherBase_s;
+//     PostableFunction         listen_postable;
+//     void*                    listen_postable_arg;
+//     RBL_DECLARE_END_TAG;
+// } RunloopListener;
 
 /**
  * RunloopQueueWatcher
@@ -117,7 +103,7 @@ struct RunloopQueueWatcher_s {
      * This is a non-owning reference as it was passed in during creation
      * of a RunloopQueueWatcher object.
      */
-    EventfdQueueRef            queue;
+    EventQueueRef            queue;
     // runloop cb and arg
     PostableFunction       queue_postable;
     void*                  queue_postable_arg;
@@ -136,55 +122,61 @@ typedef void(RunloopInterthreadQueuetWatcherCallerback(void* ctx));
 struct InterthreadQueue_s {
     /** This struct does not inherit from WatcherBase hence must declare its own openning tag*/
     RBL_DECLARE_TAG; 
-    EventfdQueueRef queue;
+    EventQueueRef queue;
     RunloopRef runloop;
     RunloopQueueWatcherRef qwatcher_ref;
     RBL_DECLARE_END_TAG;
-};// InterthreadQueue_s;, InterthreadQueue, *InterthreadQueueRef;
+};
 
-/**
- * RunloopTimer
- */
-typedef uint64_t RunloopTimerEvent;
-struct RunloopTimer_s {
-    /** The start tag is declared in the base struct
-    RBL_DECLARE_TAG; */
-    struct RunloopWatcherBase_s;
-    time_t                  expiry_time;
-    uint64_t                interval;
-    bool                    repeating;
-    PostableFunction        timer_postable;
-    void*                   timer_postable_arg;
+struct EventQueue_s {
+    /** This struct is not a sub struct of Watcher hence it must declare its own openning tag*/
+    RBL_DECLARE_TAG;
+    FunctorListRef      list;
+    pthread_mutex_t     queue_mutex;
+#ifdef C_HTTP_EFD_QUEUE
+#else
+    int                 pipefds[2];
+#endif
+    int                 readfd;
+    int                 writefd;
+    int                 id;
     RBL_DECLARE_END_TAG;
 };
 
-typedef struct RunLoopEvent_s {
+typedef struct AsioStream_s {
+    /** This struct is diffenrent to most watchers as it is no a sub class of Watcher
+     * hence it must declare its own openning tag */
+    RBL_DECLARE_TAG;
+    int                 fd;
+    RunloopStreamRef    runloop_stream_ref;
+
+    int                 read_state;
+    void*               read_buffer;
+    long                read_buffer_size;
+    AsioReadcallback    read_callback;
+    void*               read_callback_arg;
+
+    int                 write_state;
+    void*               write_buffer;
+    long                write_buffer_size;
+    AsioWritecallback   write_callback;
+    void*               write_callback_arg;
+    RBL_DECLARE_END_TAG;
+} AsioStream, *AsioStreamRef;
+
+typedef struct RunloopEvent_s {
     RBL_DECLARE_TAG;
     RunloopRef            runloop;
     void*                 context;
-    int                   fd;
-    /**
-     * function that knows how to free the specific sub type of RunloopWatcherBase from a general ref.
-     * Each derived type must provide this function when an instance is created or initializez.
-     * In the case of RunloopTimerfd and RunloopEventfd watchers must also close the fd
-     */
-    void(*free)(RunloopWatcherBaseRef);
-    /**
-     * first level handler function
-     * each derived type provides thier own type specific handler when an instance is created
-     * or initialized and must cast the first parameter to their own specific type of watcher
-     * inside the handler.
-     *
-     * This handler will be called directly from the epoll_wait code inside runloop.c
-     * its job is to decode the event and call the client code handle(s) for each event type
-    */
-    void(*handler)(RunloopWatcherBaseRef watcher_ref, uint64_t event);
+    void(*free)(RunloopEventRef);
+    void(*handler)(RunloopEventRef lrevent, uint64_t event);
     /**
      * tag that determines the variant
      */
     WatcherType           type;
     
     union {
+        // Timer event - with kqueues does not use a file desccriptor
         struct {
             time_t                  expiry_time;
             uint64_t                interval;
@@ -192,13 +184,15 @@ typedef struct RunLoopEvent_s {
             PostableFunction        timer_postable;
             void*                   timer_postable_arg;
         } timer;
-
+        // Listener - uses a file descriptor only useful for sockets
         struct {
+            int                      fd;
             PostableFunction         listen_postable;
             void*                    listen_postable_arg;
         } listener;
-
+        // Stream - a file descriptor that can be read or written
         struct {
+            int                      fd;
             uint64_t                 event_mask;
             PostableFunction         read_postable_cb;
             void*                    read_postable_arg;
@@ -206,28 +200,36 @@ typedef struct RunLoopEvent_s {
             void*                    write_postable_arg;
         } stream;
 
+        // user event - with kqueues does not use a file descriptor
         struct {
-            PostableFunction        fdevent_postable;
-            void*                   fdevent_postable_arg;
-            int                     write_fd;
-        } eventfd;
+            PostableFunction        uevent_postable;
+            void*                   uevent_postable_arg;
+            int                     write_fd; // on;y if using pipe trick
+            int                     read_fd;  // same
+        } uevent;
 
+        // signal - treat a signa as a kqueue event
+        struct {
+
+        } signal;
+
+        // A special event made from user event - wait on a thread aware queue
         struct {
             /**
              * This is a non-owning reference as it was passed in during creation
              * of a RunloopQueueWatcher object.
              */
-            EventfdQueueRef        queue;
-            // runloop cb and arg
+            EventQueueRef          queue;
             PostableFunction       queue_postable;
             void*                  queue_postable_arg;
 
             QueueWatcherReadCallbackFunction read_cb;
             void*                  read_cb_arg;
         } interthread_queue;
-
+        
+        RBL_DECLARE_END_TAG;
     };
-} RunLoopEvent, *RunLoopEventRef;
 
+} RunloopEvent, *RunloopEventRef;
 
 #endif

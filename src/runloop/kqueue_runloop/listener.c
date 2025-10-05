@@ -18,128 +18,128 @@
  * @param fd        int
  * @param event     uint64_t
  */
-static void handler(RunloopWatcherBaseRef watcher, uint64_t event)
+static void handler(RunloopEventRef lrevent, uint64_t event)
 {
-    RunloopListenerRef listener_ref = (RunloopListenerRef)watcher;
+    RunloopEventRef listener_ref = (RunloopEventRef)lrevent;
     LISTNER_CHECK_TAG(listener_ref)
     LISTNER_CHECK_END_TAG(listener_ref)
-    if(listener_ref->listen_postable) {
+    if(listener_ref->listener.listen_postable) {
         /**
          * This should be posted not called
          */
-        listener_ref->listen_postable(listener_ref->runloop,  listener_ref->listen_postable_arg);
+        listener_ref->listener.listen_postable(listener_ref->runloop,  listener_ref->listener.listen_postable_arg);
     }
 }
-static void anonymous_free(RunloopWatcherBaseRef p)
+static void anonymous_free(RunloopEventRef p)
 {
     LISTNER_CHECK_TAG((RunloopListenerRef)p)
     LISTNER_CHECK_END_TAG((RunloopListenerRef)p)
-    runloop_listener_free((RunloopListenerRef) p);
+    runloop_listener_free((RunloopEventRef) p);
 }
 
-void runloop_listener_init(RunloopListenerRef athis, RunloopRef runloop, int fd)
+void runloop_listener_init(RunloopEventRef lrevent, RunloopRef runloop, int fd)
 {
-    LISTNER_SET_TAG(athis);
-    LISTNER_SET_END_TAG(athis)
-    athis->type = RUNLOOP_WATCHER_LISTENER;
-    athis->fd = fd;
-    athis->runloop = runloop;
-    athis->free = &anonymous_free;
-    athis->handler = &handler;
-    athis->context = athis;
-    athis->listen_postable_arg = NULL;
-    athis->listen_postable = NULL;
+    LISTNER_SET_TAG(lrevent);
+    LISTNER_SET_END_TAG(lrevent)
+    lrevent->type = RUNLOOP_WATCHER_LISTENER;
+    lrevent->runloop = runloop;
+    lrevent->free = &anonymous_free;
+    lrevent->handler = &handler;
+    lrevent->context = lrevent;
+    lrevent->listener.fd = fd;
+    lrevent->listener.listen_postable_arg = NULL;
+    lrevent->listener.listen_postable = NULL;
 }
-void runloop_listener_deinit(RunloopListenerRef athis)
+void runloop_listener_deinit(RunloopEventRef lrevent)
 {
-    LISTNER_CHECK_TAG(athis)
-    LISTNER_CHECK_END_TAG(athis)
+    LISTNER_CHECK_TAG(lrevent)
+    LISTNER_CHECK_END_TAG(lrevent)
     // does not own any dynamic objects
 }
-RunloopListenerRef runloop_listener_new(RunloopRef runloop, int fd)
+RunloopEventRef runloop_listener_new(RunloopRef runloop, int fd)
 {
-    RunloopListenerRef this = malloc(sizeof(RunloopListener));
+    RunloopEventRef this = malloc(sizeof(RunloopEvent));
     runloop_listener_init(this, runloop, fd);
     return this;
 }
-void runloop_listener_free(RunloopListenerRef athis)
+void runloop_listener_free(RunloopEventRef lrevent)
 {
-    LISTNER_CHECK_TAG(athis)
-    LISTNER_CHECK_END_TAG(athis)
-    runloop_listener_verify(athis);
-    close(athis->fd);
-    free((void*)athis);
+    LISTNER_CHECK_TAG(lrevent)
+    LISTNER_CHECK_END_TAG(lrevent)
+    runloop_listener_verify(lrevent);
+    close(lrevent->listener.fd);
+    free((void*)lrevent);
 }
-void runloop_listener_register(RunloopListenerRef athis, PostableFunction postable, void* postable_arg)
+void runloop_listener_register(RunloopEventRef lrevent, PostableFunction postable, void* postable_arg)
 {
-    LISTNER_CHECK_TAG(athis)
-    LISTNER_CHECK_END_TAG(athis)
-    runloop_listener_verify(athis);
-    athis->handler = &handler;
-    athis->context = athis;
+    LISTNER_CHECK_TAG(lrevent)
+    LISTNER_CHECK_END_TAG(lrevent)
+    runloop_listener_verify(lrevent);
+    lrevent->handler = &handler;
+    lrevent->context = lrevent;
     if( postable != NULL) {
-        athis->listen_postable = postable;
+        lrevent->listener.listen_postable = postable;
     }
     if (postable_arg != NULL) {
-        athis->listen_postable_arg = postable_arg;
+        lrevent->listener.listen_postable_arg = postable_arg;
     }
 
     /**
      * NOTE the EPOLLEXCLUSIVE - prevents the thundering herd problem. Defaults to level triggered
      */
     uint32_t interest =  0;//EPOLLIN | EPOLLEXCLUSIVE;
-    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
+    int res = runloop_register(lrevent->runloop, lrevent->listener.fd, interest, (RunloopWatcherBaseRef) (lrevent));
 
     if(res != 0) {
         printf("register status : %d errno: %d \n", res, errno);
     }
     assert(res == 0);
 }
-void runloop_listener_deregister(RunloopListenerRef athis)
+void runloop_listener_deregister(RunloopEventRef athis)
 {
     LISTNER_CHECK_TAG(athis)
     LISTNER_CHECK_END_TAG(athis)
-    runloop_deregister(athis->runloop, athis->fd);
+    runloop_deregister(athis->runloop, athis->listener.fd);
 }
-void runloop_listener_arm(RunloopListenerRef athis, PostableFunction postable, void* postable_arg)
+void runloop_listener_arm(RunloopEventRef lrevent, PostableFunction postable, void* postable_arg)
 {
-    LISTNER_CHECK_TAG(athis)
-    LISTNER_CHECK_END_TAG(athis)
+    LISTNER_CHECK_TAG(lrevent)
+    LISTNER_CHECK_END_TAG(lrevent)
     if(postable != NULL) {
-        athis->listen_postable = postable;
+        lrevent->listener.listen_postable = postable;
     }
     if (postable_arg != NULL) {
-        athis->listen_postable_arg = postable_arg;
+        lrevent->listener.listen_postable_arg = postable_arg;
     }
     uint32_t interest = 0;//EPOLLIN; // | EPOLLEXCLUSIVE ;
 
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
+    int res = runloop_reregister(lrevent->runloop, lrevent->listener.fd, interest, (RunloopWatcherBaseRef) lrevent);
     if(res != 0) {
         printf("arm status : %d errno: %d \n", res, errno);
     }
     assert(res == 0);
 }
-void runloop_listener_disarm(RunloopListenerRef athis)
+void runloop_listener_disarm(RunloopEventRef athis)
 {
     LISTNER_CHECK_TAG(athis)
     LISTNER_CHECK_END_TAG(athis)
-    int res = runloop_reregister(athis->runloop, athis->fd, 0L, (RunloopWatcherBaseRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->listener.fd, 0L, (RunloopWatcherBaseRef) athis);
     assert(res == 0);
 }
-RunloopRef runloop_listener_get_runloop(RunloopListenerRef athis)
+RunloopRef runloop_listener_get_runloop(RunloopEventRef athis)
 {
     LISTNER_CHECK_TAG(athis)
     LISTNER_CHECK_END_TAG(athis)
     return athis->runloop;
 }
-int runloop_listener_get_fd(RunloopListenerRef athis)
+int runloop_listener_get_fd(RunloopEventRef athis)
 {
     LISTNER_CHECK_TAG(athis)
     LISTNER_CHECK_END_TAG(athis)
-    return athis->fd;
+    return athis->listener.fd;
 }
 
-void runloop_listener_verify(RunloopListenerRef athis)
+void runloop_listener_verify(RunloopEventRef athis)
 {
     LISTNER_CHECK_TAG(athis)
     LISTNER_CHECK_END_TAG(athis)
@@ -151,7 +151,7 @@ void runloop_listener_verify(RunloopListenerRef athis)
 static void on_listening_postable(RunloopRef rl, void* asio_listener_arg);
 
 typedef struct AsioListener_s {
-    RunloopListenerRef rl_listener_ref;
+    RunloopEventRef     rl_listener_ref;
     AcceptCallback      on_accept_callback;
     void*               on_accept_callback_arg;
 } AsioListener, *AsioListenerRef;

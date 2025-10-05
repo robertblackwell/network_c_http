@@ -11,12 +11,6 @@
  * multiple file descriptors.
  */
 
-struct RunloopStream_s;
-typedef struct RunloopStream_s RunloopStream, *RunloopStreamRef;         // Wait for an IO event on a fd
-
-struct AsioStream_s;
-typedef struct AsioStream_s AsioStream, *AsioStreamRef;         // Wait for an IO event on a fd
-
 RunloopStreamRef runloop_stream_new(RunloopRef runloop, int fd);
 void runloop_stream_free(RunloopStreamRef athis);
 

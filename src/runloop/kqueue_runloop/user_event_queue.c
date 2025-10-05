@@ -12,12 +12,12 @@
 #include <rbl/logger.h>
 #include <common/list.h>
 
-typedef EventfdQueue* EvfQueuePtr;
+typedef EventQueue* EvfQueuePtr;
 
 static void dealloc(void** p)
 {
 }
-static void mk_fds(EventfdQueueRef athis)
+static void mk_fds(EventQueueRef athis)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
 #ifdef runloop_eventfd_ENABLE
@@ -37,41 +37,42 @@ static void mk_fds(EventfdQueueRef athis)
     assert(errno == EAGAIN);
 
 }
-void runloop_eventfd_queue_init(EventfdQueueRef athis)
+void runloop_event_queue_init(RunloopRef runloop, RunloopEventRef rlevent)
 {
-    EVENTFD_SET_TAG(athis)
-    EvfQueuePtr me = (EvfQueuePtr)athis;
+    #if 0
+    EVENTFD_SET_TAG(rlevent)
+    EvfQueuePtr me = rlevent->evqueue;
     me->list = functor_list_new(runloop_MAX_FDS);
     pthread_mutex_init(&(me->queue_mutex), NULL);
     mk_fds(me);
+    #endif
 }
-EventfdQueueRef runloop_eventfd_queue_new()
+RunloopEventRef runloop_event_queue_new(RunloopRef rl)
 {
-    EventfdQueueRef tmp = malloc(sizeof(EventfdQueue));
-    runloop_eventfd_queue_init(tmp);
+    RunloopEventRef tmp = event_allocator_alloc(rl->event_allocator);
+    runloop_event_queue_init(rl, tmp);
     return tmp;
 }
-void runloop_eventfd_queue_free(EventfdQueueRef athis)
+void runloop_eventfd_queue_free(RunloopEventRef athis)
 {
-    free(athis);
+    event_allocator_free(athis->runloop->event_allocator, athis);
 }
-int runloop_eventfd_queue_readfd(EventfdQueueRef athis)
+int runloop_eventfd_queue_readfd(RunloopEventRef athis)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
-    return me->readfd;
+    return athis->uevent.read_fd;
 }
-void runloop_eventfd_queue_add(EventfdQueueRef athis, Functor item)
+void runloop_eventfd_queue_add(RunloopEventRef athis, Functor item)
 {
-    EvfQueuePtr me = (EvfQueuePtr)athis;
+    EvfQueuePtr me = athis->interthread_queue.queue;
     pthread_mutex_lock(&(me->queue_mutex));
     functor_list_add(me->list, item);
     uint64_t buf = 1;
     write(me->writefd, &buf, sizeof(buf));
     pthread_mutex_unlock(&(me->queue_mutex));
-
 }
-Functor runloop_eventfd_queue_remove(EventfdQueueRef athis) {
-    EvfQueuePtr me = (EvfQueuePtr) athis;
+Functor runloop_eventfd_queue_remove(RunloopEventRef athis) {
+    EvfQueuePtr me = athis->interthread_queue.queue;
     pthread_mutex_lock(&(me->queue_mutex));
     Functor op;
     if (functor_list_size(me->list) > 0) {

@@ -8,7 +8,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <errno.h>
-#include <sys/epoll.h>
 #include <rbl/logger.h>
 #include <src/common/utils.h>
 #include <src/runloop/runloop.h>
@@ -25,7 +24,7 @@ void async_socket_set_nonblocking(int socket);
  *  rearm the timer
  *
  */
-void WriteCtx_init(WriteCtx* this, int fd, RunloopStreamRef stream_ref, RunloopTimerRef timer_ref, int max)
+void WriteCtx_init(WriteCtx* this, int fd, RunloopStreamRef stream_ref, RunloopEventRef timer_ref, int max)
 {
     RBL_SET_TAG(WriteCtx_ATG, this)
     RBL_SET_END_TAG(WriteCtx_ATG, this)
@@ -140,7 +139,7 @@ static void wrtr_wait_timer_fired(RunloopRef rl, void* ctx_p_arg)
     WriteCtx* ctx = ctx_p_arg;
     RunloopRef runloop_ref = runloop_stream_get_runloop(ctx->stream_ref);
     RunloopStreamRef stream_ref = ctx->stream_ref;
-    RunloopTimerRef timer_ref = ctx->timer_ref;
+    RunloopEventRef timer_ref = ctx->timer_ref;
     int fd = runloop_stream_get_fd(stream_ref);
     RBL_CHECK_TAG(WriteCtx_ATG, ctx)
     RBL_CHECK_END_TAG(WriteCtx_ATG, ctx)

@@ -105,7 +105,7 @@ void http_connection_read(HttpConnectionRef cref, void(*on_http_read_cb)(void* h
 {
     RBL_CHECK_TAG(HttpConnection_TAG, cref)
     RBL_CHECK_END_TAG(HttpConnection_TAG, cref)
-    RBL_LOG_FMT("http_connect_read fd: %d", cref->asio_stream_ref->runloop_stream_ref->fd);
+    RBL_LOG_FMT("http_connect_read fd: %d", asio_stream_get_fd(cref->asio_stream_ref));
     assert(on_http_read_cb != NULL);
 
     // should be in READ_STATE_IDLE - check the variable values for state

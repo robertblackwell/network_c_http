@@ -117,12 +117,13 @@ static void postable_write_start(RunloopRef runloop_ref, void* href)
     RBL_CHECK_TAG(HttpHandler_TAG, handler_ref)
     RBL_CHECK_END_TAG(HttpHandler_TAG, handler_ref)
     #ifdef __APPLE__
-        pthread_t tid = pthread_self()
+        pthread_t tid = pthread_self();
     #elif defined(__linux__)
         pid_t tid = gettid();
     #else
     #endif
-    RBL_LOG_FMT("postable_write_start tid: %p active_response:%p fd:%d  write_state: %d\n", tid, handler_ref->active_response, handler_ref->http_connection_ref->asio_stream_ref->fd, handler_ref->http_connection_ref->write_state);
+    RBL_LOG_FMT("postable_write_start tid: %p active_response:%p fd:%d  write_state: %d\n", tid, 
+        handler_ref->active_response, asio_stream_get_fd(handler_ref->http_connection_ref->asio_stream_ref), handler_ref->http_connection_ref->write_state);
     if(handler_ref->active_response != NULL) {
         return;
     }
@@ -138,7 +139,7 @@ static void on_write_complete_cb(void* href, int status)
     HttpHandlerRef handler_ref = href;
     RBL_CHECK_TAG(HttpHandler_TAG, handler_ref)
     RBL_CHECK_END_TAG(HttpHandler_TAG, handler_ref)
-    RBL_LOG_FMT("on_write_complete_cb fd:%d  write_state:%d\n", handler_ref->http_connection_ref->asio_stream_ref->fd, handler_ref->http_connection_ref->write_state);
+    RBL_LOG_FMT("on_write_complete_cb fd:%d  write_state:%d\n", asio_stream_get_fd(handler_ref->http_connection_ref->asio_stream_ref), handler_ref->http_connection_ref->write_state);
     http_message_free(handler_ref->active_response);
     handler_ref->active_response = NULL;
     if(List_size(handler_ref->output_list) >= 1) {

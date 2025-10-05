@@ -69,7 +69,7 @@ void asio_stream_destroy(AsioStreamRef this)
     RBL_ASSERT((this != NULL), "")
     RBL_CHECK_TAG(AsioStream_TAG, this)
     RBL_CHECK_END_TAG(AsioStream_TAG, this)
-    int fd = this->runloop_stream_ref->fd;
+    int fd = this->runloop_stream_ref->stream.fd;
     int fd2 = this->fd;
     assert(fd == fd2);
 
@@ -95,7 +95,7 @@ void asio_stream_close(AsioStreamRef cref)
     FdTable_remove(cref->runloop_stream_ref->runloop->table, cref->fd);
     close(cref->fd);
     cref->fd = -1;
-    cref->runloop_stream_ref->fd = -1;
+    cref->runloop_stream_ref->stream.fd = -1;
 }
 void asio_stream_free(AsioStreamRef this)
 {
@@ -146,7 +146,7 @@ RunloopRef asio_stream_get_runloop(AsioStreamRef asio_stream_ref)
 }
 int asio_stream_get_fd(AsioStreamRef athis)
 {
-    return athis->runloop_stream_ref->fd;
+    return athis->runloop_stream_ref->stream.fd;
 }
 static void try_read(AsioStreamRef cref)
 {
@@ -180,7 +180,7 @@ static void read_eagain(AsioStreamRef cref)
     RBL_LOG_FMT("asio_stream %p", cref);
     cref->read_state = READ_STATE_EAGAIN;
 #ifdef STREAM_LEVEL_TRIGGERED
-    RBL_LOG_FMT("read_eagain arm read fd: %d\n", cref->runloop_stream_ref->fd);
+    RBL_LOG_FMT("read_eagain arm read fd: %d\n", cref->runloop_stream_ref->stream.fd);
     runloop_stream_arm_read(cref->runloop_stream_ref, epollin_postable_cb, cref);
 #endif
 }
@@ -196,7 +196,7 @@ static void epollin_postable_cb(RunloopRef rl, void* cref_arg)
         if(cref->read_callback == NULL) {
             cref->read_state = READ_STATE_IDLE;
         } else {
-            RBL_LOG_FMT("epollin_postable_cb disram read fd: %d\n", cref->runloop_stream_ref->fd);
+            RBL_LOG_FMT("epollin_postable_cb disram read fd: %d\n", cref->runloop_stream_ref->stream.fd);
             runloop_stream_disarm_read(cref->runloop_stream_ref);
             try_read(cref);
         }

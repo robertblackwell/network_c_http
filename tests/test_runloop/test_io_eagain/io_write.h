@@ -33,12 +33,12 @@ typedef struct WriteCtx_s {
     int                 writefd;
     int                 interval_ms;
     RunloopStreamRef    swatcher;
-    RunloopTimerRef     twatcher;
+    RunloopEventRef     twatcher;
     AsioStreamRef       asio_stream_ref;
     RBL_DECLARE_END_TAG;
 } WriteCtx;
 
-void WriteCtx_init(WriteCtx* this, int fd, RunloopStreamRef swatcher, RunloopTimerRef twatcher, int max);
+void WriteCtx_init(WriteCtx* this, int fd, RunloopStreamRef swatcher, RunloopEventRef twatcher, int max);
 
 
 typedef struct Writer_s {
