@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdbool.h>
+#define EVT_MAX runloop_MAX_EVENTS
 
 typedef struct FreeList_s FreeList, *FreeListRef;
 typedef struct MemorySlab_s MemorySlab, *MemorySlabRef;
@@ -19,7 +20,7 @@ struct FreeList_s {
     uint16_t    max;
     uint16_t    rdix;
     uint16_t    wrix;
-    uint16_t    buffer[runloop_FDTABLE_MAX];
+    uint16_t    buffer[EVT_MAX];
 };
 
 void freelist_init(FreeListRef fl, uint16_t max);
@@ -49,7 +50,7 @@ struct MemorySlab_s {
 
 typedef struct EventTable_s {
     FreeList    free_list;
-    MemorySlab  memory[runloop_MAX_EVENTS];
+    MemorySlab  memory[EVT_MAX];
 };
 
 EventTableRef event_allocator_new();

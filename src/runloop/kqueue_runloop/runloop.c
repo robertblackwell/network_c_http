@@ -121,7 +121,7 @@ void runloop_close(RunloopRef athis)
     athis->closed_flag = true;
     int status = close(athis->kqueue_fd);
     RBL_LOG_FMT("runloop_close status: %d errno: %d", status, errno);
-    RBL_ASSERT((status != -1), "close epoll_fd failed");
+    RBL_ASSERT((status != -1), "close kqueue_fd failed");
     int next_fd = FdTable_iterator(athis->table);
     while (next_fd  != -1) {
         close(next_fd);
@@ -282,27 +282,19 @@ int runloop_run(RunloopRef athis, time_t timeout_ms) {
                 case 0:
                     result = 0;
                     close(athis->kqueue_fd);
+                    athis->closed_flag = true;
                     goto cleanup;
                 default: {
                     for (int i = 0; i < nev; i++) {
                         RUNLOOP_CHECK_TAG(athis)
                         RUNLOOP_CHECK_END_TAG(athis)
-#if 1
-                        struct kevent ee = athis->events[i];
-                        void* pp = (void*)ee.ident;
-                        RunloopWatcherBaseRef tr = pp;
-                        RunloopEventRef wr = athis->events[i].udata;
-                        // int fd = wr->fd;
-#else
-                        int fd = events[i].data.fd;
-                        void *arg = events[i].data.ptr;
-#endif
+                        struct kevent ke = athis->events[i];
+                        void* pp = (void*)ke.ident;
+                        RunloopEventRef rlevent = events[i].udata;
+
                         int mask = athis->events[i].filter;
-                        RBL_LOG_FMT("runloop_run loop ident: %lu udata: %p events: %x", ee.ident ,wr , mask);
-                        // RunloopWatcherBaseRef wref = FdTable_lookup(athis->table, fd);
-                        // assert(wr == wref);
-                        wr->handler(wr, athis->events[i].filter);
-                        // call handler
+                        RBL_LOG_FMT("runloop_run loop ident: %lu udata: %p events: %x", ke.ident ,rlevent , mask);
+                        rlevent->handler(rlevent, athis->events[i].filter);
                         RUNLOOP_CHECK_TAG(athis)
                     }
                 }

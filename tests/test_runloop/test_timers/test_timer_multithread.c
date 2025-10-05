@@ -31,7 +31,7 @@ int make_multiple_threads(int selector)
     int nbr_threads = 5;
     TestCtx* contexts[nbr_threads];
     for(int ix = 0; ix < 5; ix++) {
-        contexts[ix] = TestCtx_new(0, 10, 100);
+        contexts[ix] = TestCtx_new(NULL, NULL, 0, 10, 100);
         contexts[ix]->selector = selector;
         int r = pthread_create(&(contexts[ix]->thread), NULL, &threadfn, (void*)&(contexts[ix]));
 

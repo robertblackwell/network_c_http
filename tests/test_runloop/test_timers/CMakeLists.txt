@@ -21,7 +21,7 @@ add_test(test_timer_single_repeating test_timer_single_repeating)
 
 
 #
-# test timer_post
+# test timer_multiple_repeating
 #
 add_executable(test_timer_multiple_repeating test_timer_multiple_repeating.c)
 target_include_directories(test_timer_multiple_repeating PUBLIC ${TEST_INCLUDE_dirS})
@@ -39,7 +39,7 @@ add_test(test_timer_post test_timer_post)
 #
 # test timer_multithreaded
 #
-#add_executable(test_timer_multithread test_timer_multithread.c)
-#target_include_directories(test_timer_multithread PUBLIC ${TEST_INCLUDE_dirS})
-#target_link_libraries(test_timer_multithread PUBLIC ${TEST_LINK_LIBS})
-#add_test(test_timer_multithread test_timer_multithread)
+add_executable(test_timer_multithread test_timer_multithread.c)
+target_include_directories(test_timer_multithread PUBLIC ${TEST_INCLUDE_dirS})
+target_link_libraries(test_timer_multithread PUBLIC ${TEST_LINK_LIBS})
+add_test(test_timer_multithread test_timer_multithread)

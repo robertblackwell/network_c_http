@@ -113,6 +113,27 @@ static int cancel_timer(RunloopRef rl, uint64_t id)
 
     return 0;
 }
+static int pause_timer(RunloopRef rl, uint64_t id)
+{
+    int flags = EV_ADD | EV_DISABLE | EV_RECEIPT ; 
+    struct kevent change;
+    struct kevent* change_ptr;
+    int nev;
+    // int flags = EV_DELETE | EV_RECEIPT; 
+    // EV_SET(&change, id, EVFILT_TIMER, flags, 0, 0, 0);
+    // nev = kevent(kq, &change, 1, NULL, 0, NULL);
+
+    #ifdef RL_KQ_BATCH_CHANGES
+        change_ptr = runloop_change_next(rl)
+        EV_SET(&change, id, EVFILT_TIMER, flags, 0, milli_secs, 0);
+    #else
+        change_ptr = &change;
+        EV_SET(&change, id, EVFILT_TIMER, flags, 0, 0, 0);
+        nev = kevent(rl->kqueue_fd, &change, 1, NULL, 0, NULL);
+    #endif
+
+    return 0;
+}
 
 void runloop_timer_register(RunloopEventRef rlevent, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating)
 {
@@ -131,37 +152,20 @@ void runloop_timer_register(RunloopEventRef rlevent, PostableFunction cb, void* 
     print_current_tme("runloop_timer_register");
     assert(res ==0);
 }
-void runloop_timer_update(RunloopEventRef athis, uint64_t interval_ms, bool repeating)
+void runloop_timer_update(RunloopEventRef rlevent, uint64_t interval_ms, bool repeating)
 {
-    // WTIMER_CHECK_TAG(athis)
-    // WTIMER_CHECK_END_TAG(athis)
-    // uint32_t interest = 0;
-    // struct itimerspec its = WTimerFd_update_interval(athis, interval_ms, repeating);
-    // int flags = 0;
-    // int rc = timerfd_settime(athis->fd, flags, &its, NULL);
-    // assert(rc == 0);
-    // int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
-    // assert(res == 0);
+    int res = register_timer(rlevent->runloop, (void*)rlevent, (uint64_t)rlevent, !repeating, interval_ms);
+    assert(res == 0);
 }
-void runloop_timer_disarm(RunloopEventRef lrevent)
+void runloop_timer_disarm(RunloopEventRef rlevent)
 {
-    // WTIMER_CHECK_TAG(athis)
-    // WTIMER_CHECK_END_TAG(athis)
-    // struct itimerspec its = WTimerFd_update_interval(athis, athis->interval, athis->repeating);
-    // int flags = 0;
-    // int rc = timerfd_settime(athis->fd, flags, &its, NULL);
-    // assert(rc == 0);
+    int res = pause_timer(rlevent->runloop, (uint64_t)rlevent);
+    assert(res ==0);
 }
-void runloop_timer_rearm(RunloopEventRef lrevent)
+void runloop_timer_rearm(RunloopEventRef rlevent)
 {
-    // WTIMER_CHECK_TAG(athis)
-    // WTIMER_CHECK_END_TAG(athis)
-    // uint64_t interval_ms = athis->interval;
-    // bool repeating = athis->repeating;
-    // struct itimerspec its = WTimerFd_update_interval(athis, interval_ms, repeating);
-    // int flags = 0;
-    // int rc = timerfd_settime(athis->fd, flags, &its, NULL);
-    // assert(rc == 0);
+    int res = register_timer(rlevent->runloop, (void*)rlevent, (uint64_t)rlevent, !rlevent->timer.repeating, rlevent->timer.interval);
+    assert(res ==0);
 }
 
 void runloop_timer_deregister(RunloopEventRef lrevent)
