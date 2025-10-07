@@ -356,3 +356,8 @@ void runloop_post(RunloopRef athis, PostableFunction cb, void* arg)
     functor_list_add(athis->ready_list, func);
     RBL_LOG_FMT("runloop_post exited functor_list_size: %d func: %p arg: %p runloop_executing: %d", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
 }
+void runloop_verify(RunloopRef rl)
+{
+    RUNLOOP_CHECK_TAG(rl)
+    RUNLOOP_CHECK_END_TAG(rl)
+}

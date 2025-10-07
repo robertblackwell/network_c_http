@@ -16,7 +16,6 @@
 #define AsioStream_TAG    "AsioSTRM"
 
 #define WATCHER_DECLARE_TAG RBL_DECLARE_TAG(Watcher)
-
 /**
  * REACTOR tag macros
  */
@@ -27,6 +26,10 @@
 #define RUNLOOP_DECLARE_END_TAG RBL_DECLARE_END_TAG(Runloop_TAG)
 #define RUNLOOP_CHECK_END_TAG(p) RBL_CHECK_END_TAG(Runloop_TAG, p)
 #define RUNLOOP_SET_END_TAG(p) RBL_SET_END_TAG(Runloop_TAG, p)
+#define VERIFY_RUNLOOP(p) do{\
+    RUNLOOP_CHECK_TAG(p) \
+    RUNLOOP_CHECK_END_TAG(p) \
+}while(0);
 
 /**
  * eventfd tag macros

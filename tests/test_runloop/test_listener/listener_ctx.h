@@ -15,7 +15,11 @@
 #include <src/common/utils.h>
 #include <src/common/socket_functions.h>
 #include <src/sync/sync_client.h>
-#include <src/runloop/runloop.h>
+#include <kqueue_runloop/runloop.h>
+#include <kqueue_runloop/runloop_internal.h>
+
+#include <rbl/check_tag.h>
+#define Ctx_TAG "LCTX"
 
 typedef int socket_handle_t;
 
@@ -29,29 +33,28 @@ typedef int socket_handle_t;
  * 
  */
 struct ListenerCtx_s {
+    RBL_DECLARE_TAG;
+    int                     l_state;
     int                     port;
     const char*             host;
     socket_handle_t         listening_socket_fd;
     RunloopRef              runloop_ref;
-    RunloopEventRef         listening_watcher_ref;
+    RunloopEventRef         rl_event;
     RunloopEventRef         timer_ref;
-    AsioListenerRef         asio_listener_ref;
     int                     listen_count;
     int                     accept_count;
+    int                     max_accept_count;
     int id;
+    RBL_DECLARE_END_TAG;
 };
 typedef struct  ListenerCtx_s TestServer, *ListenerCtxRef;
 
 
-ListenerCtxRef listener_ctx_new(int listen_fd, int id);
-void listener_ctx_init(ListenerCtxRef sref, int listen_fd, int id);
+ListenerCtxRef listener_ctx_new(int listen_fd, int id, RunloopRef rl);
+void listener_ctx_init(ListenerCtxRef sref, int listen_fd, int id, RunloopRef rl);
 
-ListenerCtxRef listener_ctx_new2(int port, const char* host, int id);
-void listener_ctx_init2(ListenerCtxRef sref, int port, const char* host, int id);
-
-
-void listener_ctx_free(ListenerCtxRef *sref);
-void listener_ctx_listen(ListenerCtxRef sref);
+void listener_ctx_free(ListenerCtxRef sref);
+void listener_ctx_run(ListenerCtxRef sref);
 
 int local_create_bound_socket(int port, const char* host);
 

@@ -11,105 +11,190 @@
 #include <src/common/utils.h>
 #include <src/common/socket_functions.h>
 
-static void on_timer(RunloopRef rl, void* arg);
-static void on_event_listening(RunloopRef rl, void* listener_ref_arg);
+#define L_STATE_EAGAIN 22
+#define L_STATE_READY 33
+#define L_STATE_INITIAL 44
+#define L_STATE_STOPPED 55
+#define L_STATE_ERROR 66
 
-ListenerCtxRef listener_ctx_new(int listen_fd, int id)
+static void on_timer(RunloopRef rl, void* arg);
+static void on_read_ready(RunloopRef rl, void* listener_ref_arg);
+static void handle_new_socket(ListenerCtxRef ctx, int sock);
+static bool can_do_more(ListenerCtxRef ctx);
+static void try_accept(ListenerCtxRef ctx);
+static void postable_try_accept(RunloopRef rl, void* arg);
+
+ListenerCtxRef listener_ctx_new(int listen_fd, int id, RunloopRef rl)
 {
+    runloop_verify(rl);
     ListenerCtxRef sref = malloc(sizeof(TestServer));
+    RBL_SET_TAG(Ctx_TAG, sref)
+    RBL_SET_END_TAG(Ctx_TAG, sref)
+    VERIFY_RUNLOOP(rl)
+    sref->l_state = L_STATE_INITIAL;
     sref->listening_socket_fd = listen_fd;
     sref->listen_count = 0;
     sref->accept_count = 0;
     sref->id = id;
+    sref->runloop_ref = rl;
+    sref->rl_event = runloop_listener_new(rl, listen_fd);
     printf("listener_ctx_new %p   listen fd: %d\n", sref, listen_fd);
     return sref;
 }
-ListenerCtxRef listener_ctx_new2(int port, const char* host, int id)
-{
-    ListenerCtxRef sref = malloc(sizeof(TestServer));
-    listener_ctx_init2(sref, port, host, id);
-    return sref;
-}
 
-void listener_ctx_init(ListenerCtxRef sref, int listen_fd, int id)
+void listener_ctx_init(ListenerCtxRef sref, int listen_fd, int id, RunloopRef rl)
 {
+    RBL_SET_TAG(Ctx_TAG, sref)
+    RBL_SET_END_TAG(Ctx_TAG, sref)
+    VERIFY_RUNLOOP(rl)
+    runloop_verify(rl);
     sref->listening_socket_fd = listen_fd;
+    sref->l_state = L_STATE_INITIAL;
     sref->listen_count = 0;
     sref->accept_count = 0;
     sref->id = id;
+    sref->runloop_ref = rl;
+    sref->rl_event = runloop_listener_new(rl, listen_fd);
     printf("listener_ctx_init %p   listen fd: %d\n", sref, listen_fd);
 }
-void listener_ctx_init2(ListenerCtxRef sref, int port, const char* host, int id)
-{
-    sref->port = port;
-    sref->host = host;
-    sref->listen_count = 0;
-    sref->accept_count = 0;
-    sref->id = id;
-#if 0
-    int listen_fd = local_create_bound_socket(port, host);
-    socket_set_non_blocking(listen_fd);
 
-    sref->listening_socket_fd = listen_fd;
+void listener_ctx_free(ListenerCtxRef sref)
+{
+    ASSERT_NOT_NULL(sref);
+    RBL_CHECK_TAG(Ctx_TAG, sref)
+    RBL_CHECK_END_TAG(Ctx_TAG, sref)
+    free(sref);
+}
+void listener_ctx_run(ListenerCtxRef ctx)
+{
+    ASSERT_NOT_NULL(ctx)
+    RBL_CHECK_TAG(Ctx_TAG, ctx)
+    RBL_CHECK_END_TAG(Ctx_TAG, ctx)
+    struct sockaddr_in peername;
+    unsigned int addr_length = (unsigned int) sizeof(peername);
+    RunloopEventRef rlevent = ctx->rl_event;
+
+    // runloop_listener_register(rlevent, on_event_listening, ctx);
+
+    ctx->timer_ref = runloop_timer_new(ctx->runloop_ref);
+    runloop_timer_register(ctx->timer_ref, &on_timer, (void *)ctx, 5000000, false);
+    runloop_post(ctx->runloop_ref, postable_try_accept, ctx);    
+    runloop_run(ctx->runloop_ref, -1);
+    printf("Listener runloop ended \n");
+    runloop_free(ctx->runloop_ref);
+}
+
+static void postable_try_accept(RunloopRef rl, void* arg)
+{
+    ListenerCtxRef ctx = arg;
+    RBL_CHECK_TAG(Ctx_TAG, ctx)
+    RBL_CHECK_END_TAG(Ctx_TAG, ctx)
+    RunloopEventRef rlevent = ctx->rl_event;
+    runloop_listener_register(rlevent, on_read_ready, ctx);
+    int fd = runloop_listener_get_fd(rlevent);
     int result;
-    if((result = listen(listen_fd, SOMAXCONN)) != 0) {
-        printf("listen call failed with errno %d \n", errno);
-        assert(0);
+    switch(ctx->l_state) {
+        case L_STATE_INITIAL:
+            if((result = listen(fd, SOMAXCONN)) != 0) {
+                printf("listen call failed with errno %d \n", errno);
+                assert(0);
+            }
+            ctx->l_state = L_STATE_READY;
+            try_accept(ctx);
+            break;
+        case L_STATE_READY:
+            try_accept(ctx);
+            break;
+        case L_STATE_EAGAIN:
+            
+        case L_STATE_STOPPED:
+        case L_STATE_ERROR:
+            break;
+        default:
+            assert(0);
+            break;
     }
-
-    printf("listener_ctx_init %p   listen fd: %d\n", sref, listen_fd);
-#endif
 }
-
-void listener_ctx_free(ListenerCtxRef *sref)
+static void handle_new_socket(ListenerCtxRef ctx, int sock)
 {
-    ASSERT_NOT_NULL(*sref);
-    free(*sref);
-    *sref = NULL;
+    RBL_CHECK_TAG(Ctx_TAG, ctx)
+    RBL_CHECK_END_TAG(Ctx_TAG, ctx)
+    int nbsock = socket_set_blocking(sock);
+    RBL_LOG_FMT("handle_new_socket ctx: %p sock: %d accept_count: %d", ctx, sock, ctx->accept_count)
+    ctx->accept_count++;
+    char buf[300];
+    int nr = read(nbsock, buf, 100);
+    buf[nr] = '\0';
+    RBL_LOG_FMT("handle_new_socket from client: %s ", buf);
+    char wbuf[300];
+    int ln = snprintf(wbuf, 100, "Reply from server: %s", buf);
+    int wr = write(nbsock, wbuf, ln);
+    close(sock);
+    // if(ctx->accept_count >= ctx->max_accept_count) {
+    //     ctx->l_state = L_STATE_STOPPED;
+    // }
 }
-void listener_ctx_listen(ListenerCtxRef listener_ctx_ref)
+static bool can_do_more(ListenerCtxRef ctx)
 {
-    ASSERT_NOT_NULL(listener_ctx_ref)
+    RBL_CHECK_TAG(Ctx_TAG, ctx)
+    RBL_CHECK_END_TAG(Ctx_TAG, ctx)
+    return true;
+}
+static void try_accept(ListenerCtxRef ctx)
+{
+    RBL_CHECK_TAG(Ctx_TAG, ctx)
+    RBL_CHECK_END_TAG(Ctx_TAG, ctx)
     struct sockaddr_in peername;
     unsigned int addr_length = (unsigned int) sizeof(peername);
-    listener_ctx_ref->runloop_ref = runloop_new();
-    listener_ctx_ref->listening_watcher_ref = runloop_listener_new(listener_ctx_ref->runloop_ref, listener_ctx_ref->listening_socket_fd);
-    RunloopListenerRef lw = listener_ctx_ref->listening_watcher_ref;
 
-    runloop_listener_register(lw, on_event_listening, listener_ctx_ref);
-    printf("listener_ctx_listen runloop: %p listen sock: %d  lw: %p\n", listener_ctx_ref->runloop_ref, listener_ctx_ref->listening_socket_fd, lw);
-    listener_ctx_ref->timer_ref = runloop_timer_new(listener_ctx_ref->runloop_ref);
-    runloop_timer_register(listener_ctx_ref->timer_ref, &on_timer, (void *) listener_ctx_ref, 5000, false);
-    runloop_run(listener_ctx_ref->runloop_ref, -1);
-    printf("Listener reactor ended \n");
-    runloop_free(listener_ctx_ref->runloop_ref);
-}
-static void on_event_listening(RunloopRef rl, void* listener_ref_arg)
-{
-    printf("listening_hander \n");
-    struct sockaddr_in peername;
-    unsigned int addr_length = (unsigned int) sizeof(peername);
-
-    ListenerCtxRef listener_ref  = listener_ref_arg;
-    RunloopEventRef rlevent = listener_ref->listening_watcher_ref;
-    int sock2 = accept(listener_ref->listening_socket_fd, (struct sockaddr *) &peername, &addr_length);
-    if(sock2 <= 0) {
-        int errno_saved = errno;
-        RBL_LOG_FMT("%s %d %d %s", "on_event_listen accept failed terminating sock2 : ", sock2, errno, strerror(errno_saved));
-    } else {
-        printf("Sock2 successfull sock: %d server_ref %p listen_ref: %p  listen_count: %d\n", sock2, listener_ref, listener_ref, listener_ref->listen_count);
-        if(listener_ref->listen_count == 0) {
-            // pretend to be busy
-            sleep(1);
+    RunloopEventRef rlevent = ctx->rl_event;
+    RunloopRef rl = runloop_listener_get_runloop(rlevent);
+    int fd = runloop_listener_get_fd(rlevent);
+    RBL_LOG_FMT("try_accept fd: %d ", fd)
+    int sock2 = accept(fd, (struct sockaddr *) &peername, &addr_length);
+    int errno_saved = errno;
+    if(sock2 > 0) {
+        ctx->listen_count++;
+        ctx->accept_count++;
+        ctx->l_state = L_STATE_READY;
+        handle_new_socket(ctx, sock2);
+        if(can_do_more(ctx)) {
+            runloop_post(rl, postable_try_accept, ctx);
         }
-        listener_ref->listen_count++;
-        listener_ref->accept_count++;
-        sleep(1);
+    } else if (sock2 == 0) {
+       // listen socket is closed ?? 
+    } else {
+        if(errno_saved == EAGAIN) {
+            RBL_LOG_FMT("try_accept fd: %d EAGAIN", fd)
+            ctx->l_state = L_STATE_EAGAIN;
+            runloop_listener_arm(rlevent, on_read_ready, ctx);
+        } else {
+            ctx->l_state = L_STATE_ERROR;
+        }
     }
-    
-    runloop_listener_arm(rlevent, NULL, NULL);
-    printf("on_event_listen id: %d new socket is : %d\n", listener_ref->id, sock2);
-    close(sock2);
+
+}
+static void on_read_ready(RunloopRef rl, void* arg)
+{
+    ListenerCtxRef ctx = arg;
+    RBL_CHECK_TAG(Ctx_TAG, ctx)
+    RBL_CHECK_END_TAG(Ctx_TAG, ctx)
+    RunloopEventRef rlevent = ctx->rl_event;
+    RBL_LOG_FMT("on_read_ready fd: %d state: %d", runloop_listener_get_fd(rlevent), ctx->l_state)
+    switch(ctx->l_state) {
+        case L_STATE_EAGAIN:
+            ctx->l_state = L_STATE_READY;
+        case L_STATE_READY:
+            try_accept(ctx);
+            break;
+        case L_STATE_INITIAL:
+        case L_STATE_STOPPED:
+        case L_STATE_ERROR:
+            RBL_LOG_FMT("on_event_listen should not be here fd: %d state: %d", runloop_listener_get_fd(rlevent), ctx->l_state)
+        default:
+            assert(0);
+            break;
+    }
 }
 /**
  * When the timer fires it is time to kill the listener.
@@ -117,24 +202,25 @@ static void on_event_listening(RunloopRef rl, void* listener_ref_arg)
 static void on_timer(RunloopRef rl, void* listener_ref_arg)
 {
     printf("on_timer entered \n");
-    ListenerCtxRef listener_ref = (ListenerCtxRef) listener_ref_arg;
+    ListenerCtxRef ctx = (ListenerCtxRef) listener_ref_arg;
+    RBL_CHECK_TAG(Ctx_TAG, ctx)
+    RBL_CHECK_END_TAG(Ctx_TAG, ctx)
     RBL_LOG_MSG("on_timer closing runloop ");
-    runloop_close(listener_ref->runloop_ref);
+    runloop_close(ctx->runloop_ref);
 //    runloop_free(listener_ref->reactor_ref);
 }
-
 int local_create_bound_socket(int port, const char *host)
 {
-    struct sockaddr_in sin;
-    memset(&sin, 0, sizeof(sin));
+    struct sockaddr_in server;
+    memset(&server, 0, sizeof(server));
     socket_handle_t tmp_socket;
-    sin.sin_family = AF_INET; // or AF_INET6 (address family)
-    sin.sin_port = htons(port);
-    sin.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server.sin_family = AF_INET; // or AF_INET6 (address family)
+    server.sin_port = port;
+    server.sin_addr.s_addr = inet_addr("127.0.0.1");
     int result;
     int yes = 1;
 
-    if((tmp_socket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) == -1) {
+    if((tmp_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
         printf("socket call failed with errno %d \n", errno);
         assert(0);
     }
@@ -146,7 +232,7 @@ int local_create_bound_socket(int port, const char *host)
         printf("setsockopt call failed with errno %d \n", errno);
         assert(0);
     }
-    if((result = bind(tmp_socket, (struct sockaddr *) &sin, sizeof(sin))) != 0) {
+    if((result = bind(tmp_socket, (struct sockaddr *) &server, sizeof(server))) != 0) {
         printf("bind call failed with errno %d \n", errno);
         assert(0);
     }

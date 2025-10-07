@@ -77,6 +77,8 @@ void read_callback(RunloopRef rl, void* read_ctx_ref_arg)
         buf[nread] = (char)0;
         s = &(buf[0]);
         RBL_LOG_FMT("index: %d count:%d fd: %d buf: %s errno: %d", ctx->reader_index, ctx->read_count, fd, buf, errno);
+    } else if(nread == 0) {
+        assert(false);
     } else {
         s = "badread";
         RBL_LOG_FMT("BAD READ rd_callback read_count: %d fd: %d nread: %d buf: %s errno: %d", ctx->read_count,

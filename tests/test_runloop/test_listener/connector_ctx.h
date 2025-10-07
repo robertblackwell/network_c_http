@@ -18,6 +18,7 @@
 
 
 typedef struct Connector {
+    int port;
     int count;
     int max_count;
     int listen_fd;

@@ -11,7 +11,27 @@
 #include <src/common/utils.h>
 #include <src/common/socket_functions.h>
 #include <rbl/logger.h>
+int connection_helper_v2(int port)
+{
+    struct sockaddr_in server;
+    int lfd;
+    char r_buff[100] = "";
+    char s_buff[100] = "";
+    lfd = socket(AF_INET, SOCK_STREAM, 0);
+    server.sin_family = AF_INET;
+    server.sin_port = port;
+    server.sin_addr.s_addr = inet_addr("127.0.0.1");
+    int r = connect(lfd, (struct sockaddr *)&server, sizeof(server));
+    int errno_saved = errno; 
+    if(r == 0) {
+        // this->connection_ptr = sync_connection_new(sfd, this->read_buffer_size);
+        return lfd;
+    } else {
+        printf("connect failed errno: %d desc: %s\n", errno_saved, strerror(errno_saved));
+        assert(false);
+    }
 
+}
 int connection_helper(char* host, int portno)
 //https://linux.die.net/man/3/getaddrinfo
 // this function exists as a hackish way to replace the code that resolves host names
@@ -47,10 +67,13 @@ int connection_helper(char* host, int portno)
         if(sfd == -1) {
             continue;
         }
-        if(connect(sfd, rp->ai_addr, rp->ai_addrlen) == 0) {
+        int r = connect(sfd, rp->ai_addr, rp->ai_addrlen);
+        int errno_saved = errno; 
+        if(r == 0) {
             // this->connection_ptr = sync_connection_new(sfd, this->read_buffer_size);
             break; // success
         } else {
+            printf("connect failed errno: %d desc: %s\n", errno_saved, strerror(errno_saved));
             assert(false);
         }
         close(sfd);
@@ -66,9 +89,10 @@ int connection_helper(char* host, int portno)
 void* connector_thread_func(void* arg)
 {
     Connector* tc = (Connector*)arg;
+    sleep(300);
     for(int i = 0; i < tc->max_count; i++) {
         printf("Client about to connect %d \n", i);
-        int rc = connection_helper("localhost", 9001);
+        int rc = connection_helper_v2(tc->port);
         if(rc == 0) {
             tc->count++;
         }

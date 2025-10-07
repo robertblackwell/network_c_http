@@ -22,6 +22,7 @@ static void handler(RunloopEventRef lrevent, uint16_t event, uint16_t flags)
     RunloopEventRef listener_ref = (RunloopEventRef)lrevent;
     LISTNER_CHECK_TAG(listener_ref)
     LISTNER_CHECK_END_TAG(listener_ref)
+    RBL_LOG_FMT("listener handler")
     if(listener_ref->listener.listen_postable) {
         /**
          * This should be posted not called
@@ -57,17 +58,17 @@ void runloop_listener_deinit(RunloopEventRef lrevent)
 }
 RunloopEventRef runloop_listener_new(RunloopRef runloop, int fd)
 {
-    RunloopEventRef this = malloc(sizeof(RunloopEvent));
+    RunloopEventRef this = event_table_get_entry(runloop->event_table);
     runloop_listener_init(this, runloop, fd);
     return this;
 }
-void runloop_listener_free(RunloopEventRef lrevent)
+void runloop_listener_free(RunloopEventRef rlevent)
 {
-    LISTNER_CHECK_TAG(lrevent)
-    LISTNER_CHECK_END_TAG(lrevent)
-    runloop_listener_verify(lrevent);
-    close(lrevent->listener.fd);
-    free((void*)lrevent);
+    LISTNER_CHECK_TAG(rlevent)
+    LISTNER_CHECK_END_TAG(rlevent)
+    runloop_listener_verify(rlevent);
+    close(rlevent->listener.fd);
+    event_table_release_entry(rlevent->runloop->event_table, rlevent);
 }
 void runloop_listener_register(RunloopEventRef lrevent, PostableFunction postable, void* postable_arg)
 {
