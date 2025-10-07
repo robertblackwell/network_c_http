@@ -1,5 +1,4 @@
-#include <kqueue_runloop/runloop.h>
-#include <kqueue_runloop/rl_internal.h>
+#include <kqueue_runloop/runloop_internal.h>
 #include <rbl/macros.h>
 #include <assert.h>
 #include <stdio.h>
@@ -16,18 +15,14 @@
  * @param fd
  * @param event
  */
-static void handler(RunloopEventRef event_ref, uint64_t event)
+static void handler(RunloopEventRef watcher, uint16_t filter, uint16_t flags)
 {
-    RunloopEventRef fdev = (RunloopEventRef)event_ref;
+    RunloopEventRef fdev = (RunloopEventRef)watcher;
+    printf("user event handler entered\n");
     EVENTFD_CHECK_TAG(fdev)
     EVENTFD_CHECK_END_TAG(fdev)
     uint64_t buf;
-    long nread = read(fdev->uevent.write_fd, &buf, sizeof(buf));
-    if(nread == sizeof(buf)) {
-        fdev->uevent.uevent_postable(fdev->runloop, fdev->uevent.uevent_postable);
-    } else {
-
-    }
+    watcher->uevent.uevent_postable(watcher->runloop, watcher);
 }
 static void anonymous_free(RunloopEventRef p)
 {
@@ -39,7 +34,7 @@ static void anonymous_free(RunloopEventRef p)
 void runloop_user_event_init(RunloopEventRef this, RunloopRef runloop)
 {
     RBL_ASSERT((this!=NULL), "this is NULL");
-    this->type = RUNLOOP_WATCHER_FDEVENT;
+    this->type = RUNLOOP_WATCHER_UEVENT;
     EVENTFD_SET_TAG(this);
     EVENTFD_SET_END_TAG(this);
     EVENTFD_CHECK_TAG(this)
@@ -54,6 +49,7 @@ void runloop_user_event_init(RunloopEventRef this, RunloopRef runloop)
     this->uevent.read_fd = pipefds[0];
     this->uevent.write_fd = pipefds[1];
 #else
+    // register_user_event(runloop, this);
     #ifdef KQ_RUNLOOP_USER_EVENT_SEMAPHORE
         RBL_LOG_FMT("two pipe trick disabled semaphore enabled")
         // this->fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC | EFD_SEMAPHORE);
@@ -66,21 +62,24 @@ void runloop_user_event_init(RunloopEventRef this, RunloopRef runloop)
     this->free = &anonymous_free;
     this->handler = &handler;
 }
-RunloopEventRef runloop_event_new(RunloopRef runloop)
+RunloopEventRef runloop_user_event_new(RunloopRef runloop)
 {
-    RunloopEventRef this = event_allocator_alloc(runloop->event_allocator);
+    RunloopEventRef this = event_table_get_entry(runloop->event_table);
     runloop_user_event_init(this, runloop);
     return this;
 }
-void runloop_event_free(RunloopEventRef athis)
+void runloop_user_event_free(RunloopEventRef athis)
 {
     EVENTFD_SET_TAG(athis);
     EVENTFD_CHECK_TAG(athis)
     close(athis->uevent.write_fd);
     free((void*)athis);
 }
-void runloop_event_register(RunloopEventRef athis)
+void runloop_user_event_register(RunloopEventRef rlevent)
 {
+    EVENTFD_SET_TAG(rlevent);
+    EVENTFD_CHECK_TAG(rlevent)
+    kqh_user_event_register(rlevent);
     #if 0
     EVENTFD_SET_TAG(athis);
     EVENTFD_CHECK_TAG(athis)
@@ -120,24 +119,23 @@ void runloop_user_event_deregister(RunloopEventRef athis)
     assert(res == 0);
     #endif
 }
-void runloop_user_event_arm(RunloopEventRef athis, PostableFunction postable, void* arg)
+void runloop_user_event_arm(RunloopEventRef rlevent, PostableFunction postable, void* arg)
 {
-    #if 0
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
-    uint32_t interest = 0;//EPOLLIN | EPOLLERR | EPOLLRDHUP;
-    if( postable != NULL) {
-        athis->uevent.uevent_postable = postable;
+    EVENTFD_SET_TAG(rlevent);
+    EVENTFD_CHECK_TAG(rlevent)
+  if( postable != NULL) {
+        rlevent->uevent.uevent_postable = postable;
     }
     if (arg != NULL) {
-        athis->uevent.uevent_postable_arg = arg;
+        rlevent->uevent.uevent_postable_arg = arg;
     }
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
-    assert(res == 0);
-    #endif
+    kqh_user_event_register(rlevent);
 }
-void runloop_user_event_disarm(RunloopEventRef athis)
+void runloop_user_event_disarm(RunloopEventRef rlevent)
 {
+    EVENTFD_SET_TAG(rlevent);
+    EVENTFD_CHECK_TAG(rlevent)
+    kqh_user_event_pause(rlevent);
     #if 0
     EVENTFD_SET_TAG(athis);
     EVENTFD_CHECK_TAG(athis)
@@ -152,9 +150,7 @@ void runloop_user_event_fire(RunloopEventRef athis)
     uint64_t buf = 1;
     write(athis->uevent.write_fd, &buf, sizeof(buf));
 #else
-    uint64_t buf = 1;
-    int x = write(athis->uevent.write_fd, &buf, sizeof(buf));
-    assert(x == sizeof(buf));
+    kqh_user_event_trigger(athis, (void*) 1234);
 #endif
 }
 void runloop_user_event_clear_one_event(RunloopEventRef athis)

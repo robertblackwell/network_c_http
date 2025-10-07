@@ -124,6 +124,8 @@ static void connection_helper(sync_client_t* this, char* host, int portno)
         if(connect(sfd, rp->ai_addr, rp->ai_addrlen) == 0) {
             this->connection_ptr = sync_connection_new(sfd, this->read_buffer_size);
             break; // success
+        } else {
+            assert(false);
         }
         close(sfd);
     }

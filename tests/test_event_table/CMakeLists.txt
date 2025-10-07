@@ -3,10 +3,10 @@
 message("test_include_dirs     ${TEST_INCLUDE_DIRS}")
 message("test_link_libs        ${TEST_LINK_LIBS}")
 
-set(TARGET test_event_allocator)
+set(TARGET test_event_table)
 add_executable(${TARGET}
-		test_event_allocator.c
-		)
+	test_event_table.c
+)
 
 target_include_directories(${TARGET}
 		PUBLIC

@@ -22,7 +22,11 @@
             "type":"pickString",
             "description": "Select the time test to run",
             "options": [
-                "test_event_allocator/test_event_allocator",
+                "test_runloop/test_kq_simple_io/test_simple_io",
+                "test_runloop/test_kq_io/test_io",
+                "test_event_table/test_event_table",
+                "test_runloop/test_listener/test_listener_asio",
+                "test_runloop/test_listener/test_listener"
             ],
             "default": "test_event_allocator/test_event_allocator"
         }
@@ -35,7 +39,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/tests/test_runloop/test_timers/${input:myTimerTest}",
             "args": [],
-            "stopAtEntry": true,
+            "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [
                 {
@@ -66,7 +70,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/build/tests/${input:anytest}",
             "args": ["stop", "-c"],
-            "stopAtEntry": true,
+            "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [
                 {

@@ -8,10 +8,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Types -= forward declares
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-struct Runloop_s;
 typedef struct Runloop_s Runloop, *RunloopRef;
-
-struct RunloopEvent_s;
 typedef struct RunloopEvent_s RunloopEvent, *RunloopEventRef;
 
 typedef RunloopEventRef RunloopTimerRef;
@@ -19,42 +16,21 @@ typedef RunloopEventRef RunloopListenerRef;
 typedef RunloopEventRef RunloopStreamRef;
 typedef RunloopEvent RunloopStream;
 
-struct RunloopWatcherBase_s;
 typedef struct RunloopWatcherBase_s RunloopWatcherBase, *RunloopWatcherBaseRef;       // Base object for objects that wait for an fd event
-
-struct RunloopEventfd_s;
 typedef struct RunloopEventfd_s RunloopEventFd, *RunloopEventFdRef;
-
-// struct RunloopStream_s;
-// typedef struct RunloopStream_s RunloopStream, *RunloopStreamRef; 
-
-struct AsioStream_s;
-typedef struct AsioStream_s AsioStream, *AsioStreamRef;  
-
-// struct RunloopListener_s;
-// typedef struct RunloopListener_s RunloopListener, * RunloopListenerRef;
-
-struct AsioListener_s;
-typedef struct AsioListener_s AsioListener, *AsioListenerRef;
-
-struct EventQueue_s;
+// typedef struct AsioStream_s AsioStream, *AsioStreamRef;
+// typedef struct AsioListener_s AsioListener, *AsioListenerRef;
 typedef struct EventQueue_s EventQueue, * EventQueueRef;
-
-struct InterthreadQueue_s;
 typedef struct InterthreadQueue_s InterthreadQueue, *InterthreadQueueRef;
-
-struct RunloopQueueWatcher_s;
 typedef struct RunloopQueueWatcher_s RunloopQueueWatcher, *RunloopQueueWatcherRef;
-
-
 /**
  * PostableFunction defines the call signature of functions that can be added to a runloops queue of
  * functions to be called. As such they represent the next step in an ongoing computation of a lightweight
  * "thread".
  */
 typedef void (*PostableFunction) (RunloopRef runloop_ref, void* arg);
-typedef void(*AsioReadcallback)(void* arg, long length, int error_number);
-typedef void(*AsioWritecallback)(void* arg, long length, int error_number);
+// typedef void(*AsioReadcallback)(void* arg, long length, int error_number);
+// typedef void(*AsioWritecallback)(void* arg, long length, int error_number);
 typedef void(*AcceptCallback)(void* arg, int accepted_fd, int errno);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -63,7 +39,6 @@ typedef void(*AcceptCallback)(void* arg, int accepted_fd, int errno);
 
 typedef struct Functor_s
 {
-//    RunloopWatcherBaseRef wref; // this is borrowed do not free
     PostableFunction f;
     void *arg;
 } Functor, *FunctorRef;
@@ -74,57 +49,23 @@ typedef uint64_t EventMask, RunloopTimerEvent;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 RunloopRef runloop_get_threads_runloop();
-/**
- * Create a new instance of a Runloop.
- *
- * @return a pointer to a dynamically allocated Runloop object that has been initialized.
- */
 RunloopRef runloop_new(void);
-/**
- * Free the memory associated with an instance of a Runloop object, including any associated other objects
- * that are owned by the subject Runloop.
- * @param athis RunloopRef
- * @throws in athis is NULL
- */
-void       runloop_free(RunloopRef athis);
-
-/**
- * Initializes the memory pointed to by __athis__ to be a valid instance of a Runloop.
- *
- * @param athis Must point to a memory area of sufficient size.
- * @throws if athis is NULL
- */
-void       runloop_init(RunloopRef athis);
-/**
- * Frees the memory of all objects that the Runloop pointed to by athis holds ownership of.
- * @param athis a valid non NULL RunloopRef
- * @throws if athis is NULL
- */
-void       runloop_deinit(RunloopRef athis);
-
-void       runloop_close(RunloopRef athis);
-int        runloop_register(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref);
-int        runloop_deregister(RunloopRef athis, int fd);
-int        runloop_reregister(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref);
-int        runloop_run(RunloopRef athis, time_t timeout);
-void       runloop_post(RunloopRef athis, PostableFunction cb, void* arg);
-void       runloop_delete(RunloopRef athis, int fd);
-void       runloop_verify(RunloopRef r);
+void runloop_free(RunloopRef athis);
+void runloop_init(RunloopRef athis);
+void runloop_deinit(RunloopRef athis);
+void runloop_close(RunloopRef athis);
+int  runloop_register(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref);
+int  runloop_deregister(RunloopRef athis, int fd);
+int  runloop_reregister(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref);
+int  runloop_run(RunloopRef athis, time_t timeout);
+void runloop_post(RunloopRef athis, PostableFunction cb, void* arg);
+void runloop_delete(RunloopRef athis, int fd);
+void runloop_verify(RunloopRef r);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Timers
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-/**
- * @brief 
- * This function creates a pointer to a timer subtype of the tagged union RunloopEvent
- * @param runloop_ref 
- * @return RunloopEventRef a timer subtype 
- */
 RunloopEventRef runloop_timer_new(RunloopRef runloop_ref);
-/**
- * These functions all take a RunloopEventRef, which is a tagged union. 
- * All of them check that the begin and end tags as well as the union tag type
-*/
 void runloop_timer_init(RunloopEventRef lrevent, RunloopRef runloop);
 void runloop_timer_free(RunloopEventRef lrevent);
 void runloop_timer_register(RunloopEventRef lrevent, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
@@ -134,92 +75,19 @@ void runloop_timer_rearm_old(RunloopEventRef lrevent, PostableFunction cb, void*
 void runloop_timer_rearm(RunloopEventRef lrevent);
 void runloop_timer_deregister(RunloopEventRef lrevent);
 RunloopRef runloop_timer_get_runloop(RunloopEventRef lrevent);
-/**
- * Convenience interface for timers
- */
+/** Convenience interface for timers*/
 RunloopEventRef runloop_timer_set(RunloopRef rl, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
-/**
- * After the call to runloop_timer_clear the timerref is invalid and muts not be ised
- */
 void runloop_timer_clear(RunloopRef rl, RunloopEventRef lrevent);
 void runloop_timer_checktag(RunloopEventRef lrevent);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Listener
+// Runloop Lsitener
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-/**
- * This function must be called on the same thread that is going to call
- * runloop_run(rlref)
- *
- * @param rlref            RunloopRef for the runloop being use for the active thread and file descriptor
- * @param port int         a port nuimber to listen on.
- * @param host const char* a host name or ip address
- * @return  AsiListenerRef
- * @throws if something fails
- */
-AsioListenerRef asio_listener_new_from_port_host(RunloopRef rlref, int port, const char* host);
-/**
- * This function must be called on the same thread that is going to call
- * runloop_run(rlref)
- *
- * @param rlref         RunloopRef for the runloop being use for the active thread and file descriptor
- * @param socket_fd     a valid file descriptor for a TCP server socket that is non-blocking.
- *                      A server socket is one that has been the subject of a bind() and listen()
- *                      calls.
- *                      Usually acquired by a call to `create_listen_socket()`
- * @return  AsiListenerRef
- * @throws if something fails
- */
-AsioListenerRef asio_listener_new(RunloopRef rlref, int socket_fd);
-/**
- * This function must be called on the same thread that is going to call
- * runloop_run(rlref)
- *
- * @param this      a pointer to a variable of type AsioListener
- * @param rl        RunloopRef
- * @param socket_fd Same requirements if asio_listener_new()
- */
-void asio_listener_init(AsioListenerRef this, RunloopRef rl, int socket_fd);
-
-/**
- * This function must be called on the same thread that is going to call
- * runloop_run(rlref) rlref is the first param
- *
- * @param this          a pointer to a variable of type AsioListener
- * @param rlref         RunloopRef for the runloop being use for the active thread and file descriptor
- * @param socket_fd     a valid file descriptor for a TCP server socket that is non-blocking.
- *                      A server socket is one that has been the subject of a bind() and listen()
- *                      call.
- *                      Usually acquired by a call to `create_listen_socket()`
- * @return  AsiListenerRef
- * @throws if something fails
- */
-void asio_listen_init_from_port_host(AsioListenerRef this, int port , const char* host);
-
-void asio_listener_deinit(AsioListenerRef this);
-void asio_listener_free(AsioListenerRef this);
-
-/**
- * This function will issue an accept() call when the underlying file descriptor is ready for such a call.
- *
- * If there are multiple threads and/or processes listening to sockets with the same port/host combination
- * the Linux OS will only notify one such thread/process for each available client connection.
- *
- * This is a single short call in that once the on_accept_cb is called the accept() function must be called
- * again to accept() subsequent client connections.
- *
- * @param alistener_ref Pointer to a AsioListenRef
- * @param on_accept_cb  callback function
- * @param arg           pointer to a user defined object providing context to the callback
- */
-void asio_accept(AsioListenerRef alistener_ref, void(on_accept_cb)(void* arg, int accepted_fd, int error), void* arg);
 
 RunloopEventRef runloop_listener_new(RunloopRef runloop, int fd);
 void runloop_listener_free(RunloopEventRef lrevent);
-
 void runloop_listener_init(RunloopEventRef lrevent, RunloopRef runloop, int fd);
 void runloop_listener_deinit(RunloopEventRef lrevent);
-
 void runloop_listener_register(RunloopEventRef lrevent, PostableFunction postable, void* postable_arg);
 void runloop_listener_deregister(RunloopEventRef lrevent);
 void runloop_listener_arm(RunloopEventRef lrevent, PostableFunction postable, void* postable_arg);
@@ -229,65 +97,69 @@ RunloopRef runloop_listener_get_runloop(RunloopEventRef lrevent);
 int runloop_listener_get_fd(RunloopEventRef lrevent);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Stream
+// RunloopStream
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-/** 
- * RunloopStreamRef is a special type of watcher designed to watch stream style file descriptors
- * (such a sockets and pipes) to detect when such an fd is ready to perform a read operation or ready
- * to perform a write operation without BLOCKING. This type of watcher is intended for situations
- * where a single thread may be performing both read and write operations on the same fd and on
- * multiple file descriptors.
- */
-
 RunloopEventRef runloop_stream_new(RunloopRef runloop, int fd);
 void runloop_stream_free(RunloopEventRef lrevent);
-
 void runloop_stream_init(RunloopEventRef lrevent, RunloopRef runloop, int fd);
 void runloop_stream_deinit(RunloopEventRef lrevent);
-
 void runloop_stream_register(RunloopEventRef lrevent);
 void runloop_stream_deregister(RunloopEventRef lrevent);
-
 void runloop_stream_arm_both(RunloopEventRef lrevent,
                              PostableFunction read_postable_cb, void* read_arg,
                              PostableFunction write_postable_cb, void* write_arg);
 
 void runloop_stream_arm_read(RunloopEventRef lrevent, PostableFunction postable_callback, void* arg);
 void runloop_stream_disarm_read(RunloopEventRef lrevent);
-
 void runloop_stream_arm_write(RunloopEventRef lrevent, PostableFunction postable_callback, void* arg);
 void runloop_stream_disarm_write(RunloopEventRef lrevent);
-
 void runloop_stream_verify(RunloopStreamRef r);
-
 RunloopRef runloop_stream_get_runloop(RunloopEventRef lrevent);
 int runloop_stream_get_fd(RunloopStreamRef this);
 void runloop_stream_checktag(RunloopEventRef lrevent);
 
-/**
- * Async io is a more convenient interface for reading and writing data to fd's like sockets.
- *
- * It is a proactor interface rather than the reactor provided by the runloop_stream
- * interface above
- */
-AsioStreamRef asio_stream_new(RunloopRef runloop_ref, int socket);
-void asio_stream_free(AsioStreamRef this);
-void asio_stream_init(AsioStreamRef this, RunloopRef runloop_ref, int fd);
-void asio_stream_deinit(AsioStreamRef cref);
-void asio_stream_read(AsioStreamRef stream_ref, void* buffer, long max_length, AsioReadcallback cb, void*  arg);
-void asio_stream_write(AsioStreamRef stream_ref, void* buffer, long length, AsioWritecallback cb, void*  arg);
-void asio_stream_close(AsioStreamRef cref);
-RunloopRef asio_stream_get_runloop(AsioStreamRef asio_stream_ref);
-int asio_stream_get_fd(AsioStreamRef asio_stream_ref);
-RunloopStreamRef asio_stream_get_runloop_stream(AsioStreamRef asio_stream_ref);
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// // Asio Stream
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// AsioStreamRef asio_stream_new(RunloopRef runloop_ref, int socket);
+// void asio_stream_free(AsioStreamRef this);
+// void asio_stream_init(AsioStreamRef this, RunloopRef runloop_ref, int fd);
+// void asio_stream_deinit(AsioStreamRef cref);
+// void asio_stream_read(AsioStreamRef stream_ref, void* buffer, long max_length, AsioReadcallback cb, void*  arg);
+// void asio_stream_write(AsioStreamRef stream_ref, void* buffer, long length, AsioWritecallback cb, void*  arg);
+// void asio_stream_close(AsioStreamRef cref);
+// RunloopRef asio_stream_get_runloop(AsioStreamRef asio_stream_ref);
+// int asio_stream_get_fd(AsioStreamRef asio_stream_ref);
+// RunloopStreamRef asio_stream_get_runloop_stream(AsioStreamRef asio_stream_ref);
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// // Asio Listener
+// ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// AsioListenerRef asio_listener_new_from_port_host(RunloopRef rlref, int port, const char* host);
+// AsioListenerRef asio_listener_new(RunloopRef rlref, int socket_fd);
+// void asio_listener_init(AsioListenerRef this, RunloopRef rl, int socket_fd);
+// void asio_listen_init_from_port_host(AsioListenerRef this, int port , const char* host);
+// void asio_listener_deinit(AsioListenerRef this);
+// void asio_listener_free(AsioListenerRef this);
+
+// /**
+//  * This function will issue an accept() call when the underlying file descriptor is ready for such a call.
+//  *
+//  * If there are multiple threads and/or processes listening to sockets with the same port/host combination
+//  * the OS will only notify one such thread/process for each available client connection.
+//  *
+//  * This is a single short call in that once the on_accept_cb is called the accept() function must be called
+//  * again to accept() subsequent client connections.
+//  *
+//  * @param alistener_ref Pointer to a AsioListenRef
+//  * @param on_accept_cb  callback function
+//  * @param arg           pointer to a user defined object providing context to the callback
+//  */
+// void asio_accept(AsioListenerRef alistener_ref, void(on_accept_cb)(void* arg, int accepted_fd, int error), void* arg);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // User Event
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-/** \defgroup eventfd EventFd
- * @{
- * ## Event Fd
- *
+/* *
  * kqueue provides a facility to create and wait on an event source that is not attached to any fd/file/pipe/device
  * and to "fire" such events explicitly.
  * 
@@ -482,4 +354,5 @@ int        runloop_watcher_base_get_fd(RunloopWatcherBaseRef this);
 // #include <kqueue_runloop/interthread_queue.h>
 
 #include "rl_checktag.h"
+#include "asio.h"
 #endif

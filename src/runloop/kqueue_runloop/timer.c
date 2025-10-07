@@ -1,6 +1,5 @@
 #include <rbl/macros.h>
-#include <kqueue_runloop/runloop.h>
-#include <kqueue_runloop/rl_internal.h>
+#include <kqueue_runloop/runloop_internal.h>
 #include <time.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -27,7 +26,7 @@ static void print_current_tme(char* prefix)
  * @param fd
  * @param event
  */
-static void handler(RunloopEventRef rlevent, uint64_t event)
+static void handler(RunloopEventRef rlevent, uint16_t event, uint16_t flags)
 {
     struct timespec ts;
 
@@ -64,7 +63,7 @@ void runloop_timer_init(RunloopEventRef lrevent, RunloopRef runloop)
 }
 RunloopEventRef runloop_timer_new(RunloopRef runloop_ref)
 {
-    RunloopEventRef this = event_allocator_alloc(runloop_ref->event_allocator);
+    RunloopEventRef this = event_table_get_entry(runloop_ref->event_table);
     runloop_timer_init(this, runloop_ref);
     return this;
 }
@@ -72,69 +71,8 @@ void runloop_timer_free(RunloopEventRef athis)
 {
     TIMER_CHECK_TAG(athis);
     TIMER_CHECK_END_TAG(athis);
-    event_allocator_free(athis->runloop->event_allocator, athis);
+    event_table_release_entry(athis->runloop->event_table, athis);
 }
-static int register_timer(RunloopRef rl, void* ctx, uint64_t id, bool one_shot, uint64_t milli_secs)
-{
-    int flags = EV_ADD | EV_ENABLE | EV_RECEIPT | (one_shot ? EV_ONESHOT : 0); 
-    struct kevent change;
-    struct kevent* change_ptr;
-    int nev;
-    #ifdef RL_KQ_BATCH_CHANGES
-        change_ptr = runloop_change_next(rl)
-        EV_SET(&change, id, EVFILT_TIMER, flags, 0, milli_secs, 0);
-    #else
-        change_ptr = &change;
-        EV_SET(&change, id, EVFILT_TIMER, flags, 0, milli_secs, ctx);
-        nev = kevent(rl->kqueue_fd, &change, 1, NULL, 0, NULL);
-    #endif
-
-    // check the data field of both change and event
-    return 0;
-}
-static int cancel_timer(RunloopRef rl, uint64_t id)
-{
-    int flags = EV_DELETE | EV_RECEIPT; 
-    struct kevent change;
-    struct kevent* change_ptr;
-    int nev;
-    // int flags = EV_DELETE | EV_RECEIPT; 
-    // EV_SET(&change, id, EVFILT_TIMER, flags, 0, 0, 0);
-    // nev = kevent(kq, &change, 1, NULL, 0, NULL);
-
-    #ifdef RL_KQ_BATCH_CHANGES
-        change_ptr = runloop_change_next(rl)
-        EV_SET(&change, id, EVFILT_TIMER, flags, 0, milli_secs, 0);
-    #else
-        change_ptr = &change;
-        EV_SET(&change, id, EVFILT_TIMER, flags, 0, 0, 0);
-        nev = kevent(rl->kqueue_fd, &change, 1, NULL, 0, NULL);
-    #endif
-
-    return 0;
-}
-static int pause_timer(RunloopRef rl, uint64_t id)
-{
-    int flags = EV_ADD | EV_DISABLE | EV_RECEIPT ; 
-    struct kevent change;
-    struct kevent* change_ptr;
-    int nev;
-    // int flags = EV_DELETE | EV_RECEIPT; 
-    // EV_SET(&change, id, EVFILT_TIMER, flags, 0, 0, 0);
-    // nev = kevent(kq, &change, 1, NULL, 0, NULL);
-
-    #ifdef RL_KQ_BATCH_CHANGES
-        change_ptr = runloop_change_next(rl)
-        EV_SET(&change, id, EVFILT_TIMER, flags, 0, milli_secs, 0);
-    #else
-        change_ptr = &change;
-        EV_SET(&change, id, EVFILT_TIMER, flags, 0, 0, 0);
-        nev = kevent(rl->kqueue_fd, &change, 1, NULL, 0, NULL);
-    #endif
-
-    return 0;
-}
-
 void runloop_timer_register(RunloopEventRef rlevent, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating)
 {
     RBL_ASSERT((rlevent != NULL), "");
@@ -147,24 +85,24 @@ void runloop_timer_register(RunloopEventRef rlevent, PostableFunction cb, void* 
     rlevent->context = ctx;
     rlevent->timer.timer_postable = cb;
     rlevent->timer.timer_postable_arg = ctx;
-    int res = register_timer(rlevent->runloop, (void*)rlevent, (uint64_t)rlevent, !repeating, interval_ms);
+    int res = kqh_timer_register(rlevent, !repeating, interval_ms);
 
     print_current_tme("runloop_timer_register");
     assert(res ==0);
 }
 void runloop_timer_update(RunloopEventRef rlevent, uint64_t interval_ms, bool repeating)
 {
-    int res = register_timer(rlevent->runloop, (void*)rlevent, (uint64_t)rlevent, !repeating, interval_ms);
+    int res = kqh_timer_register(rlevent, !repeating, interval_ms);
     assert(res == 0);
 }
 void runloop_timer_disarm(RunloopEventRef rlevent)
 {
-    int res = pause_timer(rlevent->runloop, (uint64_t)rlevent);
+    int res = kqh_timer_pause(rlevent);
     assert(res ==0);
 }
 void runloop_timer_rearm(RunloopEventRef rlevent)
 {
-    int res = register_timer(rlevent->runloop, (void*)rlevent, (uint64_t)rlevent, !rlevent->timer.repeating, rlevent->timer.interval);
+    int res = kqh_timer_register(rlevent, !rlevent->timer.repeating, rlevent->timer.interval);
     assert(res ==0);
 }
 
@@ -172,7 +110,7 @@ void runloop_timer_deregister(RunloopEventRef lrevent)
 {
     TIMER_CHECK_TAG(lrevent)
     TIMER_CHECK_END_TAG(lrevent)
-    int res = cancel_timer(lrevent->runloop, (uint64_t)lrevent);
+    int res = kqh_timer_cancel(lrevent);
     if(res != 0) {
         RBL_LOG_FMT("runloop_timer_deregister res: %d errno: %d", res, errno);
     }
@@ -206,7 +144,7 @@ void runloop_timer_clear(RunloopRef rl, RunloopEventRef lrevent)
     runloop_timer_deregister(lrevent);
     runloop_timer_free(lrevent);
 }
-void runloop_timer_checktags(RunloopEventRef lrevent)
+void runloop_timer_checktag(RunloopEventRef lrevent)
 {
     TIMER_CHECK_TAG(lrevent)
     TIMER_CHECK_END_TAG(lrevent);

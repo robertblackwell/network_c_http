@@ -1,6 +1,3 @@
-
-//#define RBL_LOG_ENABLED
-//#define RBL_LOG_ALLOW_GLOBAL
 #include "io_write.h"
 #include <assert.h>
 #include <stdio.h>
@@ -155,7 +152,6 @@ static void wrtr_wait_timer_fired(RunloopRef rl, void* ctx_p_arg)
         free(wbuf);
     } else {
         runloop_timer_disarm(timer_ref);
-        uint64_t interest = EPOLLERR | EPOLLOUT;
         runloop_stream_arm_write(ctx->stream_ref, &wrtr_cb, (void *) ctx);
     }
 }
@@ -184,8 +180,6 @@ void* writer_thread_func(void* arg)
             runloop_stream_register(ctx->stream_ref);
             runloop_stream_arm_write(ctx->stream_ref, &wrtr_cb, (void *) ctx);
         } else {
-
-            uint64_t interest = EPOLLERR | EPOLLOUT;
             runloop_stream_register(sw);
             runloop_stream_arm_write(sw, &wrtr_cb, (void *) ctx);
         }

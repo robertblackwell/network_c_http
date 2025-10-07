@@ -1,7 +1,5 @@
 
-#include <kqueue_runloop/runloop.h>
-#include <kqueue_runloop/rl_internal.h>
-
+#include <kqueue_runloop/runloop_internal.h>
 #include <assert.h>
 #include <pthread.h>
 #include <unistd.h>
@@ -49,13 +47,13 @@ void runloop_event_queue_init(RunloopRef runloop, RunloopEventRef rlevent)
 }
 RunloopEventRef runloop_event_queue_new(RunloopRef rl)
 {
-    RunloopEventRef tmp = event_allocator_alloc(rl->event_allocator);
+    RunloopEventRef tmp = event_allocator_alloc(rl->event_table);
     runloop_event_queue_init(rl, tmp);
     return tmp;
 }
 void runloop_eventfd_queue_free(RunloopEventRef athis)
 {
-    event_allocator_free(athis->runloop->event_allocator, athis);
+    event_allocator_free(athis->runloop->event_table, athis);
 }
 int runloop_eventfd_queue_readfd(RunloopEventRef athis)
 {

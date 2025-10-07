@@ -8,7 +8,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <rbl/logger.h>
-
+#if 0
 /**
  * Called whenever an fd associated with an WListener receives an fd event.
  * Should dispatch the read_evhandler and/or write_evhandler depending on whether those
@@ -17,7 +17,7 @@
  * @param fd        int
  * @param event     uint64_t
  */
-static void handler(RunloopEventRef lrevent, uint16_t event, uint16_t flags)
+static void handler(RunloopEventRef lrevent, uint64_t event)
 {
     RunloopEventRef listener_ref = (RunloopEventRef)lrevent;
     LISTNER_CHECK_TAG(listener_ref)
@@ -146,7 +146,7 @@ void runloop_listener_verify(RunloopEventRef athis)
     LISTNER_CHECK_TAG(athis)
     LISTNER_CHECK_END_TAG(athis)
 }
-#if 0
+#endif
 /****************************************************************************************************************
  * start of asio_listener code
  *****************************************************************************************************************/
@@ -227,4 +227,3 @@ static void on_listening_postable(RunloopRef rl, void* asio_listener_arg)
         cb(cb_arg, sock2, 0);
     }
 }
-#endif

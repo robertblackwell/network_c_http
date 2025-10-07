@@ -1,12 +1,9 @@
 #ifndef C_HTTP_KQRL_INTERNAL_H
 #define C_HTTP_KQRL_INTERNAL_H
 #include <runloop/kqueue_runloop/runloop.h>
-#include <runloop/kqueue_runloop/rl_checktag.h>
 #include <sys/event.h>
 #include <pthread.h>
 #include <stdbool.h>
-#include <string.h>
-#include <common/list.h>
 
 #define runloop_MAX_FDS            1024
 #define runloop_MAX_RUNLIST        1024
@@ -16,27 +13,13 @@
 #define runloop_MAX_KQ_FDS         runloop_MAX_FDS
 #define runloop_MAX_EVENTS         runloop_MAX_FDS*2
 #define CBTABLE_MAX                runloop_MAX_FDS
-#define runloop_FDTABLE_MAX        runloop_MAX_FDS
 #define runloop_READY_LIST_MAX     (2 * runloop_MAX_FDS)
 
 // enables use of eventfd rather than two pipe trick
 #define  runloop_eventfd_ENABLE
 
-#if 0
-struct FdTable_s;
-//===============
-// #define CBTABLE_MAX 4096
+typedef struct EventTable_s EventTable, *EventTableRef;
 
-typedef struct FdTable_s FdTable, *FdTableRef;
-FdTableRef FdTable_new();
-void       FdTable_free(FdTableRef athis);
-void       FdTable_insert(FdTableRef athis, RunloopWatcherBaseRef wref, int fd);
-void       FdTable_remove(FdTableRef athis, int fd);
-RunloopWatcherBaseRef FdTable_lookup(FdTableRef athis, int fd);
-int        FdTable_iterator(FdTableRef athis);
-int        FdTable_next_iterator(FdTableRef athis, int iter);
-uint64_t   FdTable_size(FdTableRef athis);
-#endif
 // /**
 //  * A Functor is a generic callback - a function pointer (of type PostableFunction) and single anonymous argument.
 //  *
@@ -82,8 +65,7 @@ struct Runloop_s {
     bool                    closed_flag;
     bool                    runloop_executing;
     pthread_t               tid;
-    // FdTableRef              table; // (int, CallbackData)
-    void*                   event_allocator;
+    EventTableRef           event_table;
     struct kevent           change[runloop_MAX_EVENTS];
     int                     change_max;
     int                     change_count;
@@ -94,7 +76,5 @@ struct Runloop_s {
     RBL_DECLARE_END_TAG;
 };
 
-#include "rl_events_internal.h"
-#include <kqueue_runloop/event_allocator.h>
 
 #endif

@@ -80,7 +80,8 @@
         "hash_set": "cpp",
         "io_read_asio.h": "c",
         "utils.h": "c",
-        "runloop.h": "c"
+        "runloop.h": "c",
+        "netdb.h": "c"
     },
     "workbench.tree.indent": 24,
     "C_Cpp.default.compilerPath": "/usr/bin/cc"

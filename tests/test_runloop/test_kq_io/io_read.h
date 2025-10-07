@@ -13,19 +13,28 @@
 #include <errno.h>
 #include <math.h>
 #include <src/common/utils.h>
-#include <src/runloop/runloop.h>
+#include <kqueue_runloop/runloop.h>
 #include <rbl/check_tag.h>
 #define ReadCtx_TAG "rdctx"
 #define ReaderTable_TAG "rdtbl"
 
+#define RD_STATE_INITIAL 11
+#define RD_STATE_EAGAIN 22
+#define RD_STATE_STOPPED 33
+#define RD_STATE_READY 44
+#define RD_STATE_ERROR 55
+
 typedef struct ReadCtx_s {
     RBL_DECLARE_TAG;
+    int                 read_state;
+    int                 return_code;
     int                 read_count;
+    int                 read_char_count;
     int                 max_read_count;
     char*               id;
     int                 reader_index;
     int                 readfd;
-    RunloopStreamRef    swatcher;
+    RunloopEventRef     reader;
     RBL_DECLARE_END_TAG;
 } ReadCtx, *ReadCtxRef;
 
@@ -45,4 +54,5 @@ void ReaderTable_add_fd(ReaderTable* this, int fd, int max);
 
 void rd_callback(RunloopStreamRef socket_watcher_ref, uint64_t event);
 void* reader_thread_func(void* arg);
+int ReaderTable_char_count(ReaderTable* wt);
 #endif

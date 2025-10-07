@@ -60,11 +60,12 @@ int test_listeners()
 
     tclient.listen_fd = fd;
 
-    ListenerCtxRef server1 = listener_ctx_new(fd);
-    ListenerCtxRef server2 = listener_ctx_new(fd);
+    ListenerCtxRef server1 = listener_ctx_new(fd, 1);
+    ListenerCtxRef server2 = listener_ctx_new(fd, 2);
     printf("Sizeof \n");
     int r1 = pthread_create(&listener_thread_1, NULL, &listener_thread_func, server1);
     int r2 = pthread_create(&listener_thread_2, NULL, &listener_thread_func, server2);
+    sleep(2);
     int r3 = pthread_create(&connector_thread, NULL, &connector_thread_func, &tclient);
 
     pthread_join(connector_thread, NULL);
@@ -75,9 +76,12 @@ int test_listeners()
      * Test that each listener got some of the connections and that
      * all connections were recorded
      */
-    UT_EQUAL_INT((server1->listen_counter + server2->listen_counter), tclient.max_count);
-    UT_NOT_EQUAL_INT(server1->listen_counter, 0);
-    UT_NOT_EQUAL_INT(server2->listen_counter, 0);
+    printf("client max_count: %d successful connects : %d \n", tclient.max_count, tclient.count);
+    printf("server 1 listen_count: %d accept_count: %d \n", server1->listen_count, server1->accept_count);
+    printf("server 2 listen_count: %d accept_count: %d \n", server2->listen_count, server2->accept_count);
+    UT_EQUAL_INT((server1->listen_count + server2->listen_count), tclient.max_count);
+    UT_NOT_EQUAL_INT(server1->listen_count, 0);
+    UT_NOT_EQUAL_INT(server2->listen_count, 0);
 
     return 0;
 }

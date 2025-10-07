@@ -31,8 +31,9 @@ typedef enum WatcherType {
     RUNLOOP_WATCHER_SOCKET = 11,
     RUNLOOP_WATCHER_TIMER = 12,
     RUNLOOP_WATCHER_QUEUE = 13,
-    RUNLOOP_WATCHER_FDEVENT = 14,
+    RUNLOOP_WATCHER_UEVENT = 14,
     RUNLOOP_WATCHER_LISTENER = 15,
+    RUNLOOP_WATCHER_SIGNAL = 15,
 } WatcherType;
 
 
@@ -143,38 +144,36 @@ struct EventQueue_s {
     RBL_DECLARE_END_TAG;
 };
 
-typedef struct AsioStream_s {
-    /** This struct is diffenrent to most watchers as it is no a sub class of Watcher
-     * hence it must declare its own openning tag */
-    RBL_DECLARE_TAG;
-    int                 fd;
-    RunloopStreamRef    runloop_stream_ref;
+// typedef struct AsioStream_s {
+//     /** This struct is diffenrent to most watchers as it is no a sub class of Watcher
+//      * hence it must declare its own openning tag */
+//     RBL_DECLARE_TAG;
+//     int                 fd;
+//     RunloopStreamRef    runloop_stream_ref;
 
-    int                 read_state;
-    void*               read_buffer;
-    long                read_buffer_size;
-    AsioReadcallback    read_callback;
-    void*               read_callback_arg;
+//     int                 read_state;
+//     void*               read_buffer;
+//     long                read_buffer_size;
+//     AsioReadcallback    read_callback;
+//     void*               read_callback_arg;
 
-    int                 write_state;
-    void*               write_buffer;
-    long                write_buffer_size;
-    AsioWritecallback   write_callback;
-    void*               write_callback_arg;
-    RBL_DECLARE_END_TAG;
-} AsioStream, *AsioStreamRef;
+//     int                 write_state;
+//     void*               write_buffer;
+//     long                write_buffer_size;
+//     AsioWritecallback   write_callback;
+//     void*               write_callback_arg;
+//     RBL_DECLARE_END_TAG;
+// } AsioStream, *AsioStreamRef;
 
 typedef struct RunloopEvent_s {
     RBL_DECLARE_TAG;
     RunloopRef            runloop;
     void*                 context;
     void(*free)(RunloopEventRef);
-    void(*handler)(RunloopEventRef lrevent, uint64_t event);
-    /**
-     * tag that determines the variant
-     */
+    void(*handler)(RunloopEventRef lrevent, uint16_t filter, uint16_t flags);
+    /** tag that determines the variant*/
     WatcherType           type;
-    
+ 
     union {
         // Timer event - with kqueues does not use a file desccriptor
         struct {
@@ -226,9 +225,8 @@ typedef struct RunloopEvent_s {
             QueueWatcherReadCallbackFunction read_cb;
             void*                  read_cb_arg;
         } interthread_queue;
-        
-        RBL_DECLARE_END_TAG;
     };
+    RBL_DECLARE_END_TAG;
 
 } RunloopEvent, *RunloopEventRef;
 

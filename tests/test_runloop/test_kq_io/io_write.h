@@ -13,16 +13,23 @@
 #include <errno.h>
 #include <math.h>
 #include <src/common/utils.h>
-#include <src/runloop/runloop.h>
-//#include <src/runloop/rl_internal.h>
+#include <kqueue_runloop/runloop.h>
 #include <rbl/check_tag.h>
 
 #define WriterTable_TAG "WrtTbl"
 #define WriteCtx_ATG "wrtCtx"
 
+#define WRT_STATE_EAGAIN 11
+#define WRT_STATE_READY 22
+#define WRT_STATE_ERROR 33
+#define WRT_STATE_STOPPED 44
+#define WRT_STATE_INITIAL 55
+
 typedef struct WriteCtx_s {
     RBL_DECLARE_TAG;
+    int                 write_state;
     int                 write_count;
+    int                 write_char_count;
     int                 max_write_count;
     char*               id;
     int                 writer_index;
@@ -31,7 +38,7 @@ typedef struct WriteCtx_s {
     char*               outbuffer[10000];
     int                 outbuffer_max_length;
     int                 outbuffer_length;
-    RunloopStreamRef    stream_ref;
+    RunloopEventRef     writer_ref;
     RunloopEventRef     timer_ref;
     RBL_DECLARE_END_TAG;
 } WriteCtx;
@@ -52,4 +59,5 @@ void WriterTable_free(WriterTable* this);
 void WriterTable_add_fd(WriterTable* this, int fd, int max, int interval_ms);
 void wrtr_callback(RunloopStreamRef watch, void* arg, uint64_t event);
 void* writer_thread_func(void* arg);
+int WriterTable_char_count(WriterTable* wt);
 #endif

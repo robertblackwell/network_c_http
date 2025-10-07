@@ -1,5 +1,6 @@
 //#define RBL_LOG_ENABLED
 //#define RBL_LOG_ALLOW_GLOBAL
+#include <kqueue_runloop/asio.h>
 #include <rbl/check_tag.h>
 #include <rbl/logger.h>
 #include <rbl/macros.h>
@@ -22,6 +23,28 @@
 #define WRITE_STATE_IDLE 21
 #define WRITE_STATE_ACTIVE 22
 #define WRITE_STATE_EAGAIN 22
+
+typedef struct AsioStream_s {
+    /** This struct is diffenrent to most watchers as it is no a sub class of Watcher
+     * hence it must declare its own openning tag */
+    RBL_DECLARE_TAG;
+    int                 fd;
+    RunloopStreamRef    runloop_stream_ref;
+
+    int                 read_state;
+    void*               read_buffer;
+    long                read_buffer_size;
+    AsioReadcallback    read_callback;
+    void*               read_callback_arg;
+
+    int                 write_state;
+    void*               write_buffer;
+    long                write_buffer_size;
+    AsioWritecallback   write_callback;
+    void*               write_callback_arg;
+    RBL_DECLARE_END_TAG;
+};
+
 
 static void try_read(AsioStreamRef cref);
 static void try_write(AsioStreamRef cref);
@@ -69,14 +92,14 @@ void asio_stream_destroy(AsioStreamRef this)
     RBL_ASSERT((this != NULL), "")
     RBL_CHECK_TAG(AsioStream_TAG, this)
     RBL_CHECK_END_TAG(AsioStream_TAG, this)
-    int fd = this->runloop_stream_ref->stream.fd;
+    int fd = asio_stream_get_fd(this);
     int fd2 = this->fd;
     assert(fd == fd2);
 
     if(fd > 0) {
         asio_stream_close(this);
     }
-    event_allocator_free(asio_stream_get_runloop(this)->event_allocator, this);
+    event_table_release_entry(asio_stream_get_runloop(this)->event_table, this);
     free(this->runloop_stream_ref);
     this->runloop_stream_ref = NULL;
     RBL_LOG_FMT("asio_stream_free close socket: %d", fd)
@@ -93,11 +116,11 @@ void asio_stream_close(AsioStreamRef cref)
      * @TODO - is this right
     runloop_stream_deregister(cref->runloop_stream_ref);
     */
-    // FdTable_remove(cref->runloop_stream_ref->runloop->table, cref->fd);
 
     close(cref->fd);
     cref->fd = -1;
-    cref->runloop_stream_ref->stream.fd = -1;
+    /* TODO*/
+    //cref->runloop_stream_ref->stream.fd = -1;
 }
 void asio_stream_free(AsioStreamRef this)
 {
@@ -144,11 +167,11 @@ RunloopStreamRef asio_stream_get_runloop_stream(AsioStreamRef asio_stream_ref)
 }
 RunloopRef asio_stream_get_runloop(AsioStreamRef asio_stream_ref)
 {
-    return asio_stream_ref->runloop_stream_ref->runloop;
+    return asio_stream_get_runloop(asio_stream_ref);
 }
 int asio_stream_get_fd(AsioStreamRef athis)
 {
-    return athis->runloop_stream_ref->stream.fd;
+    return runloop_stream_get_fd(asio_stream_get_runloop_stream(athis));
 }
 static void try_read(AsioStreamRef cref)
 {
