@@ -72,8 +72,6 @@ void event_table_init(EventTableRef et);
 void* event_table_get_entry(EventTableRef et);
 // release an Event table entry back to the EventTable free list
 void event_table_release_entry(EventTableRef et, void* p);
-// get the number of EventTable entries in use
-size_t event_table_number_outstanding(EventTable et);
 // returns true if there are any entries in use
 bool event_table_has_outstanding_events(EventTableRef et);
 // returns the number of EventTable entries in use

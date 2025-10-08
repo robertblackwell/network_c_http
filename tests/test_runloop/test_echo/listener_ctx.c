@@ -1,6 +1,6 @@
 #include <src/runloop/runloop.h>
 // //#include <src/runloop/rl_internal.h>
-#include "listener_ctx.h"
+#include "stream_ctx.h"
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -31,14 +31,7 @@ ListenerCtxRef listener_ctx_new(int listen_fd, int id, RunloopRef rl)
     RBL_SET_TAG(Ctx_TAG, sref)
     RBL_SET_END_TAG(Ctx_TAG, sref)
     VERIFY_RUNLOOP(rl)
-    sref->l_state = L_STATE_INITIAL;
-    sref->listening_socket_fd = listen_fd;
-    sref->listen_count = 0;
-    sref->accept_count = 0;
-    sref->id = id;
-    sref->runloop_ref = rl;
-    sref->rl_event = runloop_listener_new(rl, listen_fd);
-    printf("listener_ctx_new %p   listen fd: %d\n", sref, listen_fd);
+    listener_ctx_init(sref, listen_fd, id, rl);
     return sref;
 }
 
@@ -55,6 +48,8 @@ void listener_ctx_init(ListenerCtxRef sref, int listen_fd, int id, RunloopRef rl
     sref->id = id;
     sref->runloop_ref = rl;
     sref->rl_event = runloop_listener_new(rl, listen_fd);
+    StreamTableRef stref = &(sref->stream_table);
+    StreamTable_init(stref);
     printf("listener_ctx_init %p   listen fd: %d\n", sref, listen_fd);
 }
 
@@ -74,10 +69,6 @@ void listener_ctx_run(ListenerCtxRef ctx)
     unsigned int addr_length = (unsigned int) sizeof(peername);
     RunloopEventRef rlevent = ctx->rl_event;
 
-    // runloop_listener_register(rlevent, on_event_listening, ctx);
-
-    ctx->timer_ref = runloop_timer_new(ctx->runloop_ref);
-    runloop_timer_register(ctx->timer_ref, &on_timer, (void *)ctx, 5000000, false);
     runloop_post(ctx->runloop_ref, postable_try_accept, ctx);    
     int nn = event_table_number_in_use(ctx->runloop_ref->event_table);
     runloop_run(ctx->runloop_ref, -1);
@@ -116,13 +107,22 @@ static void postable_try_accept(RunloopRef rl, void* arg)
             break;
     }
 }
+static void postable_read_cb(RunloopRef rl, void* arg)
+{
+
+}
 static void handle_new_socket(ListenerCtxRef ctx, int sock)
 {
     RBL_CHECK_TAG(Ctx_TAG, ctx)
     RBL_CHECK_END_TAG(Ctx_TAG, ctx)
     // int nbsock = socket_set_blocking(sock);
     RBL_LOG_FMT("handle_new_socket ctx: %p sock: %d accept_count: %d", ctx, sock, ctx->accept_count)
-    close(sock);
+    RunloopRef rl = runloop_listener_get_runloop(ctx->rl_event);
+    StreamCtxRef stream_ctx = StreamTable_add_fd(&(ctx->stream_table), sock);
+    stream_ctx->stream = runloop_stream_new(rl, sock);
+    // async_read(rdctx, rdctx->input_buffer, postable_read_cb, )
+    runloop_post(rl, postable_reader, stream_ctx);
+    // close(sock);
     #if 0
     ctx->accept_count++;
     RunloopRef rl = ctx->runloop_ref;
@@ -141,8 +141,8 @@ static void handle_new_socket(ListenerCtxRef ctx, int sock)
     // int ln = snprintf(wbuf, 100, "Reply from server: %s", buf);
     // sleep(1);
     // int wr = write(nbsock, wbuf, ln);
-    sleep(3);
-    close(sock);
+    // sleep(3);
+    // close(sock);
     // if(ctx->accept_count >= ctx->max_accept_count) {
     //     ctx->l_state = L_STATE_STOPPED;
     // }

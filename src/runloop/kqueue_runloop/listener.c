@@ -59,6 +59,7 @@ void runloop_listener_deinit(RunloopEventRef lrevent)
 RunloopEventRef runloop_listener_new(RunloopRef runloop, int fd)
 {
     RunloopEventRef this = event_table_get_entry(runloop->event_table);
+    int x = event_table_number_in_use(runloop->event_table);
     runloop_listener_init(this, runloop, fd);
     return this;
 }

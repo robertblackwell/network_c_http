@@ -224,15 +224,16 @@ int runloop_run(RunloopRef athis, time_t timeout_ms) {
         RUNLOOP_CHECK_END_TAG(athis)
         time_t passed = time(NULL) - start;
 
-        printf("runloop functor_list_size: %d event_table_outstanding %d \n",
+        printf("runloop functor_list_size: %d event_table_number_in_user %zu \n",
             functor_list_size(athis->ready_list),
-            event_table_has_outstanding_events(athis->event_table)
+            event_table_number_in_use(athis->event_table)
         );
         if(
             ((functor_list_size(athis->ready_list) == 0))
-            && (! event_table_has_outstanding_events(athis->event_table))
+            && (0 == event_table_number_in_use(athis->event_table))
         ) {
             // no more work to do - clean exit
+            RBL_LOG_FMT("runloop exiting");
             result = 0;
             goto cleanup;
         }

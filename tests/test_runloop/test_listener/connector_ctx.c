@@ -89,13 +89,24 @@ int connection_helper(char* host, int portno)
 void* connector_thread_func(void* arg)
 {
     Connector* tc = (Connector*)arg;
-    sleep(300);
     for(int i = 0; i < tc->max_count; i++) {
         printf("Client about to connect %d \n", i);
-        int rc = connection_helper_v2(tc->port);
-        if(rc == 0) {
-            tc->count++;
-        }
+        int sock = connection_helper_v2(tc->port);
+        assert(sock > 0);
+        sleep(2);
+        tc->count++;
+        int fd = socket_is_blocking(sock);
+        printf("connector write to listener\n");
+        char* b = "Hello from connector";
+        int wn = write(sock, b, strlen(b));
+        assert(wn > 0);
+        sleep(100);
+        char buffer[200];
+        int rn = read(wn, buffer, 100);
+        printf("connector read rn: %d\n", rn);
+        assert(rn > 0);
+        buffer[rn] = '\0';
+        printf("connector received %s\n", buffer);
         usleep(200000);
     }
     printf("Connector loop ended \n");

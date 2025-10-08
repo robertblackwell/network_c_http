@@ -118,44 +118,6 @@ RunloopRef runloop_stream_get_runloop(RunloopEventRef lrevent);
 int runloop_stream_get_fd(RunloopStreamRef this);
 void runloop_stream_checktag(RunloopEventRef lrevent);
 
-// ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// // Asio Stream
-// ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// AsioStreamRef asio_stream_new(RunloopRef runloop_ref, int socket);
-// void asio_stream_free(AsioStreamRef this);
-// void asio_stream_init(AsioStreamRef this, RunloopRef runloop_ref, int fd);
-// void asio_stream_deinit(AsioStreamRef cref);
-// void asio_stream_read(AsioStreamRef stream_ref, void* buffer, long max_length, AsioReadcallback cb, void*  arg);
-// void asio_stream_write(AsioStreamRef stream_ref, void* buffer, long length, AsioWritecallback cb, void*  arg);
-// void asio_stream_close(AsioStreamRef cref);
-// RunloopRef asio_stream_get_runloop(AsioStreamRef asio_stream_ref);
-// int asio_stream_get_fd(AsioStreamRef asio_stream_ref);
-// RunloopStreamRef asio_stream_get_runloop_stream(AsioStreamRef asio_stream_ref);
-// ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// // Asio Listener
-// ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// AsioListenerRef asio_listener_new_from_port_host(RunloopRef rlref, int port, const char* host);
-// AsioListenerRef asio_listener_new(RunloopRef rlref, int socket_fd);
-// void asio_listener_init(AsioListenerRef this, RunloopRef rl, int socket_fd);
-// void asio_listen_init_from_port_host(AsioListenerRef this, int port , const char* host);
-// void asio_listener_deinit(AsioListenerRef this);
-// void asio_listener_free(AsioListenerRef this);
-
-// /**
-//  * This function will issue an accept() call when the underlying file descriptor is ready for such a call.
-//  *
-//  * If there are multiple threads and/or processes listening to sockets with the same port/host combination
-//  * the OS will only notify one such thread/process for each available client connection.
-//  *
-//  * This is a single short call in that once the on_accept_cb is called the accept() function must be called
-//  * again to accept() subsequent client connections.
-//  *
-//  * @param alistener_ref Pointer to a AsioListenRef
-//  * @param on_accept_cb  callback function
-//  * @param arg           pointer to a user defined object providing context to the callback
-//  */
-// void asio_accept(AsioListenerRef alistener_ref, void(on_accept_cb)(void* arg, int accepted_fd, int error), void* arg);
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // User Event
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -341,17 +303,25 @@ RunloopRef runloop_watcher_base_get_runloop(RunloopWatcherBaseRef athis);
 int        runloop_watcher_base_get_fd(RunloopWatcherBaseRef this);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Base event
+// Type safe - these macros provides functions to assert - that is crash if not - the types:
+//
+// -    RunloopRef
+// -    specific subtypes of RunloopEventRef
+//      - runloop_listener_verify(p)
+//      - runloop_signal_verify(p)
+//      - runloop_stream_verify(p)
+//      - runloop_timer_verify(p)
+//      - runloop_user_event_queue_verify(p)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-// #include <kqueue_runloop/rl_events_internal.h>
-// #include <kqueue_runloop/watcher_base.h>
-// #include <kqueue_runloop/timer.h>
-// #include <kqueue_runloop/listener.h>
-// #include <kqueue_runloop/stream.h>
-// #include <kqueue_runloop/user_event.h>
-// #include <kqueue_runloop/user_event_queue.h>
-// #include <kqueue_runloop/interthread_queue.h>
+#define RUNLOOP_VERIFY(p) runloop_verify(p, __FILE__, __LINE__);
+#define RUNLOOP_LISTENER_VERIFY(p) runloop_listener_verify(p, __FILE__, __LINE__);
+#define RUNLOOP_SIGNAL_VERIFY(p) runloop_signal_verify(p, __FILE__, __LINE__);
+#define RUNLOOP_STREAM_VERIFY(p) runloop_stream_verify(p, __FILE__, __LINE__);
+#define RUNLOOP_TIMER_VERIFY(p) runloop_timer_verify(p, __FILE__, __LINE__);
+#define RUNLOOP_USER_EVENT_VERIFY(p) runloop_user_event_verify(p, __FILE__, __LINE__);
+#define RUNLOOP_USER_EVENT_QUEUE_VERIFY(p) runloop_user_event_queue_verify(p, __FILE__, __LINE__);
+#define RUNLOOP_VERIFY(p) runloop_verify(p, __FILE__, __LINE__);
 
 #include "rl_checktag.h"
 #include "asio.h"

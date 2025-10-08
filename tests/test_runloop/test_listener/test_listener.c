@@ -66,7 +66,7 @@ int test_listeners()
     printf("Sizeof \n");
     int r1 = pthread_create(&listener_thread_1, NULL, &listener_thread_func, server1);
     // int r2 = pthread_create(&listener_thread_2, NULL, &listener_thread_func, server2);
-    // sleep(2);
+    sleep(2);
     // int r3 = pthread_create(&connector_thread, NULL, &connector_thread_func, &tclient);
 
     // pthread_join(connector_thread, NULL);

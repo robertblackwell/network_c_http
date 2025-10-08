@@ -71,7 +71,6 @@ void event_table_release_entry(EventTableRef ot, void* p)
 }
 size_t event_table_number_in_use(EventTableRef et)
 {
-
     FreeListRef fl = &(et->free_list);
     int fl_unused = freelist_size(fl);
     size_t fl_used = (fl->max_entries) - fl_unused;

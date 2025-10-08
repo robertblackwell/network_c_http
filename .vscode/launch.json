@@ -22,6 +22,7 @@
             "type":"pickString",
             "description": "Select the time test to run",
             "options": [
+                "test_runloop/test_echo/test_server",
                 "test_runloop/test_kq_simple_io/test_simple_io",
                 "test_runloop/test_kq_io/test_io",
                 "test_event_table/test_event_table",
