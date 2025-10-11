@@ -1,4 +1,5 @@
-#include "stream_ctx.h"
+#include "tcp_stream.h"
+#include "tcp_stream_internal.h"
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -10,29 +11,29 @@
 #include <src/common/utils.h>
 
 void async_socket_set_nonblocking(int socket);
-static void try_read(StreamCtx* ctx);
-static void read_clean_termination(StreamCtx* ctx);
-static void read_error_termination(StreamCtx* ctx, int err);
+static void try_read(TcpStream* ctx);
+static void read_clean_termination(TcpStream* ctx);
+static void read_error_termination(TcpStream* ctx, int err);
 static void postable_reader(RunloopRef rl, void* arg);
-static bool is_read_pending(StreamCtxRef ctx);
+static bool is_read_pending(TcpStreamRef ctx);
 
-void async_read(StreamCtxRef ctx, IOBufferRef input_buffer, AsyncReadCallback read_cb, void* arg)
+void tcp_read(TcpStreamRef ctx, IOBufferRef input_buffer, TcpReadCallback read_cb, void* arg)
 {
-    RBL_CHECK_TAG(StreamCtx_TAG, ctx)
-    RBL_CHECK_END_TAG(StreamCtx_TAG, ctx)
+    RBL_CHECK_TAG(TcpStream_TAG, ctx)
+    RBL_CHECK_END_TAG(TcpStream_TAG, ctx)
     assert(! is_read_pending(ctx));
     assert(IOBuffer_space_len(input_buffer) != 0);
-    RunloopRef rl = runloop_stream_get_runloop(ctx->stream);
-    ReaderCtx* rdctx = &(ctx->reader);
+    RunloopRef rl = runloop_stream_get_runloop(ctx->rlstream_ref);
+    TcpReader* rdctx = &(ctx->reader);
     rdctx->read_cb = read_cb;
     rdctx->read_cb_arg = arg;
     rdctx->input_buffer = input_buffer;
     try_read(ctx);
 }
-static bool is_read_pending(StreamCtxRef ctx)
+static bool is_read_pending(TcpStreamRef ctx)
 {
-    RBL_CHECK_TAG(StreamCtx_TAG, ctx)
-    RBL_CHECK_END_TAG(StreamCtx_TAG, ctx)
+    RBL_CHECK_TAG(TcpStream_TAG, ctx)
+    RBL_CHECK_END_TAG(TcpStream_TAG, ctx)
     assert(
         ((ctx->reader.input_buffer != NULL)&&(ctx->reader.read_cb != NULL))
         ||
@@ -44,11 +45,11 @@ static bool is_read_pending(StreamCtxRef ctx)
 
 void read_ready_callback(RunloopRef rl, void* read_ctx_ref_arg)
 {
-    StreamCtx* ctx = (StreamCtx*)read_ctx_ref_arg;
-    RBL_CHECK_TAG(StreamCtx_TAG, ctx)
-    RBL_CHECK_END_TAG(StreamCtx_TAG, ctx)
-    RunloopStreamRef stream = ctx->stream;
-    RunloopRef runloop_ref = runloop_stream_get_runloop(stream);
+    TcpStream* ctx = (TcpStream*)read_ctx_ref_arg;
+    RBL_CHECK_TAG(TcpStream_TAG, ctx)
+    RBL_CHECK_END_TAG(TcpStream_TAG, ctx)
+    RunloopStreamRef rlstream = ctx->rlstream_ref ;
+    RunloopRef runloop_ref = runloop_stream_get_runloop(rlstream);
     RBL_LOG_FMT("read_ready_callback fd %d read_state: %d\n", ctx->stream_fd, ctx->reader.read_state);
     switch(ctx->reader.read_state){
         case RD_STATE_INITIAL:
@@ -65,25 +66,25 @@ void read_ready_callback(RunloopRef rl, void* read_ctx_ref_arg)
             assert(false);
     }
 }
-static void invoke_read_cb(StreamCtxRef ctx, int nread, int errno_value)
+static void invoke_read_cb(TcpStreamRef ctx, int nread, int errno_value)
 {
-    ReaderCtx* rdctx = &(ctx->reader);
-    AsyncReadCallback cb = rdctx->read_cb;
+    TcpReader* rdctx = &(ctx->reader);
+    TcpReadCallback* cb = ctx->reader.read_cb;
+    assert(cb != NULL);
     void* arg = rdctx->read_cb_arg;
     IOBufferRef iob = rdctx->input_buffer;
     rdctx->input_buffer = NULL;
     rdctx->read_cb = NULL;
     rdctx->read_cb_arg = NULL;
-    cb(arg, nread, errno);
+    (*cb)(arg, errno_value);
 }
-static void try_read(StreamCtx* ctx)
+static void try_read(TcpStream* ctx)
 {
-    RunloopStreamRef stream = ctx->stream;
-    RunloopRef runloop_ref = runloop_stream_get_runloop(stream);
-    ReaderCtx* rdctx = &(ctx->reader);
-    IOBufferRef iob = rdctx->input_buffer;
+    RunloopStreamRef rlstream = ctx->rlstream_ref;
+    RunloopRef runloop_ref = runloop_stream_get_runloop(rlstream);
+    IOBufferRef iob = ctx->reader.input_buffer;
     assert(iob != NULL);
-    assert(ctx->stream_fd == runloop_stream_get_fd(stream));
+    assert(ctx->stream_fd == runloop_stream_get_fd(rlstream));
     RBL_LOG_FMT("try_read: read_state %d fd: %d \n", ctx->reader.read_state, ctx->stream_fd);
     switch(ctx->reader.read_state) {
         case RD_STATE_EAGAIN:
@@ -94,7 +95,7 @@ static void try_read(StreamCtx* ctx)
         case RD_STATE_STOPPED:
             return;
     }
-    int fd = runloop_stream_get_fd(stream);
+    int fd = runloop_stream_get_fd(rlstream);
     void* buf = IOBuffer_space(iob);
     int len = IOBuffer_space_len(iob);
     int nread = read(fd, buf, len);
@@ -112,7 +113,7 @@ static void try_read(StreamCtx* ctx)
         if(errno_saved == EAGAIN) {
             RBL_LOG_FMT("try_read ERROR EAGAIN %s\n", "");
             ctx->reader.read_state = RD_STATE_EAGAIN;
-            runloop_stream_arm_read(ctx->stream, read_ready_callback, ctx);
+            runloop_stream_arm_read(rlstream, read_ready_callback, ctx);
         } else {
             RBL_LOG_FMT("try_read ERROR errno: %d description %s\n", errno_saved, strerror(errno_saved));
             invoke_read_cb(ctx, nread, errno_saved);
@@ -121,24 +122,24 @@ static void try_read(StreamCtx* ctx)
 }
 void postable_reader(RunloopRef rl, void* arg)
 {
-    StreamCtx* ctx = arg;
+    TcpStream* ctx = arg;
     try_read(ctx);
 }
-static void read_clean_termination(StreamCtx* ctx)
+static void read_clean_termination(TcpStream* ctx)
 {
     RBL_LOG_FMT("read_clean_termination fd %d read_state: %d\n", ctx->stream_fd, ctx->reader.read_state);
     ctx->reader.read_state = RD_STATE_STOPPED;
-    runloop_stream_deregister(ctx->stream);
-    runloop_stream_disarm_read(ctx->stream);
-    runloop_stream_free(ctx->stream);
+    runloop_stream_deregister(ctx->rlstream_ref);
+    runloop_stream_disarm_read(ctx->rlstream_ref);
+    runloop_stream_free(ctx->rlstream_ref);
 }
-static void read_error_termination(StreamCtx* ctx, int err)
+static void read_error_termination(TcpStream* ctx, int err)
 {
     RBL_LOG_FMT("read_error_termination fd %d read_state: %d \n", ctx->stream_fd, ctx->reader.read_state);
     ctx->reader.read_state = RD_STATE_ERROR;
-    runloop_stream_deregister(ctx->stream);
-    runloop_stream_disarm_read(ctx->stream);
-    runloop_stream_free(ctx->stream);
+    runloop_stream_deregister(ctx->rlstream_ref);
+    runloop_stream_disarm_read(ctx->rlstream_ref);
+    runloop_stream_free(ctx->rlstream_ref);
 }
 #if 0
 void* reader_thread_func(void* arg)
@@ -146,7 +147,7 @@ void* reader_thread_func(void* arg)
     RunloopRef runloop_ref = runloop_new();
     StreamTable* rdr = (StreamTable*)arg;
     for(int i = 0; i < rdr->count; i++) {
-        StreamCtx* ctx = &(rdr->ctx_table[i]);
+        TcpStream* ctx = &(rdr->ctx_table[i]);
         RBL_LOG_FMT("read_thread_func loop i: %d fd %d read_state: %d\n", i, ctx->readfd, ctx->read_state);
 
         rdr->ctx_table[i].reader = runloop_stream_new(runloop_ref, ctx->readfd);
@@ -158,7 +159,7 @@ void* reader_thread_func(void* arg)
     runloop_run(runloop_ref, 1000000);
     int total_chars = 0;
     for(int i = 0; i < rdr->count; i++) {
-        StreamCtx* ctx = &(rdr->ctx_table[i]);
+        TcpStream* ctx = &(rdr->ctx_table[i]);
         total_chars += ctx->read_char_count;
         printf("Reader index: %d char count: %d \n", i, ctx->read_char_count);
     }

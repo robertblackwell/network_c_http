@@ -208,3 +208,15 @@ void* IOBuffer_memptr(IOBufferRef this)
     RBL_CHECK_TAG(IOBuffer_TAG, this)
     return this->mem_p;
 }
+char IOBuffer_consume_pop_front(IOBufferRef iob)
+{
+    char* p = IOBuffer_data(iob);
+    char ch = *p;
+    IOBuffer_consume(iob, 1);
+    return ch;
+}
+void IOBuffer_commit_push_back(IOBufferRef iob, char ch)
+{
+    char tmp = ch;
+    IOBuffer_data_add(iob, &tmp, 1);
+}

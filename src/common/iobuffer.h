@@ -195,5 +195,8 @@ bool IOBuffer_equal(IOBufferRef a, IOBufferRef b);
  * @return void*
  */
 void* IOBuffer_memptr(IOBufferRef this);
+
+char IOBuffer_consume_pop_front(IOBufferRef this);
+void IOBuffer_commit_push_back(IOBufferRef this, char ch);
 /** @} */
 #endif

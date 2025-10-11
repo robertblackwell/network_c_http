@@ -1,4 +1,5 @@
-#include "stream_ctx.h"
+#include "tcp_stream.h"
+#include "tcp_stream_internal.h"
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -7,14 +8,16 @@
 #include <errno.h>
 #include <rbl/logger.h>
 #include <src/common/utils.h>
-void async_socket_set_nonblocking(int socket);
-static void write_clean_terminate(StreamCtx* ctx);
-static void write_error_terminate(StreamCtx* ctx);
-static void try_write(StreamCtx* ctx);
-static bool is_write_pending(StreamCtxRef ctx);
-static void invoke_write_callback(StreamCtxRef ctx, int nwrite, int errnoval);
 
-void async_write(StreamCtxRef ctx, IOBufferRef outbuf, AsyncWriteCallback write_cb, void* arg)
+
+void async_socket_set_nonblocking(int socket);
+static void write_clean_terminate(TcpStream* ctx);
+static void write_error_terminate(TcpStream* ctx);
+static void try_write(TcpStream* ctx);
+static bool is_write_pending(TcpStreamRef ctx);
+static void invoke_write_callback(TcpStreamRef ctx, int nwrite, int errnoval);
+
+void tcp_write(TcpStreamRef ctx, IOBufferRef outbuf, TcpWriteCallback write_cb, void* arg)
 {
     assert(!is_write_pending(ctx));
     assert(write_cb != NULL);
@@ -24,15 +27,15 @@ void async_write(StreamCtxRef ctx, IOBufferRef outbuf, AsyncWriteCallback write_
 }
 void postable_try_write(RunloopRef rl, void* arg)
 {
-    StreamCtxRef ctx = arg;    
-    RBL_CHECK_TAG(StreamCtx_TAG, ctx)
-    RBL_CHECK_END_TAG(StreamCtx_TAG, ctx)
+    TcpStreamRef ctx = arg;    
+    RBL_CHECK_TAG(TcpStream_TAG, ctx)
+    RBL_CHECK_END_TAG(TcpStream_TAG, ctx)
     try_write(ctx);
 }
-static bool is_write_pending(StreamCtxRef ctx)
+static bool is_write_pending(TcpStreamRef ctx)
 {
-    RBL_CHECK_TAG(StreamCtx_TAG, ctx)
-    RBL_CHECK_END_TAG(StreamCtx_TAG, ctx)
+    RBL_CHECK_TAG(TcpStream_TAG, ctx)
+    RBL_CHECK_END_TAG(TcpStream_TAG, ctx)
     assert( 
         ((ctx->writer.output_buffer != NULL) && (ctx->writer.write_cb != NULL))
         || ((ctx->writer.output_buffer == NULL) && (ctx->writer.write_cb == NULL)));
@@ -58,12 +61,12 @@ static void fill_buffer(char* line, char* buffer, int max_len, int required_data
 // 
 static void wrtr_cb(RunloopRef rl, void* write_ctx_p_arg)
 {
-    StreamCtx* ctx = write_ctx_p_arg;
-    RBL_CHECK_TAG(StreamCtx_TAG, ctx)
-    RBL_CHECK_END_TAG(StreamCtx_TAG, ctx)
-    RunloopStreamRef stream = ctx->stream;
-    RunloopRef reactor = runloop_stream_get_runloop(stream);
-    runloop_stream_verify(stream);
+    TcpStream* ctx = write_ctx_p_arg;
+    RBL_CHECK_TAG(TcpStream_TAG, ctx)
+    RBL_CHECK_END_TAG(TcpStream_TAG, ctx)
+    RunloopStreamRef rlstream = ctx->rlstream_ref;
+    RunloopRef reactor = runloop_stream_get_runloop(rlstream);
+    runloop_stream_verify(rlstream);
     switch(ctx->writer.write_state) {
         case WRT_STATE_EAGAIN: 
             ctx->writer.write_state = WRT_STATE_READY;
@@ -81,11 +84,11 @@ static void wrtr_cb(RunloopRef rl, void* write_ctx_p_arg)
             assert(false);
     } 
 }
-static void try_write(StreamCtx* ctx)
+static void try_write(TcpStream* ctx)
 {
     RBL_LOG_FMT("try_write fd: %d write_state: %d\n", ctx->stream_fd, ctx->writer.write_state);
 
-    RunloopRef rl = runloop_stream_get_runloop(ctx->stream);
+    RunloopRef rl = runloop_stream_get_runloop(ctx->rlstream_ref);
     void* data = IOBuffer_data(ctx->writer.output_buffer);
     size_t len = IOBuffer_data_len(ctx->writer.output_buffer);
     int nwrite = write(ctx->stream_fd, data, len);
@@ -112,28 +115,28 @@ static void try_write(StreamCtx* ctx)
         }
     }    
 }
-static void invoke_write_callback(StreamCtxRef ctx, int nwrite, int errnoval)
+static void invoke_write_callback(TcpStreamRef ctx, int nwrite, int errnoval)
 {
     IOBuffer_free(ctx->writer.output_buffer);
-    AsyncReadCallback cb = ctx->writer.write_cb;
+    TcpWriteCallback* cb = ctx->writer.write_cb;
     ctx->writer.write_cb = NULL;
     void* arg = ctx->writer.write_cb_arg;
     ctx->writer.write_cb_arg = NULL;
-    cb(arg, nwrite, errnoval);
+    cb(arg, errnoval);
 }
-static void write_clean_terminate(StreamCtx* ctx)
+static void write_clean_terminate(TcpStream* ctx)
 {   
     ctx->writer.write_state = WRT_STATE_STOPPED;
     
-    runloop_stream_disarm_write(ctx->stream);
-    runloop_stream_deregister(ctx->stream);
-    runloop_stream_free(ctx->stream);
+    runloop_stream_disarm_write(ctx->rlstream_ref);
+    runloop_stream_deregister(ctx->rlstream_ref);
+    runloop_stream_free(ctx->rlstream_ref);
 }
-static void write_error_terminate(StreamCtx* ctx)
+static void write_error_terminate(TcpStream* ctx)
 {
-    runloop_stream_disarm_write(ctx->stream);
-    runloop_stream_deregister(ctx->stream);
-    runloop_stream_free(ctx->stream);
+    runloop_stream_disarm_write(ctx->rlstream_ref);
+    runloop_stream_deregister(ctx->rlstream_ref);
+    runloop_stream_free(ctx->rlstream_ref);
 }
 #if 0
 void* writer_thread_func(void* arg)
@@ -142,15 +145,15 @@ void* writer_thread_func(void* arg)
     RunloopRef runloop_ref = runloop_new();
     WriterTable* wrtr = (WriterTable*)arg;
     for(int i = 0; i < wrtr->count; i++) {
-        StreamCtx* ctx = &(wrtr->ctx_table[i]);
+        TcpStream* ctx = &(wrtr->ctx_table[i]);
         ctx->writer.write_state = WRT_STATE_INITIAL;
         wrtr->ctx_table[i].stream = runloop_stream_new(runloop_ref, ctx->writefd);
         wrtr->ctx_table[i].timer_ref = runloop_timer_new(runloop_ref);
         // this timer will periodically write a message and when enough writes have happened close down the writer
         runloop_timer_register(wrtr->ctx_table[i].timer_ref, &wrtr_wait_timer_fired, (void *) ctx, ctx->interval_ms, true);
 
-        RBL_CHECK_TAG(StreamCtx_ATG, ctx)
-        RBL_CHECK_END_TAG(StreamCtx_ATG, ctx)
+        RBL_CHECK_TAG(TcpStream_ATG, ctx)
+        RBL_CHECK_END_TAG(TcpStream_ATG, ctx)
         runloop_timer_checktag(ctx->timer_ref);
         runloop_stream_checktag(ctx->stream);
 
@@ -160,7 +163,7 @@ void* writer_thread_func(void* arg)
     runloop_run(runloop_ref, 10000000);
     int total_chars = 0;
     for(int i = 0; i < wrtr->count; i++) {
-        StreamCtx* ctx = &(wrtr->ctx_table[i]);
+        TcpStream* ctx = &(wrtr->ctx_table[i]);
         total_chars += ctx->write_char_count;
         printf("Writer index: %d char count: %d \n", i, ctx->write_char_count);
     }

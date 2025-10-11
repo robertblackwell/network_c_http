@@ -76,6 +76,21 @@ void runloop_stream_init(RunloopEventRef this, RunloopRef runloop, int fd)
     this->stream.write_postable_arg = NULL;
     this->stream.write_postable_cb = NULL;
 }
+void runloop_stream_deinit(RunloopEventRef this)
+{
+    SOCKW_SET_TAG(this);
+    SOCKW_SET_END_TAG(this);
+    this->stream.fd = 0;
+    this->runloop = NULL;
+    this->free = &anonymous_free;
+    this->handler = NULL;
+    this->stream.event_mask = 0;
+    this->stream.read_postable_arg = NULL;
+    this->stream.read_postable_cb = NULL;
+    this->stream.write_postable_arg = NULL;
+    this->stream.write_postable_cb = NULL;
+}
+
 RunloopEventRef runloop_stream_new(RunloopRef runloop, int fd)
 {
     RunloopEventRef this = event_table_get_entry(runloop->event_table);

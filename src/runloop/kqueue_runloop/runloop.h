@@ -9,12 +9,10 @@
 // Types -= forward declares
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 typedef struct Runloop_s Runloop, *RunloopRef;
-typedef struct RunloopEvent_s RunloopEvent, *RunloopEventRef;
-
-typedef RunloopEventRef RunloopTimerRef;
-typedef RunloopEventRef RunloopListenerRef;
-typedef RunloopEventRef RunloopStreamRef;
-typedef RunloopEvent RunloopStream;
+typedef struct  RunloopEvent_s RunloopEvent, *RunloopEventRef,
+                RunloopTimer, * RunloopTimerRef,
+                RunloopListener, *RunloopListenerRef,
+                RunloopStream, *RunloopStreamRef;
 
 typedef struct RunloopWatcherBase_s RunloopWatcherBase, *RunloopWatcherBaseRef;       // Base object for objects that wait for an fd event
 typedef struct RunloopEventfd_s RunloopEventFd, *RunloopEventFdRef;

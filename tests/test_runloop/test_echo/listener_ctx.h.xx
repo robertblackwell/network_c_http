@@ -36,7 +36,7 @@ void postable_reader_start(RunloopRef rl, void* arg);
  *      controlled by a w_timer
  * 
  */
-struct ListenerCtx_s {
+struct Server_s {
     RBL_DECLARE_TAG;
     int                     l_state;
     int                     port;
@@ -51,14 +51,14 @@ struct ListenerCtx_s {
     StreamTable             stream_table;
     RBL_DECLARE_END_TAG;
 };
-typedef struct  ListenerCtx_s TestServer, *ListenerCtxRef;
+typedef struct  Server_s TestServer, *ServerRef;
 
 
-ListenerCtxRef listener_ctx_new(int listen_fd, int id, RunloopRef rl);
-void listener_ctx_init(ListenerCtxRef sref, int listen_fd, int id, RunloopRef rl);
+ServerRef listener_ctx_new(int listen_fd, int id, RunloopRef rl);
+void listener_ctx_init(ServerRef sref, int listen_fd, int id, RunloopRef rl);
 
-void listener_ctx_free(ListenerCtxRef sref);
-void listener_ctx_run(ListenerCtxRef sref);
+void listener_ctx_free(ServerRef sref);
+void listener_ctx_run(ServerRef sref);
 
 int local_create_bound_socket(int port, const char* host);
 
