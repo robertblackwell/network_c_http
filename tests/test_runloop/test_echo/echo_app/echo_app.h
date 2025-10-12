@@ -6,7 +6,8 @@
 typedef struct EchoApp_s {
     RBL_DECLARE_TAG;
     MsgStreamRef msg_stream_ref;
-    MsgParserRef msgParser_ref;
+    AppDoneCallback* done_cb;
+    void *done_arg;
     RBL_DECLARE_END_TAG;    
 } EchoApp, *EchoAppRef;
 typedef void(EchoAppDoneCallback)(EchoAppRef app_ref, void* arg, int error);

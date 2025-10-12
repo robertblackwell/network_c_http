@@ -41,7 +41,7 @@ void msg_parser_consume(MsgParserRef mp, IOBufferRef iob_new_data, MsgParserCall
         char ch = IOBuffer_consume_pop_front(iob_new_data);
         if((ch == '\n')||(ch == '\0')) {
 
-            cb(mp->msg_ref, arg, 0);
+            cb(arg, mp->msg_ref, 0);
             mp->msg_ref = message_new();
         } else {
             IOBuffer_commit_push_back(mp->msg_ref->iob, ch);

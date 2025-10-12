@@ -16,7 +16,7 @@
  */
 static void handler(RunloopEventRef watcher, uint16_t filter, uint16_t flags)
 {
-    RunloopEventRef rl_stream = (RunloopEventRef)watcher;
+    RunloopStreamRef rl_stream = (RunloopStreamRef)watcher;
     RunloopRef rl = watcher->runloop;
     /*
      * Act on the kqueue filter
@@ -58,11 +58,11 @@ static void handler(RunloopEventRef watcher, uint16_t filter, uint16_t flags)
     }
 }
 
-static void anonymous_free(RunloopEventRef p)
+static void anonymous_free(RunloopStreamRef p)
 {
     runloop_stream_free(p);
 }
-void runloop_stream_init(RunloopEventRef this, RunloopRef runloop, int fd)
+void runloop_stream_init(RunloopStreamRef this, RunloopRef runloop, int fd)
 {
     SOCKW_SET_TAG(this);
     SOCKW_SET_END_TAG(this);
@@ -76,7 +76,7 @@ void runloop_stream_init(RunloopEventRef this, RunloopRef runloop, int fd)
     this->stream.write_postable_arg = NULL;
     this->stream.write_postable_cb = NULL;
 }
-void runloop_stream_deinit(RunloopEventRef this)
+void runloop_stream_deinit(RunloopStreamRef this)
 {
     SOCKW_SET_TAG(this);
     SOCKW_SET_END_TAG(this);
@@ -91,20 +91,21 @@ void runloop_stream_deinit(RunloopEventRef this)
     this->stream.write_postable_cb = NULL;
 }
 
-RunloopEventRef runloop_stream_new(RunloopRef runloop, int fd)
+RunloopStreamRef runloop_stream_new(RunloopRef runloop, int fd)
 {
-    RunloopEventRef this = event_table_get_entry(runloop->event_table);
+    RunloopStreamRef this = event_table_get_entry(runloop->event_table);
     runloop_stream_init(this, runloop, fd);
     return this;
 }
-void runloop_stream_free(RunloopEventRef athis)
+void runloop_stream_free(RunloopStreamRef athis)
 {
     SOCKW_SET_TAG(athis);
     SOCKW_SET_END_TAG(athis);
+    runloop_stream_deregister(athis);
     close(athis->stream.fd);
     event_table_release_entry(athis->runloop->event_table, athis);
 }
-void runloop_stream_register(RunloopEventRef athis)
+void runloop_stream_register(RunloopStreamRef athis)
 {
     SOCKW_SET_TAG(athis);
     SOCKW_SET_END_TAG(athis);
@@ -113,14 +114,14 @@ void runloop_stream_register(RunloopEventRef athis)
     // res = kqh_readerwriter_pause(athis);
     assert(res == 0);
 }
-void runloop_stream_deregister(RunloopEventRef athis)
+void runloop_stream_deregister(RunloopStreamRef athis)
 {
     SOCKW_SET_TAG(athis);
     SOCKW_SET_END_TAG(athis);
     int res = kqh_readerwriter_cancel(athis);
     assert(res == 0);
 }
-void runloop_stream_arm_both(RunloopEventRef athis,
+void runloop_stream_arm_both(RunloopStreamRef athis,
                              PostableFunction read_postable_cb, void* read_arg,
                              PostableFunction write_postable_cb, void* write_arg)
 {
@@ -143,7 +144,7 @@ void runloop_stream_arm_both(RunloopEventRef athis,
     assert(res == 0);
 }
 
-void runloop_stream_arm_read(RunloopEventRef athis, PostableFunction postable_cb, void* arg)
+void runloop_stream_arm_read(RunloopStreamRef athis, PostableFunction postable_cb, void* arg)
 {
     SOCKW_SET_TAG(athis);
     SOCKW_SET_END_TAG(athis);
@@ -156,7 +157,7 @@ void runloop_stream_arm_read(RunloopEventRef athis, PostableFunction postable_cb
     int res = kqh_reader_register(athis);
     assert(res == 0);
 }
-void runloop_stream_arm_write(RunloopEventRef athis, PostableFunction postable_cb, void* arg)
+void runloop_stream_arm_write(RunloopStreamRef athis, PostableFunction postable_cb, void* arg)
 {
     SOCKW_SET_TAG(athis);
     SOCKW_SET_END_TAG(athis);
@@ -169,7 +170,7 @@ void runloop_stream_arm_write(RunloopEventRef athis, PostableFunction postable_c
     int res = kqh_writer_register(athis);
     assert(res == 0);
 }
-void runloop_stream_disarm_read(RunloopEventRef athis)
+void runloop_stream_disarm_read(RunloopStreamRef athis)
 {
     SOCKW_SET_TAG(athis);
     SOCKW_SET_END_TAG(athis);
@@ -178,7 +179,7 @@ void runloop_stream_disarm_read(RunloopEventRef athis)
     int res = kqh_reader_pause(athis);
     assert(res == 0);
 }
-void runloop_stream_disarm_write(RunloopEventRef athis)
+void runloop_stream_disarm_write(RunloopStreamRef athis)
 {
     athis->stream.event_mask = 0;//~EPOLLOUT & athis->event_mask;
     SOCKW_SET_TAG(athis);
@@ -188,25 +189,25 @@ void runloop_stream_disarm_write(RunloopEventRef athis)
     int res = kqh_writer_pause(athis);
     assert(res == 0);
 }
-RunloopRef runloop_stream_get_runloop(RunloopEventRef athis)
+RunloopRef runloop_stream_get_runloop(RunloopStreamRef athis)
 {
     SOCKW_SET_TAG(athis);
     SOCKW_SET_END_TAG(athis);
     return athis->runloop;
 }
-int runloop_stream_get_fd(RunloopEventRef athis)
+int runloop_stream_get_fd(RunloopStreamRef athis)
 {
     SOCKW_SET_TAG(athis);
     SOCKW_SET_END_TAG(athis);
     return athis->stream.fd;
 }
 
-void runloop_stream_verify(RunloopEventRef athis)
+void runloop_stream_verify(RunloopStreamRef athis)
 {
     SOCKW_SET_TAG(athis);
     SOCKW_SET_END_TAG(athis);
 }
-void runloop_stream_checktag(RunloopEventRef athis)
+void runloop_stream_checktag(RunloopStreamRef athis)
 {
     SOCKW_SET_TAG(athis);
     SOCKW_SET_END_TAG(athis);

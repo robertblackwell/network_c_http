@@ -49,6 +49,8 @@ typedef struct MsgStream_s {
     void*             read_cb_arg;
     MsgReadCallback*  read_cb;
     IOBufferRef       input_buffer;
+    // input_msg should only be none null if the parser has set this to a new message
+    // via the parser callback
     MessageRef        input_msg;
 
     IOBufferRef       output_buffer;
@@ -62,13 +64,26 @@ MsgStreamRef msg_stream_new(RunloopRef rl, int fd);
 void msg_stream_init(MsgStreamRef msg_stream_ref, RunloopRef rl, int fd);
 void msg_stream_deinit(MsgStreamRef msg_stream_ref);
 void msg_stream_free(MsgStreamRef msg_stream_ref);
+/*
+ * This function passes a MessageRef to the caller via the callback.
+ * That is a transfer of ownership and the caller is resposible for
+ * deallocating if necessary
+ */
 void msg_stream_read(MsgStreamRef msg_stream_ref, MsgReadCallback read_cb, void* arg);
+/*
+ * This function may modify the msg_ref while framing for transmission but ownership
+ * remains with the caller
+ */
 void msg_stream_write(MsgStreamRef msg_stream_ref, MessageRef msg_ref, MsgWriteCallback write_cb, void* arg);
 
 MessageRef message_new();
 void message_init(MessageRef msg_ref);
 void message_deinit(MessageRef msg_ref);
 void message_free(MessageRef msg_ref);
+
+/**
+ * Does not modify mr - ownership stays with caller
+ */
 IOBufferRef message_serialize(MessageRef mr);
 
 MsgParserRef msg_parser_new();

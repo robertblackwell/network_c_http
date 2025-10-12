@@ -42,7 +42,7 @@ void server_ctx_init(ServerCtxRef server_ctx, RunloopRef rl, int fd)
 {
     RBL_SET_TAG(ServerCtx_TAG, server_ctx)
     RBL_SET_END_TAG(ServerCtx_TAG, server_ctx)
-    server_ctx->runloop_ref = runloop_new();
+    server_ctx->runloop_ref = rl;
     server_ctx->tcp_listener_ref = tcp_listener_new(server_ctx->runloop_ref, fd);
     // runloop_listener_init(server_ctx->rl_listener_ref, server_ctx->runloop_ref, fd);
     server_ctx->l_state = L_STATE_INITIAL;
@@ -127,6 +127,7 @@ static void postable_read_cb(RunloopRef rl, void* arg)
 #endif
 static void handle_new_socket(void* server, int new_sock, int error)
 {
+    assert(new_sock != 0);
     ServerCtxRef ctx = server;
     RBL_CHECK_TAG(ServerCtx_TAG, ctx)
     RBL_CHECK_END_TAG(ServerCtx_TAG, ctx)
@@ -149,12 +150,13 @@ static void handle_new_socket(void* server, int new_sock, int error)
 static void app_instance_done_cb(void* app, void* server, int error)
 {
     ServerCtxRef ctx = server;
+    EchoAppRef app_ref = app;
     RBL_CHECK_TAG(ServerCtx_TAG, ctx)
     RBL_CHECK_END_TAG(ServerCtx_TAG, ctx)
     ListIterator itr = List_find(ctx->connection_list, app);
     assert(itr != NULL);
     List_itr_remove(ctx->connection_list, &itr);
-
+    echo_app_free(app_ref);
 }
 #if 0
 static void handle_app_done(EchoAppRef app_ref, void* arg, int error)

@@ -17,7 +17,7 @@ static void tcp_write_callback(void* arg, int error)
     MsgStreamRef msg_stream_ref = arg;
     RBL_CHECK_TAG(MsgStream_TAG, msg_stream_ref)
     RBL_CHECK_END_TAG(MsgStream_TAG, msg_stream_ref)
-    IOBuffer_free(msg_stream_ref->output_buffer);
+    msg_stream_ref->output_buffer = NULL;
     invoke_write_callback(msg_stream_ref, error);
 }
 static void invoke_write_callback(MsgStreamRef msg_stream_ref, int error)

@@ -12,7 +12,8 @@ typedef struct Runloop_s Runloop, *RunloopRef;
 typedef struct  RunloopEvent_s RunloopEvent, *RunloopEventRef,
                 RunloopTimer, * RunloopTimerRef,
                 RunloopListener, *RunloopListenerRef,
-                RunloopStream, *RunloopStreamRef;
+                RunloopStream, *RunloopStreamRef,
+                RunloopUserEvent, *RunloopUserEventRef;
 
 typedef struct RunloopWatcherBase_s RunloopWatcherBase, *RunloopWatcherBaseRef;       // Base object for objects that wait for an fd event
 typedef struct RunloopEventfd_s RunloopEventFd, *RunloopEventFdRef;
@@ -63,58 +64,62 @@ void runloop_verify(RunloopRef r);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Timers
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-RunloopEventRef runloop_timer_new(RunloopRef runloop_ref);
-void runloop_timer_init(RunloopEventRef lrevent, RunloopRef runloop);
-void runloop_timer_free(RunloopEventRef lrevent);
-void runloop_timer_register(RunloopEventRef lrevent, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
-void runloop_timer_update(RunloopEventRef lrevent, uint64_t interval_ms, bool repeating);
-void runloop_timer_disarm(RunloopEventRef lrevent);
-void runloop_timer_rearm_old(RunloopEventRef lrevent, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
-void runloop_timer_rearm(RunloopEventRef lrevent);
-void runloop_timer_deregister(RunloopEventRef lrevent);
-RunloopRef runloop_timer_get_runloop(RunloopEventRef lrevent);
+RunloopTimerRef runloop_timer_new(RunloopRef runloop_ref);
+void runloop_timer_init(RunloopTimerRef lrevent, RunloopRef runloop);
+void runloop_timer_free(RunloopTimerRef lrevent);
+void runloop_timer_register(RunloopTimerRef lrevent, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
+void runloop_timer_update(RunloopTimerRef lrevent, uint64_t interval_ms, bool repeating);
+void runloop_timer_disarm(RunloopTimerRef lrevent);
+void runloop_timer_rearm_old(RunloopTimerRef lrevent, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
+void runloop_timer_rearm(RunloopTimerRef lrevent);
+void runloop_timer_deregister(RunloopTimerRef lrevent);
+RunloopRef runloop_timer_get_runloop(RunloopTimerRef lrevent);
 /** Convenience interface for timers*/
-RunloopEventRef runloop_timer_set(RunloopRef rl, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
-void runloop_timer_clear(RunloopRef rl, RunloopEventRef lrevent);
-void runloop_timer_checktag(RunloopEventRef lrevent);
+RunloopTimerRef runloop_timer_set(RunloopRef rl, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
+void runloop_timer_clear(RunloopRef rl, RunloopTimerRef lrevent);
+void runloop_timer_checktag(RunloopTimerRef lrevent);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Runloop Lsitener
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-RunloopEventRef runloop_listener_new(RunloopRef runloop, int fd);
-void runloop_listener_free(RunloopEventRef lrevent);
-void runloop_listener_init(RunloopEventRef lrevent, RunloopRef runloop, int fd);
-void runloop_listener_deinit(RunloopEventRef lrevent);
-void runloop_listener_register(RunloopEventRef lrevent, PostableFunction postable, void* postable_arg);
-void runloop_listener_deregister(RunloopEventRef lrevent);
-void runloop_listener_arm(RunloopEventRef lrevent, PostableFunction postable, void* postable_arg);
-void runloop_listener_disarm(RunloopEventRef lrevent);
-void runloop_listener_verify(RunloopEventRef lrevent);
-RunloopRef runloop_listener_get_runloop(RunloopEventRef lrevent);
-int runloop_listener_get_fd(RunloopEventRef lrevent);
+RunloopListenerRef runloop_listener_new(RunloopRef runloop, int fd);
+void runloop_listener_free(RunloopListenerRef lrevent);
+void runloop_listener_init(RunloopListenerRef lrevent, RunloopRef runloop, int fd);
+void runloop_listener_deinit(RunloopListenerRef lrevent);
+void runloop_listener_register(RunloopListenerRef lrevent, PostableFunction postable, void* postable_arg);
+void runloop_listener_deregister(RunloopListenerRef lrevent);
+void runloop_listener_arm(RunloopListenerRef lrevent, PostableFunction postable, void* postable_arg);
+void runloop_listener_disarm(RunloopListenerRef lrevent);
+void runloop_listener_verify(RunloopListenerRef lrevent);
+RunloopRef runloop_listener_get_runloop(RunloopListenerRef lrevent);
+int runloop_listener_get_fd(RunloopListenerRef lrevent);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // RunloopStream
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-RunloopEventRef runloop_stream_new(RunloopRef runloop, int fd);
-void runloop_stream_free(RunloopEventRef lrevent);
-void runloop_stream_init(RunloopEventRef lrevent, RunloopRef runloop, int fd);
-void runloop_stream_deinit(RunloopEventRef lrevent);
-void runloop_stream_register(RunloopEventRef lrevent);
-void runloop_stream_deregister(RunloopEventRef lrevent);
-void runloop_stream_arm_both(RunloopEventRef lrevent,
+RunloopStreamRef runloop_stream_new(RunloopRef runloop, int fd);
+void runloop_stream_init(RunloopStreamRef lrevent, RunloopRef runloop, int fd);
+/**
+ * runloop_stream_free() & runloop_stream_deinit() will close the associated file descriptor
+ * and disarm and deregister the event with epoll/kqueue
+ */
+void runloop_stream_free(RunloopStreamRef lrevent);
+void runloop_stream_deinit(RunloopStreamRef lrevent);
+void runloop_stream_register(RunloopStreamRef lrevent);
+void runloop_stream_deregister(RunloopStreamRef lrevent);
+void runloop_stream_arm_both(RunloopStreamRef lrevent,
                              PostableFunction read_postable_cb, void* read_arg,
                              PostableFunction write_postable_cb, void* write_arg);
 
-void runloop_stream_arm_read(RunloopEventRef lrevent, PostableFunction postable_callback, void* arg);
-void runloop_stream_disarm_read(RunloopEventRef lrevent);
-void runloop_stream_arm_write(RunloopEventRef lrevent, PostableFunction postable_callback, void* arg);
-void runloop_stream_disarm_write(RunloopEventRef lrevent);
+void runloop_stream_arm_read(RunloopStreamRef lrevent, PostableFunction postable_callback, void* arg);
+void runloop_stream_disarm_read(RunloopStreamRef lrevent);
+void runloop_stream_arm_write(RunloopStreamRef lrevent, PostableFunction postable_callback, void* arg);
+void runloop_stream_disarm_write(RunloopStreamRef lrevent);
 void runloop_stream_verify(RunloopStreamRef r);
-RunloopRef runloop_stream_get_runloop(RunloopEventRef lrevent);
+RunloopRef runloop_stream_get_runloop(RunloopStreamRef lrevent);
 int runloop_stream_get_fd(RunloopStreamRef this);
-void runloop_stream_checktag(RunloopEventRef lrevent);
+void runloop_stream_checktag(RunloopStreamRef lrevent);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // User Event
@@ -128,20 +133,20 @@ void runloop_stream_checktag(RunloopEventRef lrevent);
  * using the standard kqueue feature.
  *
  */
-RunloopEventRef runloop_user_event_new(RunloopRef runloop);
-void runloop_user_event_init(RunloopEventRef athis, RunloopRef runloop);
-void runloop_user_event_free(RunloopEventRef athis);
-void runloop_user_event_register(RunloopEventRef athis);
-void runloop_user_event_change_watch(RunloopEventRef athis, PostableFunction postable, void* arg, uint64_t watch_what);
-void runloop_user_event_arm(RunloopEventRef athis, PostableFunction postable, void* arg);
-void runloop_user_event_disarm(RunloopEventRef athis);
-void runloop_user_event_fire(RunloopEventRef athis);
-void runloop_user_event_clear_one_event(RunloopEventRef athis);
-void runloop_user_event_clear_all_events(RunloopEventRef athis);
-void runloop_user_event_deregister(RunloopEventRef athis);
-void runloop_user_event_verify(RunloopEventRef r);
-RunloopRef runloop_user_event_get_reactor(RunloopEventRef athis);
-int runloop_user_event_get_fd(RunloopEventRef this);
+RunloopUserEventRef runloop_user_event_new(RunloopRef runloop);
+void runloop_user_event_init(RunloopUserEventRef athis, RunloopRef runloop);
+void runloop_user_event_free(RunloopUserEventRef athis);
+void runloop_user_event_register(RunloopUserEventRef athis);
+void runloop_user_event_change_watch(RunloopUserEventRef athis, PostableFunction postable, void* arg, uint64_t watch_what);
+void runloop_user_event_arm(RunloopUserEventRef athis, PostableFunction postable, void* arg);
+void runloop_user_event_disarm(RunloopUserEventRef athis);
+void runloop_user_event_fire(RunloopUserEventRef athis);
+void runloop_user_event_clear_one_event(RunloopUserEventRef athis);
+void runloop_user_event_clear_all_events(RunloopUserEventRef athis);
+void runloop_user_event_deregister(RunloopUserEventRef athis);
+void runloop_user_event_verify(RunloopUserEventRef r);
+RunloopRef runloop_user_event_get_reactor(RunloopUserEventRef athis);
+int runloop_user_event_get_fd(RunloopUserEventRef this);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // User Event Queue

@@ -65,7 +65,10 @@ void message_free(MessageRef m)
 }
 IOBufferRef message_serialize(MessageRef msg)
 {
-    IOBufferRef iob = msg->iob;
-    msg->iob = NULL;
+    char* p = (char*)IOBuffer_cstr(msg->iob);
+    IOBufferRef iob = IOBuffer_from_cstring(p);
+    // now frame the message
+    IOBuffer_commit_push_back(iob, '\n');
+
     return iob;
 }

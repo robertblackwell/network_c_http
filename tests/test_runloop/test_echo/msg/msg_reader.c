@@ -3,7 +3,7 @@
 #include "msg_stream.h"
 static void postable_read(RunloopRef rl, void* arg);
 static void tcp_read_callback(void* arg, int error);
-static void new_message_callback(void* msg_stream, MessageRef new_msg, int error);
+static void new_message_callback(void* msgstream, MessageRef new_msg, int error);
 static void invoke_read_callback(MsgStreamRef msg_stream_ref, MessageRef new_msg, int error);
 static void try_read(MsgStreamRef msg_stream_ref);
 
@@ -26,15 +26,18 @@ static void tcp_read_callback(void* arg, int error)
     MsgStreamRef msg_stream_ref = arg;
     RBL_CHECK_TAG(MsgStream_TAG, msg_stream_ref);
     RBL_CHECK_END_TAG(MsgStream_TAG, msg_stream_ref);
+    RunloopRef rl = runloop_stream_get_runloop(msg_stream_ref->tcp_stream_ref->rlstream_ref);
     if(error == 0) {
         assert(IOBuffer_data_len(msg_stream_ref->input_buffer) != 0);
         msg_parser_consume(msg_stream_ref->msg_parser_ref, msg_stream_ref->input_buffer, new_message_callback, msg_stream_ref);
-        if(IOBuffer_data_len(msg_stream_ref->input_buffer) == 0) {
-            RunloopRef rl = runloop_listener_get_runloop(msg_stream_ref->tcp_stream_ref->rlstream_ref);
-            runloop_post(rl, postable_read, msg_stream_ref);
+        assert(IOBuffer_data_len(msg_stream_ref->input_buffer) == 0);
+        if (msg_stream_ref->input_msg != NULL) {
+            MessageRef m = msg_stream_ref->input_msg;
+            msg_stream_ref->input_msg = NULL;
+            invoke_read_callback(msg_stream_ref, m, error);
         } else {
-            // something went wrong
-            // invoke_read_callback(msg_stream_ref, m, error);
+            // did not get a full message so read some more
+            runloop_post(rl, postable_read, msg_stream_ref);
         }
     } else {
         invoke_read_callback(msg_stream_ref, NULL, error);
@@ -46,7 +49,9 @@ static void new_message_callback(void* msgstream, MessageRef new_msg, int error)
     RBL_CHECK_TAG(MsgStream_TAG, msg_stream_ref);
     RBL_CHECK_END_TAG(MsgStream_TAG, msg_stream_ref);
     if(error == 0) {
-        invoke_read_callback(msg_stream_ref, new_msg, error);
+        assert(msg_stream_ref->input_msg == NULL);
+        msg_stream_ref->input_msg = new_msg;
+        // invoke_read_callback(msg_stream_ref, new_msg, error);
     }
 }
 static void postable_read(RunloopRef rl, void* arg)
@@ -63,5 +68,9 @@ static void try_read(MsgStreamRef msg_stream_ref)
 }
 static void invoke_read_callback(MsgStreamRef msg_stream_ref, MessageRef new_msg, int error)
 {
-    msg_stream_ref->read_cb(msg_stream_ref->read_cb_arg, new_msg, error);
+    MsgReadCallback* cb = msg_stream_ref->read_cb;
+    void* arg = msg_stream_ref->read_cb_arg;
+    msg_stream_ref->read_cb = NULL;
+    msg_stream_ref->read_cb_arg = NULL;
+    cb(arg, new_msg, error);
 }

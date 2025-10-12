@@ -79,31 +79,30 @@ void tcp_listener_free(TcpListenerRef tcp_listener_ref)
 void tcp_accept(TcpListenerRef tcp_listener_ref, TcpAcceptCallback cb, void* arg)
 {
     TcpListenerRef ctx = tcp_listener_ref;
-    RBL_CHECK_TAG(TcpListener_TAG, ctx)
-    RBL_CHECK_END_TAG(TcpListener_TAG, ctx)
-    assert(ctx->accept_cb == NULL);
-    assert(ctx->accept_cb_arg == NULL);
-    ctx->accept_cb = cb;
-    ctx->accept_cb_arg = arg;
-    RBL_CHECK_TAG(ServerCtx_TAG, ctx)
-    RBL_CHECK_END_TAG(ServerCtx_TAG, ctx)
-    RunloopRef rl = runloop_listener_get_runloop(ctx->rl_listener_ref);
-    switch(ctx->l_state) {
+    RBL_CHECK_TAG(TcpListener_TAG, tcp_listener_ref)
+    RBL_CHECK_END_TAG(TcpListener_TAG, tcp_listener_ref)
+    assert(tcp_listener_ref->accept_cb == NULL);
+    assert(tcp_listener_ref->accept_cb_arg == NULL);
+    tcp_listener_ref->accept_cb = cb;
+    tcp_listener_ref->accept_cb_arg = arg;
+    RunloopRef rl = runloop_listener_get_runloop(tcp_listener_ref->rl_listener_ref);
+    switch(tcp_listener_ref->l_state) {
         case L_STATE_INITIAL:
         case L_STATE_READY:
         case L_STATE_EAGAIN:
-            if(ctx->accept_cb != NULL) {
+            if(tcp_listener_ref->accept_cb != NULL) {
 
-            }                        
+            }
+            break;                        
         case L_STATE_STOPPED:
         case L_STATE_ERROR:
-            invoke_accept_callback(ctx, 0, -33);
+            invoke_accept_callback(tcp_listener_ref, 0, -33);
             break;
         default:
             assert(0);
             break;
     }
-    runloop_post(rl, postable_try_accept, ctx);
+    runloop_post(rl, postable_try_accept, tcp_listener_ref);
 }
 static void postable_try_accept(RunloopRef rl, void* arg)
 {

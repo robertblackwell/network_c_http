@@ -17,13 +17,14 @@ static void try_write(TcpStream* ctx);
 static bool is_write_pending(TcpStreamRef ctx);
 static void invoke_write_callback(TcpStreamRef ctx, int nwrite, int errnoval);
 
-void tcp_write(TcpStreamRef ctx, IOBufferRef outbuf, TcpWriteCallback write_cb, void* arg)
+void tcp_write(TcpStreamRef tcp_stream_ref, IOBufferRef outbuf, TcpWriteCallback write_cb, void* arg)
 {
-    assert(!is_write_pending(ctx));
+    assert(!is_write_pending(tcp_stream_ref));
     assert(write_cb != NULL);
-    ctx->writer.output_buffer = outbuf;
-    ctx->writer.write_cb = write_cb;
-    ctx->writer.write_cb_arg = arg;
+    tcp_stream_ref->writer.output_buffer = outbuf;
+    tcp_stream_ref->writer.write_cb = write_cb;
+    tcp_stream_ref->writer.write_cb_arg = arg;
+    try_write(tcp_stream_ref);
 }
 void postable_try_write(RunloopRef rl, void* arg)
 {
@@ -32,14 +33,14 @@ void postable_try_write(RunloopRef rl, void* arg)
     RBL_CHECK_END_TAG(TcpStream_TAG, ctx)
     try_write(ctx);
 }
-static bool is_write_pending(TcpStreamRef ctx)
+static bool is_write_pending(TcpStreamRef tcp_stream_ref)
 {
-    RBL_CHECK_TAG(TcpStream_TAG, ctx)
-    RBL_CHECK_END_TAG(TcpStream_TAG, ctx)
+    RBL_CHECK_TAG(TcpStream_TAG, tcp_stream_ref)
+    RBL_CHECK_END_TAG(TcpStream_TAG, tcp_stream_ref)
     assert( 
-        ((ctx->writer.output_buffer != NULL) && (ctx->writer.write_cb != NULL))
-        || ((ctx->writer.output_buffer == NULL) && (ctx->writer.write_cb == NULL)));
-    return (ctx->writer.output_buffer != NULL) ;
+        ((tcp_stream_ref->writer.output_buffer != NULL) && (tcp_stream_ref->writer.write_cb != NULL))
+        || ((tcp_stream_ref->writer.output_buffer == NULL) && (tcp_stream_ref->writer.write_cb == NULL)));
+    return (tcp_stream_ref->writer.output_buffer != NULL) ;
 
 }
 static void fill_buffer(char* line, char* buffer, int max_len, int required_data_length)
@@ -91,7 +92,7 @@ static void try_write(TcpStream* ctx)
     RunloopRef rl = runloop_stream_get_runloop(ctx->rlstream_ref);
     void* data = IOBuffer_data(ctx->writer.output_buffer);
     size_t len = IOBuffer_data_len(ctx->writer.output_buffer);
-    int nwrite = write(ctx->stream_fd, data, len);
+    int nwrite = (int)write(ctx->stream_fd, data, len);
     int errno_saved = errno;
     if (nwrite > 0) {
         RBL_LOG_FMT("try_write DONE fd: %d nwrite: %d \n", ctx->stream_fd, nwrite);
@@ -117,7 +118,7 @@ static void try_write(TcpStream* ctx)
 }
 static void invoke_write_callback(TcpStreamRef ctx, int nwrite, int errnoval)
 {
-    IOBuffer_free(ctx->writer.output_buffer);
+    ctx->writer.output_buffer = NULL;
     TcpWriteCallback* cb = ctx->writer.write_cb;
     ctx->writer.write_cb = NULL;
     void* arg = ctx->writer.write_cb_arg;

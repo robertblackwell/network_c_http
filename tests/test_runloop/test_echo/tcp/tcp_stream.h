@@ -72,6 +72,11 @@ void tcp_stream_init(TcpStreamRef tcp_stream_ref, RunloopRef rl, int fd);
 void tcp_stream_deinit(TcpStreamRef tcp_stream_ref);
 void tcp_stream_free(TcpStreamRef tcp_stream_ref);
 void tcp_read(TcpStreamRef tcp, IOBufferRef iob, TcpReadCallback, void* arg);
+
+/**
+ * This function may modify the output buffer while framing it for transmission
+ * but ownship remains with the caller
+ */
 void tcp_write(TcpStreamRef tcp, IOBufferRef iob, TcpWriteCallback, void* arg);
 void tcp_close(TcpStreamRef tcp);
 
