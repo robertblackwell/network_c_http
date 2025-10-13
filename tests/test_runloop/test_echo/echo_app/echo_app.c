@@ -24,6 +24,9 @@ void echo_app_free(EchoAppRef app)
     msg_stream_free(app->msg_stream_ref);
     free(app);
 }
+
+
+
 AppInterface echo_app_interface_variable;
 AppInterfaceRef echo_app_interface()
 {
@@ -81,8 +84,8 @@ static void postable_read(RunloopRef rl, void* arg)
 MessageRef process_input_message(MessageRef input_msg)
 {
     MessageRef response = message_new();
-    char* p = IOBuffer_data(input_msg->iob);
-    int n = IOBuffer_data_len(input_msg->iob);
+    char* p = IOBuffer_data(message_get_content(input_msg));
+    int n = IOBuffer_data_len(message_get_content(input_msg));
     // for (int i = 0; i < n; i++) {
     //     if (*p == '\n') {
     //         *p = 'X';
@@ -91,7 +94,7 @@ MessageRef process_input_message(MessageRef input_msg)
     char* response_buf_ptr;
     // asprintf(&response_buf_ptr, "ServerResponse:[%s]\n", p);
     asprintf(&response_buf_ptr, "ServerResponse:[%s]\n", p);
-    response->iob = IOBuffer_from_cstring(response_buf_ptr);
+    message_set_content(response, IOBuffer_from_cstring(response_buf_ptr));
     free(response_buf_ptr);
     return response;
 }

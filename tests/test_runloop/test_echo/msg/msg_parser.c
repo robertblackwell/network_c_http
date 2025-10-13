@@ -1,5 +1,6 @@
-#include "msg_stream.h"
-
+#include "message.h"
+#include "message_internal.h"
+#include <rbl/check_tag.h>
 MsgParserRef msg_parser_new()
 {
     MsgParserRef p = malloc(sizeof(MsgParser));

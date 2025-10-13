@@ -2,48 +2,16 @@
 #define H_msg_stream_h
 #include <kqueue_runloop/runloop.h>
 #include <tcp/tcp_stream.h>
+#include "message.h"
 
 #define MsgStream_TAG "MSGSTR"
-#define MsgParser_TAG "MSGPSR"
-#define Message_TAG "MSGTAG"
-
-
-typedef struct Message_s {
-    RBL_DECLARE_TAG;
-    IOBufferRef iob;
-    RBL_DECLARE_END_TAG;
-} Message, * MessageRef;      
 
 typedef void(MsgReadCallback)(void* arg, MessageRef msg, int error);
 typedef void(MsgWriteCallback)(void* arg, int error);
 
-typedef struct MsgParser_s {
-    RBL_DECLARE_TAG;
-    char line_buffer[1000];
-    int line_buffer_length;
-    int line_buffer_max;
-    MessageRef msg_ref;
-    IOBufferRef iob;
-    RBL_DECLARE_END_TAG;
-} MsgParser, *MsgParserRef;
-
-typedef void(MsgParserCallback)(void* arg, MessageRef msg, int error);
-
-typedef struct MsgReader_s {
-    TcpStreamRef   tcp_stream_ref;
-    MsgParser      msg_parser_ref;
-    IOBufferRef    input_buffer;
-    MessageRef input_msg;
-    IOBufferRef    output_buffer;
-} MsgReader, *MsgWriterRef;
-
-typedef struct MsgWriter_s {
-
-} MsgWriter, *MsgReaderRef;
-
 typedef struct MsgStream_s {
     RBL_DECLARE_TAG;
-    TcpStreamRef tcp_stream_ref;
+    TcpStreamRef    tcp_stream_ref;
     MsgParserRef    msg_parser_ref;
 
     void*             read_cb_arg;
@@ -79,20 +47,5 @@ void msg_stream_read(MsgStreamRef msg_stream_ref, MsgReadCallback read_cb, void*
  */
 void msg_stream_write(MsgStreamRef msg_stream_ref, MessageRef msg_ref, MsgWriteCallback write_cb, void* arg);
 
-MessageRef message_new();
-void message_init(MessageRef msg_ref);
-void message_deinit(MessageRef msg_ref);
-void message_free(MessageRef msg_ref);
-
-/**
- * Does not modify mr - ownership stays with caller
- */
-IOBufferRef message_serialize(MessageRef mr);
-
-MsgParserRef msg_parser_new();
-void msg_parser_init(MsgParserRef parser_ref);
-void msg_parser_deinit(MsgParserRef parser_ref);
-void msg_parser_free(MsgParserRef parser_ref);
-void msg_parser_consume(MsgParserRef, IOBufferRef new_data, MsgParserCallback cb, void* arg);
 
 #endif

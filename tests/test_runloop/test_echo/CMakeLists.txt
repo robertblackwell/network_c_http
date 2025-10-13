@@ -39,6 +39,9 @@ add_executable(test_echo_server
 		msg/msg_stream.c
 		msg/msg_reader.c
 		msg/msg_writer.c
+		msg/message.h
+		msg/message_internal.h
+		msg/message.c
 		msg/msg_parser.c
 )
 target_compile_definitions(test_echo_server PUBLIC ASIO_LISTENER_DISABLED)
@@ -61,11 +64,14 @@ target_link_libraries(test_echo_server	PUBLIC ${TEST_LINK_LIBS})
 	tcp/tcp_writer.c
 	tcp/tcp_listener.c
 
-	msg/msg_stream.h
-	msg/msg_stream.c
-	msg/msg_reader.c
-	msg/msg_writer.c
-	msg/msg_parser.c
+		 msg/msg_stream.h
+		 msg/msg_stream.c
+		 msg/msg_reader.c
+		 msg/msg_writer.c
+		 msg/message.h
+		 msg/message_internal.h
+		 msg/message.c
+		 msg/msg_parser.c
  )
  target_compile_definitions(test_echo PUBLIC ASIO_LISTENER_ENABLED)
  target_include_directories(test_echo PUBLIC ${TEST_INCLUDE_dirS} ${CMAKE_CURRENT_SOURCE_DIR})

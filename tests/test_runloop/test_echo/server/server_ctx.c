@@ -19,13 +19,8 @@
 #define L_STATE_STOPPED 55
 #define L_STATE_ERROR 66
 
-static void on_timer(RunloopRef rl, void* arg);
-static void on_accept_ready(RunloopRef rl, void* listener_ref_arg);
 static void handle_new_socket(void* server, int sock, int error);
-static bool can_do_more(ServerCtxRef ctx);
-static void try_accept(ServerCtxRef ctx);
 static void postable_start(RunloopRef rl, void* arg);
-static void handle_app_done(EchoAppRef app_ref, void* arg, int error);
 static void app_instance_done_cb(void* app, void* server, int error);
 
 
@@ -85,46 +80,6 @@ static void postable_start(RunloopRef rl, void* arg)
     TcpListenerRef tcplr = server_ctx->tcp_listener_ref;
     tcp_accept(tcplr, handle_new_socket, server_ctx);    
 }
-#if 0
-static void postable_try_accept(RunloopRef rl, void* arg)
-{
-    ServerCtxRef ctx = arg;
-    RBL_CHECK_TAG(ServerCtx_TAG, ctx)
-    RBL_CHECK_END_TAG(ServerCtx_TAG, ctx)
-    TcpListenerRef tcp_list = ctx->tcp_listener_ref;
-    RunloopListenerRef rllistener_ref = tcp_list->rl_listener_ref;
-    runloop_listener_register(rllistener_ref, on_accept_ready, ctx);
-    int fd = runloop_listener_get_fd(rllistener_ref);
-    int result;
-    switch(ctx->l_state) {
-        case L_STATE_INITIAL:
-            if((result = listen(fd, SOMAXCONN)) != 0) {
-                printf("listen call failed with errno %d \n", errno);
-                assert(0);
-            }
-            ctx->l_state = L_STATE_READY;
-            try_accept(ctx);
-            break;
-        case L_STATE_READY:
-            try_accept(ctx);
-            break;
-        case L_STATE_EAGAIN:
-            
-        case L_STATE_STOPPED:
-        case L_STATE_ERROR:
-            break;
-        default:
-            assert(0);
-            break;
-    }
-}
-#endif
-#if 0    
-static void postable_read_cb(RunloopRef rl, void* arg)
-{
-
-}
-#endif
 static void handle_new_socket(void* server, int new_sock, int error)
 {
     assert(new_sock != 0);

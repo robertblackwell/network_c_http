@@ -19,6 +19,14 @@ void echo_app_init(EchoAppRef app, RunloopRef rl, int connection_fd);
 void echo_app_deinit(EchoAppRef app);
 void echo_app_free(EchoAppRef app);
 void echo_app_run(EchoAppRef app_ref, AppDoneCallback cb, void* arg);
+
+// /**
+//  * The generic version of the 3 function interface
+//  */
+// void* app_new(RunloopRef rl, int connection_fd);
+// void app_free(void* app_ref);
+// void app_run(void* app_ref, void(cb)(void* app_ref, void* server_ref, int fd), void* arg);
+
 typedef struct AppInterface
 {
     void*(*new)(RunloopRef rl, int fd);
