@@ -5,7 +5,7 @@
 #include <kqueue_runloop/runloop.h>
 #include <kqueue_runloop/rl_internal.h>
 #include <kqueue_runloop/rl_events_internal.h>
-#include <kqueue_runloop/event_table.h>
+#include <kqueue_runloop/event_table.c.h>
 
 int test_free_list()
 {

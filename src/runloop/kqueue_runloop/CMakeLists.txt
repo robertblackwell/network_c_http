@@ -4,7 +4,7 @@ set(kq_RUNLOOP_HEADER_FILES
 		${CMAKE_CURRENT_SOURCE_DIR}/runloop_internal.h
 		${CMAKE_CURRENT_SOURCE_DIR}/rl_checktag.h
 		${CMAKE_CURRENT_SOURCE_DIR}/rl_internal.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/event_table.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/event_table.c.h
 	)
 
 set(kq_RUNLOOP_SOURCE_FILES

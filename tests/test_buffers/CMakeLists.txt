@@ -6,7 +6,9 @@ message("test_link_libs        ${TEST_LINK_LIBS}")
 set(TARGET test_buffers)
 add_executable(${TARGET}
 		test_buffer_main.c
-		)
+		../test_generic/stack.h
+		../test_generic/free_list_test.c
+)
 
 target_include_directories(${TARGET}
 		PUBLIC

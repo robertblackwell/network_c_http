@@ -50,7 +50,7 @@ void demo_syncsocket_init(DemoSyncSocketRef this)
 {
     RBL_SET_TAG(DemoClient_TAG, this)
     RBL_SET_END_TAG(DemoClient_TAG, this)
-    this->parser_ref = demo_message_parser_new(&on_new_message, this);
+    this->parser_ref = demo_message_parser_new();
     this->input_message_list = List_new();
     this->output_message_list = List_new();
 }
@@ -126,19 +126,13 @@ int demo_syncsocket_read_message(DemoSyncSocketRef client_ref, DemoMessageRef* m
             void *buf = IOBuffer_space(iob);
             int len = IOBuffer_space_len(iob);
             long bytes_read = read(client_ref->sock, buf, len);
+            int errno_saved = errno;
             if (bytes_read > 0) {
                 IOBuffer_commit(iob, (int) bytes_read);
                 RBL_LOG_FMT("response raw: %s \n", IOBuffer_cstr(iob));
-#if 1
-                demo_message_parser_consume(client_ref->parser_ref, iob);
-#else
-                int rc = DemoMessageParser_consume(client_ref->parser_ref, iob);
-                if(rc != 0) {
-                    return -1;
-                }
-#endif
+                demo_message_parser_consume(client_ref->parser_ref, iob, &on_new_message, client_ref);
             } else {
-                return -1;
+                return errno_saved;
             }
         }
     }

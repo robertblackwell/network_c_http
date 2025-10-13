@@ -1,6 +1,6 @@
 
-#ifndef demo__message_h
-#define demo__message_h
+#ifndef H_demo_message_h
+#define H_demo_message_h
 #include <stdbool.h>
 #include <stdint.h>
 #include <src/common/buffer_chain.h>
@@ -13,9 +13,6 @@ DemoMessageRef demo_message_new_request();
 DemoMessageRef demo_message_new_response();
 void demo_message_free(DemoMessageRef p);
 void demo_message_anonymous_free(void* p);
-/**
- * @brief Methods to test and set whether a message is a request or response
- */
 bool demo_message_is_request(DemoMessageRef mref);
 bool demo_message_get_is_request(DemoMessageRef this);
 void demo_message_set_is_request(DemoMessageRef this, bool yn);

@@ -17,6 +17,7 @@
 #define DEMO_MESSAGE_DECLARE_TAG RBL_DECLARE_TAG(DemoMessage_TAG)
 #define DEMO_MESSAGE_CHECK_TAG(p) RBL_CHECK_TAG(DemoMessage_TAG, p)
 #define DEMO_MESSAGE_SET_TAG(p) RBL_SET_TAG(DemoMessage_TAG, p)
+#define DEMO_MESSAGE_SET_END_TAG(p) RBL_SET_END_TAG(DemoMessage_TAG, p)
 
 struct DemoMessage_s
 {
@@ -28,16 +29,13 @@ struct DemoMessage_s
 
 DemoMessageRef demo_message_new ()
 {
-    DemoMessageRef mref = (DemoMessageRef) eg_alloc(sizeof(DemoMessage));
+    DemoMessageRef mref = (DemoMessageRef) malloc(sizeof(DemoMessage));
     DEMO_MESSAGE_SET_TAG(mref)
     RBL_SET_END_TAG(DemoMessage_TAG, mref);
-    if(mref == NULL) goto error_label_1;
+    assert(mref != NULL);
     mref->body = NULL;
     mref->body = BufferChain_new();
     return mref;
-
-    error_label_1:
-        return NULL;
 }
 static char get_body_first_char(DemoMessageRef msg_ref)
 {
@@ -65,7 +63,6 @@ DemoMessageRef demo_message_new_request()
 }
 DemoMessageRef demo_message_new_response()
 {
-
     DemoMessageRef mref = demo_message_new();
     RBL_CHECK_TAG(DemoMessage_TAG, mref);
     RBL_CHECK_END_TAG(DemoMessage_TAG, mref);
@@ -75,10 +72,9 @@ void demo_message_free(DemoMessageRef this)
 {
     RBL_CHECK_TAG(DemoMessage_TAG, this);
     RBL_CHECK_END_TAG(DemoMessage_TAG, this);
-
     BufferChain_free(((this)->body));
     this->body = NULL;
-    eg_free(this);
+    free(this);
 }
 void demo_message_anonymous_free(void* p)
 {
@@ -109,10 +105,6 @@ void demo_message_set_is_request(DemoMessageRef this, bool yn)
     RBL_CHECK_TAG(DemoMessage_TAG, this);
     RBL_CHECK_END_TAG(DemoMessage_TAG, this);
     return;
-    if(yn)
-        set_body_first_char(this, 'Q');
-    else
-        set_body_first_char(this, 'R');
 }
 void demo_message_set_content_length(DemoMessageRef this, int length)
 {

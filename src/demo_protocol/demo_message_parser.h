@@ -70,20 +70,24 @@ struct DemoMessageParser_s {
     RBL_DECLARE_END_TAG;
 };
 
-DemoMessageParserRef demo_message_parser_new(
-        /**
-         * This function is called every time the parser completes a new message
-         */
-        void(*on_message_complete_cb)(void* on_msg_ctx, DemoMessageRef msgref),
-        /**
-         * This is an anonymous pointer to the context object you want the on_message_complete_cb
-         * to have while it decides what to do with the new message.
-         */
-        void* on_new_message_ctx);
+DemoMessageParserRef demo_message_parser_new();
+    // /**
+    //  * This function is called every time the parser completes a new message
+    //  */
+    // void(*on_message_complete_cb)(void* on_msg_ctx, DemoMessageRef msgref),
+    // /**
+    //  * This is an anonymous pointer to the context object you want the on_message_complete_cb
+    //  * to have while it decides what to do with the new message.
+    //  */
+    // void* on_new_message_ctx);
 
 void demo_message_parser_free(DemoMessageParserRef this);
 
-int demo_message_parser_consume(DemoMessageParserRef parser, IOBufferRef iobuffer_ref);
+int demo_message_parser_consume(DemoMessageParserRef parser,
+    IOBufferRef iobuffer_ref,
+    void (*on_message_complete_cb)(void *, DemoMessageRef),
+    void* on_new_message_ctx
+    );
 
 #endif
 

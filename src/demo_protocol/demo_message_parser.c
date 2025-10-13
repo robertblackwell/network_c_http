@@ -58,8 +58,8 @@ DemoMessageParserRef demo_message_parser_new(
     this->message_free = (void(*)(void*))&demo_message_free;
     this->m_state = STATE_IDLE;
     this->m_current_message_ptr = NULL;
-    this->on_new_message_callback = on_message_complete_cb;
-    this->on_new_message_complete_ctx = on_new_message_ctx;
+    this->on_new_message_callback = NULL;
+    this->on_new_message_complete_ctx = NULL;
     return this;
 }
 void demo_message_parser_free(DemoMessageParserRef this)
@@ -84,10 +84,19 @@ int DemoParser_append_bytes(DemoMessageParserRef this, void *buffer, unsigned le
     RBL_CHECK_END_TAG(DemoParser_TAG, this)
     return 0;
 }
-int demo_message_parser_consume(DemoMessageParserRef parser, IOBufferRef iobuffer_ref)
+int demo_message_parser_consume(DemoMessageParserRef parser,
+    IOBufferRef iobuffer_ref,
+    void (*on_message_complete_cb)(void *, DemoMessageRef),
+    void* on_new_message_ctx
+)
 {
+    parser->on_new_message_callback = on_message_complete_cb;
+    parser->on_new_message_complete_ctx = on_new_message_ctx;
     void* buf = IOBuffer_data(iobuffer_ref);
     int length = IOBuffer_data_len(iobuffer_ref);
+    if (parser->m_current_message_ptr == NULL) {
+        parser->m_current_message_ptr = demo_message_new();
+    }
     assert(length != 0);
     int error_code = 0;
     RBL_CHECK_TAG(DemoParser_TAG, parser)
@@ -101,18 +110,17 @@ int demo_message_parser_consume(DemoMessageParserRef parser, IOBufferRef iobuffe
         assert(ch == ch2);
         switch (parser->m_state) {
             case STATE_IDLE:
-                if(parser->m_current_message_ptr == NULL) {
-                    parser->m_current_message_ptr = demo_message_new();
-                }
                 if(ch == CH_STX) parser->m_state = STATE_BODY;
                 break;
             case STATE_BODY: {
                 if (isprint(ch)) {
                     BufferChainRef bc = demo_message_get_body(parser->m_current_message_ptr);
+                    // this block is debugging
                     BufferChain_append(bc, &ch, 1);
                     IOBufferRef iobtmp = BufferChain_compact(bc);
                     const char* xx = IOBuffer_cstr(iobtmp);
                     IOBuffer_free(iobtmp);
+                    //
                 } else if (ch == CH_ETX) {
                     parser->m_state = STATE_IDLE;
                     parser->on_new_message_callback(parser-> on_new_message_complete_ctx, parser->m_current_message_ptr);
@@ -126,7 +134,7 @@ int demo_message_parser_consume(DemoMessageParserRef parser, IOBufferRef iobuffe
             case STATE_ERROR_RECOVERY:
                 /**
                  * Come to this state after a parse error - search for SOH until end of buffer.
-                 * If not found the terminate the read operation with an error
+                 * If not found then terminate the read operation with an error
                  */
                 if((ch == CH_STX) && (i < length - 1)) {
                     parser->m_state = STATE_BODY;
@@ -134,6 +142,7 @@ int demo_message_parser_consume(DemoMessageParserRef parser, IOBufferRef iobuffe
                     if(i == length - 1) {
                         RBL_LOG_FMT("DemmoParser_consume parse error \n");
                         demo_message_free(parser->m_current_message_ptr);
+                        parser->m_current_message_ptr = NULL;
                         parser->m_current_message_ptr = demo_message_new();
                         return 0;
                     }
