@@ -41,6 +41,10 @@ void tcp_stream_free(TcpStreamRef t)
     RBL_CHECK_END_TAG(TcpStream_TAG, t)
     runloop_stream_free(t->rlstream_ref);
 }
+RunloopRef tcp_stream_get_runloop(TcpStreamRef tcp_stream_ref)
+{
+    return runloop_stream_get_runloop(tcp_stream_ref->rlstream_ref);
+}
 void async_socket_set_nonblocking(int socket)
 {
     int flags = fcntl(socket, F_GETFL, 0);

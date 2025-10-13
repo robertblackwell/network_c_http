@@ -24,7 +24,18 @@ void echo_app_free(EchoAppRef app)
     msg_stream_free(app->msg_stream_ref);
     free(app);
 }
-
+void* generic_echo_app_new(RunloopRef rl, int fd)
+{
+    return echo_app_new(rl, fd);
+}
+void generic_echo_app_free(void* app)
+{
+    echo_app_free(app);
+}
+void generic_echo_app_run(void* app_ref, void(cb)(void* app, void* server, int error), void* arg)
+{
+    echo_app_run(app_ref, cb, arg);
+}
 
 
 AppInterface echo_app_interface_variable;
@@ -45,7 +56,7 @@ void echo_app_run(EchoAppRef app, AppDoneCallback* cb, void* arg)
 {
     app->done_cb = cb;
     app->done_arg = arg;
-    RunloopRef rl = runloop_stream_get_runloop(app->msg_stream_ref->tcp_stream_ref->rlstream_ref);
+    RunloopRef rl = msg_stream_get_runloop(app->msg_stream_ref);
     runloop_post(rl, postable_read, app);
 }
 static void msg_read_callback(void* arg, MessageRef msg, int error)
@@ -70,7 +81,7 @@ static void msg_write_callback(void* arg, int error)
     if(error != 0) {
 
     }
-    RunloopRef rl = runloop_stream_get_runloop(app->msg_stream_ref->tcp_stream_ref->rlstream_ref);
+    RunloopRef rl = msg_stream_get_runloop(app->msg_stream_ref);
     runloop_post(rl, postable_read, app);
 }
 static void postable_read(RunloopRef rl, void* arg)

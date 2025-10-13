@@ -31,21 +31,29 @@ struct ServerCtx_s {
     int                     l_state;
     int                     port;
     const char*             host;
+    // application generic interface
+    void* (*app_new)(RunloopRef rl, int fd);
+    void (*app_run)(void* app, void(cb)(void* app, void* server, int error), void* arg);
+    void (*app_free)(void* app);
+
     socket_handle_t         listening_socket_fd;
     RunloopRef              runloop_ref;
-    // actual struct not pointer
     TcpListenerRef          tcp_listener_ref;
-    // RunloopListenerRef      rl_listener_ref;
-    // this is only here to allocate space always use the _ref
-    // RunloopListener         memory_rl_listener;
-    // This list keeps track of open connections/sockets 
     ListRef                 connection_list;
     RBL_DECLARE_END_TAG;
 };
 typedef struct  ServerCtx_s ServerCtx, *ServerCtxRef;
 
-ServerCtxRef server_ctx_new(RunloopRef rl, int listener_fd);
-void server_ctx_init(ServerCtxRef server_ref, RunloopRef rl, int listener_fd);
+ServerCtxRef server_ctx_new(RunloopRef rl, int listener_fd,
+    void* (*app_new)(RunloopRef rl, int fd),
+    void (*app_run)(void* app, void(cb)(void* app, void* server, int error), void* arg),
+    void (*app_free)(void* app)
+);
+void server_ctx_init(ServerCtxRef server_ref, RunloopRef rl, int listener_fd,
+    void* (*app_new)(RunloopRef rl, int fd),
+    void (*app_run)(void* app, void(cb)(void* app, void* server, int error), void* arg),
+    void (*app_free)(void* app)
+);
 
 void server_ctx_free(ServerCtxRef sref);
 void server_ctx_run(ServerCtxRef sref);

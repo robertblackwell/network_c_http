@@ -2,6 +2,7 @@
 #include <pthread.h>
 #include <sys/_pthread/_pthread_t.h>
 #include <server/server_ctx.h>
+#include <echo_app/echo_app.h>
 #include "tests/test_runloop/test_listener/listener_ctx.h"
 
 typedef struct TestCtx {
@@ -91,7 +92,14 @@ void* server_thread_function(void* tctx)
     socket_set_non_blocking(fd);
     RunloopRef runloop = runloop_new();
     ServerCtxRef server_ctx_ref = &server_ctx;
-    server_ctx_init(server_ctx_ref, runloop, fd);
+    server_ctx_init(
+        server_ctx_ref,
+        runloop,
+        fd,
+        generic_echo_app_new,
+        generic_echo_app_run,
+        generic_echo_app_free
+        );
     server_ctx_run(server_ctx_ref);
     runloop_run(runloop, 5000L);
     return 0;

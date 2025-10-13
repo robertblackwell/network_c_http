@@ -14,7 +14,7 @@ void async_socket_set_nonblocking(int socket);
 static void write_clean_terminate(TcpStream* ctx);
 static void write_error_terminate(TcpStream* ctx);
 static void try_write(TcpStream* ctx);
-static bool is_write_pending(TcpStreamRef ctx);
+static bool is_write_pending(TcpStreamRef tcp_stream_ref);
 static void invoke_write_callback(TcpStreamRef ctx, int nwrite, int errnoval);
 
 void tcp_write(TcpStreamRef tcp_stream_ref, IOBufferRef outbuf, TcpWriteCallback write_cb, void* arg)

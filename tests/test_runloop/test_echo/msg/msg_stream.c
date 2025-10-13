@@ -38,3 +38,7 @@ void msg_stream_free(MsgStreamRef msg_stream_ref)
     if(msg_stream_ref->input_buffer) IOBuffer_free(msg_stream_ref->input_buffer);
     if(msg_stream_ref->output_buffer) IOBuffer_free(msg_stream_ref->output_buffer);
 }
+RunloopRef msg_stream_get_runloop(MsgStreamRef msg_stream_ref)
+{
+    return tcp_stream_get_runloop(msg_stream_ref->tcp_stream_ref);
+}

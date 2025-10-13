@@ -35,6 +35,7 @@ MsgStreamRef msg_stream_new(RunloopRef rl, int fd);
 void msg_stream_init(MsgStreamRef msg_stream_ref, RunloopRef rl, int fd);
 void msg_stream_deinit(MsgStreamRef msg_stream_ref);
 void msg_stream_free(MsgStreamRef msg_stream_ref);
+RunloopRef msg_stream_get_runloop(MsgStreamRef msg_stream_ref);
 /*
  * This function passes a MessageRef to the caller via the callback.
  * That is a transfer of ownership and the caller is resposible for
