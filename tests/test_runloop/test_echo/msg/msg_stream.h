@@ -51,8 +51,11 @@ typedef struct MsgStream_s {
     IOBufferRef       input_buffer;
     // input_msg should only be none null if the parser has set this to a new message
     // via the parser callback
+#if 0
     MessageRef        input_msg;
-
+#else
+    ListRef           input_message_list;
+#endif
     IOBufferRef       output_buffer;
     MsgWriteCallback* write_cb;
     void*             write_cb_arg;

@@ -19,6 +19,12 @@ void echo_app_init(EchoAppRef app, RunloopRef rl, int connection_fd);
 void echo_app_deinit(EchoAppRef app);
 void echo_app_free(EchoAppRef app);
 void echo_app_run(EchoAppRef app_ref, AppDoneCallback cb, void* arg);
-
+typedef struct AppInterface
+{
+    void*(*new)(RunloopRef rl, int fd);
+    void(*run)(void* app_ref, void(done_cb)(void* app_ref, void* server, int error), void* server);
+    void(*free)(void* app_ref);
+} AppInterface, *AppInterfaceRef;
+AppInterfaceRef echo_app_interface();
 
 #endif

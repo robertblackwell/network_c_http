@@ -17,6 +17,7 @@ void msg_stream_init(MsgStreamRef msg_stream, RunloopRef rl, int fd)
     msg_stream->write_cb_arg = NULL;
     msg_stream->input_buffer = NULL;
     msg_stream->output_buffer = NULL;
+    msg_stream->input_message_list = List_new();
     msg_stream->msg_parser_ref = msg_parser_new();
 }
 void msg_stream_deinit(MsgStreamRef msg_stream_ref)

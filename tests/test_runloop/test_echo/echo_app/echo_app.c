@@ -24,6 +24,15 @@ void echo_app_free(EchoAppRef app)
     msg_stream_free(app->msg_stream_ref);
     free(app);
 }
+AppInterface echo_app_interface_variable;
+AppInterfaceRef echo_app_interface()
+{
+    AppInterfaceRef ai = & echo_app_interface_variable;
+    ai->new = (void*(*)(RunloopRef, int))echo_app_new;
+    ai->run = (void(*)(void*, void(*)(void*, void*, int), void*))(echo_app_run);
+    ai->free = (void(*)(void*))(echo_app_free);
+    return ai;
+}
 static void msg_read_callback(void* arg, MessageRef msg, int error);
 static void msg_write_callback(void* arg, int error);
 static void postable_read(RunloopRef rl, void* arg);
