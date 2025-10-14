@@ -1,4 +1,5 @@
-
+#ifndef H_rbl_check_tags_H
+#define H_rbl_check_tags_H
 /**
  * These macros add identity tags to a struct, set the value of that identity tag and test the value
  *
@@ -35,7 +36,7 @@
  * 
  * NOTE: if you make a tag too long - you will get a runtime error NOT a compile time error
  */
-
+#include <string.h>
 
 #ifdef RBL_TAG_CHECK_ON
 #define RBL_TAG_LENGTH 16
@@ -114,3 +115,5 @@
     #define RBL_INVALIDATE_STRUCT(p, TYPE)
 #endif
 /** @} */
+
+#endif

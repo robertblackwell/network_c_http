@@ -12,6 +12,10 @@
 typedef struct ResponseTimesArray_s ResponseTimesArray, *ResponseTimesArrayRef;
 
 ResponseTimesArrayRef rta_new(int size_in_doubles);
+void rta_start_measurement(ResponseTimesArrayRef this);
+void rta_start_round_trip(ResponseTimesArrayRef this);
+void rta_end_round_trip(ResponseTimesArrayRef this);
+void rta_end_measurement(ResponseTimesArrayRef this);
 int rta_length(ResponseTimesArrayRef this);
 void rta_add(ResponseTimesArrayRef this, double value);
 void rta_append(ResponseTimesArrayRef dest, ResponseTimesArrayRef src);

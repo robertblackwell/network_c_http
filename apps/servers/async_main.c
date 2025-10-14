@@ -1,6 +1,5 @@
-#include <src/demo_protocol/demo_server.h>
-#include <src/demo_protocol/demo_message.h>
-#include <src/common/socket_functions.h>
+#include "server/server_ctx.h"
+#include <common/socket_functions.h>
 #include <rbl/logger.h>
 #include <stdio.h>
 #include <getopt.h>
@@ -8,7 +7,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include<signal.h>
-#include "demo_async_process_main.h"
+#include "async_process_main.h"
 
 static void usage();
 static void process_args(int argc, char* argv[], char** host_p, int* port, int* nbr_roundtrips_per_connection_p, int* nbr_connections_per_thread_p, int* nbr_threads_p, int* nbr_processes_p);
@@ -16,13 +15,13 @@ void* thread_function(void* arg);
 char* default_host = "localhost";
 int   default_port = 9011;
 
-DemoServerRef g_sref;
+ServerCtxRef g_sref;
 void sig_handler(int signo)
 {
     printf("apps_demo.c signal handler \n");
     if ((signo == SIGINT) || (signo == SIGABRT)) {
         printf("received SIGINT or SIGABRT\n");
-        demo_server_free(g_sref);
+        server_ctx_free(g_sref);
         g_sref = NULL;
         exit(0);
     }
@@ -62,7 +61,7 @@ int main(int argc, char** argv) {
     int child_pid;
     for (int p = 0; p < nbr_processes; p++) {
         if ((child_pid = fork()) == 0) {
-            demo_process_main(host, port, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection);
+            process_main(host, port, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection);
             exit(0);
         }
     }
@@ -98,16 +97,16 @@ static void usage()
 
 }
 static void process_args(int argc, char* argv[], char** host_ip_p, int* port, int* nbr_roundtrips_per_connection_p, int* nbr_connections_per_thread_p, int* nbr_threads_p, int* nbr_processes_p) {
-    int c;
+    int opt_id;
     char* host_ptr = "localhost";
-    int port_number = 9011;
+    int port_number = 9002;
     int nbr_processes = 1;
     int nbr_threads = 1;
     int nbr_connections_per_thread = 1;
-    int nbr_roundtrips_per_connection = 1;
-    while ((c = getopt(argc, argv, "n:h:r:c:p:t:")) != -1) {
+    int nbr_roundtrips_per_connection = 100;
+    while ((opt_id = getopt(argc, argv, "n:h:r:c:p:t:")) != -1) {
 //        printf("c = %c\n", (char)c);
-        switch (c) {
+        switch (opt_id) {
             case 'n':
                 RBL_LOG_FMT("-t options %s", optarg);
                 nbr_processes = atoi(optarg);

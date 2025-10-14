@@ -177,6 +177,7 @@ endif()
 set(C_HTTP_INCLUDE_PATHS 
 	${C_HTTP_PROJECT_DIR}
 	${C_HTTP_INCLUDE_DIR}
+	${C_HTTP_PROJECT_DIR}/apps/servers
 	${C_HTTP_SOURCE_DIR}
 	${C_HTTP_RUNLOOP_DIR}
 	${C_HTTP_VENDOR_INCLUDEDIR}
@@ -240,6 +241,7 @@ include(CTest)
 enable_testing()
 
 add_subdirectory(src)
+add_subdirectory(apps)
 add_subdirectory(tests)
 #add_subdirectory(sync_server_app)
 #add_subdirectory(verifier)

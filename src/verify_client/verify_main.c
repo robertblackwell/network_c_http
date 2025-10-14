@@ -1,4 +1,4 @@
-#include <src/demo_protocol/msg_sync_stream.h>
+#include <src/demo_protocol/sync_msg_stream.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -6,12 +6,14 @@
 #include <sys/time.h>
 #include <math.h>
 #include <src/common/verify_statistics.h>
-#include "demo_verify_getopt.h"
-#include "demo_verify_thread_context.h"
+#include "verify_getopt.h"
+#include "verify_thread_context.h"
+#include "sync_msg_stream.h"
 #include "../demo_common/demo_make_request_response.h"
 
+void verify_app_run(SyncMsgStreamRef stream, VerifyThreadContextRef ctx);
 
-#define NBR_PROCCES 1
+#define NBR_PROCESSES 1
 #define NBR_THREADS 8
 #define NBR_CONNECTIONS_PER_THREAD 3
 #define NBR_ROUNDTRIPS_PER_CONNECTION 30
@@ -19,7 +21,6 @@
 #define MAX_RESPONSE_TIMES (NBR_THREADS * MAX_ROUNDTRIPS_PER_THREAD)
 
 void* threadfn(void* data);
-
 int main(int argc, char* argv[])
 {
 
@@ -39,13 +40,10 @@ int main(int argc, char* argv[])
                         &nbr_roundtrips_per_connection,
                         &nbr_connections_per_thread,
                         &nbr_threads);
-    /**
-     * run the test threads
-     */
     pthread_t workers[nbr_threads];
     VerifyThreadContext* tctx[nbr_threads];
     for(int t = 0; t < nbr_threads; t++) {
-        VerifyThreadContext* ctx = Ctx_new(t, nbr_roundtrips_per_connection, nbr_connections_per_thread, nbr_threads);
+        VerifyThreadContext* ctx = verify_ctx_new(port, t, nbr_roundtrips_per_connection, nbr_connections_per_thread, nbr_threads);
         tctx[t] = ctx;
         pthread_create(&(workers[t]), NULL, threadfn, (void*)ctx);
     }
@@ -53,7 +51,7 @@ int main(int argc, char* argv[])
     /**
      * Consolidate the results from each thread
      */
-    ResponseTimesArrayRef all_readings = rta_new(total_nbr_roundtrips);
+    const ResponseTimesArrayRef all_readings = rta_new(total_nbr_roundtrips);
     for(int t = 0; t < nbr_threads; t++) {
         pthread_join(workers[t], NULL);
 
@@ -66,8 +64,8 @@ int main(int argc, char* argv[])
     double stddev;
     int total_roundtrips;
     rta_stat_analyse(all_readings, &avg, &stddev, &total_roundtrips);
-    struct timeval main_end_time = get_time();
-    double main_elapsed = time_diff_ms(main_end_time, main_time_start);
+    const struct timeval main_end_time = get_time();
+    const double main_elapsed = time_diff_ms(main_end_time, main_time_start);
     double av_time = main_elapsed / (nbr_threads * 1.0);
     printf("Total elapsed time %f  threads: %d per connections per thread: %d rountrips per connection: %d\n\n", tot_time, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection);
     printf("Nbr threads : %d  nbr connections per thread: %d nbr of requests per connection: %d av time %f \n\n", nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection, av_time);
@@ -76,49 +74,14 @@ int main(int argc, char* argv[])
 void* threadfn(void* data)
 {
     VerifyThreadContext* ctx = (VerifyThreadContext*)data;
-    struct timeval start_time = get_time();
+    rta_start_measurement(ctx->response_times_ref);
     for(int i = 0; i < ctx->max_connections_per_thread; i++) {
-        DemoSyncSocketRef client = demo_syncsocket_new();
-        demo_syncsocket_connect(client, "127.0.0.1", 9011);
-        ctx->roundtrip_per_connection_counter = 0;
-        while(1) {
-            struct timeval iter_start_time = get_time();
-            bool last_round = ctx->roundtrip_per_connection_counter + 1 == ctx->max_rountrips_per_connection;
-            DemoMessageRef request = demo_make_request();
-            DemoMessageRef response = NULL;
-            int rc1 = demo_syncsocket_write_message(client, request);
-            if (rc1 != 0) break;
-            int rc2 = demo_syncsocket_read_message(client, &response);
-            if (rc2 != 0) break;
-            IOBufferRef iob_req = demo_message_serialize(request);
-            IOBufferRef iob_resp = demo_message_serialize(response);
-            if (!demo_verify_response(request, response)) {
-                printf("Demo Verify response failed");
-            } else {
-                printf("Demo verify succeeded\n");
-            }
-            struct timeval iter_end_time = get_time();
-
-            rta_add(ctx->response_times_ref, time_diff_ms(iter_end_time, iter_start_time));
-
-            ctx->roundtrip_per_connection_counter++;
-            ctx->total_roundtrips++;
-            if(ctx->roundtrip_per_connection_counter >= ctx->max_rountrips_per_connection) {
-                break;
-            }
-            demo_message_free(request);
-            request = NULL;
-            if(response != NULL) {
-                demo_message_free(response);
-                response = NULL;
-            }
-        }
-        demo_syncsocket_free(client);
+        SyncMsgStreamRef stream = sync_msg_stream_new();
+        sync_msg_stream_connect(stream, "127.0.0.1", ctx->port);
+        verify_ctx_reset_connection_round_trip_count(ctx);
+        verify_app_run(stream, ctx);
+        sync_msg_stream_free(stream);
     }
-    struct timeval end_time = get_time();
-
-    rta_set_elapsed_time(ctx->response_times_ref, time_diff_ms(end_time, start_time));
-//    ctx->total_time =  time_diff_ms(end_time, start_time);
-
-return NULL;
+    rta_end_measurement(ctx->response_times_ref);
+    return NULL;
 }

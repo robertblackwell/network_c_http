@@ -1,6 +1,7 @@
-#include <src/demo_protocol/msg_sync_stream.h>
+#include "sync_msg_stream.h"
 #include <src/common/alloc.h>
 #include <src/common/cbuffer.h>
+#include <common/iobuffer.h>
 #include <rbl/logger.h>
 #include <src/common/list.h>
 #include <assert.h>
@@ -10,15 +11,15 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <errno.h>
-#define DemoClient_TAG "DECLNT"
+#define SyncMsgStream_TAG "SMSGSRTM"
 #include <rbl/check_tag.h>
 
 /**
- * A tcp_sync_stream is an object and set of functions that wrap an fd that represents
+ * A sync_msg_stream is an object and set of functions that wrap an fd that represents
  * either a pipe or socket and allows the reading and writing of complete Message
  * packets.
  */
-struct DemoSyncSocket_s {
+struct SyncMsgStream_s {
     RBL_DECLARE_TAG;
     int sock;
     MessageParserRef parser_ref;
@@ -28,46 +29,46 @@ struct DemoSyncSocket_s {
 };
 void on_new_message(void* ctx, MessageRef msg)
 {
-    DemoSyncSocketRef client_ref = ctx;
+    SyncMsgStreamRef client_ref = ctx;
     assert(msg != NULL);
     List_add_back(client_ref->input_message_list, msg);
 }
 
-DemoSyncSocketRef tcp_sync_stream_new(MessageParserRef parser_ref)
+SyncMsgStreamRef sync_msg_stream_new(MessageParserRef parser_ref)
 {
-    DemoSyncSocketRef this = eg_alloc(sizeof(DemoSyncSocket));
-    tcp_sync_stream_init(this);
+    SyncMsgStreamRef this = eg_alloc(sizeof(SyncMsgStream));
+    sync_msg_stream_init(this);
     return this;
 }
-DemoSyncSocketRef tcp_sync_stream_new_from_fd(int fd)
+SyncMsgStreamRef sync_msg_stream_new_from_fd(int fd)
 {
-    DemoSyncSocketRef this = eg_alloc(sizeof(DemoSyncSocket));
-    tcp_sync_stream_init(this);
+    SyncMsgStreamRef this = eg_alloc(sizeof(SyncMsgStream));
+    sync_msg_stream_init(this);
     this->sock = fd;
     return this;
 }
-void tcp_sync_stream_init(DemoSyncSocketRef this)
+void sync_msg_stream_init(SyncMsgStreamRef this)
 {
-    RBL_SET_TAG(DemoClient_TAG, this)
-    RBL_SET_END_TAG(DemoClient_TAG, this)
-    this->parser_ref = demo_message_parser_new();
+    RBL_SET_TAG(SyncMsgStream_TAG, this)
+    RBL_SET_END_TAG(SyncMsgStream_TAG, this)
+    this->parser_ref = message_parser_new();
     this->input_message_list = List_new();
     this->output_message_list = List_new();
 }
-void tcp_sync_stream_free(DemoSyncSocketRef this)
+void sync_msg_stream_free(SyncMsgStreamRef this)
 {
-    RBL_CHECK_TAG(DemoClient_TAG, this)
-    RBL_CHECK_END_TAG(DemoClient_TAG, this)
-    RBL_LOG_FMT("tcp_sync_stream_free %p  %d\n", this, this->sock);
+    RBL_CHECK_TAG(SyncMsgStream_TAG, this)
+    RBL_CHECK_END_TAG(SyncMsgStream_TAG, this)
+    RBL_LOG_FMT("sync_msg_stream_free %p  %d\n", this, this->sock);
     close(this->sock);
     eg_free(this);
 }
 
-void tcp_sync_stream_connect(DemoSyncSocketRef this, char* host, int port)
+void sync_msg_stream_connect(SyncMsgStreamRef this, char* host, int port)
 {
     int sockfd, n;
-    RBL_CHECK_TAG(DemoClient_TAG, this)
-    RBL_CHECK_END_TAG(DemoClient_TAG, this)
+    RBL_CHECK_TAG(SyncMsgStream_TAG, this)
+    RBL_CHECK_END_TAG(SyncMsgStream_TAG, this)
     struct sockaddr_in serv_addr;
     struct hostent *hostent;
 
@@ -86,20 +87,20 @@ void tcp_sync_stream_connect(DemoSyncSocketRef this, char* host, int port)
     // bcopy((char *)hostent->h_addr, (char *)&serv_addr.sin_addr.s_addr, hostent->h_length);
     bcopy((char *)hostent->h_addr_list[0], (char *)&serv_addr.sin_addr.s_addr, hostent->h_length);
     serv_addr.sin_port = htons(port);
-    RBL_LOG_FMT("tcp_sync_stream_connect %p sockfd: %d\n", this, sockfd);
+    RBL_LOG_FMT("sync_msg_stream_connect %p sockfd: %d\n", this, sockfd);
     if (connect(sockfd,(struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
         int errno_saved = errno;
         RBL_LOG_ERROR("ERROR client %p connecting sockfd: % derrno: %d\n", this, sockfd, errno_saved);
     }
     this->sock = sockfd;
 }
-void tcp_sync_stream_close(DemoSyncSocketRef sock)
+void sync_msg_stream_close(SyncMsgStreamRef sock)
 {
 
 }
-int tcp_sync_stream_write_message(DemoSyncSocketRef client_ref, MessageRef msg_ref)
+int sync_msg_stream_write_message(SyncMsgStreamRef client_ref, MessageRef msg_ref)
 {
-    IOBufferRef outbuf = demo_message_serialize(msg_ref);
+    IOBufferRef outbuf = message_serialize(msg_ref);
     void* out_data = IOBuffer_data(outbuf);
     int out_len = IOBuffer_data_len(outbuf);
     assert(out_len > 0);
@@ -114,7 +115,7 @@ int tcp_sync_stream_write_message(DemoSyncSocketRef client_ref, MessageRef msg_r
     }
     return errno_saved;
 }
-int tcp_sync_stream_read_message(DemoSyncSocketRef client_ref, MessageRef* msg_ref_ptr)
+int sync_msg_stream_read_message(SyncMsgStreamRef client_ref, MessageRef* msg_ref_ptr)
 {
     while(1) {
         if(List_size(client_ref->input_message_list) > 0) {
@@ -130,7 +131,7 @@ int tcp_sync_stream_read_message(DemoSyncSocketRef client_ref, MessageRef* msg_r
             if (bytes_read > 0) {
                 IOBuffer_commit(iob, (int) bytes_read);
                 RBL_LOG_FMT("response raw: %s \n", IOBuffer_cstr(iob));
-                demo_message_parser_consume(client_ref->parser_ref, iob, &on_new_message, client_ref);
+                message_parser_consume(client_ref->parser_ref, iob, &on_new_message, client_ref);
             } else {
                 return errno_saved;
             }

@@ -9,6 +9,8 @@
 struct ResponseTimesArray_s {
     int size_in_doubles;
     int next_index;
+    struct timeval start_time;
+    struct timeval round_trip_start_time;
     double total_elapsed_time;
     double* readings_ptr;
 };
@@ -20,6 +22,25 @@ ResponseTimesArrayRef rta_new(int size_in_doubles)
     this->readings_ptr = malloc(size_in_doubles * sizeof(double));
     return this;
 }
+void rta_start_measurement(ResponseTimesArrayRef rta)
+{
+    rta->start_time = get_time();
+}
+void rta_end_measurement(ResponseTimesArrayRef rta)
+{
+    struct timeval end_time = get_time();
+    rta_set_elapsed_time(rta, time_diff_ms(end_time, rta->start_time));
+}
+void rta_start_round_trip(ResponseTimesArrayRef rta)
+{
+    rta->round_trip_start_time = get_time();
+}
+void rta_end_round_trip(ResponseTimesArrayRef rta)
+{
+    struct timeval end_time = get_time();
+    rta_add(rta, time_diff_ms(end_time, rta->round_trip_start_time));
+}
+
 int rta_length(ResponseTimesArrayRef this)
 {
     return this->next_index;
@@ -28,6 +49,7 @@ void rta_expand(ResponseTimesArrayRef this, int to_nbr_doubles)
 {
     assert(to_nbr_doubles > this->size_in_doubles);
     this->readings_ptr = realloc(this->readings_ptr, to_nbr_doubles * sizeof(double));
+    assert(this->readings_ptr);
 }
 void rta_add(ResponseTimesArrayRef this, double value)
 {
