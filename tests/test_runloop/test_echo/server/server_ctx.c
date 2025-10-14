@@ -23,31 +23,21 @@ static void postable_start(RunloopRef rl, void* arg);
 static void app_instance_done_cb(void* app, void* server, int error);
 
 
-ServerCtxRef server_ctx_new(RunloopRef rl, int listener_fd,
-    void* (*app_new)(RunloopRef rl, int fd),
-    void (*app_run)(void* app, void(cb)(void* app, void* server, int error), void* arg),
-    void (*app_free)(void* app)
-)
+ServerCtxRef server_ctx_new(RunloopRef rl, int listener_fd, ServerAppInterfaceRef app_interface)
 {
     ServerCtxRef sref = malloc(sizeof(ServerCtx));
-    server_ctx_init(sref, rl, listener_fd, app_new, app_run, app_free);
+    server_ctx_init(sref, rl, listener_fd, app_interface);
     RBL_SET_TAG(ServerCtx_TAG, sref)
     RBL_SET_END_TAG(ServerCtx_TAG, sref)
     return sref;
 }
 
-void server_ctx_init(ServerCtxRef server_ctx, RunloopRef rl, int fd,
-    void* (*app_new)(RunloopRef rl, int fd),
-    void (*app_run)(void* app, void(cb)(void* app, void* server, int error), void* arg),
-    void (*app_free)(void* app)
-)
+void server_ctx_init(ServerCtxRef server_ctx, RunloopRef rl, int fd, ServerAppInterfaceRef app_interface)
 {
     RBL_SET_TAG(ServerCtx_TAG, server_ctx)
     RBL_SET_END_TAG(ServerCtx_TAG, server_ctx)
     server_ctx->runloop_ref = rl;
-    server_ctx->app_new = app_new;
-    server_ctx->app_run = app_run;
-    server_ctx->app_free = app_free;
+    server_ctx->app_interface = app_interface;
     server_ctx->tcp_listener_ref = tcp_listener_new(server_ctx->runloop_ref, fd);
     // runloop_listener_init(server_ctx->rl_listener_ref, server_ctx->runloop_ref, fd);
     server_ctx->l_state = L_STATE_INITIAL;
@@ -99,10 +89,10 @@ static void handle_new_socket(void* server, int new_sock, int error)
     // int nbsock = socket_set_blocking(sock);
     RBL_LOG_FMT("handle_new_socket ctx: %p sock: %d ", ctx, new_sock)
     RunloopRef rl = tcp_listener_get_runloop(ctx->tcp_listener_ref);
-    void* app_ref = ctx->app_new(rl, new_sock);
+    void* app_ref = ctx->app_interface->new(rl, new_sock);
     if(error == 0) {
         List_add_back(ctx->connection_list, app_ref);
-        ctx->app_run(app_ref, app_instance_done_cb, ctx);
+        ctx->app_interface->run(app_ref, app_instance_done_cb, ctx);
     } else{
         // termnate ?
     }
@@ -120,7 +110,7 @@ static void app_instance_done_cb(void* app, void* server, int error)
     ListIterator itr = List_find(ctx->connection_list, app);
     assert(itr != NULL);
     List_itr_remove(ctx->connection_list, &itr);
-    ctx->app_free(app);
+    ctx->app_interface->free(app);
 }
 int local_create_bound_socket(int port, const char *host)
 {

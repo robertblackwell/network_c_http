@@ -69,3 +69,47 @@ void message_set_content(MessageRef mr, IOBufferRef iob)
     }
     mr->iob = iob;
 }
+void* generic_message_new(){
+    return message_new();
+}
+void generic_message_free(void* msg_ref){
+    message_free(msg_ref);
+}
+IOBufferRef generic_message_serialize(void* msg_ref){
+    return message_serialize(msg_ref);
+}
+IOBufferRef generic_message_get_content(void* msg_ref){
+    return message_get_content(msg_ref);
+}
+void generic_message_set_content(void* msg_ref, IOBufferRef iob){
+    message_set_content(msg_ref, iob);
+};
+void* generic_parser_new(){
+    return msg_parser_new();
+}
+void generic_parser_free(void* msg_ref){
+    msg_parser_free(msg_ref);
+}
+void generic_parser_consume(
+    void* parser_ref,
+    IOBufferRef new_data,
+    void(cb)(void* user_ctx, void* new_msg_ref, int error),
+    void* arg){
+    MsgParserCallback* mpcb = (MsgParserCallback*)cb;
+    return msg_parser_consume(parser_ref, new_data, mpcb, arg);
+}
+static IMessage imessage_var;
+IMessageRef msg_get_message_interface()
+{
+    IMessageRef mr = &imessage_var;
+    mr->message_new = &generic_message_new;
+    mr->message_free = &generic_message_free;
+    mr->serialize = &generic_message_serialize;
+    mr->get_content = &generic_message_get_content;
+    mr->set_content = &generic_message_set_content;
+
+    mr->parser_new = &generic_parser_new;
+    mr->parser_free = &generic_parser_free;
+    mr->parser_consume = &generic_parser_consume;
+    return mr;
+}

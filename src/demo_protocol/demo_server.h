@@ -1,6 +1,6 @@
 #ifndef c_demo_server_h
 #define c_demo_server_h
-#include <src/demo_protocol/demo_message.h>
+#include <src/demo_protocol/message.h>
 #include <src/demo_protocol/demo_connection.h>
 #include <src/common/socket_functions.h>
 #include <src/constants.h>

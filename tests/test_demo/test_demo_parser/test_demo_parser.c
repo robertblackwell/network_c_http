@@ -6,7 +6,7 @@
 #include <rbl/unittest.h>
 #include <rbl/logger.h>
 #include <src/http/kvpair.h>
-#include <src/demo_protocol/demo_message.h>
+#include <src/demo_protocol/message.h>
 #include "test_harness.h"
 #include "run_list.c"
 // B002

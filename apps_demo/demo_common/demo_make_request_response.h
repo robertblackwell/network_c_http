@@ -1,6 +1,6 @@
 #ifndef C_HTTP_Demo_MAKE_REQUEST_RESPONSE_H
 #define C_HTTP_Demo_MAKE_REQUEST_RESPONSE_H
-#include <src/demo_protocol/demo_message.h>
+#include <src/demo_protocol/message.h>
 
 DemoMessageRef demo_make_request();
 

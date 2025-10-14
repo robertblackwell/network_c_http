@@ -6,7 +6,7 @@
 #include <rbl/macros.h>
 #include <rbl/logger.h>
 #include <src/runloop/runloop.h>
-#include <src/demo_protocol/demo_message.h>
+#include <src/demo_protocol/message.h>
 
 #define READ_STATE_IDLE     11
 #define READ_STATE_ACTIVE   13

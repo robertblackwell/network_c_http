@@ -1,4 +1,4 @@
-#include <src/demo_protocol/demo_sync_socket.h>
+#include <src/demo_protocol/tcp_sync_stream.h>
 #include <src/common/alloc.h>
 #include <src/common/cbuffer.h>
 #include <rbl/logger.h>
@@ -14,39 +14,39 @@
 #include <rbl/check_tag.h>
 
 /**
- * A demo_syncsocket is an object and set of functions that wrap an fd that represents
- * either a pipe or socket and allows the reading and writing of complete DemoMessage
+ * A tcp_sync_stream is an object and set of functions that wrap an fd that represents
+ * either a pipe or socket and allows the reading and writing of complete Message
  * packets.
  */
 struct DemoSyncSocket_s {
     RBL_DECLARE_TAG;
     int sock;
-    DemoMessageParserRef parser_ref;
+    MessageParserRef parser_ref;
     ListRef input_message_list;
     ListRef output_message_list;
     RBL_DECLARE_END_TAG;
 };
-void on_new_message(void* ctx, DemoMessageRef msg)
+void on_new_message(void* ctx, MessageRef msg)
 {
     DemoSyncSocketRef client_ref = ctx;
     assert(msg != NULL);
     List_add_back(client_ref->input_message_list, msg);
 }
 
-DemoSyncSocketRef demo_syncsocket_new(DemoMessageParserRef parser_ref)
+DemoSyncSocketRef tcp_sync_stream_new(MessageParserRef parser_ref)
 {
     DemoSyncSocketRef this = eg_alloc(sizeof(DemoSyncSocket));
-    demo_syncsocket_init(this);
+    tcp_sync_stream_init(this);
     return this;
 }
-DemoSyncSocketRef demo_syncsocket_new_from_fd(int fd)
+DemoSyncSocketRef tcp_sync_stream_new_from_fd(int fd)
 {
     DemoSyncSocketRef this = eg_alloc(sizeof(DemoSyncSocket));
-    demo_syncsocket_init(this);
+    tcp_sync_stream_init(this);
     this->sock = fd;
     return this;
 }
-void demo_syncsocket_init(DemoSyncSocketRef this)
+void tcp_sync_stream_init(DemoSyncSocketRef this)
 {
     RBL_SET_TAG(DemoClient_TAG, this)
     RBL_SET_END_TAG(DemoClient_TAG, this)
@@ -54,16 +54,16 @@ void demo_syncsocket_init(DemoSyncSocketRef this)
     this->input_message_list = List_new();
     this->output_message_list = List_new();
 }
-void demo_syncsocket_free(DemoSyncSocketRef this)
+void tcp_sync_stream_free(DemoSyncSocketRef this)
 {
     RBL_CHECK_TAG(DemoClient_TAG, this)
     RBL_CHECK_END_TAG(DemoClient_TAG, this)
-    RBL_LOG_FMT("demo_syncsocket_free %p  %d\n", this, this->sock);
+    RBL_LOG_FMT("tcp_sync_stream_free %p  %d\n", this, this->sock);
     close(this->sock);
     eg_free(this);
 }
 
-void demo_syncsocket_connect(DemoSyncSocketRef this, char* host, int port)
+void tcp_sync_stream_connect(DemoSyncSocketRef this, char* host, int port)
 {
     int sockfd, n;
     RBL_CHECK_TAG(DemoClient_TAG, this)
@@ -86,18 +86,18 @@ void demo_syncsocket_connect(DemoSyncSocketRef this, char* host, int port)
     // bcopy((char *)hostent->h_addr, (char *)&serv_addr.sin_addr.s_addr, hostent->h_length);
     bcopy((char *)hostent->h_addr_list[0], (char *)&serv_addr.sin_addr.s_addr, hostent->h_length);
     serv_addr.sin_port = htons(port);
-    RBL_LOG_FMT("demo_syncsocket_connect %p sockfd: %d\n", this, sockfd);
+    RBL_LOG_FMT("tcp_sync_stream_connect %p sockfd: %d\n", this, sockfd);
     if (connect(sockfd,(struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
         int errno_saved = errno;
         RBL_LOG_ERROR("ERROR client %p connecting sockfd: % derrno: %d\n", this, sockfd, errno_saved);
     }
     this->sock = sockfd;
 }
-void demo_syncsocket_close(DemoSyncSocketRef sock)
+void tcp_sync_stream_close(DemoSyncSocketRef sock)
 {
 
 }
-int demo_syncsocket_write_message(DemoSyncSocketRef client_ref, DemoMessageRef msg_ref)
+int tcp_sync_stream_write_message(DemoSyncSocketRef client_ref, MessageRef msg_ref)
 {
     IOBufferRef outbuf = demo_message_serialize(msg_ref);
     void* out_data = IOBuffer_data(outbuf);
@@ -114,11 +114,11 @@ int demo_syncsocket_write_message(DemoSyncSocketRef client_ref, DemoMessageRef m
     }
     return errno_saved;
 }
-int demo_syncsocket_read_message(DemoSyncSocketRef client_ref, DemoMessageRef* msg_ref_ptr)
+int tcp_sync_stream_read_message(DemoSyncSocketRef client_ref, MessageRef* msg_ref_ptr)
 {
     while(1) {
         if(List_size(client_ref->input_message_list) > 0) {
-            DemoMessageRef m = List_remove_first(client_ref->input_message_list);
+            MessageRef m = List_remove_first(client_ref->input_message_list);
             *msg_ref_ptr = m;
             return 0;
         } else {

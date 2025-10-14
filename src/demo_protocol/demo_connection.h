@@ -3,7 +3,7 @@
 #include <src/runloop/runloop.h>
 #include <src/common/list.h>
 #include <src/common/iobuffer.h>
-#include <src/demo_protocol/demo_message_parser.h>
+#include <src/demo_protocol/message_parser.h>
 #include <rbl/check_tag.h>
 
 #define DemoConnection_TAG "DmCONN"

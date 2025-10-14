@@ -10,7 +10,7 @@
 #include <sys/socket.h>
 #include <pthread.h>
 #include <errno.h>
-#include <src/demo_protocol/demo_message.h>
+#include <src/demo_protocol/message.h>
 
 static void on_new_message_handler( void* href, DemoMessageRef msgref, int error_code);
 static void postable_write_start(RunloopRef reactor_ref, void* href);
@@ -80,7 +80,7 @@ void demo_handler_free(DemoHandlerRef this)
     free(this);
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// main driver functon - keeps everything going
+// main driver function - keeps everything going
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 static void on_new_message_handler(void* href, DemoMessageRef request_ref, int error_code)
 {

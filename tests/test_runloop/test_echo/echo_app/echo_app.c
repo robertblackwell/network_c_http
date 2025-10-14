@@ -38,11 +38,11 @@ void generic_echo_app_run(void* app_ref, void(cb)(void* app, void* server, int e
 }
 
 
-AppInterface echo_app_interface_variable;
-AppInterfaceRef echo_app_interface()
+ServerAppInterface echo_app_server_app_interface_variable;
+ServerAppInterfaceRef echo_app_get_server_app_interface()
 {
-    AppInterfaceRef ai = & echo_app_interface_variable;
-    ai->new = (void*(*)(RunloopRef, int))echo_app_new;
+    ServerAppInterfaceRef ai = & echo_app_server_app_interface_variable;
+    ai->new = (void*(*)(void*, int))echo_app_new;
     ai->run = (void(*)(void*, void(*)(void*, void*, int), void*))(echo_app_run);
     ai->free = (void(*)(void*))(echo_app_free);
     return ai;

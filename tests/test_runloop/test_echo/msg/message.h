@@ -1,6 +1,7 @@
 #ifndef H_message_H
 #define H_message_H
 #include <common/iobuffer.h>
+#include <interfaces/message_interface.h>
 #define MsgParser_TAG "MSGPSR"
 #define Message_TAG "MSGTAG"
 typedef struct Message_s  Message, * MessageRef;
@@ -22,6 +23,6 @@ MsgParserRef msg_parser_new();
 void msg_parser_init(MsgParserRef parser_ref);
 void msg_parser_deinit(MsgParserRef parser_ref);
 void msg_parser_free(MsgParserRef parser_ref);
-void msg_parser_consume(MsgParserRef, IOBufferRef new_data, MsgParserCallback cb, void* arg);
-
+void msg_parser_consume(MsgParserRef, IOBufferRef new_data, MsgParserCallback /*void(cb)(void* user_ctx, void* new_msg, int error)*/, void* arg);
+IMessageRef msg_get_message_interface();
 #endif

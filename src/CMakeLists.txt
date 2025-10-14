@@ -56,7 +56,7 @@ set(C_HTTP_LIBRARY_SOURCE_FILES
 set_source_files_properties(${C_HTTP_LIBRARY_SOURCE_FILES} PROPERTIES LANGUAGE C)
 add_subdirectory(http_protocol)
 add_subdirectory(common)
-add_subdirectory(demo_protocol)
+#add_subdirectory(demo_protocol)
 add_subdirectory(http)
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 	message("Setting Linux flag")

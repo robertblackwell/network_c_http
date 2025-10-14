@@ -1,4 +1,4 @@
-#include <src/demo_protocol/demo_sync_socket.h>
+#include <src/demo_protocol/tcp_sync_stream.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>

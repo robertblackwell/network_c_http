@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <interfaces/server_app_interface.h>
 #include <server/server_ctx.h>
 #include <echo_app/echo_app.h>
 ServerCtx server_ctx;
@@ -19,13 +20,7 @@ int main()
     socket_set_non_blocking(fd);
     RunloopRef runloop = runloop_new();
     ServerCtxRef server_ctx_ref = &server_ctx;
-    server_ctx_init(
-        server_ctx_ref,
-        runloop, fd,
-        generic_echo_app_new,
-        generic_echo_app_run,
-        generic_echo_app_free
-    );
+    server_ctx_init(server_ctx_ref, runloop, fd, echo_app_get_server_app_interface());
     server_ctx_run(server_ctx_ref);
     runloop_run(runloop, 0L);
     return 0;
