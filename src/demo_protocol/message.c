@@ -1,5 +1,5 @@
 
-#include <src/demo_protocol/message.h>
+#include <src/demo_protocol/demo_message.h>
 #include <src/common/alloc.h>
 #include <src/http/header_list.h>
 #include <rbl/logger.h>

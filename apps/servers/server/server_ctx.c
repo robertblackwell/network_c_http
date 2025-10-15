@@ -11,6 +11,10 @@
 #include <src/common/socket_functions.h>
 #include "server_ctx.h"
 
+#define APP_NEW(rl, sock) echo_app_new(rl, sock)
+#define APP_RUN(app_ref, app_instance_done_cb, ctx) echo_app_run(app_ref, app_instance_done_cb, ctx)
+#define APP_FREE(app_ref) echo_app_free(app_ref)
+
 #define L_STATE_EAGAIN 22
 #define L_STATE_READY 33
 #define L_STATE_INITIAL 44
@@ -22,21 +26,21 @@ static void postable_start(RunloopRef rl, void* arg);
 static void app_instance_done_cb(void* app, void* server, int error);
 
 
-ServerCtxRef server_ctx_new(RunloopRef rl, int listener_fd, ServerAppInterfaceRef app_interface)
+ServerCtxRef server_ctx_new(RunloopRef rl, int listener_fd)
 {
     ServerCtxRef sref = malloc(sizeof(ServerCtx));
-    server_ctx_init(sref, rl, listener_fd, app_interface);
+    server_ctx_init(sref, rl, listener_fd);
     RBL_SET_TAG(ServerCtx_TAG, sref)
     RBL_SET_END_TAG(ServerCtx_TAG, sref)
     return sref;
 }
 
-void server_ctx_init(ServerCtxRef server_ctx, RunloopRef rl, int fd, ServerAppInterfaceRef app_interface)
+void server_ctx_init(ServerCtxRef server_ctx, RunloopRef rl, int fd)
 {
     RBL_SET_TAG(ServerCtx_TAG, server_ctx)
     RBL_SET_END_TAG(ServerCtx_TAG, server_ctx)
     server_ctx->runloop_ref = rl;
-    server_ctx->app_interface = app_interface;
+    // server_ctx->app_interface = app_interface;
     server_ctx->tcp_listener_ref = tcp_listener_new(server_ctx->runloop_ref, fd);
     // runloop_listener_init(server_ctx->rl_listener_ref, server_ctx->runloop_ref, fd);
     server_ctx->l_state = L_STATE_INITIAL;
@@ -91,7 +95,9 @@ static void handle_new_socket(void* server, int new_sock, int error)
 #if 0
     void* app_ref = ctx->app_interface->new(rl, new_sock);
 #else
-    void* app_ref = generic_app_new(rl, new_sock);
+    // void* app_ref = generic_app_new(rl, new_sock);
+    void* app_ref = APP_NEW(rl, new_sock);
+
 #endif
     if(error == 0) {
         List_add_back(ctx->connection_list, app_ref);

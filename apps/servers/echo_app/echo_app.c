@@ -1,7 +1,13 @@
 #include <echo_app/echo_app.h>
-#include <msg/message.h>
+#if defined(MSG_SELECT_ECHO)
+    #include <msg/echo_msg.h>
+#elif defined(MSG_SELECT_DEMO)
+    #include <msg/demo_msg.h>
+#else
+#error "msg stream - have not selected message type"
+#endif
 #include <msg/msg_stream.h>
-MessageRef process_input_message(MessageRef input_msg);
+MSG_REF process_input_message(MSG_REF input_msg);
 
 EchoAppRef echo_app_new(RunloopRef rl, int connection_fd)
 {
@@ -17,10 +23,10 @@ void echo_app_init(EchoAppRef app, RunloopRef rl, int connection_fd)
     // other stuff to come
 }
 
-void echo_app_deinit(EchoAppRef app)
-{
-    msg_stream_deinit(app->msg_stream_ref);
-}
+// void echo_app_deinit(EchoAppRef app)
+// {
+//     msg_stream_deinit(app->msg_stream_ref);
+// }
 void echo_app_free(EchoAppRef app)
 {
     msg_stream_free(app->msg_stream_ref);
@@ -49,7 +55,7 @@ ServerAppInterfaceRef echo_app_get_server_app_interface()
     ai->free = (void(*)(void*))(echo_app_free);
     return ai;
 }
-static void msg_read_callback(void* arg, MessageRef msg, int error);
+static void msg_read_callback(void* arg, MSG_REF msg, int error);
 static void msg_write_callback(void* arg, int error);
 static void postable_read(RunloopRef rl, void* arg);
 static void invoke_done_callback(EchoAppRef app, int error);
@@ -61,7 +67,7 @@ void echo_app_run(EchoAppRef app, AppDoneCallback* cb, void* arg)
     RunloopRef rl = msg_stream_get_runloop(app->msg_stream_ref);
     runloop_post(rl, postable_read, app);
 }
-static void msg_read_callback(void* arg, MessageRef msg, int error)
+static void msg_read_callback(void* arg, MSG_REF msg, int error)
 {
     EchoAppRef app = arg;
     RBL_CHECK_TAG(EchoApp_TAG, app)
@@ -71,7 +77,7 @@ static void msg_read_callback(void* arg, MessageRef msg, int error)
         invoke_done_callback(app, error);
     } else {
         assert(msg != NULL);
-        MessageRef response = process_input_message(msg);
+        MSG_REF response = process_input_message(msg);
         msg_stream_write(app->msg_stream_ref, response, msg_write_callback, app);
     }
 }
@@ -94,11 +100,11 @@ static void postable_read(RunloopRef rl, void* arg)
     msg_stream_read(app->msg_stream_ref, msg_read_callback, app);
 }
 
-MessageRef process_input_message(MessageRef input_msg)
+MSG_REF process_input_message(MSG_REF input_msg)
 {
-    MessageRef response = message_new();
-    char* p = IOBuffer_data(message_get_content(input_msg));
-    int n = IOBuffer_data_len(message_get_content(input_msg));
+    MSG_REF response = MSG_NEW;
+    char* p = IOBuffer_data(MSG_GET_CONTENT(input_msg));
+    int n = IOBuffer_data_len(MSG_GET_CONTENT(input_msg));
     // for (int i = 0; i < n; i++) {
     //     if (*p == '\n') {
     //         *p = 'X';
@@ -107,7 +113,7 @@ MessageRef process_input_message(MessageRef input_msg)
     char* response_buf_ptr;
     // asprintf(&response_buf_ptr, "ServerResponse:[%s]\n", p);
     asprintf(&response_buf_ptr, "ServerResponse:[%s]\n", p);
-    message_set_content(response, IOBuffer_from_cstring(response_buf_ptr));
+    MSG_SET_CONTENT(response, IOBuffer_from_cstring(response_buf_ptr));
     free(response_buf_ptr);
     return response;
 }

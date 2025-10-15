@@ -14,14 +14,19 @@
 #include <math.h>
 #include <common/utils.h>
 #include <common/iobuffer.h>
-#include <interfaces/server_app_interface.h>
 #include <common/socket_functions.h>
 #include <common/list.h>
 #include <kqueue_runloop/runloop.h>
 #include <kqueue_runloop/runloop_internal.h>
 #include <rbl/check_tag.h>
 #include <msg/msg_stream.h>
-
+#ifdef APP_SELECT_ECHO
+#include <echo_app/echo_app.h>
+#elif APP_SELECT_DEMO
+#include <echo_app/echo_app.h>
+#else
+#error "Server - no app was selected"
+#endif
 #define StreamTable_TAG "SRMTBL"
 #define ServerCtx_TAG "SVRCTX"
 
@@ -32,7 +37,7 @@ struct ServerCtx_s {
     int                     l_state;
     int                     port;
     const char*             host;
-    ServerAppInterfaceRef   app_interface;
+    // ServerAppInterfaceRef   app_interface;
     // application generic interface
     // void* (*app_new)(RunloopRef rl, int fd);
     // void (*app_run)(void* app, void(cb)(void* app, void* server, int error), void* arg);
@@ -46,9 +51,9 @@ struct ServerCtx_s {
 };
 typedef struct  ServerCtx_s ServerCtx, *ServerCtxRef;
 
-ServerCtxRef server_ctx_new(RunloopRef rl, int listener_fd, ServerAppInterfaceRef app_interface);
+ServerCtxRef server_ctx_new(RunloopRef rl, int listener_fd);
 
-void server_ctx_init(ServerCtxRef server_ref, RunloopRef rl, int listener_fd, ServerAppInterfaceRef app_interface);
+void server_ctx_init(ServerCtxRef server_ref, RunloopRef rl, int listener_fd);
 
 void server_ctx_free(ServerCtxRef sref);
 void server_ctx_run(ServerCtxRef sref);

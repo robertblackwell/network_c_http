@@ -1,7 +1,7 @@
 #ifndef demo_parser_h
 #define demo_parser_h
 #include <stdint.h>
-#include "message.h"
+#include "demo_msg.h"
 #include <src/common/cbuffer.h>
 
 
