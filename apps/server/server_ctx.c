@@ -92,20 +92,10 @@ static void handle_new_socket(void* server, int new_sock, int error)
     // int nbsock = socket_set_blocking(sock);
     RBL_LOG_FMT("handle_new_socket ctx: %p sock: %d ", ctx, new_sock)
     RunloopRef rl = tcp_listener_get_runloop(ctx->tcp_listener_ref);
-#if 0
-    void* app_ref = ctx->app_interface->new(rl, new_sock);
-#else
-    // void* app_ref = generic_app_new(rl, new_sock);
     void* app_ref = APP_NEW(rl, new_sock);
-
-#endif
     if(error == 0) {
         List_add_back(ctx->connection_list, app_ref);
-#if 0
-        ctx->app_interface->run(app_ref, app_instance_done_cb, ctx);
-#else
-        generic_app_run(app_ref, app_instance_done_cb, ctx);
-#endif
+        APP_RUN(app_ref, app_instance_done_cb, ctx);
     } else{
         // termnate ?
     }
@@ -123,11 +113,7 @@ static void app_instance_done_cb(void* app, void* server, int error)
     ListIterator itr = List_find(ctx->connection_list, app);
     assert(itr != NULL);
     List_itr_remove(ctx->connection_list, &itr);
-#if 0
-    ctx->app_interface->free(app);
-#else
-    generic_app_free(app);
-#endif
+    APP_FREE(app);
 }
 int local_create_bound_socket(int port, const char *host)
 {

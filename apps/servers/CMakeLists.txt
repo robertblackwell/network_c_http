@@ -1,3 +1,3 @@
 
 
-add_subdirectory("echo_app")
+add_subdirectory("../server_apps")

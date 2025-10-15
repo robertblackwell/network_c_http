@@ -2,7 +2,7 @@
 #define H_msg_select_H
 
 #if defined(MSG_SELECT_ECHO)
-    #include "echo_msg.h"
+    #include "newline_msg.h"
 #elif defined(MSG_SELECT_DEMO)
     #include "demo_message.h"
 #else

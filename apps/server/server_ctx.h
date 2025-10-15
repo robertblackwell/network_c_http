@@ -1,7 +1,6 @@
 #ifndef h_test_echo_io_stream_h
 #define h_test_echo_io_stream_h
 
-
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -19,14 +18,19 @@
 #include <kqueue_runloop/runloop.h>
 #include <kqueue_runloop/runloop_internal.h>
 #include <rbl/check_tag.h>
-#include <msg/msg_stream.h>
+#include <async_msg_stream/msg_stream.h>
+#include <server_apps/server_app_selection_header.h>
+
+#if 0
 #ifdef APP_SELECT_ECHO
-#include <echo_app/echo_app.h>
+#include <server_apps/echo_app.h>
 #elif APP_SELECT_DEMO
-#include <echo_app/echo_app.h>
+#include <server_apps/echo_app.h>
 #else
 #error "Server - no app was selected"
 #endif
+#endif
+
 #define StreamTable_TAG "SRMTBL"
 #define ServerCtx_TAG "SVRCTX"
 

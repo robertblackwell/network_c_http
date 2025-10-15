@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <interfaces/server_app_interface.h>
 #include <server/server_ctx.h>
-#include <echo_app/echo_app.h>
+#include <apps/servers/server_apps/echo_app.h>
 ServerCtx server_ctx;
 static void server_main(RunloopRef runloop, void* arg);
 static void* accept_cb(void* arg, int sock, int error);

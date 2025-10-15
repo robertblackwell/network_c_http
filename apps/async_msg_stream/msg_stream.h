@@ -2,13 +2,16 @@
 #define H_msg_stream_h
 #include <kqueue_runloop/runloop.h>
 #include <tcp/tcp_stream.h>
+#include <msg/msg_selection_header.h>
 
+#if 0
 #if defined(MSG_SELECT_ECHO)
-    #include "echo_msg.h"
+    #include <msg/newline_msg.h>
 #elif defined(MSG_SELECT_DEMO)
-    #include "demo_msg.h"
+    #include <msg/demo_msg.h>
 #else
 #error "msg stream - have not selected message type"
+#endif
 #endif
 
 #define MsgStream_TAG "MSGSTR"
@@ -41,7 +44,7 @@ void msg_stream_init(MsgStreamRef msg_stream_ref, RunloopRef rl, int fd);
 void msg_stream_free(MsgStreamRef msg_stream_ref);
 RunloopRef msg_stream_get_runloop(MsgStreamRef msg_stream_ref);
 /*
- * This function passes a MessageRef to the caller via the callback.
+ * This function passes a message ref to the caller via the callback.
  * That is a transfer of ownership and the caller is resposible for
  * deallocating if necessary
  */

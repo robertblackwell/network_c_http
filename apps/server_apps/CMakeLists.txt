@@ -4,24 +4,25 @@ set(DEMO_TARGET demo_server)
 set(SERVER_APP_SRC
 		echo_app.h
 		echo_app.c
-		../async_main.c
-		../async_process_main.c
-		../async_process_main.h
+		../server/async_main.c
+		../server/async_process_main.c
+		../server/async_process_main.h
 		../server/server_ctx.h
 		../server/server_ctx.c
+
 		../tcp/tcp_stream.h
 		../tcp/tcp_stream_internal.h
 		../tcp/tcp_stream.c
 		../tcp/tcp_reader.c
 		../tcp/tcp_writer.c
 		../tcp/tcp_listener.c
-		../msg/msg_stream.h
-		../msg/msg_stream.c
-		../msg/msg_reader.c
-		../msg/msg_writer.c
-		../msg/echo_msg.h
-		../msg/echo_msg.c
-		../msg/echo_msg_parser.c
+		../async_msg_stream/msg_stream.h
+		../async_msg_stream/msg_stream.c
+		../async_msg_stream/msg_reader.c
+		../async_msg_stream/msg_writer.c
+		../msg/newline_msg.h
+		../msg/newline_msg.c
+		../msg/newline_msg_parser.c
 		../msg/demo_msg.h
 		../msg/demo_msg.c
 		../msg/demo_msg_parser.c

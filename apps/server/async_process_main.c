@@ -1,5 +1,5 @@
 #include "async_process_main.h"
-#include "server/server_ctx.h"
+#include "server_ctx.h"
 #include <src/common/socket_functions.h>
 #include <rbl/logger.h>
 #include <stdio.h>

@@ -1,12 +1,12 @@
-#include <echo_app/echo_app.h>
+#include "echo_app.h"
 #if defined(MSG_SELECT_ECHO)
-    #include <msg/echo_msg.h>
+    #include <msg/newline_msg.h>
 #elif defined(MSG_SELECT_DEMO)
     #include <msg/demo_msg.h>
 #else
 #error "msg stream - have not selected message type"
 #endif
-#include <msg/msg_stream.h>
+#include <async_msg_stream/msg_stream.h>
 MSG_REF process_input_message(MSG_REF input_msg);
 
 EchoAppRef echo_app_new(RunloopRef rl, int connection_fd)
@@ -32,29 +32,7 @@ void echo_app_free(EchoAppRef app)
     msg_stream_free(app->msg_stream_ref);
     free(app);
 }
-void* generic_app_new(void* runloop, int fd)
-{
-    return echo_app_new(runloop, fd);
-}
-void generic_app_free(void* app)
-{
-    echo_app_free(app);
-}
-void generic_app_run(void* app_ref, void(cb)(void* app, void* server, int error), void* arg)
-{
-    echo_app_run(app_ref, cb, arg);
-}
 
-
-ServerAppInterface echo_app_server_app_interface_variable;
-ServerAppInterfaceRef echo_app_get_server_app_interface()
-{
-    ServerAppInterfaceRef ai = & echo_app_server_app_interface_variable;
-    ai->new = (void*(*)(void*, int))echo_app_new;
-    ai->run = (void(*)(void*, void(*)(void*, void*, int), void*))(echo_app_run);
-    ai->free = (void(*)(void*))(echo_app_free);
-    return ai;
-}
 static void msg_read_callback(void* arg, MSG_REF msg, int error);
 static void msg_write_callback(void* arg, int error);
 static void postable_read(RunloopRef rl, void* arg);

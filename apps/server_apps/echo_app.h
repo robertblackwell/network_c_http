@@ -1,7 +1,6 @@
 #ifndef H_echo_app_h
 #define H_echo_app_h
-#include <msg/msg_stream.h>
-#include <interfaces/server_app_interface.h>
+#include <async_msg_stream/msg_stream.h>
 #include <server/server_ctx.h>
 #define EchoApp_TAG "ECHTAG"
 typedef void(AppDoneCallback)(void* app_ref, void* arg, int error);
