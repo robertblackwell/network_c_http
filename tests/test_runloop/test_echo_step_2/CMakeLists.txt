@@ -49,6 +49,10 @@
 set(TARGET test_echo_step_2)
 add_executable(${TARGET}
 	test_echo.c
+	test_ctx.h
+	test_ctx.c
+	client/client_thread_function.c
+
 	${C_HTTP_PROJECT_DIR}/apps/server_apps/echo_app.h
 	${C_HTTP_PROJECT_DIR}/apps/server_apps/echo_app.c
 
