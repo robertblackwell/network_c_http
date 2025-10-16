@@ -3,7 +3,13 @@
 #include <sys/_pthread/_pthread_t.h>
 #include <server/server_ctx.h>
 #include "tests/test_runloop/test_listener/listener_ctx.h"
-
+/**
+* This program tests the echo application and newline_msg protocal in a single process. So that is can be used
+* as part of a unit test suite.
+*
+* The server uses much of the machinery of apps/tcp apps/server_apps apps.async_msg_stream
+* but the client part is entirely built just for this test and uses no general machinery
+*/
 typedef struct TestCtx {
     int     port;
     int     id;
