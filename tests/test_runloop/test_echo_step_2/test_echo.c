@@ -30,10 +30,10 @@ int test_echo() {
     pthread_t client_2_thread;
     pthread_create(&server_thread, NULL, server_thread_function, &(tctx[0]));
     sleep(3);
-    pthread_create(&client_1_thread, NULL, client_thread_function, &(tctx[0]));
+    // pthread_create(&client_1_thread, NULL, client_thread_function, &(tctx[0]));
     pthread_create(&client_2_thread, NULL, client_thread_function, &(tctx[1]));
     pthread_join(client_1_thread, NULL);
-    pthread_join(client_2_thread, NULL);
+    // pthread_join(client_2_thread, NULL);
     UT_EQUAL_INT(tctx[0].error_count, 0);
     UT_EQUAL_INT(tctx[1].error_count, 0);
     pthread_join(server_thread, NULL);

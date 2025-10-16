@@ -40,7 +40,7 @@ void newline_msg_parser_free(NewLineMsgParserRef p)
     if(p->msg_ref) newline_msg_free(p->msg_ref);
     free(p);
 }
-void newline_msg_parser_consume(NewLineMsgParserRef mp, IOBufferRef iob_new_data, MsgParserCallback cb, void* arg)
+void newline_msg_parser_consume(NewLineMsgParserRef mp, IOBufferRef iob_new_data, NewLineMsgParserCallback cb, void* arg)
 {
     int buffer_length = IOBuffer_data_len(iob_new_data);
     char* buffer = IOBuffer_data(iob_new_data);

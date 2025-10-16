@@ -6,7 +6,7 @@
 typedef struct NewLineMsg_s  NewLineMsg, * NewLineMsgRef;
 typedef struct NewLineMsgParser_s NewLineMsgParser, *NewLineMsgParserRef;
 
-typedef void(MsgParserCallback)(void* arg, NewLineMsgRef new_msg, int error);
+typedef void(NewLineMsgParserCallback)(void* arg, NewLineMsgRef new_msg, int error);
 
 NewLineMsgRef newline_msg_new();
 void newline_msg_init(NewLineMsgRef msg_ref);
@@ -20,7 +20,7 @@ NewLineMsgParserRef newline_msg_parser_new();
 void newline_msg_parser_init(NewLineMsgParserRef parser_ref);
 void newline_msg_parser_deinit(NewLineMsgParserRef parser_ref);
 void newline_msg_parser_free(NewLineMsgParserRef parser_ref);
-void newline_msg_parser_consume(NewLineMsgParserRef, IOBufferRef new_data, MsgParserCallback cb/*void(cb)(void* user_ctx, void* new_msg, int error)*/, void* arg);
+void newline_msg_parser_consume(NewLineMsgParserRef, IOBufferRef new_data, NewLineMsgParserCallback cb/*void(cb)(void* user_ctx, void* new_msg, int error)*/, void* arg);
 
 #define MSG_REF NewLineMsgRef
 #define MSG_NEW newline_msg_new()

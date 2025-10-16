@@ -90,7 +90,7 @@ MSG_REF process_input_message(MSG_REF input_msg)
     // }
     char* response_buf_ptr;
     // asprintf(&response_buf_ptr, "ServerResponse:[%s]\n", p);
-    asprintf(&response_buf_ptr, "ServerResponse:[%s]\n", p);
+    asprintf(&response_buf_ptr, "ServerResponse:[%s]", p);
     MSG_SET_CONTENT(response, IOBuffer_from_cstring(response_buf_ptr));
     free(response_buf_ptr);
     return response;

@@ -44,12 +44,9 @@ void newline_msg_free(NewLineMsgRef m)
 }
 IOBufferRef newline_msg_serialize(NewLineMsgRef msg)
 {
-    char* p = (char*)IOBuffer_cstr(msg->iob);
-    IOBufferRef iob = IOBuffer_from_cstring(p);
-    // now frame the message
-    IOBuffer_commit_push_back(iob, '\n');
-
-    return iob;
+    IOBufferRef tmp = IOBuffer_new();
+    IOBuffer_sprintf(tmp, "%s\n", IOBuffer_cstr(msg->iob));
+    return tmp;
 }
 IOBufferRef newline_msg_get_content(NewLineMsgRef msg_ref)
 {
