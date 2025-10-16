@@ -4,16 +4,6 @@
 #include <tcp/tcp_stream.h>
 #include <msg/msg_selection_header.h>
 
-#if 0
-#if defined(MSG_SELECT_ECHO)
-    #include <msg/newline_msg.h>
-#elif defined(MSG_SELECT_DEMO)
-    #include <msg/demo_msg.h>
-#else
-#error "msg stream - have not selected message type"
-#endif
-#endif
-
 #define MsgStream_TAG "MSGSTR"
 
 typedef void(MsgReadCallback)(void* arg, MSG_REF msg, int error);

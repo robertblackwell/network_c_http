@@ -11,9 +11,9 @@
 #include <src/common/utils.h>
 
 void async_socket_set_nonblocking(int socket);
-static void try_read(TcpStreamRef tcp_stream_ref);
+static void try_read(TcpStream* ctx);
 static void postable_reader(RunloopRef rl, void* arg);
-static bool is_read_pending(TcpStreamRef tcp_stream_ref);
+static bool is_read_pending(TcpStreamRef ctx);
 
 void tcp_read(TcpStreamRef ctx, IOBufferRef input_buffer, TcpReadCallback read_cb, void* arg)
 {
@@ -57,6 +57,7 @@ void read_ready_callback(RunloopRef rl, void* read_ctx_ref_arg)
             try_read(tcp_stream_ref);
             break;
         case RD_STATE_ERROR:
+            break;
         case RD_STATE_STOPPED:
             break;
         default:

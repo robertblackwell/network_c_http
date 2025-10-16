@@ -198,5 +198,6 @@ void* IOBuffer_memptr(IOBufferRef this);
 
 char IOBuffer_consume_pop_front(IOBufferRef this);
 void IOBuffer_commit_push_back(IOBufferRef this, char ch);
+void IOBuffer_sprintf(IOBufferRef iob, const char* fmt, ...);
 /** @} */
 #endif

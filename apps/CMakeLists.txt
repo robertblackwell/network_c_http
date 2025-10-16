@@ -27,17 +27,22 @@ set(SERVER_APP_SRC
 set(verify_src
         sync_msg_stream/sync_msg_stream.c
         sync_msg_stream/sync_msg_stream.h
+
         msg/newline_msg.h
         msg/newline_msg.c
         msg/newline_msg_parser.c
         msg/demo_msg.h
         msg/demo_msg.c
         msg/demo_msg_parser.c
+
         client/verify_getopt.c
         client/verify_getopt.h
         client/verify_main.c
         client/verify_thread_context.c
         client/verify_thread_context.h
+        client/verify_statistics.c
+        client/verify_statistics.h
+
         client_verify_apps/verify_app.c
 )
 function(my_function arg_name1 arg_name2)

@@ -1,10 +1,11 @@
-#include <common/verify_statistics.h>
+#include <client/verify_statistics.h>
 #include <common/make_uuid.h>
+#include <common/buffer_chain.h>
 #include <client/verify_thread_context.h>
 #include <sync_msg_stream/sync_msg_stream.h>
 #include <msg/msg_selection_header.h>
 #include <uuid/uuid.h>
-
+#include "msg/demo_msg.h"
 
 MSG_REF make_request();
 void process_request(void* handler, MSG_REF request, MSG_REF reply);
@@ -53,7 +54,7 @@ MSG_REF make_request()
     uuid_unparse_lower(uuid, buf_ptr);
     sprintf(buf, "%s", buf_ptr);
 #if defined(MSG_SELECT_DEMO)
-    message_set_is_request(request, true);
+    demo_msg_set_is_request(request, true);
     BufferChainRef body = BufferChain_new();
 #else
 
@@ -76,8 +77,8 @@ MSG_REF make_request()
 void process_request(void* handler, MSG_REF request, MSG_REF reply)
 {
 #if defined(MSG_SELECT_DEMO)
-    message_set_is_request(reply, false);
-    BufferChainRef request_body = message_get_body(request);
+    demo_msg_set_is_request(reply, false);
+    BufferChainRef request_body = demo_msg_get_body(request);
     IOBufferRef  iob = BufferChain_compact(request_body);
     char opcode = *(char*)(IOBuffer_data(iob));
     *(char*)(IOBuffer_data(iob)) = 'R';
@@ -85,7 +86,7 @@ void process_request(void* handler, MSG_REF request, MSG_REF reply)
     BufferChain_append_IOBuffer(bc, iob);
     IOBuffer_free(iob);
     //    BufferChain_append_bufferchain(bc, request_body);
-    message_set_body(reply, bc);
+    demo_msg_set_body(reply, bc);
 #endif
 }
 bool verify_response(MSG_REF request, MSG_REF response)

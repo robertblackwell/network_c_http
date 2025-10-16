@@ -31,7 +31,7 @@ static void tcp_read_callback(void* arg, int error)
     MsgStreamRef msg_stream_ref = arg;
     RBL_CHECK_TAG(MsgStream_TAG, msg_stream_ref);
     RBL_CHECK_END_TAG(MsgStream_TAG, msg_stream_ref);
-    RunloopRef rl = msg_stream_get_runloop(msg_stream_ref);
+    RunloopRef rl = runloop_stream_get_runloop(msg_stream_ref->tcp_stream_ref->rlstream_ref);
     if(error == 0) {
         assert(IOBuffer_data_len(msg_stream_ref->input_buffer) != 0);
         msg_parser_consume(msg_stream_ref->msg_parser_ref, msg_stream_ref->input_buffer, new_message_callback, msg_stream_ref);

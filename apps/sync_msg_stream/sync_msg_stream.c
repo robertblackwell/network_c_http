@@ -12,6 +12,7 @@
 #include <netdb.h>
 #include <errno.h>
 #define SyncMsgStream_TAG "SMSGSRTM"
+#include <arpa/inet.h>
 #include <rbl/check_tag.h>
 
 /**
@@ -37,21 +38,21 @@ void on_new_message(void* ctx, MSG_REF msg, int error)
 SyncMsgStreamRef sync_msg_stream_new(MSG_PARSER_REF parser_ref)
 {
     SyncMsgStreamRef this = eg_alloc(sizeof(SyncMsgStream));
-    sync_msg_stream_init(this);
+    sync_msg_stream_init(this, parser_ref);
     return this;
 }
-SyncMsgStreamRef sync_msg_stream_new_from_fd(int fd)
+SyncMsgStreamRef sync_msg_stream_new_from_fd(MSG_PARSER_REF parser, int fd)
 {
     SyncMsgStreamRef this = eg_alloc(sizeof(SyncMsgStream));
-    sync_msg_stream_init(this);
+    sync_msg_stream_init(this, parser);
     this->sock = fd;
     return this;
 }
-void sync_msg_stream_init(SyncMsgStreamRef this)
+void sync_msg_stream_init(SyncMsgStreamRef this, MSG_PARSER_REF parser_ref)
 {
     RBL_SET_TAG(SyncMsgStream_TAG, this)
     RBL_SET_END_TAG(SyncMsgStream_TAG, this)
-    this->parser_ref = MSG_PARSER_NEW();
+    this->parser_ref = parser_ref;
     this->input_message_list = List_new();
     this->output_message_list = List_new();
 }
@@ -61,7 +62,7 @@ void sync_msg_stream_free(SyncMsgStreamRef this)
     RBL_CHECK_END_TAG(SyncMsgStream_TAG, this)
     RBL_LOG_FMT("sync_msg_stream_free %p  %d\n", this, this->sock);
     close(this->sock);
-    eg_free(this);
+    free(this);
 }
 
 void sync_msg_stream_connect(SyncMsgStreamRef this, char* host, int port)
@@ -71,26 +72,16 @@ void sync_msg_stream_connect(SyncMsgStreamRef this, char* host, int port)
     RBL_CHECK_END_TAG(SyncMsgStream_TAG, this)
     struct sockaddr_in serv_addr;
     struct hostent *hostent;
-
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (sockfd < 0)
-        RBL_LOG_ERROR("ERROR opening socket");
-
-    hostent = gethostbyname(host);
-    if (hostent == NULL) {
-        fprintf(stderr,"ERROR, no such host\n");
-        exit(0);
-    }
-    bzero((char *) &serv_addr, sizeof(serv_addr));
-    // this method is deprecated -
+    assert(sockfd > 0);
     serv_addr.sin_family = AF_INET;
-    // bcopy((char *)hostent->h_addr, (char *)&serv_addr.sin_addr.s_addr, hostent->h_length);
-    bcopy((char *)hostent->h_addr_list[0], (char *)&serv_addr.sin_addr.s_addr, hostent->h_length);
     serv_addr.sin_port = htons(port);
+    serv_addr.sin_addr.s_addr = inet_addr(host);
     RBL_LOG_FMT("sync_msg_stream_connect %p sockfd: %d\n", this, sockfd);
-    if (connect(sockfd,(struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) {
+    int status = connect(sockfd,(struct sockaddr *)&serv_addr, sizeof(serv_addr));
+    if (status < 0) {
         int errno_saved = errno;
-        RBL_LOG_ERROR("ERROR client %p connecting sockfd: % derrno: %d\n", this, sockfd, errno_saved);
+        RBL_LOG_ERROR("ERROR client %p port: %d connecting sockfd: % d errno: %d . %s\n", this, port, sockfd, errno_saved, strerror(errno_saved));
     }
     this->sock = sockfd;
 }

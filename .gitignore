@@ -25,7 +25,7 @@ deps/lib/
 deps/lib
 docs/html
 docs/latex
-
+junk/
 packages/
 
 .smpl_cache/

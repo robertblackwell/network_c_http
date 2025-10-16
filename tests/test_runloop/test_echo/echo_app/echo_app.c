@@ -1,4 +1,4 @@
-#include "echo_app.h"
+#include <echo_app/echo_app.h>
 MessageRef process_input_message(MessageRef input_msg);
 
 EchoAppRef echo_app_new(RunloopRef rl, int connection_fd)
@@ -24,25 +24,11 @@ void echo_app_free(EchoAppRef app)
     msg_stream_free(app->msg_stream_ref);
     free(app);
 }
-void* generic_echo_app_new(RunloopRef rl, int fd)
+AppInterface echo_app_interface_variable;
+AppInterfaceRef echo_app_interface()
 {
-    return echo_app_new(rl, fd);
-}
-void generic_echo_app_free(void* app)
-{
-    echo_app_free(app);
-}
-void generic_echo_app_run(void* app_ref, void(cb)(void* app, void* server, int error), void* arg)
-{
-    echo_app_run(app_ref, cb, arg);
-}
-
-
-ServerAppInterface echo_app_server_app_interface_variable;
-ServerAppInterfaceRef echo_app_get_server_app_interface()
-{
-    ServerAppInterfaceRef ai = & echo_app_server_app_interface_variable;
-    ai->new = (void*(*)(void*, int))echo_app_new;
+    AppInterfaceRef ai = & echo_app_interface_variable;
+    ai->new = (void*(*)(RunloopRef, int))echo_app_new;
     ai->run = (void(*)(void*, void(*)(void*, void*, int), void*))(echo_app_run);
     ai->free = (void(*)(void*))(echo_app_free);
     return ai;
@@ -56,7 +42,7 @@ void echo_app_run(EchoAppRef app, AppDoneCallback* cb, void* arg)
 {
     app->done_cb = cb;
     app->done_arg = arg;
-    RunloopRef rl = msg_stream_get_runloop(app->msg_stream_ref);
+    RunloopRef rl = runloop_stream_get_runloop(app->msg_stream_ref->tcp_stream_ref->rlstream_ref);
     runloop_post(rl, postable_read, app);
 }
 static void msg_read_callback(void* arg, MessageRef msg, int error)
@@ -81,7 +67,7 @@ static void msg_write_callback(void* arg, int error)
     if(error != 0) {
 
     }
-    RunloopRef rl = msg_stream_get_runloop(app->msg_stream_ref);
+    RunloopRef rl = runloop_stream_get_runloop(app->msg_stream_ref->tcp_stream_ref->rlstream_ref);
     runloop_post(rl, postable_read, app);
 }
 static void postable_read(RunloopRef rl, void* arg)
@@ -95,8 +81,8 @@ static void postable_read(RunloopRef rl, void* arg)
 MessageRef process_input_message(MessageRef input_msg)
 {
     MessageRef response = message_new();
-    char* p = IOBuffer_data(message_get_content(input_msg));
-    int n = IOBuffer_data_len(message_get_content(input_msg));
+    char* p = IOBuffer_data(input_msg->iob);
+    int n = IOBuffer_data_len(input_msg->iob);
     // for (int i = 0; i < n; i++) {
     //     if (*p == '\n') {
     //         *p = 'X';
@@ -105,7 +91,7 @@ MessageRef process_input_message(MessageRef input_msg)
     char* response_buf_ptr;
     // asprintf(&response_buf_ptr, "ServerResponse:[%s]\n", p);
     asprintf(&response_buf_ptr, "ServerResponse:[%s]\n", p);
-    message_set_content(response, IOBuffer_from_cstring(response_buf_ptr));
+    response->iob = IOBuffer_from_cstring(response_buf_ptr);
     free(response_buf_ptr);
     return response;
 }

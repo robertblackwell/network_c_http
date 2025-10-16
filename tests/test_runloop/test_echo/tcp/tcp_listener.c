@@ -7,7 +7,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <tcp/tcp_stream.h>
-#include <tcp/tcp_stream_internal.h>
 #include <kqueue_runloop/runloop.h>
 #include <server/server_ctx.h>
 #include <rbl/logger.h>
@@ -17,11 +16,12 @@
 #define L_STATE_INITIAL 44
 #define L_STATE_STOPPED 55
 #define L_STATE_ERROR 66
-
+static void on_timer(RunloopRef rl, void* arg);
 static void on_accept_ready(RunloopRef rl, void* listener_ref_arg);
 static void postable_try_accept(RunloopRef rl, void* arg);
 static void try_accept(TcpListenerRef tcp_listener_ref);
-void invoke_accept_callback(TcpListenerRef ctx, int new_sock, int error);
+static void on_accept_ready(RunloopRef rl, void* arg);
+void invoke_accept_callback(TcpListenerRef t, int sock, int error);
 
 TcpListenerRef tcp_listener_new(RunloopRef rl, int fd)
 {
@@ -50,10 +50,31 @@ void tcp_listener_free(TcpListenerRef tcp_listener_ref)
     RBL_CHECK_END_TAG(TcpListener_TAG, tcp_listener_ref)
     runloop_listener_free(tcp_listener_ref->rl_listener_ref);
 }
-RunloopRef tcp_listener_get_runloop(TcpListenerRef tcp_listener_ref)
-{
-    return runloop_listener_get_runloop(tcp_listener_ref->rl_listener_ref);
-}
+// ServerCtx server_ctx;
+// StreamTable stream_table;
+// Server listener_ctx;
+// static void server_main(RunloopRef runloop, void* arg);
+// static void* accept_cb(void* arg, int sock, int error);
+
+// int main() 
+// {
+
+//     int port = 9002;
+//     int fd = local_create_bound_socket(port, "localhost");
+//     socket_set_non_blocking(fd);
+//     RunloopRef runloop = runloop_new();
+//     listener_ctx_init(&(listener_ctx), fd, 1, runloop);
+//     RBL_SET_TAG(ServerCtx_TAG, (&server_ctx))
+//     RBL_SET_END_TAG(ServerCtx_TAG, (&server_ctx))
+//     server_ctx.port = port;
+//     server_ctx.listener_ctx_ref = &listener_ctx;
+//     server_ctx.stream_table_ref = &stream_table;
+//     ServerCtxRef server_ctx_ref = &server_ctx;
+//     ServerRef listener_ref = &(listener_ctx);
+//     runloop_post(runloop, server_main, server_ctx_ref);
+//     runloop_run(runloop, NULL);
+//     return 0;
+// }
 
 void tcp_accept(TcpListenerRef tcp_listener_ref, TcpAcceptCallback cb, void* arg)
 {
@@ -187,3 +208,29 @@ void invoke_accept_callback(TcpListenerRef ctx, int new_sock, int error)
     ctx->accept_cb_arg = NULL;
     cb(arg, new_sock, error);
 }
+#if 0
+void* accept_cb(void* arg, int sock, int error)
+{
+    assert(arg != NULL);
+    ServerCtxRef server = arg;
+    RBL_CHECK_TAG(ServerCtx_TAG, server)
+    RBL_CHECK_END_TAG(ServerCtx_TAG, server)
+    ServerRef listener_ctx = server->listener_ctx_ref;
+    RBL_CHECK_TAG(Server_TAG, server)
+    RBL_CHECK_END_TAG(Server_TAG, server)
+    RunloopEventRef listener = listener_ctx->listener_event;
+    RBL_CHECK_TAG(Listener_TAG, server)
+    RBL_CHECK_END_TAG(Listener_TAG, server)
+    RunloopRef rl = runloop_listener_get_runloop(listener);
+    if(error == 0) {
+        TcpStreamRef stream_ctx = StreamTable_add_fd(server->stream_table_ref, sock);
+        stream_ctx->stream = runloop_stream_new(rl, sock);
+        // have to start a stream handler as a new "green thread" which means post a function
+        stream_handler_run(stream_ctx, stream_complete_cb, server);
+        runloop_post(rl, try_accept, server);
+
+    } else {
+        // handle an error
+    }
+}
+#endif

@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdarg.h>
 
 #define IOBuffer_TAG "IOBUFF"
 #include <rbl/check_tag.h>
@@ -121,6 +122,7 @@ void IOBuffer_data_add(IOBufferRef this, void* p, int len)
 void* IOBuffer_space(const IOBufferRef this)
 {
     RBL_CHECK_TAG(IOBuffer_TAG, this)
+    void* tmp = this->buffer_ptr + this->buffer_remaining;
     return (this->buffer_ptr + this->buffer_remaining);
 }
 int IOBuffer_space_len(const IOBufferRef this)
@@ -219,4 +221,19 @@ void IOBuffer_commit_push_back(IOBufferRef iob, char ch)
 {
     char tmp = ch;
     IOBuffer_data_add(iob, &tmp, 1);
+}
+void IOBuffer_sprintf(IOBufferRef iob, const char* fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    char* buf = IOBuffer_space(iob);
+    int len = IOBuffer_space_len(iob);
+    int nchars = vsnprintf(buf, len, fmt, args);
+    va_end(args);
+    if (nchars > len-1) {
+        // buffer was too small
+        assert(0);
+    } else {
+        IOBuffer_commit(iob, nchars);
+    }
 }

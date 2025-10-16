@@ -5,7 +5,7 @@
 #include <pthread.h>
 #include <sys/time.h>
 #include <math.h>
-#include <src/common/verify_statistics.h>
+#include "verify_statistics.h"
 #include "verify_getopt.h"
 #include "verify_thread_context.h"
 
