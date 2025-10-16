@@ -58,7 +58,8 @@ add_executable(${TARGET}
 
  	server/server_ctx.h
 	server/server_ctx.c
-
+	mstream/mstream.h
+	mstream/mstream.c
 	${C_HTTP_PROJECT_DIR}/apps/tcp/tcp_stream.h
 	${C_HTTP_PROJECT_DIR}/apps/tcp/tcp_stream_internal.h
 	${C_HTTP_PROJECT_DIR}/apps/tcp/tcp_stream.c

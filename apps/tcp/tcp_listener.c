@@ -95,7 +95,7 @@ static void postable_try_accept(RunloopRef rl, void* arg)
     switch(ctx->l_state) {
         case L_STATE_INITIAL:
             if((result = listen(fd, SOMAXCONN)) != 0) {
-                printf("listen call failed with errno %d \n", errno);
+                printf("listen call failed with errno %d ", errno);
                 assert(0);
             }
             ctx->l_state = L_STATE_READY;

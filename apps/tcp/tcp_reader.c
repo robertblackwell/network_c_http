@@ -48,7 +48,7 @@ void read_ready_callback(RunloopRef rl, void* read_ctx_ref_arg)
     RBL_CHECK_END_TAG(TcpStream_TAG, tcp_stream_ref)
     RunloopStreamRef rlstream = tcp_stream_ref->rlstream_ref ;
     RunloopRef runloop_ref = runloop_stream_get_runloop(rlstream);
-    RBL_LOG_FMT("read_ready_callback fd %d read_state: %d\n", tcp_stream_ref->stream_fd, tcp_stream_ref->reader.read_state);
+    RBL_LOG_FMT("read_ready_callback fd %d read_state: %d", tcp_stream_ref->stream_fd, tcp_stream_ref->reader.read_state);
     switch(tcp_stream_ref->reader.read_state){
         case RD_STATE_INITIAL:
         case RD_STATE_READY:
@@ -82,7 +82,7 @@ static void try_read(TcpStreamRef tcp_stream_ref)
     IOBufferRef iob = tcp_stream_ref->reader.input_buffer;
     assert(iob != NULL);
     assert(tcp_stream_ref->stream_fd == runloop_stream_get_fd(rlstream));
-    RBL_LOG_FMT("try_read: read_state %d fd: %d \n", tcp_stream_ref->reader.read_state, tcp_stream_ref->stream_fd);
+    RBL_LOG_FMT("try_read: read_state %d fd: %d ", tcp_stream_ref->reader.read_state, tcp_stream_ref->stream_fd);
     switch(tcp_stream_ref->reader.read_state) {
         case RD_STATE_EAGAIN:
         case RD_STATE_INITIAL:
@@ -103,18 +103,18 @@ static void try_read(TcpStreamRef tcp_stream_ref)
     if(nread > 0) {
         tcp_stream_ref->reader.read_state = RD_STATE_READY;
         IOBuffer_commit(iob, nread);
-        RBL_LOG_FMT("try_read nread: %d read_state: %d buf:%s\n", nread, tcp_stream_ref->reader.read_state, IOBuffer_cstr(iob));
+        RBL_LOG_FMT("try_read nread: %d read_state: %d buf:%s", nread, tcp_stream_ref->reader.read_state, IOBuffer_cstr(iob));
         invoke_read_cb(tcp_stream_ref, nread, 0);
     } else if (nread == 0) {
         // eof
         invoke_read_cb(tcp_stream_ref, nread, errno_saved);
     } else {
         if(errno_saved == EAGAIN) {
-            RBL_LOG_FMT("try_read ERROR EAGAIN %s\n", "");
+            RBL_LOG_FMT("try_read ERROR EAGAIN %s", "");
             tcp_stream_ref->reader.read_state = RD_STATE_EAGAIN;
             runloop_stream_arm_read(rlstream, read_ready_callback, tcp_stream_ref);
         } else {
-            RBL_LOG_FMT("try_read ERROR errno: %d description %s\n", errno_saved, strerror(errno_saved));
+            RBL_LOG_FMT("try_read ERROR errno: %d description %s", errno_saved, strerror(errno_saved));
             invoke_read_cb(tcp_stream_ref, nread, errno_saved);
         }
     }

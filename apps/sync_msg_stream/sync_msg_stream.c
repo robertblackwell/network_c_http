@@ -60,7 +60,7 @@ void sync_msg_stream_free(SyncMsgStreamRef this)
 {
     RBL_CHECK_TAG(SyncMsgStream_TAG, this)
     RBL_CHECK_END_TAG(SyncMsgStream_TAG, this)
-    RBL_LOG_FMT("sync_msg_stream_free %p  %d\n", this, this->sock);
+    RBL_LOG_FMT("sync_msg_stream_free %p  %d", this, this->sock);
     close(this->sock);
     free(this);
 }
@@ -77,11 +77,11 @@ void sync_msg_stream_connect(SyncMsgStreamRef this, char* host, int port)
     serv_addr.sin_family = AF_INET;
     serv_addr.sin_port = htons(port);
     serv_addr.sin_addr.s_addr = inet_addr(host);
-    RBL_LOG_FMT("sync_msg_stream_connect %p sockfd: %d\n", this, sockfd);
+    RBL_LOG_FMT("sync_msg_stream_connect %p sockfd: %d", this, sockfd);
     int status = connect(sockfd,(struct sockaddr *)&serv_addr, sizeof(serv_addr));
     if (status < 0) {
         int errno_saved = errno;
-        RBL_LOG_ERROR("ERROR client %p port: %d connecting sockfd: % d errno: %d . %s\n", this, port, sockfd, errno_saved, strerror(errno_saved));
+        RBL_LOG_ERROR("ERROR client %p port: %d connecting sockfd: % d errno: %d . %s", this, port, sockfd, errno_saved, strerror(errno_saved));
     }
     this->sock = sockfd;
 }
@@ -121,7 +121,7 @@ int sync_msg_stream_read(SyncMsgStreamRef client_ref, MSG_REF * msg_ref_ptr)
             int errno_saved = errno;
             if (bytes_read > 0) {
                 IOBuffer_commit(iob, (int) bytes_read);
-                RBL_LOG_FMT("response raw: %s \n", IOBuffer_cstr(iob));
+                RBL_LOG_FMT("response raw: %s", IOBuffer_cstr(iob));
                 MSG_PARSER_CONSUME(client_ref->parser_ref, iob, &on_new_message, client_ref);
             } else {
                 return errno_saved;

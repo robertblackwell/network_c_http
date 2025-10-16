@@ -148,7 +148,7 @@ void  demo_msg_parser_consume(DemoMsgParserRef parser,
                     parser->m_state = STATE_BODY;
                 } else {
                     if(i == length - 1) {
-                        RBL_LOG_FMT("DemmoParser_consume parse error \n");
+                        RBL_LOG_FMT("DemoParser_consume parse error ");
                         demo_msg_free(parser->m_current_message_ptr);
                         parser->m_current_message_ptr = NULL;
                         parser->m_current_message_ptr = demo_msg_new();
