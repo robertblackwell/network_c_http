@@ -119,12 +119,13 @@ void  demo_msg_parser_consume(DemoMsgParserRef parser,
                 break;
             case STATE_BODY: {
                 if (isprint(ch)) {
-                    BufferChainRef bc = demo_msg_get_body(parser->m_current_message_ptr);
+                    IOBufferRef iobtmp = demo_msg_get_body(parser->m_current_message_ptr);
+                    IOBuffer_commit_push_back(iobtmp, (char)ch);
                     // this block is debugging
-                    BufferChain_append(bc, &ch, 1);
-                    IOBufferRef iobtmp = BufferChain_compact(bc);
+                    // BufferChain_append(bc, &ch, 1);
+                    // IOBufferRef iobtmp = BufferChain_compact(bc);
                     const char* xx = IOBuffer_cstr(iobtmp);
-                    IOBuffer_free(iobtmp);
+                    // IOBuffer_free(iobtmp);
                     //
                 } else if (ch == CH_ETX) {
                     parser->m_state = STATE_IDLE;
@@ -140,6 +141,7 @@ void  demo_msg_parser_consume(DemoMsgParserRef parser,
                 break;
             }
             case STATE_ERROR_RECOVERY:
+                RBL_LOG_FMT("demo parser in Error state waiting for CH_STX")
                 /**
                  * Come to this state after a parse error - search for SOH until end of buffer.
                  * If not found then terminate the read operation with an error

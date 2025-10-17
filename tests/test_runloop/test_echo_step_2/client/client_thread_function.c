@@ -6,20 +6,20 @@
 #include <rbl/logger.h>
 #include <common/socket_functions.h>
 #include <server/server_ctx.h>
-#include <msg/newline_msg.h>
+#include <msg/msg_selection_header.h>
 #include "../mstream/mstream.h"
 #include "../test_ctx.h"
-#define MSTREAM
-_Thread_local NewLineMsgRef new_msg = NULL;
-void new_message_callback(void* arg, NewLineMsgRef msg, int error_code)
+#define MSTREAMX
+_Thread_local MSG_REF new_msg = NULL;
+void new_message_callback(void* arg, MSG_REF msg, int error_code)
 {
     new_msg = msg;
 }
-NewLineMsgRef make_request(TestCtxRef ctx, int i, int j);
-void msg_write(int lfd, NewLineMsgRef newline_msg);
-NewLineMsgRef msg_read(int fd, NewLineMsgParserRef parser);
+MSG_REF make_request(TestCtxRef ctx, int i, int j);
+void msg_write(int lfd, MSG_REF msg_ref);
+MSG_REF msg_read(int fd, MSG_PARSER_REF parser);
 int local_connect(const char* host, int port);
-bool verify(NewLineMsgRef request, NewLineMsgRef response);
+bool verify(MSG_REF request, MSG_REF response);
 
 void* client_thread_function(void* tctx) {
 
@@ -32,9 +32,9 @@ void* client_thread_function(void* tctx) {
 #else
         int lfd = local_connect("127.0.0.1", port);
 #endif
-        NewLineMsgParserRef parser = newline_msg_parser_new();
+        MSG_PARSER_REF parser = MSG_PARSER_NEW();
         for (int j = 0; j < ctx->nbr_msg_per_connection; j++) {
-            NewLineMsgRef request_msg = make_request(ctx, i, j);
+            MSG_REF request_msg = make_request(ctx, i, j);
 #if defined(MSTREAM)
             mstream_write(mstream_ref, request_msg);
 #else
@@ -43,14 +43,14 @@ void* client_thread_function(void* tctx) {
 #if defined(MSTREAM)
             NewLineMsgRef response_msg = mstream_read(mstream_ref, parser);
 #else
-            NewLineMsgRef response_msg = msg_read(lfd, parser);
+            MSG_REF response_msg = msg_read(lfd, parser);
 #endif
             bool ok = verify(request_msg, response_msg);
             if(!ok) {
                 ctx->error_count++;
             }
-            newline_msg_free(request_msg);
-            newline_msg_free(response_msg);
+            MSG_FREE(request_msg);
+            MSG_FREE(response_msg);
             printf("Test response %d id: %d i:%d j:%d\n", (int)((bool)ok), ctx->id, i, j);
         }
 #if defined(MSTREAM)
@@ -61,41 +61,45 @@ void* client_thread_function(void* tctx) {
     }
     return NULL;
 }
-NewLineMsgRef make_request(TestCtxRef ctx, int i, int j)
+MSG_REF make_request(TestCtxRef ctx, int i, int j)
 {
-    NewLineMsgRef newline_msg = newline_msg_new(256);
-    IOBufferRef iob = newline_msg_get_content(newline_msg);
+    MSG_REF msg_ref = MSG_NEW;
+    IOBufferRef iob = MSG_GET_CONTENT(msg_ref);
     IOBuffer_sprintf(iob, "Client %d connection: %d msg: %d", ctx->id, i, j);
-    return newline_msg;
+    return msg_ref;
 }
-bool verify(NewLineMsgRef request_msg, NewLineMsgRef response_msg)
+bool verify(MSG_REF request_msg, MSG_REF response_msg)
 {
-    IOBufferRef request_content = newline_msg_get_content(request_msg);
-    IOBufferRef response_content = newline_msg_get_content(response_msg);
+    IOBufferRef request_content = MSG_GET_CONTENT(request_msg);
+    IOBufferRef response_content = MSG_GET_CONTENT(response_msg);
     printf("[server] %s", IOBuffer_cstr(response_content));
     char test_buffer[200];
-    sprintf(test_buffer, "ServerResponse:[%s]", IOBuffer_cstr(request_content));
+    int slen = sprintf(test_buffer, "ServerResponse:[%s]", IOBuffer_cstr(request_content));
+    assert(slen == strlen(test_buffer));
     RBL_LOG_FMT("response:%s  send: %s ", IOBuffer_cstr(response_content), IOBuffer_cstr(request_content));
-    bool ok = (bool)strcmp(test_buffer, IOBuffer_cstr(response_content));
+    bool ok = (bool)(0 == strcmp(test_buffer, IOBuffer_cstr(response_content)));
+    if (!ok) {
+        printf("Not ok\n");
+    }
     return ok;
 }
-void msg_write(int lfd, NewLineMsgRef newline_msg)
+void msg_write(int lfd, MSG_REF msg_ref)
 {
-    IOBufferRef send_iob = newline_msg_serialize(newline_msg);
+    IOBufferRef send_iob = MSG_SERIALIZE(msg_ref);
     size_t nw = write(lfd, IOBuffer_data(send_iob), IOBuffer_data_len(send_iob));
     assert(nw > 0);
 }
-NewLineMsgRef msg_read(int lfd, NewLineMsgParserRef parser)
+MSG_REF msg_read(int lfd, MSG_PARSER_REF parser)
 {
     IOBufferRef iob_response = IOBuffer_new(256);
     size_t rn = read(lfd, IOBuffer_space(iob_response), IOBuffer_space_len(iob_response));
     assert(rn > 0);
     IOBuffer_commit(iob_response, rn);
-    newline_msg_parser_consume(parser, iob_response, new_message_callback, NULL);
+    MSG_PARSER_CONSUME(parser, iob_response, new_message_callback, NULL);
     assert(new_msg != NULL);
     IOBuffer_free(iob_response);
     iob_response = NULL;
-    NewLineMsgRef response_msg = new_msg;
+    MSG_REF response_msg = new_msg;
     new_msg = NULL;
     return response_msg;
 }

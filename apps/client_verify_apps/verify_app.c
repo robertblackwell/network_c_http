@@ -78,15 +78,14 @@ void process_request(void* handler, MSG_REF request, MSG_REF reply)
 {
 #if defined(MSG_SELECT_DEMO)
     demo_msg_set_is_request(reply, false);
-    BufferChainRef request_body = demo_msg_get_body(request);
-    IOBufferRef  iob = BufferChain_compact(request_body);
+    IOBufferRef  iob = demo_msg_get_body(request);
     char opcode = *(char*)(IOBuffer_data(iob));
     *(char*)(IOBuffer_data(iob)) = 'R';
     BufferChainRef bc =  BufferChain_new();
     BufferChain_append_IOBuffer(bc, iob);
     IOBuffer_free(iob);
     //    BufferChain_append_bufferchain(bc, request_body);
-    demo_msg_set_body(reply, bc);
+    demo_msg_set_body(reply, iob);
 #endif
 }
 bool verify_response(MSG_REF request, MSG_REF response)

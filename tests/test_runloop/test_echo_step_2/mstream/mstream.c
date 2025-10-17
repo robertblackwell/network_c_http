@@ -4,15 +4,14 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
-#include <apps/msg/newline_msg.h>
 struct MStream_s
 {
     const char* host;
     int port;
     int fd;
-    NewLineMsgRef new_msg;
+    MSG_REF new_msg;
 };
-void new_msg_cb(void* arg, NewLineMsgRef nm, int error_code)
+void new_msg_cb(void* arg, MSG_REF nm, int error_code)
 {
     MStreamRef mstream = arg;
     mstream->new_msg = nm;
@@ -42,27 +41,26 @@ MStreamRef mstream_new(const char* host, int port)
     mstream_init(stream, host, port);
     return stream;
 }
-void mstream_write(MStreamRef stream, NewLineMsgRef newline_msg)
+void mstream_write(MStreamRef stream, MSG_REF msg_ref)
 {
-    IOBufferRef send_iob = newline_msg_serialize(newline_msg);
+    IOBufferRef send_iob = MSG_SERIALIZE(msg_ref);
     size_t nw = write(stream->fd, IOBuffer_data(send_iob), IOBuffer_data_len(send_iob));
     assert(nw > 0);
 }
-NewLineMsgRef mstream_read(MStreamRef stream, NewLineMsgParserRef parser)
+MSG_REF mstream_read(MStreamRef stream, MSG_PARSER_REF parser)
 {
     IOBufferRef iob_response = IOBuffer_new(256);
     size_t rn = read(stream->fd, IOBuffer_space(iob_response), IOBuffer_space_len(iob_response));
     assert(rn > 0);
     IOBuffer_commit(iob_response, (int)rn);
-    newline_msg_parser_consume(parser, iob_response, new_msg_cb, stream);
+    MSG_PARSER_CONSUME(parser, iob_response, new_msg_cb, stream);
     if (stream->new_msg == NULL)
         assert(stream->new_msg != NULL);
     IOBuffer_free(iob_response);
     iob_response = NULL;
-    NewLineMsgRef response_msg = stream->new_msg;
+    MSG_REF response_msg = stream->new_msg;
     stream->new_msg = NULL;
     return response_msg;
-
 }
 void mstream_free(MStreamRef s)
 {

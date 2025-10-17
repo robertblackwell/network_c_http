@@ -1,4 +1,5 @@
 #include "echo_app.h"
+
 #if defined(MSG_SELECT_ECHO)
     #include <msg/newline_msg.h>
 #elif defined(MSG_SELECT_DEMO)
@@ -6,6 +7,7 @@
 #else
 #error "msg stream - have not selected message type"
 #endif
+
 #include <async_msg_stream/msg_stream.h>
 MSG_REF process_input_message(MSG_REF input_msg);
 

@@ -53,7 +53,7 @@ IOBufferRef IOBuffer_init(IOBufferRef this, int capacity);
  * @return IOBufferRef
  */
 IOBufferRef IOBuffer_new_with_capacity(int capacity);
-
+void IOBuffer_expand_and_reset(IOBufferRef iob, int new_capacity);
 /**
  * @brief Create a new IOBuffer with a a default capacity.
  *

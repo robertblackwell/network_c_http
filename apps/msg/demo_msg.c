@@ -23,7 +23,7 @@ struct DemoMsg_s
 {
     RBL_DECLARE_TAG;
     bool            is_request;
-    BufferChainRef  body;
+    IOBufferRef     body;
     RBL_DECLARE_END_TAG;
 };
 
@@ -33,21 +33,23 @@ DemoMsgRef demo_msg_new ()
     DEMO_MESSAGE_SET_TAG(mref)
     RBL_SET_END_TAG(DemoMsg_TAG, mref);
     assert(mref != NULL);
-    mref->body = NULL;
-    mref->body = BufferChain_new();
+    mref->body = IOBuffer_new_with_capacity (1024);
     return mref;
 }
 static char get_body_first_char(DemoMsgRef msg_ref)
 {
-    assert(BufferChain_size(msg_ref->body));
-    IOBufferRef iob = BufferChain_front(msg_ref->body);
+    RBL_CHECK_TAG(DemoMsg_TAG, msg_ref);
+    RBL_CHECK_END_TAG(DemoMsg_TAG, msg_ref);
+    assert(IOBuffer_data_len(msg_ref->body) > 1);
+    IOBufferRef iob = msg_ref->body;
     char first_byte = (char)(*(char*)(IOBuffer_data(iob)));
     return first_byte;
 }
 static void set_body_first_char(DemoMsgRef msg_ref, char first_byte)
 {
-    assert(BufferChain_size(msg_ref->body));
-    IOBufferRef iob = BufferChain_front(msg_ref->body);
+    RBL_CHECK_TAG(DemoMsg_TAG, msg_ref);
+    RBL_CHECK_END_TAG(DemoMsg_TAG, msg_ref);
+    IOBufferRef iob = (msg_ref->body);
     (*(char*)(IOBuffer_data(iob))) = first_byte;
 }
 /**
@@ -72,7 +74,7 @@ void demo_msg_free(DemoMsgRef this)
 {
     RBL_CHECK_TAG(DemoMsg_TAG, this);
     RBL_CHECK_END_TAG(DemoMsg_TAG, this);
-    BufferChain_free(((this)->body));
+    IOBuffer_free(((this)->body));
     this->body = NULL;
     free(this);
 }
@@ -84,15 +86,16 @@ IOBufferRef demo_msg_serialize(DemoMsgRef mref)
 {
     RBL_CHECK_TAG(DemoMsg_TAG, mref);
     RBL_CHECK_END_TAG(DemoMsg_TAG, mref);
-    BufferChainRef bc = BufferChain_new();
+    IOBufferRef iob = IOBuffer_new_with_capacity (IOBuffer_data_len(mref->body) + 64);
     char* start_str = "\02";
     char* end_str = "\03";
-    BufferChain_append(bc, (void*)start_str, 1);
-    BufferChain_append_bufferchain(bc, mref->body);
-    BufferChain_append(bc, (void*) end_str, 1);
-    IOBufferRef result = BufferChain_compact(bc);
-    BufferChain_free((bc));
-    return result;
+    IOBuffer_sprintf(iob, "\02%s\03", IOBuffer_cstr(mref->body));
+    // BufferChain_append(bc, (void*)start_str, 1);
+    // BufferChain_append_bufferchain(bc, mref->body);
+    // BufferChain_append(bc, (void*) end_str, 1);
+    // IOBufferRef result = BufferChain_compact(bc);
+    // BufferChain_free((bc));
+    return iob;
 }
 bool demo_msg_get_is_request(DemoMsgRef this)
 {
@@ -125,7 +128,7 @@ void demo_msg_set_lrc(DemoMsgRef this, char lrc)
     RBL_CHECK_TAG(DemoMsg_TAG, this);
     RBL_CHECK_END_TAG(DemoMsg_TAG, this);
 }
-BufferChainRef demo_msg_get_body(DemoMsgRef this)
+IOBufferRef demo_msg_get_body(DemoMsgRef this)
 {
     RBL_CHECK_TAG(DemoMsg_TAG, this);
     RBL_CHECK_END_TAG(DemoMsg_TAG, this);
@@ -133,24 +136,25 @@ BufferChainRef demo_msg_get_body(DemoMsgRef this)
 }
 IOBufferRef demo_msg_get_content(DemoMsgRef msg_ref)
 {
-    return BufferChain_compact(msg_ref->body);
+    RBL_CHECK_TAG(DemoMsg_TAG, msg_ref);
+    RBL_CHECK_END_TAG(DemoMsg_TAG, msg_ref);
+    return (msg_ref->body);
 }
 void demo_msg_set_content(DemoMsgRef msg_ref, IOBufferRef content)
 {
-    if (msg_ref->body) {
-        BufferChain_free(msg_ref->body);
+    RBL_CHECK_TAG(DemoMsg_TAG, msg_ref);
+    RBL_CHECK_END_TAG(DemoMsg_TAG, msg_ref);
+    if (msg_ref->body == NULL) {
+        msg_ref->body = content;
+    } else {
+        IOBuffer_free(msg_ref->body);
+        msg_ref->body = content;
     }
-    msg_ref->body = BufferChain_new();
-    BufferChain_append_IOBuffer(msg_ref->body, content);
 }
-void demo_msg_set_body(DemoMsgRef this, BufferChainRef bc)
+void demo_msg_set_body(DemoMsgRef this, IOBufferRef iob)
 {
     RBL_CHECK_TAG(DemoMsg_TAG, this);
     RBL_CHECK_END_TAG(DemoMsg_TAG, this);
-    if(this->body != NULL) {
-        RBL_LOG_FMT("demodemo_msg_set_body existing body being ignored bc: %p  this->body: %p", bc, this->body);
-        BufferChain_free((this->body));
-    }
-    this->body = bc;
+    demo_msg_set_content(this, iob);
 }
 /**@}*/

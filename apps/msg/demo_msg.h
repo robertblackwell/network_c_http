@@ -23,8 +23,8 @@ void demo_msg_set_content_length( DemoMsgRef this, int length);
 IOBufferRef demo_msg_get_content( DemoMsgRef mref);
 void demo_msg_set_content(DemoMsgRef msg, IOBufferRef content);
 
-BufferChainRef demo_msg_get_body( DemoMsgRef mref);
-void demo_msg_set_body( DemoMsgRef mref, BufferChainRef bodyp);
+IOBufferRef demo_msg_get_body( DemoMsgRef mref);
+void demo_msg_set_body( DemoMsgRef mref, IOBufferRef bodyp);
 IOBufferRef demo_msg_serialize( DemoMsgRef this);
 
 typedef struct DemoMsgParser_s DemoMsgParser, *DemoMsgParserRef;
@@ -37,19 +37,19 @@ void demo_msg_parser_consume(DemoMsgParserRef parser, IOBufferRef iobuffer_ref,
     void* on_new_message_ctx
     );
 
-
-#define MSG_REF DemoMsgRef
-#define MSG_NEW demo_msg_new()
-#define MSG_FREE(msg_ref) demo_msg_free(msg_ref)
-#define MSG_SET_CONTENT(msg_ref, content) demo_msg_set_content(msg_ref, content)
-#define MSG_GET_CONTENT(msg_ref) (demo_msg_get_content(msg_ref))
-#define MSG_SERIALIZE(msg_ref) demo_msg_serialize(msg_ref)
-
-#define MSG_PARSER_REF DemoMsgParserRef
-#define MSG_PARSER_NEW() demo_msg_parser_new()
-#define MSG_PARSER_FREE(msg_parser_ref) demo_msg_parser_free(msg_parser_ref)
-#define MSG_PARSER_DEINIT(msg_parser_ref) demo_msg_parser_deinit(msg_parser_ref)
-#define MSG_PARSER_CONSUME(msg_parser_ref, new_data, msg_callback, arg) demo_msg_parser_consume(msg_parser_ref, new_data, msg_callback, arg)
-
+//
+// #define MSG_REF DemoMsgRef
+// #define MSG_NEW demo_msg_new()
+// #define MSG_FREE(msg_ref) demo_msg_free(msg_ref)
+// #define MSG_SET_CONTENT(msg_ref, content) demo_msg_set_content(msg_ref, content)
+// #define MSG_GET_CONTENT(msg_ref) (demo_msg_get_content(msg_ref))
+// #define MSG_SERIALIZE(msg_ref) demo_msg_serialize(msg_ref)
+//
+// #define MSG_PARSER_REF DemoMsgParserRef
+// #define MSG_PARSER_NEW() demo_msg_parser_new()
+// #define MSG_PARSER_FREE(msg_parser_ref) demo_msg_parser_free(msg_parser_ref)
+// #define MSG_PARSER_DEINIT(msg_parser_ref) demo_msg_parser_deinit(msg_parser_ref)
+// #define MSG_PARSER_CONSUME(msg_parser_ref, new_data, msg_callback, arg) demo_msg_parser_consume(msg_parser_ref, new_data, msg_callback, arg)
+//
 
 #endif

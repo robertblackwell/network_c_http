@@ -47,7 +47,8 @@
 ##add_test(test_echo_server test_echo_server)
 
 set(TARGET test_echo_step_2)
-add_executable(${TARGET}
+#add_executable(${TARGET}
+set(echo_test_src
 	test_echo.c
 	test_ctx.h
 	test_ctx.c
@@ -74,6 +75,9 @@ add_executable(${TARGET}
 		${C_HTTP_PROJECT_DIR}/apps/msg/newline_msg_parser.c
 		${C_HTTP_PROJECT_DIR}/apps/msg/newline_msg.c
 		${C_HTTP_PROJECT_DIR}/apps/msg/newline_msg.h
+		${C_HTTP_PROJECT_DIR}/apps/msg/demo_msg_parser.c
+		${C_HTTP_PROJECT_DIR}/apps/msg/demo_msg.c
+		${C_HTTP_PROJECT_DIR}/apps/msg/demo_msg.h
  )
 set(TEST_INCLUDE_DIRS
 		${C_HTTP_PROJECT_DIR}/tests/test_runloop/test_echo_step_2
@@ -81,7 +85,14 @@ set(TEST_INCLUDE_DIRS
 		${C_HTTP_PROJECT_DIR}/src
 		${C_HTTP_PROJECT_DIR}
 )
- target_compile_definitions(${TARGET} PUBLIC APP_SELECT_ECHO MSG_SELECT_ECHO)
- target_include_directories(${TARGET} PUBLIC ${TEST_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR})
- target_link_libraries(${TARGET}	PUBLIC ${TEST_LINK_LIBS})
- add_test(${TARGET} ${TARGET})
+function(build_test NAME MSG_SELECTION )
+set(TARGET ${NAME})
+add_executable(${TARGET} ${echo_test_src})
+target_compile_definitions(${TARGET} PUBLIC APP_SELECT_ECHO ${MSG_SELECTION})
+target_include_directories(${TARGET} PUBLIC ${TEST_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(${TARGET}	PUBLIC ${TEST_LINK_LIBS})
+add_test(${TARGET} ${TARGET})
+endfunction()
+
+build_test("test_echo_step_2_echo" "MSG_SELECT_ECHO")
+build_test("test_echo_step_2_demo" "MSG_SELECT_DEMO")
