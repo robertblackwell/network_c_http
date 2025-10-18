@@ -9,6 +9,10 @@
 #include <interfaces/server_app_interface.h>
 #include <server/server_ctx.h>
 #include <apps/servers/server_apps/echo_app.h>
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 ServerCtx server_ctx;
 static void server_main(RunloopRef runloop, void* arg);
 static void* accept_cb(void* arg, int sock, int error);
@@ -25,3 +29,6 @@ int main()
     runloop_run(runloop, 0L);
     return 0;
 }
+#ifdef __cplusplus
+}
+#endif

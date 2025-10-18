@@ -2,20 +2,11 @@
 #define H_tcp_stream_h
 #include <kqueue_runloop/runloop.h>
 #include <kqueue_runloop/runloop_internal.h>
-
 #include <common/iobuffer.h>
 
-// #define RD_STATE_INITIAL 11
-// #define RD_STATE_EAGAIN 22
-// #define RD_STATE_STOPPED 33
-// #define RD_STATE_READY 44
-// #define RD_STATE_ERROR 55
-//
-// #define WRT_STATE_EAGAIN 11
-// #define WRT_STATE_READY 22
-// #define WRT_STATE_ERROR 33
-// #define WRT_STATE_STOPPED 44
-// #define WRT_STATE_INITIAL 55
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef void(TcpReadCallback)(void* arg, int error);
 typedef void(TcpWriteCallback)(void* arg, int error);
@@ -48,5 +39,8 @@ void tcp_listener_deinit(TcpListenerRef listener_ref);
 void tcp_listener_free(TcpListenerRef listener_ref);
 void tcp_accept(TcpListenerRef tcp_listener_ref, TcpAcceptCallback cb, void* arg);
 RunloopRef tcp_listener_get_runloop(TcpListenerRef tcp_listener_ref);
+#ifdef __cplusplus
+}
+#endif
 
 #endif

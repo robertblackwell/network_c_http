@@ -45,5 +45,4 @@ void msg_stream_read(MsgStreamRef msg_stream_ref, MsgReadCallback read_cb, void*
  */
 void msg_stream_write(MsgStreamRef msg_stream_ref, MSG_REF msg_ref, MsgWriteCallback write_cb, void* arg);
 
-
 #endif

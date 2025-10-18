@@ -1,5 +1,9 @@
 #ifndef H_tcp_stream_internal_h
 #define H_tcp_stream_internal_h
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 #include <common/iobuffer.h>
 #include <kqueue_runloop/runloop.h>
 #include "tcp_stream.h"
@@ -56,5 +60,7 @@ struct TcpStream_s {
     RBL_DECLARE_END_TAG;
 };
 
-
+#ifdef __cplusplus
+}
+#endif
 #endif

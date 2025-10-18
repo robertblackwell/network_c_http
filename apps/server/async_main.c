@@ -8,6 +8,9 @@
 #include <sys/wait.h>
 #include<signal.h>
 #include "async_process_main.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 static void usage();
 static void process_args(int argc, char* argv[], char** host_p, int* port, int* nbr_roundtrips_per_connection_p, int* nbr_connections_per_thread_p, int* nbr_threads_p, int* nbr_processes_p);
@@ -148,3 +151,6 @@ static void process_args(int argc, char* argv[], char** host_ip_p, int* port, in
     *nbr_threads_p = nbr_threads;
     *nbr_processes_p = nbr_processes;
 }
+#ifdef __cplusplus
+}
+#endif

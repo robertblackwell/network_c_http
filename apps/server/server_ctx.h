@@ -33,6 +33,9 @@
 
 #define StreamTable_TAG "SRMTBL"
 #define ServerCtx_TAG "SVRCTX"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef int socket_handle_t;
 typedef void(AppDoneCallback)(void* app, void* server, int error);
@@ -54,19 +57,16 @@ struct ServerCtx_s {
     RBL_DECLARE_END_TAG;
 };
 typedef struct  ServerCtx_s ServerCtx, *ServerCtxRef;
-
 ServerCtxRef server_ctx_new(RunloopRef rl, int listener_fd);
-
 void server_ctx_init(ServerCtxRef server_ref, RunloopRef rl, int listener_fd);
-
 void server_ctx_free(ServerCtxRef sref);
 void server_ctx_run(ServerCtxRef sref);
 void server_ctx_accept(ServerCtxRef lctx, void(accept_callback)(void* arg, int new_socket, int error), void* arg);
-
 int local_create_bound_socket(int port, const char* host);
-
 void postable_reader(RunloopRef rl, void* arg);
-
 void* reader_thread_func(void* arg);
 
+#ifdef __cplusplus
+}
+#endif
 #endif
