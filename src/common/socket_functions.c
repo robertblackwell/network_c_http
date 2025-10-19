@@ -18,6 +18,52 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netinet/tcp.h>
+int create_bound_socket(int port, const char *host)
+{
+    struct sockaddr_in server;
+    memset(&server, 0, sizeof(server));
+    socket_handle_t tmp_socket;
+    server.sin_family = AF_INET; // or AF_INET6 (address family)
+    server.sin_port = htons(port);
+    server.sin_addr.s_addr = inet_addr("127.0.0.1");
+    int result;
+    int yes = 1;
+
+    if((tmp_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
+        printf("socket call failed with errno %d \n", errno);
+        assert(0);
+    }
+    if((result = setsockopt(tmp_socket, SOL_SOCKET, SO_REUSEPORT  , &yes, sizeof(yes))) != 0) {
+        printf("setsockopt call failed with errno %d \n", errno);
+        assert(0);
+    }
+    if((result = setsockopt(tmp_socket, SOL_SOCKET, SO_REUSEADDR  , &yes, sizeof(yes))) != 0) {
+        printf("setsockopt call failed with errno %d \n", errno);
+        assert(0);
+    }
+    if((result = bind(tmp_socket, (struct sockaddr *) &server, sizeof(server))) != 0) {
+        printf("bind call failed with errno %d \n", errno);
+        assert(0);
+    }
+    //    if((result = listen(tmp_socket, SOMAXCONN)) != 0) {
+    //        printf("listen call failed with errno %d \n", errno);
+    //        assert(0);
+    //    }
+    return tmp_socket;
+}
+int create_and_connect_socket(const char* host_ip, int port)
+{
+    struct sockaddr_in server;
+    int lfd = socket(AF_INET, SOCK_STREAM, 0);
+    server.sin_family = AF_INET;
+    server.sin_port = htons(port);
+    server.sin_addr.s_addr = inet_addr(host_ip);
+    const int status = connect(lfd, (struct sockaddr *)&server, sizeof server);
+    int errno_saved = errno;
+    const char* errmsg = strerror(errno_saved);
+    assert(status == 0);
+    return lfd;
+}
 
 socket_handle_t create_listener_socket(int port, const char *host)
 {
@@ -71,9 +117,6 @@ void socket_report_error(const char* format, ...)
     return;
 }
 
-//
-//
-//
 socket_handle_t socket_create_listener_on_port(int port)
 {
     socket_handle_t tmp_socket;
@@ -116,96 +159,13 @@ socket_handle_t socket_create_listener_on_port(int port)
 //
 socket_handle_t socket_connect_host_port( char* hostname, unsigned short port, int* status )
 {
-#ifdef USE_IPV6
-    struct addrinfo hints;
-    char portstr[10];
-    int gaierr;
-    struct addrinfo* ai;
-    struct addrinfo* ai2;
-    struct addrinfo* aiv4;
-    struct addrinfo* aiv6;
-    struct sockaddr_in6 sa;
-#else /* USE_IPV6 */
     struct hostent *he;
     struct sockaddr_in sa;
-#endif /* USE_IPV6 */
     int sa_len, sock_family, sock_type, sock_protocol;
     int sockfd;
     
     (void) memset( (void*) &sa, 0, sizeof(sa) );
-    
-#ifdef USE_IPV6
-    
-    (void) memset( &hints, 0, sizeof(hints) );
-    hints.ai_family = PF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    (void) snprintf( portstr, sizeof(portstr), "%d", (int) port );
-    if ( (gaierr = getaddrinfo( hostname, portstr, &hints, &ai )) != 0 ){
-        socket_throw_error(0, errno, "getaddrinfo failed");
-        *status = errno;
-        return 0;
-    }
-    /* Find the first IPv4 and IPv6 entries. */
-    aiv4 = (struct addrinfo*) 0;
-    aiv6 = (struct addrinfo*) 0;
-    for ( ai2 = ai; ai2 != (struct addrinfo*) 0; ai2 = ai2->ai_next )
-    {
-        switch ( ai2->ai_family )
-        {
-            case AF_INET:
-                if ( aiv4 == (struct addrinfo*) 0 )
-                    aiv4 = ai2;
-                break;
-            case AF_INET6:
-                if ( aiv6 == (struct addrinfo*) 0 )
-                    aiv6 = ai2;
-                break;
-        }
-    }
-    
-    /* If there's an IPv4 address, use that, otherwise try IPv6. */
-    if ( aiv4 != (struct addrinfo*) 0 )
-    {
-        if ( sizeof(sa) < aiv4->ai_addrlen )
-        {
-            (void) fprintf(
-                           stderr, "%s - sockaddr too small (%lu < %lu)\n",
-                           hostname, (unsigned long) sizeof(sa),
-                           (unsigned long) aiv4->ai_addrlen );
-            exit( 1 );
-        }
-        sock_family = aiv4->ai_family;
-        sock_type = aiv4->ai_socktype;
-        sock_protocol = aiv4->ai_protocol;
-        sa_len = aiv4->ai_addrlen;
-        (void) memmove( &sa, aiv4->ai_addr, sa_len );
-        goto ok;
-    }
-    if ( aiv6 != (struct addrinfo*) 0 )
-    {
-        if ( sizeof(sa) < aiv6->ai_addrlen )
-        {
-            (void) fprintf(
-                           stderr, "%s - sockaddr too small (%lu < %lu)\n",
-                           hostname, (unsigned long) sizeof(sa),
-                           (unsigned long) aiv6->ai_addrlen );
-            exit( 1 );
-        }
-        sock_family = aiv6->ai_family;
-        sock_type = aiv6->ai_socktype;
-        sock_protocol = aiv6->ai_protocol;
-        sa_len = aiv6->ai_addrlen;
-        (void) memmove( &sa, aiv6->ai_addr, sa_len );
-        goto ok;
-    }
-    
-    socket_throw_error(sockfd, errno, "Unknown host." );
-    
-ok:
-    freeaddrinfo( ai );
-    
-#else /* USE_IPV6 */
-    
+
     he = gethostbyname( hostname );
     if ( he == (struct hostent*) 0 ){
         printf("ERROR gethostname %d %s\n", errno, strerror(errno));
@@ -219,9 +179,7 @@ ok:
     sa_len = sizeof(sa);
     (void) memmove( &sa.sin_addr, he->h_addr, he->h_length );
     sa.sin_port = htons( port );
-    
-#endif /* USE_IPV6 */
-    
+
     sockfd = socket( sock_family, sock_type, sock_protocol );
     if ( sockfd < 0 ){
         printf("ERROR socket %d %s\n", errno, strerror(errno));
@@ -229,16 +187,6 @@ ok:
         *status = errno;
         return 0;
     }
-//    int result;
-//    int yes = 1;
-//    if( (result = setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes))) != 0 )
-//    {
-//        printf("ERROR setsockoptt %d %s\n", errno, strerror(errno));
-//        socket_throw_error(sockfd, errno, "the setsockopt failed %d");
-//    }
-
-    int value = 1;
-    // setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE, &value, sizeof(value));
 
     if ( connect( sockfd, (struct sockaddr*) &sa, sa_len ) < 0 ){
         printf("ERROR connect %d %s\n", errno, strerror(errno));

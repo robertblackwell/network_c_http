@@ -6,7 +6,7 @@
  * to select the correct message module
  */
 #if defined(MSG_SELECT_ECHO)
-    #warning " on the MSG_SELECT_ECHO branch"
+    // #warning " on the MSG_SELECT_ECHO branch"
     #include <msg/newline_msg.h>
     #define MSG_REF NewLineMsgRef
     #define MSG_NEW newline_msg_new()
@@ -22,7 +22,7 @@
     #define MSG_PARSER_CONSUME(msg_parser_ref, new_data, msg_callback, arg) newline_msg_parser_consume(msg_parser_ref, new_data, msg_callback, arg)
 
 #elif defined(MSG_SELECT_DEMO)
-    #warning " on the MSG_SELECT_DEMO branch"
+    // #warning " on the MSG_SELECT_DEMO branch"
 
     #include <msg/demo_msg.h>
 
@@ -38,7 +38,6 @@
     #define MSG_PARSER_FREE(msg_parser_ref) demo_msg_parser_free(msg_parser_ref)
     #define MSG_PARSER_DEINIT(msg_parser_ref) demo_msg_parser_deinit(msg_parser_ref)
     #define MSG_PARSER_CONSUME(msg_parser_ref, new_data, msg_callback, arg) demo_msg_parser_consume(msg_parser_ref, new_data, msg_callback, arg)
-
 
 #else
 #error "msg stream - have not selected message type"

@@ -60,8 +60,8 @@ set(echo_test_src
  	server/server_ctx.h
 	server/server_ctx.c
 
-	helpers/local_create_bound_socket.c
-	helpers/local_create_bound_socket.h
+#	helpers/local_create_bound_socket.c
+#	helpers/local_create_bound_socket.h
 
 	${C_HTTP_PROJECT_DIR}/apps/mstream/mstream.h
 	${C_HTTP_PROJECT_DIR}/apps/mstream/mstream.c

@@ -26,11 +26,10 @@ void socket_throw_error(socket_handle_t socket, int errorno, const char* message
 
 void socket_report_error(const char* format, ...);
 
-socket_handle_t create_listener_socket(int port, const char *host);
+int create_bound_socket(int port, const char *host);
+int create_and_connect_socket(const char* host_ip, int port);
 
-//
-//
-//
+socket_handle_t create_listener_socket(int port, const char *host);
 socket_handle_t sockt_create_listener_on_port(int port);
 
 //

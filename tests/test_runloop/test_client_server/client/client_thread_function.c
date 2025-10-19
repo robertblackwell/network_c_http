@@ -27,10 +27,11 @@ void* client_thread_function(void* tctx) {
     int port = ctx->port;
     RBL_LOG_FMT("Client port: %d", ctx->port)
     for(int i = 0; i < ctx->nbr_connections; i++) {
+#define MSTREAM
 #if defined(MSTREAM)
         MStreamRef mstream_ref = mstream_new("127.0.0.1", port);
 #else
-        int lfd = local_connect("127.0.0.1", port);
+        int lfd = create_and_connect_socket("127.0.0.1", port);
 #endif
         MSG_PARSER_REF parser = MSG_PARSER_NEW();
         for (int j = 0; j < ctx->nbr_msg_per_connection; j++) {
@@ -41,7 +42,7 @@ void* client_thread_function(void* tctx) {
             msg_write(lfd, request_msg);
 #endif
 #if defined(MSTREAM)
-            NewLineMsgRef response_msg = mstream_read(mstream_ref, parser);
+            MSG_REF response_msg = mstream_read(mstream_ref, parser);
 #else
             MSG_REF response_msg = msg_read(lfd, parser);
 #endif
@@ -103,6 +104,7 @@ MSG_REF msg_read(int lfd, MSG_PARSER_REF parser)
     new_msg = NULL;
     return response_msg;
 }
+#if 0
 int local_connect(const char* host, int port)
 {
     struct sockaddr_in server;
@@ -114,3 +116,4 @@ int local_connect(const char* host, int port)
     assert(status == 0);
     return lfd;
 }
+#endif

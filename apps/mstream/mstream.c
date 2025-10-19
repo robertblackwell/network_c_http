@@ -2,38 +2,41 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <errno.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <rbl/check_tag.h>
+#include <common/list.h>
+
+#include <common/socket_functions.h>
+#define SyncMsgStream_TAG "SMSGSRTM"
+
 struct MStream_s
 {
+    RBL_DECLARE_TAG;
     const char* host;
     int port;
     int fd;
-    MSG_REF new_msg;
+    ListRef input_msg_list;
+    RBL_DECLARE_END_TAG;
 };
 void new_msg_cb(void* arg, MSG_REF nm, int error_code)
 {
     MStreamRef mstream = arg;
-    mstream->new_msg = nm;
-}
-static int local_connect(const char* host, int port)
-{
-    struct sockaddr_in server;
-    int lfd = socket(AF_INET, SOCK_STREAM, 0);
-    server.sin_family = AF_INET;
-    server.sin_port = htons(port);
-    server.sin_addr.s_addr = inet_addr(host);
-    const int status = connect(lfd, (struct sockaddr *)&server, sizeof server);
-    assert(status == 0);
-    return lfd;
+    RBL_SET_TAG(SyncMsgStream_TAG, mstream)
+    RBL_SET_END_TAG(SyncMsgStream_TAG, mstream)
+    assert(nm != NULL);
+    List_add_back(mstream->input_msg_list, nm);
 }
 void mstream_init(MStreamRef stream, const char* host, int port)
 {
     assert(stream != NULL);
+    RBL_SET_TAG(SyncMsgStream_TAG, stream)
+    RBL_SET_END_TAG(SyncMsgStream_TAG, stream)
     stream->host = host;
     stream->port = port;
-    stream->fd = local_connect(stream->host, stream->port);
-    stream->new_msg = NULL;
+    stream->fd = create_and_connect_socket(stream->host, stream->port);
+    stream->input_msg_list = List_new();
 }
 MStreamRef mstream_new(const char* host, int port)
 {
@@ -43,28 +46,52 @@ MStreamRef mstream_new(const char* host, int port)
 }
 void mstream_write(MStreamRef stream, MSG_REF msg_ref)
 {
+    RBL_CHECK_TAG(SyncMsgStream_TAG, stream)
+    RBL_CHECK_END_TAG(SyncMsgStream_TAG, stream)
     IOBufferRef send_iob = MSG_SERIALIZE(msg_ref);
-    size_t nw = write(stream->fd, IOBuffer_data(send_iob), IOBuffer_data_len(send_iob));
-    assert(nw > 0);
+    int out_len = IOBuffer_data_len(send_iob);
+    ssize_t nw = write(stream->fd, IOBuffer_data(send_iob), IOBuffer_data_len(send_iob));
+    int errno_saved = errno;
+    if (nw != out_len) {
+        if (nw > 0) {
+            assert(0);
+        } else if (nw == 0) {
+            assert(0); // have to start worrying about signals and EAGAIN
+        } else {
+            assert(0);
+        }
+    }
 }
 MSG_REF mstream_read(MStreamRef stream, MSG_PARSER_REF parser)
 {
-    IOBufferRef iob_response = IOBuffer_new(256);
-    size_t rn = read(stream->fd, IOBuffer_space(iob_response), IOBuffer_space_len(iob_response));
-    assert(rn > 0);
-    IOBuffer_commit(iob_response, (int)rn);
-    MSG_PARSER_CONSUME(parser, iob_response, new_msg_cb, stream);
-    if (stream->new_msg == NULL)
-        assert(stream->new_msg != NULL);
-    IOBuffer_free(iob_response);
-    iob_response = NULL;
-    MSG_REF response_msg = stream->new_msg;
-    stream->new_msg = NULL;
-    return response_msg;
+    RBL_CHECK_TAG(SyncMsgStream_TAG, stream)
+    RBL_CHECK_END_TAG(SyncMsgStream_TAG, stream)
+    while (1) {
+        if (List_size(stream->input_msg_list) > 0) {
+            MSG_REF m = List_remove_first(stream->input_msg_list);
+            return m;
+        } else {
+            IOBufferRef iob = IOBuffer_new(256);
+            size_t rn = read(stream->fd, IOBuffer_space(iob), IOBuffer_space_len(iob));
+            int errno_saved = errno;
+            if (rn <= 0) {
+                assert(rn > 0);
+            } else {
+                IOBuffer_commit(iob, (int)rn);
+                MSG_PARSER_CONSUME(parser, iob, new_msg_cb, stream);
+            }
+        }
+    }
 }
 void mstream_free(MStreamRef s)
 {
     close(s->fd);
+    ListIterator itr = List_iterator(s->input_msg_list);
+    while (itr != NULL) {
+        MSG_REF m = List_itr_unpack(s->input_msg_list, itr);
+        MSG_FREE(m);
+        itr = List_itr_next(s->input_msg_list, itr);
+    }
     free(s);
 }
 

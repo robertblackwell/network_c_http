@@ -2,6 +2,7 @@
 #include <pthread.h>
 #include <sys/_pthread/_pthread_t.h>
 #include <rbl/unittest.h>
+#include <common/socket_functions.h>
 #include "test_ctx.h"
 #include <server/server_ctx.h>
 #include <client/client_thread_function.h>
@@ -38,7 +39,7 @@ int test_echo()
     pthread_t client_1_thread;
     pthread_t client_2_thread;
     pthread_create(&server_thread, NULL, server_thread_function, &(tctx[0]));
-    sleep(3);
+    sleep(1);
     pthread_create(&client_1_thread, NULL, client_thread_function, &(tctx[0]));count++;
     pthread_create(&client_2_thread, NULL, client_thread_function, &(tctx[1]));count++;
     pthread_join(client_1_thread, NULL);
@@ -54,13 +55,13 @@ void* server_thread_function(void* tctx)
     static ServerCtx server_ctx;
     TestCtxRef ctx = (TestCtxRef)tctx;
     int port = ctx->port;
-    int fd = local_create_bound_socket(port, "localhost");
+    int fd = create_bound_socket(port, "127.0.0.1");
     socket_set_non_blocking(fd);
     RunloopRef runloop = runloop_new();
     ServerCtxRef server_ctx_ref = &server_ctx;
     server_ctx_init(server_ctx_ref, runloop, fd);
     server_ctx_run(server_ctx_ref);
-    runloop_run(runloop, 5000L);
+    runloop_run(runloop, 3000L);
     printf("server thread ending htons(9002): %d\n", htons(port));
     return 0;
 }
