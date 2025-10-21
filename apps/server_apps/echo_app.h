@@ -2,7 +2,7 @@
 #define H_echo_app_h
 #include <msg/msg_selection_header.h>
 #include <async_msg_stream/msg_stream.h>
-#include <server/server_ctx.h>
+#include <server_process/server_ctx.h>
 #ifdef __cplusplus
 extern "C" {
 #endif

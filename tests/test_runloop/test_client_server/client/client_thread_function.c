@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <rbl/logger.h>
 #include <common/socket_functions.h>
-#include <server/server_ctx.h>
+#include <apps/server_process/server_ctx.h>
 #include <msg/msg_selection_header.h>
 #include <mstream/mstream.h>
 #include "../test_ctx.h"

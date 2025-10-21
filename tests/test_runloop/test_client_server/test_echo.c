@@ -4,7 +4,7 @@
 #include <rbl/unittest.h>
 #include <common/socket_functions.h>
 #include "test_ctx.h"
-#include <server/server_ctx.h>
+#include <apps/server_process/server_ctx.h>
 #include <client/client_thread_function.h>
 /**
 * This program tests the echo application and newline_msg protocal in a single process. So that is can be used

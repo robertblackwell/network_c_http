@@ -7,7 +7,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <interfaces/server_app_interface.h>
-#include <server/server_ctx.h>
+#include <server_old/server_ctx.h>
 #include <apps/servers/server_apps/echo_app.h>
 #ifdef __cplusplus
 extern "C" {

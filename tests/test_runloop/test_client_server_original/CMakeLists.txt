@@ -72,7 +72,16 @@ set(TEST_INCLUDE_DIRS
 		${C_HTTP_PROJECT_DIR}/src
 		${C_HTTP_PROJECT_DIR}
 )
+# this is a custom list of include dirs to ensure that this test does not include code
+# outside the test dir other than rbl and common
+set(INC_DIRS
+		${C_HTTP_PROJECT_DIR}
+		${C_HTTP_PROJECT_DIR}/src
+		${C_HTTP_PROJECT_DIR}/tests/test_runloop/test_client_server_original
+		${CMAKE_CURRENT_SOURCE_DIR}
+)
+message("ZZZZZZZtest client server INC_DIRS ${INC_DIRS}")
  target_compile_definitions(test_echo PUBLIC ASIO_LISTENER_ENABLED)
- target_include_directories(test_echo PUBLIC ${TEST_INCLUDE_DIRS} ${CMAKE_CURRENT_SOURCE_DIR})
+ target_include_directories(test_echo PUBLIC ${INC_DIRS})
  target_link_libraries(test_echo	PUBLIC ${TEST_LINK_LIBS})
  add_test(test_echo test_echo)

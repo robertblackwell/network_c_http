@@ -201,10 +201,6 @@ bool    socket_is_blocking(socket_handle_t socket)
 {
     int     val;
     bool    is_blocking = false;
-    int junk = O_NONBLOCK;
-    int tmp;
-    int tmp2;
-    
     if ( (val = fcntl(socket, F_GETFL, 0)) < 0)
     {
         socket_throw_error(socket, errno,  "FCNTL failed" );
@@ -216,8 +212,6 @@ bool    socket_is_blocking(socket_handle_t socket)
         int t3 = t1 & t2;
         int t4 = ! t3;
         
-        tmp = (val & O_NONBLOCK);
-        tmp2 = ! tmp;
         is_blocking = !(val & O_NONBLOCK);
     }
     return is_blocking;
@@ -298,30 +292,6 @@ void socket_set_recvtimeout(socket_handle_t socket, int time_interval_seconds)
         printf("socket_set_recvto failed socket: %d errno: %d %s\n", socket, errno_saved, strerror(errno_saved));
         assert(false);
     }
-}
-
-void socket_wait_for_write_flush(socket_handle_t socket)
-{
-    assert(0);
-    // int raw_sock = socket;
-    
-    // shutdown(raw_sock, SHUT_WR);
-    // char junk;
-    // int junk_len = sizeof(junk);
-    // long recv_res = recv(raw_sock, &junk, junk_len, 0);
-    // if( recv_res < 0){
-    //     socket_throw_error(socket, errno, "wait on flush recv call failed");
-    // }
-    
-    // long count=3;
-    // socklen_t len = sizeof(count);
-    // int r = getsockopt(raw_sock, SOL_SOCKET, SO_NWRITE, &count, &len);
-    // if( r < 0 ){
-    //     socket_throw_error(socket, errno, "SO_NWRITE call failed");
-    // }
-    // if( count > 0){
-    //     socket_throw_error(socket, errno, "SO_NWRITE call returned count > 0 treat as io error");
-    // }
 }
 
 bool socket_write_data(socket_handle_t socket,  void* buffer, int buffer_length, int* status)

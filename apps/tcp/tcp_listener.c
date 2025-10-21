@@ -1,7 +1,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <stdio.h>
-#include <string.h>
+#include <errno.h>
 #include <sys/socket.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -9,7 +9,6 @@
 #include <tcp/tcp_stream.h>
 #include <tcp/tcp_stream_internal.h>
 #include <kqueue_runloop/runloop.h>
-#include <server/server_ctx.h>
 #include <rbl/logger.h>
 
 #define L_STATE_EAGAIN 22

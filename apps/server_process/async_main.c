@@ -3,6 +3,7 @@
 #include <rbl/logger.h>
 #include <stdio.h>
 #include <getopt.h>
+#include <errno.h>
 // #include <mcheck.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -30,11 +31,14 @@ void sig_handler(int signo)
     }
 }
 int main(int argc, char** argv) {
+
     if (signal(SIGINT, sig_handler) == SIG_ERR) {
-        printf("sync_app.c main signal() failed");
+        int errno_saved = errno;
+        printf("sync_app.c main line:%d signal() failed errno: %d %s\n", __LINE__, errno_saved, strerror(errno_saved));
     }
     if (signal(SIGABRT, sig_handler) == SIG_ERR) {
-        printf("sync_app.c main signal() failed");
+        int errno_saved = errno;
+        printf("sync_app.c main line:%d signal() failed errno: %d %s\n", __LINE__, errno_saved, strerror(errno_saved));
     }
     //printf("Hello this is xr-junk main \n");
     int port = 9011;
@@ -61,14 +65,29 @@ int main(int argc, char** argv) {
     printf("host: %s port: %d nbr_processes: %d nbr_threads: %d \n",
            host, port, nbr_processes, nbr_threads
            );
+#define ONE_PROCESS
+#ifdef ONE_PROCESS
+    process_main(host, port, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection);
+#else
+
     int child_pid;
     for (int p = 0; p < nbr_processes; p++) {
         if ((child_pid = fork()) == 0) {
-            process_main(host, port, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection);
+            for (int k = 0; k < 5; k++) {
+                printf("child process %d\n", getpid());
+                sleep(20);
+            }
+            // process_main(host, port, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection);
             exit(0);
         }
     }
-    while (wait(NULL) > 0);
+    pid_t wpid;
+    sleep(20);
+    while ((wpid = wait(NULL)) > 0) {
+        printf("Child process %d terminated \n", wpid);
+    }
+#endif
+    printf("All processes finished\n");
 }
 static void usage()
 {

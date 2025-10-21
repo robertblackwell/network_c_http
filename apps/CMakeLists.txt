@@ -1,11 +1,11 @@
 set(SERVER_APP_SRC
     server_apps/echo_app.h
     server_apps/echo_app.c
-    server/async_main.c
-    server/async_process_main.c
-    server/async_process_main.h
-    server/server_ctx.h
-    server/server_ctx.c
+    server_process/async_main.c
+    server_process/async_process_main.c
+    server_process/async_process_main.h
+    server_process/server_ctx.h
+    server_process/server_ctx.c
 
     tcp/tcp_stream.h
     tcp/tcp_stream_internal.h
@@ -25,8 +25,8 @@ set(SERVER_APP_SRC
     msg/demo_msg_parser.c
 )
 set(verify_src
-        sync_msg_stream/sync_msg_stream.c
-        sync_msg_stream/sync_msg_stream.h
+        mstream/mstream.c
+        mstream/mstream.h
 
         msg/newline_msg.h
         msg/newline_msg.c
@@ -40,10 +40,11 @@ set(verify_src
         client/verify_main.c
         client/verify_thread_context.c
         client/verify_thread_context.h
+        client/verify_client_thread_function.c
         client/verify_statistics.c
         client/verify_statistics.h
 
-        client_verify_apps/verify_app.c
+#        client_verify_apps/verify_app.c
 )
 function(my_function arg_name1 arg_name2)
     # Function body
@@ -75,9 +76,9 @@ function(build_client NAME APP_SELECTION MSG_SELECTION)
     target_include_directories(${TARGET} PUBLIC ${C_HTTP_INCLUDE_PATHS} ${C_HTTP_PROJECT_DIR}/apps})
     target_link_libraries(${TARGET} PUBLIC ${C_HTTP_LINK_LIBRARIES})
 endfunction()
-build_server("echo_newline" "APP_SELECT_ECHO" "MSG_SELECT_ECHO")
-build_server("echo_demo" "APP_SELECT_ECHO" "MSG_SELECT_DEMO")
-build_client("echo_newline" "APP_SELECT_ECHO" "MSG_SELECT_ECHO")
-build_client("echo_demo" "APP_SELECT_ECHO" "MSG_SELECT_DEMO")
+build_server("server_newline" "APP_SELECT_ECHO" "MSG_SELECT_ECHO")
+build_server("server_demo" "APP_SELECT_ECHO" "MSG_SELECT_DEMO")
+build_client("verify_newline" "APP_SELECT_ECHO" "MSG_SELECT_ECHO")
+build_client("verify_demo" "APP_SELECT_ECHO" "MSG_SELECT_DEMO")
 
 

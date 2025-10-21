@@ -57,11 +57,8 @@ set(echo_test_src
 	${C_HTTP_PROJECT_DIR}/apps/server_apps/echo_app.h
 	${C_HTTP_PROJECT_DIR}/apps/server_apps/echo_app.c
 
- 	server/server_ctx.h
-	server/server_ctx.c
-
-#	helpers/local_create_bound_socket.c
-#	helpers/local_create_bound_socket.h
+	${C_HTTP_PROJECT_DIR}/apps/server_process/server_ctx.h
+	${C_HTTP_PROJECT_DIR}/apps/server_process/server_ctx.c
 
 	${C_HTTP_PROJECT_DIR}/apps/mstream/mstream.h
 	${C_HTTP_PROJECT_DIR}/apps/mstream/mstream.c

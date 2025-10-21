@@ -9,11 +9,7 @@
 #include <rbl/logger.h>
 #include <src/common/utils.h>
 #include <src/common/socket_functions.h>
-#include "server_ctx.h"
-
-#define APP_NEW(rl, sock) echo_app_new(rl, sock)
-#define APP_RUN(app_ref, app_instance_done_cb, ctx) echo_app_run(app_ref, app_instance_done_cb, ctx)
-#define APP_FREE(app_ref) echo_app_free(app_ref)
+#include <apps/server_apps/echo_app.h>
 
 #define L_STATE_EAGAIN 22
 #define L_STATE_READY 33
@@ -24,7 +20,6 @@
 static void handle_new_socket(void* server, int sock, int error);
 static void postable_start(RunloopRef rl, void* arg);
 static void app_instance_done_cb(void* app, void* server, int error);
-
 
 ServerCtxRef server_ctx_new(RunloopRef rl, int listener_fd)
 {
@@ -40,9 +35,7 @@ void server_ctx_init(ServerCtxRef server_ctx, RunloopRef rl, int fd)
     RBL_SET_TAG(ServerCtx_TAG, server_ctx)
     RBL_SET_END_TAG(ServerCtx_TAG, server_ctx)
     server_ctx->runloop_ref = rl;
-    // server_ctx->app_interface = app_interface;
     server_ctx->tcp_listener_ref = tcp_listener_new(server_ctx->runloop_ref, fd);
-    // runloop_listener_init(server_ctx->rl_listener_ref, server_ctx->runloop_ref, fd);
     server_ctx->l_state = L_STATE_INITIAL;
     server_ctx->connection_list = List_new();
 }
@@ -92,7 +85,7 @@ static void handle_new_socket(void* server, int new_sock, int error)
     // int nbsock = socket_set_blocking(sock);
     RBL_LOG_FMT("handle_new_socket ctx: %p sock: %d ", ctx, new_sock)
     RunloopRef rl = tcp_listener_get_runloop(ctx->tcp_listener_ref);
-    void* app_ref = APP_NEW(rl, new_sock);
+    EchoAppRef app_ref = APP_NEW(rl, new_sock);
     if(error == 0) {
         List_add_back(ctx->connection_list, app_ref);
         APP_RUN(app_ref, app_instance_done_cb, ctx);
@@ -108,43 +101,11 @@ static void handle_new_socket(void* server, int new_sock, int error)
 static void app_instance_done_cb(void* app, void* server, int error)
 {
     ServerCtxRef ctx = server;
+    EchoAppRef app_ref = app;
     RBL_CHECK_TAG(ServerCtx_TAG, ctx)
     RBL_CHECK_END_TAG(ServerCtx_TAG, ctx)
     ListIterator itr = List_find(ctx->connection_list, app);
     assert(itr != NULL);
     List_itr_remove(ctx->connection_list, &itr);
-    APP_FREE(app);
-}
-int local_create_bound_socket(int port, const char *host)
-{
-    struct sockaddr_in server;
-    memset(&server, 0, sizeof(server));
-    socket_handle_t tmp_socket;
-    server.sin_family = AF_INET; // or AF_INET6 (address family)
-    server.sin_port = htons(port);
-    server.sin_addr.s_addr = inet_addr("127.0.0.1");
-    int result;
-    int yes = 1;
-
-    if((tmp_socket = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-        printf("socket call failed with errno %d \n", errno);
-        assert(0);
-    }
-    if((result = setsockopt(tmp_socket, SOL_SOCKET, SO_REUSEPORT  , &yes, sizeof(yes))) != 0) {
-        printf("setsockopt call failed with errno %d \n", errno);
-        assert(0);
-    }
-    if((result = setsockopt(tmp_socket, SOL_SOCKET, SO_REUSEADDR  , &yes, sizeof(yes))) != 0) {
-        printf("setsockopt call failed with errno %d \n", errno);
-        assert(0);
-    }
-    if((result = bind(tmp_socket, (struct sockaddr *) &server, sizeof(server))) != 0) {
-        printf("bind call failed with errno %d \n", errno);
-        assert(0);
-    }
-//    if((result = listen(tmp_socket, SOMAXCONN)) != 0) {
-//        printf("listen call failed with errno %d \n", errno);
-//        assert(0);
-//    }
-    return tmp_socket;
+    APP_FREE(app_ref);
 }

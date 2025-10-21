@@ -1,4 +1,4 @@
-#include <sync_msg_stream/sync_msg_stream.h>
+#include <mstream/mstream.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -9,7 +9,7 @@
 #include "verify_getopt.h"
 #include "verify_thread_context.h"
 
-void verify_app_run(SyncMsgStreamRef stream, VerifyThreadContextRef ctx);
+void verify_app_run(MStreamRef stream, VerifyThreadContextRef ctx);
 
 #define NBR_PROCESSES 1
 #define NBR_THREADS 8
@@ -18,7 +18,7 @@ void verify_app_run(SyncMsgStreamRef stream, VerifyThreadContextRef ctx);
 #define MAX_ROUNDTRIPS_PER_THREAD (NBR_CONNECTIONS_PER_THREAD * NBR_ROUNDTRIPS_PER_CONNECTION)
 #define MAX_RESPONSE_TIMES (NBR_THREADS * MAX_ROUNDTRIPS_PER_THREAD)
 
-void* threadfn(void* data);
+void* verify_client_thread_function(void* data);
 int main(int argc, char* argv[])
 {
 
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
     for(int t = 0; t < nbr_threads; t++) {
         VerifyThreadContext* ctx = verify_ctx_new(port, t, nbr_roundtrips_per_connection, nbr_connections_per_thread, nbr_threads);
         tctx[t] = ctx;
-        pthread_create(&(workers[t]), NULL, threadfn, (void*)ctx);
+        pthread_create(&(workers[t]), NULL, verify_client_thread_function, (void*)ctx);
     }
     double tot_time = 0;
     /**
@@ -69,18 +69,17 @@ int main(int argc, char* argv[])
     printf("Nbr threads : %d  nbr connections per thread: %d nbr of requests per connection: %d av time %f \n\n", nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection, av_time);
     printf("Response times mean: %f stddev: %f total nbr roundtrips: %d \n", avg, stddev, total_roundtrips);
 }
-void* threadfn(void* data)
-{
-    VerifyThreadContext* ctx = (VerifyThreadContext*)data;
-    rta_start_measurement(ctx->response_times_ref);
-    MSG_PARSER_REF parser = MSG_PARSER_NEW();
-    for(int i = 0; i < ctx->max_connections_per_thread; i++) {
-        SyncMsgStreamRef stream = sync_msg_stream_new(parser);
-        sync_msg_stream_connect(stream, "127.0.0.1", ctx->port);
-        verify_ctx_reset_connection_round_trip_count(ctx);
-        verify_app_run(stream, ctx);
-        sync_msg_stream_free(stream);
-    }
-    rta_end_measurement(ctx->response_times_ref);
-    return NULL;
-}
+// void* threadfn(void* data)
+// {
+//     VerifyThreadContext* ctx = (VerifyThreadContext*)data;
+//     rta_start_measurement(ctx->response_times_ref);
+//     MSG_PARSER_REF parser = MSG_PARSER_NEW();
+//     for(int i = 0; i < ctx->max_connections_per_thread; i++) {
+//         MStreamRef stream = mstream_new("127.0.0.1", ctx->port);
+//         verify_ctx_reset_connection_round_trip_count(ctx);
+//         verify_app_run(stream, ctx);
+//         mstream_free(stream);
+//     }
+//     rta_end_measurement(ctx->response_times_ref);
+//     return NULL;
+// }
