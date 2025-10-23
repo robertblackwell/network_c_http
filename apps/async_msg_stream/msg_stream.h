@@ -1,6 +1,7 @@
 #ifndef H_msg_stream_h
 #define H_msg_stream_h
-#include <kqueue_runloop/runloop.h>
+#include <common/list.h>
+#include <runloop/runloop.h>
 #include <tcp/tcp_stream.h>
 #include <msg/msg_selection_header.h>
 

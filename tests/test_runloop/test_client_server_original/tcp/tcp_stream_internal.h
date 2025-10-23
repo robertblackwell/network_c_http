@@ -1,7 +1,7 @@
 #ifndef H_tcp_stream_internal_h
 #define H_tcp_stream_internal_h
 #include <common/iobuffer.h>
-#include <kqueue_runloop/runloop.h>
+#include <runloop/runloop.h>
 #include "tcp_stream.h"
 
 #define RD_STATE_INITIAL 11

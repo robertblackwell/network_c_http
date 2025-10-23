@@ -1,7 +1,6 @@
 #ifndef H_tcp_stream_h
 #define H_tcp_stream_h
-#include <kqueue_runloop/runloop.h>
-#include <kqueue_runloop/runloop_internal.h>
+#include <runloop/runloop.h>
 #include <common/iobuffer.h>
 
 #ifdef __cplusplus
@@ -35,7 +34,7 @@ void tcp_close(TcpStreamRef tcp);
 
 TcpListenerRef tcp_listener_new(RunloopRef rl, int fd);
 void tcp_listener_init(TcpListenerRef listener_ref, RunloopRef rl, int fd);
-void tcp_listener_deinit(TcpListenerRef listener_ref);
+// void tcp_listener_deinit(TcpListenerRef listener_ref);
 void tcp_listener_free(TcpListenerRef listener_ref);
 void tcp_accept(TcpListenerRef tcp_listener_ref, TcpAcceptCallback cb, void* arg);
 RunloopRef tcp_listener_get_runloop(TcpListenerRef tcp_listener_ref);

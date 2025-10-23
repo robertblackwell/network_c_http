@@ -33,7 +33,8 @@ void tcp_stream_deinit(TcpStreamRef t)
 {
     RBL_CHECK_TAG(TcpStream_TAG, t)
     RBL_CHECK_END_TAG(TcpStream_TAG, t)
-    runloop_stream_deinit(t->rlstream_ref);
+    assert(0);
+    // runloop_stream_deinit(t->rlstream_ref);
 }
 void tcp_stream_free(TcpStreamRef t)
 {

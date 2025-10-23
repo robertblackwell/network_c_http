@@ -8,7 +8,7 @@
 #include <unistd.h>
 #include <tcp/tcp_stream.h>
 #include <tcp/tcp_stream_internal.h>
-#include <kqueue_runloop/runloop.h>
+#include <runloop/runloop.h>
 #include <rbl/logger.h>
 
 #define L_STATE_EAGAIN 22

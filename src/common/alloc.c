@@ -8,11 +8,11 @@
 void* eg__alloc(size_t n)
 {
     void* p = malloc(n);
-    #ifdef __APPLE__
-    int x = malloc_size(p);
-    #else
-    int x = malloc_usable_size(p);
-    #endif
+    // #ifdef __APPLE__
+    // int x = malloc_size(p);
+    // #else
+    // int x = malloc_usable_size(p);
+    // #endif
     return p;
 }
 void eg__free(void* p)

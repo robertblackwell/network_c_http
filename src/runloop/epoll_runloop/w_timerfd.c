@@ -1,6 +1,5 @@
 #include <rbl/macros.h>
-#include <runloop/epoll_runloop/runloop.h>
-#include <runloop/epoll_runloop/rl_internal.h>
+#include <runloop/epoll_runloop/runloop_internal.h>
 #include <time.h>
 #include <sys/timerfd.h>
 #include <unistd.h>

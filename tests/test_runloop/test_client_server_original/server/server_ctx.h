@@ -16,8 +16,7 @@
 #include <common/iobuffer.h>
 #include <common/socket_functions.h>
 #include <common/list.h>
-#include <kqueue_runloop/runloop.h>
-#include <kqueue_runloop/runloop_internal.h>
+#include <runloop/runloop.h>
 #include <rbl/check_tag.h>
 #include <msg/msg_stream.h>
 

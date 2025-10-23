@@ -29,7 +29,7 @@ static void callback_non_repeating(RunloopRef runloop, void* test_ctx_arg)
     double percent_error = fabs(100.0*(((double)(interval) - gap)/((double)(interval))));
     gap = percent_error;
     ctx_p->counter++;
-    RunloopEventRef tr = ctx_p->watcher;
+    RunloopTimerRef tr = ctx_p->watcher;
     runloop_timer_free(tr);
     RBL_LOG_FMT("counter : %d  gap: %f ", ctx_p->counter, gap);
 }
@@ -48,7 +48,7 @@ int test_timer_non_repeating()
     // previous call sets test_ctx_p_1->counter == 0
 
     RunloopRef runloop_ref = runloop_new();
-    RunloopEventRef tw_1 = runloop_timer_new(runloop_ref);
+    RunloopTimerRef tw_1 = runloop_timer_new(runloop_ref);
 
     TestCtx* test_ctx_p_1 = TestCtx_new(runloop_ref, tw_1, 1, 5, 100);
 

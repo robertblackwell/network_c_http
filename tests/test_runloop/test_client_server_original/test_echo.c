@@ -1,8 +1,10 @@
 
 #include <pthread.h>
+#ifdef APPLE_FLAG
 #include <sys/_pthread/_pthread_t.h>
+#endif
+#include <rbl/unittest.h>
 #include "server/server_ctx.h"
-#include "tests/test_runloop/test_listener/listener_ctx.h"
 
 typedef struct TestCtx {
     int     port;
@@ -60,19 +62,29 @@ void* client_thread_function(void* tctx) {
         const int status = connect(lfd, (struct sockaddr *)&server, sizeof server);
         assert(status == 0);
         for (int j = 0; j < ctx->nbr_msg_per_connection; j++) {
-            char send_msg[200] = "";
-            sprintf(send_msg, "Client %d connection: %d msg: %d", ctx->id, i, j);
-            char send_buffer[200];
-            sprintf(send_buffer, "%s\n", send_msg);
+            #if 1
+            char* send_msg_ptr = NULL;
+            int sl = asprintf(&send_msg_ptr, "Client %d connection: %d msg: %d", ctx->id, i, j);
+            #else
+            send_msg[300] = "";
+            snprintf(send_msg, 290, "Client %d connection: %d msg: %d", ctx->id, i, j);
+            char send_buffer[300];
+            snprintf(send_buffer, 290, "%s\n", send_msg);
             size_t lenx = strlen(send_buffer);
-            printf("sending len:%lu msg:%s", lenx, send_buffer);
-            send(lfd, send_buffer, lenx, 0);
-            char recieve_buffer[200];
-            recv(lfd, recieve_buffer, sizeof recieve_buffer, 0);
-            printf("[server] %s", recieve_buffer);
+            #endif
+            char* send_buff_ptr = NULL;
+            size_t sl2 = asprintf(&send_buff_ptr, "%s\n", send_msg_ptr);
+
+            printf("sending len:%lu msg:%s", sl2, send_buff_ptr);
+            send(lfd, send_buff_ptr, sl2, 0);
+            char receive_buffer[200];
+            recv(lfd, receive_buffer, sizeof receive_buffer, 0);
+            printf("[server] %s", receive_buffer);
             char test_buffer[200];
-            sprintf(test_buffer, "ServerResponse:[%s]\n\n", send_msg);
-            int ok = strcmp(test_buffer, recieve_buffer);
+            sprintf(test_buffer, "ServerResponse:[%s]\n\n", send_msg_ptr);
+            int ok = strcmp(test_buffer, receive_buffer);
+            // free(send_buff_ptr);
+            // free(send_msg_ptr);
             if(ok != 0) {
                 ctx->error_count++;
             }

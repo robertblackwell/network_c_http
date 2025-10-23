@@ -1,5 +1,5 @@
-#ifndef C_HTTP_RL_INTERNAL_H
-#define C_HTTP_RL_INTERNAL_H
+#ifndef C_HTTP_epoll_RL_INTERNAL_H
+#define C_HTTP_epoll_RL_INTERNAL_H
 #include <runloop/epoll_runloop/runloop.h>
 #include <runloop/epoll_runloop/rl_checktag.h>
 
@@ -36,27 +36,20 @@ int        FdTable_iterator(FdTableRef athis);
 int        FdTable_next_iterator(FdTableRef athis, int iter);
 uint64_t   FdTable_size(FdTableRef athis);
 
-// /**
-//  * A Functor is a generic callback - a function pointer (of type PostableFunction) and single anonymous argument.
-//  *
-//  * The significant thing is that the function pointer, points to a function that has the correct
-//  * signature for the RunList
-//  *
-// */
-//  struct Functor_s;
-// typedef struct Functor_s Functor, *FunctorRef;
-// FunctorRef Functor_new(PostableFunction f, void* arg);
-// void Functor_init(FunctorRef funref, PostableFunction f, void* arg);
-// void Functor_free(FunctorRef athis);
-// void Functor_call(FunctorRef athis, RunloopRef runloop_ref);
-// bool Functor_is_empty(FunctorRef f);
-// void Functor_dealloc(void **p);
-// struct Functor_s
-// {
-// //    RunloopWatcherBaseRef wref; // this is borrowed do not free
-//     PostableFunction f;
-//     void *arg;
-// };
+/**
+ * A Functor is a generic callback - a function pointer (of type PostableFunction) and single anonymous argument.
+ *
+ * The significant thing is that the function pointer, points to a function that has the correct
+ * signature for the RunList
+ *
+*/
+FunctorRef Functor_new(PostableFunction f, void* arg);
+void Functor_init(FunctorRef funref, PostableFunction f, void* arg);
+void Functor_free(FunctorRef athis);
+void Functor_call(FunctorRef athis, RunloopRef runloop_ref);
+bool Functor_is_empty(FunctorRef f);
+void Functor_dealloc(void **p);
+
 typedef struct FunctorList_s {
 //    char       tag[RBL_TAG_LENGTH];
     RBL_DECLARE_TAG;
@@ -92,6 +85,7 @@ struct Runloop_s {
     FunctorListRef          ready_list;
     RBL_DECLARE_END_TAG;
 };
+#if 0
 /**
  * This include file holds the definition of structs related to file descriptor events.
  *
@@ -115,6 +109,7 @@ typedef struct EventfdQueue_s {
     RBL_DECLARE_END_TAG;
 } EventfdQueue;
 
+
 typedef struct AsioStream_s {
     /** This struct is diffenrent to most watchers as it is no a sub class of Watcher
      * hence it must declare its own openning tag */
@@ -136,7 +131,6 @@ typedef struct AsioStream_s {
     RBL_DECLARE_END_TAG;
 } AsioStream, *AsioStreamRef;
 
-#if 0
 /**
  * RunloopWatcherBase - a generic observer object
  */

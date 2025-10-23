@@ -32,10 +32,10 @@ typedef struct WriteCtx_s {
     int                 outbuffer_max_length;
     int                 outbuffer_length;
     RunloopStreamRef    stream_ref;
-    RunloopEventRef     timer_ref;
+    RunloopTimerRef     timer_ref;
     RBL_DECLARE_END_TAG;
 } WriteCtx;
-void WriteCtx_init(WriteCtx* this, int fd, RunloopStreamRef swatcher, RunloopEventRef twatcher, int max);
+void WriteCtx_init(WriteCtx* ctx, int fd, RunloopStreamRef swatcher, RunloopTimerRef twatcher, int max);
 
 
 typedef struct WriterTable_s {
@@ -46,10 +46,10 @@ typedef struct WriterTable_s {
 } WriterTable;
 
 
-void WriterTable_init(WriterTable* this);
+void WriterTable_init(WriterTable* wtref);
 WriterTable* WriterTable_new();
-void WriterTable_free(WriterTable* this);
-void WriterTable_add_fd(WriterTable* this, int fd, int max, int interval_ms);
+void WriterTable_free(WriterTable* wtref);
+void WriterTable_add_fd(WriterTable* wtref, int fd, int max, int interval_ms);
 void wrtr_callback(RunloopStreamRef watch, void* arg, uint64_t event);
 void* writer_thread_func(void* arg);
 #endif

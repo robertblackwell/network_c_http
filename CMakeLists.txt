@@ -4,9 +4,6 @@ cmake_minimum_required(VERSION 3.16)
 ##
 ## That is - knows nothing about installing this project
 ##
-# if(APPLE)
-# 	set(CMAKE_C_COMPILER "gcc-15")
-# endif()
 ##
 ## Project 
 ## name  version
@@ -86,12 +83,21 @@ set (CHTTP_CXX_FLAGS "${CHTTP_CXX_FLAGS} -DCH_TAG_CHECK_ON")
 #		paranoid - trying to provoke errors
 set (CHTTP_C_FLAGS "${CHTTP_CXX_FLAGS} -DCH_SCRIBBLE")
 set (CHTTP_CXX_FLAGS "${CHTTP_CXX_FLAGS} -DCH_SCRIBBLE")
+# 
+# Detect OS
+# 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	message(STATUS "Building on Linux")
 	set(LINUX_FLAG on)
 	set(CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DLINUX_FLAG")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+	message(STATUS "Building on Darwin")
+	set(DARWIN_FLAG on)
 	set(APPLE_FLAG on)
-	set(CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DLINUX_FLAG")
+	set(CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DAPPLE_FLAG")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
+	message(STATUS "Building on Windows")
+	set(WINDOWS_FLAG on)
 endif()
 
 #CH_ASYNC_SINGLE_THREAD
@@ -152,7 +158,6 @@ set(CMAKE_C_STANDARD 11)
 if(DEFINED CMAKE_DL_LIBS)
     set(C_HTTP_DL_LIB_SO libdl.so)
 endif()
-
 set(C_HTTP_PROJECT_DIR       ${C_HTTP_SOURCE_DIR})
 ## location of project header and source files
 set(C_HTTP_SOURCE_NAME       src)
@@ -244,7 +249,7 @@ include(CTest)
 enable_testing()
 
 add_subdirectory(src)
-add_subdirectory(apps)
+# add_subdirectory(apps)
 add_subdirectory(tests)
 #add_subdirectory(sync_server_app)
 #add_subdirectory(verifier)

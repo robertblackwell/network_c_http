@@ -1,7 +1,6 @@
 #ifndef H_tcp_stream_h
 #define H_tcp_stream_h
-#include <kqueue_runloop/runloop.h>
-#include <kqueue_runloop/runloop_internal.h>
+#include <runloop/runloop.h>
 
 #include <common/iobuffer.h>
 

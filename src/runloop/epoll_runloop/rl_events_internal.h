@@ -1,6 +1,6 @@
-#ifndef C_HTTP_RL_EVENTS_INTERNAL_H
-#define C_HTTP_RL_EVENTS_INTERNAL_H
-#include "runloop.h"
+#ifndef C_HTTP_EPOLL_RL_EVENTS_INTERNAL_H
+#define C_HTTP_EPOLL_RL_EVENTS_INTERNAL_H
+#include "runloop_internal.h"
 #include "rl_checktag.h"
 
 #include <pthread.h>
@@ -41,21 +41,7 @@ struct RunloopWatcherBase_s {
     RunloopRef            runloop;
     void*                 context;
     int                   fd;
-    /**
-     * function that knows how to free the specific sub type of RunloopWatcherBase from a general ref.
-     * Each derived type must provide this function when an instance is created or initializez.
-     * In the case of RunloopTimerfd and RunloopEventfd watchers must also close the fd
-     */
     void(*free)(RunloopWatcherBaseRef);
-    /**
-     * first level handler function
-     * each derived type provides thier own type specific handler when an instance is created
-     * or initialized and must cast the first parameter to their own specific type of watcher
-     * inside the handler.
-     *
-     * This handler will be called directly from the epoll_wait code inside runloop.c
-     * its job is to decode the event and call the client code handle(s) for each event type
-    */
     void(*handler)(RunloopWatcherBaseRef watcher_ref, uint64_t event);
 };
 /**
@@ -103,6 +89,22 @@ typedef struct RunloopListener_s {
     RBL_DECLARE_END_TAG;
 } RunloopListener;
 
+typedef struct EventfdQueue_s {
+    /** This struct is not a sub struct of Watcher hence it must declare its own openning tag*/
+    RBL_DECLARE_TAG;
+    FunctorListRef      list;
+    pthread_mutex_t     queue_mutex;
+#ifdef C_HTTP_EFD_QUEUE
+#else
+    int                 pipefds[2];
+#endif
+    int                 readfd;
+    int                 writefd;
+    int                 id;
+    RBL_DECLARE_END_TAG;
+} EventfdQueue;
+
+
 /**
  * RunloopQueueWatcher
  */
@@ -139,7 +141,7 @@ struct InterthreadQueue_s {
     RunloopRef runloop;
     RunloopQueueWatcherRef qwatcher_ref;
     RBL_DECLARE_END_TAG;
-};// InterthreadQueue_s;, InterthreadQueue, *InterthreadQueueRef;
+} ;//InterthreadQueue_s, InterthreadQueue, *InterthreadQueueRef;
 
 /**
  * RunloopTimer
@@ -156,7 +158,7 @@ struct RunloopTimer_s {
     void*                   timer_postable_arg;
     RBL_DECLARE_END_TAG;
 };
-
+#if 0
 typedef struct RunLoopEvent_s {
     RBL_DECLARE_TAG;
     RunloopRef            runloop;
@@ -227,6 +229,6 @@ typedef struct RunLoopEvent_s {
 
     };
 } RunLoopEvent, *RunLoopEventRef;
-
+#endif
 
 #endif

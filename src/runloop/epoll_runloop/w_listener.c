@@ -1,5 +1,4 @@
-#include "runloop.h"
-#include "rl_internal.h"
+#include "runloop_internal.h"
 #include <common/socket_functions.h>
 #include <assert.h>
 #include <stdio.h>
@@ -145,7 +144,7 @@ void runloop_listener_verify(RunloopListenerRef athis)
     LISTNER_CHECK_TAG(athis)
     LISTNER_CHECK_END_TAG(athis)
 }
-
+#if 0
 /****************************************************************************************************************
  * start of asio_listener code
  *****************************************************************************************************************/
@@ -226,3 +225,4 @@ static void on_listening_postable(RunloopRef rl, void* asio_listener_arg)
         cb(cb_arg, sock2, 0);
     }
 }
+    #endif

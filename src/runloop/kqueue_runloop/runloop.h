@@ -14,11 +14,7 @@ typedef struct  RunloopEvent_s RunloopEvent, *RunloopEventRef,
                 RunloopListener, *RunloopListenerRef,
                 RunloopStream, *RunloopStreamRef,
                 RunloopUserEvent, *RunloopUserEventRef;
-
-typedef struct RunloopWatcherBase_s RunloopWatcherBase, *RunloopWatcherBaseRef;       // Base object for objects that wait for an fd event
-typedef struct RunloopEventfd_s RunloopEventFd, *RunloopEventFdRef;
-// typedef struct AsioStream_s AsioStream, *AsioStreamRef;
-// typedef struct AsioListener_s AsioListener, *AsioListenerRef;
+typedef struct RunloopWatcherBase_s RunloopWatcherBase, *RunloopWatcherBaseRef;   
 typedef struct EventQueue_s EventQueue, * EventQueueRef;
 typedef struct InterthreadQueue_s InterthreadQueue, *InterthreadQueueRef;
 typedef struct RunloopQueueWatcher_s RunloopQueueWatcher, *RunloopQueueWatcherRef;
@@ -46,7 +42,6 @@ typedef uint64_t EventMask, RunloopTimerEvent;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Runloop interface
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 RunloopRef runloop_get_threads_runloop();
 RunloopRef runloop_new(void);
 void runloop_free(RunloopRef athis);
@@ -74,7 +69,6 @@ void runloop_timer_rearm_old(RunloopTimerRef lrevent, PostableFunction cb, void*
 void runloop_timer_rearm(RunloopTimerRef lrevent);
 void runloop_timer_deregister(RunloopTimerRef lrevent);
 RunloopRef runloop_timer_get_runloop(RunloopTimerRef lrevent);
-/** Convenience interface for timers*/
 RunloopTimerRef runloop_timer_set(RunloopRef rl, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
 void runloop_timer_clear(RunloopRef rl, RunloopTimerRef lrevent);
 void runloop_timer_checktag(RunloopTimerRef lrevent);
@@ -100,10 +94,6 @@ int runloop_listener_get_fd(RunloopListenerRef lrevent);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 RunloopStreamRef runloop_stream_new(RunloopRef runloop, int fd);
 void runloop_stream_init(RunloopStreamRef lrevent, RunloopRef runloop, int fd);
-/**
- * runloop_stream_free() & runloop_stream_deinit() will close the associated file descriptor
- * and disarm and deregister the event with epoll/kqueue
- */
 void runloop_stream_free(RunloopStreamRef lrevent);
 void runloop_stream_deinit(RunloopStreamRef lrevent);
 void runloop_stream_register(RunloopStreamRef lrevent);
@@ -127,11 +117,9 @@ void runloop_stream_checktag(RunloopStreamRef lrevent);
 /* *
  * kqueue provides a facility to create and wait on an event source that is not attached to any fd/file/pipe/device
  * and to "fire" such events explicitly.
- * 
  * One of the variants of the RunloopEvent struct and related functions use the kqueue facility to provide a
  * generalized mechanism for creating custom events that can be fired and notified
  * using the standard kqueue feature.
- *
  */
 RunloopUserEventRef runloop_user_event_new(RunloopRef runloop);
 void runloop_user_event_init(RunloopUserEventRef athis, RunloopRef runloop);
@@ -151,145 +139,21 @@ int runloop_user_event_get_fd(RunloopUserEventRef this);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // User Event Queue
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-/** 
- *
- * A RunloopEventQueue is a queue that allows one thread to run a callback function on the
- * runloop of another thread. The runloop mechanism provides a queue that is dedicated to inter thread
- * communication and the queue data structure itself is protected by a mutex.
- * 
- * The act of adding an element to the queue causes a user_event to be triggered
- * in the receiver thread so that queue synchronisation interacts well with the other events
- * managed by a runloop.
- *
- * The actual implementation of this mechanism comes in the form of two separate objects and sets of functions.
- *
- * A RunloopEventQueue is the object that implements the queue and it the means by which the sending thread adds to the queue
- * and the receiving thread retrieves items from the queue.
- *
- * A RunloopQueueWatcher object is a user_event object through which the receiver thread is notified
- * that the queue has entries.
- *
- * ### How does it work
- *
- * The way this mechanism works is that the receiving thread:
- *
- * -    create a runloop,
- * -    create a RunloopEventQueue,
- * -    create a RunloopQueueWatcher,
- * -    shares a pointer to the queue with one or more source threads through either a global var or a thread argument.
- * -    calls runloop_queue_watcher_async_read(qwatcher, on_queue_entry_callback, context_ptr)
- *
- * -    When a source threads adds an entry to the queue by calling eventfd_queue_add(queue, item)
- * -    the on_queue_entry_callback() function will be called with the first item on the queue.
- *
- * ### Receiving thread:
- *
- * ```
- * RunloopRef rl = runloop_new();
- * EventFdQueueRef queue = runloop_eventfd_queue_new()
- * RunloopQueueWatcher qwatcher = runloop_queue_watcher_new(runloop, queue);
- * runloop_queuewatcher_read(qwatcher, on_queue_entry_callback, context_ptr)
- *
- * ....
- *
- * ### The callabck function
- *
- * ```
- * void on_queue_entry_callback(RunloopRef rl, qitem, void* context_ptr)
- * {
- *      // do whatever is appropriate with the item
- * }
- *
- * ```
- *
- * ### Source thread:
- *
- * ....
- *
- * eventfd_queue_add(queue, item);
- *
- * ```
- *
- * ### What are queue entries ?
- *
- * The mechaism described above is __NOT__ a general purpose mechaism for sending data between threads, but rather
- * one that is specilaized for sending a pair of the form (PostableFunction, void* arg) to a runloop.
- *
- * Thus entries that can be exchanged using an EventfdQueue are always and only a datatype called a `Functor`
- * and they are always transfered __BY VALUE__.
- *
- * For an example of this working see test_q_asio and test_q
- *
- */
-
-/**
- * Allocate the memory for an EventfdQueue and initialize that memory.
- *
- * @return a EventfdQueueRef
- */
 EventQueueRef runloop_event_queue_new(RunloopRef runloop, EventQueueRef this);
-/**
- * Initialize already allocated memory as a valid EventfdQueue
- * @param runloop
- * @param this
- */
 void runloop_event_queue_init(RunloopRef runloop, EventQueueRef this);
-/**
- * Deallocate all objects owned by the EventfdQueue including items on the queue
- * but not the memory holding the values used by the eventfdqueue object.
- *
- * @param this
- */
 void runloop_event_queue_deinit(EventQueueRef this);
-/**
- * Free all memory associated with `this` EventfdQueue
- * @param athis
- */
 void  runloop_event_queue_free(EventQueueRef athis);
-/**
- * Add a Functor item to an instance of an EventfdQueue.
- *
- *
- * @param athis
- * @param item  Passed in and added to the queue by value
- */
 void  runloop_event_queue_add(EventQueueRef athis, Functor item);
-
-
-/**
- * The following 3 functions are aprt of a low level api for event queues.
- */
 Functor runloop_event_queue_remove(EventQueueRef athis);
 int   runloop_event_queue_readfd(EventQueueRef athis);
 RunloopRef runloop_event_queue_get_runloop(EventQueueRef athis);
 
-/** Queue Watcher
- *
- * A runloop_queue_watcher is the mechanism a thread uses to recieve an event whenever
- * a new entry is added to the queue by the same or a different thread.
- */
-/**
- * By now you should know how these 4 functions work and how they interact.
- */
 RunloopQueueWatcherRef runloop_queue_watcher_new(RunloopRef runloop, EventQueueRef qref);
 void runloop_queue_watcher_init(RunloopQueueWatcherRef qw, RunloopRef runloop, EventQueueRef qref);
 void runloop_queue_watcher_deinit(RunloopQueueWatcherRef qw);
 void runloop_queue_watcher_free(RunloopQueueWatcherRef this);
 
 typedef void(*QueueWatcherReadCallbackFunction)(void* context_ptr, Functor item, int status);
-/**
- * This function initiates an asynchronous read of an item from an EventfdQueue via
- * the RunloopQueueWatcher that is associated with the EventQueue.
- *
- * When an item is available the callback function will be called
- * @param queue        The queue that will generate and event and from which to read an item
- * @param callback     A callback function that will be called when an item is available.
- *                     If status == 0 the read is successfull and the `item` 2nd argument to the
- *                     callback function is valid.
- *                     When status != 0 the second argument is invalid and the read failed.
- * @param context_ptr  This parameter is used by the caller to store any information that will provide
- *                     context that the callback function can use to access the variables that it needs access to.
- */
 void runloop_queue_watcher_async_read(RunloopQueueWatcherRef queue_watcher_ref, QueueWatcherReadCallbackFunction callback, void* context_ptr);
 
 void runloop_queue_watcher_register(RunloopQueueWatcherRef athis, PostableFunction postable_cb, void* postable_arg);

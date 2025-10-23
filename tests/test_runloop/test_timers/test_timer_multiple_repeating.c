@@ -22,7 +22,7 @@ static void callback_multiple_repeating_timers(RunloopRef runloop_ref, void* ctx
 {
     TestCtx* ctx_p = (TestCtx*) ctx_arg;
     long interval = ctx_p->interval_ms;
-    RunloopEventRef watcher = ctx_p->watcher;
+    RunloopTimerRef watcher = ctx_p->watcher;
     struct timespec tnow = current_time();
     double gap = time_diff(tnow, ctx_p->start_time);
     double percent_error = fabs(100.0*(((double)(interval) - gap)/((double)(interval))));
@@ -44,10 +44,10 @@ int test_timer_multiple_repeating()
 
     RunloopRef runloop_ref = runloop_new();
 
-    RunloopEventRef tw_1 = runloop_timer_new(runloop_ref);
+    RunloopTimerRef tw_1 = runloop_timer_new(runloop_ref);
     runloop_timer_register(tw_1, &callback_multiple_repeating_timers, test_ctx_p_1, 100, true);
 
-    RunloopEventRef tw_2 = runloop_timer_new(runloop_ref);
+    RunloopTimerRef tw_2 = runloop_timer_new(runloop_ref);
     runloop_timer_register(tw_2, &callback_multiple_repeating_timers, test_ctx_p_2, 100, true);
 
     runloop_run(runloop_ref, 10000);

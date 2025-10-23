@@ -2,110 +2,51 @@
 #define C_HTTP_EPOLL_RUNLOOP_H
 
 #include <stdint.h>
-#include <time.h>
 #include <stdbool.h>
 #include <stdint.h>
-/** \defgroup runloop Runloop
- * @{
- * ## Runloop
- * A Runloop is a device that:
- * -    uses Linux epoll to allow client code to watch for events on file descriptors, and
- * -    to schedule callback functions (via runloop_post())  to be run at some point in the future
- *
- * The key feature of the device is that many file descriptors can be monitored simultaiously,
- * and many callbacks can be waiting for execution. In this regard a reactor is like
- * a lightweight task scheduler
- *
- * To watch or observe a file descriptor for events an object of type RunloopWatcherBase (or derived from RunloopWatcherBase)
- * must be created and passed to the reactor.
- *
- * The RunloopWatcherBase holds at least 2 pieces of information:
- * -    a function to be called when an event of interest happens
- * -    optionally a context pointer for the callback function
- * in this sense the various watchers are generalizations of a callback closure
- *
- * For convenience a number of special purposes watchers/observers have been provided.
- */
-#pragma "Defining RunloopRef"
-struct Runloop_s;
+#include <time.h>
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Types -= forward declares
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 typedef struct Runloop_s Runloop, *RunloopRef;
-
-struct RunloopWatcherBase_s;
-/**
- * There are 5 types of events that can be waited for. They are:
- * -    timer, wait for it to expire
- * -    socket/pipe,  ready for read, ready for write
- * -    socket, ready for accept() call
- * -    a linux eventfd, wait for the fd to be triggered
- * -    interthread queue, wait for an entry to be added
- *
- * To use each type of event a specific type of opaque object must be created in order to perform such an event wait.
- *
- * There are some common elements shared between these 5 types of events and those
- * common elements are represented by the type RunloopWatcherBase.
- *
- * In other languages RunloopWatcherBase would be the base class with the other event objects inheriting from
- * this base object.
- *
-* Since C does not have inheritence the approach adopted is embedding. Thus a subclass is defined as follows:
-*
-*```
-* typedef struct SubClassOfEvent_s {
-    *      RunloopWatcherBase;
-    *      .....
-    *      other fields as required for the specific subclass
-            *      .....
-    * } SubClassOfEvent, *SubClassOfEventRef;
-*```
-* This means that a pointer to a SubClassOfEvent is also a pointer to a RunloopWatcherBase instance.
-*
-* For this to work the code must be compiled with the microsoft extension __-fms-extensions__.
-*/
-typedef struct RunloopWatcherBase_s RunloopWatcherBase, *RunloopWatcherBaseRef;       // Base object for objects that wait for an fd event
-
-struct Functor_s;
-typedef struct Functor_s Functor;
-
-typedef uint64_t EventMask, RunloopTimerEvent;
-
+typedef struct RunloopWatcherBase_s RunloopWatcherBase, *RunloopWatcherBaseRef;
+typedef struct RunloopTimer_s RunloopTimer,  *RunloopTimerRef;  
+typedef struct RunloopListener_s RunloopListener, * RunloopListenerRef;  
+typedef struct RunloopStream_s RunloopStream, *RunloopStreamRef;         
+typedef struct RunloopEventfd_s RunloopEventfd, *RunloopEventfdRef;      
+typedef struct EventfdQueue_s EventfdQueue, * EventfdQueueRef;
+typedef struct InterthreadQueue_s InterthreadQueue, *InterthreadQueueRef;
+typedef struct RunloopQueueWatcher_s RunloopQueueWatcher, *RunloopQueueWatcherRef; 
 /**
  * PostableFunction defines the call signature of functions that can be added to a runloops queue of
  * functions to be called. As such they represent the next step in an ongoing computation of a lightweight
  * "thread".
  */
 typedef void (*PostableFunction) (RunloopRef runloop_ref, void* arg);
+// typedef void(*AsioReadcallback)(void* arg, long length, int error_number);
+// typedef void(*AsioWritecallback)(void* arg, long length, int error_number);
+typedef void(*AcceptCallback)(void* arg, int accepted_fd, int errno);
 
-typedef void(*AsioReadcallback)(void* arg, long length, int error_number);
-typedef void(*AsioWritecallback)(void* arg, long length, int error_number);
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Functors - not sure why it this promonent
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+typedef struct Functor_s
+{
+//    RunloopWatcherBaseRef wref; // this is borrowed do not free
+    PostableFunction f;
+    void *arg;
+} Functor, *FunctorRef;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Runloop interface
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 RunloopRef runloop_get_threads_reactor();
-/**
- * Create a new instance of a Runloop.
- *
- * @return a pointer to a dynamically allocated Runloop object that has been initialized.
- */
 RunloopRef runloop_new(void);
-/**
- * Free the memory associated with an instance of a Runloop object, including any associated other objects
- * that are owned by the subject Runloop.
- * @param athis RunloopRef
- * @throws in athis is NULL
- */
 void       runloop_free(RunloopRef athis);
-
-/**
- * Initializes the memory pointed to by __athis__ to be a valid instance of a Runloop.
- *
- * @param athis Must point to a memory area of sufficient size.
- * @throws if athis is NULL
- */
 void       runloop_init(RunloopRef athis);
-/**
- * Frees the memory of all objects that the Runloop pointed to by athis holds ownership of.
- * @param athis a valid non NULL RunloopRef
- * @throws if athis is NULL
- */
 void       runloop_deinit(RunloopRef athis);
-
 void       runloop_close(RunloopRef athis);
 int        runloop_register(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref);
 int        runloop_deregister(RunloopRef athis, int fd);
@@ -114,99 +55,140 @@ int        runloop_run(RunloopRef athis, time_t timeout);
 void       runloop_post(RunloopRef athis, PostableFunction cb, void* arg);
 void       runloop_delete(RunloopRef athis, int fd);
 void       runloop_verify(RunloopRef r);
-/** @} */
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Timers
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+RunloopTimerRef runloop_timer_new(RunloopRef runloop_ref);
+void runloop_timer_init(RunloopTimerRef this, RunloopRef runloop);
+void runloop_timer_free(RunloopTimerRef athis);
+void runloop_timer_register(RunloopTimerRef athis, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
+void runloop_timer_update(RunloopTimerRef athis, uint64_t interval_ms, bool repeating);
+void runloop_timer_disarm(RunloopTimerRef athis);
+void runloop_timer_rearm_old(RunloopTimerRef athis, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
+void runloop_timer_rearm(RunloopTimerRef athis);
+void runloop_timer_deregister(RunloopTimerRef athis);
+RunloopRef runloop_timer_get_runloop(RunloopTimerRef athis);
+RunloopTimerRef runloop_timer_set(RunloopRef rl, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
+void runloop_timer_clear(RunloopRef rl, RunloopTimerRef timerref);
+void runloop_timer_checktag(RunloopTimerRef athis);
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Runloop Lsitener
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+RunloopListenerRef runloop_listener_new(RunloopRef runloop, int fd);
+void runloop_listener_free(RunloopListenerRef athis);
+void runloop_listener_init(RunloopListenerRef athis, RunloopRef runloop, int fd);
+void runloop_listener_deinit(RunloopListenerRef athis);
+void runloop_listener_register(RunloopListenerRef athis, PostableFunction postable, void* postable_arg);
+void runloop_listener_deregister(RunloopListenerRef athis);
+void runloop_listener_arm(RunloopListenerRef athis, PostableFunction postable, void* postable_arg);
+void runloop_listener_disarm(RunloopListenerRef athis);
+void runloop_listener_verify(RunloopListenerRef r);
+RunloopRef runloop_listener_get_runloop(RunloopListenerRef athis);
+int runloop_listener_get_fd(RunloopListenerRef this);
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// RunloopStream
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+RunloopStreamRef runloop_stream_new(RunloopRef runloop, int fd);
+void runloop_stream_free(RunloopStreamRef athis);
+void runloop_stream_init(RunloopStreamRef athis, RunloopRef runloop, int fd);
+void runloop_stream_deinit(RunloopStreamRef athis);
+void runloop_stream_register(RunloopStreamRef athis);
+void runloop_stream_deregister(RunloopStreamRef athis);
+void runloop_stream_arm_both(RunloopStreamRef athis,
+                             PostableFunction read_postable_cb, void* read_arg,
+                             PostableFunction write_postable_cb, void* write_arg);
+void runloop_stream_arm_read(RunloopStreamRef athis, PostableFunction postable_callback, void* arg);
+void runloop_stream_disarm_read(RunloopStreamRef athis);
+void runloop_stream_arm_write(RunloopStreamRef athis, PostableFunction postable_callback, void* arg);
+void runloop_stream_disarm_write(RunloopStreamRef athis);
+void runloop_stream_verify(RunloopStreamRef r);
+RunloopRef runloop_stream_get_runloop(RunloopStreamRef athis);
+int runloop_stream_get_fd(RunloopStreamRef this);
+void runloop_stream_checktag(RunloopStreamRef athis);
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// User Event
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /**
- * A Functor is a generic callback - a function pointer (of type PostableFunction) and single anonymous argument.
- *
- * The significant thing is that the function pointer, points to a function that has the correct
- * signature for the RunList
- *
-*/
- struct Functor_s;
-typedef struct Functor_s Functor, *FunctorRef;
-FunctorRef Functor_new(PostableFunction f, void* arg);
-void Functor_init(FunctorRef funref, PostableFunction f, void* arg);
-void Functor_free(FunctorRef athis);
-void Functor_call(FunctorRef athis, RunloopRef runloop_ref);
-bool Functor_is_empty(FunctorRef f);
-void Functor_dealloc(void **p);
-struct Functor_s
-{
-//    RunloopWatcherBaseRef wref; // this is borrowed do not free
-    PostableFunction f;
-    void *arg;
-};
+ * epoll provides a facility to create a file descriptor that is not attached to any file/pipe/device
+ * and to "fire" events on that file descriptor that can be waited for using the epoll call.
+ * This facility provides a mechanism to create and wait on arbitary event sources.
+ * 
+ */
+RunloopEventfdRef runloop_eventfd_new(RunloopRef runloop);
+void runloop_eventfd_init(RunloopEventfdRef athis, RunloopRef runloop);
+void runloop_eventfd_free(RunloopEventfdRef athis);
+void runloop_eventfd_register(RunloopEventfdRef athis);
+void runloop_eventfd_change_watch(RunloopEventfdRef athis, PostableFunction postable, void* arg, uint64_t watch_what);
+void runloop_eventfd_arm(RunloopEventfdRef athis, PostableFunction postable, void* arg);
+void runloop_eventfd_disarm(RunloopEventfdRef athis);
+void runloop_eventfd_fire(RunloopEventfdRef athis);
+void runloop_eventfd_clear_one_event(RunloopEventfdRef athis);
+void runloop_eventfd_clear_all_events(RunloopEventfdRef athis);
+void runloop_eventfd_deregister(RunloopEventfdRef athis);
+void runloop_eventfd_verify(RunloopEventfdRef r);
+RunloopRef runloop_eventfd_get_reactor(RunloopEventfdRef athis);
+int runloop_eventfd_get_fd(RunloopEventfdRef this);
 
-/**
- * The following include files provide the API for their specific type of event.
- *
- * The first of these RunloopWatcherBase in w_watcher_base.h is meant to be the common element of all event
- * objects and in other languages wold be the base class with the other event objects inheriting from
- * this base object.
- *
- * Since C does not have inheritence the approach adopted is embedding. Thus a subclass is defined as follows:
- *
- * ```
- * typedef struct SubClassOfEvent_s {
- *      RunloopWatcherBase;
- *      .....
- *      other fields as required for the specific subclass
- *      .....
- * } SubClassOfEvent, *SubClassOfEventRef;
- *
- * This means that a pointer to a SubClassOfEvent is also a pointer to a RunloopWatcherBase instance.
- *
- * For this to work the code must be compiled with the microsoft extension __-fms-extensions__.
- *
- * Note that these include files only hold forward decleration of their data structures
- */
-#include "w_watcher_base.h"
-#include "w_timer.h"
-#include "w_listener.h"
-#include "w_stream.h"
-#include "w_eventfd.h"
-#include "w_eventfd_queue.h"
-#include "w_interthread_queue.h"
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// User Event Queue
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+EventfdQueueRef runloop_eventfd_queue_new();
+void eventfd_queue_init(RunloopRef runloop, EventfdQueueRef this);
+void eventfd_queue_deinit(EventfdQueueRef this);
+void  runloop_eventfd_queue_free(EventfdQueueRef athis);
+void  runloop_eventfd_queue_add(EventfdQueueRef athis, Functor item);
+Functor runloop_eventfd_queue_remove(EventfdQueueRef athis);
+int   runloop_eventfd_queue_readfd(EventfdQueueRef athis);
+RunloopRef runloop_eventfd_queue_get_runloop(EventfdQueueRef athis);
 
-/**
- * The next include file provide details struct definitions for all the structured forward declared in
- * the previous group of header files.
- *
- * The details are all in one file because of the dependencies between the data structures which include struct
- * definitions not required to give the event object API.
- */
-// #include "rl_internal.h"
-/**
- * When coding in the C language, particularly using callback style it is very easy to misinterpret the data type
- * at the end of a pointer. In order to have runtime checking that points reference the type of object I think they
- * do, and to be able to see during debugging what type of object is at the end of a pointer. I have apllied a
- * technique I learned many years ago.
- *
- * The in-memory image of every object is bracketed by an known byte pattern that is different for each type of
- * object.
- *
- * Every time a pointer is interpreted as pointiing to a specific type of object the barckets are tested to
- * confirm that the object is the type that was expected. This is done with 6 macros which may be found in
- *
- * ```
- * rbl/checktags.h
- * ```
- * The macros are:
- * ```
- *  RBL_DECLARE_TAGE
- *  RBL_DECLARE_END_TAG
- *  RBL_SET_TAG
- *  RBL_SET_END_TAG
- *  RBL_CHECK_TAG
- *  RBL_CHECK_END_TAG
- * ```
- *
- * The last two macros abort the program is the correct tag is not found.
- *
- * In addition to aiding in the correct interpretation of pointers the bracketing nature of the tags
- * catches a lot of situations where the code writes off the end of an object or an object gets corrupted.
- *
- */
+RunloopQueueWatcherRef runloop_queue_watcher_new(RunloopRef runloop, EventfdQueueRef qref);
+void runloop_queue_watcher_init(RunloopQueueWatcherRef qw, RunloopRef runloop, EventfdQueueRef qref);
+void runloop_queue_watcher_deinit(RunloopQueueWatcherRef qw);
+void runloop_queue_watcher_free(RunloopQueueWatcherRef this);
+
+typedef void(*QueueWatcherReadCallbackFunction)(void* context_ptr, Functor item, int status);
+void runloop_queue_watcher_async_read(RunloopQueueWatcherRef queue_watcher_ref, QueueWatcherReadCallbackFunction callback, void* context_ptr);
+
+void runloop_queue_watcher_register(RunloopQueueWatcherRef athis, PostableFunction postable_cb, void* postable_arg);
+void runloop_queue_watcher_change_watch(RunloopQueueWatcherRef athis, PostableFunction postable_cb, void* arg, uint64_t watch_what);
+void runloop_queue_watcher_deregister(RunloopQueueWatcherRef athis);
+void runloop_queue_watcher_verify(RunloopQueueWatcherRef r);
+RunloopRef runloop_queue_watcher_get_reactor(RunloopQueueWatcherRef athis);
+int runloop_queue_watcher_get_fd(RunloopQueueWatcherRef this);
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Base event
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+RunloopRef runloop_watcher_base_get_runloop(RunloopWatcherBaseRef athis);
+int        runloop_watcher_base_get_fd(RunloopWatcherBaseRef this);
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Type safe - these macros provides functions to assert - that is crash if not - the types:
+//
+// -    RunloopRef
+// -    specific subtypes of RunloopEventRef
+//      - runloop_listener_verify(p)
+//      - runloop_signal_verify(p)
+//      - runloop_stream_verify(p)
+//      - runloop_timer_verify(p)
+//      - runloop_user_event_queue_verify(p)
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+#define RUNLOOP_VERIFY(p) runloop_verify(p, __FILE__, __LINE__);
+#define RUNLOOP_LISTENER_VERIFY(p) runloop_listener_verify(p, __FILE__, __LINE__);
+#define RUNLOOP_SIGNAL_VERIFY(p) runloop_signal_verify(p, __FILE__, __LINE__);
+#define RUNLOOP_STREAM_VERIFY(p) runloop_stream_verify(p, __FILE__, __LINE__);
+#define RUNLOOP_TIMER_VERIFY(p) runloop_timer_verify(p, __FILE__, __LINE__);
+#define RUNLOOP_USER_EVENT_VERIFY(p) runloop_user_event_verify(p, __FILE__, __LINE__);
+#define RUNLOOP_USER_EVENT_QUEUE_VERIFY(p) runloop_user_event_queue_verify(p, __FILE__, __LINE__);
+#define RUNLOOP_VERIFY(p) runloop_verify(p, __FILE__, __LINE__);
+
 #include "rl_checktag.h"
 #endif

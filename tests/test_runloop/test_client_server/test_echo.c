@@ -1,6 +1,8 @@
 
 #include <pthread.h>
+#ifdef APPLE_FLAG
 #include <sys/_pthread/_pthread_t.h>
+#endif
 #include <rbl/unittest.h>
 #include <common/socket_functions.h>
 #include "test_ctx.h"

@@ -20,7 +20,7 @@
 static void posted_from_post_cb(RunloopRef runloop_ref, void* arg)
 {
     TestCtx* ctx_p = arg;
-    RunloopEventRef tw =  ctx_p->watcher; // (RunloopEventRef)w;
+    RunloopTimerRef tw =  ctx_p->watcher; // (RunloopEventRef)w;
     RBL_LOG_FMT(" arg: %p  counter: %d", arg, ctx_p->counter);
     if(ctx_p->counter >= ctx_p->max_count) {
         RBL_LOG_MSG(" clear timer ");
@@ -42,7 +42,7 @@ static void posted_from_post_cb(RunloopRef runloop_ref, void* arg)
 static void callback_post(RunloopRef rl, void* ctx_arg)
 {
     TestCtx* ctx_p = (TestCtx*)ctx_arg;
-    RunloopEventRef watcher = ctx_p->watcher;
+    RunloopTimerRef watcher = ctx_p->watcher;
     long interval = ctx_p->interval_ms;
     struct timespec tnow = current_time();
     double gap = time_diff(tnow, ctx_p->start_time);
@@ -59,7 +59,7 @@ int test_timer_post()
     RunloopRef runloop_ref = runloop_new();
     long interval_ms = 100;
 
-    RunloopEventRef tw_1 = runloop_timer_new(runloop_ref);
+    RunloopTimerRef tw_1 = runloop_timer_new(runloop_ref);
     TestCtx* test_ctx_p = TestCtx_new(runloop_ref, tw_1, 0, 5, interval_ms);
     runloop_timer_register(tw_1, &callback_post, (void *) test_ctx_p, interval_ms, true);
     test_ctx_p->watcher = tw_1;
