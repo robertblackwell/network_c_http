@@ -1,4 +1,4 @@
-#include <http_in_c/http_protocol/http_sync_socket.h>
+#include <src/http_protocol/http_sync_socket.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -6,7 +6,7 @@
 #include <sys/time.h>
 #include <math.h>
 #include "http_verify_getopt.h"
-#include "http_in_c/common/verify_statistics.h"
+#include "src/common/verify_statistics.h"
 #include "http_verify_thread_context.h"
 #include "http_common/http_make_request_response.h"
 

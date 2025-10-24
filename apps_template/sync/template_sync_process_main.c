@@ -1,8 +1,8 @@
 #include "tmpl_sync_process_main.h"
 
-#include <http_in_c/tmpl_protocol/tmpl_sync_socket.h>
-#include <http_in_c/tmpl_protocol/tmpl_message.h>
-#include <http_in_c/common/socket_functions.h>
+#include <src/tmpl_protocol/tmpl_sync_socket.h>
+#include <src/tmpl_protocol/tmpl_message.h>
+#include <src/common/socket_functions.h>
 #include <rbl/logger.h>
 #include <rbl/macros.h>
 #include <stdio.h>

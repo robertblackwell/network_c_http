@@ -1,9 +1,9 @@
 #ifndef chttp_demo_connection_h
 #define chttp_demo_connection_h
-#include <http_in_c/runloop/runloop.h>
-#include <http_in_c/common/list.h>
-#include <http_in_c/common/iobuffer.h>
-#include <http_in_c/demo_protocol/demo_message_parser.h>
+#include <src/runloop/runloop.h>
+#include <src/common/list.h>
+#include <src/common/iobuffer.h>
+#include <src/demo_protocol/demo_message_parser.h>
 #include <rbl/check_tag.h>
 
 #define DemoConnection_TAG "DmCONN"

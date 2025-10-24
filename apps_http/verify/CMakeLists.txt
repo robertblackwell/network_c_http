@@ -4,8 +4,8 @@ add_executable(http_verify_app
 		../http_common/http_make_request_response.h
 		http_verify_getopt.c
 		http_verify_getopt.h
-        ../../http_in_c/common/verify_statistics.c
-        ../../http_in_c/common/verify_statistics.h
+        ../../src/common/verify_statistics.c
+        ../../src/common/verify_statistics.h
 		http_verify_thread_context.c
 		http_verify_thread_context.h
 		)

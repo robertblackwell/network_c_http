@@ -1,11 +1,11 @@
-#include <http_in_c/demo_protocol/demo_sync_socket.h>
+#include <src/demo_protocol/demo_sync_socket.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <pthread.h>
 #include <sys/time.h>
 #include <math.h>
-#include <http_in_c/common/verify_statistics.h>
+#include <src/common/verify_statistics.h>
 #include "demo_verify_getopt.h"
 #include "demo_verify_thread_context.h"
 #include "../demo_common/demo_make_request_response.h"

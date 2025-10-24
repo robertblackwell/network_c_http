@@ -1,4 +1,4 @@
-#include <http_in_c/tmpl_protocol/tmpl_sync_socket.h>
+#include <src/tmpl_protocol/tmpl_sync_socket.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>

@@ -10,9 +10,9 @@
 #include <sys/epoll.h>
 #include <rbl/unittest.h>
 #include <rbl/macros.h>
-#include <http_in_c/common/utils.h>
-#include <http_in_c/runloop/runloop.h>
-#include <http_in_c/runloop/rl_internal.h>
+#include <src/common/utils.h>
+#include <src/runloop/runloop.h>
+// #include <src/runloop/rl_internal.h>
 
 typedef struct QReader_s {
     RunloopRef      rdr_runloop_ref;
@@ -77,7 +77,7 @@ void queue_postable(RunloopRef rl, void* q_rdr_ctx_arg)
     QReaderRef rdr = (QReaderRef)q_rdr_ctx_arg;
     EventfdQueueRef queue = rdr->queue;
     RunloopQueueWatcherRef qw = rdr->queue_watcher;
-    Functor queue_data = runloop_eventfd_queue_remove(queue);
+    Functor queue_data = runloop_user_event_queue_remove(queue);
 
     WriterArgRef writer_arg_ref = (WriterArgRef)queue_data.arg;
 
@@ -138,7 +138,7 @@ void* writer_thread_func(void* arg)
         usleep(500000);
         WriterArgRef writer_arg_ref = writer_arg_new(wrtr, i);
         Functor func = {.f = (void*)&writer_post_function, .arg = (void*) writer_arg_ref};
-        runloop_eventfd_queue_add(wrtr->queue, func);
+        runloop_user_event_queue_add(wrtr->queue, func);
     }
     return NULL;
 }
@@ -166,7 +166,7 @@ void* writer_thread_func(void* arg)
 int test_q()
 {
     RunloopRef rdr_runloop_ref = runloop_new();
-    EventfdQueueRef queue = runloop_eventfd_queue_new();
+    EventfdQueueRef queue = runloop_user_event_queue_new();
     RunloopQueueWatcherRef qw = runloop_queue_watcher_new(rdr_runloop_ref, queue);
     QReaderRef rdr = queue_reader_new(rdr_runloop_ref, queue, qw, 10);
     QWriterRef wrtr = queue_writer_new(rdr_runloop_ref, queue, 10);

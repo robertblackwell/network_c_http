@@ -12,9 +12,8 @@
 
 #include <sys/epoll.h>
 #include <rbl/logger.h>
-#include <http_in_c/common/utils.h>
-#include <http_in_c/runloop/runloop.h>
-#include <http_in_c/runloop/rl_internal.h>
+#include <src/common/utils.h>
+#include <src/runloop/runloop.h>
 
 void async_socket_set_nonblocking(int socket);
 
@@ -89,7 +88,7 @@ void start_read(RunloopRef rl, void* ctx_arg)
 {
     ReadCtxRef ctx = ctx_arg;
     DemoConnectionRef cref = ctx->demo_conn_ref;
-    RBL_LOG_FMT("ctx_arg: %p  fd: %d", ctx_arg, cref->asio_stream_ref->fd)
+    RBL_LOG_FMT("ctx_arg: %p  fd: %d", ctx_arg, asio_stream_get_fd(cref->asio_stream_ref))
     demo_connection_read(cref, on_read_message, ctx);
 }
 static void on_connection_complete(void* arg)

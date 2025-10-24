@@ -1,14 +1,14 @@
 #ifndef C_HTTP_Tmpl_HANDLER_H
 #define C_HTTP_Tmpl_HANDLER_H
 #include <rbl/check_tag.h>
-#include <http_in_c/runloop/rl_internal.h>
-#include <http_in_c/common/list.h>
-#include <http_in_c/common/iobuffer.h>
-#include <http_in_c/tmpl_protocol/tmpl_connection.h>
-#include <http_in_c/tmpl_protocol/tmpl_server.h>
+#include <src/runloop/rl_internal.h>
+#include <src/common/list.h>
+#include <src/common/iobuffer.h>
+#include <src/tmpl_protocol/tmpl_connection.h>
+#include <src/tmpl_protocol/tmpl_server.h>
 
 #define TmplHandler_TAG "DmHDLR"
-#include <http_in_c/runloop/rl_checktag.h>
+#include <src/runloop/rl_checktag.h>
 
 typedef struct TmplHandler_s TmplHandler, *TmplHandlerRef;
 

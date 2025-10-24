@@ -14,11 +14,10 @@
 
 #include <sys/epoll.h>
 #include <math.h>
-#include <http_in_c/common/utils.h>
-#include <http_in_c/runloop/runloop.h>
-#include <http_in_c/runloop/rl_internal.h>
+#include <src/common/utils.h>
+#include <src/runloop/runloop.h>
 #include <rbl/check_tag.h>
-#include <http_in_c/demo_protocol/demo_connection.h>
+#include <src/demo_protocol/demo_connection.h>
 
 #define WriterTable_TAG "WrtTbl"
 #define WriteCtx_ATG "wrtCtx"

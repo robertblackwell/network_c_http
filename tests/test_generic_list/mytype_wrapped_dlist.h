@@ -8,7 +8,7 @@
 #define TYPE MyTypeA
 #define TYPED(THING) MyTypeA##THING
 #define PREFIX(THING) MyTypeAWList##THING
-#include <http_in_c/common/generics/dlist_wrapper_template.h>
+#include <src/common/generics/dlist_wrapper_template.h>
 //#include "dlist_wrapper_template.h"
 
 

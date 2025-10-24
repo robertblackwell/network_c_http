@@ -7,7 +7,7 @@
 #include <string.h>
 #include <rbl/unittest.h>
 #include <rbl/macros.h>
-#include <http_in_c/runloop/runloop.h>
+#include <src/runloop/runloop.h>
 #include <rbl/logger.h>
 #include "demo_read.h"
 #include "demo_write.h"

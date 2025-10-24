@@ -47,9 +47,9 @@ $text=<<<EOD
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
-#include <http_in_c/alloc.h>
-#include <http_in_c/list.h>
-#include <http_in_c/utils.h>
+#include <src/alloc.h>
+#include <src/list.h>
+#include <src/utils.h>
 //Internal - type used to build list
 
 struct {$node}_s {

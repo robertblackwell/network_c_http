@@ -3,11 +3,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <rbl/unittest.h>
-#include <http_in_c/common/cbuffer.h>
+#include <src/common/cbuffer.h>
 #include <rbl/logger.h>
-#include <http_in_c/common/list.h>
-#include <http_in_c//runloop/runloop.h>
-#include <http_in_c/runloop/rl_internal.h>
+#include <src/common/list.h>
+#include <src//runloop/runloop.h>
+#include <src/runloop/rl_internal.h>
 
 //typedef struct DummyObj_s {
 //    long value;

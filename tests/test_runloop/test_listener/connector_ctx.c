@@ -8,9 +8,9 @@
 #include <string.h>
 #include <errno.h>
 #include <rbl/unittest.h>
-#include <http_in_c/common/utils.h>
-#include <http_in_c/common/socket_functions.h>
-#include <http_in_c/sync/sync_client.h>
+#include <src/common/utils.h>
+#include <src/common/socket_functions.h>
+#include <src/sync/sync_client.h>
 
 void* connector_thread_func(void* arg)
 {

@@ -1,8 +1,8 @@
 #include "http_async_process_main.h"
 
-#include <http_in_c/http_protocol/http_server.h>
-#include <http_in_c/http_protocol/http_message.h>
-#include <http_in_c/common/socket_functions.h>
+#include <src/http_protocol/http_server.h>
+#include <src/http_protocol/http_message.h>
+#include <src/common/socket_functions.h>
 #include "../http_common/http_make_request_response.h"
 #include <rbl/logger.h>
 #include <stdio.h>

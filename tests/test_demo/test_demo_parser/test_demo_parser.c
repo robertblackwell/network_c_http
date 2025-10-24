@@ -5,8 +5,8 @@
 #include <string.h>
 #include <rbl/unittest.h>
 #include <rbl/logger.h>
-#include <http_in_c/http/kvpair.h>
-#include <http_in_c/demo_protocol/demo_message.h>
+#include <src/http/kvpair.h>
+#include <src/demo_protocol/demo_message.h>
 #include "test_harness.h"
 #include "run_list.c"
 // B002

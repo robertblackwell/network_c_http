@@ -1,9 +1,9 @@
 #ifndef chttp_http_connection_h
 #define chttp_http_connection_h
-#include <http_in_c/runloop/runloop.h>
-#include <http_in_c/common/list.h>
-#include <http_in_c/common/iobuffer.h>
-#include <http_in_c/http_protocol/http_message_parser.h>
+#include <src/runloop/runloop.h>
+#include <src/common/list.h>
+#include <src/common/iobuffer.h>
+#include <src/http_protocol/http_message_parser.h>
 #include <rbl/check_tag.h>
 
 #define HttpConnection_TAG "DmCONN"

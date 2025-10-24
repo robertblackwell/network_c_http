@@ -4,10 +4,10 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <assert.h>
-#include <http_in_c/common/cbuffer.h>
+#include <src/common/cbuffer.h>
 #include <rbl/logger.h>
 #include <rbl/unittest.h>
-#include <http_in_c/common/queue.h>
+#include <src/common/queue.h>
 
 typedef struct Params_s {
 	QueueRef qref;

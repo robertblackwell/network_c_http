@@ -1,15 +1,15 @@
 
 #include <assert.h>
 #include <stdio.h>
-#include <http_in_c/common/url_parser.h>
-#include <http_in_c/common/alloc.h>
+#include <src/common/url_parser.h>
+#include <src/common/alloc.h>
 #include <rbl/unittest.h>
-#include <http_in_c/common/cbuffer.h>
+#include <src/common/cbuffer.h>
 #include <rbl/logger.h>
-#include <http_in_c/common/list.h>
-#include <http_in_c/saved/sync_server.h>
-#include <http_in_c/http/header_list.h>
-#include <http_in_c/http_protocol/http_message.h>
+#include <src/common/list.h>
+#include <src/saved/sync_server.h>
+#include <src/http/header_list.h>
+#include <src/http_protocol/http_message.h>
 
 //https://github.com/uriparser/uriparser
 

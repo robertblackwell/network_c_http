@@ -9,9 +9,9 @@
 #include <math.h>
 #include <rbl/logger.h>
 #include <rbl/unittest.h>
-#include <http_in_c/common/utils.h>
-#include <http_in_c/runloop/runloop.h>
-#include <http_in_c/runloop/rl_internal.h>
+#include <src/common/utils.h>
+#include <src/runloop/runloop.h>
+// #include <src/runloop/rl_internal.h>
 
 #include "./timer_helpers.c"
 //
@@ -49,7 +49,7 @@ static void callback_post(RunloopRef rl, void* ctx_arg)
     ctx_p->start_time = tnow;
     double percent_error = fabs(100.0*(((double)(interval) - gap)/((double)(interval))));
     gap = percent_error;
-    RunloopRef reactor = watcher->runloop;
+    RunloopRef reactor = runloop_timer_get_runloop(watcher);
     RBL_LOG_FMT(" counter: %d gap: %f ", ctx_p->counter, gap);
     runloop_post(reactor, posted_from_post_cb, ctx_p);
 }

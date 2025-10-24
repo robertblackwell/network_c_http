@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
-#include <http_in_c/common/make_uuid.h>
+#include <src/common/make_uuid.h>
 #include "http_make_request_response.h"
 
 static BufferChainRef make_reply_body_from_request(HttpMessageRef request);

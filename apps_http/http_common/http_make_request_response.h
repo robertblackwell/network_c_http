@@ -1,6 +1,6 @@
 #ifndef C_HTTP_Http_MAKE_REQUEST_RESPONSE_H
 #define C_HTTP_Http_MAKE_REQUEST_RESPONSE_H
-#include <http_in_c/http_protocol/http_message.h>
+#include <src/http_protocol/http_message.h>
 
 HttpMessageRef http_make_request(char* url, bool keep_alive_flag);
 

@@ -1,4 +1,4 @@
-#include <http_in_c/tmpl_protocol/tmpl_server.h>
+#include <src/tmpl_protocol/tmpl_server.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -8,9 +8,9 @@
 #include <sys/epoll.h>
 #include <rbl/logger.h>
 #include <rbl/check_tag.h>
-#include <http_in_c/common/alloc.h>
-#include <http_in_c/common/utils.h>
-#include <http_in_c/common/socket_functions.h>
+#include <src/common/alloc.h>
+#include <src/common/utils.h>
+#include <src/common/socket_functions.h>
 #include "demo_handler.h"
 
 static TmplHandlerRef my_only_client;

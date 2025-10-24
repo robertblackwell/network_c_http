@@ -8,9 +8,9 @@
 #include <rbl/unittest.h>
 #include <rbl/check_tag.h>
 #include <rbl/macros.h>
-#include <http_in_c/common/utils.h>
-#include <http_in_c/runloop/runloop.h>
-#include <http_in_c/runloop/rl_internal.h>
+#include <src/common/utils.h>
+#include <src/runloop/runloop.h>
+// #include <src/runloop/rl_internal.h>
 //
 // Tests fdevent
 // start two threads
@@ -61,14 +61,14 @@ int test_fdevent_1()
 
     RunloopRef runloop_ref = runloop_new();
     RunloopTimerRef tw_1 = runloop_timer_new(runloop_ref);
-    RunloopEventfdRef fdev = runloop_eventfd_new(runloop_ref);
+    RunloopEventfdRef fdev = runloop_user_event_new(runloop_ref);
 
     TestCtx* test_ctx_p = TestCtx_new(runloop_ref, tw_1, fdev, 0, NBR_TIMES_FIRE);
 
     runloop_timer_register(tw_1, &timer_callback_1, (void *) test_ctx_p, 100, true);
     runloop_timer_disarm(tw_1);
-    runloop_eventfd_register(fdev);
-    runloop_eventfd_arm(fdev, &fdevent_postable, test_ctx_p);
+    runloop_user_event_register(fdev);
+    runloop_user_event_arm(fdev, &fdevent_postable, test_ctx_p);
     runloop_timer_rearm(tw_1);
     runloop_run(runloop_ref, 10000);
 
@@ -88,14 +88,14 @@ int test_fdevent_multiple()
 
     RunloopRef runloop_ref = runloop_new();
     RunloopTimerRef tw_1 = runloop_timer_new(runloop_ref);
-    RunloopEventfdRef fdev = runloop_eventfd_new(runloop_ref);
+    RunloopEventfdRef fdev = runloop_user_event_new(runloop_ref);
 
     TestCtx* test_ctx_p_1 = TestCtx_new(runloop_ref, tw_1, fdev, 0, 5);
     RunloopTimerRef tw_2 = runloop_timer_new(runloop_ref);
     TestCtx* test_ctx_p_2 = TestCtx_new(runloop_ref, tw_2, fdev, 0, 6);
 
-    runloop_eventfd_register(fdev);
-    runloop_eventfd_arm(fdev, &fdevent_postable, test_ctx_p_1);
+    runloop_user_event_register(fdev);
+    runloop_user_event_arm(fdev, &fdevent_postable, test_ctx_p_1);
 
 //    runloop_timer_register(tw_1, &callback_1, (void *) test_ctx_p_1, 1000, true);
 //    runloop_timer_disarm(tw_1);
@@ -127,11 +127,11 @@ static void timer_callback_1(RunloopRef rl, void* test_ctx_arg)
         RBL_LOG_MSG(" clear timer");
         runloop_close(ctx_p->runloop_ref);
 //        runloop_timer_deregister(watcher);
-//        runloop_eventfd_deregister(fdev);
+//        runloop_user_event_deregister(fdev);
     } else {
-        runloop_eventfd_fire(fdevent_ref);
+        runloop_user_event_fire(fdevent_ref);
         ctx_p->counter++;
-        runloop_eventfd_fire(fdevent_ref);
+        runloop_user_event_fire(fdevent_ref);
         ctx_p->counter++;
 
     }

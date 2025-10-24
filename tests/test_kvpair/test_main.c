@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <rbl/unittest.h>
 #include <rbl/logger.h>
-#include <http_in_c/http/kvpair.h>
+#include <src/http/kvpair.h>
 
 ///////////////////////////////////////////////////
 int test_kvpair_new()

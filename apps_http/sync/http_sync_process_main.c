@@ -1,8 +1,8 @@
 #include "http_sync_process_main.h"
 
-#include <http_in_c/http_protocol/http_sync_socket.h>
-#include <http_in_c/http_protocol/http_message.h>
-#include <http_in_c/common/socket_functions.h>
+#include <src/http_protocol/http_sync_socket.h>
+#include <src/http_protocol/http_message.h>
+#include <src/common/socket_functions.h>
 #include <rbl/logger.h>
 #include <rbl/macros.h>
 #include <stdio.h>

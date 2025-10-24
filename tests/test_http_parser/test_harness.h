@@ -1,10 +1,10 @@
 #ifndef c_http_test_parser_harness_h
 #define c_http_test_parser_harness_h
 #include <stdbool.h>
-#include <http_in_c/common/list.h>
-#include <http_in_c/http_protocol/http_message.h>
-//#include <http_in_c/saved/sync_reader.h>
-#include <http_in_c/http_protocol/http_message_parser.h>
+#include <src/common/list.h>
+#include <src/http_protocol/http_message.h>
+//#include <src/saved/sync_reader.h>
+#include <src/http_protocol/http_message_parser.h>
 
 /* Test input - is a list of blocks of text and some context so that these blocks can be
  * "read" and "processed" one at a time*/

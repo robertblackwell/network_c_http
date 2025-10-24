@@ -1,6 +1,6 @@
-#include <http_in_c/tmpl_protocol/tmpl_server.h>
-#include <http_in_c/tmpl_protocol/tmpl_message.h>
-#include <http_in_c/common/socket_functions.h>
+#include <src/tmpl_protocol/tmpl_server.h>
+#include <src/tmpl_protocol/tmpl_message.h>
+#include <src/common/socket_functions.h>
 #include <rbl/logger.h>
 #include <stdio.h>
 #include <getopt.h>

@@ -79,6 +79,13 @@ set (CHTTP_CXX_FLAGS "${CHTTP_CXX_FLAGS} -DCH_TAG_CHECK_ON")
 #		paranoid - trying to provoke errors
 set (CHTTP_C_FLAGS "${CHTTP_CXX_FLAGS} -DCH_SCRIBBLE")
 set (CHTTP_CXX_FLAGS "${CHTTP_CXX_FLAGS} -DCH_SCRIBBLE")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+	set(LINUX_FLAG on)
+	set(CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DLINUX_FLAG")
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+	set(APPLE_FLAG on)
+	set(CHTTP_C_FLAGS "${CHTTP_C_FLAGS} -DLINUX_FLAG")
+endif()
 
 #CH_ASYNC_SINGLE_THREAD
 # Forces the async server to run as a single threaded server. Hopefully a temporary
@@ -138,8 +145,8 @@ endif()
 
 set(C_HTTP_PROJECT_DIR       ${C_HTTP_SOURCE_DIR})
 ## location of project header and source files
-set(C_HTTP_SOURCE_NAME       c_http)
-set(C_HTTP_INCLUDE_NAME      c_http)
+set(C_HTTP_SOURCE_NAME       src)
+set(C_HTTP_INCLUDE_NAME      src)
 set(C_HTTP_TOOLS_NAME        tools)
 set(C_HTTP_LIB_NAME          c_http_library)
 set(C_HTTP_SOURCE_DIR        ${C_HTTP_PROJECT_DIR}/${C_HTTP_SOURCE_NAME})
@@ -161,8 +168,8 @@ endif()
 ## used by all compile steps to find headers
 set(C_HTTP_INCLUDE_PATHS 
 	${C_HTTP_PROJECT_DIR}
-	# ${C_HTTP_INCLUDE_DIR}
-	# ${C_HTTP_SOURCE_DIR}
+	${C_HTTP_INCLUDE_DIR}
+	${C_HTTP_SOURCE_DIR}
 	${C_HTTP_VENDOR_INCLUDEDIR}
 	${C_HTTP_VENDOR_SRCDIR}
 )
@@ -221,7 +228,7 @@ endif()
 include(CTest) 
 enable_testing()
 
-add_subdirectory(http_in_c)
+add_subdirectory(src)
 add_subdirectory(tests)
 #add_subdirectory(sync_server_app)
 #add_subdirectory(verifier)

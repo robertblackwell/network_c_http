@@ -1,0 +1,17 @@
+set(RUNLOOP_HEADER_FILES "")
+set(RUNLOOP_SOURCE_FILES "")
+
+if(LINUX_FLAG)
+	message("Include epoll_runloop")
+	add_subdirectory(epoll_runloop)
+elseif(APPLE_FLAG)
+	message("Include kqueue_runloop")
+	add_subdirectory(kqueue_runloop)
+endif()
+set(C_HTTP_LIBRARY_SOURCE_FILES ${C_HTTP_LIBRARY_SOURCE_FILES} ${RUNLOOP_SOURCE_FILES} PARENT_SCOPE)
+set(C_HTTP_LIBRARY_HEADER_FILES ${C_HTTP_LIBRARY_HEADER_FILES} ${RUNLOOP_HEADER_FILES} PARENT_SCOPE)
+
+message("RUNLOOP_SOURCE_FILES")
+foreach(F in ${RUNLOOP_SOURCE_FILES})
+	message("SOURCE FILE: ${F}")
+endforeach()

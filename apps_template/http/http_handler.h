@@ -1,14 +1,14 @@
 #ifndef C_HTTP_Http_HANDLER_H
 #define C_HTTP_Http_HANDLER_H
 #include <rbl/check_tag.h>
-#include <http_in_c/runloop/rl_internal.h>
-#include <http_in_c/common/list.h>
-#include <http_in_c/common/iobuffer.h>
-#include <http_in_c/http_protocol/http_connection.h>
-#include <http_in_c/http_protocol/http_server.h>
+#include <src/runloop/rl_internal.h>
+#include <src/common/list.h>
+#include <src/common/iobuffer.h>
+#include <src/http_protocol/http_connection.h>
+#include <src/http_protocol/http_server.h>
 
 #define HttpHandler_TAG "DmHDLR"
-#include <http_in_c/runloop/rl_checktag.h>
+#include <src/runloop/rl_checktag.h>
 
 typedef struct HttpHandler_s HttpHandler, *HttpHandlerRef;
 

@@ -12,10 +12,9 @@
 #include <errno.h>
 #include <sys/epoll.h>
 #include <rbl/logger.h>
-#include <http_in_c/common/utils.h>
-#include <http_in_c/runloop/runloop.h>
-#include <http_in_c//runloop/rl_internal.h>
-#include <http_in_c/demo_protocol/demo_connection.h>
+#include <src/common/utils.h>
+#include <src/runloop/runloop.h>
+#include <src/demo_protocol/demo_connection.h>
 void async_socket_set_nonblocking(int socket);
 
 /**
@@ -101,7 +100,7 @@ static void wrtr_wait_timer_fired(RunloopRef rl, void* ctx_p_arg)
     RBL_CHECK_TAG(WriteCtx_ATG, ctx)
     RBL_CHECK_END_TAG(WriteCtx_ATG, ctx)
     RBL_CHECK_TAG(DemoConnection_TAG, cref)
-    WTIMER_CHECK_TAG(ctx->timer_ref)
+    runloop_timer_checktag(ctx->timer_ref);
     RBL_LOG_FMT("test_io: Socket watcher wrtr_wait_timer_fired write_fd: %d", ctx->writefd);
     if(ctx->write_count > ctx->max_write_count) {
         demo_connection_close(cref);
@@ -139,7 +138,7 @@ void* writer_thread_func(void* arg)
 
         RBL_CHECK_TAG(WriteCtx_ATG, ctx)
         RBL_CHECK_END_TAG(WriteCtx_ATG, ctx)
-        WTIMER_CHECK_TAG(ctx->timer_ref);
+        runloop_timer_checktag(ctx->timer_ref);
     }
     runloop_run(runloop_ref, 10000000);
     return NULL;
