@@ -25,7 +25,7 @@ static void posted_from_post_cb(RunloopRef runloop_ref, void* arg)
     RBL_LOG_FMT(" arg: %p  counter: %d", arg, ctx_p->counter);
     if(ctx_p->counter >= ctx_p->max_count) {
         RBL_LOG_MSG(" clear timer ");
-        runloop_timer_deregister(tw);
+        runloop_timer_clear(ctx_p->runloop_ref, tw);
     } else {
         ctx_p->counter++;
     }

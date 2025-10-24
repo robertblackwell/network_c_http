@@ -12,6 +12,7 @@
 #define runloop_MAX_RUNLIST        1024
 #define runloop_MAX_ITQ            256
 #define runloop_MAX_WATCHERS       runloop_MAX_FDS
+#define runloop_MAX_EVENTS         runloop_MAX_WATCHERS*2
 #define runloop_FUNCTOR_LIST_MAX   runloop_MAX_ITQ
 #define runloop_MAX_EPOLL_FDS      runloop_MAX_FDS
 #define CBTABLE_MAX                runloop_MAX_FDS
@@ -21,6 +22,7 @@
 // enables use of eventfd rather than two pipe trick
 #define  runloop_eventfd_ENABLE
 
+typedef struct EventTable_s EventTable, *EventTableRef;
 
 struct FdTable_s;
 //===============
@@ -81,10 +83,14 @@ struct Runloop_s {
     bool                    closed_flag;
     bool                    runloop_executing;
     pid_t                   tid;
+    EventTableRef           event_table_ref;
     FdTableRef              table; // (int, CallbackData)
     FunctorListRef          ready_list;
     RBL_DECLARE_END_TAG;
 };
+
+void* rl_event_allocate(RunloopRef rl, size_t size_required);
+void  rl_event_free(RunloopRef rl, void* p);
 #if 0
 /**
  * This include file holds the definition of structs related to file descriptor events.

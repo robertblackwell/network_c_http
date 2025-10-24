@@ -52,9 +52,7 @@ static void runloop_epoll_ctl(RunloopRef athis, int op, int fd, uint64_t interes
     RUNLOOP_CHECK_TAG(athis)
     struct epoll_event epev = {
         .events = interest,
-        .data = {
-            .fd = fd,
-        }
+        .data = {.ptr = watcher}
     };
     // note epev.data is a union so the next line overites .fd = fd
     epev.data.ptr = watcher;
@@ -94,7 +92,7 @@ void runloop_init(RunloopRef athis) {
     runloop->runloop_executing = false;
     RBL_ASSERT((runloop->epoll_fd != -1), "epoll_create failed");
     RBL_LOG_FMT("runloop_new epoll_fd %d", runloop->epoll_fd);
-    runloop->table = FdTable_new();
+    runloop->event_table_ref = event_table_new();
     runloop->ready_list = functor_list_new(runloop_READY_LIST_MAX);
 }
 void runloop_close(RunloopRef athis)
@@ -105,11 +103,6 @@ void runloop_close(RunloopRef athis)
     int status = close(athis->epoll_fd);
     RBL_LOG_FMT("runloop_close status: %d errno: %d", status, errno);
     RBL_ASSERT((status != -1), "close epoll_fd failed");
-    int next_fd = FdTable_iterator(athis->table);
-    while (next_fd  != -1) {
-        close(next_fd);
-        next_fd = FdTable_next_iterator(athis->table, next_fd);
-    }
 }
 
 void runloop_free(RunloopRef athis)
@@ -119,7 +112,6 @@ void runloop_free(RunloopRef athis)
     if(! athis->closed_flag) {
         runloop_close(athis);
     }
-    FdTable_free(athis->table);
     functor_list_free(athis->ready_list);
     free(athis);
 }
@@ -134,34 +126,25 @@ int runloop_register(RunloopRef athis, int fd, uint32_t interest, RunloopWatcher
     RUNLOOP_CHECK_END_TAG(athis)
     RBL_LOG_FMT("fd : %d  for events %d", fd, interest);
     runloop_epoll_ctl(athis, EPOLL_CTL_ADD, fd, interest, wref);
-    FdTable_insert(athis->table, wref, fd);
     return 0;
 }
 int runloop_deregister(RunloopRef athis, int fd)
 {
     RUNLOOP_CHECK_TAG(athis)
     RUNLOOP_CHECK_END_TAG(athis)
-    RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
-    runloop_epoll_ctl(athis, EPOLL_CTL_DEL, fd, EPOLLEXCLUSIVE | EPOLLIN, NULL);
-    FdTable_remove(athis->table, fd);
     return 0;
 }
 
 int runloop_reregister(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref) {
     RUNLOOP_CHECK_TAG(athis)
     RUNLOOP_CHECK_END_TAG(athis)
-    RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
     runloop_epoll_ctl(athis, EPOLL_CTL_MOD, fd, interest, wref);
-    RunloopWatcherBaseRef wref_tmp = FdTable_lookup(athis->table, fd);
-    assert(wref == wref_tmp);
     return 0;
 }
 void runloop_delete(RunloopRef athis, int fd)
 {
     RUNLOOP_CHECK_TAG(athis)
     RUNLOOP_CHECK_END_TAG(athis)
-    RBL_ASSERT((FdTable_lookup(athis->table, fd) != NULL), "fd not in FdTable");
-    FdTable_remove(athis->table, fd);
 }
 void print_events(struct epoll_event events[], int count)
 {
@@ -184,23 +167,28 @@ int runloop_run(RunloopRef athis, time_t timeout) {
         RUNLOOP_CHECK_END_TAG(athis)
         time_t passed = time(NULL) - start;
 
-        if((FdTable_size(athis->table) == 0) &&((functor_list_size(athis->ready_list) == 0))) {
+        printf("runloop functor_list_size: %d event_table_number_in_user %zu \n",
+               functor_list_size(athis->ready_list),
+               event_table_number_in_use(athis->event_table_ref)
+        );
+        if(
+            ((functor_list_size(athis->ready_list) == 0))
+            &&(0 == event_table_number_in_use(athis->event_table_ref))
+        ) {
             // no more work to do - clean exit
             result = 0;
             goto cleanup;
         }
+
         int max_events = runloop_MAX_EPOLL_FDS;
         if(functor_list_size(athis->ready_list) == 0) {
             int nfds = epoll_wait(athis->epoll_fd, events, max_events, -1);
-            RBL_LOG_FMT("reactor epoll_wait returned nfds: %d fd[0]: %d fds active: %ld  ready_list_size:%d",
-                        nfds, events[0].data.fd,
-                        FdTable_size(athis->table), functor_list_size(athis->ready_list));
             time_t currtime = time(NULL);
             switch (nfds) {
                 case -1:
                     int saved_errno = errno;
                     if (errno == EINTR) {
-                        printf("reactor interrupted\n");
+                        printf("runloop interrupted\n");
                         result = -1;
                         goto cleanup;
                         continue;
@@ -222,17 +210,14 @@ int runloop_run(RunloopRef athis, time_t timeout) {
                         RUNLOOP_CHECK_END_TAG(athis)
 #if 1
                         RunloopWatcherBaseRef wr = events[i].data.ptr;
+                        // here check we got a valid event watcher
                         int fd = wr->fd;
 #else
                         int fd = events[i].data.fd;
                         void *arg = events[i].data.ptr;
 #endif
                         int mask = events[i].events;
-                        RBL_LOG_FMT("runloop_run loop fd: %d events: %x", fd, mask);
-                        RunloopWatcherBaseRef wref = FdTable_lookup(athis->table, fd);
-                        assert(wr == wref);
-                        wref->handler(wref, events[i].events);
-                        RBL_LOG_FMT("fd: %d", fd);
+                        wr->handler(wr, events[i].events);
                         // call handler
                         RUNLOOP_CHECK_TAG(athis)
                     }

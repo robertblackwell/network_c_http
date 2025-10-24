@@ -58,7 +58,7 @@ void runloop_listener_deinit(RunloopListenerRef athis)
 }
 RunloopListenerRef runloop_listener_new(RunloopRef runloop, int fd)
 {
-    RunloopListenerRef this = malloc(sizeof(RunloopListener));
+    RunloopListenerRef this = rl_event_allocate(runloop, sizeof(RunloopListener));
     runloop_listener_init(this, runloop, fd);
     return this;
 }
@@ -68,7 +68,7 @@ void runloop_listener_free(RunloopListenerRef athis)
     LISTNER_CHECK_END_TAG(athis)
     runloop_listener_verify(athis);
     close(athis->fd);
-    free((void*)athis);
+    rl_event_free(athis->runloop, athis);
 }
 void runloop_listener_register(RunloopListenerRef athis, PostableFunction postable, void* postable_arg)
 {

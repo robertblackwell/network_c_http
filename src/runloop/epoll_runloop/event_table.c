@@ -1,6 +1,4 @@
-#include <kqueue_runloop/event_table.c.h>
-#include <kqueue_runloop/runloop.h>
-#include <kqueue_runloop/rl_internal.h>
+#include "event_table.h"
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -63,6 +61,15 @@ void* event_table_get_entry(EventTableRef ot)
     (mp->m).my_index = ix; 
     return mp;
 }
+void* event_table_safe_get_entry(EventTableRef ot, size_t obj_size, const char* file, int line)
+{
+    assert(sizeof(MemorySlab) >= obj_size);
+    uint16_t ix = freelist_get(&(ot->free_list));
+    MemorySlab* mp = &(ot->memory[ix]);
+    (mp->m).my_index = ix; 
+    return mp;
+}
+
 void event_table_release_entry(EventTableRef ot, void* p)
 {
     MemorySlab* mp = (MemorySlab*)p;

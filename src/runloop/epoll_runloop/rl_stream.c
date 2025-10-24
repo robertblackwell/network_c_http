@@ -56,7 +56,7 @@ void runloop_stream_init(RunloopStreamRef this, RunloopRef runloop, int fd)
 }
 RunloopStreamRef runloop_stream_new(RunloopRef runloop, int fd)
 {
-    RunloopStreamRef this = malloc(sizeof(RunloopStream));
+    RunloopStreamRef this = rl_event_allocate(runloop, sizeof(RunloopStream));
     runloop_stream_init(this, runloop, fd);
     return this;
 }
@@ -65,7 +65,7 @@ void runloop_stream_free(RunloopStreamRef athis)
     SOCKW_SET_TAG(athis);
     SOCKW_SET_END_TAG(athis);
     close(athis->fd);
-    free((void*)athis);
+    rl_event_free(athis->runloop, athis);
 }
 void runloop_stream_register(RunloopStreamRef athis)
 {

@@ -90,6 +90,7 @@ void read_callback(RunloopRef rl, void* read_ctx_ref_arg)
     ctx->read_count++;
     if(ctx->read_count > ctx->max_read_count) {
         runloop_deregister(runloop_ref, runloop_stream_get_fd(stream));
+        runloop_stream_free(stream);
     } else {
         return;
     }

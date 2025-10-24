@@ -37,11 +37,11 @@ static void itqueue_postable(RunloopRef rl, void* itq_ref_arg)//(RunloopQueueWat
 
 InterthreadQueueRef itqueue_new(RunloopRef rl)
 {
-    InterthreadQueueRef itq_ref = malloc(sizeof(InterthreadQueue));
+    InterthreadQueueRef itq_ref = rl_event_allocate(rl, sizeof(InterthreadQueue));
     RBL_SET_TAG(InterThreadQ_TYPE, itq_ref);
     RBL_SET_END_TAG(InterThreadQ_TYPE, itq_ref)
     itq_ref->runloop = rl;
-    itq_ref->queue = runloop_user_event_queue_new();
+    itq_ref->queue = runloop_user_event_queue_new(rl);
     itq_ref->qwatcher_ref = runloop_queue_watcher_new(itq_ref->runloop, itq_ref->queue);
     runloop_queue_watcher_register(itq_ref->qwatcher_ref, &itqueue_postable, itq_ref);
     return itq_ref;
@@ -54,4 +54,8 @@ Functor itqueue_remove(InterthreadQueueRef qref)
 {
     Functor func = runloop_user_event_queue_remove(qref->queue);
     return func;
+}
+void itqueue_free(InterthreadQueueRef itq)
+{
+    rl_event_free(itq->runloop, itq);
 }

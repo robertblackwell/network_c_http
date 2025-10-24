@@ -104,7 +104,8 @@ static size_t fill_buffer(char* line, char* buffer, int max_len, int required_da
 void on_write_complete(void* ctx_arg, long bytes_written, int status)
 {
     WriteCtxRef ctx = ctx_arg;
-    runloop_timer_register(ctx->timer_ref, &wrtr_wait_timer_fired, (void *) ctx, ctx->interval_ms, false);
+    runloop_timer_rearm(ctx->timer_ref);
+//    runloop_timer_register(ctx->timer_ref, &wrtr_wait_timer_fired, (void *) ctx, ctx->interval_ms, false);
 }
 static void wrtr_wait_timer_fired(RunloopRef rl, void* ctx_p_arg)
 {
@@ -118,9 +119,11 @@ static void wrtr_wait_timer_fired(RunloopRef rl, void* ctx_p_arg)
     RBL_LOG_FMT("test_io: Socket watcher wrtr_wait_timer_fired write_fd: %d", ctx->writefd);
     if(ctx->write_count > ctx->max_write_count) {
         asio_stream_close(ctx->asiostream_ref);
+
     } else {
         ctx->write_count++;
         char tmp[200];
+        RBL_LOG_FMT("wrtr_wait_timer_fired write_count: %d", ctx->write_count);
         sprintf(tmp, "this is a line from writer %d count: %d\n", ctx->writer_index, ctx->write_count);
         size_t len = fill_buffer(tmp, ctx->outbuffer, ctx->outbuffer_max_length, 100000);
         asio_stream_write(ctx->asiostream_ref, ctx->outbuffer, strlen(ctx->outbuffer), &on_write_complete, ctx);

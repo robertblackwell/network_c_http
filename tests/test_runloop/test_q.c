@@ -92,7 +92,10 @@ void queue_postable(RunloopRef rl, void* q_rdr_ctx_arg)
     runloop_post(rl, pf, postable_arg);
 
     if (rdr->count >= rdr->expected_count) {
+//        RunloopRef rl = rdr->rdr_runloop_ref;
         runloop_queue_watcher_deregister(qw);
+        runloop_queue_watcher_free(qw);
+        runloop_close(rl);
     }
 
 }
@@ -166,7 +169,7 @@ void* writer_thread_func(void* arg)
 int test_q()
 {
     RunloopRef rdr_runloop_ref = runloop_new();
-    UserEventQueueRef queue = runloop_user_event_queue_new();
+    UserEventQueueRef queue = runloop_user_event_queue_new(rdr_runloop_ref);
     RunloopQueueWatcherRef qw = runloop_queue_watcher_new(rdr_runloop_ref, queue);
     QReaderRef rdr = queue_reader_new(rdr_runloop_ref, queue, qw, 10);
     QWriterRef wrtr = queue_writer_new(rdr_runloop_ref, queue, 10);

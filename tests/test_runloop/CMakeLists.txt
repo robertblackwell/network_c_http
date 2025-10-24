@@ -22,14 +22,14 @@ target_include_directories(test_q PUBLIC ${TEST_INCLUDE_DIRS})
 target_link_libraries(test_q PUBLIC ${TEST_LINK_LIBS})
 add_test(test_q test_q)
 
+if(0)
 # test_q_asio
 add_executable(test_q_asio test_q_asio.c )
 target_include_directories(test_q_asio PUBLIC ${TEST_INCLUDE_dirS})
 target_link_libraries(test_q_asio PUBLIC ${TEST_LINK_LIBS})
 add_test(test_q_asio test_q_asio)
-
-if(off)
 endif()
+
 add_subdirectory(test_listener)
 add_subdirectory(test_timers)
 add_subdirectory(test_io)

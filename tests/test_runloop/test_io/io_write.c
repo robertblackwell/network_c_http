@@ -121,6 +121,8 @@ static void wrtr_cb(RunloopRef rl, void* write_ctx_p_arg)
     if(ctx->write_count > ctx->max_write_count) {
         runloop_deregister(reactor, runloop_stream_get_fd(ctx->stream_ref));
         runloop_deregister(reactor, runloop_timer_get_fd(ctx->timer_ref));
+        runloop_stream_free(ctx->stream_ref);
+        runloop_timer_free(ctx->timer_ref);
         return;
     }
     // disarm writeable events on this fd

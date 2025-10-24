@@ -1,10 +1,9 @@
 
-#ifndef H_event_allocator_H
-#define H_event_allocator_H
-#include <kqueue_runloop/runloop.h>
-#include <kqueue_runloop/rl_internal.h>
-#include <kqueue_runloop/rl_events_internal.h>
+#ifndef H_runloop_epoll_event_allocator_H
+#define H_runloop_epoll_event_allocator_H
+#include "runloop_internal.h"
 #include <unistd.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -44,25 +43,28 @@ size_t freelist_size(FreeListRef fl);
 struct MemorySlab_s {
     struct {
         union {
-            RunloopEventRef     timer;
-            RunloopEventRef     listener;
-            RunloopStream       stream;
-            RunloopEvent        user_event;
-            RunloopEventRef     signal;
-
-            RunloopQueueEvent   qevent;
-            RunloopInterthreadQueueEvent itqevent;
-            RunloopQueueWatcher qwatcher;
-            RunloopEvent        runloop_event;
+            #ifdef LINUX_FLAG
+            RunloopTimer       timer;
+            RunloopListener    listener;
+            RunloopStream      stream;
+            RunloopUserEvent   user_event;
+            #elif APPLE_FLAG
+            RunloopSignal      signal;
+            RunloopEvent       runloop_event;
+            #endif
+            // RunloopQueueEvent   qevent;
+            // RunloopInterthreadQueueEvent itqevent;
+            // RunloopQueueWatcher qwatcher;
+            // RunloopEvent        runloop_event;
         };
         uint16_t    my_index; 
     } m;
 };
 
-struct EventTable_s {
+typedef struct EventTable_s {
     FreeList    free_list;
     MemorySlab  memory[EVT_MAX+1];
-};
+}EventTable, *EventTableRef;
 
 // create a new EventTable
 EventTableRef event_table_new();
@@ -70,11 +72,14 @@ EventTableRef event_table_new();
 void event_table_init(EventTableRef et);
 // get a free entry from an event table
 void* event_table_get_entry(EventTableRef et);
+void* event_table_safe_get_entry(EventTableRef et, size_t obj_size, const char* file, int line);
 // release an Event table entry back to the EventTable free list
 void event_table_release_entry(EventTableRef et, void* p);
 // returns true if there are any entries in use
 bool event_table_has_outstanding_events(EventTableRef et);
 // returns the number of EventTable entries in use
 size_t event_table_number_in_use(EventTableRef et);
+
+#define EVENT_TABLE_GET_ENTRY(event_table_ref, obj_size) event_table_safe_get_entry(event_table_ref, obj_size, __FILE__, __LINE__)
 
 #endif

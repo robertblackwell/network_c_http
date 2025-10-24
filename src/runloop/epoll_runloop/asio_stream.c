@@ -93,7 +93,6 @@ void asio_stream_close(AsioStreamRef cref)
      * @TODO - is this right
     runloop_stream_deregister(cref->runloop_stream_ref);
     */
-    FdTable_remove(cref->runloop_stream_ref->runloop->table, cref->fd);
     close(cref->fd);
     cref->fd = -1;
     cref->runloop_stream_ref->fd = -1;

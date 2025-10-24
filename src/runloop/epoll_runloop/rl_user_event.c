@@ -1,3 +1,4 @@
+#include <src/runloop/epoll_runloop/event_table.h>
 #include "runloop_internal.h"
 #include <rbl/macros.h>
 #include <assert.h>
@@ -30,13 +31,13 @@ static void handler(RunloopWatcherBaseRef fdevent_ref, uint64_t event)
 
     }
 }
-static void anonymous_free(RunloopWatcherBaseRef p)
-{
-    RunloopUserEventRef fdevp = (RunloopUserEventRef)p;
-    USER_EVENT_CHECK_TAG(fdevp)
-    USER_EVENT_CHECK_END_TAG(fdevp)
-    runloop_user_event_free(fdevp);
-}
+// static void anonymous_free(RunloopWatcherBaseRef p)
+// {
+//     RunloopUserEventRef fdevp = (RunloopUserEventRef)p;
+//     USER_EVENT_CHECK_TAG(fdevp)
+//     USER_EVENT_CHECK_END_TAG(fdevp)
+//     runloop_user_event_free(fdevp);
+// }
 void runloop_user_event_init(RunloopUserEventRef this, RunloopRef runloop)
 {
     RBL_ASSERT((this!=NULL), "this is NULL");
@@ -64,16 +65,12 @@ void runloop_user_event_init(RunloopUserEventRef this, RunloopRef runloop)
     #endif
 #endif
     this->runloop = runloop;
-    this->free = &anonymous_free;
+    // this->free = &anonymous_free;
     this->handler = &handler;
 }
 RunloopUserEventRef runloop_user_event_new(RunloopRef runloop)
 {
-    #if USE_EVENT_TABLE
-    RunloopUserEventRef this = event_table_get_entry(runloop_ref->event_table);
-    #else
-    RunloopUserEventRef this = malloc(sizeof(RunloopUserEvent));
-    #endif
+    RunloopUserEventRef this = rl_event_allocate(runloop, sizeof(RunloopUserEvent));
     runloop_user_event_init(this, runloop);
     return this;
 }
@@ -82,7 +79,7 @@ void runloop_user_event_free(RunloopUserEventRef athis)
     USER_EVENT_SET_TAG(athis);
     USER_EVENT_CHECK_TAG(athis)
     close(athis->fd);
-    free((void*)athis);
+    rl_event_free(athis->runloop, athis);
 }
 void runloop_user_event_register(RunloopUserEventRef athis)
 {

@@ -9,6 +9,9 @@
 #include <sys/epoll.h>
 #include <errno.h>
 #include <rbl/logger.h>
+#define TIMER_STATE_REGISTERED 11
+#define TIMER_STATE_NOT_REGISTERED 22
+#define TIMER_STATE_DISARMED 33
 
 static struct timespec current_time()
 {
@@ -49,7 +52,7 @@ static void handler(RunloopWatcherBaseRef watcher, uint64_t event)
     RBL_LOG_FMT("read() returned %d, res=%lx n", nread, ret);
 
     if(!timer_watcher->repeating) {
-        runloop_timer_deregister(timer_watcher);
+        runloop_timer_disarm(timer_watcher);
     }
     RBL_ASSERT((timer_watcher->timer_postable != NULL), "timer_handler should not be NULL");
     timer_watcher->timer_postable(timer_watcher->runloop, timer_watcher->timer_postable_arg);
@@ -68,20 +71,23 @@ void runloop_timer_init(RunloopTimerRef this, RunloopRef runloop)
     this->free = &anonymous_free;
     this->context = NULL;
     this->handler = &handler;
+    this->state = TIMER_STATE_NOT_REGISTERED;
     this->timer_postable = NULL;
     this->timer_postable_arg = NULL;
     this->interval = 0;
     this->repeating = false;
     this->fd = timerfd_create(CLOCK_REALTIME, TFD_CLOEXEC | TFD_NONBLOCK);
+    struct itimerspec its = {.it_value.tv_nsec=0,.it_value.tv_sec=0};//WTimerFd_update_interval(athis, athis->interval, athis->repeating);
+    // initialize timer to disarmed and non repeating
+    int flags = 0;
+    int rc = timerfd_settime(this->fd, flags, &its, NULL);
+    assert(rc == 0);
+
     RBL_LOG_FMT("runloop_timer_init fd: %d ", this->fd);
 }
 RunloopTimerRef runloop_timer_new(RunloopRef runloop_ref)
 {
-    #if USE_EVENT_TABLE
-    RunloopEventRef this = event_table_get_entry(runloop_ref->event_table);
-    #else
-    RunloopTimerRef this = malloc(sizeof(RunloopTimer));
-    #endif
+    RunloopTimerRef this = rl_event_allocate(runloop_ref, sizeof(RunloopTimer));
     runloop_timer_init(this, runloop_ref);
     return this;
 }
@@ -90,11 +96,7 @@ void runloop_timer_free(RunloopTimerRef athis)
     WTIMER_CHECK_TAG(athis)
     WTIMER_CHECK_END_TAG(athis)
     close(athis->fd);
-    #if USE_EVENT_TABLE
-    event_table_release_entry(athis->runloop->event_table, athis);
-    #else
-    free((void*)athis);
-    #endif
+    rl_event_free(athis->runloop, athis);
 }
 struct itimerspec WTimerFd_update_interval(RunloopTimerRef this, uint64_t interval_ms, bool repeating)
 {
@@ -133,6 +135,8 @@ void runloop_timer_register(RunloopTimerRef athis, PostableFunction cb, void* ct
     RBL_ASSERT((athis != NULL), "");
     WTIMER_CHECK_TAG(athis)
     WTIMER_CHECK_END_TAG(athis)
+    assert(athis->state != TIMER_STATE_REGISTERED);
+    athis->state = TIMER_STATE_REGISTERED;
     athis->interval = interval_ms;
     athis->repeating = repeating;
     // interpose our own handler to do repeating stuff
@@ -152,23 +156,28 @@ void runloop_timer_register(RunloopTimerRef athis, PostableFunction cb, void* ct
     int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
     assert(res ==0);
 }
-void runloop_timer_update(RunloopTimerRef athis, uint64_t interval_ms, bool repeating)
+void runloop_timer_update(RunloopTimerRef athis, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating)
 {
     WTIMER_CHECK_TAG(athis)
     WTIMER_CHECK_END_TAG(athis)
     uint32_t interest = 0;
     struct itimerspec its = WTimerFd_update_interval(athis, interval_ms, repeating);
     int flags = 0;
+    athis->timer_postable = cb;
+    athis->timer_postable_arg = ctx;
     int rc = timerfd_settime(athis->fd, flags, &its, NULL);
     assert(rc == 0);
     int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
     assert(res == 0);
 }
+
 void runloop_timer_disarm(RunloopTimerRef athis)
 {
     WTIMER_CHECK_TAG(athis)
     WTIMER_CHECK_END_TAG(athis)
-    struct itimerspec its = WTimerFd_update_interval(athis, athis->interval, athis->repeating);
+    assert(athis->state == TIMER_STATE_REGISTERED);
+    athis->state = TIMER_STATE_DISARMED;
+    struct itimerspec its = {.it_value.tv_nsec=0,.it_value.tv_sec=0};//WTimerFd_update_interval(athis, athis->interval, athis->repeating);
     int flags = 0;
     int rc = timerfd_settime(athis->fd, flags, &its, NULL);
     assert(rc == 0);
@@ -189,6 +198,8 @@ void runloop_timer_rearm(RunloopTimerRef athis)
 {
     WTIMER_CHECK_TAG(athis)
     WTIMER_CHECK_END_TAG(athis)
+    assert((athis->state == TIMER_STATE_DISARMED)||(athis->state == TIMER_STATE_REGISTERED));
+    athis->state = TIMER_STATE_REGISTERED;
     uint64_t interval_ms = athis->interval;
     bool repeating = athis->repeating;
     struct itimerspec its = WTimerFd_update_interval(athis, interval_ms, repeating);
@@ -201,6 +212,8 @@ void runloop_timer_deregister(RunloopTimerRef athis)
 {
     WTIMER_CHECK_TAG(athis)
     WTIMER_CHECK_END_TAG(athis)
+    assert(athis->state != TIMER_STATE_NOT_REGISTERED);
+    athis->state = TIMER_STATE_NOT_REGISTERED;
     RBL_LOG_FMT("runloop_timer_deregister this->fd : %d", athis->fd);
     int res = runloop_deregister(athis->runloop, athis->fd);
     if(res != 0) {

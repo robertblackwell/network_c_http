@@ -45,15 +45,16 @@ void runloop_user_event_queue_init(UserEventQueueRef athis)
     pthread_mutex_init(&(me->queue_mutex), NULL);
     mk_fds(me);
 }
-UserEventQueueRef runloop_user_event_queue_new()
+UserEventQueueRef runloop_user_event_queue_new(RunloopRef rl)
 {
-    UserEventQueueRef tmp = malloc(sizeof(UserEventQueue));
+    UserEventQueueRef tmp = rl_event_allocate(rl, sizeof(UserEventQueue));
     runloop_user_event_queue_init(tmp);
     return tmp;
 }
 void runloop_user_event_queue_free(UserEventQueueRef athis)
 {
-    free(athis);
+    RunloopRef rl = athis->runloop;
+    rl_event_free(rl, athis);
 }
 int runloop_user_event_queue_readfd(UserEventQueueRef athis)
 {

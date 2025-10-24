@@ -11,10 +11,13 @@
                 "${workspaceFolder}/vendor/src/**"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/clang",
-            "cStandard": "c11",
+            "compilerPath": "/usr/bin/gcc-11",
+            "cStandard": "gnu11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "clang-x64"
+            "intelliSenseMode": "linux-gcc-x64",
+            "compilerArgs": [
+                "-fms-extension"
+            ]
         }
     ],
     "version": 4

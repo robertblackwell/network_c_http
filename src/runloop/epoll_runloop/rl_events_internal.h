@@ -94,6 +94,7 @@ typedef struct UserEventQueue_s {
     RBL_DECLARE_TAG;
     FunctorListRef      list;
     pthread_mutex_t     queue_mutex;
+    RunloopRef          runloop;
 #ifdef C_HTTP_EFD_QUEUE
 #else
     int                 pipefds[2];
@@ -147,6 +148,7 @@ struct InterthreadQueue_s {
  * RunloopTimer
  */
 typedef uint64_t RunloopTimerEvent;
+
 struct RunloopTimer_s {
     /** The start tag is declared in the base struct
     RBL_DECLARE_TAG; */
@@ -156,6 +158,7 @@ struct RunloopTimer_s {
     bool                    repeating;
     PostableFunction        timer_postable;
     void*                   timer_postable_arg;
+    int                     state;
     RBL_DECLARE_END_TAG;
 };
 struct AsioStream_s {

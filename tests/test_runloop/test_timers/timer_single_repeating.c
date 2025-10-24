@@ -34,7 +34,7 @@ static void callback_repeating(RunloopRef runloop_ref, void* test_ctx_arg)
 
     if(ctx_p->counter >= ctx_p->max_count) {
         RBL_LOG_FMT(" clear timer watcher: %p", watcher);
-        runloop_timer_deregister(watcher);
+        runloop_timer_clear(ctx_p->runloop_ref, watcher);
     } else {
         RBL_LOG_FMT("callback_repeating counter: %d", ctx_p->counter);
         ctx_p->counter++;

@@ -41,7 +41,7 @@ void runloop_queue_watcher_init(RunloopQueueWatcherRef this, RunloopRef runloop,
 }
 RunloopQueueWatcherRef runloop_queue_watcher_new(RunloopRef runloop, UserEventQueueRef qref)
 {
-    RunloopQueueWatcherRef this = malloc(sizeof(RunloopQueueWatcher));
+    RunloopQueueWatcherRef this = rl_event_allocate(runloop, sizeof(RunloopQueueWatcher));
     runloop_queue_watcher_init(this, runloop, qref);
     return this;
 }
@@ -55,7 +55,7 @@ void runloop_queue_watcher_free(RunloopQueueWatcherRef this)
     QUEUE_WATCHER_CHECK_TAG(this)
     QUEUE_WATCHER_CHECK_END_TAG(this)
     close(this->fd);
-    free(this);
+    rl_event_free(this->runloop, this);
 }
 void runloop_queue_watcher_async_read(RunloopQueueWatcherRef this, QueueWatcherReadCallbackFunction cb, void* cb_context_arg)
 {

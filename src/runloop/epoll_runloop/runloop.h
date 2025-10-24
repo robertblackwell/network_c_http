@@ -9,11 +9,13 @@
 // Types -= forward declares
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 typedef struct Runloop_s Runloop, *RunloopRef;
+
 typedef struct RunloopWatcherBase_s RunloopWatcherBase, *RunloopWatcherBaseRef;
 typedef struct RunloopTimer_s RunloopTimer,  *RunloopTimerRef;  
 typedef struct RunloopListener_s RunloopListener, * RunloopListenerRef;  
 typedef struct RunloopStream_s RunloopStream, *RunloopStreamRef;         
 typedef struct RunloopUserEvent_s RunloopUserEvent, *RunloopUserEventRef;      
+
 typedef struct UserEventQueue_s UserEventQueue, * UserEventQueueRef;
 typedef struct InterthreadQueue_s InterthreadQueue, *InterthreadQueueRef;
 typedef struct RunloopQueueWatcher_s RunloopQueueWatcher, *RunloopQueueWatcherRef; 
@@ -65,7 +67,7 @@ RunloopTimerRef runloop_timer_new(RunloopRef runloop_ref);
 void runloop_timer_init(RunloopTimerRef this, RunloopRef runloop);
 void runloop_timer_free(RunloopTimerRef athis);
 void runloop_timer_register(RunloopTimerRef athis, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
-void runloop_timer_update(RunloopTimerRef athis, uint64_t interval_ms, bool repeating);
+void runloop_timer_update(RunloopTimerRef athis, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
 void runloop_timer_disarm(RunloopTimerRef athis);
 void runloop_timer_rearm_old(RunloopTimerRef athis, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
 void runloop_timer_rearm(RunloopTimerRef athis);
@@ -146,7 +148,7 @@ int runloop_user_event_get_fd(RunloopUserEventRef this);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // User Event Queue
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-UserEventQueueRef runloop_user_event_queue_new();
+UserEventQueueRef runloop_user_event_queue_new(RunloopRef runloop);
 void user_event_queue_init(RunloopRef runloop, UserEventQueueRef this);
 void user_event_queue_deinit(UserEventQueueRef this);
 void  runloop_user_event_queue_free(UserEventQueueRef athis);

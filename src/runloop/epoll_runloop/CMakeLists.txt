@@ -4,18 +4,20 @@ set(epoll_RUNLOOP_HEADER_FILES
 		${CMAKE_CURRENT_SOURCE_DIR}/runloop_internal.h
 		${CMAKE_CURRENT_SOURCE_DIR}/rl_internal.h
 		${CMAKE_CURRENT_SOURCE_DIR}/rl_events_internal.h
-#			${CMAKE_CURRENT_SOURCE_DIR}/event_allocator.h
+		${CMAKE_CURRENT_SOURCE_DIR}/event_table.h
 	)
 
 set(epoll_RUNLOOP_SOURCE_FILES
 	#aio runloop and aio_http/1.1 details
-		# ${CMAKE_CURRENT_SOURCE_DIR}/asio_stream.c
-		${CMAKE_CURRENT_SOURCE_DIR}/fd_map.c
-		${CMAKE_CURRENT_SOURCE_DIR}/fdtable.c
+		 ${CMAKE_CURRENT_SOURCE_DIR}/asio_stream.c
+		${CMAKE_CURRENT_SOURCE_DIR}/asio_listener.c
+#		${CMAKE_CURRENT_SOURCE_DIR}/fd_map.c
+#		${CMAKE_CURRENT_SOURCE_DIR}/fdtable.c
 		${CMAKE_CURRENT_SOURCE_DIR}/functor.c
 		${CMAKE_CURRENT_SOURCE_DIR}/functor_list.c
-		# ${CMAKE_CURRENT_SOURCE_DIR}/run_list.c
+		 ${CMAKE_CURRENT_SOURCE_DIR}/rl_allocator.c
         ${CMAKE_CURRENT_SOURCE_DIR}/runloop.c
+		${CMAKE_CURRENT_SOURCE_DIR}/event_table.c
 
 		${CMAKE_CURRENT_SOURCE_DIR}/w_watcher_base.c
 

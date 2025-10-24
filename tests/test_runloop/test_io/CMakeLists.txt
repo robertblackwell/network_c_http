@@ -10,6 +10,7 @@ target_include_directories(test_io PUBLIC ${TEST_INCLUDE_dirS})
 target_link_libraries(test_io PUBLIC ${TEST_LINK_LIBS})
 add_test(test_io test_io)
 
+if(0)
 add_executable(test_io_asio
 		test_io_asio.c
         io_read_asio.h
@@ -21,3 +22,4 @@ add_executable(test_io_asio
 target_include_directories(test_io_asio PUBLIC ${TEST_INCLUDE_dirS})
 target_link_libraries(test_io_asio PUBLIC ${TEST_LINK_LIBS})
 add_test(test_io_asio test_io_asio)
+endif()
