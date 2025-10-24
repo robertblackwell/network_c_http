@@ -28,7 +28,7 @@ static void handler(RunloopWatcherBaseRef watcher, uint64_t event)
      */
     queue_watcher_ref->queue_postable(queue_watcher_ref->runloop, queue_watcher_ref->queue_postable_arg);
 }
-void runloop_queue_watcher_init(RunloopQueueWatcherRef this, RunloopRef runloop, EventfdQueueRef qref)
+void runloop_queue_watcher_init(RunloopQueueWatcherRef this, RunloopRef runloop, UserEventQueueRef qref)
 {
     QUEUE_WATCHER_SET_TAG(this);
     QUEUE_WATCHER_SET_END_TAG(this)
@@ -39,7 +39,7 @@ void runloop_queue_watcher_init(RunloopQueueWatcherRef this, RunloopRef runloop,
     this->handler = &handler;
     this->context = this;
 }
-RunloopQueueWatcherRef runloop_queue_watcher_new(RunloopRef runloop, EventfdQueueRef qref)
+RunloopQueueWatcherRef runloop_queue_watcher_new(RunloopRef runloop, UserEventQueueRef qref)
 {
     RunloopQueueWatcherRef this = malloc(sizeof(RunloopQueueWatcher));
     runloop_queue_watcher_init(this, runloop, qref);

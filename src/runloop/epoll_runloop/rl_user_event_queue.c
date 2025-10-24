@@ -12,12 +12,12 @@
 #include <rbl/logger.h>
 #include <common/list.h>
 
-typedef EventfdQueue* EvfQueuePtr;
+typedef UserEventQueue* EvfQueuePtr;
 
 static void dealloc(void** p)
 {
 }
-static void mk_fds(EventfdQueueRef athis)
+static void mk_fds(UserEventQueueRef athis)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
 #ifdef runloop_eventfd_ENABLE
@@ -37,30 +37,30 @@ static void mk_fds(EventfdQueueRef athis)
     assert(errno == EAGAIN);
 
 }
-void runloop_user_event_queue_init(EventfdQueueRef athis)
+void runloop_user_event_queue_init(UserEventQueueRef athis)
 {
-    EVENTFD_SET_TAG(athis)
+    USER_EVENT_SET_TAG(athis)
     EvfQueuePtr me = (EvfQueuePtr)athis;
     me->list = functor_list_new(runloop_MAX_FDS);
     pthread_mutex_init(&(me->queue_mutex), NULL);
     mk_fds(me);
 }
-EventfdQueueRef runloop_user_event_queue_new()
+UserEventQueueRef runloop_user_event_queue_new()
 {
-    EventfdQueueRef tmp = malloc(sizeof(EventfdQueue));
+    UserEventQueueRef tmp = malloc(sizeof(UserEventQueue));
     runloop_user_event_queue_init(tmp);
     return tmp;
 }
-void runloop_user_event_queue_free(EventfdQueueRef athis)
+void runloop_user_event_queue_free(UserEventQueueRef athis)
 {
     free(athis);
 }
-int runloop_user_event_queue_readfd(EventfdQueueRef athis)
+int runloop_user_event_queue_readfd(UserEventQueueRef athis)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
     return me->readfd;
 }
-void runloop_user_event_queue_add(EventfdQueueRef athis, Functor item)
+void runloop_user_event_queue_add(UserEventQueueRef athis, Functor item)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
     pthread_mutex_lock(&(me->queue_mutex));
@@ -70,7 +70,7 @@ void runloop_user_event_queue_add(EventfdQueueRef athis, Functor item)
     pthread_mutex_unlock(&(me->queue_mutex));
 
 }
-Functor runloop_user_event_queue_remove(EventfdQueueRef athis) {
+Functor runloop_user_event_queue_remove(UserEventQueueRef athis) {
     EvfQueuePtr me = (EvfQueuePtr) athis;
     pthread_mutex_lock(&(me->queue_mutex));
     Functor op;

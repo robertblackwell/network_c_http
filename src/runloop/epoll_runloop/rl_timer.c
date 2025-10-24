@@ -77,7 +77,11 @@ void runloop_timer_init(RunloopTimerRef this, RunloopRef runloop)
 }
 RunloopTimerRef runloop_timer_new(RunloopRef runloop_ref)
 {
+    #if USE_EVENT_TABLE
+    RunloopEventRef this = event_table_get_entry(runloop_ref->event_table);
+    #else
     RunloopTimerRef this = malloc(sizeof(RunloopTimer));
+    #endif
     runloop_timer_init(this, runloop_ref);
     return this;
 }
@@ -86,7 +90,11 @@ void runloop_timer_free(RunloopTimerRef athis)
     WTIMER_CHECK_TAG(athis)
     WTIMER_CHECK_END_TAG(athis)
     close(athis->fd);
+    #if USE_EVENT_TABLE
+    event_table_release_entry(athis->runloop->event_table, athis);
+    #else
     free((void*)athis);
+    #endif
 }
 struct itimerspec WTimerFd_update_interval(RunloopTimerRef this, uint64_t interval_ms, bool repeating)
 {

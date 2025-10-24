@@ -51,7 +51,7 @@ struct RunloopWatcherBase_s {
  * This mechanism can also be emulated with a pipe.
  */
 typedef uint64_t WEventFdMask;
-struct RunloopEventfd_s {
+struct RunloopUserEvent_s {
     /** The start tag is declared in the base struct
     RBL_DECLARE_TAG; */
     struct RunloopWatcherBase_s;
@@ -89,7 +89,7 @@ typedef struct RunloopListener_s {
     RBL_DECLARE_END_TAG;
 } RunloopListener;
 
-typedef struct EventfdQueue_s {
+typedef struct UserEventQueue_s {
     /** This struct is not a sub struct of Watcher hence it must declare its own openning tag*/
     RBL_DECLARE_TAG;
     FunctorListRef      list;
@@ -102,7 +102,7 @@ typedef struct EventfdQueue_s {
     int                 writefd;
     int                 id;
     RBL_DECLARE_END_TAG;
-} EventfdQueue;
+} UserEventQueue;
 
 
 /**
@@ -118,7 +118,7 @@ struct RunloopQueueWatcher_s {
      * This is a non-owning reference as it was passed in during creation
      * of a RunloopQueueWatcher object.
      */
-    EventfdQueueRef            queue;
+    UserEventQueueRef      queue;
     // runloop cb and arg
     PostableFunction       queue_postable;
     void*                  queue_postable_arg;
@@ -137,8 +137,8 @@ typedef void(RunloopInterthreadQueuetWatcherCallerback(void* ctx));
 struct InterthreadQueue_s {
     /** This struct does not inherit from WatcherBase hence must declare its own openning tag*/
     RBL_DECLARE_TAG; 
-    EventfdQueueRef queue;
-    RunloopRef runloop;
+    UserEventQueueRef      queue;
+    RunloopRef             runloop;
     RunloopQueueWatcherRef qwatcher_ref;
     RBL_DECLARE_END_TAG;
 } ;//InterthreadQueue_s, InterthreadQueue, *InterthreadQueueRef;

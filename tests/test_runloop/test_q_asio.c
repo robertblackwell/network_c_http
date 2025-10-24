@@ -16,14 +16,14 @@
 
 typedef struct QReader_s {
     RunloopRef              rdr_runloop_ref;
-    EventfdQueueRef         queue;
+    UserEventQueueRef         queue;
     RunloopQueueWatcherRef  queue_watcher;
     int                     count;
     int                     expected_count;
 } QReader, *QReaderRef;
 
 
-QReaderRef queue_reader_new(RunloopRef rl, EventfdQueueRef queue, RunloopQueueWatcherRef qw, int expected_count)
+QReaderRef queue_reader_new(RunloopRef rl, UserEventQueueRef queue, RunloopQueueWatcherRef qw, int expected_count)
 {
     QReaderRef this = malloc(sizeof(QReader));
     this->rdr_runloop_ref = rl;
@@ -40,7 +40,7 @@ void queue_reader_free(QReaderRef this)
 
 typedef struct QWriter_s {
     RunloopRef      rdr_runloop_ref;
-    EventfdQueueRef queue;
+    UserEventQueueRef queue;
     int count_max;
     long post_count;
 } QWriter, *QWriterRef;
@@ -51,7 +51,7 @@ typedef struct WriterArg {
     QWriterRef qwriter_ref;
 } WriterArg, *WriterArgRef;
 
-QWriterRef queue_writer_new(RunloopRef rl,  EventfdQueueRef queue, int max)
+QWriterRef queue_writer_new(RunloopRef rl,  UserEventQueueRef queue, int max)
 {
     QWriterRef this = malloc(sizeof(QWriter));
     this->rdr_runloop_ref = rl;
@@ -75,7 +75,7 @@ WriterArgRef writer_arg_new(QWriterRef qwrtr_ref, long count)
 void queue_postable(RunloopRef rl, void* q_rdr_ctx_arg)
 {
     QReaderRef rdr = (QReaderRef)q_rdr_ctx_arg;
-    EventfdQueueRef queue = rdr->queue;
+    UserEventQueueRef queue = rdr->queue;
     RunloopQueueWatcherRef qw = rdr->queue_watcher;
     Functor queue_data = runloop_user_event_queue_remove(queue);
 
@@ -201,7 +201,7 @@ void* writer_thread_func(void* arg)
 int test_q()
 {
     RunloopRef rdr_runloop_ref = runloop_new();
-    EventfdQueueRef queue = runloop_user_event_queue_new();
+    UserEventQueueRef queue = runloop_user_event_queue_new();
     RunloopQueueWatcherRef qw = runloop_queue_watcher_new(rdr_runloop_ref, queue);
     QReaderRef rdr = queue_reader_new(rdr_runloop_ref, queue, qw, 10);
     QWriterRef wrtr = queue_writer_new(rdr_runloop_ref, queue, 10);

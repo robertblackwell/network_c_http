@@ -25,7 +25,7 @@ static void itqueue_postable(RunloopRef rl, void* itq_ref_arg)//(RunloopQueueWat
     InterthreadQueueRef itq_ref = itq_ref_arg;
 //    void* ctx = qwref->queue_postable_arg;
 //    RunloopRef rl = runloop_queue_watcher_get_reactor(qwref);
-    EventfdQueueRef queue = itq_ref->queue;
+    UserEventQueueRef queue = itq_ref->queue;
     Functor queue_data = runloop_user_event_queue_remove(queue);
     RBL_ASSERT((!Functor_is_empty(&(queue_data))), "An empty entry in a func list");
     PostableFunction pf = queue_data.f;

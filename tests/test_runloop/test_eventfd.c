@@ -26,12 +26,12 @@ typedef struct TestCtx_s  {
     struct timespec     start_time;
     RunloopRef          runloop_ref;
     RunloopTimerRef     timer_ref;
-    RunloopEventfdRef   fdevent_ref;
+    RunloopUserEventRef   fdevent_ref;
     int                 fdevent_counter;
     RBL_DECLARE_END_TAG;
 } TestCtx;
 
-TestCtx* TestCtx_new(RunloopRef rl, RunloopTimerRef timer_ref, RunloopEventfdRef eventfd_ref, int counter_init, int counter_max);
+TestCtx* TestCtx_new(RunloopRef rl, RunloopTimerRef timer_ref, RunloopUserEventRef eventfd_ref, int counter_init, int counter_max);
 
 //
 // single repeating timer
@@ -61,7 +61,7 @@ int test_fdevent_1()
 
     RunloopRef runloop_ref = runloop_new();
     RunloopTimerRef tw_1 = runloop_timer_new(runloop_ref);
-    RunloopEventfdRef fdev = runloop_user_event_new(runloop_ref);
+    RunloopUserEventRef fdev = runloop_user_event_new(runloop_ref);
 
     TestCtx* test_ctx_p = TestCtx_new(runloop_ref, tw_1, fdev, 0, NBR_TIMES_FIRE);
 
@@ -88,7 +88,7 @@ int test_fdevent_multiple()
 
     RunloopRef runloop_ref = runloop_new();
     RunloopTimerRef tw_1 = runloop_timer_new(runloop_ref);
-    RunloopEventfdRef fdev = runloop_user_event_new(runloop_ref);
+    RunloopUserEventRef fdev = runloop_user_event_new(runloop_ref);
 
     TestCtx* test_ctx_p_1 = TestCtx_new(runloop_ref, tw_1, fdev, 0, 5);
     RunloopTimerRef tw_2 = runloop_timer_new(runloop_ref);
@@ -120,7 +120,7 @@ int test_fdevent_multiple()
 static void timer_callback_1(RunloopRef rl, void* test_ctx_arg)
 {
     TestCtx* ctx_p = (TestCtx*) test_ctx_arg;
-    RunloopEventfdRef fdevent_ref = ctx_p->fdevent_ref;
+    RunloopUserEventRef fdevent_ref = ctx_p->fdevent_ref;
     RBL_ASSERT((fdevent_ref != NULL), "callback1 fdevent_ref == NULL");
     RBL_LOG_FMT("callback1_counter %d counter: %d", ctx_p->callback1_counter, ctx_p->counter);
     if(ctx_p->counter >= ctx_p->max_count) {
@@ -144,7 +144,7 @@ void fdevent_postable(RunloopRef rl, void* test_ctx_arg)
     RBL_LOG_FMT("w: %p arg: %p fdevent_counter % d", test_ctx_p->fdevent_ref , test_ctx_arg, test_ctx_p->fdevent_counter);
 }
 
-TestCtx* TestCtx_new(RunloopRef rl, RunloopTimerRef timer_ref, RunloopEventfdRef eventfd_ref,int counter_init, int counter_max)
+TestCtx* TestCtx_new(RunloopRef rl, RunloopTimerRef timer_ref, RunloopUserEventRef eventfd_ref,int counter_init, int counter_max)
 {
     TestCtx* tmp = malloc(sizeof(TestCtx));
     RBL_SET_TAG(TestCtx_TYPE, tmp)

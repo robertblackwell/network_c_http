@@ -27,7 +27,7 @@ static void interthread_queue_handler(RunloopQueueWatcherRef watcher, uint64_t e
     printf("interthread_queue_handler\n");
     return;
     RunloopRef rx = runloop_queue_watcher_get_reactor(watcher);
-    EventfdQueueRef evqref = watcher->queue;
+    UserEventQueueRef evqref = watcher->queue;
     Functor func = runloop_user_event_queue_remove(evqref);
     void* pf = func.f;
     watcher->queue_postable_arg = func.arg;
