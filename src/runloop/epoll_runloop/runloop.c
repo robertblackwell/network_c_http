@@ -12,12 +12,6 @@
 #include <rbl/macros.h>
 #include <common/list.h>
 
-//__thread RunloopRef my_reactor_ptr = NULL;
-//
-//#define CHECK_THREAD(reactor_ref) //assert(reactor_ref == my_reactor_ptr);
-
-
-
 static void drain_callback(void* arg)
 {
     printf("drain callback\n");
@@ -44,42 +38,9 @@ static int *int_in_heap(int key) {
     return result;
 }
 /**
- * Perform a general epoll_ctl call with error checking.
- * In the event of an error abort 
- */
-static void runloop_epoll_ctl(RunloopRef athis, int op, int fd, uint64_t interest, void* watcher)
-{
-    RUNLOOP_CHECK_TAG(athis)
-    struct epoll_event epev = {
-        .events = interest,
-        .data = {.ptr = watcher}
-    };
-    // note epev.data is a union so the next line overites .fd = fd
-    epev.data.ptr = watcher;
-    int status = epoll_ctl(athis->epoll_fd, op, fd, &(epev));
-    if (status != 0) {
-        int errno_saved = errno;
-        RBL_LOG_ERROR("runloop_epoll_ctl epoll_fd: %d fd: %d status : %d errno : %d %s", athis->epoll_fd, fd, status, errno_saved, strerror(errno_saved));
-    }
-    RBL_LOG_FMT("runloop_epoll_ctl epoll_fd: %d status : %d errno : %d", athis->epoll_fd, status, errno);
-    RBL_ASSERT((status == 0), "epoll ctl call failed");
-}
-
-//RunloopRef runloop_get_threads_reactor()
-//{
-//    return my_reactor_ptr;
-//}
-
-/**
  * Create a new reactor runloop. Should only be one per thread
  * @NOTE - this implementation only works for Linux and uses epoll
  */
-RunloopRef runloop_new(void) {
-    RunloopRef runloop = malloc(sizeof(Runloop));
-    RBL_ASSERT((runloop != NULL), "malloc failed new runloop");
-    runloop_init(runloop);
-    return (RunloopRef)runloop;
-}
 void runloop_init(RunloopRef athis) {
 
     RunloopRef runloop = athis;
@@ -95,6 +56,13 @@ void runloop_init(RunloopRef athis) {
     runloop->event_table_ref = event_table_new();
     runloop->ready_list = functor_list_new(runloop_READY_LIST_MAX);
 }
+RunloopRef runloop_new(void) {
+    RunloopRef runloop = malloc(sizeof(Runloop));
+    RBL_ASSERT((runloop != NULL), "malloc failed new runloop");
+    runloop_init(runloop);
+    return (RunloopRef)runloop;
+}
+
 void runloop_close(RunloopRef athis)
 {
     RUNLOOP_CHECK_TAG(athis)
@@ -116,31 +84,6 @@ void runloop_free(RunloopRef athis)
     free(athis);
 }
 
-/**
- * Register a RunloopWatcherBase (actuallyr one of its derivatives) and its associated file descriptor
- * with the epoll instance. Specify the types of events the watcher is interested in
- */
-int runloop_register(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref)
-{
-    RUNLOOP_CHECK_TAG(athis)
-    RUNLOOP_CHECK_END_TAG(athis)
-    RBL_LOG_FMT("fd : %d  for events %d", fd, interest);
-    runloop_epoll_ctl(athis, EPOLL_CTL_ADD, fd, interest, wref);
-    return 0;
-}
-int runloop_deregister(RunloopRef athis, int fd)
-{
-    RUNLOOP_CHECK_TAG(athis)
-    RUNLOOP_CHECK_END_TAG(athis)
-    return 0;
-}
-
-int runloop_reregister(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref) {
-    RUNLOOP_CHECK_TAG(athis)
-    RUNLOOP_CHECK_END_TAG(athis)
-    runloop_epoll_ctl(athis, EPOLL_CTL_MOD, fd, interest, wref);
-    return 0;
-}
 void runloop_delete(RunloopRef athis, int fd)
 {
     RUNLOOP_CHECK_TAG(athis)

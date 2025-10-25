@@ -49,15 +49,15 @@ typedef struct Functor_s
 RunloopRef runloop_get_threads_reactor();
 RunloopRef runloop_new(void);
 void       runloop_free(RunloopRef athis);
-void       runloop_init(RunloopRef athis);
-void       runloop_deinit(RunloopRef athis);
+//void       runloop_init(RunloopRef athis);
+//void       runloop_deinit(RunloopRef athis);
 void       runloop_close(RunloopRef athis);
-int        runloop_register(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref);
-int        runloop_deregister(RunloopRef athis, int fd);
-int        runloop_reregister(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref);
+//int        runloop_register(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref);
+//int        runloop_deregister(RunloopRef athis, int fd);
+//int        runloop_reregister(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref);
 int        runloop_run(RunloopRef athis, time_t timeout);
 void       runloop_post(RunloopRef athis, PostableFunction cb, void* arg);
-void       runloop_delete(RunloopRef athis, int fd);
+//void       runloop_delete(RunloopRef athis, int fd);
 void       runloop_verify(RunloopRef r);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////

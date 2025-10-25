@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <sys/epoll.h>
 #include <unistd.h>
+#include "epoll_helper.h"
 
 /**
  * Called whenever an fd associated with an WSocket receives an fd event.
@@ -42,8 +43,8 @@ static void anonymous_free(RunloopWatcherBaseRef p)
 }
 void runloop_stream_init(RunloopStreamRef this, RunloopRef runloop, int fd)
 {
-    SOCKW_SET_TAG(this);
-    SOCKW_SET_END_TAG(this);
+    STREAM_SET_TAG(this);
+    STREAM_SET_END_TAG(this);
     this->fd = fd;
     this->runloop = runloop;
     this->free = &anonymous_free;
@@ -62,22 +63,23 @@ RunloopStreamRef runloop_stream_new(RunloopRef runloop, int fd)
 }
 void runloop_stream_free(RunloopStreamRef athis)
 {
-    SOCKW_SET_TAG(athis);
-    SOCKW_SET_END_TAG(athis);
+    STREAM_SET_TAG(athis);
+    STREAM_SET_END_TAG(athis);
     close(athis->fd);
     rl_event_free(athis->runloop, athis);
 }
 void runloop_stream_register(RunloopStreamRef athis)
 {
-    SOCKW_SET_TAG(athis);
-    SOCKW_SET_END_TAG(athis);
+    STREAM_SET_TAG(athis);
+    STREAM_SET_END_TAG(athis);
     uint32_t interest = 0;
-    int res = runloop_register(athis->runloop, athis->fd, 0L, (RunloopWatcherBaseRef) (athis));
-    assert(res ==0);
+    eph_add(athis->runloop->epoll_fd, athis->fd, 0L, athis);
+//    int res = runloop_register(athis->runloop, athis->fd, 0L, (RunloopWatcherBaseRef) (athis));
+//    assert(res ==0);
 }
 //void WIoFd_change_watch(RunloopStreamRef this, SocketEventHandler cb, void* arg, uint64_t watch_what)
 //{
-//    SOCKW_CHECK_TAG(this)
+//    STREAM_CHECK_TAG(this)
 //    uint32_t interest = watch_what;
 //    if( cb != NULL) {
 //        this->cb = cb;
@@ -90,10 +92,11 @@ void runloop_stream_register(RunloopStreamRef athis)
 //}
 void runloop_stream_deregister(RunloopStreamRef athis)
 {
-    SOCKW_SET_TAG(athis);
-    SOCKW_SET_END_TAG(athis);
-    int res = runloop_deregister(athis->runloop, athis->fd);
-    assert(res == 0);
+    STREAM_SET_TAG(athis);
+    STREAM_SET_END_TAG(athis);
+    eph_del(athis->runloop->epoll_fd, athis->fd, 0, athis);
+//    int res = runloop_deregister(athis->runloop, athis->fd);
+//    assert(res == 0);
 }
 void runloop_stream_arm_both(RunloopStreamRef athis,
                              PostableFunction read_postable_cb, void* read_arg,
@@ -101,8 +104,8 @@ void runloop_stream_arm_both(RunloopStreamRef athis,
 {
     uint64_t interest = EPOLLET | EPOLLOUT | EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | athis->event_mask;
     athis->event_mask = interest;
-    SOCKW_SET_TAG(athis);
-    SOCKW_SET_END_TAG(athis);
+    STREAM_SET_TAG(athis);
+    STREAM_SET_END_TAG(athis);
     if(read_postable_cb != NULL) {
         athis->read_postable_cb = read_postable_cb;
     }
@@ -115,82 +118,77 @@ void runloop_stream_arm_both(RunloopStreamRef athis,
     if (write_arg != NULL) {
         athis->write_postable_arg = write_arg;
     }
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
-    assert(res == 0);
+    eph_mod(athis->runloop->epoll_fd, athis->fd, interest, athis);
 }
 
 void runloop_stream_arm_read(RunloopStreamRef athis, PostableFunction postable_cb, void* arg)
 {
     uint64_t interest = EPOLLIN | EPOLLERR | EPOLLHUP | EPOLLRDHUP | athis->event_mask;
     athis->event_mask = interest;
-    SOCKW_SET_TAG(athis);
-    SOCKW_SET_END_TAG(athis);
+    STREAM_SET_TAG(athis);
+    STREAM_SET_END_TAG(athis);
     if(postable_cb != NULL) {
         athis->read_postable_cb = postable_cb;
     }
     if (arg != NULL) {
         athis->read_postable_arg = arg;
     }
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
-    assert(res == 0);
+    eph_mod(athis->runloop->epoll_fd, athis->fd, interest, athis);
 }
 void runloop_stream_arm_write(RunloopStreamRef athis, PostableFunction postable_cb, void* arg)
 {
     uint64_t interest = EPOLLOUT | EPOLLERR | EPOLLHUP | EPOLLRDHUP | athis->event_mask;
     athis->event_mask = interest;
-    SOCKW_SET_TAG(athis);
-    SOCKW_SET_END_TAG(athis);
+    STREAM_SET_TAG(athis);
+    STREAM_SET_END_TAG(athis);
     if(postable_cb != NULL) {
         athis->write_postable_cb = postable_cb;
     }
     if (arg != NULL) {
         athis->write_postable_arg = arg;
     }
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
-    assert(res == 0);
+    eph_mod(athis->runloop->epoll_fd, athis->fd, interest, athis);
 }
 void runloop_stream_disarm_read(RunloopStreamRef athis)
 {
     athis->event_mask &= ~EPOLLIN;
-    SOCKW_SET_TAG(athis);
-    SOCKW_SET_END_TAG(athis);
+    STREAM_SET_TAG(athis);
+    STREAM_SET_END_TAG(athis);
     athis->read_postable_cb = NULL;
     athis->read_postable_arg = NULL;
-    int res = runloop_reregister(athis->runloop, athis->fd, athis->event_mask, (RunloopWatcherBaseRef) athis);
-    assert(res == 0);
+    eph_mod(athis->runloop->epoll_fd, athis->fd, athis->event_mask, athis);
 }
 void runloop_stream_disarm_write(RunloopStreamRef athis)
 {
     athis->event_mask = ~EPOLLOUT & athis->event_mask;
-    SOCKW_SET_TAG(athis);
-    SOCKW_SET_END_TAG(athis);
+    STREAM_SET_TAG(athis);
+    STREAM_SET_END_TAG(athis);
     athis->write_postable_cb = NULL;
     athis->write_postable_arg = NULL;
-    int res = runloop_reregister(athis->runloop, athis->fd, athis->event_mask, (RunloopWatcherBaseRef) athis);
-    assert(res == 0);
+    eph_mod(athis->runloop->epoll_fd, athis->fd, athis->event_mask, athis);
 }
 RunloopRef runloop_stream_get_runloop(RunloopStreamRef athis)
 {
-    SOCKW_SET_TAG(athis);
-    SOCKW_SET_END_TAG(athis);
+    STREAM_SET_TAG(athis);
+    STREAM_SET_END_TAG(athis);
     return athis->runloop;
 }
 int runloop_stream_get_fd(RunloopStreamRef athis)
 {
-    SOCKW_SET_TAG(athis);
-    SOCKW_SET_END_TAG(athis);
+    STREAM_SET_TAG(athis);
+    STREAM_SET_END_TAG(athis);
     return athis->fd;
 }
 
 void runloop_stream_verify(RunloopStreamRef athis)
 {
-    SOCKW_SET_TAG(athis);
-    SOCKW_SET_END_TAG(athis);
+    STREAM_SET_TAG(athis);
+    STREAM_SET_END_TAG(athis);
 }
 void runloop_stream_checktag(RunloopStreamRef athis)
 {
-    SOCKW_SET_TAG(athis);
-    SOCKW_SET_END_TAG(athis);
+    STREAM_SET_TAG(athis);
+    STREAM_SET_END_TAG(athis);
 }
 
 

@@ -9,6 +9,7 @@
 #include <sys/epoll.h>
 #include <errno.h>
 #include <rbl/logger.h>
+#include "epoll_helper.h"
 #define TIMER_STATE_REGISTERED 11
 #define TIMER_STATE_NOT_REGISTERED 22
 #define TIMER_STATE_DISARMED 33
@@ -149,26 +150,26 @@ void runloop_timer_register(RunloopTimerRef athis, PostableFunction cb, void* ct
     int rc = timerfd_settime(athis->fd, flags, &its, NULL);
     int er = errno;
     assert(rc == 0);
-    uint32_t interest = EPOLLIN | EPOLLERR;
+    uint32_t interest = eph_interest_read(false); // EPOLLIN | EPOLLERR;
     print_current_tme("runloop_timer_register");
     RBL_LOG_FMT("runloop_timer_register its.it_value secs %ld nsecs: %ld ", its.it_value.tv_sec, its.it_value.tv_nsec);
     RBL_LOG_FMT("runloop_timer_register its.it_interval secs %ld nsecs: %ld", its.it_interval.tv_sec, its.it_interval.tv_nsec);
-    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
-    assert(res ==0);
+    eph_add(athis->runloop->epoll_fd, athis->fd, interest, athis);
+//    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
+//    assert(res ==0);
 }
 void runloop_timer_update(RunloopTimerRef athis, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating)
 {
     WTIMER_CHECK_TAG(athis)
     WTIMER_CHECK_END_TAG(athis)
-    uint32_t interest = 0;
     struct itimerspec its = WTimerFd_update_interval(athis, interval_ms, repeating);
     int flags = 0;
     athis->timer_postable = cb;
     athis->timer_postable_arg = ctx;
     int rc = timerfd_settime(athis->fd, flags, &its, NULL);
     assert(rc == 0);
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
-    assert(res == 0);
+    uint32_t interest = eph_interest_read(false); // EPOLLIN | EPOLLERR;
+    eph_mod(athis->runloop->epoll_fd, athis->fd, interest, athis);
 }
 
 void runloop_timer_disarm(RunloopTimerRef athis)
@@ -215,12 +216,7 @@ void runloop_timer_deregister(RunloopTimerRef athis)
     assert(athis->state != TIMER_STATE_NOT_REGISTERED);
     athis->state = TIMER_STATE_NOT_REGISTERED;
     RBL_LOG_FMT("runloop_timer_deregister this->fd : %d", athis->fd);
-    int res = runloop_deregister(athis->runloop, athis->fd);
-    if(res != 0) {
-        RBL_LOG_FMT("runloop_timer_deregister res: %d errno: %d", res, errno);
-    }
-    RBL_LOG_FMT("runloop_timer_deregister res: %d errno: %d", res, errno);
-    assert(res == 0);
+    eph_del(athis->runloop->epoll_fd, athis->fd, eph_interest_none(), athis);
 }
 RunloopRef runloop_timer_get_runloop(RunloopTimerRef athis)
 {

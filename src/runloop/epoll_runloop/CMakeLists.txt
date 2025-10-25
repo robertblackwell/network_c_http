@@ -5,6 +5,7 @@ set(epoll_RUNLOOP_HEADER_FILES
 		${CMAKE_CURRENT_SOURCE_DIR}/rl_internal.h
 		${CMAKE_CURRENT_SOURCE_DIR}/rl_events_internal.h
 		${CMAKE_CURRENT_SOURCE_DIR}/event_table.h
+		${CMAKE_CURRENT_SOURCE_DIR}/epoll_helper.h
 	)
 
 set(epoll_RUNLOOP_SOURCE_FILES
@@ -18,6 +19,7 @@ set(epoll_RUNLOOP_SOURCE_FILES
 		 ${CMAKE_CURRENT_SOURCE_DIR}/rl_allocator.c
         ${CMAKE_CURRENT_SOURCE_DIR}/runloop.c
 		${CMAKE_CURRENT_SOURCE_DIR}/event_table.c
+		${CMAKE_CURRENT_SOURCE_DIR}/epoll_helper.c
 
 		${CMAKE_CURRENT_SOURCE_DIR}/w_watcher_base.c
 

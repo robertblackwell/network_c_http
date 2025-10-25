@@ -119,8 +119,8 @@ static void wrtr_cb(RunloopRef rl, void* write_ctx_p_arg)
     RBL_LOG_FMT("index: %d fd: %d nread: %d errno: %d write_count %d\n", ctx->writer_index, fd, nwrite, errno, ctx->write_count);
     ctx->write_count++;
     if(ctx->write_count > ctx->max_write_count) {
-        runloop_deregister(reactor, runloop_stream_get_fd(ctx->stream_ref));
-        runloop_deregister(reactor, runloop_timer_get_fd(ctx->timer_ref));
+        runloop_stream_deregister(ctx->stream_ref);
+        runloop_timer_deregister(ctx->timer_ref);
         runloop_stream_free(ctx->stream_ref);
         runloop_timer_free(ctx->timer_ref);
         return;

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <sys/epoll.h>
 #include <unistd.h>
+#include "epoll_helper.h"
 
 static void on_read_ready_postable(RunloopRef rl, void* qw_arg)
 {
@@ -72,8 +73,7 @@ void runloop_queue_watcher_register(RunloopQueueWatcherRef athis, PostableFuncti
 //    uint32_t interest = watch_what;
     athis->queue_postable = postable_cb;
     athis->queue_postable_arg = postable_arg;
-    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
-    assert(res ==0);
+    eph_add(athis->runloop->epoll_fd, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
 }
 void runloop_queue_watcher_change_watch(RunloopQueueWatcherRef athis, PostableFunction cb, void* arg, uint64_t watch_what)
 {
@@ -86,16 +86,14 @@ void runloop_queue_watcher_change_watch(RunloopQueueWatcherRef athis, PostableFu
     if (arg != NULL) {
         athis->queue_postable_arg = arg;
     }
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
-    assert(res == 0);
+    eph_mod(athis->runloop->epoll_fd, athis->fd, interest, (RunloopWatcherBaseRef) athis);
 }
 void runloop_queue_watcher_deregister(RunloopQueueWatcherRef athis)
 {
     QUEUE_WATCHER_CHECK_TAG(athis)
     QUEUE_WATCHER_CHECK_END_TAG(athis)
 
-    int res = runloop_deregister(athis->runloop, athis->fd);
-    assert(res == 0);
+    eph_del(athis->runloop->epoll_fd, athis->fd, 0, athis);
 }
 RunloopRef runloop_queue_watcher_get_runloop(RunloopQueueWatcherRef athis)
 {

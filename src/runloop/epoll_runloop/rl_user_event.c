@@ -10,6 +10,7 @@
 #include <sys/epoll.h>
 #include <sys/eventfd.h>
 #include <unistd.h>
+#include "epoll_helper.h"
 #define RUNLOOP_USER_EVENT_SEMAPHORE
 
 /**
@@ -89,52 +90,56 @@ void runloop_user_event_register(RunloopUserEventRef athis)
     uint32_t interest = 0L;
     athis->fdevent_postable = NULL;
     athis->fdevent_postable_arg = NULL;
-    /**
-     * Make sure this call enabled level triggering of events on this fd
-     */
-    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
-    assert(res ==0);
+    eph_add(athis->runloop->epoll_fd, athis->fd, interest, athis);
+//    /**
+//     * Make sure this call enabled level triggering of events on this fd
+//     */
+//    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
+//    assert(res ==0);
 }
-void runloop_user_event_change_watch(RunloopUserEventRef athis, PostableFunction postable, void* arg, uint64_t watch_what)
-{
-    USER_EVENT_SET_TAG(athis);
-    USER_EVENT_CHECK_TAG(athis)
-    uint32_t interest = watch_what;
-    if( postable != NULL) {
-        athis->fdevent_postable = postable;
-    }
-    if (arg != NULL) {
-        athis->fdevent_postable_arg = arg;
-    }
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
-    assert(res == 0);
-}
+//void runloop_user_event_change_watch(RunloopUserEventRef athis, PostableFunction postable, void* arg, uint64_t watch_what)
+//{
+//    USER_EVENT_SET_TAG(athis);
+//    USER_EVENT_CHECK_TAG(athis)
+//    uint32_t interest = watch_what;
+//    if( postable != NULL) {
+//        athis->fdevent_postable = postable;
+//    }
+//    if (arg != NULL) {
+//        athis->fdevent_postable_arg = arg;
+//    }
+//    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
+//    assert(res == 0);
+//}
 void runloop_user_event_deregister(RunloopUserEventRef athis)
 {
     USER_EVENT_SET_TAG(athis);
     USER_EVENT_CHECK_TAG(athis)
-    int res = runloop_deregister(athis->runloop, athis->fd);
-    assert(res == 0);
+    eph_del(athis->runloop->epoll_fd, athis->fd, (uint32_t)0, athis);
+//    int res = runloop_deregister(athis->runloop, athis->fd);
+//    assert(res == 0);
 }
 void runloop_user_event_arm(RunloopUserEventRef athis, PostableFunction postable, void* arg)
 {
     USER_EVENT_SET_TAG(athis);
     USER_EVENT_CHECK_TAG(athis)
-    uint32_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP;
+    uint32_t interest = eph_interest_read(false);// | EPOLLERR | EPOLLRDHUP;
     if( postable != NULL) {
         athis->fdevent_postable = postable;
     }
     if (arg != NULL) {
         athis->fdevent_postable_arg = arg;
     }
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
-    assert(res == 0);
+    eph_mod(athis->runloop->epoll_fd, athis->fd, interest, athis);
+//    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
+//    assert(res == 0);
 }
 void runloop_user_event_disarm(RunloopUserEventRef athis)
 {
     USER_EVENT_SET_TAG(athis);
     USER_EVENT_CHECK_TAG(athis)
-    int res = runloop_reregister(athis->runloop, athis->fd, 0, (RunloopWatcherBaseRef) athis);
+    eph_mod(athis->runloop->epoll_fd, athis->fd, (uint32_t)0, athis);
+//    int res = runloop_reregister(athis->runloop, athis->fd, 0, (RunloopWatcherBaseRef) athis);
 }
 void runloop_user_event_fire(RunloopUserEventRef athis)
 {

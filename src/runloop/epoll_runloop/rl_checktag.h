@@ -6,7 +6,7 @@
 
 #define Runloop_TAG       "RUNLOOP"
 #define UserEvent_TAG       "USREVENT"
-#define STREAM_TAG        "STREAM"
+#define Stream_TAG        "STREAM"
 #define Listener_TAG      "LISTNR"
 #define QueueWatcher_TAG  "QWatcher"
 #define Timer_TAG         "Timer"
@@ -42,13 +42,13 @@
 /**
  * RunloopStream
  */
-#define SOCKW_DECLARE_TAG RBL_DECLARE_TAG(STREAM_TAG)
-#define SOCKW_CHECK_TAG(p) RBL_CHECK_TAG(STREAM_TAG, p)
-#define SOCKW_SET_TAG(p) RBL_SET_TAG(STREAM_TAG, p)
+#define STREAM_DECLARE_TAG RBL_DECLARE_TAG(Stream_TAG)
+#define STREAM_CHECK_TAG(p) RBL_CHECK_TAG(Stream_TAG, p)
+#define STREAM_SET_TAG(p) RBL_SET_TAG(Stream_TAG, p)
 
-#define SOCKW_DECLARE_END_TAG RBL_DECLARE_END_TAG(STREAM_TAG)
-#define SOCKW_CHECK_END_TAG(p) RBL_CHECK_END_TAG(STREAM_TAG, p)
-#define SOCKW_SET_END_TAG(p) RBL_SET_END_TAG(STREAM_TAG, p)
+#define STREAM_DECLARE_END_TAG RBL_DECLARE_END_TAG(Stream_TAG)
+#define STREAM_CHECK_END_TAG(p) RBL_CHECK_END_TAG(Stream_TAG, p)
+#define STREAM_SET_END_TAG(p) RBL_SET_END_TAG(Stream_TAG, p)
 
 /**
  * WListener
