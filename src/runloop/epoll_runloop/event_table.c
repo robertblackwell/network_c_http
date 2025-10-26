@@ -54,6 +54,10 @@ void event_table_init(EventTableRef ot)
 {
     freelist_init(&(ot->free_list));
 }
+void event_table_free(EventTableRef et)
+{
+    free(et);
+}
 void* event_table_get_entry(EventTableRef ot)
 {
     uint16_t ix = freelist_get(&(ot->free_list));

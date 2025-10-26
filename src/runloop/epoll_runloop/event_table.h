@@ -79,6 +79,7 @@ void event_table_release_entry(EventTableRef et, void* p);
 bool event_table_has_outstanding_events(EventTableRef et);
 // returns the number of EventTable entries in use
 size_t event_table_number_in_use(EventTableRef et);
+void event_table_free(EventTableRef et);
 
 #define EVENT_TABLE_GET_ENTRY(event_table_ref, obj_size) event_table_safe_get_entry(event_table_ref, obj_size, __FILE__, __LINE__)
 

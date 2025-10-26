@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <src/common/cbuffer.h>
+#include <common/cbuffer.h>
 #define IOBUFFER_DEFAULT_CAPACITY 4*1024
 
 
@@ -53,7 +53,7 @@ IOBufferRef IOBuffer_init(IOBufferRef this, int capacity);
  * @return IOBufferRef
  */
 IOBufferRef IOBuffer_new_with_capacity(int capacity);
-
+void IOBuffer_expand_and_reset(IOBufferRef iob, int new_capacity);
 /**
  * @brief Create a new IOBuffer with a a default capacity.
  *
@@ -195,5 +195,9 @@ bool IOBuffer_equal(IOBufferRef a, IOBufferRef b);
  * @return void*
  */
 void* IOBuffer_memptr(IOBufferRef this);
+
+char IOBuffer_consume_pop_front(IOBufferRef this);
+void IOBuffer_commit_push_back(IOBufferRef this, char ch);
+void IOBuffer_sprintf(IOBufferRef iob, const char* fmt, ...);
 /** @} */
 #endif

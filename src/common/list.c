@@ -49,7 +49,7 @@ void ListNode_dispose(ListRef lref, ListNode** lnref_ptr)
 // create and initialize
 ListRef List_new()
 {
-    ListRef lref = eg_alloc(sizeof(List));
+    ListRef lref = malloc(sizeof(List));
     if(lref != NULL) {
         List_init(lref);
     }

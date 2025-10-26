@@ -1,11 +1,12 @@
 
 
-#include <src/common/iobuffer.h>
-#include <src/common/alloc.h>
+#include <common/iobuffer.h>
+#include <common/alloc.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdarg.h>
 
 #define IOBuffer_TAG "IOBUFF"
 #include <rbl/check_tag.h>
@@ -45,14 +46,23 @@ IOBufferRef IOBuffer_init(IOBufferRef this, int capacity )
     memerror:
         return NULL;
 }
-
+void IOBuffer_expand_and_reset(IOBufferRef iob, int new_capacity)
+{
+    if (new_capacity > iob->buffer_capacity) {
+        free(iob->mem_p);
+        IOBuffer_init(iob, new_capacity);
+    }
+}
 IOBufferRef IOBuffer_new_with_capacity(int capacity)
 {
     IOBufferRef pcref = eg_alloc(sizeof(IOBuffer));
-    if (pcref == NULL)
+    if (pcref == NULL) {
+        assert(0);
         return NULL;
+    }
     if(IOBuffer_init(pcref, capacity) == NULL) {
         free(pcref);
+        assert(0);
     }
     return pcref;
 }
@@ -121,6 +131,7 @@ void IOBuffer_data_add(IOBufferRef this, void* p, int len)
 void* IOBuffer_space(const IOBufferRef this)
 {
     RBL_CHECK_TAG(IOBuffer_TAG, this)
+    void* tmp = this->buffer_ptr + this->buffer_remaining;
     return (this->buffer_ptr + this->buffer_remaining);
 }
 int IOBuffer_space_len(const IOBufferRef this)
@@ -207,4 +218,37 @@ void* IOBuffer_memptr(IOBufferRef this)
 {
     RBL_CHECK_TAG(IOBuffer_TAG, this)
     return this->mem_p;
+}
+char IOBuffer_consume_pop_front(IOBufferRef iob)
+{
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    char* p = IOBuffer_data(iob);
+    char ch = *p;
+    IOBuffer_consume(iob, 1);
+    return ch;
+}
+void IOBuffer_commit_push_back(IOBufferRef iob, char ch)
+{
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    char tmp = ch;
+    IOBuffer_data_add(iob, &tmp, 1);
+}
+void IOBuffer_sprintf(IOBufferRef iob, const char* fmt, ...)
+{
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    va_list args;
+    va_start(args, fmt);
+    char* buf = IOBuffer_space(iob);
+    int len1 = IOBuffer_space_len(iob);
+    int nchars1 = vsnprintf(buf, len1, fmt, args);
+    if (nchars1 > len1-1) {
+        IOBuffer_expand_and_reset(iob, 2*nchars1);
+        int len2 = IOBuffer_space_len(iob);
+        int nchars2 = vsnprintf(buf, len2, fmt, args);
+        assert(len2 > nchars2);
+        IOBuffer_commit(iob, nchars2);
+    } else {
+        IOBuffer_commit(iob, nchars1);
+    }
+    va_end(args);
 }

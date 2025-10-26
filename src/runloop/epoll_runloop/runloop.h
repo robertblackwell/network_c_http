@@ -55,7 +55,7 @@ void       runloop_close(RunloopRef athis);
 //int        runloop_register(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref);
 //int        runloop_deregister(RunloopRef athis, int fd);
 //int        runloop_reregister(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref);
-int        runloop_run(RunloopRef athis, time_t timeout);
+int        runloop_run(RunloopRef athis, int timeout_milli_secs);
 void       runloop_post(RunloopRef athis, PostableFunction cb, void* arg);
 //void       runloop_delete(RunloopRef athis, int fd);
 void       runloop_verify(RunloopRef r);

@@ -80,6 +80,7 @@ void runloop_free(RunloopRef athis)
     if(! athis->closed_flag) {
         runloop_close(athis);
     }
+    event_table_free(athis->event_table_ref);
     functor_list_free(athis->ready_list);
     free(athis);
 }
@@ -96,7 +97,7 @@ void print_events(struct epoll_event events[], int count)
         printf("\n");
     }
 }
-int runloop_run(RunloopRef athis, time_t timeout) {
+int runloop_run(RunloopRef athis, int timeout_milli_secs) {
     RUNLOOP_CHECK_TAG(athis)
     RUNLOOP_CHECK_END_TAG(athis)
 //    athis->tid = gettid();
@@ -125,7 +126,7 @@ int runloop_run(RunloopRef athis, time_t timeout) {
 
         int max_events = runloop_MAX_EPOLL_FDS;
         if(functor_list_size(athis->ready_list) == 0) {
-            int nfds = epoll_wait(athis->epoll_fd, events, max_events, -1);
+            int nfds = epoll_wait(athis->epoll_fd, events, max_events, timeout_milli_secs);
             time_t currtime = time(NULL);
             switch (nfds) {
                 case -1:
@@ -146,6 +147,7 @@ int runloop_run(RunloopRef athis, time_t timeout) {
                 case 0:
                     result = 0;
                     close(athis->epoll_fd);
+                    athis->closed_flag = true;
                     goto cleanup;
                 default: {
                     for (int i = 0; i < nfds; i++) {
