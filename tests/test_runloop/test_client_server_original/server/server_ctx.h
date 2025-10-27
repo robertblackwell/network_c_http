@@ -18,7 +18,7 @@
 #include <common/list.h>
 #include <runloop/runloop.h>
 #include <rbl/check_tag.h>
-#include <msg/msg_stream.h>
+#include <msg/newline_msg.h>
 
 #define StreamTable_TAG "SRMTBL"
 #define ServerCtx_TAG "SVRCTX"

@@ -62,11 +62,13 @@ add_executable(${target}
 	tcp/tcp_writer.c
 	tcp/tcp_listener.c
 
-	msg/msg_stream.h
-	msg/msg_stream.c
-	msg/msg_reader.c
-	msg/msg_writer.c
-	msg/msg_parser.c
+		msg/newline_msg.h
+		msg/newline_msg.c
+		msg/newline_msg_parser.c
+
+		mstream/msg_stream.c
+		mstream/msg_reader.c
+		mstream/msg_writer.c
  )
 set(TEST_INCLUDE_DIRS
 		${C_HTTP_PROJECT_DIR}/tests/test_runloop/test_echo

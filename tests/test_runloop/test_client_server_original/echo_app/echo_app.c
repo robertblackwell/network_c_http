@@ -1,12 +1,6 @@
 #include "echo_app.h"
-MessageRef process_input_message(MessageRef input_msg);
+NewlineMsgRef process_input_message(NewlineMsgRef input_msg);
 
-EchoAppRef echo_app_new(RunloopRef rl, int connection_fd)
-{
-    EchoAppRef appref = malloc(sizeof(EchoApp));
-    echo_app_init(appref, rl, connection_fd);
-    return appref;
-}
 void echo_app_init(EchoAppRef app, RunloopRef rl, int connection_fd)
 {
     RBL_SET_TAG(EchoApp_TAG, app)
@@ -15,9 +9,11 @@ void echo_app_init(EchoAppRef app, RunloopRef rl, int connection_fd)
     // other stuff to come
 }
 
-void echo_app_deinit(EchoAppRef app)
+EchoAppRef echo_app_new(RunloopRef rl, int connection_fd)
 {
-    msg_stream_deinit(app->msg_stream_ref);
+    EchoAppRef appref = malloc(sizeof(EchoApp));
+    echo_app_init(appref, rl, connection_fd);
+    return appref;
 }
 void echo_app_free(EchoAppRef app)
 {
@@ -33,7 +29,7 @@ AppInterfaceRef echo_app_interface()
     ai->free = (void(*)(void*))(echo_app_free);
     return ai;
 }
-static void msg_read_callback(void* arg, MessageRef msg, int error);
+static void msg_read_callback(void* arg, NewlineMsgRef msg, int error);
 static void msg_write_callback(void* arg, int error);
 static void postable_read(RunloopRef rl, void* arg);
 static void invoke_done_callback(EchoAppRef app, int error);
@@ -45,7 +41,7 @@ void echo_app_run(EchoAppRef app, AppDoneCallback* cb, void* arg)
     RunloopRef rl = runloop_stream_get_runloop(app->msg_stream_ref->tcp_stream_ref->rlstream_ref);
     runloop_post(rl, postable_read, app);
 }
-static void msg_read_callback(void* arg, MessageRef msg, int error)
+static void msg_read_callback(void* arg, NewlineMsgRef msg, int error)
 {
     EchoAppRef app = arg;
     RBL_CHECK_TAG(EchoApp_TAG, app)
@@ -55,8 +51,8 @@ static void msg_read_callback(void* arg, MessageRef msg, int error)
         invoke_done_callback(app, error);
     } else {
         assert(msg != NULL);
-        MessageRef response = process_input_message(msg);
-        message_free(msg);
+        NewlineMsgRef response = process_input_message(msg);
+        newline_msg_free(msg);
         msg_stream_write(app->msg_stream_ref, response, msg_write_callback, app);
     }
 }
@@ -79,9 +75,9 @@ static void postable_read(RunloopRef rl, void* arg)
     msg_stream_read(app->msg_stream_ref, msg_read_callback, app);
 }
 
-MessageRef process_input_message(MessageRef input_msg)
+NewlineMsgRef process_input_message(NewlineMsgRef input_msg)
 {
-    MessageRef response = message_new();
+    NewlineMsgRef response = newline_msg_new();
     char* p = IOBuffer_data(input_msg->iob);
 
     char* response_buf_ptr;
@@ -89,7 +85,7 @@ MessageRef process_input_message(MessageRef input_msg)
     IOBufferRef tmp = IOBuffer_from_cstring(response_buf_ptr);
     free(response_buf_ptr);
 
-    message_set_content(response, tmp);
+    newline_msg_set_content(response, tmp);
     return response;
 }
 static void invoke_done_callback(EchoAppRef app, int error)
