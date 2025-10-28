@@ -77,6 +77,9 @@ add_executable(${target}
 		mstream/msg_stream.c
 		mstream/msg_reader.c
 		mstream/msg_writer.c
+
+		sync_msg_stream/sync_msg_stream.c
+		sync_msg_stream/sync_msg_stream.h
  )
 set(TEST_INCLUDE_DIRS
 		${C_HTTP_PROJECT_DIR}/tests/test_runloop/test_echo
