@@ -1,6 +1,6 @@
 #ifndef H_echo_app_h
 #define H_echo_app_h
-#include <msg/newline_msg.h>
+#include <tests/test_runloop/test_client_server_original/msg/newline/newline_msg.h>
 #include <mstream/msg_stream.h>
 #include <server/server_ctx.h>
 #define EchoApp_TAG "ECHTAG"

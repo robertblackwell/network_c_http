@@ -189,6 +189,7 @@ void IOBuffer_reset(IOBufferRef this)
     RBL_CHECK_TAG(IOBuffer_TAG, this)
     this->buffer_ptr = this->mem_p;
     this->buffer_remaining = 0;
+    *(char*)(this->mem_p + this->buffer_remaining) = IOB_TERM_CHAR;
 }
 void IOBuffer_free(IOBufferRef this)
 {

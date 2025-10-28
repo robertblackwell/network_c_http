@@ -3,15 +3,17 @@
 #include <runloop/runloop.h>
 #include <common/list.h>
 #include <tcp/tcp_stream.h>
-#include <msg/newline_msg.h>
+#include <msg/msg_generic.h>
 #define MsgStream_TAG "MSGSTR"
 
 typedef struct MsgStream_s MsgStream, *MsgStreamRef;
+typedef void(MsgReadCallback)(void* arg, GenericMsgRef msg, int error);
+typedef void(MsgWriteCallback)(void* arg, int error);
 
 struct MsgStream_s {
     RBL_DECLARE_TAG;
-    TcpStreamRef tcp_stream_ref;
-    NewlineMsgParserRef    msg_parser_ref;
+    TcpStreamRef    tcp_stream_ref;
+    GenericMsgParserRef    msg_parser_ref;
 
     void*             read_cb_arg;
     MsgReadCallback*  read_cb;
@@ -39,6 +41,6 @@ void msg_stream_read(MsgStreamRef msg_stream_ref, MsgReadCallback read_cb, void*
  * This function may modify the msg_ref while framing for transmission but ownership
  * remains with the caller
  */
-void msg_stream_write(MsgStreamRef msg_stream_ref, NewlineMsgRef msg_ref, MsgWriteCallback write_cb, void* arg);
+void msg_stream_write(MsgStreamRef msg_stream_ref, GenericMsgRef msg_ref, MsgWriteCallback write_cb, void* arg);
 
 #endif

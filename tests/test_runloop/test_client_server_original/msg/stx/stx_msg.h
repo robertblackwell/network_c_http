@@ -20,7 +20,7 @@ bool stx_msg_get_is_request(StxMsgRef this);
 void stx_msg_set_is_request(StxMsgRef this, bool yn);
 void stx_msg_set_lrc(StxMsgRef this, char lrc);
 void stx_msg_set_content_length(StxMsgRef this, int length);
-BufferChainRef stx_msg_get_body(StxMsgRef mref);
-void stx_msg_set_body(StxMsgRef mref, BufferChainRef bodyp);
+IOBufferRef stx_msg_get_body(StxMsgRef mref);
+void stx_msg_set_body(StxMsgRef mref, IOBufferRef bodyp);
 
 #endif

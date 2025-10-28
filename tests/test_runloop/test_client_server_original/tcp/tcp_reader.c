@@ -19,6 +19,7 @@ void tcp_read(TcpStreamRef ctx, IOBufferRef input_buffer, TcpReadCallback read_c
 {
     RBL_CHECK_TAG(TcpStream_TAG, ctx)
     RBL_CHECK_END_TAG(TcpStream_TAG, ctx)
+    assert(input_buffer != NULL);
     assert(! is_read_pending(ctx));
     assert(IOBuffer_space_len(input_buffer) != 0);
     RunloopRef rl = runloop_stream_get_runloop(ctx->rlstream_ref);

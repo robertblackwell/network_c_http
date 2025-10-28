@@ -34,7 +34,7 @@ enum State {
 
 #define PARSE_ERROR_CB(THIS, BYTES, ERRC) do{ \
     IOBuffer_consume(iobuffer_ref, BYTES);                                        \
-    StxMessageParserPrivateReturnValue rv = {.error_code = (ERRC)}; \
+    StxMsgParserPrivateReturnValue rv = {.error_code = (ERRC)}; \
     THIS->on_read_parser_error_cb(THIS->on_read_ctx, ERRC##_message);                                        \
     /*return rv;*/               \
 }while(0);
@@ -43,52 +43,52 @@ enum State {
 #define ADD_TO_BODY(THIS, CH)   ()
 #define FINALIZE_BODY(THIS)
 
-void StxMessageParser_initialize(StxMessageParserRef this);
+void StxMsgParser_initialize(StxMsgParserRef this);
 
-StxMessageParserRef stx_message_parser_new(
-        void (*on_message_complete_cb)(void *, StxMessageRef),
+StxMsgParserRef stx_msg_parser_new(
+        StxMsgParserCallback on_message_complete_cb,
         void* on_new_message_ctx
     )
 {
-    StxMessageParserRef this = malloc(sizeof(StxMessageParser));
-    RBL_SET_TAG(StxMessageParser_TAG, this)
-    RBL_SET_END_TAG(StxMessageParser_TAG, this)
+    StxMsgParserRef this = malloc(sizeof(StxMsgParser));
+    RBL_SET_TAG(StxMsgParser_TAG, this)
+    RBL_SET_END_TAG(StxMsgParser_TAG, this)
     this->m_state = STATE_IDLE;
     this->m_current_message_ptr = NULL;
     this->on_new_message_callback = on_message_complete_cb;
     this->on_new_message_complete_ctx = on_new_message_ctx;
     return this;
 }
-void stx_message_parser_free(StxMessageParserRef this)
+void stx_msg_parser_free(StxMsgParserRef this)
 {
-    RBL_CHECK_TAG(StxMessageParser_TAG, this)
-    RBL_CHECK_END_TAG(StxMessageParser_TAG, this)
+    RBL_CHECK_TAG(StxMsgParser_TAG, this)
+    RBL_CHECK_END_TAG(StxMsgParser_TAG, this)
     ASSERT_NOT_NULL(this);
     if(this->m_current_message_ptr) {
-        stx_message_free(this->m_current_message_ptr);
+        stx_msg_free(this->m_current_message_ptr);
     }
     free(this);
 }
-StxMessageRef StxMessageParser_current_message(StxMessageParserRef this)
+StxMsgRef StxMsgParser_current_message(StxMsgParserRef this)
 {
-    RBL_CHECK_TAG(StxMessageParser_TAG, this)
-    RBL_CHECK_END_TAG(StxMessageParser_TAG, this)
+    RBL_CHECK_TAG(StxMsgParser_TAG, this)
+    RBL_CHECK_END_TAG(StxMsgParser_TAG, this)
     return this->m_current_message_ptr;
 }
-int StxMessageParser_append_bytes(StxMessageParserRef this, void *buffer, unsigned length)
+int StxMsgParser_append_bytes(StxMsgParserRef this, void *buffer, unsigned length)
 {
-    RBL_CHECK_TAG(StxMessageParser_TAG, this)
-    RBL_CHECK_END_TAG(StxMessageParser_TAG, this)
+    RBL_CHECK_TAG(StxMsgParser_TAG, this)
+    RBL_CHECK_END_TAG(StxMsgParser_TAG, this)
     return 0;
 }
-int stx_message_parser_consume(StxMessageParserRef parser, IOBufferRef iobuffer_ref)
+int stx_msg_parser_consume(StxMsgParserRef parser, IOBufferRef iobuffer_ref)
 {
     void* buf = IOBuffer_data(iobuffer_ref);
     int length = IOBuffer_data_len(iobuffer_ref);
     assert(length != 0);
     int error_code = 0;
-    RBL_CHECK_TAG(StxMessageParser_TAG, parser)
-    RBL_CHECK_END_TAG(StxMessageParser_TAG, parser)
+    RBL_CHECK_TAG(StxMsgParser_TAG, parser)
+    RBL_CHECK_END_TAG(StxMsgParser_TAG, parser)
 
     char* charbuf = (char*) buf;
     for(int i = 0; i < length; i++) {
@@ -99,21 +99,21 @@ int stx_message_parser_consume(StxMessageParserRef parser, IOBufferRef iobuffer_
         switch (parser->m_state) {
             case STATE_IDLE:
                 if(parser->m_current_message_ptr == NULL) {
-                    parser->m_current_message_ptr = stx_message_new();
+                    parser->m_current_message_ptr = stx_msg_new();
                 }
                 if(ch == CH_STX) parser->m_state = STATE_BODY;
                 break;
             case STATE_BODY: {
                 if (isprint(ch)) {
-                    BufferChainRef bc = stx_message_get_body(parser->m_current_message_ptr);
-                    BufferChain_append(bc, &ch, 1);
-                    IOBufferRef iobtmp = BufferChain_compact(bc);
-                    const char* xx = IOBuffer_cstr(iobtmp);
-                    IOBuffer_free(iobtmp);
+                    IOBufferRef iob = stx_msg_get_body(parser->m_current_message_ptr);
+                    IOBuffer_data_add(iob, &ch, 1);
+                    // IOBufferRef iobtmp = BufferChain_compact(bc);
+                    // const char* xx = IOBuffer_cstr(iobtmp);
+                    // IOBuffer_free(iobtmp);
                 } else if (ch == CH_ETX) {
                     parser->m_state = STATE_IDLE;
-                    parser->on_new_message_callback(parser-> on_new_message_complete_ctx, parser->m_current_message_ptr);
-                    parser->m_current_message_ptr = stx_message_new();
+                    parser->on_new_message_callback(parser-> on_new_message_complete_ctx, parser->m_current_message_ptr, 0);
+                    parser->m_current_message_ptr = stx_msg_new();
                     parser->m_state = STATE_IDLE;
                 } else {
                     parser->m_state = STATE_ERROR_RECOVERY;
@@ -130,8 +130,8 @@ int stx_message_parser_consume(StxMessageParserRef parser, IOBufferRef iobuffer_
                 } else {
                     if(i == length - 1) {
                         RBL_LOG_FMT("DemmoParser_consume parse error \n");
-                        stx_message_free(parser->m_current_message_ptr);
-                        parser->m_current_message_ptr = stx_message_new();
+                        stx_msg_free(parser->m_current_message_ptr);
+                        parser->m_current_message_ptr = stx_msg_new();
                         return 0;
                     }
                 }
@@ -143,29 +143,29 @@ int stx_message_parser_consume(StxMessageParserRef parser, IOBufferRef iobuffer_
     return 0;
 }
 
-int StxMessageParser_get_errno(StxMessageParserRef this)
+int StxMsgParser_get_errno(StxMsgParserRef this)
 {
-    RBL_CHECK_TAG(StxMessageParser_TAG, this)
-    RBL_CHECK_END_TAG(StxMessageParser_TAG, this)
+    RBL_CHECK_TAG(StxMsgParser_TAG, this)
+    RBL_CHECK_END_TAG(StxMsgParser_TAG, this)
     return 0;
 }
-StxMessageParserError StxMessageParser_get_error(StxMessageParserRef this)
+StxMsgParserError StxMsgParser_get_error(StxMsgParserRef this)
 {
 //    llhttp_errno_t x = llhttp_get_errno(this->m_llhttp_ptr);
 //    char* n = (char*)llhttp_errno_name(x);
 //    char* d = (char*)llhttp_errno_name(x);
-    RBL_CHECK_TAG(StxMessageParser_TAG, this)
-    RBL_CHECK_END_TAG(StxMessageParser_TAG, this)
-    StxMessageParserError erst;
+    RBL_CHECK_TAG(StxMsgParser_TAG, this)
+    RBL_CHECK_END_TAG(StxMsgParser_TAG, this)
+    StxMsgParserError erst;
     erst.m_err_number = 1;
     erst.m_name = "";
     erst.m_description = "";
     return erst;
 }
 
-void StxMessageParser_initialize(StxMessageParserRef this)
+void StxMsgParser_initialize(StxMsgParserRef this)
 {
-    RBL_CHECK_TAG(StxMessageParser_TAG, this)
-    RBL_CHECK_END_TAG(StxMessageParser_TAG, this)
+    RBL_CHECK_TAG(StxMsgParser_TAG, this)
+    RBL_CHECK_END_TAG(StxMsgParser_TAG, this)
     this->m_current_message_ptr = NULL;
 }

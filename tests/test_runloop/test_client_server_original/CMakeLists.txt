@@ -62,9 +62,17 @@ add_executable(${target}
 	tcp/tcp_writer.c
 	tcp/tcp_listener.c
 
-		msg/newline_msg.h
-		msg/newline_msg.c
-		msg/newline_msg_parser.c
+		msg/msg_generic.h
+		msg/msg_generic.c
+
+		msg/newline/newline_msg.h
+		msg/newline/newline_msg.c
+		msg/newline/newline_msg_parser.c
+
+		msg/stx/stx_msg.h
+		msg/stx/stx_msg.c
+		msg/stx/stx_msg_parser.h
+		msg/stx/stx_msg_parser.c
 
 		mstream/msg_stream.c
 		mstream/msg_reader.c

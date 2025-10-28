@@ -1,5 +1,5 @@
 #include "echo_app.h"
-NewlineMsgRef process_input_message(NewlineMsgRef input_msg);
+GenericMsgRef process_input_message(GenericMsgRef input_msg);
 
 void echo_app_init(EchoAppRef app, RunloopRef rl, int connection_fd)
 {
@@ -29,7 +29,7 @@ AppInterfaceRef echo_app_interface()
     ai->free = (void(*)(void*))(echo_app_free);
     return ai;
 }
-static void msg_read_callback(void* arg, NewlineMsgRef msg, int error);
+static void msg_read_callback(void* arg, GenericMsgRef msg, int error);
 static void msg_write_callback(void* arg, int error);
 static void postable_read(RunloopRef rl, void* arg);
 static void invoke_done_callback(EchoAppRef app, int error);
@@ -41,7 +41,7 @@ void echo_app_run(EchoAppRef app, AppDoneCallback* cb, void* arg)
     RunloopRef rl = runloop_stream_get_runloop(app->msg_stream_ref->tcp_stream_ref->rlstream_ref);
     runloop_post(rl, postable_read, app);
 }
-static void msg_read_callback(void* arg, NewlineMsgRef msg, int error)
+static void msg_read_callback(void* arg, GenericMsgRef msg, int error)
 {
     EchoAppRef app = arg;
     RBL_CHECK_TAG(EchoApp_TAG, app)
@@ -51,8 +51,8 @@ static void msg_read_callback(void* arg, NewlineMsgRef msg, int error)
         invoke_done_callback(app, error);
     } else {
         assert(msg != NULL);
-        NewlineMsgRef response = process_input_message(msg);
-        newline_msg_free(msg);
+        GenericMsgRef response = process_input_message(msg);
+        generic_msg_free(msg);
         msg_stream_write(app->msg_stream_ref, response, msg_write_callback, app);
     }
 }
@@ -75,17 +75,17 @@ static void postable_read(RunloopRef rl, void* arg)
     msg_stream_read(app->msg_stream_ref, msg_read_callback, app);
 }
 
-NewlineMsgRef process_input_message(NewlineMsgRef input_msg)
+GenericMsgRef process_input_message(GenericMsgRef input_msg)
 {
-    NewlineMsgRef response = newline_msg_new();
-    char* p = IOBuffer_data(input_msg->iob);
+    GenericMsgRef response = generic_msg_new();
+    char* p = IOBuffer_data(generic_msg_get_content(input_msg));
 
     char* response_buf_ptr;
-    asprintf(&response_buf_ptr, "ServerResponse:[%s]\n", p);
+    asprintf(&response_buf_ptr, "ServerResponse:[%s]", p);
     IOBufferRef tmp = IOBuffer_from_cstring(response_buf_ptr);
     free(response_buf_ptr);
 
-    newline_msg_set_content(response, tmp);
+    generic_msg_set_content(response, tmp);
     return response;
 }
 static void invoke_done_callback(EchoAppRef app, int error)

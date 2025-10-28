@@ -1,5 +1,5 @@
-#ifndef demo_parser_h
-#define demo_parser_h
+#ifndef H_stx_msg_parser_h
+#define H_stx_msg_parser_h
 #include <stdint.h>
 #include "stx_msg.h"
 #include <src/common/cbuffer.h>
@@ -53,12 +53,12 @@ typedef struct ParserInterface_s ParserInterface, *ParserInterfaceRef;
  * over buffer and message boundaries
  */
 typedef struct StxMsgParser_s StxMsgParser, *StxMsgParserRef;
-typedef void(*StxMsgComplete_CB)(void* ctx, StxMsgRef);
+typedef void(StxMsgParserCallback)(void* arg, StxMsgRef mref, int error);
 struct StxMsgParser_s {
     RBL_DECLARE_TAG;
     int                    m_state;
     void*                  on_new_message_complete_ctx; // generally a pointer to the connection
-    StxMsgComplete_CB      on_new_message_callback;
+    StxMsgParserCallback   *on_new_message_callback;
     StxMsgRef              m_current_message_ptr;
     RBL_DECLARE_END_TAG;
 };
@@ -67,7 +67,7 @@ StxMsgParserRef stx_msg_parser_new(
         /**
          * This function is called every time the parser completes a new message
          */
-        void(*on_message_complete_cb)(void* on_msg_ctx, StxMsgRef msgref),
+        StxMsgParserCallback  on_message_complete_cb,
         /**
          * This is an anonymous pointer to the context object you want the on_message_complete_cb
          * to have while it decides what to do with the new message.

@@ -2,7 +2,7 @@
 #define H_newline_msg__h
 #include <runloop/runloop.h>
 #include <common/list.h>
-#include <tcp/tcp_stream.h>
+#include <tests/test_runloop/test_client_server_original/tcp/tcp_stream.h>
 
 #define NewlineMsgParser_TAG "MSGPSR"
 #define NewlineMsg_TAG "MSGTAG"
@@ -14,8 +14,6 @@ typedef struct NewlineMsg_s {
     RBL_DECLARE_END_TAG;
 } NewlineMsg, * NewlineMsgRef;
 
-typedef void(MsgReadCallback)(void* arg, NewlineMsgRef msg, int error);
-typedef void(MsgWriteCallback)(void* arg, int error);
 
 typedef void(NewlineMsgParserCallback)(void* arg, NewlineMsgRef msg, int error);
 

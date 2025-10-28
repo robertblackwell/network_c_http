@@ -21,23 +21,12 @@ void msg_stream_init(MsgStreamRef msg_stream, RunloopRef rl, int fd)
     msg_stream->input_message_list = List_new();
     msg_stream_reader_init(msg_stream);
 }
-#if 0
-void msg_stream_deinit(MsgStreamRef msg_stream_ref)
-{
-    RBL_CHECK_TAG(MsgStream_TAG, msg_stream_ref)
-    RBL_CHECK_END_TAG(MsgStream_TAG, msg_stream_ref)
-    tcp_stream_deinit(msg_stream_ref->tcp_stream_ref);
-    newline_message_parser_deinit(msg_stream_ref->msg_parser_ref);
-    if(msg_stream_ref->input_buffer) IOBuffer_destroy(msg_stream_ref->input_buffer);
-    if(msg_stream_ref->output_buffer) IOBuffer_destroy(msg_stream_ref->output_buffer);
-}
-#endif
 void msg_stream_free(MsgStreamRef msg_stream_ref)
 {   
     RBL_CHECK_TAG(MsgStream_TAG, msg_stream_ref)
     RBL_CHECK_END_TAG(MsgStream_TAG, msg_stream_ref)
     tcp_stream_free(msg_stream_ref->tcp_stream_ref);
-    newline_msg_parser_free(msg_stream_ref->msg_parser_ref);
+    generic_msg_parser_free(msg_stream_ref->msg_parser_ref);
     List_safe_free(msg_stream_ref->input_message_list, free);
     if(msg_stream_ref->input_buffer) IOBuffer_free(msg_stream_ref->input_buffer);
     if(msg_stream_ref->output_buffer) IOBuffer_free(msg_stream_ref->output_buffer);
