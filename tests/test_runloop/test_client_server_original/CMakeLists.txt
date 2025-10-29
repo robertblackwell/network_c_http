@@ -47,12 +47,12 @@
 ##add_test(test_echo_server test_echo_server)
 
 set(target test_client_server_original)
-add_executable(${target}
+set(TARGET_SRC
 	test_echo.c
 	echo_app/echo_app.h
 	echo_app/echo_app.c
 
- 	server/server_ctx.h
+	server/server_ctx.h
 	server/server_ctx.c
 
 	tcp/tcp_stream.h
@@ -62,25 +62,60 @@ add_executable(${target}
 	tcp/tcp_writer.c
 	tcp/tcp_listener.c
 
-		msg/msg_generic.h
-		msg/msg_generic.c
+	msg/msg_generic.h
+	msg/msg_generic.c
 
-		msg/newline/newline_msg.h
-		msg/newline/newline_msg.c
-		msg/newline/newline_msg_parser.c
+	msg/newline/newline_msg.h
+	msg/newline/newline_msg.c
+	msg/newline/newline_msg_parser.c
 
-		msg/stx/stx_msg.h
-		msg/stx/stx_msg.c
-		msg/stx/stx_msg_parser.h
-		msg/stx/stx_msg_parser.c
+	msg/stx/stx_msg.h
+	msg/stx/stx_msg.c
+	msg/stx/stx_msg_parser.h
+	msg/stx/stx_msg_parser.c
 
-		mstream/msg_stream.c
-		mstream/msg_reader.c
-		mstream/msg_writer.c
+	mstream/msg_stream.c
+	mstream/msg_reader.c
+	mstream/msg_writer.c
 
-		sync_msg_stream/sync_msg_stream.c
-		sync_msg_stream/sync_msg_stream.h
- )
+	sync_msg_stream/sync_msg_stream.c
+	sync_msg_stream/sync_msg_stream.h
+)
+
+#add_executable(${target} ${TARGET_SRC})
+#	test_echo.c
+#	echo_app/echo_app.h
+#	echo_app/echo_app.c
+#
+# 	server/server_ctx.h
+#	server/server_ctx.c
+#
+#	tcp/tcp_stream.h
+#	tcp/tcp_stream_internal.h
+#	tcp/tcp_stream.c
+#	tcp/tcp_reader.c
+#	tcp/tcp_writer.c
+#	tcp/tcp_listener.c
+#
+#		msg/msg_generic.h
+#		msg/msg_generic.c
+#
+#		msg/newline/newline_msg.h
+#		msg/newline/newline_msg.c
+#		msg/newline/newline_msg_parser.c
+#
+#		msg/stx/stx_msg.h
+#		msg/stx/stx_msg.c
+#		msg/stx/stx_msg_parser.h
+#		msg/stx/stx_msg_parser.c
+#
+#		mstream/msg_stream.c
+#		mstream/msg_reader.c
+#		mstream/msg_writer.c
+#
+#		sync_msg_stream/sync_msg_stream.c
+#		sync_msg_stream/sync_msg_stream.h
+# )
 set(TEST_INCLUDE_DIRS
 		${C_HTTP_PROJECT_DIR}/tests/test_runloop/test_echo
 		${C_HTTP_PROJECT_DIR}/src
@@ -94,8 +129,28 @@ set(INC_DIRS
 		${C_HTTP_PROJECT_DIR}/tests/test_runloop/test_client_server_original
 		${CMAKE_CURRENT_SOURCE_DIR}
 )
-message("ZZZZZZZtest client server INC_DIRS ${INC_DIRS}")
-# target_compile_definitions(test_echo PUBLIC ASIO_LISTENER_ENABLED)
- target_include_directories(${target} PUBLIC ${INC_DIRS})
- target_link_libraries(${target}	PUBLIC ${TEST_LINK_LIBS})
- add_test(${target} ${target})
+function(mktarget name msgselect)
+	set(target ${name}_${msgselect})
+	set(MSG_SELECT_VAR "")
+	string(TOUPPER ${msgselect} MSG_SELECT_VAR)
+	set(MSG_SELECT_OPT MSG_SELECT_${MSG_SELECT_VAR})
+	message("ZZZZZZZZZ")
+	message("message select option ${MSG_SELECT_OPT}")
+	message("target: ${target}")
+	message("test client server original INC_DIRS ${INC_DIRS}")
+	message("ZZZZZZZZZ")
+	add_executable(${target} ${TARGET_SRC})
+	if(msgselect STREQUAL "newline")
+		target_compile_definitions(${target} PUBLIC MSG_SELECT_NEWLINE)
+	elseif (msgselect STREQUAL "stx")
+		target_compile_definitions(${target} PUBLIC MSG_SELECT_STX)
+	else()
+		message( FATAL_ERROR "Msg selection not selected")
+	endif()
+ 	target_include_directories(${target} PUBLIC ${INC_DIRS})
+ 	target_link_libraries(${target}	PUBLIC ${TEST_LINK_LIBS})
+ 	add_test(${target} ${target})
+endfunction()
+
+mktarget(test_client_server_original newline)
+mktarget(test_client_server_original stx)

@@ -1,5 +1,11 @@
 #include "msg_generic.h"
-
+inline const char* generic_msg_selection() {
+#if defined(MSG_SELECT_NEWLINE)
+    return "newline_msg";
+#elif defined(MSG_SELECT_STX)
+    return "stx_msg";
+#endif
+}
 inline GenericMsgRef generic_msg_new() {
 #if defined(MSG_SELECT_NEWLINE)
     return newline_msg_new();

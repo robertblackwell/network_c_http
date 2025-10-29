@@ -1,7 +1,6 @@
 #ifndef H_generic_msg_h
 #define H_generic_msg_h
 
-#define MSG_SELECT_NEWLINE
 #if defined(MSG_SELECT_NEWLINE)
 #include "newline/newline_msg.h"
 typedef NewlineMsg GenericMessage;
@@ -18,7 +17,7 @@ typedef StxMsgParser GenericMsgParser;
 typedef StxMsgParserRef GenericMsgParserRef;
 typedef StxMsgParserCallback GenericMsgParserCallback;
 #endif
-
+const char* generic_msg_selection();
 GenericMsgRef generic_msg_new();
 void generic_msg_free(GenericMsgRef msg_ref);
 IOBufferRef generic_msg_get_content(GenericMsgRef msg);

@@ -6,12 +6,12 @@
 #endif
 #include <common/socket_functions.h>
 #include <rbl/unittest.h>
-#include <msg/newline/newline_msg.h>
+#include <msg/msg_generic.h>
 
 typedef struct SyncMsgStream_s  SyncMsgStream, *SyncMsgStreamRef;
 SyncMsgStreamRef sync_msg_stream_new();
 void sync_msg_stream_free(SyncMsgStreamRef s);
 void sync_msg_stream_connect(SyncMsgStreamRef syn_stream, int port);
-void sync_msg_stream_send(SyncMsgStreamRef sync_stream, NewlineMsgRef msgref);
-NewlineMsgRef sync_msg_stream_recv(SyncMsgStreamRef sync_stream);
+void sync_msg_stream_send(SyncMsgStreamRef sync_stream, GenericMsgRef msgref);
+GenericMsgRef sync_msg_stream_recv(SyncMsgStreamRef sync_stream);
 #endif

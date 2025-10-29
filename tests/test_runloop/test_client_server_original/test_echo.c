@@ -25,34 +25,42 @@ void testctx_init(TestCtxRef ctx, int id, int nbr_connections, int nbr_messages_
 
 void* client_thread_function(void* tctx);
 void* server_thread_function(void* tctx);
-int test_echo();
+int test_client_server();
 
 int main() {
-    UT_ADD(test_echo);
+    printf("test_echo msg selection is : %s\n", generic_msg_selection());
+    UT_ADD(test_client_server);
     int rc = UT_RUN();
     return rc;
 }
-int test_echo() {
-    TestCtx tctx[2];
-    testctx_init(&tctx[0], 11, 4, 4);
-    testctx_init(&tctx[1], 22, 4, 4);
-    pthread_t server_thread;
-    pthread_t client_1_thread;
-    pthread_t client_2_thread;
-    pthread_create(&server_thread, NULL, server_thread_function, &(tctx[0]));
+int test_client_server() {
+    int nbr_servers = 5;
+    int nbr_clients = 10;
+    pthread_t server_thread[nbr_servers];
+    pthread_t client_thread[nbr_clients];
+    TestCtx tctx[nbr_clients];
+    for(int iclient = 0; iclient < nbr_clients; iclient++) {
+        testctx_init(&tctx[iclient], iclient*10+iclient, 4, 4);
+    }
+    for (int iserver = 0; iserver < nbr_servers; iserver++) {
+        pthread_create(&server_thread[iserver], NULL, server_thread_function, &(tctx[0]));
+    }
     sleep(3);
-    pthread_create(&client_1_thread, NULL, client_thread_function, &(tctx[0]));
-    pthread_create(&client_2_thread, NULL, client_thread_function, &(tctx[1]));
-    pthread_join(client_1_thread, NULL);
-    pthread_join(client_2_thread, NULL);
-    UT_EQUAL_INT(tctx[0].error_count, 0);
-    UT_EQUAL_INT(tctx[1].error_count, 0);
-    pthread_join(server_thread, NULL);
+    for (int iclient = 0; iclient < nbr_clients; iclient++) {
+        pthread_create(&client_thread[iclient], NULL, client_thread_function, &(tctx[0]));
+    }
+    for(int iclient = 0; iclient < nbr_clients; iclient++) {
+        UT_EQUAL_INT(tctx[iclient].error_count, 0);
+        pthread_join(client_thread[iclient], NULL);
+    }
+    for(int iserver = 0; iserver < nbr_servers; iserver++) {
+        pthread_join(server_thread[iserver], NULL);
+    }
     printf("After all joins\n");
     return 0;
 }
-bool verify(NewlineMsgRef sendmsg, NewlineMsgRef response);
-NewlineMsgRef make_send_msg(int ident, int i, int j);
+bool verify(GenericMsgRef sendmsg, GenericMsgRef response);
+GenericMsgRef make_send_msg(int ident, int i, int j);
 
 void* client_thread_function(void* tctx) {
 
@@ -63,19 +71,10 @@ void* client_thread_function(void* tctx) {
     for(int i = 0; i < ctx->nbr_connections; i++) {
         SyncMsgStreamRef sync_stream = sync_msg_stream_new();
         sync_msg_stream_connect(sync_stream, port);
-#if 0
-        struct sockaddr_in server;
-        int lfd = socket(AF_INET, SOCK_STREAM, 0);
-        server.sin_family = AF_INET;
-        server.sin_port = port;
-        server.sin_addr.s_addr = inet_addr("127.0.0.1");
-        const int status = connect(lfd, (struct sockaddr *)&server, sizeof server);
-        assert(status == 0);
-#endif
         for (int j = 0; j < ctx->nbr_msg_per_connection; j++) {
-            NewlineMsgRef sendmsg = make_send_msg(ident, i, j);
+            GenericMsgRef sendmsg = make_send_msg(ident, i, j);
             sync_msg_stream_send(sync_stream, sendmsg);
-            NewlineMsgRef response = sync_msg_stream_recv(sync_stream);
+            GenericMsgRef response = sync_msg_stream_recv(sync_stream);
             bool ok = verify(sendmsg, response);
             if(!ok) {
                 ctx->error_count++;
@@ -102,20 +101,20 @@ void* server_thread_function(void* tctx)
     runloop_free(runloop);
     return 0;
 }
-NewlineMsgRef make_send_msg(int ident, int i, int j)
+GenericMsgRef make_send_msg(int ident, int i, int j)
 {
     char* send_content_ptr = NULL;
     int sl = asprintf(&send_content_ptr, "ABCDEFGHIJKLMNOPQRSTUVWXYZ Client %d connection: %d msg: %d", ident, i, j);
     assert(sl != -1);
-    NewlineMsgRef msgref = newline_msg_new();
+    GenericMsgRef msgref = generic_msg_new();
     IOBufferRef iob = IOBuffer_from_cstring(send_content_ptr);
-    newline_msg_set_content(msgref, iob);
+    generic_msg_set_content(msgref, iob);
     return msgref;
 }
-bool verify(NewlineMsgRef sendmsg, NewlineMsgRef response)
+bool verify(GenericMsgRef sendmsg, GenericMsgRef response)
 {
-    const char* send_cstr = IOBuffer_cstr(newline_msg_get_content(sendmsg));
-    const char* response_cstr = IOBuffer_cstr(newline_msg_get_content(response));
+    const char* send_cstr = IOBuffer_cstr(generic_msg_get_content(sendmsg));
+    const char* response_cstr = IOBuffer_cstr(generic_msg_get_content(response));
     char* test_buffer_ptr;
     ssize_t len = asprintf(&test_buffer_ptr, "ServerResponse:[%s]", send_cstr);
     assert(len != -1);
