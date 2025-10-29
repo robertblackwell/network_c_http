@@ -40,14 +40,14 @@ int test_client_server() {
     pthread_t client_thread[nbr_clients];
     TestCtx tctx[nbr_clients];
     for(int iclient = 0; iclient < nbr_clients; iclient++) {
-        testctx_init(&tctx[iclient], iclient*10+iclient, 4, 4);
+        testctx_init(&tctx[iclient], (1+iclient)*100+(1+iclient), 4, 4);
     }
     for (int iserver = 0; iserver < nbr_servers; iserver++) {
         pthread_create(&server_thread[iserver], NULL, server_thread_function, &(tctx[0]));
     }
     sleep(3);
     for (int iclient = 0; iclient < nbr_clients; iclient++) {
-        pthread_create(&client_thread[iclient], NULL, client_thread_function, &(tctx[0]));
+        pthread_create(&client_thread[iclient], NULL, client_thread_function, &(tctx[iclient]));
     }
     for(int iclient = 0; iclient < nbr_clients; iclient++) {
         UT_EQUAL_INT(tctx[iclient].error_count, 0);
@@ -83,7 +83,7 @@ void* client_thread_function(void* tctx) {
         }
         sync_msg_stream_free(sync_stream);
     }
-    printf("Client thread function exiting\n");
+    printf("Client thread function exiting ident: %d\n", ident);
     return NULL;
 }
 void* server_thread_function(void* tctx)

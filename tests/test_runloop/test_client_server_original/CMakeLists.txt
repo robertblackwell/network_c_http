@@ -22,8 +22,8 @@
 #
 #add_executable(test_echo_server
 #		main.c
-#		echo_app/echo_app.h
-#		echo_app/echo_app.c
+#		simple_request_response_app/simple_request_response_app.h
+#		simple_request_response_app/simple_request_response_app.c
 #
 #		server/server_ctx.h
 #		server/server_ctx.c
@@ -48,9 +48,9 @@
 
 set(target test_client_server_original)
 set(TARGET_SRC
-	test_echo.c
-	echo_app/echo_app.h
-	echo_app/echo_app.c
+		test_client_server.c
+		simple_request_response_app/simple_app.h
+		simple_request_response_app/simple_app.c
 
 	server/server_ctx.h
 	server/server_ctx.c
@@ -84,8 +84,8 @@ set(TARGET_SRC
 
 #add_executable(${target} ${TARGET_SRC})
 #	test_echo.c
-#	echo_app/echo_app.h
-#	echo_app/echo_app.c
+#	simple_request_response_app/simple_request_response_app.h
+#	simple_request_response_app/simple_request_response_app.c
 #
 # 	server/server_ctx.h
 #	server/server_ctx.c

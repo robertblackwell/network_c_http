@@ -1,17 +1,14 @@
 #include <src/runloop/runloop.h>
-// //#include <src/runloop/rl_internal.h>
 #include "server_ctx.h"
 #include <assert.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <string.h>
 #include <errno.h>
 #include <rbl/unittest.h>
 #include <rbl/logger.h>
 #include <src/common/utils.h>
 #include <src/common/socket_functions.h>
-#include <echo_app/echo_app.h>
-#include "server_ctx.h"
+#include <simple_request_response_app/simple_app.h>
 
 #define L_STATE_EAGAIN 22
 #define L_STATE_READY 33
@@ -25,7 +22,7 @@ static void handle_new_socket(void* server, int sock, int error);
 static bool can_do_more(ServerCtxRef ctx);
 static void try_accept(ServerCtxRef ctx);
 static void postable_start(RunloopRef rl, void* arg);
-static void handle_app_done(EchoAppRef app_ref, void* arg, int error);
+static void handle_app_done(SimpleAppRef app_ref, void* arg, int error);
 static void app_instance_done_cb(void* app, void* server, int error);
 
 
@@ -91,46 +88,7 @@ static void postable_start(RunloopRef rl, void* arg)
     TcpListenerRef tcplr = server_ctx->tcp_listener_ref;
     tcp_accept(tcplr, handle_new_socket, server_ctx);    
 }
-#if 0
-static void postable_try_accept(RunloopRef rl, void* arg)
-{
-    ServerCtxRef ctx = arg;
-    RBL_CHECK_TAG(ServerCtx_TAG, ctx)
-    RBL_CHECK_END_TAG(ServerCtx_TAG, ctx)
-    TcpListenerRef tcp_list = ctx->tcp_listener_ref;
-    RunloopListenerRef rllistener_ref = tcp_list->rl_listener_ref;
-    runloop_listener_register(rllistener_ref, on_accept_ready, ctx);
-    int fd = runloop_listener_get_fd(rllistener_ref);
-    int result;
-    switch(ctx->l_state) {
-        case L_STATE_INITIAL:
-            if((result = listen(fd, SOMAXCONN)) != 0) {
-                printf("listen call failed with errno %d \n", errno);
-                assert(0);
-            }
-            ctx->l_state = L_STATE_READY;
-            try_accept(ctx);
-            break;
-        case L_STATE_READY:
-            try_accept(ctx);
-            break;
-        case L_STATE_EAGAIN:
-            
-        case L_STATE_STOPPED:
-        case L_STATE_ERROR:
-            break;
-        default:
-            assert(0);
-            break;
-    }
-}
-#endif
-#if 0    
-static void postable_read_cb(RunloopRef rl, void* arg)
-{
 
-}
-#endif
 static void handle_new_socket(void* server, int new_sock, int error)
 {
     assert(new_sock != 0);
@@ -140,10 +98,10 @@ static void handle_new_socket(void* server, int new_sock, int error)
     // int nbsock = socket_set_blocking(sock);
     RBL_LOG_FMT("handle_new_socket ctx: %p sock: %d ", ctx, new_sock)
     RunloopRef rl = runloop_listener_get_runloop(ctx->tcp_listener_ref->rl_listener_ref);
-    EchoAppRef app_ref = echo_app_new(rl, new_sock);
+    SimpleAppRef app_ref = simple_app_new(rl, new_sock);
     if(error == 0) {
         List_add_back(ctx->connection_list, app_ref);
-        echo_app_run(app_ref, app_instance_done_cb, ctx);
+        simple_app_run(app_ref, app_instance_done_cb, ctx);
     } else{
         // termnate ?
         assert(0);
@@ -157,13 +115,13 @@ static void handle_new_socket(void* server, int new_sock, int error)
 static void app_instance_done_cb(void* app, void* server, int error)
 {
     ServerCtxRef ctx = server;
-    EchoAppRef app_ref = app;
+    SimpleAppRef app_ref = app;
     RBL_CHECK_TAG(ServerCtx_TAG, ctx)
     RBL_CHECK_END_TAG(ServerCtx_TAG, ctx)
     ListIterator itr = List_find(ctx->connection_list, app);
     assert(itr != NULL);
     List_itr_remove(ctx->connection_list, &itr);
-    echo_app_free(app_ref);
+    simple_app_free(app_ref);
 }
 int local_create_bound_socket(int port, const char *host)
 {
