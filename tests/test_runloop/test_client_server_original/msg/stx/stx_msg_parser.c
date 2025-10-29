@@ -169,3 +169,7 @@ void StxMsgParser_initialize(StxMsgParserRef this)
     RBL_CHECK_END_TAG(StxMsgParser_TAG, this)
     this->m_current_message_ptr = NULL;
 }
+const char* stx_msg_parser_strerror(StxMsgParserRef parser_ref, int parser_errno)
+{
+    return "parser error";
+}

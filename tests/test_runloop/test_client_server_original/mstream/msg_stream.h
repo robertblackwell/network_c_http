@@ -18,8 +18,6 @@ struct MsgStream_s {
     void*             read_cb_arg;
     MsgReadCallback*  read_cb;
     IOBufferRef       input_buffer;
-    // input_msg should only be none null if the parser has set this to a new message
-    // via the parser callback
     ListRef           input_message_list;
     IOBufferRef       output_buffer;
     MsgWriteCallback* write_cb;
@@ -34,12 +32,18 @@ void msg_stream_free(MsgStreamRef msg_stream_ref);
 /*
  * This function passes a MessageRef to the caller via the callback.
  * That is a transfer of ownership and the caller is resposible for
- * deallocating if necessary
+ * deallocating the message object if necessary, error == 0 means success.
+ * When error != 0 for an io error msg will be NULL.
+ * An error while parsing a message will result in
+ * error != 0 and a partially complete message from which it may be possible
+ * to determine where the parse error occurred. This will depend on the actual
+ * real message type
  */
 void msg_stream_read(MsgStreamRef msg_stream_ref, MsgReadCallback read_cb, void* arg);
 /*
  * This function may modify the msg_ref while framing for transmission but ownership
- * remains with the caller
+ * remains with the caller. After write_cb is invoked the caller should manage the msg_ref
+ * lifetime as it needs.
  */
 void msg_stream_write(MsgStreamRef msg_stream_ref, GenericMsgRef msg_ref, MsgWriteCallback write_cb, void* arg);
 

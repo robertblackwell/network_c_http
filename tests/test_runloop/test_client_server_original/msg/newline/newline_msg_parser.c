@@ -1,5 +1,6 @@
 #include "newline_msg.h"
-
+#include <ctype.h>
+#include <stdio.h>
 NewlineMsgParserRef newline_msg_parser_new(NewlineMsgParserCallback* cb, void* arg)
 {
     NewlineMsgParserRef p = malloc(sizeof(NewlineMsgParser));
@@ -33,21 +34,28 @@ void newline_msg_parser_free(NewlineMsgParserRef p)
     if(p->msg_ref) newline_msg_free(p->msg_ref);
     free(p);
 }
-void newline_msg_parser_consume(NewlineMsgParserRef mp, IOBufferRef iob_new_data)
+int newline_msg_parser_consume(NewlineMsgParserRef mp, IOBufferRef iob_new_data)
 {
-    int buffer_length = IOBuffer_data_len(iob_new_data);
-    char* buffer = IOBuffer_data(iob_new_data);
-    int line_buffer_length;
-    int consume_count = 0;
-    int commit_count = 0;
+//    int buffer_length = IOBuffer_data_len(iob_new_data);
+//    char* buffer = IOBuffer_data(iob_new_data);
+//    int line_buffer_length;
+//    int consume_count = 0;
+//    int commit_count = 0;
     while(!IOBuffer_empty(iob_new_data)){
         char ch = IOBuffer_consume_pop_front(iob_new_data);
         if((ch == '\n')||(ch == '\0')) {
 
             mp->cb(mp->cb_arg, mp->msg_ref, 0);
             mp->msg_ref = newline_msg_new();
+        }else if(isprint((int)ch) == 0) {
+            return -2;
         } else {
             IOBuffer_commit_push_back(mp->msg_ref->iob, ch);
         }
     }
+    return 0;
+}
+const char* newline_msg_parser_strerror(NewlineMsgParserRef parser_ref, int parser_errno)
+{
+    return "newline_error";
 }

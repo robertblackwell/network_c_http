@@ -44,7 +44,7 @@ add_subdirectory(test_runloop)
 # add_subdirectory(test_static_list)
 #add_subdirectory(test_url) #this is superceded by test_url_parser
 add_subdirectory(test_url_parser)
-add_subdirectory(test_demo/test_demo_parser) #does not build
+add_subdirectory(test_stx_msg_parser) #does not build
 #add_subdirectory(test_demo/test_demo_connection)
 
 if (OFF)

@@ -39,19 +39,25 @@ static void tcp_read_callback(void* arg, int error)
     RunloopRef rl = runloop_stream_get_runloop(msg_stream_ref->tcp_stream_ref->rlstream_ref);
     if(error == 0) {
         assert(IOBuffer_data_len(msg_stream_ref->input_buffer) != 0);
-        generic_msg_parser_consume(msg_stream_ref->msg_parser_ref, msg_stream_ref->input_buffer);//, new_message_callback, msg_stream_ref);
-        assert(IOBuffer_data_len(msg_stream_ref->input_buffer) == 0);
+        int parser_error = generic_msg_parser_consume(msg_stream_ref->msg_parser_ref, msg_stream_ref->input_buffer);//, new_message_callback, msg_stream_ref);
+        if(parser_error == 0) {
+            assert(IOBuffer_data_len(msg_stream_ref->input_buffer) == 0);
 #if 1
-        IOBuffer_free(msg_stream_ref->input_buffer);
-        msg_stream_ref->input_buffer = NULL;
+            IOBuffer_free(msg_stream_ref->input_buffer);
+            msg_stream_ref->input_buffer = NULL;
 #else
-        IOBuffer_reset(msg_stream_ref->input_buffer);
+            IOBuffer_reset(msg_stream_ref->input_buffer);
 #endif
-        if (List_size(msg_stream_ref->input_message_list) != 0) {
-            GenericMsgRef m = List_remove_first(msg_stream_ref->input_message_list);
-            invoke_read_callback(msg_stream_ref, m, error);
+            if (List_size(msg_stream_ref->input_message_list) != 0) {
+                GenericMsgRef m = List_remove_first(msg_stream_ref->input_message_list);
+                invoke_read_callback(msg_stream_ref, m, error);
+            } else {
+                runloop_post(rl, postable_read, msg_stream_ref);
+            }
         } else {
-            runloop_post(rl, postable_read, msg_stream_ref);
+            assert(0);
+            IOBuffer_reset(msg_stream_ref->input_buffer);
+            invoke_read_callback(msg_stream_ref, NULL, parser_error);
         }
     } else {
         invoke_read_callback(msg_stream_ref, NULL, error);

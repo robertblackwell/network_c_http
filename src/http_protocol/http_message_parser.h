@@ -64,7 +64,7 @@ struct HttpMessageParser_s {
 };
 void HttpParser_reset(HttpMessageParser*);
 HttpMessageParserRef http_message_parser_new(
-        // a function that will be called by the parser when parsing of a new message is comlete
+        // a function that will be called by the parser when parsing of a new message is complete
         void(*on_new_message_cb)(void* on_new_message_ctx, HttpMessageRef new_message_ref),
         // a pointer to a ctx object you want the handler to have access to while it
         // deciddes what to do with a new message
@@ -79,8 +79,9 @@ void http_message_parser_free(HttpMessageParserRef this);
  * the end of one message and the start of the successive message.
  *
  * When a full message is complete the parser will call the 'message_complete_handler'. This function should
- * process the message and send the reply before returning. This will suspend the parser until the processing
- * of the message is complete. And if necessary will continue with the next message
+ * queue the message until the parser completes the processing of the current buffer.
+ * On completion of the current buffer the parser function will return so that its caller can then
+ * process any messages that have been queued.
  *
  * The http_message_parser_consume() function will only return  if:
  *

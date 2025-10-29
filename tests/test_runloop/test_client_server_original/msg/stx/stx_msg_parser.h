@@ -77,7 +77,7 @@ StxMsgParserRef stx_msg_parser_new(
 void stx_msg_parser_free(StxMsgParserRef this);
 
 int stx_msg_parser_consume(StxMsgParserRef parser, IOBufferRef iobuffer_ref);
-
+const char* stx_msg_parser_strerror(StxMsgParserRef parser, int parser_errno);
 #endif
 
 

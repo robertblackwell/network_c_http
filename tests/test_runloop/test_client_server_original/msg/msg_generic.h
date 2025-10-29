@@ -26,7 +26,7 @@ IOBufferRef generic_msg_serialize(GenericMsgRef mr);
 
 GenericMsgParserRef generic_msg_parser_new(GenericMsgParserCallback* cb, void* arg);
 void generic_msg_parser_free(GenericMsgParserRef parser_ref);
-void generic_msg_parser_consume(GenericMsgParserRef pref, IOBufferRef new_data);
-
+int generic_msg_parser_consume(GenericMsgParserRef pref, IOBufferRef new_data);
+const char* generic_strerror(GenericMsgParserRef parser_ref, int parser_errno);
 
 #endif

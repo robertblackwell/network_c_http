@@ -57,10 +57,17 @@ inline void generic_msg_parser_free(GenericMsgParserRef parser_ref){
     stx_msg_parser_free(parser_ref);
 #endif
 }
-inline void generic_msg_parser_consume(GenericMsgParserRef pref, IOBufferRef new_data){
+inline int generic_msg_parser_consume(GenericMsgParserRef pref, IOBufferRef new_data){
 #if defined(MSG_SELECT_NEWLINE)
-    newline_msg_parser_consume(pref, new_data);
+    return newline_msg_parser_consume(pref, new_data);
 #elif defined(MSG_SELECT_STX)
-    stx_msg_parser_consume(pref, new_data);
+    return stx_msg_parser_consume(pref, new_data);
+#endif
+}
+inline const char* generic_strerror(GenericMsgParserRef pref, int parser_errno){
+#if defined(MSG_SELECT_NEWLINE)
+    return newline_msg_parser_strerror(pref, parser_errno);
+#elif defined(MSG_SELECT_STX)
+    return stx_msg_parser_strerror(pref, parser_errno);
 #endif
 }
