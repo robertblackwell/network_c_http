@@ -2,8 +2,8 @@
 #define c_http_test_parser_harness_h
 #include <stdbool.h>
 #include <src/common/list.h>
-#include <apps/msg/stx/stx_msg.h>
-#include <apps/msg/stx/stx_msg_parser.h>
+#include <src/stx/stx_msg.h>
+#include <src/stx/stx_msg_parser.h>
 
 /* Test input - is a list of blocks of text and some context so that these blocks can be
  * "read" and "processed" one at a time*/

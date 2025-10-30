@@ -8,10 +8,10 @@ add_executable(${TARGET}
         test_stx_msg_parser.c
         test_harness.c
         test_harness.h
-		../../apps/msg/stx/stx_msg.c
-		../../apps/msg/stx/stx_msg.h
-		../../apps/msg/stx/stx_msg_parser.c
-		../../apps/msg/stx/stx_msg_parser.h
+		../../src/stx/stx_msg.c
+		../../src/stx/stx_msg.h
+		../../src/stx/stx_msg_parser.c
+		../../src/stx/stx_msg_parser.h
 
 )
 

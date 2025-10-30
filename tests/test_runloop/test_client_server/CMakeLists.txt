@@ -65,14 +65,14 @@ set(TARGET_SRC
 		${C_HTTP_PROJECT_DIR}/apps/msg/msg_generic.h
 		${C_HTTP_PROJECT_DIR}/apps/msg/msg_generic.c
 
-		${C_HTTP_PROJECT_DIR}/apps/msg/newline/newline_msg.h
-		${C_HTTP_PROJECT_DIR}/apps/msg/newline/newline_msg.c
-		${C_HTTP_PROJECT_DIR}/apps/msg/newline/newline_msg_parser.c
-
-		${C_HTTP_PROJECT_DIR}/apps/msg/stx/stx_msg.h
-		${C_HTTP_PROJECT_DIR}/apps/msg/stx/stx_msg.c
-		${C_HTTP_PROJECT_DIR}/apps/msg/stx/stx_msg_parser.h
-		${C_HTTP_PROJECT_DIR}/apps/msg/stx/stx_msg_parser.c
+#		${C_HTTP_PROJECT_DIR}/src/newline/newline_msg.h
+#		${C_HTTP_PROJECT_DIR}/src/newline/newline_msg.c
+#		${C_HTTP_PROJECT_DIR}/src/newline/newline_msg_parser.c
+#
+#		${C_HTTP_PROJECT_DIR}/src/stx/stx_msg.h
+#		${C_HTTP_PROJECT_DIR}/src/stx/stx_msg.c
+#		${C_HTTP_PROJECT_DIR}/src/stx/stx_msg_parser.h
+#		${C_HTTP_PROJECT_DIR}/src/stx/stx_msg_parser.c
 
 		${C_HTTP_PROJECT_DIR}/apps/tcp_msg_stream/msg_stream.c
 		${C_HTTP_PROJECT_DIR}/apps/tcp_msg_stream/msg_reader.c
@@ -152,5 +152,5 @@ function(mktarget name msgselect)
  	add_test(${target} ${target})
 endfunction()
 
-mktarget(test_client_server_original newline)
-mktarget(test_client_server_original stx)
+mktarget(test_client_server newline)
+mktarget(test_client_server stx)

@@ -57,6 +57,8 @@ set_source_files_properties(${C_HTTP_LIBRARY_SOURCE_FILES} PROPERTIES LANGUAGE C
 add_subdirectory(common)
 add_subdirectory(runloop)
 add_subdirectory(http)
+add_subdirectory(newline)
+add_subdirectory(stx)
 add_subdirectory(sync)
 foreach(F in ${C_HTTP_LIBRARY_SOURCE_FILES})
 	message("SOURCE FILE: ${F}")

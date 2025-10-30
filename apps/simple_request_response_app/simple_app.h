@@ -1,6 +1,6 @@
 #ifndef H_echo_app_h
 #define H_echo_app_h
-#include <apps/msg/newline/newline_msg.h>
+//#include <apps/msg/newline/newline_msg.h>
 #include <apps/tcp_msg_stream/msg_stream.h>
 #include <apps/server/server_ctx.h>
 #define SimpleApp_TAG "SMPAPP"

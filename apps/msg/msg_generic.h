@@ -2,15 +2,15 @@
 #define H_generic_msg_h
 
 #if defined(MSG_SELECT_NEWLINE)
-#include "newline/newline_msg.h"
+#include <src/newline/newline_msg.h>
 typedef NewlineMsg GenericMessage;
 typedef NewlineMsgRef GenericMsgRef;
 typedef NewlineMsgParser GenericMsgParser;
 typedef NewlineMsgParserRef GenericMsgParserRef;
 typedef NewlineMsgParserCallback GenericMsgParserCallback;
 #elif defined(MSG_SELECT_STX)
-#include "apps/msg/stx/stx_msg.h"
-#include "apps/msg/stx/stx_msg_parser.h"
+#include <src/stx/stx_msg.h>
+#include <src/stx/stx_msg_parser.h>
 typedef StxMsg GenericMessage;
 typedef StxMsgRef GenericMsgRef;
 typedef StxMsgParser GenericMsgParser;
