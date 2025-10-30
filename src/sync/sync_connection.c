@@ -7,7 +7,7 @@
 #include <src/common/alloc.h>
 #include <src/common/utils.h>
 #include <src/common/iobuffer.h>
-#include <src/http_protocol/http_message_parser.h>
+#include <src/http/http_message_parser.h>
 #include <rbl/logger.h>
 #include <stdio.h>
 #include <unistd.h>

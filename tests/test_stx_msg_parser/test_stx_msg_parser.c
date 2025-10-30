@@ -6,7 +6,7 @@
 #include <rbl/unittest.h>
 #include <rbl/logger.h>
 #include <src/http/kvpair.h>
-#include <tests/test_runloop/test_client_server_original/msg/stx/stx_msg.h>
+#include <apps/msg/stx/stx_msg.h>
 #include "test_harness.h"
 #include "run_list.c"
 

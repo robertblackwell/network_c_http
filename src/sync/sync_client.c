@@ -6,7 +6,7 @@
 #include <src/sync/sync_internal.h>
 #include <src/common/alloc.h>
 #include <src/common/cbuffer.h>
-#include <src/http_protocol/http_message.h>
+#include <src/http/http_message.h>
 #include <rbl/logger.h>
 #include <assert.h>
 #include <stdio.h>

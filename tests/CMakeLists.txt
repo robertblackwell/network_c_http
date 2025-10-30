@@ -31,7 +31,7 @@ add_subdirectory(test_kvpair)
 add_subdirectory(test_list)
 add_subdirectory(test_list_macro)
 #add_subdirectory(test_memalloc) #does not build
-add_subdirectory(test_message)
+add_subdirectory(test_http_message)
 #add_subdirectory(test_own)
 add_subdirectory(test_http_parser)
 add_subdirectory(test_query)

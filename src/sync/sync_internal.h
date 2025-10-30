@@ -3,7 +3,7 @@
 #include <rbl/logger.h>
 #include <src/common/socket_functions.h>
 #include <src/common/queue.h>
-#include <src/http_protocol/http_message_parser.h>
+#include <src/http/http_message_parser.h>
 
 #include <src/sync/sync.h>
 #include <src/sync/tags.h>

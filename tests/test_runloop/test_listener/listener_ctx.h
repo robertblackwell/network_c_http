@@ -14,7 +14,7 @@
 #include <rbl/unittest.h>
 #include <src/common/utils.h>
 #include <src/common/socket_functions.h>
-#include <src/sync/sync_client.h>
+//#include <src/sync/sync_client.h>
 #include <src/runloop/runloop.h>
 
 typedef int socket_handle_t;

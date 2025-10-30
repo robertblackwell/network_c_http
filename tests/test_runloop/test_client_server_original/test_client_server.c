@@ -4,8 +4,8 @@
 #include <sys/_pthread/_pthread_t.h>
 #endif
 #include <rbl/unittest.h>
-#include <sync_msg_stream/sync_msg_stream.h>
-#include "server/server_ctx.h"
+#include <apps/sync_msg_stream/sync_msg_stream.h>
+#include <apps/server/server_ctx.h>
 
 typedef struct TestCtx {
     int     port;

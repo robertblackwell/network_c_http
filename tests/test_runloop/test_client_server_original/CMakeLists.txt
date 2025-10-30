@@ -49,37 +49,37 @@
 set(target test_client_server_original)
 set(TARGET_SRC
 		test_client_server.c
-		simple_request_response_app/simple_app.h
-		simple_request_response_app/simple_app.c
+		${C_HTTP_PROJECT_DIR}/apps/simple_request_response_app/simple_app.h
+		${C_HTTP_PROJECT_DIR}/apps/simple_request_response_app/simple_app.c
 
-	server/server_ctx.h
-	server/server_ctx.c
+		${C_HTTP_PROJECT_DIR}/apps/server/server_ctx.h
+		${C_HTTP_PROJECT_DIR}/apps/server/server_ctx.c
 
-	tcp/tcp_stream.h
-	tcp/tcp_stream_internal.h
-	tcp/tcp_stream.c
-	tcp/tcp_reader.c
-	tcp/tcp_writer.c
-	tcp/tcp_listener.c
+		${C_HTTP_PROJECT_DIR}/apps/tcp/tcp_stream.h
+		${C_HTTP_PROJECT_DIR}/apps/tcp/tcp_stream_internal.h
+		${C_HTTP_PROJECT_DIR}/apps/tcp/tcp_stream.c
+		${C_HTTP_PROJECT_DIR}/apps/tcp/tcp_reader.c
+		${C_HTTP_PROJECT_DIR}/apps/tcp/tcp_writer.c
+		${C_HTTP_PROJECT_DIR}/apps/tcp/tcp_listener.c
 
-	msg/msg_generic.h
-	msg/msg_generic.c
+		${C_HTTP_PROJECT_DIR}/apps/msg/msg_generic.h
+		${C_HTTP_PROJECT_DIR}/apps/msg/msg_generic.c
 
-	msg/newline/newline_msg.h
-	msg/newline/newline_msg.c
-	msg/newline/newline_msg_parser.c
+		${C_HTTP_PROJECT_DIR}/apps/msg/newline/newline_msg.h
+		${C_HTTP_PROJECT_DIR}/apps/msg/newline/newline_msg.c
+		${C_HTTP_PROJECT_DIR}/apps/msg/newline/newline_msg_parser.c
 
-	msg/stx/stx_msg.h
-	msg/stx/stx_msg.c
-	msg/stx/stx_msg_parser.h
-	msg/stx/stx_msg_parser.c
+		${C_HTTP_PROJECT_DIR}/apps/msg/stx/stx_msg.h
+		${C_HTTP_PROJECT_DIR}/apps/msg/stx/stx_msg.c
+		${C_HTTP_PROJECT_DIR}/apps/msg/stx/stx_msg_parser.h
+		${C_HTTP_PROJECT_DIR}/apps/msg/stx/stx_msg_parser.c
 
-	mstream/msg_stream.c
-	mstream/msg_reader.c
-	mstream/msg_writer.c
+		${C_HTTP_PROJECT_DIR}/apps/tcp_msg_stream/msg_stream.c
+		${C_HTTP_PROJECT_DIR}/apps/tcp_msg_stream/msg_reader.c
+		${C_HTTP_PROJECT_DIR}/apps/tcp_msg_stream/msg_writer.c
 
-	sync_msg_stream/sync_msg_stream.c
-	sync_msg_stream/sync_msg_stream.h
+		${C_HTTP_PROJECT_DIR}/apps/sync_msg_stream/sync_msg_stream.c
+		${C_HTTP_PROJECT_DIR}/apps/sync_msg_stream/sync_msg_stream.h
 )
 
 #add_executable(${target} ${TARGET_SRC})

@@ -6,7 +6,7 @@
 #include <rbl/unittest.h>
 #include <rbl/logger.h>
 #include <src/http/kvpair.h>
-#include <src/http_protocol/http_message.h>
+#include <src/http/http_message.h>
 #include <src/test_helpers/message_private.h>
 //#include <src/saved/sync_reader.h>
 #include "test_harness.h"

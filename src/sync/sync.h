@@ -1,6 +1,6 @@
 #ifndef c_http_sync_sync.h
 #define c_http_sync_sync.h
-#include <src/http_protocol/http_message.h>
+#include <src/http/http_message.h>
 
 #include <assert.h>
 #include <stdio.h>
@@ -9,7 +9,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <src//common/queue.h>
+#include <src/common/queue.h>
 
 typedef struct  sync_server_s sync_server_t, *sync_server_r;
 typedef struct sync_worker_s sync_worker_t, *sync_worker_r;

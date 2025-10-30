@@ -11,9 +11,7 @@
 #include <src/http/http_message.h>
 
 
-void free_kvpair(void* p) {
-    KVPair_free((KVPairRef) p);
-}
+#ifdef HDRXX
 ///////////////////////////////////////////////////
 int test_hdrlist_new()
 {
@@ -21,8 +19,7 @@ int test_hdrlist_new()
     int sz = HdrList_size(hdrlistref);
     UT_NOT_EQUAL_PTR(hdrlistref, NULL);
     UT_EQUAL_INT(sz, 0);
-    HdrList_safe_free(hdrlistref);
-    hdrlistref = NULL;
+    HdrList_dispose(&hdrlistref);
     UT_EQUAL_PTR(hdrlistref, NULL);
 	return 0;
 }
@@ -46,7 +43,7 @@ int test_hdrlist_add_back_get_content()
     UT_EQUAL_INT(strcmp(sh2, "KVPAIRKEY2"), 0);
     UT_EQUAL_INT(strcmp(sv2, "4444"), 0);
     List_display((ListRef)hdrlistref);
-    HdrList_safe_free(hdrlistref);
+    HdrList_dispose(&hdrlistref);
     return 0;
 }
 int test_hdrlist_find()
@@ -99,8 +96,8 @@ int test_hdrlist_find()
     HdrList_remove(hdrlistref, "KVPAIRKEY2");
     UT_EQUAL_INT(HdrList_size(hdrlistref), 0);
 
-    HdrList_safe_free(hdrlistref);
-    Cbuffer_free(cbref);cbref = NULL;
+    HdrList_dispose(&hdrlistref);
+    Cbuffer_dispose(&cbref);
 
     return 0;
 }
@@ -123,8 +120,8 @@ int test_serialize_headers()
     HdrList_add_front(hdrs, hl_content_type);
     CbufferRef ser = HdrList_serialize(hdrs);
     free(body_len_str);
-    HdrList_safe_free(hdrs);
-    Cbuffer_free(ser);
+    HdrList_dispose(&hdrs);
+    Cbuffer_dispose(&ser);
     return 0;
 }
 int test_serialize_headers_2()
@@ -140,8 +137,8 @@ int test_serialize_headers_2()
 
     CbufferRef ser = HdrList_serialize(hdrs);
     free(body_len_str);
-    Cbuffer_free(ser);
-    HdrList_safe_free(hdrs);
+    Cbuffer_dispose(&ser);
+    HdrList_dispose(&hdrs);
     return 0;
 }
 int test_hdr_add_many()
@@ -158,7 +155,7 @@ int test_hdr_add_many()
 }
 int test_hdrlist_ar()
 {
-    const char* ar[][2] = {
+    char* ar[][2] = {
         {"Key1", "value1"},
         {"Key2", "value2"},
         {"Key3", "value3"},
@@ -171,125 +168,138 @@ int test_hdrlist_ar()
     UT_EQUAL_CSTR(Cbuffer_cstr(cb), "KEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\n");
     return 0;
 }
-#ifdef HGHGH
-int test_list_add_front()
+#endif
+HttpMessageRef make_request_message()
 {
-    ListRef lref = List_new(dealloc);
-    DummyObj* dref = DummyObj_new(333);
-    List_add_front(lref, (void*) dref);
-    int sz = List_size(lref);
-    int v1 = ((DummyObj*)List_first(lref))->value;
-    int v2 = ((DummyObj*)List_last(lref))->value;
-    UT_EQUAL_INT(sz, 1);
-    UT_EQUAL_INT(v1, 333);
-    UT_EQUAL_INT(v2, 333);
-    DummyObj* dref2 = DummyObj_new(444);
-    List_add_front(lref, (void*) dref2);
-    int v11 = ((DummyObj*)List_first(lref))->value;
-    int v12 = ((DummyObj*)List_last(lref))->value;
-    UT_EQUAL_INT((List_size(lref)), 2);
-    UT_EQUAL_INT(v11, 444);
-    UT_EQUAL_INT(v12, 333);
-
-    return 0;
+    const char* ar[][2] = {
+            {"Key1", "value1"},
+            {"Key2", "value2"},
+            {"Key3", "value3"},
+            {"Key4", "value4"},
+            {NULL, NULL}
+    };
+    HttpMessageRef msg = http_message_new_request();
+    http_message_set_method(msg, HTTP_POST);
+    http_message_set_target(msg, "/somewhere.php?a=111&b=222");
+    http_message_set_headers_arr(msg, ar);
+    return msg;
 }
-int test_list_remove_front()
+HttpMessageRef make_response_message()
 {
-    ListRef lref = List_new(dealloc);
-    DummyObj* dref = DummyObj_new(333);
-    List_add_front(lref, (void*) dref);
-    List_remove_first(lref);
-    UT_EQUAL_INT((List_size(lref)), 0);
-    DummyObj* dref1 = DummyObj_new(111);
-    DummyObj* dref2 = DummyObj_new(222);
-    DummyObj* dref3= DummyObj_new(333);
-    List_add_front(lref, (void*) dref1);
-    List_add_front(lref, (void*) dref2);
-    List_add_front(lref, (void*) dref3);
-    UT_EQUAL_INT((List_size(lref)), 3);
-    int v1 = (int)((DummyObj*)List_remove_first(lref))->value;
-    int v2 = (int)((DummyObj*)List_remove_first(lref))->value;
-    int v3 = (int)((DummyObj*)List_remove_first(lref))->value;
-    UT_EQUAL_INT((List_size(lref)), 0);
-    UT_EQUAL_INT(v1, 333);
-    UT_EQUAL_INT(v2, 222);
-    UT_EQUAL_INT(v3, 111);
-
-    return 0;
+    const char* ar[][2] = {
+            {"Key1", "value1"},
+            {"Key2", "value2"},
+            {"Key3", "value3"},
+            {"Key4", "value4"},
+            {NULL, NULL}
+    };
+    HttpMessageRef msg = http_message_new_response();
+    http_message_set_status(msg, 203);
+    http_message_set_reason(msg, "AREASON");
+    http_message_set_headers_arr(msg, ar);
+    return msg;
 }
-int test_iter()
+HttpMessageRef make_response_message_empty_body()
 {
-    ListRef lref = List_new(dealloc);
-    DummyObj* dref = DummyObj_new(333);
-    List_add_front(lref, (void*) dref);
-    List_remove_first(lref);
-    UT_EQUAL_INT((List_size(lref)), 0);
-    DummyObj* dref1 = DummyObj_new(111);
-    DummyObj* dref2 = DummyObj_new(222);
-    DummyObj* dref3= DummyObj_new(333);
-    List_add_front(lref, (void*) dref1);
-    List_add_front(lref, (void*) dref2);
-    List_add_front(lref, (void*) dref3);
-    UT_EQUAL_INT((List_size(lref)), 3);
-    ListIterator iter = List_iterator(lref);
-    for(int i = 3; i != 0;i--) {
-        DummyObj* dref = (DummyObj*)List_itr_unpack(lref, iter);
-        int v1 = i*100 + i*10 + i;
-        int v2 = dref->value;
-        UT_EQUAL_INT(v1, v2);
-        iter = List_itr_next(lref, iter);
+    const char* ar[][2] = {
+            {"Key1", "value1"},
+            {"Key2", "value2"},
+            {"Key3", "value3"},
+            {"Key4", "value4"},
+            {NULL, NULL}
+    };
+    HttpMessageRef msg = http_message_new_response();
+    http_message_set_status(msg, 203);
+    http_message_set_reason(msg, "AREASON");
+    http_message_set_headers_arr(msg, ar);
+    http_message_set_body(msg, BufferChain_new());
+    return msg;
+}
+static BufferChainRef make_chain_2()
+{
+    char* str[5] = {
+            (char*)"ABCDEFGH",
+            (char*)"IJKLMNOPQ",
+            (char*)"RSTUVWXYZ1234",
+            NULL
+    };
+    BufferChainRef bc = BufferChain_new();
+    for(int i = 0; i < 3; i++) {
+        IOBufferRef iob = IOBuffer_from_cstring(str[i]);
+        BufferChain_add_back(bc, iob);
+    }
+    return bc;
+}
+
+HttpMessageRef make_response_message_with_body()
+{
+    const char* ar[][2] = {
+            {"Key1", "value1"},
+            {"Key2", "value2"},
+            {"Key3", "value3"},
+            {"Key4", "value4"},
+            {NULL, NULL}
+    };
+    HttpMessageRef msg = http_message_new_response();
+    http_message_set_status(msg, 203);
+    http_message_set_reason(msg, "AREASON");
+    http_message_set_headers_arr(msg, ar);
+    http_message_set_body(msg, make_chain_2());
+    return msg;
+}
+
+int test_serialize()
+{
+    {
+        HttpMessageRef msg = make_request_message();
+        IOBufferRef ser = http_message_serialize(msg);
+        const char *correct = "POST /somewhere.php?a=111&b=222 HTTP/1.1\r\nKEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\n\r\n";
+        const char *candidate = IOBuffer_cstr(ser);
+        int r = strcmp(candidate, correct);
+        UT_EQUAL_INT(r, 0);
+    }
+    {
+        HttpMessageRef msg = make_response_message();
+        IOBufferRef ser = http_message_serialize(msg);
+        const char *correct = "HTTP/1.1  203 AREASON\r\nKEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\n\r\n";
+        const char *candidate = IOBuffer_cstr(ser);
+        int r = strcmp(candidate, correct);
+        UT_EQUAL_INT(r, 0);
+    }
+    {
+        HttpMessageRef msg = make_response_message_empty_body();
+        IOBufferRef ser = http_message_serialize(msg);
+        const char *correct = "HTTP/1.1  203 AREASON\r\nKEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\n\r\n";
+        const char *candidate = IOBuffer_cstr(ser);
+        int r = strcmp(candidate, correct);
+        UT_EQUAL_INT(r, 0);
+    }
+    {
+        HttpMessageRef msg = make_response_message_with_body();
+        IOBufferRef ser = http_message_serialize(msg);
+        const char *correct = "HTTP/1.1  203 AREASON\r\nKEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\n\r\nABCDEFGHIJKLMNOPQRSTUVWXYZ1234";
+        const char *candidate = IOBuffer_cstr(ser);
+        int r = strcmp(candidate, correct);
+        UT_EQUAL_INT(r, 0);
     }
     return 0;
 }
-int test_list_remove_back()
+int test_content_length()
 {
-    ListRef lref = List_new(dealloc);
-    DummyObj* dref = DummyObj_new(333);
-    List_add_back(lref, (void*) dref);
-    List_remove_last(lref);
-    UT_EQUAL_INT((List_size(lref)), 0);
-    DummyObj* dref1 = DummyObj_new(111);
-    DummyObj* dref2 = DummyObj_new(222);
-    DummyObj* dref3= DummyObj_new(333);
-    List_add_back(lref, (void*) dref1);
-    List_add_back(lref, (void*) dref2);
-    List_add_back(lref, (void*) dref3);
-    UT_EQUAL_INT((List_size(lref)), 3);
-    DummyObj* oref1 = (DummyObj*)List_remove_last(lref);
-    DummyObj* oref2 = (DummyObj*)List_remove_last(lref);
-    DummyObj* oref3 = (DummyObj*)List_remove_last(lref);
-    UT_EQUAL_INT((List_size(lref)), 0);
-    UT_EQUAL_INT((oref1->value), 333);
-    UT_EQUAL_INT((oref2->value), 222);
-    UT_EQUAL_INT((oref3->value), 111);
+    HttpMessageRef msg = make_response_message_empty_body();
+    http_message_set_content_length(msg, 123);
+    IOBufferRef ser = http_message_serialize(msg);
+    const char *correct = "HTTP/1.1  203 AREASON\r\nKEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\nCONTENT-LENGTH: 123\r\n\r\n";
+    const char *candidate = IOBuffer_cstr(ser);
+    int r = strcmp(candidate, correct);
+    UT_EQUAL_INT(r, 0);
 
     return 0;
 }
-
-
-int test_list_remove_back_one()
-{
-    ListRef lref = List_new(dealloc);
-    DummyObj* dref = DummyObj_new(333);
-    List_add_front(lref, (void*) dref);
-    List_remove_last(lref);
-    UT_EQUAL_INT((List_size(lref)), 0);
-
-    return 0;
-}
-#endif
 int main()
 {
-    UT_ADD(test_hdrlist_ar);
-	UT_ADD(test_hdrlist_new);
-    UT_ADD(test_hdrlist_add_back_get_content);
-    UT_ADD(test_hdrlist_find);
-    UT_ADD(test_hdr_add_many);
-//    UT_ADD(test_list_remove_front);
-//    UT_ADD(test_list_remove_back);
-//    UT_ADD(test_iter);
-    UT_ADD(test_serialize_headers);
-    UT_ADD(test_serialize_headers_2);
+    UT_ADD(test_serialize);
+    UT_ADD(test_content_length);
 	int rc = UT_RUN();
 	return rc;
 }

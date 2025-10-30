@@ -8,12 +8,10 @@ add_executable(${TARGET}
         test_stx_msg_parser.c
         test_harness.c
         test_harness.h
-		fill_iobuffer.c
-		fill_iobuffer.h
-		../test_runloop/test_client_server_original/msg/stx/stx_msg.c
-		../test_runloop/test_client_server_original/msg/stx/stx_msg.h
-		../test_runloop/test_client_server_original/msg/stx/stx_msg_parser.c
-		../test_runloop/test_client_server_original/msg/stx/stx_msg_parser.h
+		../../apps/msg/stx/stx_msg.c
+		../../apps/msg/stx/stx_msg.h
+		../../apps/msg/stx/stx_msg_parser.c
+		../../apps/msg/stx/stx_msg_parser.h
 
 )
 

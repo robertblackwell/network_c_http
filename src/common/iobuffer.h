@@ -32,11 +32,13 @@
  *      IOBuffer_consume(this, bytes_written)
  *```
  *
- * NOTE: IOBuffers never expand - they can be made to have any capacity needed at creation time, there after
+ * NOTE: IOBuffers never (really ?) expand - they can be made to have any capacity needed at creation time, there after
  * they cannot expand. A consequence of this is that there re no "append" style methods.
  *
  * It would be dangerous to allow a buffer to expand (and the address of the underlying memory possibly change)
  * while the same buffer was being used for IO
+ *
+ * NOTE: iobuffers are NOT thread safe and should not shared between threads.
  *
  * @{*/
 

@@ -8,7 +8,7 @@
 #include <src/common/list.h>
 #include <src/http/kvpair.h>
 #include <src/http/header_list.h>
-#include <src/http_protocol/http_message.h>
+#include <src/http/http_message.h>
 
 int run_list (ListRef tests);
 
