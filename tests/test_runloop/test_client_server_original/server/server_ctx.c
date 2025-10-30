@@ -58,6 +58,10 @@ void server_ctx_free(ServerCtxRef sref)
     RBL_CHECK_END_TAG(ServerCtx_TAG, sref)
     printf("server_ctx_free\n");
     tcp_listener_free(sref->tcp_listener_ref);
+    while(List_size(sref->connection_list) > 0) {
+        SimpleAppRef app = List_remove_first(sref->connection_list);
+        simple_app_free(app);
+    }
 //    ListIterator itr = List_iterator(sref->connection_list);
 //    while(itr) {
 //        TcpStreamRef p = List_itr_unpack(sref->connection_list, itr);
