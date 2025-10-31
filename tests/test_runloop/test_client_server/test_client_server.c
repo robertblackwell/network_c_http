@@ -53,6 +53,7 @@ int test_client_server() {
         UT_EQUAL_INT(tctx[iclient].error_count, 0);
         pthread_join(client_thread[iclient], NULL);
     }
+    printf("after all client joins \n");
     for(int iserver = 0; iserver < nbr_servers; iserver++) {
         pthread_join(server_thread[iserver], NULL);
     }
@@ -78,8 +79,8 @@ void* client_thread_function(void* tctx) {
             bool ok = verify(sendmsg, response);
             if(!ok) {
                 ctx->error_count++;
+                printf("Test fail response %d id: %d i:%d j:%d\n", (int)ok, ident, i, j);
             }
-            printf("Test response %d id: %d i:%d j:%d\n", (int)ok, ident, i, j);
         }
         sync_msg_stream_free(sync_stream);
     }
@@ -96,13 +97,14 @@ void* server_thread_function(void* tctx)
     ServerCtxRef server_ctx_ref = server_ctx_new(runloop, fd);
     server_ctx_run(server_ctx_ref);
     runloop_run(runloop, 5000L);
-    printf("XXXXXserver thread after runloop_run()\n");
+//    printf("XXXXXserver thread after runloop_run()\n");
     server_ctx_free(server_ctx_ref);
     runloop_free(runloop);
     return 0;
 }
 GenericMsgRef make_send_msg(int ident, int i, int j)
 {
+#if defined(MSG_SELECT_NEWLINE) || defined(MSG_SELECT_STX)
     char* send_content_ptr = NULL;
     int sl = asprintf(&send_content_ptr, "ABCDEFGHIJKLMNOPQRSTUVWXYZ Client %d connection: %d msg: %d", ident, i, j);
     assert(sl != -1);
@@ -110,9 +112,13 @@ GenericMsgRef make_send_msg(int ident, int i, int j)
     IOBufferRef iob = IOBuffer_from_cstring(send_content_ptr);
     generic_msg_set_content(msgref, iob);
     return msgref;
+#elif defined(MSG_SELECT_HTTP)
+    return http_make_request("http://somewhere.com/somefolder?a=1", false);
+#endif
 }
 bool verify(GenericMsgRef sendmsg, GenericMsgRef response)
 {
+#if defined(MSG_SELECT_NEWLINE) || defined(MSG_SELECT_STX)
     const char* send_cstr = IOBuffer_cstr(generic_msg_get_content(sendmsg));
     const char* response_cstr = IOBuffer_cstr(generic_msg_get_content(response));
     char* test_buffer_ptr;
@@ -124,4 +130,7 @@ bool verify(GenericMsgRef sendmsg, GenericMsgRef response)
     bool ok = (strcmp(test_buffer_ptr, response_cstr) ==0);
     free(test_buffer_ptr);
     return ok;
+#elif defined(MSG_SELECT_HTTP)
+    return http_verify_response(sendmsg, response);
+#endif
 }

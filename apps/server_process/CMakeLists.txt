@@ -1,32 +1,14 @@
-
-
-set(target test_client_server_original)
 set(TARGET_SRC
-		test_client_server.c
-		${C_HTTP_PROJECT_DIR}/apps/simple_request_response_app/simple_app.h
-		${C_HTTP_PROJECT_DIR}/apps/simple_request_response_app/simple_app.c
+		${C_HTTP_PROJECT_DIR}/apps/server_process/async_process_main.c
+		${C_HTTP_PROJECT_DIR}/apps/server_process/async_main.c
 
-		${C_HTTP_PROJECT_DIR}/apps/server/server_ctx.h
-		${C_HTTP_PROJECT_DIR}/apps/server/server_ctx.c
-
-#		${C_HTTP_PROJECT_DIR}/apps/tcp/tcp_stream.h
-#		${C_HTTP_PROJECT_DIR}/apps/tcp/tcp_stream_internal.h
-#		${C_HTTP_PROJECT_DIR}/apps/tcp/tcp_stream.c
-#		${C_HTTP_PROJECT_DIR}/apps/tcp/tcp_reader.c
-#		${C_HTTP_PROJECT_DIR}/apps/tcp/tcp_writer.c
-#		${C_HTTP_PROJECT_DIR}/apps/tcp/tcp_listener.c
+		${C_HTTP_PROJECT_DIR}/apps/server_process/async_process_main.h
 
 		${C_HTTP_PROJECT_DIR}/apps/msg/msg_generic.h
 		${C_HTTP_PROJECT_DIR}/apps/msg/msg_generic.c
 
-#		${C_HTTP_PROJECT_DIR}/src/newline/newline_msg.h
-#		${C_HTTP_PROJECT_DIR}/src/newline/newline_msg.c
-#		${C_HTTP_PROJECT_DIR}/src/newline/newline_msg_parser.c
-#
-#		${C_HTTP_PROJECT_DIR}/src/stx/stx_msg.h
-#		${C_HTTP_PROJECT_DIR}/src/stx/stx_msg.c
-#		${C_HTTP_PROJECT_DIR}/src/stx/stx_msg_parser.h
-#		${C_HTTP_PROJECT_DIR}/src/stx/stx_msg_parser.c
+		${C_HTTP_PROJECT_DIR}/apps/server/server_ctx.h
+		${C_HTTP_PROJECT_DIR}/apps/server/server_ctx.c
 
 		${C_HTTP_PROJECT_DIR}/apps/http_common/http_make_request_response.c
 		${C_HTTP_PROJECT_DIR}/apps/http_common/http_make_request_response.h
@@ -35,8 +17,9 @@ set(TARGET_SRC
 		${C_HTTP_PROJECT_DIR}/apps/tcp_msg_stream/msg_reader.c
 		${C_HTTP_PROJECT_DIR}/apps/tcp_msg_stream/msg_writer.c
 
-		${C_HTTP_PROJECT_DIR}/apps/sync_msg_stream/sync_msg_stream.c
-		${C_HTTP_PROJECT_DIR}/apps/sync_msg_stream/sync_msg_stream.h
+		${C_HTTP_PROJECT_DIR}/apps/simple_request_response_app/simple_app.c
+		${C_HTTP_PROJECT_DIR}/apps/simple_request_response_app/simple_app.h
+
 )
 
 set(TEST_INCLUDE_DIRS
@@ -73,10 +56,10 @@ function(mktarget name msgselect)
 		message( FATAL_ERROR "Msg selection not selected")
 	endif()
  	target_include_directories(${target} PUBLIC ${INC_DIRS})
- 	target_link_libraries(${target}	PUBLIC ${TEST_LINK_LIBS})
- 	add_test(${target} ${target})
+ 	target_link_libraries(${target}	PUBLIC ${C_HTTP_LINK_LIBRARIES})
+# 	add_test(${target} ${target})
 endfunction()
 
-mktarget(test_client_server newline)
-mktarget(test_client_server stx)
-mktarget(test_client_server http)
+mktarget(server_process newline)
+mktarget(server_process stx)
+mktarget(server_process http)

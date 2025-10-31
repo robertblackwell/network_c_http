@@ -19,16 +19,16 @@ typedef struct RunloopUserEvent_s RunloopUserEvent, *RunloopUserEventRef;
 typedef struct UserEventQueue_s UserEventQueue, * UserEventQueueRef;
 typedef struct InterthreadQueue_s InterthreadQueue, *InterthreadQueueRef;
 typedef struct RunloopQueueWatcher_s RunloopQueueWatcher, *RunloopQueueWatcherRef; 
-typedef struct AsioStream_s AsioStream, *AsioStreamRef;
-typedef struct AsioListener_s AsioListener, *AsioListenerRef;
+//typedef struct AsioStream_s AsioStream, *AsioStreamRef;
+//typedef struct AsioListener_s AsioListener, *AsioListenerRef;
 /**
  * PostableFunction defines the call signature of functions that can be added to a runloops queue of
  * functions to be called. As such they represent the next step in an ongoing computation of a lightweight
  * "thread".
  */
 typedef void (*PostableFunction) (RunloopRef runloop_ref, void* arg);
-typedef void(*AsioReadcallback)(void* arg, long length, int error_number);
-typedef void(*AsioWritecallback)(void* arg, long length, int error_number);
+//typedef void(*AsioReadcallback)(void* arg, long length, int error_number);
+//typedef void(*AsioWritecallback)(void* arg, long length, int error_number);
 typedef void(*AcceptCallback)(void* arg, int accepted_fd, int errno);
 
 
@@ -186,6 +186,7 @@ int        runloop_watcher_base_get_fd(RunloopWatcherBaseRef this);
  * interface above
  */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+#if 0
 AsioStreamRef asio_stream_new(RunloopRef runloop_ref, int socket);
 void asio_stream_free(AsioStreamRef this);
 void asio_stream_init(AsioStreamRef this, RunloopRef runloop_ref, int fd);
@@ -205,7 +206,7 @@ void asio_listener_deinit(AsioListenerRef this);
 void asio_listener_free(AsioListenerRef this);
 void asio_accept(AsioListenerRef alistener_ref, void(on_accept_cb)(void* arg, int accepted_fd, int error), void* arg);
 RunloopListenerRef asio_listener_get_runloop_listener(AsioListenerRef asio_listener_ref);
-
+#endif
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Type safe - these macros provides functions to assert - that is crash if not - the types:
 //

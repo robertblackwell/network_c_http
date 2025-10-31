@@ -358,4 +358,13 @@ void http_message_set_headers_arr(HttpMessageRef mref, const char* ar[][2])
     RBL_CHECK_TAG(HttpMessage_TAG, mref)
     HdrList_add_arr(mref->headers, ar);
 }
+IOBufferRef http_message_get_content(HttpMessageRef mref)
+{
+
+}
+void http_message_set_content(HttpMessageRef mref, IOBufferRef iob)
+{
+
+}
+
 /**@}*/

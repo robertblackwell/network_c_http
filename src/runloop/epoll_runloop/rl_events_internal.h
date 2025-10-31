@@ -161,6 +161,7 @@ struct RunloopTimer_s {
     int                     state;
     RBL_DECLARE_END_TAG;
 };
+#if defined(ASIO_SUPPORT)
 struct AsioStream_s {
     /** This struct is diffenrent to most watchers as it is no a sub class of Watcher
      * hence it must declare its own openning tag */
@@ -187,79 +188,7 @@ struct AsioListener_s {
     AcceptCallback      on_accept_callback;
     void*               on_accept_callback_arg;
 };
-
-
-#if 0
-typedef struct RunLoopEvent_s {
-    RBL_DECLARE_TAG;
-    RunloopRef            runloop;
-    void*                 context;
-    int                   fd;
-    /**
-     * function that knows how to free the specific sub type of RunloopWatcherBase from a general ref.
-     * Each derived type must provide this function when an instance is created or initializez.
-     * In the case of RunloopTimerfd and RunloopEventfd watchers must also close the fd
-     */
-    void(*free)(RunloopWatcherBaseRef);
-    /**
-     * first level handler function
-     * each derived type provides thier own type specific handler when an instance is created
-     * or initialized and must cast the first parameter to their own specific type of watcher
-     * inside the handler.
-     *
-     * This handler will be called directly from the epoll_wait code inside runloop.c
-     * its job is to decode the event and call the client code handle(s) for each event type
-    */
-    void(*handler)(RunloopWatcherBaseRef watcher_ref, uint64_t event);
-    /**
-     * tag that determines the variant
-     */
-    WatcherType           type;
-    
-    union {
-        struct {
-            time_t                  expiry_time;
-            uint64_t                interval;
-            bool                    repeating;
-            PostableFunction        timer_postable;
-            void*                   timer_postable_arg;
-        } timer;
-
-        struct {
-            PostableFunction         listen_postable;
-            void*                    listen_postable_arg;
-        } listener;
-
-        struct {
-            uint64_t                 event_mask;
-            PostableFunction         read_postable_cb;
-            void*                    read_postable_arg;
-            PostableFunction         write_postable_cb;
-            void*                    write_postable_arg;
-        } stream;
-
-        struct {
-            PostableFunction        fdevent_postable;
-            void*                   fdevent_postable_arg;
-            int                     write_fd;
-        } eventfd;
-
-        struct {
-            /**
-             * This is a non-owning reference as it was passed in during creation
-             * of a RunloopQueueWatcher object.
-             */
-            EventfdQueueRef        queue;
-            // runloop cb and arg
-            PostableFunction       queue_postable;
-            void*                  queue_postable_arg;
-
-            QueueWatcherReadCallbackFunction read_cb;
-            void*                  read_cb_arg;
-        } interthread_queue;
-
-    };
-} RunLoopEvent, *RunLoopEventRef;
 #endif
+
 
 #endif

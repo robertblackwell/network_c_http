@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
 #include <src/common/alloc.h>
 /**
  * @brief key value pair with string key and string value
@@ -20,28 +21,16 @@ struct KVPair_s {
     size_t value_len;
 };
 
-//char* make_upper(char* src)
-//{
-//    int srclen = strlen(src);
-//    char* dest = eg_alloc(srclen+1);
-//    char* s = src;
-//    char* p = dest;
-//    for(int i = 0; i < srclen; i++) {
-//        p[i] = toupper((unsigned char) dest[i]);
-//    }
-//    p[srclen+1] = (unsigned char)'\0';
-//    return dest;
-//}
-// creates and initializes a new KVPair obj. Returns NULL on allocation failure
+// creates and initializes a new KVPair obj. assert() on allocation failure
 KVPairRef KVPair_new(const char* labptr, int lablen, const char* valptr, size_t vallen)
 {
     // store {label}: {value}\r\n\0
-    KVPairRef hlref = eg_alloc(sizeof(KVPair));
+    KVPairRef hlref = malloc(sizeof(KVPair));
     if(hlref  == NULL) goto mem_error_1;
     hlref->label_len = lablen;
     hlref->value_len = vallen;
 
-    hlref->label_ptr = eg_alloc(lablen+1);
+    hlref->label_ptr = malloc(lablen+1);
     if(hlref->label_ptr == NULL) goto mem_error_2;
     memcpy(hlref->label_ptr, labptr, lablen);
         // Convert to upper case
@@ -54,7 +43,7 @@ KVPairRef KVPair_new(const char* labptr, int lablen, const char* valptr, size_t 
      */
     p[lablen] = '\0';
 
-    hlref->value_ptr = eg_alloc(vallen+1);
+    hlref->value_ptr = malloc(vallen+1);
     if(hlref->value_ptr == NULL) goto mem_error_2;
     memcpy(hlref->value_ptr, valptr, vallen);
     /**
@@ -64,12 +53,14 @@ KVPairRef KVPair_new(const char* labptr, int lablen, const char* valptr, size_t 
 
     return  hlref;
     mem_error_1:
+        assert(0);
         // nothing got allocated
         return NULL;
     mem_error_2:
         // hlref ok one of the otehrs failed
         if(hlref->label_ptr != NULL) free((void*)hlref->label_ptr);
         if(hlref->value_ptr != NULL) free((void*)hlref->value_ptr);
+        assert(0);
         free((void*)hlref);
         return NULL;
 }

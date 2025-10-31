@@ -1,4 +1,5 @@
 #include "simple_app.h"
+#include <rbl/logger.h>
 GenericMsgRef process_input_message(GenericMsgRef input_msg);
 
 void simple_app_init(SimpleAppRef app, RunloopRef rl, int connection_fd)
@@ -47,7 +48,7 @@ static void msg_read_callback(void* arg, GenericMsgRef msg, int error)
     RBL_CHECK_TAG(SimpleApp_TAG, app)
     RBL_CHECK_END_TAG(SimpleApp_TAG, app)
     if(error != 0) {
-        printf("msg_read_callback error %d  %s\n ", error, strerror(error));
+        RBL_LOG_FMT("msg_read_callback error %d  %s ", error, strerror(error));
         invoke_done_callback(app, error);
     } else {
         assert(msg != NULL);
@@ -78,6 +79,7 @@ static void postable_read(RunloopRef rl, void* arg)
 GenericMsgRef process_input_message(GenericMsgRef input_msg)
 {
     GenericMsgRef response = generic_msg_new();
+#if defined(MSG_SELECT_NEWLINE) || defined(MSG_SELECT_STX)
     char* p = IOBuffer_data(generic_msg_get_content(input_msg));
 
     char* response_buf_ptr;
@@ -87,6 +89,12 @@ GenericMsgRef process_input_message(GenericMsgRef input_msg)
 
     generic_msg_set_content(response, tmp);
     return response;
+#elif defined(MSG_SELECT_HTTP)
+    HttpMessageRef reply = http_message_new();
+    http_process_request(input_msg, reply);
+    return reply;
+#else
+#endif
 }
 static void invoke_done_callback(SimpleAppRef app, int error)
 {

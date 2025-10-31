@@ -18,7 +18,7 @@
 #include <common/list.h>
 #include <runloop/runloop.h>
 #include <rbl/check_tag.h>
-#include <apps/tcp/tcp_stream.h>
+#include <tcp/tcp_stream.h>
 #include <apps/msg/msg_generic.h>
 
 #define StreamTable_TAG "SRMTBL"

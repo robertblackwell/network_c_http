@@ -17,7 +17,7 @@
 #define sync_connection_TAG "SYNCCONN"
 #include <rbl/check_tag.h>
 
-static void parser_on_message_handler(void* void_parser_ptr, HttpMessageRef input_message_ref)
+static void parser_on_message_handler(void* void_parser_ptr, HttpMessageRef input_message_ref, int error)
 {
     HttpMessageParserRef parser_ref = void_parser_ptr;
     sync_connection_t* connptr = parser_ref->on_message_handler_context;

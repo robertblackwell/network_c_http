@@ -42,7 +42,7 @@ typedef struct http_parser_error_s http_parser_error_t;
  */
 struct HttpMessageParser_s;
 typedef struct HttpMessageParser_s HttpMessageParser, *HttpMessageParserRef;
-typedef void (*ParserOnMessageCompleteHandler)(void* new_msg_ctx, HttpMessageRef msg);
+typedef void (ParserOnMessageCompleteHandler)(void* new_msg_ctx, HttpMessageRef msg, int error);
 
 struct HttpMessageParser_s {
     RBL_DECLARE_TAG;
@@ -51,7 +51,7 @@ struct HttpMessageParser_s {
     llhttp_t*                       m_llhttp_ptr;
     llhttp_settings_t*              m_llhttp_settings_ptr;
     HttpMessageRef                  current_message_ptr;
-    ParserOnMessageCompleteHandler  on_message_handler;
+    ParserOnMessageCompleteHandler*  on_message_handler;
     void*                           on_message_handler_context;
     int                             m_header_state;
     ///////////////////////////////////////////////////////////////////////////////////
@@ -65,7 +65,7 @@ struct HttpMessageParser_s {
 void HttpParser_reset(HttpMessageParser*);
 HttpMessageParserRef http_message_parser_new(
         // a function that will be called by the parser when parsing of a new message is complete
-        void(*on_new_message_cb)(void* on_new_message_ctx, HttpMessageRef new_message_ref),
+        void(on_new_message_cb)(void* on_new_message_ctx, HttpMessageRef new_message_ref, int error),
         // a pointer to a ctx object you want the handler to have access to while it
         // deciddes what to do with a new message
         void* handler_context) ;

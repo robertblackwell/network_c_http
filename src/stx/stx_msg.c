@@ -142,7 +142,7 @@ void stx_msg_set_body(StxMsgRef this, IOBufferRef iob)
     RBL_CHECK_TAG(StxMsg_TAG, this);
     RBL_CHECK_END_TAG(StxMsg_TAG, this);
     if(this->body != iob) {
-        RBL_LOG_FMT("demomessage_set_body existing body being ignored bc: %p  this->body: %p", bc, this->body);
+        RBL_LOG_FMT("demomessage_set_body existing body being ignored bc: %p  this->body: %p", iob, this->body);
         IOBuffer_free((this->body));
         this->body = iob;
     }

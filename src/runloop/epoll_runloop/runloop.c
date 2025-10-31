@@ -111,7 +111,7 @@ int runloop_run(RunloopRef athis, int timeout_milli_secs) {
         RUNLOOP_CHECK_END_TAG(athis)
         time_t passed = time(NULL) - start;
 
-        printf("runloop functor_list_size: %d event_table_number_in_user %zu \n",
+        RBL_LOG_FMT("runloop functor_list_size: %d event_table_number_in_user %zu",
                functor_list_size(athis->ready_list),
                event_table_number_in_use(athis->event_table_ref)
         );

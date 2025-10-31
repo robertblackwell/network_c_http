@@ -79,7 +79,7 @@ void parser_test_destroy(parser_test_t* this)
 {
     ASSERT_NOT_NULL(this);
 }
-void on_message_handler(void* void_parser_test_ref, HttpMessageRef msg_ref)
+void on_message_handler(void* void_parser_test_ref, HttpMessageRef msg_ref, int error)
 {
     parser_test_t* ptest = void_parser_test_ref;
     test_output_r r = test_output_new(msg_ref, 0);

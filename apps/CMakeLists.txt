@@ -1,0 +1,2 @@
+add_subdirectory(client_process)
+add_subdirectory(server_process)

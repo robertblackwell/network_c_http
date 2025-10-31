@@ -12,20 +12,22 @@ extern void rbl_log_function(char* level, const char* funcname, const char* file
 //
 // RBL_LOG_ERROR - error logging is always on
 //
+#if 1
 #define RBL_LOG_ERROR(f_, ...) do {\
 		char* s; \
 		int c  = asprintf(&s, f_, ##__VA_ARGS__); \
 		rbl_log_function("ERR", __FUNCTION__, __FILE__, __LINE__, s); \
 		free(s); \
 	} while(0);
-
+#endif
+#if 0
 #define RBL_LOG_FMT(f_, ...) do {\
 		char* s; \
 		int c  = asprintf(&s, f_, ##__VA_ARGS__); \
 		rbl_log_function("LOG", __FUNCTION__, __FILE__, __LINE__, s); \
 		free(s); \
 	} while(0);
-
+#endif
 
 #if defined(RBL_LOG_ENABLED) && defined(RBL_LOG_ALLOW_GLOBAL)
 	#define RBL_LOG_PRINTF(f_, ...) printf((f_), ##__VA_ARGS__)

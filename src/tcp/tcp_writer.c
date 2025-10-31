@@ -87,7 +87,7 @@ static void wrtr_cb(RunloopRef rl, void* write_ctx_p_arg)
 }
 static void try_write(TcpStream* ctx)
 {
-    RBL_LOG_FMT("try_write fd: %d write_state: %d\n", ctx->stream_fd, ctx->writer.write_state);
+    RBL_LOG_FMT("try_write fd: %d write_state: %d\n", ctx->stream_fd, ctx->write_state);
 
     RunloopRef rl = runloop_stream_get_runloop(ctx->rlstream_ref);
     void* data = IOBuffer_data(ctx->output_buffer);
@@ -107,7 +107,7 @@ static void try_write(TcpStream* ctx)
         invoke_write_callback(ctx, nwrite, errno_saved);
     } else {
         if (errno_saved == EAGAIN) {
-            RBL_LOG_FMT("try_write EAGAIN fd: %d write_state: %d\n", ctx->stream_fd, ctx->writer.write_state);
+            RBL_LOG_FMT("try_write EAGAIN fd: %d write_state: %d\n", ctx->stream_fd, ctx->write_state);
             ctx->write_state = WRT_STATE_EAGAIN;
         } else {
             RBL_LOG_FMT("try_write fd: %d errno %d desc: %s \n", ctx->stream_fd, errno_saved, strerror(errno_saved));

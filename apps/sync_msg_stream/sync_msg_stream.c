@@ -3,6 +3,7 @@
 #ifdef APPLE_FLAG
 #include <sys/_pthread/_pthread_t.h>
 #endif
+#include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <rbl/unittest.h>
@@ -42,6 +43,8 @@ void sync_msg_stream_connect(SyncMsgStreamRef sync_stream, int port)
     server.sin_port = port;
     server.sin_addr.s_addr = inet_addr("127.0.0.1");
     const int status = connect(lfd, (struct sockaddr *) &server, sizeof server);
+    int errno_saved = errno;
+    char* x = strerror(errno_saved);
     assert(status == 0);
     sync_stream->fd = lfd;
 }

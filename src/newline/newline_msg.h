@@ -2,7 +2,8 @@
 #define H_newline_msg__h
 #include <runloop/runloop.h>
 #include <common/list.h>
-#include <apps/tcp/tcp_stream.h>
+#include <common/iobuffer.h>
+//#include <apps/tcp/tcp_stream.h>
 
 #define NewlineMsgParser_TAG "MSGPSR"
 #define NewlineMsg_TAG "MSGTAG"

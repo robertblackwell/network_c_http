@@ -30,7 +30,7 @@ static int chunk_complete_cb(llhttp_t* parser);
 static int on_reset_cb(llhttp_t* parser);
 
 void HttpParser_initialize(HttpMessageParser *this);
-HttpMessageParserRef http_message_parser_new(void(*on_new_message_cb)(void* ctx, HttpMessageRef new_msg_ref), void* handler_context)
+HttpMessageParserRef http_message_parser_new(void(*on_new_message_cb)(void* ctx, HttpMessageRef new_msg_ref, int error), void* handler_context)
 {
     HttpMessageParserRef this = eg_alloc(sizeof(HttpMessageParser));
     if(this == NULL)
@@ -404,7 +404,7 @@ int message_complete_cb(llhttp_t* parser)
     RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
     HttpMessageRef tmp = this->current_message_ptr;
     this->current_message_ptr = http_message_new();
-    this->on_message_handler(this->on_message_handler_context, tmp);
+    this->on_message_handler(this->on_message_handler_context, tmp, 0);
     return 0;
 }
 static

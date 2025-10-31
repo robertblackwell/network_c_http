@@ -2,7 +2,7 @@
 #define H_msg_stream_h
 #include <runloop/runloop.h>
 #include <common/list.h>
-#include <apps/tcp/tcp_stream.h>
+#include <src/tcp/tcp_stream.h>
 #include <apps/msg/msg_generic.h>
 #define MsgStream_TAG "MSGSTR"
 

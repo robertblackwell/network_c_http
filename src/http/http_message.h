@@ -148,6 +148,11 @@ BufferChainRef http_message_get_body(HttpMessageRef mref);
  */
 void http_message_set_body(HttpMessageRef mref, BufferChainRef bodyp);
 
+/* These two functions are required so that http messages conform to the interface
+ * required for generic_msg
+ */
+IOBufferRef http_message_get_content(HttpMessageRef mref);
+void http_message_set_content(HttpMessageRef mref, IOBufferRef iob);
 
 IOBufferRef http_message_serialize(HttpMessageRef this);
 IOBufferRef http_message_dump(HttpMessageRef this);

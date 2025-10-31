@@ -230,6 +230,7 @@ enable_testing()
 
 add_subdirectory(src)
 add_subdirectory(tests)
+add_subdirectory(apps)
 #add_subdirectory(sync_server_app)
 #add_subdirectory(verifier)
 #add_subdirectory(async-server-app)
