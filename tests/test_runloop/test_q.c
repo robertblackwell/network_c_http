@@ -71,6 +71,10 @@ WriterArgRef writer_arg_new(QWriterRef qwrtr_ref, long count)
     waref->qwriter_ref = qwrtr_ref;
     return waref;
 }
+/**
+ * Called whenever the user-event associated with the queue is triggered by the
+ * queue writer
+ */
 void queue_postable(RunloopRef rl, void* q_rdr_ctx_arg)
 {
     QReaderRef rdr = (QReaderRef)q_rdr_ctx_arg;
@@ -95,11 +99,17 @@ void queue_postable(RunloopRef rl, void* q_rdr_ctx_arg)
         runloop_queue_watcher_deregister(qw);
         runloop_queue_watcher_free(qw);
         runloop_close(rl);
+    } else {
+#ifdef APPLE_FLAG
+        runloop_queue_watcher_register(qw, queue_postable, q_rdr_ctx_arg);
+#endif
     }
-
 }
 /**
- * arg is QReaderRef
+ * This thread creates a queue watcher that will get an event from its runloop whenever
+ * the user_event associated with the queue is triggered by the writer thread.
+ * This will be notified by a call to the queue_postable() function. This function
+ * will be called from the readers runloop and will read data from the queue
  */
 void* reader_thread_func(void* arg)
 {
@@ -107,7 +117,6 @@ void* reader_thread_func(void* arg)
     RunloopRef runloop_ref = q_rdr_ctx->rdr_runloop_ref;
     pid_t tid = gettid();
     RunloopQueueWatcherRef qw = runloop_queue_watcher_new(runloop_ref, q_rdr_ctx->queue);
-//    uint64_t interest = EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
     runloop_queue_watcher_register(qw, queue_postable, arg);
     printf("reader thread rl: %p tid: %ld\n", runloop_ref, (long)tid);
     runloop_run(runloop_ref, -1);

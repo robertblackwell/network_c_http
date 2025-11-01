@@ -25,7 +25,7 @@ typedef struct TestCtx_s  {
     struct timespec     start_time;
     RunloopRef          runloop_ref;
     RunloopTimerRef     timer_ref;
-    RunloopUserEventRef   fdevent_ref;
+    RunloopUserEventRef user_event_ref;
     int                 fdevent_counter;
     RBL_DECLARE_END_TAG;
 } TestCtx;
@@ -37,14 +37,14 @@ TestCtx* TestCtx_new(RunloopRef rl, RunloopTimerRef timer_ref, RunloopUserEventR
 //
 
 int test_fdevent_multiple();
-int test_fdevent_1();
+int test_userevent_1();
 static void timer_callback_1(RunloopRef rl, void* arg);
 void fdevent_postable(RunloopRef rl, void* test_ctx_arg);
 
 
 int main()
 {
-    UT_ADD(test_fdevent_1);
+    UT_ADD(test_userevent_1);
 //    UT_ADD(test_fdevent_multiple);
     int rc = UT_RUN();
     return rc;
@@ -55,7 +55,7 @@ int main()
  * All happens in a single thread
  */
 #define NBR_TIMES_FIRE 10
-int test_fdevent_1()
+int test_userevent_1()
 {
 
     RunloopRef runloop_ref = runloop_new();
@@ -82,7 +82,7 @@ int test_fdevent_1()
     return 0;
 }
 
-int test_fdevent_multiple()
+int test_userevent_multiple()
 {
 
     RunloopRef runloop_ref = runloop_new();
@@ -119,7 +119,7 @@ int test_fdevent_multiple()
 static void timer_callback_1(RunloopRef rl, void* test_ctx_arg)
 {
     TestCtx* ctx_p = (TestCtx*) test_ctx_arg;
-    RunloopUserEventRef fdevent_ref = ctx_p->fdevent_ref;
+    RunloopUserEventRef fdevent_ref = ctx_p->user_event_ref;
     RBL_ASSERT((fdevent_ref != NULL), "callback1 fdevent_ref == NULL");
     RBL_LOG_FMT("callback1_counter %d counter: %d", ctx_p->callback1_counter, ctx_p->counter);
     if(ctx_p->counter >= ctx_p->max_count) {
@@ -154,6 +154,6 @@ TestCtx* TestCtx_new(RunloopRef rl, RunloopTimerRef timer_ref, RunloopUserEventR
     tmp->fdevent_counter = 0;
     tmp->runloop_ref = rl;
     tmp->timer_ref = timer_ref;
-    tmp->fdevent_ref = eventfd_ref;
+    tmp->user_event_ref = eventfd_ref;
     return tmp;
 }
