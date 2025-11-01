@@ -7,7 +7,6 @@
 #include <stdint.h>
 #include <string.h>
 
-#include <sys/epoll.h>
 #include <rbl/unittest.h>
 #include <rbl/macros.h>
 #include <src/common/utils.h>

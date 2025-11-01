@@ -1,6 +1,6 @@
 #ifndef H_kqueue_helpers_H
 #define H_kqueue_helpers_H
-#include <kqueue_runloop/runloop_internal.h>
+#include "runloop_internal.h"
 #include <sys/event.h>
 
 int kqh_readerwriter_register(RunloopEventRef rlevent);

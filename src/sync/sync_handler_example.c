@@ -9,7 +9,7 @@
 #include <assert.h>
 #include <pthread.h>
 
-static BufferChainRef simple_response_body(char* message, socket_handle_t socket, int pthread_self_value)
+static BufferChainRef simple_response_body(char* message, socket_handle_t socket, pthread_t pthread_self_value)
 {
     time_t t = time(NULL);
     struct tm *tm = localtime(&t);

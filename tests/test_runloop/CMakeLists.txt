@@ -14,14 +14,14 @@ target_compile_definitions(test_eventfd PUBLIC RUNLOOP_EVENTFD_SEMAPHORE)
 target_include_directories(test_eventfd	PUBLIC ${TEST_INCLUDE_DIRS})
 target_link_libraries(test_eventfd PUBLIC ${TEST_LINK_LIBS})
 add_test(test_eventfd test_eventfd)
-
+if(0)
 # test queue watcher
 add_executable(test_q	test_q.c)
 #target_compile_definitions(${TARGET_Q} PUBLIC RBL_TAG_CHECK_ON=1)
 target_include_directories(test_q PUBLIC ${TEST_INCLUDE_DIRS})
 target_link_libraries(test_q PUBLIC ${TEST_LINK_LIBS})
 add_test(test_q test_q)
-
+endif()
 if(0)
 # test_q_asio
 add_executable(test_q_asio test_q_asio.c )

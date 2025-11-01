@@ -51,7 +51,8 @@ void UTRecordAssertResult(const char* fn, const char* file, int line, const char
 #define UT_EQUAL_INT(a,b) do{\
 	if(a != b) {\
 	    char* msg; \
-		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %d b = %d\n"), __FUNCTION__, __FILE__, __LINE__,a , b);\
+		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") \
+			BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %ld b = %ld\n"), __FUNCTION__, __FILE__, __LINE__,(long)a , (long)b);\
         UTRecordAssertResult(__FUNCTION__, __FILE__, __LINE__, msg);   \
         free(msg); \
 		return 1; \
@@ -60,7 +61,8 @@ void UTRecordAssertResult(const char* fn, const char* file, int line, const char
 #define UT_NOT_EQUAL_INT(a,b) do{\
 	if(a == b) {\
 	    char* msg; \
-		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %d b = %d\n"), __FUNCTION__, __FILE__, __LINE__,a , b);\
+		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") \
+			BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %ld b = %ld\n"), __FUNCTION__, __FILE__, __LINE__,(long)a , (long)b);\
         UTRecordAssertResult(__FUNCTION__, __FILE__, __LINE__, msg);   \
         free(msg); \
 		return 1; \
@@ -70,7 +72,8 @@ void UTRecordAssertResult(const char* fn, const char* file, int line, const char
 #define UT_NOT_EQUAL_LONG(a,b) do{\
 	if(a == b) {\
 	    char* msg; \
-		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %ld b = %ld\n"), __FUNCTION__, __FILE__, __LINE__,a , b);\
+		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") \
+			BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %ld b = %ld\n"), __FUNCTION__, __FILE__, __LINE__,(long)a , (long)b);\
         UTRecordAssertResult(__FUNCTION__, __FILE__, __LINE__, msg);   \
         free(msg); \
 		return 1; \
@@ -79,7 +82,8 @@ void UTRecordAssertResult(const char* fn, const char* file, int line, const char
 #define UT_EQUAL_LONG(a,b) do{\
 	if(a != b) {\
 	    char* msg; \
-		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %ld b = %ld\n"), __FUNCTION__, __FILE__, __LINE__,a , b);\
+		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") \
+			BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %ld b = %ld\n"), __FUNCTION__, __FILE__, __LINE__,(long)a ,(long)b);\
         UTRecordAssertResult(__FUNCTION__, __FILE__, __LINE__, msg);   \
         free(msg); \
 		return 1; \
@@ -89,7 +93,8 @@ void UTRecordAssertResult(const char* fn, const char* file, int line, const char
 #define UT_EQUAL_PTR(a,b) do{\
 	if(a != b) {\
 	    char* msg; \
-		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %lx b = %lx\n"), __FUNCTION__, __FILE__, __LINE__,a , b);\
+		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") \
+			BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %lx b = %lx\n"), __FUNCTION__, __FILE__, __LINE__,(unsigned long)a , (unsigned long)b);\
         UTRecordAssertResult(__FUNCTION__, __FILE__, __LINE__, msg);   \
         free(msg); \
 		return 1; \
@@ -99,7 +104,8 @@ void UTRecordAssertResult(const char* fn, const char* file, int line, const char
 #define UT_NOT_EQUAL_PTR(a,b) do{\
 	if(a == b) {\
 	    char* msg; \
-		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %lx b = %lx\n"), __FUNCTION__, __FILE__, __LINE__,a , b);\
+		int x = asprintf(&msg, BRIGHT_RED("FAILED report ") BRIGHT_CYAN("func:") BLUE(" %s") BRIGHT_CYAN(" file:") BLUE(" %s ") \
+			BRIGHT_CYAN("line:") BLUE("%d") BRIGHT_BLUE(" not equal a = %lx b = %lx\n"), __FUNCTION__, __FILE__, __LINE__,(unsigned long)a , (unsigned long)b);\
         UTRecordAssertResult(__FUNCTION__, __FILE__, __LINE__, msg);   \
         free(msg); \
 		return 1; \

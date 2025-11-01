@@ -31,4 +31,5 @@ void* connector_thread_func(void* arg)
     //     RunloopListenerRef listener = server->listening_watcher_ref;
     //     runloop_listener_deregister(listener);
     // }
+    return NULL;
 }

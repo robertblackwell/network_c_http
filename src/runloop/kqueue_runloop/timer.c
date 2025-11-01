@@ -1,5 +1,5 @@
 #include <rbl/macros.h>
-#include <kqueue_runloop/runloop_internal.h>
+#include "runloop_internal.h"
 #include <time.h>
 #include <unistd.h>
 #include <stdlib.h>

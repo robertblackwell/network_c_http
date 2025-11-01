@@ -27,6 +27,7 @@ void* listener_thread_func(void* arg)
     ListenerCtxRef server_ref = (ListenerCtxRef) arg;
     printf("Listener thread server: %p \n", server_ref);
     listener_ctx_listen(server_ref);
+    return NULL;
 }
 
 int test_listeners()

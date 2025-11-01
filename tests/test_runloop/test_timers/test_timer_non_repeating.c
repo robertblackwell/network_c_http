@@ -4,7 +4,6 @@
              /* See feature_test_macros(7) */
 #include <fcntl.h>
 #include <stdint.h>
-#include <sys/epoll.h>
 #include <math.h>
 #include <rbl/logger.h>
 #include <rbl/unittest.h>
@@ -12,7 +11,7 @@
 #include <src/runloop/runloop.h>
 // #include <src/runloop/rl_internal.h>
 
-#include "./timer_helpers.c"
+#include "timer_helpers.c"
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 // A callback for the non repeating test.

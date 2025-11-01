@@ -1,6 +1,6 @@
-#include <kqueue_runloop/runloop.h>
-#include <kqueue_runloop/rl_internal.h>
-#include <kqueue_runloop/event_table.c.h>
+#include "runloop.h"
+#include "rl_internal.h"
+#include "event_table.h"
 #include <stdint.h>
 #include <time.h>
 #include <sys/event.h>

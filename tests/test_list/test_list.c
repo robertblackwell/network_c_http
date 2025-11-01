@@ -14,6 +14,7 @@ DummyObj* DummyObj_new(long val)
 {
     DummyObj* dref = malloc(sizeof(DummyObj));
     dref->value = val;
+    return dref;
 }
 void DummyObj_free(DummyObj* dref)
 {

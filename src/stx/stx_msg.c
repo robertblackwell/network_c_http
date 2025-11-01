@@ -47,7 +47,7 @@ static char get_body_first_char(StxMsgRef msg_ref)
     char first_byte = (char)(*(char*)(IOBuffer_data(msg_ref->body)));
     return first_byte;
 }
-static char set_body_first_char(StxMsgRef msg_ref, char first_byte)
+static void set_body_first_char(StxMsgRef msg_ref, char first_byte)
 {
     assert(IOBuffer_data_len(msg_ref->body));
     (*(char*)(IOBuffer_data(msg_ref->body))) = first_byte;
@@ -101,6 +101,8 @@ bool stx_msg_get_is_request(StxMsgRef this)
 {
     RBL_CHECK_TAG(StxMsg_TAG, this);
     RBL_CHECK_END_TAG(StxMsg_TAG, this);
+    assert(0);
+    return true;
 }
 void stx_msg_set_is_request(StxMsgRef this, bool yn)
 {

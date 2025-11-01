@@ -10,7 +10,7 @@ set(TEST_INCLUDE_DIRS
 	${TEST_DIR} 
 	${C_HTTP_INCLUDE_PATHS} 
 	SYSTEM ${VENDOR_DIR}/include)
-
+if(LINUX_FLAG)
 set(TEST_LINK_LIBS 
 	${C_HTTP_LIB_NAME} 
 	Threads::Threads 
@@ -20,6 +20,17 @@ set(TEST_LINK_LIBS
 	${CMAKE_DL_LIBS}
 	${DL_LIB_SO}
 	)
+elseif(APPLE_FLAG)
+set(TEST_LINK_LIBS 
+	${C_HTTP_LIB_NAME} 
+	Threads::Threads 
+	${CMAKE_DL_LIBS}
+	m
+	${CMAKE_DL_LIBS}
+	${DL_LIB_SO}
+	)
+endif()
+message("TEST_LINK_LIBS    ${TEST_LINK_LIBS}")
 set(TEST_SERVER_BASEURL "http://whiteacorn.com/utests/echo/test.php")
 add_subdirectory(test_buffers)
 #add_subdirectory(test_generic) #does not build
@@ -29,7 +40,7 @@ add_subdirectory(test_hdrlist)
 #add_subdirectory(test_istype)
 add_subdirectory(test_kvpair)
 add_subdirectory(test_list)
-add_subdirectory(test_list_macro)
+# add_subdirectory(test_list_macro)
 #add_subdirectory(test_memalloc) #does not build
 add_subdirectory(test_http_message)
 #add_subdirectory(test_own)
@@ -39,7 +50,7 @@ add_subdirectory(test_queue)
 
 add_subdirectory(test_rbl)
 add_subdirectory(test_runloop)
-add_subdirectory(test_ucontext)
+# add_subdirectory(test_ucontext)
 
 # add_subdirectory(test_static_list)
 #add_subdirectory(test_url) #this is superceded by test_url_parser

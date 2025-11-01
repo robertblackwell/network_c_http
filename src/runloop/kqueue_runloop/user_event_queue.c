@@ -1,5 +1,5 @@
 
-#include <kqueue_runloop/runloop_internal.h>
+#include "runloop_internal.h"
 #include <assert.h>
 #include <pthread.h>
 #include <unistd.h>

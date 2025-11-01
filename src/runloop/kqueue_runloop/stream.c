@@ -1,4 +1,4 @@
-#include <kqueue_runloop/runloop_internal.h>
+#include "runloop_internal.h"
 #include <rbl/logger.h>
 #include <assert.h>
 #include <stdio.h>

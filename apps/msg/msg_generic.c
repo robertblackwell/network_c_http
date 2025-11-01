@@ -88,5 +88,6 @@ inline const char* generic_strerror(GenericMsgParserRef pref, int parser_errno){
 #elif defined(MSG_SELECT_STX)
     return stx_msg_parser_strerror(pref, parser_errno);
 #elif defined(MSG_SELECT_HTTP)
+    return "invalid MSG_SELECT_? chosen";
 #endif
 }

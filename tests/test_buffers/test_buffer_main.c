@@ -36,7 +36,7 @@ int test_make_buffer()
     printf("m_size %ld \n", Cbuffer_size(b));
     printf("m_capacity %ld \n", Cbuffer_capacity(b));
     printf("m_cptr %lx \n", (long)Cbuffer_data(b));
-    UT_NOT_EQUAL_PTR(b, NULL);
+    UT_NOT_EQUAL_PTR((b), NULL);
     UT_EQUAL_INT(Cbuffer_size(b), 0);
     UT_NOT_EQUAL_PTR((void*)Cbuffer_data(b), NULL);
     Cbuffer_free(b); b = NULL;

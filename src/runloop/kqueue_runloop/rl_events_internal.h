@@ -1,8 +1,8 @@
 #ifndef C_HTTP_KQRL_EVENTS_INTERNAL_H
 #define C_HTTP_KQRL_EVENTS_INTERNAL_H
-#include <kqueue_runloop/runloop.h>
-#include <kqueue_runloop/rl_internal.h>
-#include <kqueue_runloop/rl_checktag.h>
+#include "runloop.h"
+#include "rl_internal.h"
+#include "rl_checktag.h"
 
 #include <pthread.h>
 #include <stdbool.h>
@@ -52,6 +52,8 @@ struct RunloopWatcherBase_s {
  * 
  * This mechanism can also be emulated with a pipe.
  */
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
 typedef uint64_t WEventFdMask;
 struct RunloopEventfd_s {
     /** The start tag is declared in the base struct
@@ -62,10 +64,12 @@ struct RunloopEventfd_s {
     int                 write_fd;
     RBL_DECLARE_END_TAG;
 };
-
+#pragma clang diagnostic pop
 /**
  * RunloopStream
  */
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
 struct RunloopStream_s {
     /** The start tag is declared in the base struct
     RBL_DECLARE_TAG; */
@@ -78,10 +82,13 @@ struct RunloopStream_s {
     void*                    write_postable_arg;
     RBL_DECLARE_END_TAG;
 };
+#pragma clang diagnostic pop
 
 /**
  * WListener
  */
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
 // typedef struct RunloopListener_s {
 //     /** The start tag is declared in the base struct
 //     RBL_DECLARE_TAG; */
@@ -90,10 +97,13 @@ struct RunloopStream_s {
 //     void*                    listen_postable_arg;
 //     RBL_DECLARE_END_TAG;
 // } RunloopListener;
+#pragma clang diagnostic pop
 
 /**
  * RunloopQueueWatcher
  */
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
 typedef uint64_t RunloopQueueEvent;
 typedef void(RunloopQueuetWatcherCallerback(void* ctx));
 struct RunloopQueueWatcher_s {
@@ -114,6 +124,7 @@ struct RunloopQueueWatcher_s {
 
     RBL_DECLARE_END_TAG;
 };
+#pragma clang diagnostic pop
 
 /**
  * InterThreadQueue

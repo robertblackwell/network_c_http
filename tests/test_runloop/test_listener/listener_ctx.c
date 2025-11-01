@@ -99,7 +99,7 @@ static void on_event_listening(RunloopRef rl, void* listener_ref_arg)
             sleep(1);
         }
         listener_ref->listen_counter++;
-        sleep(0.6);
+        sleep(1);
     }
     close(sock2);
     printf("on_event_listen new socket is : %d\n", sock2);

@@ -1,4 +1,4 @@
-#include <kqueue_runloop/runloop_internal.h>
+#include "runloop_internal.h"
 #include <sys/event.h>
 
 //////////////////////////////////////////////////////////////////////////////

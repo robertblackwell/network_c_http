@@ -48,7 +48,7 @@ HttpMessageParserRef http_message_parser_new(void(*on_new_message_cb)(void* ctx,
     this->on_message_handler_context = handler_context;
     return this;
 }
-void HttpParser_reset(HttpMessageParser*)
+void HttpParser_reset(HttpMessageParser* parser_ptr)
 {
 
 }

@@ -49,7 +49,7 @@ void* thread_function(void* arg)
     ServerCtx server_ctx;
     ThreadContext* ctx = arg;
     int fd = create_bound_socket(ctx->port, ctx->host);
-    printf("thread pid: %d tid: %lu host: %s port: %d ident: %d pthread_t: %lu fd: %d\n", getpid(), pthread_self(), ctx->host, ctx->port, ctx->ident, ctx->thread, ctx->listening_socket);
+    printf("thread pid: %d tid: %lu host: %s port: %d ident: %d pthread_t: %lu fd: %d\n", getpid(), (unsigned long)pthread_self(), ctx->host, ctx->port, ctx->ident, (unsigned long)ctx->thread, ctx->listening_socket);
     socket_set_non_blocking(fd);
     RunloopRef runloop = runloop_new();
     ServerCtxRef server_ctx_ref = &server_ctx;

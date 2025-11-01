@@ -10,7 +10,6 @@
 #include <string.h>
 #include <errno.h>
 
-#include <sys/epoll.h>
 #include <rbl/logger.h>
 #include <src/common/utils.h>
 #include <src/runloop/runloop.h>
@@ -104,7 +103,6 @@ void* reader_thread_func(void* arg)
         ReadCtx* ctx = &(rdr->ctx_table[i]);
         rdr->ctx_table[i].swatcher = runloop_stream_new(runloop_ref, ctx->readfd);
         RunloopStreamRef sw = rdr->ctx_table[i].swatcher;
-        uint64_t interest = EPOLLERR | EPOLLIN;
         runloop_stream_register(sw);
         runloop_stream_arm_read(sw, &read_callback, (void *) ctx);
     }

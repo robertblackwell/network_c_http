@@ -112,4 +112,6 @@ bool verify_response(GenericMsgRef request_msg, GenericMsgRef response_msg)
     return http_verify_response(request_msg, response_msg);
 
 #endif
+    assert(0); // should never get here
+    return false;
 }
