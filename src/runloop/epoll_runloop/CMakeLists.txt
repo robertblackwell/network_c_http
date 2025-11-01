@@ -10,8 +10,8 @@ set(epoll_RUNLOOP_HEADER_FILES
 
 set(epoll_RUNLOOP_SOURCE_FILES
 	#aio runloop and aio_http/1.1 details
-		 ${CMAKE_CURRENT_SOURCE_DIR}/asio_stream.c
-		${CMAKE_CURRENT_SOURCE_DIR}/asio_listener.c
+#		 ${CMAKE_CURRENT_SOURCE_DIR}/asio_stream.c
+#		${CMAKE_CURRENT_SOURCE_DIR}/asio_listener.c
 #		${CMAKE_CURRENT_SOURCE_DIR}/fd_map.c
 #		${CMAKE_CURRENT_SOURCE_DIR}/fdtable.c
 		${CMAKE_CURRENT_SOURCE_DIR}/functor.c
@@ -31,8 +31,8 @@ set(epoll_RUNLOOP_SOURCE_FILES
 		${CMAKE_CURRENT_SOURCE_DIR}/rl_user_event_queue.c
 		${CMAKE_CURRENT_SOURCE_DIR}/rl_interthread_queue.c
 
-		${CMAKE_CURRENT_SOURCE_DIR}/asio_listener.c
-		${CMAKE_CURRENT_SOURCE_DIR}/asio_stream.c
+#		${CMAKE_CURRENT_SOURCE_DIR}/asio_listener.c
+#		${CMAKE_CURRENT_SOURCE_DIR}/asio_stream.c
 #		${CMAKE_CURRENT_SOURCE_DIR}/event_allocator.c
 	)
 

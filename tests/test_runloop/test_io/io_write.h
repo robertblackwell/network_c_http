@@ -33,7 +33,6 @@ typedef struct WriteCtx_s {
     int                 outbuffer_max_length;
     int                 outbuffer_length;
     RunloopStreamRef    stream_ref;
-    AsioStreamRef       asio_stream_ref;
     RunloopTimerRef     timer_ref;
     RBL_DECLARE_END_TAG;
 } WriteCtx;

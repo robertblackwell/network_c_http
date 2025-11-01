@@ -39,8 +39,8 @@ add_subdirectory(test_queue)
 
 add_subdirectory(test_rbl)
 add_subdirectory(test_runloop)
+add_subdirectory(test_ucontext)
 
-#add_subdirectory(test_rw)
 # add_subdirectory(test_static_list)
 #add_subdirectory(test_url) #this is superceded by test_url_parser
 add_subdirectory(test_url_parser)

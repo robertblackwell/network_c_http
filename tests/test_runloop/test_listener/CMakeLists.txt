@@ -1,19 +1,4 @@
 
-#set(test_listener_src
-#		test_listener.c
-#		listener_ctx.h
-#		listener_ctx.c
-#		connector_ctx.h
-#		connector_ctx.c
-#)
-#set(test_listener_asio_src
-#		test_listener.c
-#		listener_ctx.h
-#		asio_listener_ctx.c
-#		connector_ctx.h
-#		connector_ctx.c
-#)
-
 
 add_executable(test_listener
 		test_listener.c
@@ -29,9 +14,7 @@ add_test(test_listener test_listener)
 
 if(0)
 add_executable(test_listener_asio
-		test_listener_asio.c
 		listener_ctx.h
-		asio_listener_ctx.c
 		connector_ctx.h
 		connector_ctx.c
 )
