@@ -80,6 +80,8 @@ void read_callback(RunloopRef rl, void* read_ctx_ref_arg)
     if(nread > 0) {
         buf[nread] = (char)0;
         s = &(buf[0]);
+        printf("readcallback index: %d count:%d fd: %d buf: %s errno: %d\n", ctx->reader_index, ctx->read_count, fd, buf, errno);
+
         RBL_LOG_FMT("index: %d count:%d fd: %d buf: %s errno: %d", ctx->reader_index, ctx->read_count, fd, buf, errno);
     } else {
         s = "badread";
@@ -91,6 +93,9 @@ void read_callback(RunloopRef rl, void* read_ctx_ref_arg)
         runloop_stream_deregister(stream);
         runloop_stream_free(stream);
     } else {
+#ifdef APPLE_FLAG
+        runloop_stream_register(stream);
+#endif
         return;
     }
 }
@@ -106,6 +111,6 @@ void* reader_thread_func(void* arg)
         runloop_stream_register(sw);
         runloop_stream_arm_read(sw, &read_callback, (void *) ctx);
     }
-    runloop_run(runloop_ref, 1000000);
+    runloop_run(runloop_ref, 5000);
     return NULL;
 }

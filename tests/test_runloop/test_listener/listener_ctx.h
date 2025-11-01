@@ -14,7 +14,6 @@
 #include <rbl/unittest.h>
 #include <src/common/utils.h>
 #include <src/common/socket_functions.h>
-//#include <src/sync/sync_client.h>
 #include <src/runloop/runloop.h>
 
 typedef int socket_handle_t;
@@ -37,12 +36,13 @@ struct ListenerCtx_s {
     RunloopTimerRef         timer_ref;
     int                     listen_counter;
     int                     accept_count;
+    int                     ident;
 };
 typedef struct  ListenerCtx_s TestServer, *ListenerCtxRef;
 
 
-ListenerCtxRef listener_ctx_new(int listen_fd);
-void listener_ctx_init(ListenerCtxRef sref, int listen_fd);
+ListenerCtxRef listener_ctx_new(int ident, int listen_fd);
+void listener_ctx_init(ListenerCtxRef sref, int ident, int listen_fd);
 
 ListenerCtxRef listener_ctx_new2(int port, const char* host);
 void listener_ctx_init2(ListenerCtxRef sref, int port, const char* host);

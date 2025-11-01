@@ -74,6 +74,8 @@ int test_io()
 
     pthread_join(rdr_thread, NULL);
     pthread_join(wrtr_thread, NULL);
+    UT_TRUE(max_io <= rdr->ctx_table[0].read_count)
+    UT_TRUE(max_io <= rdr->ctx_table[1].read_count)
     RBL_LOG_MSG("Trace after join\n\n")
     printf("After join\n");
     return 0;

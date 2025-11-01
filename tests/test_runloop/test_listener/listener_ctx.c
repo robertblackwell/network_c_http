@@ -14,29 +14,33 @@
 static void on_timer(RunloopRef rl, void* arg);
 static void on_event_listening(RunloopRef rl, void* listener_ref_arg);
 
-ListenerCtxRef listener_ctx_new(int listen_fd)
+ListenerCtxRef listener_ctx_new(int ident, int listen_fd)
 {
     ListenerCtxRef sref = malloc(sizeof(TestServer));
+    sref->ident = ident;
     sref->listening_socket_fd = listen_fd;
     sref->listen_counter = 0;
     sref->accept_count = 0;
     printf("listener_ctx_new %p   listen fd: %d\n", sref, listen_fd);
     return sref;
 }
+#if 0
 ListenerCtxRef listener_ctx_new2(int port, const char* host)
 {
     ListenerCtxRef sref = malloc(sizeof(TestServer));
     listener_ctx_init2(sref, port, host);
     return sref;
 }
-
-void listener_ctx_init(ListenerCtxRef sref, int listen_fd)
+#endif
+void listener_ctx_init(ListenerCtxRef sref, int ident, int listen_fd)
 {
+    sref->ident = ident;
     sref->listening_socket_fd = listen_fd;
     sref->listen_counter = 0;
     sref->accept_count = 0;
     printf("listener_ctx_init %p   listen fd: %d\n", sref, listen_fd);
 }
+#if 0
 void listener_ctx_init2(ListenerCtxRef sref, int port, const char* host)
 {
     sref->port = port;
@@ -57,7 +61,7 @@ void listener_ctx_init2(ListenerCtxRef sref, int port, const char* host)
     printf("listener_ctx_init %p   listen fd: %d\n", sref, listen_fd);
 #endif
 }
-
+#endif
 void listener_ctx_free(ListenerCtxRef *sref)
 {
     ASSERT_NOT_NULL(*sref);
@@ -78,8 +82,8 @@ void listener_ctx_listen(ListenerCtxRef listener_ctx_ref)
     listener_ctx_ref->timer_ref = runloop_timer_new(listener_ctx_ref->runloop_ref);
     runloop_timer_register(listener_ctx_ref->timer_ref, &on_timer, (void *) listener_ctx_ref, 5000, false);
     runloop_run(listener_ctx_ref->runloop_ref, -1);
-    printf("Listener reactor ended \n");
-    runloop_free(listener_ctx_ref->runloop_ref);
+
+    printf("Listener runloop ended ident: %d listen count: %d accept count: %d\n", listener_ctx_ref->ident, listener_ctx_ref->listen_counter, listener_ctx_ref->accept_count);
 }
 static void on_event_listening(RunloopRef rl, void* listener_ref_arg)
 {
@@ -102,6 +106,10 @@ static void on_event_listening(RunloopRef rl, void* listener_ref_arg)
         sleep(1);
     }
     close(sock2);
+#ifdef APPLE_FLAG
+    RunloopListenerRef lw = listener_ref->listening_watcher_ref;
+    runloop_listener_register(lw, on_event_listening, listener_ref);
+#endif
     printf("on_event_listen new socket is : %d\n", sock2);
 }
 /**
@@ -143,9 +151,5 @@ int local_create_bound_socket(int port, const char *host)
         printf("bind call failed with errno %d \n", errno);
         assert(0);
     }
-//    if((result = listen(tmp_socket, SOMAXCONN)) != 0) {
-//        printf("listen call failed with errno %d \n", errno);
-//        assert(0);
-//    }
     return tmp_socket;
 }

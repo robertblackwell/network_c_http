@@ -2,8 +2,6 @@
 #define XR_TRACE_ENABLE
 #include <stdio.h>
 #include <pthread.h>
-             /* See feature_test_macros(7) */
-#include <string.h>
 #include <rbl/unittest.h>
 #include <src/common/utils.h>
 #include <src/common/socket_functions.h>
@@ -38,30 +36,13 @@ int test_listeners()
     Connector tclient;
     tclient.max_count = 5;
     tclient.count = 0;
-    /**
-     * NOTE: the creation of the socket file descriptor that will be used for listen()-ing and accept()
-     *
-     * Further the socket is created and bound to a host/port in the main thread and passed to the other
-     * threads.
-     * Need to test whether this is necessary
-     *  -   NO works if works if created in each thread - see conditional
-     *      compile below
-     *
-     * Also need to test it for forking processes. Aslo works for forking processes. See
-     * demo_sync and demo_async
-     *
-     * Finally can I do this inside the runloop_listener_init() function - YES
-     * again see the conditional compiles below
-     *
-     * */
-
     int fd = create_listener_socket(9001, "localhost");
     socket_set_non_blocking(fd);
 
     tclient.listen_fd = fd;
 
-    ListenerCtxRef server1 = listener_ctx_new(fd);
-    ListenerCtxRef server2 = listener_ctx_new(fd);
+    ListenerCtxRef server1 = listener_ctx_new(1, fd);
+    ListenerCtxRef server2 = listener_ctx_new(2, fd);
     printf("Sizeof \n");
     int r1 = pthread_create(&listener_thread_1, NULL, &listener_thread_func, server1);
     int r2 = pthread_create(&listener_thread_2, NULL, &listener_thread_func, server2);
@@ -70,7 +51,8 @@ int test_listeners()
     pthread_join(connector_thread, NULL);
     pthread_join(listener_thread_1, NULL);
     pthread_join(listener_thread_2, NULL);
-    printf("test_listener all threads hace joined \n");
+
+    printf("test_listener all threads have joined \n");
     /**
      * Test that each listener got some of the connections and that
      * all connections were recorded
