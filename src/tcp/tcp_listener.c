@@ -9,7 +9,6 @@
 #include <unistd.h>
 #include <src/tcp/tcp_stream.h>
 #include <runloop/runloop.h>
-//#include <tests/test_runloop/test_client_server_original/server/server_ctx.h>
 #include <rbl/logger.h>
 
 #define L_STATE_EAGAIN 22
@@ -17,8 +16,7 @@
 #define L_STATE_INITIAL 44
 #define L_STATE_STOPPED 55
 #define L_STATE_ERROR 66
-static void on_timer(RunloopRef rl, void* arg);
-static void on_accept_ready(RunloopRef rl, void* listener_ref_arg);
+
 static void postable_try_accept(RunloopRef rl, void* arg);
 static void try_accept(TcpListenerRef tcp_listener_ref);
 static void on_accept_ready(RunloopRef rl, void* arg);
@@ -52,31 +50,6 @@ void tcp_listener_free(TcpListenerRef tcp_listener_ref)
     runloop_listener_free(tcp_listener_ref->rl_listener_ref);
     free(tcp_listener_ref);
 }
-// ServerCtx server_ctx;
-// StreamTable stream_table;
-// Server listener_ctx;
-// static void server_main(RunloopRef runloop, void* arg);
-// static void* accept_cb(void* arg, int sock, int error);
-
-// int main() 
-// {
-
-//     int port = 9002;
-//     int fd = local_create_bound_socket(port, "localhost");
-//     socket_set_non_blocking(fd);
-//     RunloopRef runloop = runloop_new();
-//     listener_ctx_init(&(listener_ctx), fd, 1, runloop);
-//     RBL_SET_TAG(ServerCtx_TAG, (&server_ctx))
-//     RBL_SET_END_TAG(ServerCtx_TAG, (&server_ctx))
-//     server_ctx.port = port;
-//     server_ctx.listener_ctx_ref = &listener_ctx;
-//     server_ctx.stream_table_ref = &stream_table;
-//     ServerCtxRef server_ctx_ref = &server_ctx;
-//     ServerRef listener_ref = &(listener_ctx);
-//     runloop_post(runloop, server_main, server_ctx_ref);
-//     runloop_run(runloop, NULL);
-//     return 0;
-// }
 
 void tcp_accept(TcpListenerRef tcp_listener_ref, TcpAcceptCallback cb, void* arg)
 {

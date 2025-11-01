@@ -1,6 +1,5 @@
 
 src/runloop_original/
-src/runloop/kqueue_runloop/
 
 deps_old
 deps_old/
