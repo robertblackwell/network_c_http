@@ -1,5 +1,4 @@
-#include "runloop.h"
-#include "rl_internal.h"
+#include "runloop_internal.h"
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,11 +9,11 @@ static void on_read_ready_postable(RunloopRef rl, void* qw_arg)
     RunloopQueueWatcherRef qw = qw_arg;
     QUEUE_WATCHER_SET_TAG(qw);
     QUEUE_WATCHER_SET_END_TAG(qw)
-    Functor fn = runloop_eventfd_queue_remove(qw->queue);
-    QueueWatcherReadCallbackFunction tmp_cb = qw->read_cb;
-    qw->read_cb = NULL;
-    void* tmp_arg = qw->read_cb_arg;
-    qw->read_cb_arg = NULL;
+    Functor fn = runloop_user_event_queue_remove(qw->queue_watcher.queue);
+    QueueWatcherReadCallbackFunction tmp_cb = qw->queue_watcher.read_cb;
+    qw->queue_watcher.read_cb = NULL;
+    void* tmp_arg = qw->queue_watcher.read_cb_arg;
+    qw->queue_watcher.read_cb_arg = NULL;
     runloop_queue_watcher_deregister(qw);
     tmp_cb(tmp_arg, fn, 0);
 }
@@ -26,22 +25,24 @@ static void handler(RunloopWatcherBaseRef watcher, uint64_t event)
     /**
      * should be posted to runloop not called
      */
-    queue_watcher_ref->queue_postable(queue_watcher_ref->runloop, queue_watcher_ref->queue_postable_arg);
+    queue_watcher_ref->queue_watcher.queue_postable(queue_watcher_ref->runloop, queue_watcher_ref->queue_watcher.queue_postable_arg);
 }
-void runloop_queue_watcher_init(RunloopQueueWatcherRef this, RunloopRef runloop, EventfdQueueRef qref)
+void runloop_queue_watcher_init(RunloopQueueWatcherRef this, RunloopRef runloop, UserEventQueueRef qref)
 {
     QUEUE_WATCHER_SET_TAG(this);
     QUEUE_WATCHER_SET_END_TAG(this)
     this->type = RUNLOOP_WATCHER_QUEUE;
-    this->queue = qref;
-    this->fd = runloop_eventfd_queue_readfd(qref);
+    this->queue_watcher.queue = qref;
+    // this->queue_watcher. = runloop_user_event_queue_readfd(qref);
     this->runloop = runloop;
-    this->handler = &handler;
+    // this->handler = &handler;
     this->context = this;
 }
-RunloopQueueWatcherRef runloop_queue_watcher_new(RunloopRef runloop, EventfdQueueRef qref)
+RunloopQueueWatcherRef runloop_queue_watcher_new(RunloopRef runloop, UserEventQueueRef qref)
 {
-    RunloopQueueWatcherRef this = malloc(sizeof(RunloopQueueWatcher));
+    assert(0);
+
+    RunloopQueueWatcherRef this = NULL;//malloc(sizeof(RunloopQueueWatcher));
     runloop_queue_watcher_init(this, runloop, qref);
     return this;
 }
@@ -54,24 +55,22 @@ void runloop_queue_watcher_free(RunloopQueueWatcherRef this)
 {
     QUEUE_WATCHER_CHECK_TAG(this)
     QUEUE_WATCHER_CHECK_END_TAG(this)
-    close(this->fd);
+    // close(this->queue_watcher. fd);
     free(this);
 }
 void runloop_queue_watcher_async_read(RunloopQueueWatcherRef this, QueueWatcherReadCallbackFunction cb, void* cb_context_arg)
 {
-    this->read_cb = cb;
-    this->read_cb_arg = cb_context_arg;
+    this->queue_watcher.read_cb = cb;
+    this->queue_watcher.read_cb_arg = cb_context_arg;
     runloop_queue_watcher_register(this, on_read_ready_postable, this);
 }
 void runloop_queue_watcher_register(RunloopQueueWatcherRef athis, PostableFunction postable_cb, void* postable_arg)
 {
     QUEUE_WATCHER_CHECK_TAG(athis)
     QUEUE_WATCHER_CHECK_END_TAG(athis)
-    uint64_t interest = 0;//EPOLLIN | EPOLLERR | EPOLLRDHUP | EPOLLHUP;
-
-//    uint32_t interest = watch_what;
-    athis->queue_postable = postable_cb;
-    athis->queue_postable_arg = postable_arg;
+    athis->queue_watcher.queue_postable = postable_cb;
+    athis->queue_watcher.queue_postable_arg = postable_arg;
+    kqh_user_event_queue_register(athis->queue_watcher.queue);
     int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
     assert(res ==0);
 }
@@ -81,10 +80,10 @@ void runloop_queue_watcher_change_watch(RunloopQueueWatcherRef athis, PostableFu
     QUEUE_WATCHER_CHECK_END_TAG(athis)
     uint32_t interest = watch_what;
     if(cb != NULL) {
-        athis->queue_postable = cb;
+        athis->queue_watcher.queue_postable = cb;
     }
     if (arg != NULL) {
-        athis->queue_postable_arg = arg;
+        athis->queue_watcher.queue_postable_arg = arg;
     }
     int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
     assert(res == 0);

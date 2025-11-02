@@ -12,6 +12,16 @@
 #include <src/common/utils.h>
 #include <src/runloop/runloop.h>
 // #include <src/runloop/rl_internal.h>
+uint64_t local_gettid() {
+    #ifdef LINUX_FLAG
+        return (uint64_t)gettid();
+    #elif defined(APPLE_FLAG)
+        uint64_t tid;
+        pthread_threadid_np(NULL, &tid);
+        return tid;
+    #endif
+    return tid;
+}
 
 typedef struct QReader_s {
     RunloopRef      rdr_runloop_ref;
@@ -115,10 +125,10 @@ void* reader_thread_func(void* arg)
 {
     QReaderRef q_rdr_ctx = (QReaderRef)arg;
     RunloopRef runloop_ref = q_rdr_ctx->rdr_runloop_ref;
-    pid_t tid = gettid();
+    uint64_t tid = local_gettid();
     RunloopQueueWatcherRef qw = runloop_queue_watcher_new(runloop_ref, q_rdr_ctx->queue);
     runloop_queue_watcher_register(qw, queue_postable, arg);
-    printf("reader thread rl: %p tid: %ld\n", runloop_ref, (long)tid);
+    printf("reader thread rl: %p tid: %llu\n", runloop_ref, tid);
     runloop_run(runloop_ref, -1);
     return NULL;
 }
@@ -133,9 +143,9 @@ void writer_post_function(RunloopRef rl, void* arg)
     long pcount = qwrtr_ref->post_count;
     long count = wref->count;
     pthread_t mytid = pthread_self();
-    pid_t tid = gettid();
-    printf("writer post function thread: %ld  rl: %p arg: %p arg->count: %ld post_count: %ld\n",
-           (long)tid, rl, arg, count, pcount);
+    uint64_t tid = local_gettid();
+    printf("writer post function thread: %llu  rl: %p arg: %p arg->count: %ld post_count: %ld\n",
+           tid, rl, arg, count, pcount);
 }
 /**
  *  arg is a QWriterRef
@@ -143,8 +153,8 @@ void writer_post_function(RunloopRef rl, void* arg)
 void* writer_thread_func(void* arg)
 {
     QWriterRef wrtr = (QWriterRef)arg;
-    pid_t tid = gettid();
-    printf("writer thread tid: %ld \n", (long)tid);
+    uint64_t tid = local_gettid();
+    printf("writer thread tid: %llu \n", tid);
     for(long i = 1; i <= 10; i++) {
         usleep(500000);
         WriterArgRef writer_arg_ref = writer_arg_new(wrtr, i);
@@ -155,13 +165,13 @@ void* writer_thread_func(void* arg)
 }
 /**
  * Test EventFdQueue using a reader and write thread.
- * Writer thread loops a number of times writing data to an instance of EventFdQueue
+ * Writer thread loops a number of times writing data to an instance of UserEventQueue
  * Reader thread has a runloop and a RunloopQueueWatcher waiting for data on the
- * same EventFdQueue.
+ * same UserEventQueue.
  * The queue watcher counts the number of times it receives data on the queue
  * and terminates when it has the expected number.
  *
- * IN addition the data from the queue is a postable function and an arg value.
+ * In addition the data from the queue is a postable function and an arg value.
  *
  * The queue watcher function posts that function to the readers runloop.
  * TODO - need a way of counting the number of calls to the writer_post_function.

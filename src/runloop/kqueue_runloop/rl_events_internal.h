@@ -36,7 +36,6 @@ typedef enum WatcherType {
     RUNLOOP_WATCHER_SIGNAL = 15,
 } WatcherType;
 
-
 struct RunloopWatcherBase_s {
     RBL_DECLARE_TAG;
     WatcherType           type;
@@ -46,21 +45,30 @@ struct RunloopWatcherBase_s {
     void(*free)(RunloopEventRef);
     void(*handler)(RunloopEventRef rlevent, uint64_t event);
 };
-/**
- * eventfd is the way epoll provides custom events. Create a special file descriptor using eventfd() call
- * and latter fire it by writing data to that fd. The event observer will reaceive a readready event from epoll.
- * 
- * This mechanism can also be emulated with a pipe.
- */
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
-typedef uint64_t WEventFdMask;
-struct RunloopEventfd_s {
+struct RunloopTimer_s {
     /** The start tag is declared in the base struct
     RBL_DECLARE_TAG; */
     struct RunloopWatcherBase_s;
-    PostableFunction    fdevent_postable;
-    void*               fdevent_postable_arg;
+     time_t                  expiry_time;
+    uint64_t                interval;
+    bool                    repeating;
+    PostableFunction        timer_postable;
+    void*                   timer_postable_arg;
+    RBL_DECLARE_END_TAG;
+};
+#pragma clang diagnostic pop
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
+typedef uint64_t WEventFdMask;
+struct RunloopUserEvent_s {
+    /** The start tag is declared in the base struct
+    RBL_DECLARE_TAG; */
+    struct RunloopWatcherBase_s;
+    PostableFunction    user_event_postable;
+    void*               user_event_postable_arg;
     int                 write_fd;
     RBL_DECLARE_END_TAG;
 };
@@ -89,14 +97,24 @@ struct RunloopStream_s {
  */
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
-// typedef struct RunloopListener_s {
-//     /** The start tag is declared in the base struct
-//     RBL_DECLARE_TAG; */
-//     struct RunloopWatcherBase_s;
-//     PostableFunction         listen_postable;
-//     void*                    listen_postable_arg;
-//     RBL_DECLARE_END_TAG;
-// } RunloopListener;
+struct RunloopListener_s {
+    /** The start tag is declared in the base struct
+    RBL_DECLARE_TAG; */
+    struct RunloopWatcherBase_s;
+    PostableFunction         listen_postable;
+    void*                    listen_postable_arg;
+    RBL_DECLARE_END_TAG;
+};
+#pragma clang diagnostic pop
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
+struct RunloopSignal_s{
+    /** The start tag is declared in the base struct
+    RBL_DECLARE_TAG; */
+    struct RunloopWatcherBase_s;
+    RBL_DECLARE_END_TAG;
+};
 #pragma clang diagnostic pop
 
 /**
@@ -114,7 +132,7 @@ struct RunloopQueueWatcher_s {
      * This is a non-owning reference as it was passed in during creation
      * of a RunloopQueueWatcher object.
      */
-    EventQueueRef            queue;
+    UserEventQueueRef            queue;
     // runloop cb and arg
     PostableFunction       queue_postable;
     void*                  queue_postable_arg;
@@ -134,17 +152,18 @@ typedef void(RunloopInterthreadQueuetWatcherCallerback(void* ctx));
 struct InterthreadQueue_s {
     /** This struct does not inherit from WatcherBase hence must declare its own openning tag*/
     RBL_DECLARE_TAG; 
-    EventQueueRef queue;
+    UserEventQueueRef queue;
     RunloopRef runloop;
     RunloopQueueWatcherRef qwatcher_ref;
     RBL_DECLARE_END_TAG;
 };
 
-struct EventQueue_s {
+struct UserEventQueue_s {
     /** This struct is not a sub struct of Watcher hence it must declare its own openning tag*/
     RBL_DECLARE_TAG;
     FunctorListRef      list;
     pthread_mutex_t     queue_mutex;
+    RunloopRef          runloop;
 #ifdef C_HTTP_EFD_QUEUE
 #else
     int                 pipefds[2];
@@ -154,27 +173,6 @@ struct EventQueue_s {
     int                 id;
     RBL_DECLARE_END_TAG;
 };
-
-// typedef struct AsioStream_s {
-//     /** This struct is diffenrent to most watchers as it is no a sub class of Watcher
-//      * hence it must declare its own openning tag */
-//     RBL_DECLARE_TAG;
-//     int                 fd;
-//     RunloopStreamRef    runloop_stream_ref;
-
-//     int                 read_state;
-//     void*               read_buffer;
-//     long                read_buffer_size;
-//     AsioReadcallback    read_callback;
-//     void*               read_callback_arg;
-
-//     int                 write_state;
-//     void*               write_buffer;
-//     long                write_buffer_size;
-//     AsioWritecallback   write_callback;
-//     void*               write_callback_arg;
-//     RBL_DECLARE_END_TAG;
-// } AsioStream, *AsioStreamRef;
 
 typedef struct RunloopEvent_s {
     RBL_DECLARE_TAG;
@@ -214,22 +212,37 @@ typedef struct RunloopEvent_s {
         struct {
             PostableFunction        uevent_postable;
             void*                   uevent_postable_arg;
-            int                     write_fd; // on;y if using pipe trick
-            int                     read_fd;  // same
+            // int                     write_fd; // on;y if using pipe trick
+            // int                     read_fd;  // same
         } uevent;
 
         // signal - treat a signa as a kqueue event
         struct {
 
         } signal;
+        struct {
+            RunloopUserEventRef user_event;
+            FunctorListRef      list;
+            pthread_mutex_t     queue_mutex;
+            RunloopRef          runloop;
+            QueueWatcherReadCallbackFunction read_cb;
+            void*                            read_cb_arg;
+        } user_event_queue;
 
+        struct {
+            UserEventQueueRef            queue;
+            PostableFunction       queue_postable;
+            void*                  queue_postable_arg;
+            QueueWatcherReadCallbackFunction read_cb;
+            void*                            read_cb_arg;
+        } queue_watcher;
         // A special event made from user event - wait on a thread aware queue
         struct {
             /**
              * This is a non-owning reference as it was passed in during creation
              * of a RunloopQueueWatcher object.
              */
-            EventQueueRef          queue;
+            UserEventQueueRef          queue;
             PostableFunction       queue_postable;
             void*                  queue_postable_arg;
 

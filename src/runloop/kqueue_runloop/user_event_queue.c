@@ -10,22 +10,23 @@
 #include <rbl/logger.h>
 #include <common/list.h>
 
-typedef EventQueue* EvfQueuePtr;
+typedef UserEventQueue* EvfQueuePtr;
 
 static void dealloc(void** p)
 {
 }
-static void mk_fds(EventQueueRef athis)
+#if 0
+static void mk_fds(UserEventQueueRef athis)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
-#ifdef runloop_eventfd_ENABLE
-    int fd = -2;//eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
-    me->readfd = fd;
-    me->writefd = fd;
-#else
+#ifdef RUNLOOP_USER_EVENT_TWO_PIPE_TRICK
     pipe2(this->pipefds, O_NONBLOCK | O_CLOEXEC);
     this->readfd = this->pipefds[0];
     this->writefd = this->pipefds[1];
+#else
+    // if not using the two piupe trick, since this is kqueue
+    // we use the EVFILT_USER where athis is the unique identifier
+
 #endif
     uint64_t buf;
     while(1) {
@@ -35,52 +36,54 @@ static void mk_fds(EventQueueRef athis)
     assert(errno == EAGAIN);
 
 }
-void runloop_event_queue_init(RunloopRef runloop, RunloopEventRef rlevent)
+#endif
+void runloop_event_queue_init(RunloopRef rl, UserEventQueueRef aq)
 {
-    #if 0
-    EVENTFD_SET_TAG(rlevent)
-    EvfQueuePtr me = rlevent->evqueue;
-    me->list = functor_list_new(runloop_MAX_FDS);
-    pthread_mutex_init(&(me->queue_mutex), NULL);
-    mk_fds(me);
-    #endif
+    USER_EVENT_SET_TAG(aq);
+    EvfQueuePtr me = (EvfQueuePtr)aq;
+    me->user_event_queue.list = functor_list_new(runloop_MAX_FDS);
+    pthread_mutex_init(&(me->user_event_queue.queue_mutex), NULL);
 }
-RunloopEventRef runloop_event_queue_new(RunloopRef rl)
+UserEventQueueRef runloop_user_event_queue_new(RunloopRef rl)
 {
-    RunloopEventRef tmp = event_allocator_alloc(rl->event_table);
+    UserEventQueueRef tmp = event_table_get_entry(rl->event_table);
     runloop_event_queue_init(rl, tmp);
     return tmp;
 }
-void runloop_eventfd_queue_free(RunloopEventRef athis)
+void runloop_user_event_queue_free(UserEventQueueRef athis)
 {
-    event_allocator_free(athis->runloop->event_table, athis);
+    event_table_release_entry(athis->runloop->event_table, athis);
 }
-int runloop_eventfd_queue_readfd(RunloopEventRef athis)
+int runloop_user_event_queue_readfd(UserEventQueueRef athis)
 {
+    assert(0); // kqueue user_event does not have a readfd
     EvfQueuePtr me = (EvfQueuePtr)athis;
-    return athis->uevent.read_fd;
+    return -1;
 }
-void runloop_eventfd_queue_add(RunloopEventRef athis, Functor item)
+void runloop_user_event_queue_add(UserEventQueueRef athis, Functor item)
 {
-    EvfQueuePtr me = athis->interthread_queue.queue;
-    pthread_mutex_lock(&(me->queue_mutex));
-    functor_list_add(me->list, item);
-    uint64_t buf = 1;
-    write(me->writefd, &buf, sizeof(buf));
-    pthread_mutex_unlock(&(me->queue_mutex));
+    EvfQueuePtr me = athis;
+    pthread_mutex_lock(&(me->user_event_queue.queue_mutex));
+    if ((me->user_event_queue.list != NULL) ) {
+        functor_list_add(me->user_event_queue.list, item);
+        kqh_user_event_queue_trigger(athis, NULL);
+    }
+    pthread_mutex_unlock(&(me->user_event_queue.queue_mutex));
 }
-Functor runloop_eventfd_queue_remove(RunloopEventRef athis) {
-    EvfQueuePtr me = athis->interthread_queue.queue;
-    pthread_mutex_lock(&(me->queue_mutex));
+Functor runloop_user_event_queue_remove(UserEventQueueRef athis) {
+    EvfQueuePtr me = athis;
+    pthread_mutex_lock(&(me->user_event_queue.queue_mutex));
     Functor op;
-    if (functor_list_size(me->list) > 0) {
-        op = functor_list_remove(me->list);
+    if (functor_list_size(me->user_event_queue.list) > 0) {
+        op = functor_list_remove(me->user_event_queue.list);
     } else {
         op.f = NULL; op.arg = NULL;
     }
-    uint64_t buf;
-    int nread = read(me->readfd, &buf, sizeof(buf));
-    pthread_mutex_unlock(&(me->queue_mutex));
+    pthread_mutex_unlock(&(me->user_event_queue.queue_mutex));
     // remember to read from the pipe to clear the event
     return op;
+}
+RunloopRef runloop_user_event_queue_get_runloop(UserEventQueueRef athis)
+{
+    return athis->runloop;
 }

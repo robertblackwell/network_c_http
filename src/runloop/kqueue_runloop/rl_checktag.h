@@ -5,10 +5,10 @@
 #include <string.h>
 
 #define Runloop_TAG       "RUNLOOP"
-#define EventFd_TAG       "EVENTFD"
+#define UserEvent_TAG     "USREVT"
 #define STREAM_TAG        "STREAM"
 #define Listener_TAG      "LISTNR"
-#define QueueWatcher_TAG  "QWatcher"
+#define QueueWatcher_TAG  "QUWTCH"
 #define Timer_TAG         "Timer"
 #define ITQueue_TAG       "ITQUEUE"
 #define FdTable_TAG       "FDTABL"
@@ -34,13 +34,13 @@
 /**
  * eventfd tag macros
  */
-#define EVENTFD_DECLARE_TAG RBL_DECLARE_TAG(EventFd_TAG)
-#define EVENTFD_CHECK_TAG(p) RBL_CHECK_TAG(EventFd_TAG, p)
-#define EVENTFD_SET_TAG(p) RBL_SET_TAG(EventFd_TAG, p)
+#define USER_EVENT_DECLARE_TAG RBL_DECLARE_TAG(UserEvent_TAG)
+#define USER_EVENT_CHECK_TAG(p) RBL_CHECK_TAG(UserEvent_TAG, p)
+#define USER_EVENT_SET_TAG(p) RBL_SET_TAG(UserEvent_TAG, p)
 
-#define EVENTFD_DECLARE_END_TAG RBL_DECLARE_END_TAG(EventFd_TAG)
-#define EVENTFD_CHECK_END_TAG(p) RBL_CHECK_END_TAG(EventFd_TAG, p)
-#define EVENTFD_SET_END_TAG(p) RBL_SET_END_TAG(EventFd_TAG, p)
+#define USER_EVENT_DECLARE_END_TAG RBL_DECLARE_END_TAG(UserEvent_TAG)
+#define USER_EVENT_CHECK_END_TAG(p) RBL_CHECK_END_TAG(UserEvent_TAG, p)
+#define USER_EVENT_SET_END_TAG(p) RBL_SET_END_TAG(UserEvent_TAG, p)
 
 /**
  * RunloopStream

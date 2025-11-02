@@ -9,36 +9,30 @@
 #include <unistd.h>
 #define KQ_RUNLOOP_USER_EVENT_SEMAPHORE
 
-/**
- *
- * @param ctx
- * @param fd
- * @param event
- */
 static void handler(RunloopEventRef watcher, uint16_t filter, uint16_t flags)
 {
     RunloopEventRef fdev = (RunloopEventRef)watcher;
     printf("user event handler entered\n");
-    EVENTFD_CHECK_TAG(fdev)
-    EVENTFD_CHECK_END_TAG(fdev)
+    USER_EVENT_CHECK_TAG(fdev)
+    USER_EVENT_CHECK_END_TAG(fdev)
     uint64_t buf;
-    watcher->uevent.uevent_postable(watcher->runloop, watcher);
+    watcher->uevent.uevent_postable(watcher->runloop, watcher->uevent.uevent_postable_arg);
 }
 static void anonymous_free(RunloopEventRef p)
 {
     RunloopEventRef fdevp = (RunloopEventRef)p;
-    EVENTFD_CHECK_TAG(fdevp)
-    EVENTFD_CHECK_END_TAG(fdevp)
+    USER_EVENT_CHECK_TAG(fdevp)
+    USER_EVENT_CHECK_END_TAG(fdevp)
     runloop_user_event_free(fdevp);
 }
 void runloop_user_event_init(RunloopEventRef this, RunloopRef runloop)
 {
     RBL_ASSERT((this!=NULL), "this is NULL");
     this->type = RUNLOOP_WATCHER_UEVENT;
-    EVENTFD_SET_TAG(this);
-    EVENTFD_SET_END_TAG(this);
-    EVENTFD_CHECK_TAG(this)
-    EVENTFD_CHECK_END_TAG(this)
+    USER_EVENT_SET_TAG(this);
+    USER_EVENT_SET_END_TAG(this);
+    USER_EVENT_CHECK_TAG(this)
+    USER_EVENT_CHECK_END_TAG(this)
     /*
      * The readfd must be NONBLOCK
      */
@@ -70,19 +64,20 @@ RunloopEventRef runloop_user_event_new(RunloopRef runloop)
 }
 void runloop_user_event_free(RunloopEventRef athis)
 {
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
-    close(athis->uevent.write_fd);
-    free((void*)athis);
+    USER_EVENT_SET_TAG(athis);
+    USER_EVENT_CHECK_TAG(athis)
+    event_table_release_entry(athis->runloop->event_table, athis);
+    // close(athis->uevent.write_fd);
+    // free((void*)athis);
 }
 void runloop_user_event_register(RunloopEventRef rlevent)
 {
-    EVENTFD_SET_TAG(rlevent);
-    EVENTFD_CHECK_TAG(rlevent)
+    USER_EVENT_SET_TAG(rlevent);
+    USER_EVENT_CHECK_TAG(rlevent)
     kqh_user_event_register(rlevent);
     #if 0
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
+    USER_EVENT_SET_TAG(athis);
+    USER_EVENT_CHECK_TAG(athis)
 
     uint32_t interest = 0L;
     athis->uevent.uevent_postable = NULL;
@@ -97,8 +92,8 @@ void runloop_user_event_register(RunloopEventRef rlevent)
 void runloop_user_event_change_watch(RunloopEventRef athis, PostableFunction postable, void* arg, uint64_t watch_what)
 {
     #if 0
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
+    USER_EVENT_SET_TAG(athis);
+    USER_EVENT_CHECK_TAG(athis)
     uint32_t interest = watch_what;
     if( postable != NULL) {
         athis->uevent.uevent_postable = postable;
@@ -113,16 +108,16 @@ void runloop_user_event_change_watch(RunloopEventRef athis, PostableFunction pos
 void runloop_user_event_deregister(RunloopEventRef athis)
 {
     #if 0
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
+    USER_EVENT_SET_TAG(athis);
+    USER_EVENT_CHECK_TAG(athis)
     int res = runloop_deregister(athis->runloop, athis->fd);
     assert(res == 0);
     #endif
 }
 void runloop_user_event_arm(RunloopEventRef rlevent, PostableFunction postable, void* arg)
 {
-    EVENTFD_SET_TAG(rlevent);
-    EVENTFD_CHECK_TAG(rlevent)
+    USER_EVENT_SET_TAG(rlevent);
+    USER_EVENT_CHECK_TAG(rlevent)
   if( postable != NULL) {
         rlevent->uevent.uevent_postable = postable;
     }
@@ -133,20 +128,15 @@ void runloop_user_event_arm(RunloopEventRef rlevent, PostableFunction postable, 
 }
 void runloop_user_event_disarm(RunloopEventRef rlevent)
 {
-    EVENTFD_SET_TAG(rlevent);
-    EVENTFD_CHECK_TAG(rlevent)
+    USER_EVENT_SET_TAG(rlevent);
+    USER_EVENT_CHECK_TAG(rlevent)
     kqh_user_event_pause(rlevent);
-    #if 0
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
-    int res = runloop_reregister(athis->runloop, athis->fd, 0, (RunloopWatcherBaseRef) athis);
-    #endif
 }
 void runloop_user_event_fire(RunloopEventRef athis)
 {
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
-#ifdef RUNLOOP_EVENTFD_TWO_PIPE_TRICK
+    USER_EVENT_SET_TAG(athis);
+    USER_EVENT_CHECK_TAG(athis)
+#ifdef RUNLOOP_USER_EVENT_TWO_PIPE_TRICK
     uint64_t buf = 1;
     write(athis->uevent.write_fd, &buf, sizeof(buf));
 #else
@@ -155,38 +145,35 @@ void runloop_user_event_fire(RunloopEventRef athis)
 }
 void runloop_user_event_clear_one_event(RunloopEventRef athis)
 {
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
+    USER_EVENT_SET_TAG(athis);
+    USER_EVENT_CHECK_TAG(athis)
     uint64_t buf;
-    int nread = read(athis->uevent.read_fd, &buf, sizeof(buf));
+    assert(0);
 }
 void runloop_user_event_clear_all_events(RunloopEventRef athis)
 {
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
+    USER_EVENT_SET_TAG(athis);
+    USER_EVENT_CHECK_TAG(athis)
     uint64_t buf;
-    while(1) {
-        int nread = read(athis->uevent.read_fd,  &buf, sizeof(buf));
-        if (nread == -1) break;
-    }
+    assert(0);
     assert(errno == EAGAIN);
 }
 
 RunloopRef runloop_user_event_get_runloop(RunloopEventRef athis)
 {
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
+    USER_EVENT_SET_TAG(athis);
+    USER_EVENT_CHECK_TAG(athis)
     return athis->runloop;
 }
 int runloop_user_event_get_fd(RunloopEventRef athis)
 {
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
-    return athis->uevent.read_fd;
+    USER_EVENT_SET_TAG(athis);
+    USER_EVENT_CHECK_TAG(athis)
+    return -1;//athis->uevent.read_fd;
 }
 
 void runloop_user_event_verify(RunloopEventRef athis)
 {
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
+    USER_EVENT_SET_TAG(athis);
+    USER_EVENT_CHECK_TAG(athis)
 }

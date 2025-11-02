@@ -13,11 +13,14 @@ typedef struct  RunloopEvent_s RunloopEvent, *RunloopEventRef,
                 RunloopTimer, * RunloopTimerRef,
                 RunloopListener, *RunloopListenerRef,
                 RunloopStream, *RunloopStreamRef,
-                RunloopUserEvent, *RunloopUserEventRef;
+                RunloopUserEvent, *RunloopUserEventRef,
+                RunloopSignal, *RunloopSignalRef,
+                UserEventQueue, * UserEventQueueRef,
+                RunloopQueueWatcher, *RunloopQueueWatcherRef;
 typedef struct RunloopWatcherBase_s RunloopWatcherBase, *RunloopWatcherBaseRef;   
-typedef struct EventQueue_s EventQueue, * EventQueueRef;
+// typedef struct UserEventQueue_s UserEventQueue, * UserEventQueueRef;
 typedef struct InterthreadQueue_s InterthreadQueue, *InterthreadQueueRef;
-typedef struct RunloopQueueWatcher_s RunloopQueueWatcher, *RunloopQueueWatcherRef;
+// typedef struct RunloopQueueWatcher_s RunloopQueueWatcher, *RunloopQueueWatcherRef;
 /**
  * PostableFunction defines the call signature of functions that can be added to a runloops queue of
  * functions to be called. As such they represent the next step in an ongoing computation of a lightweight
@@ -133,23 +136,23 @@ void runloop_user_event_clear_one_event(RunloopUserEventRef athis);
 void runloop_user_event_clear_all_events(RunloopUserEventRef athis);
 void runloop_user_event_deregister(RunloopUserEventRef athis);
 void runloop_user_event_verify(RunloopUserEventRef r);
-RunloopRef runloop_user_event_get_reactor(RunloopUserEventRef athis);
+RunloopRef runloop_user_event_get_runloop(RunloopUserEventRef athis);
 int runloop_user_event_get_fd(RunloopUserEventRef this);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // User Event Queue
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-EventQueueRef runloop_event_queue_new(RunloopRef runloop, EventQueueRef this);
-void runloop_event_queue_init(RunloopRef runloop, EventQueueRef this);
-void runloop_event_queue_deinit(EventQueueRef this);
-void  runloop_event_queue_free(EventQueueRef athis);
-void  runloop_event_queue_add(EventQueueRef athis, Functor item);
-Functor runloop_event_queue_remove(EventQueueRef athis);
-int   runloop_event_queue_readfd(EventQueueRef athis);
-RunloopRef runloop_event_queue_get_runloop(EventQueueRef athis);
+UserEventQueueRef runloop_user_event_queue_new(RunloopRef runloop);
+void runloop_user_event_queue_init(RunloopRef runloop, UserEventQueueRef this);
+void runloop_user_event_queue_deinit(UserEventQueueRef this);
+void  runloop_user_event_queue_free(UserEventQueueRef athis);
+void  runloop_user_event_queue_add(UserEventQueueRef athis, Functor item);
+Functor runloop_user_event_queue_remove(UserEventQueueRef athis);
+int   runloop_user_event_queue_readfd(UserEventQueueRef athis);
+RunloopRef runloop_user_event_queue_get_runloop(UserEventQueueRef athis);
 
-RunloopQueueWatcherRef runloop_queue_watcher_new(RunloopRef runloop, EventQueueRef qref);
-void runloop_queue_watcher_init(RunloopQueueWatcherRef qw, RunloopRef runloop, EventQueueRef qref);
+RunloopQueueWatcherRef runloop_queue_watcher_new(RunloopRef runloop, UserEventQueueRef qref);
+void runloop_queue_watcher_init(RunloopQueueWatcherRef qw, RunloopRef runloop, UserEventQueueRef qref);
 void runloop_queue_watcher_deinit(RunloopQueueWatcherRef qw);
 void runloop_queue_watcher_free(RunloopQueueWatcherRef this);
 
