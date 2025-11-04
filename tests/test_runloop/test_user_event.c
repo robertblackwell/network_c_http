@@ -124,7 +124,7 @@ static void timer_callback_1(RunloopRef rl, void* test_ctx_arg)
         ctx_p->timer_ref = NULL;
         nbr_timers--;
     } else {
-        runloop_user_event_fire(fdevent_ref);
+        runloop_user_event_fire(fdevent_ref, (void*)4321);
         ctx_p->counter++;
     }
     ctx_p->callback1_counter++;

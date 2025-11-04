@@ -49,10 +49,6 @@ struct MemorySlab_s {
             RunloopStream       stream;
             RunloopEvent        user_event;
             RunloopEventRef     signal;
-
-            RunloopQueueEvent   qevent;
-            RunloopInterthreadQueueEvent itqevent;
-            // RunloopQueueWatcher qwatcher;
             RunloopEvent        runloop_event;
         };
         uint16_t    my_index; 

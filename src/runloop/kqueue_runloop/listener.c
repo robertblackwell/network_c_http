@@ -17,7 +17,7 @@
  * @param fd        int
  * @param event     uint64_t
  */
-static void handler(RunloopEventRef lrevent, uint16_t event, uint16_t flags)
+static void handler(RunloopEventRef lrevent, uint16_t event, uint16_t flags, void* data)
 {
     RunloopEventRef listener_ref = (RunloopEventRef)lrevent;
     LISTNER_CHECK_TAG(listener_ref)

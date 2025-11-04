@@ -37,53 +37,89 @@ static void mk_fds(UserEventQueueRef athis)
 
 }
 #endif
-void runloop_event_queue_init(RunloopRef rl, UserEventQueueRef aq)
+void user_event_queue_init(RunloopRef rl, UserEventQueueRef aq)
 {
-    USER_EVENT_SET_TAG(aq);
+    RBL_SET_TAG(UEQueue_TAG, aq);
+    RBL_SET_END_TAG(UEQueue_TAG, aq);
     EvfQueuePtr me = (EvfQueuePtr)aq;
-    me->user_event_queue.list = functor_list_new(runloop_MAX_FDS);
-    pthread_mutex_init(&(me->user_event_queue.queue_mutex), NULL);
+    me->runloop = rl;
+    me->user_event = runloop_user_event_new(rl);
+    me->list = functor_list_new(runloop_MAX_FDS);
+    pthread_mutex_init(&(me->queue_mutex), NULL);
 }
-UserEventQueueRef runloop_user_event_queue_new(RunloopRef rl)
+UserEventQueueRef user_event_queue_new(RunloopRef rl)
 {
-    UserEventQueueRef tmp = event_table_get_entry(rl->event_table);
-    runloop_event_queue_init(rl, tmp);
+    UserEventQueueRef tmp = malloc(sizeof(UserEventQueue));
+    user_event_queue_init(rl, tmp);
     return tmp;
 }
-void runloop_user_event_queue_free(UserEventQueueRef athis)
+void user_event_queue_free(UserEventQueueRef athis)
 {
-    event_table_release_entry(athis->runloop->event_table, athis);
+    RBL_CHECK_TAG(UEQueue_TAG, athis);
+    RBL_CHECK_END_TAG(UEQueue_TAG, athis);
+    runloop_user_event_free(athis->user_event);
+    functor_list_free(athis->list);
+    free(athis);
 }
-int runloop_user_event_queue_readfd(UserEventQueueRef athis)
+void user_event_queue_register(UserEventQueueRef uequeue, UserEventQueueCallback cb, void* cb_arg)
 {
+    RBL_CHECK_TAG(UEQueue_TAG, uequeue);
+    RBL_CHECK_END_TAG(UEQueue_TAG, uequeue);
+    runloop_user_event_register(uequeue->user_event);
+    runloop_user_event_arm(uequeue->user_event, cb, cb_arg);
+}
+void user_event_queue_deregister(UserEventQueueRef uequeue)
+{
+    RBL_CHECK_TAG(UEQueue_TAG, uequeue);
+    RBL_CHECK_END_TAG(UEQueue_TAG, uequeue);
+    runloop_user_event_deregister(uequeue->user_event);
+}
+
+int user_event_queue_readfd(UserEventQueueRef athis)
+{
+    RBL_CHECK_TAG(UEQueue_TAG, athis);
+    RBL_CHECK_END_TAG(UEQueue_TAG, athis);
     assert(0); // kqueue user_event does not have a readfd
     EvfQueuePtr me = (EvfQueuePtr)athis;
     return -1;
 }
-void runloop_user_event_queue_add(UserEventQueueRef athis, Functor item)
+void user_event_queue_add(UserEventQueueRef athis, Functor item)
 {
+    RBL_CHECK_TAG(UEQueue_TAG, athis);
+    RBL_CHECK_END_TAG(UEQueue_TAG, athis);
     EvfQueuePtr me = athis;
-    pthread_mutex_lock(&(me->user_event_queue.queue_mutex));
-    if ((me->user_event_queue.list != NULL) ) {
-        functor_list_add(me->user_event_queue.list, item);
-        kqh_user_event_queue_trigger(athis, NULL);
+    pthread_mutex_lock(&(me->queue_mutex));
+    if ((me->list != NULL) ) {
+        functor_list_add(me->list, item);
+        RunloopUserEventRef uevent = athis->user_event;
+        kqh_user_event_trigger(uevent, NULL);
     }
-    pthread_mutex_unlock(&(me->user_event_queue.queue_mutex));
+    pthread_mutex_unlock(&(me->queue_mutex));
 }
-Functor runloop_user_event_queue_remove(UserEventQueueRef athis) {
+Functor user_event_queue_remove(UserEventQueueRef athis) {
+    RBL_CHECK_TAG(UEQueue_TAG, athis);
+    RBL_CHECK_END_TAG(UEQueue_TAG, athis);
     EvfQueuePtr me = athis;
-    pthread_mutex_lock(&(me->user_event_queue.queue_mutex));
+    pthread_mutex_lock(&(me->queue_mutex));
     Functor op;
-    if (functor_list_size(me->user_event_queue.list) > 0) {
-        op = functor_list_remove(me->user_event_queue.list);
+    if (functor_list_size(me->list) > 0) {
+        op = functor_list_remove(me->list);
     } else {
         op.f = NULL; op.arg = NULL;
     }
-    pthread_mutex_unlock(&(me->user_event_queue.queue_mutex));
+    pthread_mutex_unlock(&(me->queue_mutex));
     // remember to read from the pipe to clear the event
     return op;
 }
-RunloopRef runloop_user_event_queue_get_runloop(UserEventQueueRef athis)
+RunloopRef user_event_queue_get_runloop(UserEventQueueRef athis)
 {
+    RBL_CHECK_TAG(UEQueue_TAG, athis);
+    RBL_CHECK_END_TAG(UEQueue_TAG, athis);
+    assert(athis->runloop == runloop_user_event_get_runloop(athis->user_event));
     return athis->runloop;
+}
+void user_event_queue_verify(UserEventQueueRef ueq)
+{
+    RBL_CHECK_TAG(UEQueue_TAG, ueq);
+    RBL_CHECK_END_TAG(UEQueue_TAG, ueq);
 }

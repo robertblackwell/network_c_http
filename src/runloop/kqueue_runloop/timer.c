@@ -26,7 +26,7 @@ static void print_current_tme(char* prefix)
  * @param fd
  * @param event
  */
-static void handler(RunloopEventRef rlevent, uint16_t event, uint16_t flags)
+static void handler(RunloopEventRef rlevent, uint16_t event, uint16_t flags, void* data)
 {
     struct timespec ts;
 

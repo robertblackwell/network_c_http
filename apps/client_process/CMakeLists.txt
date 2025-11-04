@@ -44,9 +44,11 @@ set(INC_DIRS
 function(mktarget name msgselect)
 	set(target ${name}_${msgselect})
 	set(MSG_SELECT_VAR "")
+
 	string(TOUPPER ${msgselect} MSG_SELECT_VAR)
 	set(MSG_SELECT_OPT MSG_SELECT_${MSG_SELECT_VAR})
 	message("ZZZZZZZZZ")
+	message("${name} link libraries  ${C_HTTP_LINK_LIBRARIES}")
 	message("message select option ${MSG_SELECT_OPT}")
 	message("target: ${target}")
 	message("test client server original INC_DIRS ${INC_DIRS}")

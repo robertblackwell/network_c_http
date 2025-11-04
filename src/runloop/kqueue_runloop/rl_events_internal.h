@@ -116,34 +116,6 @@ struct RunloopSignal_s{
     RBL_DECLARE_END_TAG;
 };
 #pragma clang diagnostic pop
-
-/**
- * RunloopQueueWatcher
- */
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
-typedef uint64_t RunloopQueueEvent;
-typedef void(RunloopQueuetWatcherCallerback(void* ctx));
-struct RunloopQueueWatcher_s {
-    /** The start tag is declared in the base struct
-    RBL_DECLARE_TAG; */
-    struct RunloopWatcherBase_s;
-    /**
-     * This is a non-owning reference as it was passed in during creation
-     * of a RunloopQueueWatcher object.
-     */
-    UserEventQueueRef            queue;
-    // runloop cb and arg
-    PostableFunction       queue_postable;
-    void*                  queue_postable_arg;
-
-    QueueWatcherReadCallbackFunction read_cb;
-    void*                            read_cb_arg;
-
-    RBL_DECLARE_END_TAG;
-};
-#pragma clang diagnostic pop
-
 /**
  * InterThreadQueue
  */
@@ -164,6 +136,8 @@ struct UserEventQueue_s {
     FunctorListRef      list;
     pthread_mutex_t     queue_mutex;
     RunloopRef          runloop;
+    RunloopUserEventRef user_event;
+    int                 user_event_dup_fd;
 #ifdef C_HTTP_EFD_QUEUE
 #else
     int                 pipefds[2];
@@ -179,7 +153,7 @@ typedef struct RunloopEvent_s {
     RunloopRef            runloop;
     void*                 context;
     void(*free)(RunloopEventRef);
-    void(*handler)(RunloopEventRef lrevent, uint16_t filter, uint16_t flags);
+    void(*handler)(RunloopEventRef lrevent, uint16_t filter, uint16_t flags, void* data);
     /** tag that determines the variant*/
     WatcherType           type;
  
@@ -207,51 +181,20 @@ typedef struct RunloopEvent_s {
             PostableFunction         write_postable_cb;
             void*                    write_postable_arg;
         } stream;
-
         // user event - with kqueues does not use a file descriptor
         struct {
-            PostableFunction        uevent_postable;
-            void*                   uevent_postable_arg;
+            UserEventCallback       uevent_cb;
+            void*                   uevent_cb_arg;
+            void*                   uevent_data;
+            int                     dup_fd;
             // int                     write_fd; // on;y if using pipe trick
             // int                     read_fd;  // same
         } uevent;
-
         // signal - treat a signa as a kqueue event
         struct {
-
         } signal;
-        struct {
-            RunloopUserEventRef user_event;
-            FunctorListRef      list;
-            pthread_mutex_t     queue_mutex;
-            RunloopRef          runloop;
-            QueueWatcherReadCallbackFunction read_cb;
-            void*                            read_cb_arg;
-        } user_event_queue;
-
-        struct {
-            UserEventQueueRef            queue;
-            PostableFunction       queue_postable;
-            void*                  queue_postable_arg;
-            QueueWatcherReadCallbackFunction read_cb;
-            void*                            read_cb_arg;
-        } queue_watcher;
-        // A special event made from user event - wait on a thread aware queue
-        struct {
-            /**
-             * This is a non-owning reference as it was passed in during creation
-             * of a RunloopQueueWatcher object.
-             */
-            UserEventQueueRef          queue;
-            PostableFunction       queue_postable;
-            void*                  queue_postable_arg;
-
-            QueueWatcherReadCallbackFunction read_cb;
-            void*                  read_cb_arg;
-        } interthread_queue;
     };
     RBL_DECLARE_END_TAG;
-
 } RunloopEvent, *RunloopEventRef;
 
 #endif

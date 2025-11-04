@@ -283,10 +283,11 @@ int runloop_run(RunloopRef athis, time_t timeout_ms) {
                         RunloopEventRef rlevent = events[i].udata;
 
                         int filters = athis->events[i].filter;
+                        void* data = (void*)events[i].data;
                         uint32_t flags = athis->events[i].flags;
                         int eof = flags & EV_EOF;
                         RBL_LOG_FMT("runloop_run loop ident: %lu udata: %p events: %x flags: %x eof:%d", ke.ident ,rlevent , filters, flags, eof);
-                        rlevent->handler(rlevent, filters, flags);
+                        rlevent->handler(rlevent, filters, flags, data);
                         RUNLOOP_CHECK_TAG(athis)
                     }
                 }

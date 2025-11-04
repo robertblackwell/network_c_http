@@ -369,8 +369,9 @@ int kqh_user_event_trigger(RunloopUserEventRef rlevent, void* data)
 #else
     uint64_t id = (uint64_t)rlevent;
     RunloopRef rl = rlevent->runloop;
+    int kqfd = (rlevent->uevent.dup_fd == -1) ? rlevent->runloop->kqueue_fd : rlevent->uevent.dup_fd;
     EV_SET(&change, id, EVFILT_USER, flags, NOTE_TRIGGER, (intptr_t)data, rlevent);
-    nev = kevent(rl->kqueue_fd, &change, 1, NULL, 0, NULL);
+    nev = kevent(kqfd, &change, 1, NULL, 0, NULL);
 #endif
     return 0;
 }
@@ -396,84 +397,6 @@ int kqh_user_event_cancel(RunloopUserEventRef rlevent)
     return 0;
 }
 int kqh_user_event_pause (RunloopUserEventRef rlevent)
-{
-    int flags = EV_ADD | EV_DISABLE | EV_RECEIPT ;
-    struct kevent change;
-    int nev;
-    // int flags = EV_DELETE | EV_RECEIPT;
-    // EV_SET(&change, id, EVFILT_TIMER, flags, 0, 0, 0);
-    // nev = kevent(kq, &change, 1, NULL, 0, NULL);
-
-#ifdef RL_KQ_BATCH_CHANGES
-    change_ptr = runloop_change_next(rl)
-    EV_SET(&change, id, EVFILT_TIMER, flags, 0, milli_secs, 0);
-#else
-    uint64_t id = (uint64_t)rlevent;
-    RunloopRef rl = rlevent->runloop;
-    EV_SET(&change, id, EVFILT_USER, flags, 0, 0, 0);
-    nev = kevent(rl->kqueue_fd, &change, 1, NULL, 0, NULL);
-#endif
-
-    return 0;
-}
-//////////////////////////////////////////////////////////////////////////////
-/// user event queue
-///////////////////////////////////////////////////////////////////////////////
-
-int kqh_user_event_queue_register(UserEventQueueRef rlevent)
-{
-    int flags = EV_ADD | EV_ENABLE | EV_RECEIPT;
-    struct kevent change;
-    int nev;
-#ifdef RL_KQ_BATCH_CHANGES
-    change_ptr = runloop_change_next(rl)
-    EV_SET(&change, id, EVFILT_TIMER, flags, 0, milli_secs, 0);
-#else
-    uint64_t id = (uint64_t)rlevent;
-    RunloopRef rl = rlevent->runloop;
-    EV_SET(&change, id, EVFILT_USER, flags, 0, 0, rlevent);
-    nev = kevent(rl->kqueue_fd, &change, 1, NULL, 0, NULL);
-#endif
-    return 0;
-}
-int kqh_user_event_queue_trigger(UserEventQueueRef rlevent, void* data)
-{
-    int flags = EV_ADD | EV_ENABLE | EV_RECEIPT;
-    struct kevent change;
-    int nev;
-#ifdef RL_KQ_BATCH_CHANGES
-    change_ptr = runloop_change_next(rl)
-    EV_SET(&change, id, EVFILT_TIMER, flags, 0, milli_secs, 0);
-#else
-    uint64_t id = (uint64_t)rlevent;
-    RunloopRef rl = rlevent->runloop;
-    EV_SET(&change, id, EVFILT_USER, flags, NOTE_TRIGGER, (intptr_t)data, rlevent);
-    nev = kevent(rl->kqueue_fd, &change, 1, NULL, 0, NULL);
-#endif
-    return 0;
-}
-int kqh_user_event_queue_cancel(UserEventQueueRef rlevent)
-{
-    int flags = EV_DELETE | EV_RECEIPT;
-    struct kevent change;
-    int nev;
-    // int flags = EV_DELETE | EV_RECEIPT;
-    // EV_SET(&change, id, EVFILT_TIMER, flags, 0, 0, 0);
-    // nev = kevent(kq, &change, 1, NULL, 0, NULL);
-
-#ifdef RL_KQ_BATCH_CHANGES
-    change_ptr = runloop_change_next(rl)
-    EV_SET(&change, id, EVFILT_TIMER, flags, 0, milli_secs, 0);
-#else
-    uint64_t id = (uint64_t)rlevent;
-    RunloopRef rl = rlevent->runloop;
-    EV_SET(&change, id, EVFILT_USER, flags, 0, 0, 0);
-    nev = kevent(rl->kqueue_fd, &change, 1, NULL, 0, NULL);
-#endif
-
-    return 0;
-}
-int kqh_user_event_queue_pause (UserEventQueueRef rlevent)
 {
     int flags = EV_ADD | EV_DISABLE | EV_RECEIPT ;
     struct kevent change;

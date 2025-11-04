@@ -28,11 +28,6 @@ int kqh_user_event_trigger(RunloopUserEventRef rlevent, void* data);
 int kqh_user_event_cancel(RunloopUserEventRef rlevent);
 int kqh_user_event_pause (RunloopUserEventRef rlevent);
 
-int kqh_user_event_queue_register(UserEventQueueRef rlevent);
-int kqh_user_event_queue_trigger(UserEventQueueRef rlevent, void* data);
-int kqh_user_event_queue_cancel(UserEventQueueRef rlevent);
-int kqh_user_event_queue_pause (UserEventQueueRef rlevent);
-
 
 int kqh_listener_register(RunloopListenerRef rlevent);
 int kqh_listener_cancel(RunloopListenerRef rlevent);

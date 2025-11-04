@@ -11,6 +11,8 @@
 #include <rbl/macros.h>
 #include <src/common/utils.h>
 #include <src/runloop/runloop.h>
+
+#include "runloop/kqueue_runloop/rl_events_internal.h"
 // #include <src/runloop/rl_internal.h>
 uint64_t local_gettid() {
     #ifdef LINUX_FLAG
@@ -23,35 +25,43 @@ uint64_t local_gettid() {
     return tid;
 }
 
+#define QRCTX_Tag "QRCTX"
 typedef struct QReader_s {
-    RunloopRef      rdr_runloop_ref;
-    UserEventQueueRef queue;
-    RunloopQueueWatcherRef queue_watcher;
+    RBL_DECLARE_TAG;
+    RunloopRef        rdr_runloop_ref;
+    UserEventQueueRef ue_queue;
     int count;
     int expected_count;
+    RBL_DECLARE_END_TAG;
 } QReader, *QReaderRef;
 
 
-QReaderRef queue_reader_new(RunloopRef rl, UserEventQueueRef queue, RunloopQueueWatcherRef qw, int expected_count)
+QReaderRef queue_reader_new(RunloopRef rl, UserEventQueueRef ue_queue, int expected_count)
 {
     QReaderRef this = malloc(sizeof(QReader));
+    RBL_SET_TAG(QRCTX_Tag, this);
+    RBL_SET_END_TAG(QRCTX_Tag, this);
     this->rdr_runloop_ref = rl;
-    this->queue = queue;
-    this->queue_watcher = qw;
+    this->ue_queue = ue_queue;
     this->expected_count = expected_count;
-    this->count = 1;
+    this->count = 0;
     return this;
 }
 void queue_reader_free(QReaderRef this)
 {
+    RBL_CHECK_TAG(QRCTX_Tag, this);
+    RBL_CHECK_END_TAG(QRCTX_Tag, this);
     free(this);
 }
 
+#define QWCTX_Tag "QWCTX"
 typedef struct QWriter_s {
+    RBL_DECLARE_TAG;
     RunloopRef      rdr_runloop_ref;
-    UserEventQueueRef queue;
+    UserEventQueueRef ue_queue;
     int count_max;
     long post_count;
+    RBL_DECLARE_END_TAG;
 } QWriter, *QWriterRef;
 
 typedef struct WriterArg {
@@ -60,17 +70,21 @@ typedef struct WriterArg {
     QWriterRef qwriter_ref;
 } WriterArg, *WriterArgRef;
 
-QWriterRef queue_writer_new(RunloopRef rl,  UserEventQueueRef queue, int max)
+QWriterRef queue_writer_new(RunloopRef rl,  UserEventQueueRef ue_queue, int max)
 {
     QWriterRef this = malloc(sizeof(QWriter));
+    RBL_SET_TAG(QWCTX_Tag, this);
+    RBL_SET_END_TAG(QWCTX_Tag, this);
     this->rdr_runloop_ref = rl;
-    this->queue = queue;
+    this->ue_queue = ue_queue;
     this->count_max = max;
     this->post_count = 0;
     return this;
 }
 void queue_writer_free(QReaderRef this)
 {
+    RBL_CHECK_TAG(QWCTX_Tag, this);
+    RBL_CHECK_END_TAG(QWCTX_Tag, this);
     free(this);
 }
 WriterArgRef writer_arg_new(QWriterRef qwrtr_ref, long count)
@@ -85,35 +99,29 @@ WriterArgRef writer_arg_new(QWriterRef qwrtr_ref, long count)
  * Called whenever the user-event associated with the queue is triggered by the
  * queue writer
  */
-void queue_postable(RunloopRef rl, void* q_rdr_ctx_arg)
+void queue_cb(RunloopRef rl, void* q_rdr_ctx_arg)
 {
     QReaderRef rdr = (QReaderRef)q_rdr_ctx_arg;
-    UserEventQueueRef queue = rdr->queue;
-    RunloopQueueWatcherRef qw = rdr->queue_watcher;
-    Functor queue_data = runloop_user_event_queue_remove(queue);
-
-    WriterArgRef writer_arg_ref = (WriterArgRef)queue_data.arg;
-
-    printf("Q Handler received %p count: %d\n", &queue_data, rdr->count);
-    bool x = (long)writer_arg_ref->count == (long)rdr->count;
-    RBL_ASSERT(x, "count check failed in queue_postable");
-    rdr->count++;
-    // now call the postable function passed by the writer
-
-    PostableFunction pf = queue_data.f;
-    void* postable_arg = queue_data.arg;
-    runloop_post(rl, pf, postable_arg);
-
-    if (rdr->count >= rdr->expected_count) {
-//        RunloopRef rl = rdr->rdr_runloop_ref;
-        runloop_queue_watcher_deregister(qw);
-        runloop_queue_watcher_free(qw);
-        runloop_close(rl);
-    } else {
-#ifdef APPLE_FLAG
-        runloop_queue_watcher_register(qw, queue_postable, q_rdr_ctx_arg);
-#endif
+    RBL_CHECK_TAG(QRCTX_Tag, rdr)
+    RBL_CHECK_END_TAG(QRCTX_Tag, rdr)
+    UserEventQueueRef ue_queue = rdr->ue_queue;
+    user_event_queue_verify(ue_queue);
+    runloop_user_event_verify(ue_queue->user_event);
+    while (1) {
+        Functor queue_data = user_event_queue_remove(ue_queue);
+        if (queue_data.f == NULL) {
+            printf("queue_cb - queue is empty \n");
+            return;
+       }
+        rdr->count++;
+        printf("Q callback received %p count: %d\n", &queue_data, rdr->count);
+        PostableFunction pf = queue_data.f;
+        void* postable_arg = queue_data.arg;
+        runloop_post(rl, pf, postable_arg);
     }
+#ifdef APPLE_FLAG
+    user_event_queue_register(ue_queue, queue_cb, q_rdr_ctx_arg);
+#endif
 }
 /**
  * This thread creates a queue watcher that will get an event from its runloop whenever
@@ -123,13 +131,13 @@ void queue_postable(RunloopRef rl, void* q_rdr_ctx_arg)
  */
 void* reader_thread_func(void* arg)
 {
-    QReaderRef q_rdr_ctx = (QReaderRef)arg;
-    RunloopRef runloop_ref = q_rdr_ctx->rdr_runloop_ref;
+    QReaderRef rctx = (QReaderRef)arg;
+    RunloopRef runloop_ref = rctx->rdr_runloop_ref;
     uint64_t tid = local_gettid();
-    RunloopQueueWatcherRef qw = runloop_queue_watcher_new(runloop_ref, q_rdr_ctx->queue);
-    runloop_queue_watcher_register(qw, queue_postable, arg);
+    UserEventQueueRef ue_queue = rctx->ue_queue;
+    user_event_queue_register(ue_queue, queue_cb, arg);
     printf("reader thread rl: %p tid: %llu\n", runloop_ref, tid);
-    runloop_run(runloop_ref, -1);
+    runloop_run(runloop_ref, 5000);
     return NULL;
 }
 /**
@@ -155,12 +163,14 @@ void* writer_thread_func(void* arg)
     QWriterRef wrtr = (QWriterRef)arg;
     uint64_t tid = local_gettid();
     printf("writer thread tid: %llu \n", tid);
-    for(long i = 1; i <= 10; i++) {
-        usleep(500000);
+    for(long i = 0; i < wrtr->count_max; i++) {
+        // usleep(5000);
         WriterArgRef writer_arg_ref = writer_arg_new(wrtr, i);
         Functor func = {.f = (void*)&writer_post_function, .arg = (void*) writer_arg_ref};
-        runloop_user_event_queue_add(wrtr->queue, func);
+        user_event_queue_add(wrtr->ue_queue, func);
+        printf("writer loop i: %ld  count_max: %ld post_count: %ld\n", i, (long)wrtr->count_max, wrtr->post_count);
     }
+    sleep(2);
     return NULL;
 }
 /**
@@ -186,23 +196,40 @@ void* writer_thread_func(void* arg)
  */
 int test_q()
 {
+    int nbr_writers = 5;
+    int nbr_readers = 1;
+    QReaderRef rdr[nbr_readers];
+    pthread_t  reader_threads[nbr_readers];
+    QWriterRef writers[nbr_writers];
+    pthread_t writer_threads[nbr_writers];
+
     RunloopRef rdr_runloop_ref = runloop_new();
-    UserEventQueueRef queue = runloop_user_event_queue_new(rdr_runloop_ref);
-    RunloopQueueWatcherRef qw = runloop_queue_watcher_new(rdr_runloop_ref, queue);
-    QReaderRef rdr = queue_reader_new(rdr_runloop_ref, queue, qw, 10);
-    QWriterRef wrtr = queue_writer_new(rdr_runloop_ref, queue, 10);
+    UserEventQueueRef queue = user_event_queue_new(rdr_runloop_ref);
+    for (int ir = 0; ir < nbr_readers; ++ir) {
+        rdr[ir] = queue_reader_new(rdr_runloop_ref, queue, 10);
+        int r_rdr = pthread_create(&(reader_threads[ir]), NULL, reader_thread_func, (void*)rdr[ir]);
+    }
+    sleep(2);
+    for (int iw=0; iw < nbr_writers; ++iw) {
+        writers[iw] = queue_writer_new(rdr_runloop_ref, queue, 6);
+        int w = pthread_create(&(writer_threads[iw]), NULL, writer_thread_func, (void*)writers[iw]);
+    }
 
-    pthread_t rdr_thread;
-    pthread_t wrtr_thread;
-
-    int r_rdr = pthread_create(&rdr_thread, NULL, reader_thread_func, (void*)rdr);
-    int r_wrtr = pthread_create(&wrtr_thread, NULL, writer_thread_func, (void*)wrtr);
-
-    pthread_join(rdr_thread, NULL);
-    pthread_join(wrtr_thread, NULL);
-    UT_TRUE((rdr->expected_count == rdr->count));
-    UT_TRUE((rdr->count == wrtr->count_max));
-    UT_TRUE((wrtr->post_count+1 == wrtr->count_max));
+    long rtotal = 0;
+    for (int ir = 0; ir < nbr_readers; ++ir) {
+        pthread_join(reader_threads[ir], NULL);
+        rtotal += rdr[ir]->count;
+    }
+    long wtotal = 0;
+    long ptotal = 0;
+    for (int iw=0; iw < nbr_writers; ++iw) {
+        pthread_join(writer_threads[iw], NULL);
+        wtotal += writers[iw]->count_max;
+        ptotal += writers[iw]->post_count;
+    }
+    printf("rtotal: %ld wtotal: %ld ptotal: %ld\n", rtotal, wtotal, ptotal);
+    UT_TRUE((wtotal == rtotal));
+    UT_TRUE((wtotal == ptotal));
     return 0;
 }
 
