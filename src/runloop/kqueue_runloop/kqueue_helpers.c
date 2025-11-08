@@ -342,9 +342,9 @@ int kqh_timer_pause(RunloopTimerRef rlevent)
 /// user events
 ///////////////////////////////////////////////////////////////////////////////
 
-int kqh_user_event_register(RunloopUserEventRef rlevent)
+int kqh_user_event_arm(RunloopUserEventRef rlevent)
 {
-    int flags = EV_ADD | EV_ENABLE | EV_RECEIPT | EV_DISPATCH;
+    int flags = EV_ADD | EV_ENABLE | EV_RECEIPT | EV_DISPATCH | EV_ONESHOT;
     struct kevent change;
     int nev;
 #ifdef RL_KQ_BATCH_CHANGES

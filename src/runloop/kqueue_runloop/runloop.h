@@ -127,18 +127,19 @@ void runloop_stream_checktag(RunloopStreamRef lrevent);
  * using the standard kqueue feature.
  */
 RunloopUserEventRef runloop_user_event_new(RunloopRef runloop);
-void runloop_user_event_init(RunloopUserEventRef athis, RunloopRef runloop);
 void runloop_user_event_free(RunloopUserEventRef athis);
 void runloop_user_event_register(RunloopUserEventRef athis);
-void runloop_user_event_change_watch(RunloopUserEventRef athis, UserEventCallback cb, void* cb_arg, uint64_t watch_what);
 void runloop_user_event_arm(RunloopUserEventRef athis, UserEventCallback cb, void* cb_arg);
 void runloop_user_event_disarm(RunloopUserEventRef athis);
 void runloop_user_event_fire(RunloopUserEventRef athis, void* data);
-void runloop_user_event_clear_one_event(RunloopUserEventRef athis);
-void runloop_user_event_clear_all_events(RunloopUserEventRef athis);
 void runloop_user_event_deregister(RunloopUserEventRef athis);
 void runloop_user_event_verify(RunloopUserEventRef r);
 RunloopRef runloop_user_event_get_runloop(RunloopUserEventRef athis);
+
+void runloop_user_event_init(RunloopUserEventRef athis, RunloopRef runloop);
+void runloop_user_event_change_watch(RunloopUserEventRef athis, UserEventCallback cb, void* cb_arg, uint64_t watch_what);
+void runloop_user_event_clear_one_event(RunloopUserEventRef athis);
+void runloop_user_event_clear_all_events(RunloopUserEventRef athis);
 int runloop_user_event_get_fd(RunloopUserEventRef this);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -148,31 +149,11 @@ UserEventQueueRef user_event_queue_new(RunloopRef runloop);
 void user_event_queue_init(RunloopRef runloop, UserEventQueueRef this);
 void user_event_queue_deinit(UserEventQueueRef this);
 void user_event_queue_free(UserEventQueueRef athis);
-void user_event_queue_register(UserEventQueueRef athis, UserEventQueueCallback cb, void* cb_arg);
-void user_event_queue_deregister(UserEventQueueRef athis);
 void user_event_queue_add(UserEventQueueRef athis, Functor item);
-Functor user_event_queue_remove(UserEventQueueRef athis);
-int   user_event_queue_readfd(UserEventQueueRef athis);
-RunloopRef user_event_queue_get_runloop(UserEventQueueRef athis);
+void user_event_queue_arm(UserEventQueueRef athis);
 void user_event_queue_verify(UserEventQueueRef ueq);
+RunloopRef user_event_queue_get_runloop(UserEventQueueRef athis);
 
-
-#if 0
-RunloopQueueWatcherRef runloop_queue_watcher_new(RunloopRef runloop, UserEventQueueRef qref);
-void runloop_queue_watcher_init(RunloopQueueWatcherRef qw, RunloopRef runloop, UserEventQueueRef qref);
-void runloop_queue_watcher_deinit(RunloopQueueWatcherRef qw);
-void runloop_queue_watcher_free(RunloopQueueWatcherRef this);
-
-typedef void(*QueueWatcherReadCallbackFunction)(void* context_ptr, Functor item, int status);
-void runloop_queue_watcher_async_read(RunloopQueueWatcherRef queue_watcher_ref, QueueWatcherReadCallbackFunction callback, void* context_ptr);
-
-void runloop_queue_watcher_register(RunloopQueueWatcherRef athis, PostableFunction postable_cb, void* postable_arg);
-void runloop_queue_watcher_change_watch(RunloopQueueWatcherRef athis, PostableFunction postable_cb, void* arg, uint64_t watch_what);
-void runloop_queue_watcher_deregister(RunloopQueueWatcherRef athis);
-void runloop_queue_watcher_verify(RunloopQueueWatcherRef r);
-RunloopRef runloop_queue_watcher_get_reactor(RunloopQueueWatcherRef athis);
-int runloop_queue_watcher_get_fd(RunloopQueueWatcherRef this);
-#endif
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Base event
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////

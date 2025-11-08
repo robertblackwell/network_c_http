@@ -129,7 +129,7 @@ struct InterthreadQueue_s {
     RunloopQueueWatcherRef qwatcher_ref;
     RBL_DECLARE_END_TAG;
 };
-
+typedef void(*QueueCallback)(void* arg);
 struct UserEventQueue_s {
     /** This struct is not a sub struct of Watcher hence it must declare its own openning tag*/
     RBL_DECLARE_TAG;
@@ -138,6 +138,9 @@ struct UserEventQueue_s {
     RunloopRef          runloop;
     RunloopUserEventRef user_event;
     int                 user_event_dup_fd;
+    QueueCallback       trigger_cb;
+    void*               trigger_cb_arg;
+
 #ifdef C_HTTP_EFD_QUEUE
 #else
     int                 pipefds[2];

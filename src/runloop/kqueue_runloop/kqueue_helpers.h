@@ -23,10 +23,26 @@ int kqh_timer_register(RunloopTimerRef rlevent, bool one_shot, uint64_t milli_se
 int kqh_timer_cancel(RunloopTimerRef rlevent);
 int kqh_timer_pause(RunloopTimerRef rlevent);
 
-int kqh_user_event_register(RunloopUserEventRef rlevent);
-int kqh_user_event_trigger(RunloopUserEventRef rlevent, void* data);
-int kqh_user_event_cancel(RunloopUserEventRef rlevent);
-int kqh_user_event_pause (RunloopUserEventRef rlevent);
+/**
+ * Add an ident+filter of type EVFILT_USER to the runloop's kqueue
+ * and set the filter to watch for trigger event with EV_DISPATCH set
+ * so that the ident+filter must be re-armed after each event.
+ *
+ * In the case of kqueue this function can be called multiple times without problem.
+ */
+int kqh_user_event_arm(RunloopUserEventRef user_event);
+/**
+ * Trigger the user event (EVFILT_USER) and pass the given data value along with the event
+ */
+int kqh_user_event_trigger(RunloopUserEventRef user_event, void* data);
+/**
+ * Delete the ident+filter from the kqueue
+ */
+int kqh_user_event_cancel(RunloopUserEventRef user_event);
+/**
+ * Disable the ident+filter so that events are ignored by the kqueue
+ */
+int kqh_user_event_pause (RunloopUserEventRef user_event);
 
 
 int kqh_listener_register(RunloopListenerRef rlevent);

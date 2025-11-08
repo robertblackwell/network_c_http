@@ -38,9 +38,9 @@
 
 
 #ifdef RBL_TAG_CHECK_ON
-#define RBL_TAG_LENGTH 16
+#define RBL_TAG_LENGTH 15
 
-#define RBL_DECLARE_TAG_FIELD(field) char field[RBL_TAG_LENGTH]
+#define RBL_DECLARE_TAG_FIELD(field) char field[RBL_TAG_LENGTH];
 #define RBL_DECLARE_TAG char tag[RBL_TAG_LENGTH]
 #define RBL_DECLARE_END_TAG  RBL_DECLARE_TAG_FIELD(end_tag)
 

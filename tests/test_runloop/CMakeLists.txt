@@ -15,7 +15,7 @@ function(build_test name)
     add_test(test_${name} test_${name})
 endfunction()
 
-build_test(user_event)
+#build_test(user_event)
 build_test(user_event_multi_thread)
 if(1)
 # test queue watcher

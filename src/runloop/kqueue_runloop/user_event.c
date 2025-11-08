@@ -10,7 +10,7 @@
 #define KQ_USER_EVENT_DUP_FD
 #undef KQ_USER_EVENT_TWO_PIPE_TRICK
 
-static void handler(RunloopEventRef watcher, uint16_t filter, uint16_t flags, void* data)
+static void handler(RunloopUserEventRef watcher, uint16_t filter, uint16_t flags, void* data)
 {
     RunloopUserEventRef fdev = (RunloopUserEventRef)watcher;
     USER_EVENT_CHECK_TAG(fdev)
@@ -28,100 +28,59 @@ static void handler(RunloopEventRef watcher, uint16_t filter, uint16_t flags, vo
     fdev->uevent.uevent_cb(watcher->runloop, watcher->uevent.uevent_cb_arg);
 #endif
 }
-static void anonymous_free(RunloopEventRef p)
+void runloop_user_event_init(RunloopUserEventRef user_event, RunloopRef runloop)
 {
-    RunloopEventRef fdevp = (RunloopEventRef)p;
-    USER_EVENT_CHECK_TAG(fdevp)
-    USER_EVENT_CHECK_END_TAG(fdevp)
-    runloop_user_event_free(fdevp);
-}
-void runloop_user_event_init(RunloopEventRef this, RunloopRef runloop)
-{
-    RBL_ASSERT((this!=NULL), "this is NULL");
-    this->type = RUNLOOP_WATCHER_UEVENT;
-    USER_EVENT_SET_TAG(this);
-    USER_EVENT_SET_END_TAG(this);
-    USER_EVENT_CHECK_TAG(this)
-    USER_EVENT_CHECK_END_TAG(this)
+    RBL_ASSERT((user_event!=NULL), "user_event is NULL");
+    user_event->type = RUNLOOP_WATCHER_UEVENT;
+    USER_EVENT_SET_TAG(user_event);
+    USER_EVENT_SET_END_TAG(user_event);
+    USER_EVENT_CHECK_TAG(user_event)
+    USER_EVENT_CHECK_END_TAG(user_event)
 #ifdef KQ_USER_EVENT_TWO_PIPE_TRICK
     RBL_LOG_FMT("two pipe trick enabled")
     int pipefds[2];
     pipe(pipefds);
-    this->uevent.read_fd = pipefds[0];
-    this->uevent.write_fd = pipefds[1];
+    user_event->uevent.read_fd = pipefds[0];
+    user_event->uevent.write_fd = pipefds[1];
 #else
-    // register_user_event(runloop, this);
+    // register_user_event(runloop, user_event);
     #ifdef KQ_USER_EVENT_DUP_FD
         RBL_LOG_FMT("two pipe trick disabled kqueue - dup fd")
-        this->uevent.dup_fd = dup(runloop->kqueue_fd);
+        user_event->uevent.dup_fd = dup(runloop->kqueue_fd);
     #else
     RBL_LOG_FMT("two pipe trick disabled dup_fd disabled")
-        this->fd = -1;
+        user_event->fd = -1;
     #endif
 #endif
-    this->runloop = runloop;
-    this->free = &anonymous_free;
-    this->handler = &handler;
+    user_event->runloop = runloop;
+    user_event->handler = &handler;
+    // kqh_user_event_pause(user_event);
 }
-RunloopEventRef runloop_user_event_new(RunloopRef runloop)
+RunloopUserEventRef runloop_user_event_new(RunloopRef runloop)
 {
-    RunloopEventRef this = event_table_get_entry(runloop->event_table);
-    runloop_user_event_init(this, runloop);
-    return this;
+    RunloopUserEventRef user_event = event_table_get_entry(runloop->event_table);
+    runloop_user_event_init(user_event, runloop);
+    return user_event;
 }
-void runloop_user_event_free(RunloopEventRef athis)
+void runloop_user_event_free(RunloopUserEventRef user_event)
 {
-    USER_EVENT_CHECK_TAG(athis);
-    USER_EVENT_CHECK_END_TAG(athis)
-    event_table_release_entry(athis->runloop->event_table, athis);
-    // close(athis->uevent.write_fd);
-    // free((void*)athis);
+    USER_EVENT_CHECK_TAG(user_event);
+    USER_EVENT_CHECK_END_TAG(user_event)
+    kqh_user_event_cancel(user_event);
+    event_table_release_entry(user_event->runloop->event_table, user_event);
 }
-void runloop_user_event_register(RunloopEventRef rlevent)
+void runloop_user_event_register(RunloopUserEventRef user_event)
 {
-    USER_EVENT_CHECK_TAG(rlevent)
-    USER_EVENT_CHECK_END_TAG(rlevent);
-    kqh_user_event_register(rlevent);
-    #if 0
-    USER_EVENT_SET_TAG(athis);
-    USER_EVENT_CHECK_TAG(athis)
-
-    uint32_t interest = 0L;
-    athis->uevent.uevent_postable = NULL;
-    athis->uevent.uevent_postable_arg = NULL;
-    /**
-     * Make sure this call enabled level triggering of events on this fd
-     */
-    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
-    assert(res ==0);
-    #endif
+    USER_EVENT_CHECK_TAG(user_event);
+    USER_EVENT_CHECK_END_TAG(user_event)
 }
-void runloop_user_event_change_watch(RunloopEventRef athis, UserEventCallback cb, void* cb_arg, uint64_t watch_what)
+void runloop_user_event_deregister(RunloopUserEventRef user_event)
 {
-    #if 0
-    USER_EVENT_CHECK_TAG(rlevent)
-    USER_EVENT_CHECK_END_TAG(rlevent);
-    uint32_t interest = watch_what;
-    if( postable != NULL) {
-        athis->uevent.uevent_postable = postable;
-    }
-    if (arg != NULL) {
-        athis->uevent.uevent_postable_arg = arg;
-    }
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
-    assert(res == 0);
-    #endif
+    USER_EVENT_CHECK_TAG(user_event);
+    USER_EVENT_CHECK_END_TAG(user_event)
+    kqh_user_event_cancel(user_event);
 }
-void runloop_user_event_deregister(RunloopEventRef athis)
-{
-    #if 0
-    USER_EVENT_CHECK_TAG(rlevent)
-    USER_EVENT_CHECK_END_TAG(rlevent);
-    int res = runloop_deregister(athis->runloop, athis->fd);
-    assert(res == 0);
-    #endif
-}
-void runloop_user_event_arm(RunloopEventRef rlevent, UserEventCallback cb, void* cb_arg)
+void runloop_user_event_arm(RunloopUserEventRef rlevent, UserEventCallback cb, void* cb_arg)
 {
     USER_EVENT_CHECK_TAG(rlevent)
     USER_EVENT_CHECK_END_TAG(rlevent);
@@ -131,56 +90,34 @@ void runloop_user_event_arm(RunloopEventRef rlevent, UserEventCallback cb, void*
     if (cb_arg != NULL) {
         rlevent->uevent.uevent_cb_arg = cb_arg;
     }
-    kqh_user_event_register(rlevent);
+    kqh_user_event_arm(rlevent);
 }
-void runloop_user_event_disarm(RunloopEventRef rlevent)
+void runloop_user_event_disarm(RunloopUserEventRef rlevent)
 {
     USER_EVENT_CHECK_TAG(rlevent)
     USER_EVENT_CHECK_END_TAG(rlevent);
     kqh_user_event_pause(rlevent);
 }
-void runloop_user_event_fire(RunloopEventRef athis, void* data)
+void runloop_user_event_fire(RunloopUserEventRef user_event, void* data)
 {
-    USER_EVENT_CHECK_TAG(athis)
-    USER_EVENT_CHECK_END_TAG(athis);
+    USER_EVENT_CHECK_TAG(user_event)
+    USER_EVENT_CHECK_END_TAG(user_event);
 #ifdef KQ_USER_EVENT_TWO_PIPE_TRICK
     uint64_t buf = 1;
-    write(athis->uevent.write_fd, &buf, sizeof(buf));
+    write(user_event->uevent.write_fd, &buf, sizeof(buf));
 #else
-    kqh_user_event_trigger(athis, (void*) data);
+    kqh_user_event_trigger(user_event, (void*) data);
 #endif
 }
-void runloop_user_event_clear_one_event(RunloopEventRef athis)
-{
-    USER_EVENT_CHECK_TAG(athis)
-    USER_EVENT_CHECK_END_TAG(athis);
-    uint64_t buf;
-    assert(0);
-}
-void runloop_user_event_clear_all_events(RunloopEventRef athis)
-{
-    USER_EVENT_CHECK_TAG(athis)
-    USER_EVENT_CHECK_END_TAG(athis);
-    uint64_t buf;
-    assert(0);
-    assert(errno == EAGAIN);
-}
 
-RunloopRef runloop_user_event_get_runloop(RunloopEventRef athis)
+RunloopRef runloop_user_event_get_runloop(RunloopUserEventRef user_event)
 {
-    USER_EVENT_CHECK_TAG(athis)
-    USER_EVENT_CHECK_END_TAG(athis);
-    return athis->runloop;
+    USER_EVENT_CHECK_TAG(user_event)
+    USER_EVENT_CHECK_END_TAG(user_event);
+    return user_event->runloop;
 }
-int runloop_user_event_get_fd(RunloopEventRef athis)
+void runloop_user_event_verify(RunloopUserEventRef user_event)
 {
-    USER_EVENT_CHECK_TAG(athis)
-    USER_EVENT_CHECK_END_TAG(athis);
-    return -1;//athis->uevent.read_fd;
-}
-
-void runloop_user_event_verify(RunloopEventRef athis)
-{
-    USER_EVENT_CHECK_TAG(athis)
-    USER_EVENT_CHECK_END_TAG(athis);
+    USER_EVENT_CHECK_TAG(user_event)
+    USER_EVENT_CHECK_END_TAG(user_event);
 }
