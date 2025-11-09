@@ -33,7 +33,7 @@ typedef enum WatcherType {
     RUNLOOP_WATCHER_QUEUE = 13,
     RUNLOOP_WATCHER_UEVENT = 14,
     RUNLOOP_WATCHER_LISTENER = 15,
-    RUNLOOP_WATCHER_SIGNAL = 15,
+    RUNLOOP_WATCHER_SIGNAL = 16,
 } WatcherType;
 
 struct RunloopWatcherBase_s {
@@ -46,6 +46,9 @@ struct RunloopWatcherBase_s {
     void(*handler)(RunloopWatcherBaseRef watcher, uint16_t filter, uint16_t flags, void* data);
 
 };
+//
+// Timer
+//
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
 struct RunloopTimer_s {
@@ -61,6 +64,9 @@ struct RunloopTimer_s {
 };
 #pragma clang diagnostic pop
 
+/**
+ * User event
+*/
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
 typedef uint64_t WEventFdMask;
@@ -75,6 +81,7 @@ struct RunloopUserEvent_s {
     RBL_DECLARE_END_TAG;
 };
 #pragma clang diagnostic pop
+
 /**
  * RunloopStream
  */
@@ -95,7 +102,7 @@ struct RunloopStream_s {
 #pragma clang diagnostic pop
 
 /**
- * WListener
+ * Listener
  */
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
@@ -110,6 +117,9 @@ struct RunloopListener_s {
 };
 #pragma clang diagnostic pop
 
+/**
+ * Signal event - catch signals via event queue
+ */
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
 struct RunloopSignal_s{

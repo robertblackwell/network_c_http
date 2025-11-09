@@ -32,19 +32,41 @@ typedef enum WatcherType {
     RUNLOOP_WATCHER_QUEUE = 13,
     RUNLOOP_WATCHER_FDEVENT = 14,
     RUNLOOP_WATCHER_LISTENER = 15,
+    RUNLOOP_WATCHER_SIGNAL = 16,
 } WatcherType;
 
-
+/**
+ * Base structure for all event watchers
+ */
 struct RunloopWatcherBase_s {
     RBL_DECLARE_TAG;
     WatcherType           type;
     RunloopRef            runloop;
     void*                 context;
     int                   fd;
-    void(*free)(RunloopWatcherBaseRef);
+    // void(*free)(RunloopWatcherBaseRef);
     void(*handler)(RunloopWatcherBaseRef watcher_ref, uint64_t event);
 };
 /**
+ * RunloopTimer
+ */
+typedef uint64_t RunloopTimerEvent;
+
+struct RunloopTimer_s {
+    /** The start tag is declared in the base struct
+    RBL_DECLARE_TAG; */
+    struct RunloopWatcherBase_s;
+    time_t                  expiry_time;
+    uint64_t                interval;
+    bool                    repeating;
+    PostableFunction        timer_postable;
+    void*                   timer_postable_arg;
+    int                     state;
+    RBL_DECLARE_END_TAG;
+};
+/**
+ * User Event
+ * 
  * eventfd is the way epoll provides custom events. Create a special file descriptor using eventfd() call
  * and latter fire it by writing data to that fd. The event observer will reaceive a readready event from epoll.
  * 
@@ -78,7 +100,7 @@ struct RunloopStream_s {
 };
 
 /**
- * WListener
+ * Listener
  */
 typedef struct RunloopListener_s {
     /** The start tag is declared in the base struct
@@ -105,7 +127,7 @@ typedef struct UserEventQueue_s {
     RBL_DECLARE_END_TAG;
 } UserEventQueue;
 
-
+#if 0
 /**
  * RunloopQueueWatcher
  */
@@ -144,23 +166,7 @@ struct InterthreadQueue_s {
     RBL_DECLARE_END_TAG;
 } ;//InterthreadQueue_s, InterthreadQueue, *InterthreadQueueRef;
 
-/**
- * RunloopTimer
- */
-typedef uint64_t RunloopTimerEvent;
-
-struct RunloopTimer_s {
-    /** The start tag is declared in the base struct
-    RBL_DECLARE_TAG; */
-    struct RunloopWatcherBase_s;
-    time_t                  expiry_time;
-    uint64_t                interval;
-    bool                    repeating;
-    PostableFunction        timer_postable;
-    void*                   timer_postable_arg;
-    int                     state;
-    RBL_DECLARE_END_TAG;
-};
+#endif
 #if defined(ASIO_SUPPORT)
 struct AsioStream_s {
     /** This struct is diffenrent to most watchers as it is no a sub class of Watcher
