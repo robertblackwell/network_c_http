@@ -39,17 +39,17 @@
  *
  */
 
-
-uint64_t local_gettid() {
+// this type def should be such that the result value can be printf'd with %ul specification
+typedef unsigned long LocalTid;
+LocalTid local_gettid() {
     uint64_t tid;
     #ifdef LINUX_FLAG
         tid = (uint64_t)gettid();
     #elif defined(APPLE_FLAG)
-        uint64_t tid;
         pthread_threadid_np(NULL, &tid);
-        return tid;
+        return (LocalTid)tid;
     #endif
-    return tid;
+    return (LocalTid)tid;
 }
 
 #define QRCTX_Tag "QRCTX"
@@ -59,7 +59,7 @@ typedef struct QReader_s {
     UserEventQueueRef ue_queue;
     int count;
     int expected_count;
-    uint64_t tid;
+    LocalTid tid;
     RBL_DECLARE_END_TAG;
 } QReader, *QReaderRef;
 
@@ -87,7 +87,7 @@ typedef struct QWriter_s {
     RBL_DECLARE_TAG;
     RunloopRef      rdr_runloop_ref;
     UserEventQueueRef ue_queue;
-    uint64_t rdr_thread_id;
+    LocalTid rdr_thread_id;
     int count_max;
     long post_count;
     RBL_DECLARE_END_TAG;
@@ -99,7 +99,7 @@ typedef struct WriterArg {
     QWriterRef qwriter_ref;
 } WriterArg, *WriterArgRef;
 
-QWriterRef queue_writer_new(RunloopRef rl,  UserEventQueueRef ue_queue, uint64_t rdr_thread_id, int max)
+QWriterRef queue_writer_new(RunloopRef rl,  UserEventQueueRef ue_queue, LocalTid rdr_thread_id, int max)
 {
     QWriterRef this = malloc(sizeof(QWriter));
     RBL_SET_TAG(QWCTX_Tag, this);
@@ -129,7 +129,7 @@ void* reader_thread_func(void* arg)
 {
     QReaderRef rctx = (QReaderRef)arg;
     RunloopRef runloop_ref = rctx->rdr_runloop_ref;
-    uint64_t tid = local_gettid();
+    LocalTid tid = local_gettid();
     rctx->tid = tid;
     UserEventQueueRef ue_queue = rctx->ue_queue;
     user_event_queue_arm(ue_queue);
@@ -148,11 +148,11 @@ void writer_post_function(RunloopRef rl, void* arg)
     long pcount = qwrtr_ref->post_count;
     long count = wref->count;
     pthread_t mytid = pthread_self();
-    uint64_t tid = local_gettid();
+    LocalTid tid = local_gettid();
     uint64_t tid2 = wref->qwriter_ref->rdr_thread_id;
     assert(tid == tid2); // this tests that the post function is running on the thread with the runloop
     printf("writer post function thread: %lu rdr_thread_id: %lu rl: %p arg: %p arg->count: %ld post_count: %ld\n",
-           tid, wref->qwriter_ref->rdr_thread_id, rl, arg, count, pcount);
+           (unsigned long)tid, (unsigned long)wref->qwriter_ref->rdr_thread_id, rl, arg, count, pcount);
 }
 /**
  *  arg is a QWriterRef
@@ -160,8 +160,8 @@ void writer_post_function(RunloopRef rl, void* arg)
 void* writer_thread_func(void* arg)
 {
     QWriterRef wrtr = (QWriterRef)arg;
-    uint64_t tid = local_gettid();
-    printf("writer thread tid: %lu \n", tid);
+    LocalTid tid = local_gettid();
+    printf("writer thread tid: %lu \n", (unsigned long)tid);
     for(long i = 0; i < wrtr->count_max; i++) {
         // usleep(5000);
         WriterArgRef writer_arg_ref = writer_arg_new(wrtr, i);
@@ -174,8 +174,8 @@ void* writer_thread_func(void* arg)
 }
 int test_q()
 {
-    const int nbr_writers = 5;
-    const int nbr_readers = 1; // dont change this value
+    int nbr_writers = 5;
+    int nbr_readers = 1; // dont change this value
     QReaderRef rdr[nbr_readers];
     pthread_t  reader_threads[nbr_readers];
     QWriterRef writers[nbr_writers];
@@ -189,7 +189,7 @@ int test_q()
     }
 
     sleep(2);
-    uint64_t reader_tid = rdr[0]->tid;
+    LocalTid reader_tid = rdr[0]->tid;
     for (int iw=0; iw < nbr_writers; ++iw) {
         writers[iw] = queue_writer_new(rdr_runloop_ref, queue, reader_tid, 6);
         int w = pthread_create(&(writer_threads[iw]), NULL, writer_thread_func, (void*)writers[iw]);

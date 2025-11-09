@@ -44,7 +44,6 @@ struct RunloopWatcherBase_s {
     // void(*free)(RunloopEventRef);
     // void(*handler)(RunloopWatcherBaseRef rlwatcher, uint64_t event);
     void(*handler)(RunloopWatcherBaseRef watcher, uint16_t filter, uint16_t flags, void* data);
-
 };
 //
 // Timer
