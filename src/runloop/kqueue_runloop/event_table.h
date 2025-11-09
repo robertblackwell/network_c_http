@@ -47,9 +47,8 @@ struct MemorySlab_s {
             RunloopEventRef     timer;
             RunloopEventRef     listener;
             RunloopStream       stream;
-            RunloopEvent        user_event;
-            RunloopEventRef     signal;
-            RunloopEvent        runloop_event;
+            RunloopUserEvent    user_event;
+            RunloopSignal       signal;
         };
         uint16_t    my_index; 
     } m;

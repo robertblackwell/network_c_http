@@ -25,29 +25,6 @@ static void drain_callback(void* arg)
 {
     printf("drain callback\n");
 }
-static void interthread_queue_handler(RunloopQueueWatcherRef watcher, uint64_t event)
-{
-    #if 0
-    printf("interthread_queue_handler\n");
-    return;
-    RunloopRef rx = runloop_queue_watcher_get_reactor(watcher);
-    EventfdQueueRef evqref = watcher->queue;
-    Functor func = runloop_user_event_queue_remove(evqref);
-    void* pf = func.f;
-    watcher->queue_postable_arg = func.arg;
-    void* arg = (void*) watcher;
-    long d = (long) func.arg;
-    printf("reactor::interthread_queue_handler f: %p d: %ld \n", pf, d);
-    runloop_post(rx, func.f, arg);
-}
-static int *int_in_heap(int key) {
-    int *result;
-    if ((result = malloc(sizeof(*result))) == NULL)
-        abort();
-    *result = key;
-    return result;
-    #endif
-}
 struct kevent* runloop_get_change_table(RunloopRef athis);
 int runloop_get_change_table_size(RunloopRef athis);
 struct kevent* runloop_change_at(RunloopRef athis, int index);
@@ -280,14 +257,14 @@ int runloop_run(RunloopRef athis, time_t timeout_ms) {
                         RUNLOOP_CHECK_END_TAG(athis)
                         struct kevent ke = athis->events[i];
                         void* pp = (void*)ke.ident;
-                        RunloopEventRef rlevent = events[i].udata;
+                        RunloopWatcherBaseRef rlwatcher = events[i].udata;
 
                         int filters = athis->events[i].filter;
                         void* data = (void*)events[i].data;
                         uint32_t flags = athis->events[i].flags;
                         int eof = flags & EV_EOF;
                         RBL_LOG_FMT("runloop_run loop ident: %lu udata: %p events: %x flags: %x eof:%d", ke.ident ,rlevent , filters, flags, eof);
-                        rlevent->handler(rlevent, filters, flags, data);
+                        rlwatcher->handler(rlwatcher, filters, flags, data);
                         RUNLOOP_CHECK_TAG(athis)
                     }
                 }

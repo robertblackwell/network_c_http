@@ -10,22 +10,22 @@
 #define KQ_USER_EVENT_DUP_FD
 #undef KQ_USER_EVENT_TWO_PIPE_TRICK
 
-static void handler(RunloopUserEventRef watcher, uint16_t filter, uint16_t flags, void* data)
+static void handler(RunloopWatcherBaseRef watcher, uint16_t filter, uint16_t flags, void* data)
 {
     RunloopUserEventRef fdev = (RunloopUserEventRef)watcher;
     USER_EVENT_CHECK_TAG(fdev)
     USER_EVENT_CHECK_END_TAG(fdev)
 #ifdef KQ_USER_EVENT_TWO_PIPE_TRICK
     uint64_t buf;
-    long nread = read(fdev->uevent.read_fd, &buf, sizeof(buf));
+    long nread = read(fdev->read_fd, &buf, sizeof(buf));
     if (nread == sizeof(buf)) {
-        fdev->uevent.uevent_cb(fdev->runloop, fdev->uevent.uevent_cb_arg);
+        fdev->uevent_cb(fdev->runloop, fdev->uevent_cb_arg);
     }
 #else
     printf("user event handler entered filter %x flags: %x data: %p\n", filter, flags, data);
-    fdev->uevent.uevent_data = data;
+    fdev->uevent_data = data;
     uint64_t buf;
-    fdev->uevent.uevent_cb(watcher->runloop, watcher->uevent.uevent_cb_arg);
+    fdev->uevent_cb(fdev->runloop, fdev->uevent_cb_arg);
 #endif
 }
 void runloop_user_event_init(RunloopUserEventRef user_event, RunloopRef runloop)
@@ -40,13 +40,13 @@ void runloop_user_event_init(RunloopUserEventRef user_event, RunloopRef runloop)
     RBL_LOG_FMT("two pipe trick enabled")
     int pipefds[2];
     pipe(pipefds);
-    user_event->uevent.read_fd = pipefds[0];
-    user_event->uevent.write_fd = pipefds[1];
+    user_event->read_fd = pipefds[0];
+    user_event->write_fd = pipefds[1];
 #else
     // register_user_event(runloop, user_event);
     #ifdef KQ_USER_EVENT_DUP_FD
         RBL_LOG_FMT("two pipe trick disabled kqueue - dup fd")
-        user_event->uevent.dup_fd = dup(runloop->kqueue_fd);
+        user_event->dup_fd = dup(runloop->kqueue_fd);
     #else
     RBL_LOG_FMT("two pipe trick disabled dup_fd disabled")
         user_event->fd = -1;
@@ -85,10 +85,10 @@ void runloop_user_event_arm(RunloopUserEventRef rlevent, UserEventCallback cb, v
     USER_EVENT_CHECK_TAG(rlevent)
     USER_EVENT_CHECK_END_TAG(rlevent);
     if( cb != NULL) {
-        rlevent->uevent.uevent_cb = cb;
+        rlevent->uevent_cb = cb;
     }
     if (cb_arg != NULL) {
-        rlevent->uevent.uevent_cb_arg = cb_arg;
+        rlevent->uevent_cb_arg = cb_arg;
     }
     kqh_user_event_arm(rlevent);
 }
@@ -104,7 +104,7 @@ void runloop_user_event_fire(RunloopUserEventRef user_event, void* data)
     USER_EVENT_CHECK_END_TAG(user_event);
 #ifdef KQ_USER_EVENT_TWO_PIPE_TRICK
     uint64_t buf = 1;
-    write(user_event->uevent.write_fd, &buf, sizeof(buf));
+    write(user_event->write_fd, &buf, sizeof(buf));
 #else
     kqh_user_event_trigger(user_event, (void*) data);
 #endif

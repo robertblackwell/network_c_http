@@ -17,216 +17,133 @@
  * @param fd        int
  * @param event     uint64_t
  */
-static void handler(RunloopEventRef lrevent, uint16_t event, uint16_t flags, void* data)
+static void handler(RunloopWatcherBaseRef lrwatcher, uint16_t event, uint16_t flags, void* data)
 {
-    RunloopEventRef listener_ref = (RunloopEventRef)lrevent;
+    RunloopListenerRef listener_ref = (RunloopListenerRef)lrwatcher;
     LISTNER_CHECK_TAG(listener_ref)
     LISTNER_CHECK_END_TAG(listener_ref)
     RBL_LOG_FMT("listener handler")
-    if(listener_ref->listener.listen_postable) {
+    if(listener_ref->listen_postable) {
         /**
          * This should be posted not called
          */
-        listener_ref->listener.listen_postable(listener_ref->runloop,  listener_ref->listener.listen_postable_arg);
+        listener_ref->listen_postable(listener_ref->runloop,  listener_ref->listen_postable_arg);
     }
 }
 static void anonymous_free(RunloopEventRef p)
 {
     LISTNER_CHECK_TAG((RunloopListenerRef)p)
     LISTNER_CHECK_END_TAG((RunloopListenerRef)p)
-    runloop_listener_free((RunloopEventRef) p);
+    runloop_listener_free((RunloopListenerRef) p);
 }
 
-void runloop_listener_init(RunloopEventRef lrevent, RunloopRef runloop, int fd)
+void runloop_listener_init(RunloopListenerRef listener, RunloopRef runloop, int fd)
 {
-    LISTNER_SET_TAG(lrevent);
-    LISTNER_SET_END_TAG(lrevent)
-    lrevent->type = RUNLOOP_WATCHER_LISTENER;
-    lrevent->runloop = runloop;
-    lrevent->free = &anonymous_free;
-    lrevent->handler = &handler;
-    lrevent->context = lrevent;
-    lrevent->listener.fd = fd;
-    lrevent->listener.listen_postable_arg = NULL;
-    lrevent->listener.listen_postable = NULL;
+    LISTNER_SET_TAG(listener);
+    LISTNER_SET_END_TAG(listener);
+    listener->type = RUNLOOP_WATCHER_LISTENER;
+    listener->runloop = runloop;
+    listener->handler = &handler;
+    listener->context = listener;
+    listener->fd = fd;
+    listener->listen_postable_arg = NULL;
+    listener->listen_postable = NULL;
 }
-void runloop_listener_deinit(RunloopEventRef lrevent)
+void runloop_listener_deinit(RunloopListenerRef listener)
 {
-    LISTNER_CHECK_TAG(lrevent)
-    LISTNER_CHECK_END_TAG(lrevent)
+    LISTNER_CHECK_TAG(listener)
+    LISTNER_CHECK_END_TAG(listener)
     // does not own any dynamic objects
 }
-RunloopEventRef runloop_listener_new(RunloopRef runloop, int fd)
+RunloopListenerRef runloop_listener_new(RunloopRef runloop, int fd)
 {
-    RunloopEventRef this = event_table_get_entry(runloop->event_table);
-    int x = event_table_number_in_use(runloop->event_table);
-    runloop_listener_init(this, runloop, fd);
-    return this;
+    RunloopListenerRef listener = event_table_get_entry(runloop->event_table);
+    size_t x = event_table_number_in_use(runloop->event_table);
+    runloop_listener_init(listener, runloop, fd);
+    return listener;
 }
-void runloop_listener_free(RunloopEventRef rlevent)
+void runloop_listener_free(RunloopListenerRef listener)
 {
-    LISTNER_CHECK_TAG(rlevent)
-    LISTNER_CHECK_END_TAG(rlevent)
-    runloop_listener_verify(rlevent);
-    close(rlevent->listener.fd);
-    event_table_release_entry(rlevent->runloop->event_table, rlevent);
+    LISTNER_CHECK_TAG(listener)
+    LISTNER_CHECK_END_TAG(listener)
+    runloop_listener_verify(listener);
+    close(listener->fd);
+    event_table_release_entry(listener->runloop->event_table, listener);
 }
-void runloop_listener_register(RunloopEventRef lrevent, PostableFunction postable, void* postable_arg)
+void runloop_listener_register(RunloopListenerRef listener, PostableFunction postable, void* postable_arg)
 {
-    LISTNER_CHECK_TAG(lrevent)
-    LISTNER_CHECK_END_TAG(lrevent)
-    runloop_listener_verify(lrevent);
-    lrevent->handler = &handler;
-    lrevent->context = lrevent;
+    LISTNER_CHECK_TAG(listener)
+    LISTNER_CHECK_END_TAG(listener)
+    runloop_listener_verify(listener);
+    listener->handler = &handler;
+    listener->context = listener;
     if( postable != NULL) {
-        lrevent->listener.listen_postable = postable;
+        listener->listen_postable = postable;
     }
     if (postable_arg != NULL) {
-        lrevent->listener.listen_postable_arg = postable_arg;
+        listener->listen_postable_arg = postable_arg;
     }
-    int res = kqh_listener_register(lrevent);
+    int res = kqh_listener_register(listener);
     if(res != 0) {
         printf("register status : %d errno: %d \n", res, errno);
     }
     assert(res == 0);
 }
 
-void runloop_listener_deregister(RunloopEventRef lrevent)
+void runloop_listener_deregister(RunloopListenerRef listener)
 {
-    LISTNER_CHECK_TAG(lrevent)
-    LISTNER_CHECK_END_TAG(lrevent)
-    kqh_listener_cancel(lrevent);
+    LISTNER_CHECK_TAG(listener)
+    LISTNER_CHECK_END_TAG(listener)
+    kqh_listener_cancel(listener);
 }
-void runloop_listener_arm(RunloopEventRef lrevent, PostableFunction postable, void* postable_arg)
+void runloop_listener_arm(RunloopListenerRef listener, PostableFunction postable, void* postable_arg)
 {
-    LISTNER_CHECK_TAG(lrevent)
-    LISTNER_CHECK_END_TAG(lrevent)
+    LISTNER_CHECK_TAG(listener)
+    LISTNER_CHECK_END_TAG(listener)
     if(postable != NULL) {
-        lrevent->listener.listen_postable = postable;
+        listener->listen_postable = postable;
     }
     if (postable_arg != NULL) {
-        lrevent->listener.listen_postable_arg = postable_arg;
+        listener->listen_postable_arg = postable_arg;
     }
-    int res = kqh_listener_register(lrevent);
+    int res = kqh_listener_register(listener);
     if(res != 0) {
         printf("arm status : %d errno: %d \n", res, errno);
     }
     assert(res == 0);
 }
-void runloop_listener_rearm(RunloopEventRef lrevent)
+void runloop_listener_rearm(RunloopListenerRef listener)
 {
-    LISTNER_CHECK_TAG(lrevent)
-    LISTNER_CHECK_END_TAG(lrevent)
-    int res = kqh_listener_register(lrevent);
+    LISTNER_CHECK_TAG(listener)
+    LISTNER_CHECK_END_TAG(listener)
+    int res = kqh_listener_register(listener);
     if(res != 0) {
         printf("arm status : %d errno: %d \n", res, errno);
     }
     assert(res == 0);
 }
-void runloop_listener_disarm(RunloopEventRef athis)
+void runloop_listener_disarm(RunloopListenerRef listener)
 {
-    LISTNER_CHECK_TAG(athis)
-    LISTNER_CHECK_END_TAG(athis)
-    int res = kqh_listener_pause(athis);
+    LISTNER_CHECK_TAG(listener)
+    LISTNER_CHECK_END_TAG(listener)
+    int res = kqh_listener_pause(listener);
     assert(res == 0);
 }
-RunloopRef runloop_listener_get_runloop(RunloopEventRef athis)
+RunloopRef runloop_listener_get_runloop(RunloopListenerRef listener)
 {
-    LISTNER_CHECK_TAG(athis)
-    LISTNER_CHECK_END_TAG(athis)
-    return athis->runloop;
+    LISTNER_CHECK_TAG(listener)
+    LISTNER_CHECK_END_TAG(listener)
+    return listener->runloop;
 }
-int runloop_listener_get_fd(RunloopEventRef athis)
+int runloop_listener_get_fd(RunloopListenerRef listener)
 {
-    LISTNER_CHECK_TAG(athis)
-    LISTNER_CHECK_END_TAG(athis)
-    return athis->listener.fd;
-}
-
-void runloop_listener_verify(RunloopEventRef athis)
-{
-    LISTNER_CHECK_TAG(athis)
-    LISTNER_CHECK_END_TAG(athis)
-}
-#if 0
-/****************************************************************************************************************
- * start of asio_listener code
- *****************************************************************************************************************/
-static void on_listening_postable(RunloopRef rl, void* asio_listener_arg);
-
-typedef struct AsioListener_s {
-    RunloopEventRef     rl_listener_ref;
-    AcceptCallback      on_accept_callback;
-    void*               on_accept_callback_arg;
-} AsioListener, *AsioListenerRef;
-
-AsioListenerRef asio_listener_new(RunloopRef rl, int socket_fd)
-{
-    AsioListenerRef this = malloc(sizeof(AsioListener));
-    asio_listener_init(this, rl, socket_fd);
-    return this;
-}
-AsioListenerRef asio_listener_new_from_port_host(RunloopRef rl, int port, const char* host)
-{
-    int fd = create_listener_socket(port, host);
-    socket_set_non_blocking(fd);
-    AsioListenerRef asio_listener_ref = asio_listener_new(rl, fd);
-    return asio_listener_ref;
-}
-void asio_listener_init(AsioListenerRef this, RunloopRef rl, int socket_fd)
-{
-    this->on_accept_callback = NULL;
-    this->on_accept_callback_arg = NULL;
-    this->rl_listener_ref = runloop_listener_new(rl, socket_fd);
-}
-void asio_listener_init_from_port_host(AsioListenerRef this,  RunloopRef rl, int port, const char* host)
-{
-    int fd = create_listener_socket(port, host);
-    socket_set_non_blocking(fd);
-    asio_listener_init(this, rl, fd);
-}
-void asio_listener_deinit(AsioListenerRef this)
-{
-    this->on_accept_callback = NULL;
-    this->on_accept_callback_arg = NULL;
-    runloop_listener_free(this->rl_listener_ref);
-    this->rl_listener_ref = NULL;
-}
-void asio_listener_free(AsioListenerRef this)
-{
-    asio_listener_deinit(this);
-    free(this);
+    LISTNER_CHECK_TAG(listener)
+    LISTNER_CHECK_END_TAG(listener)
+    return listener->fd;
 }
 
-void asio_accept(AsioListenerRef this, AcceptCallback on_accept_callback, void* arg)
+void runloop_listener_verify(RunloopListenerRef listener)
 {
-    this->on_accept_callback = on_accept_callback;
-    this->on_accept_callback_arg = arg;
-    runloop_listener_register(this->rl_listener_ref, on_listening_postable, this);
+    LISTNER_CHECK_TAG(listener)
+    LISTNER_CHECK_END_TAG(listener)
 }
-static void on_listening_postable(RunloopRef rl, void* asio_listener_arg)
-{
-    AsioListenerRef asio_listener_ref  = asio_listener_arg;
-    printf("listening_handler fd: %d\n", asio_listener_ref->rl_listener_ref->listener.fd);
-    struct sockaddr_in peername;
-    unsigned int addr_length = (unsigned int) sizeof(peername);
-    int fd = runloop_listener_get_fd(asio_listener_ref->rl_listener_ref);
-    AcceptCallback cb = asio_listener_ref->on_accept_callback;
-    void* cb_arg = asio_listener_ref->on_accept_callback_arg;
-
-    int sock2 = accept(fd, (struct sockaddr *) &peername, &addr_length);
-    if(sock2 <= 0) {
-        int errno_saved = errno;
-        asio_listener_ref->on_accept_callback = NULL;
-        asio_listener_ref->on_accept_callback_arg = NULL;
-        runloop_listener_disarm(asio_listener_ref->rl_listener_ref);
-        cb(cb_arg, sock2, errno_saved);
-        RBL_LOG_FMT("%s %d %d %s", "Listener thread :: accept failed terminating sock2 : ", sock2, errno, strerror(errno_saved));
-    } else {
-        asio_listener_ref->on_accept_callback = NULL;
-        asio_listener_ref->on_accept_callback_arg = NULL;
-        runloop_listener_deregister(asio_listener_ref->rl_listener_ref);
-        cb(cb_arg, sock2, 0);
-    }
-}
-#endif

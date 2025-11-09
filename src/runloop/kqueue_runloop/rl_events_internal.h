@@ -41,9 +41,10 @@ struct RunloopWatcherBase_s {
     WatcherType           type;
     RunloopRef            runloop;
     void*                 context;
-    int                   fd;
-    void(*free)(RunloopEventRef);
-    void(*handler)(RunloopEventRef rlevent, uint64_t event);
+    // void(*free)(RunloopEventRef);
+    // void(*handler)(RunloopWatcherBaseRef rlwatcher, uint64_t event);
+    void(*handler)(RunloopWatcherBaseRef watcher, uint16_t filter, uint16_t flags, void* data);
+
 };
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
@@ -51,7 +52,7 @@ struct RunloopTimer_s {
     /** The start tag is declared in the base struct
     RBL_DECLARE_TAG; */
     struct RunloopWatcherBase_s;
-     time_t                  expiry_time;
+     time_t                 expiry_time;
     uint64_t                interval;
     bool                    repeating;
     PostableFunction        timer_postable;
@@ -67,9 +68,10 @@ struct RunloopUserEvent_s {
     /** The start tag is declared in the base struct
     RBL_DECLARE_TAG; */
     struct RunloopWatcherBase_s;
-    PostableFunction    user_event_postable;
-    void*               user_event_postable_arg;
-    int                 write_fd;
+    UserEventCallback       uevent_cb;
+    void*                   uevent_cb_arg;
+    void*                   uevent_data;
+    int                     dup_fd;
     RBL_DECLARE_END_TAG;
 };
 #pragma clang diagnostic pop
@@ -82,8 +84,8 @@ struct RunloopStream_s {
     /** The start tag is declared in the base struct
     RBL_DECLARE_TAG; */
     struct RunloopWatcherBase_s;
+    int                      fd;
     uint64_t                 event_mask;
-
     PostableFunction         read_postable_cb;
     void*                    read_postable_arg;
     PostableFunction         write_postable_cb;
@@ -101,6 +103,7 @@ struct RunloopListener_s {
     /** The start tag is declared in the base struct
     RBL_DECLARE_TAG; */
     struct RunloopWatcherBase_s;
+    int                      fd;
     PostableFunction         listen_postable;
     void*                    listen_postable_arg;
     RBL_DECLARE_END_TAG;
@@ -116,6 +119,7 @@ struct RunloopSignal_s{
     RBL_DECLARE_END_TAG;
 };
 #pragma clang diagnostic pop
+#if 0
 /**
  * InterThreadQueue
  */
@@ -129,6 +133,7 @@ struct InterthreadQueue_s {
     RunloopQueueWatcherRef qwatcher_ref;
     RBL_DECLARE_END_TAG;
 };
+#endif
 typedef void(*QueueCallback)(void* arg);
 struct UserEventQueue_s {
     /** This struct is not a sub struct of Watcher hence it must declare its own openning tag*/
@@ -150,7 +155,7 @@ struct UserEventQueue_s {
     int                 id;
     RBL_DECLARE_END_TAG;
 };
-
+#if 0
 typedef struct RunloopEvent_s {
     RBL_DECLARE_TAG;
     RunloopRef            runloop;
@@ -199,5 +204,5 @@ typedef struct RunloopEvent_s {
     };
     RBL_DECLARE_END_TAG;
 } RunloopEvent, *RunloopEventRef;
-
+#endif
 #endif
