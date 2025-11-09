@@ -25,11 +25,11 @@ set(epoll_RUNLOOP_SOURCE_FILES
 
 		${CMAKE_CURRENT_SOURCE_DIR}/rl_user_event.c
 		${CMAKE_CURRENT_SOURCE_DIR}/rl_listener.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/rl_queue_watcher.c
+        # ${CMAKE_CURRENT_SOURCE_DIR}/rl_queue_watcher.c
 		${CMAKE_CURRENT_SOURCE_DIR}/rl_stream.c
 		${CMAKE_CURRENT_SOURCE_DIR}/rl_timer.c
 		${CMAKE_CURRENT_SOURCE_DIR}/rl_user_event_queue.c
-		${CMAKE_CURRENT_SOURCE_DIR}/rl_interthread_queue.c
+		# ${CMAKE_CURRENT_SOURCE_DIR}/rl_interthread_queue.c
 
 #		${CMAKE_CURRENT_SOURCE_DIR}/asio_listener.c
 #		${CMAKE_CURRENT_SOURCE_DIR}/asio_stream.c

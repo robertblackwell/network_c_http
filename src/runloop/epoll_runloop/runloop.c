@@ -16,20 +16,6 @@ static void drain_callback(void* arg)
 {
     printf("drain callback\n");
 }
-static void interthread_queue_handler(RunloopQueueWatcherRef watcher, uint64_t event)
-{
-    printf("interthread_queue_handler\n");
-    return;
-    RunloopRef rx = runloop_queue_watcher_get_reactor(watcher);
-    UserEventQueueRef evqref = watcher->queue;
-    Functor func = runloop_user_event_queue_remove(evqref);
-    void* pf = func.f;
-    watcher->queue_postable_arg = func.arg;
-    void* arg = (void*) watcher;
-    long d = (long) func.arg;
-    printf("reactor::interthread_queue_handler f: %p d: %ld \n", pf, d);
-    runloop_post(rx, func.f, arg);
-}
 static int *int_in_heap(int key) {
     int *result;
     if ((result = malloc(sizeof(*result))) == NULL)

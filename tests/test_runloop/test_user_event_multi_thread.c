@@ -70,7 +70,13 @@ void* sender_thread_func(void* arg)
     SenderCtx* ctx_p = arg;
     for (int k = 0; k < ctx_p->max_count; k++) {
         printf("sender trigger k: %d ctx_p: %p\n", k, ctx_p);
+        #ifdef APPLE_FLAG
         runloop_user_event_fire(ctx_p->user_event_ref, arg);
+        #elif defined(LINUX_FLAG)
+        printf("about to fire user event \n");
+        RunloopUserEventRef uev = ctx_p->user_event_ref;
+        runloop_user_event_fire(uev);
+        #endif
         //
         // This sleep call must be long enough to prevent multiple triggers being amalgamated into
         // a single event by the kqueue implementation
@@ -101,6 +107,10 @@ int test_user_event_multi_thread()
         free(sender_ctx[i]);
     }
     printf("total count: %d recv count: %d\n", total_count, recv_ctx->counter);
+#if defined(APPLE_FLAG)
     UT_TRUE(total_count >= recv_ctx->counter);
+#elif defined(LINUX_FLAG)
+    UT_TRUE(total_count == recv_ctx->counter);
+#endif
     return 0;
 }

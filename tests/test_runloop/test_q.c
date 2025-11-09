@@ -12,8 +12,6 @@
 #include <src/common/utils.h>
 #include <src/runloop/runloop.h>
 
-#include "runloop/kqueue_runloop/rl_events_internal.h"
-
 /**
  * Test UserEventQueue using one (and only one) reader threads and multiple writer thread.
  *
@@ -43,8 +41,9 @@
 
 
 uint64_t local_gettid() {
+    uint64_t tid;
     #ifdef LINUX_FLAG
-        return (uint64_t)gettid();
+        tid = (uint64_t)gettid();
     #elif defined(APPLE_FLAG)
         uint64_t tid;
         pthread_threadid_np(NULL, &tid);
@@ -134,7 +133,7 @@ void* reader_thread_func(void* arg)
     rctx->tid = tid;
     UserEventQueueRef ue_queue = rctx->ue_queue;
     user_event_queue_arm(ue_queue);
-    printf("reader thread rl: %p tid: %llu\n", runloop_ref, tid);
+    printf("reader thread rl: %p tid: %lu\n", runloop_ref, tid);
     runloop_run(runloop_ref, 5000);
     return NULL;
 }
@@ -152,7 +151,7 @@ void writer_post_function(RunloopRef rl, void* arg)
     uint64_t tid = local_gettid();
     uint64_t tid2 = wref->qwriter_ref->rdr_thread_id;
     assert(tid == tid2); // this tests that the post function is running on the thread with the runloop
-    printf("writer post function thread: %llu rdr_thread_id: %llu rl: %p arg: %p arg->count: %ld post_count: %ld\n",
+    printf("writer post function thread: %lu rdr_thread_id: %lu rl: %p arg: %p arg->count: %ld post_count: %ld\n",
            tid, wref->qwriter_ref->rdr_thread_id, rl, arg, count, pcount);
 }
 /**
@@ -162,7 +161,7 @@ void* writer_thread_func(void* arg)
 {
     QWriterRef wrtr = (QWriterRef)arg;
     uint64_t tid = local_gettid();
-    printf("writer thread tid: %llu \n", tid);
+    printf("writer thread tid: %lu \n", tid);
     for(long i = 0; i < wrtr->count_max; i++) {
         // usleep(5000);
         WriterArgRef writer_arg_ref = writer_arg_new(wrtr, i);
@@ -175,8 +174,8 @@ void* writer_thread_func(void* arg)
 }
 int test_q()
 {
-    int nbr_writers = 5;
-    int nbr_readers = 1; // dont change this value
+    const int nbr_writers = 5;
+    const int nbr_readers = 1; // dont change this value
     QReaderRef rdr[nbr_readers];
     pthread_t  reader_threads[nbr_readers];
     QWriterRef writers[nbr_writers];

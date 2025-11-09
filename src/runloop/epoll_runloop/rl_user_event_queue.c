@@ -13,10 +13,33 @@
 #include <common/list.h>
 
 typedef UserEventQueue* EvfQueuePtr;
+Functor user_event_queue_remove(UserEventQueueRef athis);
 
-static void dealloc(void** p)
+void queue_triggered_cb(RunloopRef rl, void* arg)
 {
+    UserEventQueueRef ue_queue = (UserEventQueueRef)arg;
+    RBL_CHECK_TAG(UEQueue_TAG, ue_queue);
+    RBL_CHECK_END_TAG(UEQueue_TAG, ue_queue);
+    user_event_queue_verify(ue_queue);
+    runloop_user_event_verify(ue_queue->user_event);
+//    while (1) {
+        Functor queue_data = user_event_queue_remove(ue_queue);
+        if (queue_data.f == NULL) {
+            printf("queue_cb - queue is empty \n");
+            return;
+        }
+        PostableFunction pf = queue_data.f;
+        void* postable_arg = queue_data.arg;
+        runloop_post(rl, pf, postable_arg);
+//    }
+#ifdef APPLE_FLAG
+    // user_event_queue_register(ue_queue, queue_triggered_cb, arg);
+    runloop_user_event_arm(ue_queue->user_event, queue_triggered_cb, ue_queue);
+#elif defined(LINUX_FLAG)
+//    runloop_user_event_arm(ue_queue->user_event, queue_triggered_cb, ue_queue);
+#endif
 }
+
 static void mk_fds(UserEventQueueRef athis)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
@@ -37,52 +60,71 @@ static void mk_fds(UserEventQueueRef athis)
     assert(errno == EAGAIN);
 
 }
-void runloop_user_event_queue_init(UserEventQueueRef athis)
+void runloop_user_event_queue_init(RunloopRef rl, UserEventQueueRef uequeue)
 {
-    USER_EVENT_SET_TAG(athis)
-    EvfQueuePtr me = (EvfQueuePtr)athis;
-    me->list = functor_list_new(runloop_MAX_FDS);
-    pthread_mutex_init(&(me->queue_mutex), NULL);
-    mk_fds(me);
+    RBL_SET_TAG(UEQueue_TAG, uequeue)
+    RBL_SET_END_TAG(UEQueue_TAG, uequeue)
+    EvfQueuePtr me = (EvfQueuePtr)uequeue;
+    uequeue->list = functor_list_new(runloop_MAX_FDS);
+    uequeue->user_event = runloop_user_event_new(rl);
+    pthread_mutex_init(&(uequeue->queue_mutex), NULL);
 }
-UserEventQueueRef runloop_user_event_queue_new(RunloopRef rl)
+UserEventQueueRef user_event_queue_new(RunloopRef rl)
 {
     UserEventQueueRef tmp = rl_event_allocate(rl, sizeof(UserEventQueue));
-    runloop_user_event_queue_init(tmp);
+    runloop_user_event_queue_init(rl, tmp);
     return tmp;
 }
-void runloop_user_event_queue_free(UserEventQueueRef athis)
+void user_event_queue_free(UserEventQueueRef ueq)
 {
-    RunloopRef rl = athis->runloop;
-    rl_event_free(rl, athis);
+    RBL_CHECK_TAG(UEQueue_TAG, ueq)
+    RBL_CHECK_END_TAG(UEQueue_TAG, ueq)
+    RunloopRef rl = ueq->runloop;
+    functor_list_free(ueq->list);
+    runloop_user_event_deregister(ueq->user_event);
+    runloop_user_event_free(ueq->user_event);
+    rl_event_free(rl, ueq);
 }
-int runloop_user_event_queue_readfd(UserEventQueueRef athis)
+//int user_event_queue_readfd(UserEventQueueRef athis)
+//{
+//    EvfQueuePtr me = (EvfQueuePtr)athis;
+//    return me->readfd;
+//}
+void user_event_queue_arm(UserEventQueueRef uequeue)
 {
-    EvfQueuePtr me = (EvfQueuePtr)athis;
-    return me->readfd;
+    RBL_CHECK_TAG(UEQueue_TAG, uequeue)
+    RBL_CHECK_END_TAG(UEQueue_TAG, uequeue)
+    runloop_user_event_arm(uequeue->user_event, queue_triggered_cb, uequeue);
 }
-void runloop_user_event_queue_add(UserEventQueueRef athis, Functor item)
+
+void user_event_queue_add(UserEventQueueRef ueq, Functor item)
 {
-    EvfQueuePtr me = (EvfQueuePtr)athis;
+    RBL_CHECK_TAG(UEQueue_TAG, ueq)
+    RBL_CHECK_END_TAG(UEQueue_TAG, ueq)
+    EvfQueuePtr me = (EvfQueuePtr)ueq;
+
     pthread_mutex_lock(&(me->queue_mutex));
     functor_list_add(me->list, item);
-    uint64_t buf = 1;
-    write(me->writefd, &buf, sizeof(buf));
+    runloop_user_event_fire(me->user_event);
     pthread_mutex_unlock(&(me->queue_mutex));
 
 }
-Functor runloop_user_event_queue_remove(UserEventQueueRef athis) {
-    EvfQueuePtr me = (EvfQueuePtr) athis;
-    pthread_mutex_lock(&(me->queue_mutex));
+Functor user_event_queue_remove(UserEventQueueRef ueq) {
+    RBL_CHECK_TAG(UEQueue_TAG, ueq)
+    RBL_CHECK_END_TAG(UEQueue_TAG, ueq)
+    EvfQueuePtr me = (EvfQueuePtr) ueq;
+    pthread_mutex_lock(&(ueq->queue_mutex));
     Functor op;
-    if (functor_list_size(me->list) > 0) {
-        op = functor_list_remove(me->list);
+    if (functor_list_size(ueq->list) > 0) {
+        op = functor_list_remove(ueq->list);
     } else {
         op.f = NULL; op.arg = NULL;
     }
-    uint64_t buf;
-    int nread = read(me->readfd, &buf, sizeof(buf));
-    pthread_mutex_unlock(&(me->queue_mutex));
-    // remember to read from the pipe to clear the event
+    pthread_mutex_unlock(&(ueq->queue_mutex));
     return op;
+}
+void user_event_queue_verify(UserEventQueueRef ueq)
+{
+    RBL_CHECK_TAG(UEQueue_TAG, ueq);
+    RBL_CHECK_END_TAG(UEQueue_TAG, ueq);
 }

@@ -3,6 +3,7 @@
 #include <rbl/macros.h>
 #include <assert.h>
 #include <stdio.h>
+#include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -25,11 +26,17 @@ static void handler(RunloopWatcherBaseRef fdevent_ref, uint64_t event)
     USER_EVENT_CHECK_TAG(fdev)
     USER_EVENT_CHECK_END_TAG(fdev)
     uint64_t buf;
-    long nread = read(fdev->fd, &buf, sizeof(buf));
-    if(nread == sizeof(buf)) {
-        fdev->fdevent_postable(fdev->runloop, fdev->fdevent_postable_arg);
-    } else {
-
+    while(1) {
+        ssize_t nread = read(fdev->fd, &buf, sizeof(buf));
+        int errno_saved = errno;
+//        printf("uevent handler nread: %ld  buf: %lu\n", nread, buf);
+        if (nread == sizeof(buf)) {
+            fdev->fdevent_postable(fdev->runloop, fdev->fdevent_postable_arg);
+        } else if((nread < 0) && (errno_saved == EAGAIN)){
+            return;
+        } else {
+            assert(0);
+        }
     }
 }
 // static void anonymous_free(RunloopWatcherBaseRef p)
@@ -39,14 +46,14 @@ static void handler(RunloopWatcherBaseRef fdevent_ref, uint64_t event)
 //     USER_EVENT_CHECK_END_TAG(fdevp)
 //     runloop_user_event_free(fdevp);
 // }
-void runloop_user_event_init(RunloopUserEventRef this, RunloopRef runloop)
+void runloop_user_event_init(RunloopUserEventRef uevent, RunloopRef runloop)
 {
-    RBL_ASSERT((this!=NULL), "this is NULL");
-    this->type = RUNLOOP_WATCHER_FDEVENT;
-    USER_EVENT_SET_TAG(this);
-    USER_EVENT_SET_END_TAG(this);
-    USER_EVENT_CHECK_TAG(this)
-    USER_EVENT_CHECK_END_TAG(this)
+    RBL_ASSERT((uevent!=NULL), "this is NULL");
+    uevent->type = RUNLOOP_WATCHER_FDEVENT;
+    USER_EVENT_SET_TAG(uevent);
+    USER_EVENT_SET_END_TAG(uevent);
+    USER_EVENT_CHECK_TAG(uevent)
+    USER_EVENT_CHECK_END_TAG(uevent)
     /*
      * The readfd must be NONBLOCK
      */
@@ -54,20 +61,21 @@ void runloop_user_event_init(RunloopUserEventRef this, RunloopRef runloop)
     RBL_LOG_FMT("two pipe trick enabled")
     int pipefds[2];
     pipe(pipefds);
-    this->fd = pipefds[0];
-    this->write_fd = pipefds[1];
+    uevent->fd = pipefds[0];
+    uevent->write_fd = pipefds[1];
 #else
     #ifdef RUNLOOP_USER_EVENT_SEMAPHORE
         RBL_LOG_FMT("two pipe trick disabled semaphore enabled")
-        this->fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC | EFD_SEMAPHORE);
+    uevent->fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC | EFD_SEMAPHORE);
     #else
     RBL_LOG_FMT("two pipe trick disabled semaphore disabled")
-        this->fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+        uevent->fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
     #endif
 #endif
-    this->runloop = runloop;
+    uevent->runloop = runloop;
     // this->free = &anonymous_free;
-    this->handler = &handler;
+    uevent->handler = &handler;
+    runloop_user_event_register(uevent);
 }
 RunloopUserEventRef runloop_user_event_new(RunloopRef runloop)
 {
@@ -91,26 +99,7 @@ void runloop_user_event_register(RunloopUserEventRef athis)
     athis->fdevent_postable = NULL;
     athis->fdevent_postable_arg = NULL;
     eph_add(athis->runloop->epoll_fd, athis->fd, interest, athis);
-//    /**
-//     * Make sure this call enabled level triggering of events on this fd
-//     */
-//    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
-//    assert(res ==0);
 }
-//void runloop_user_event_change_watch(RunloopUserEventRef athis, PostableFunction postable, void* arg, uint64_t watch_what)
-//{
-//    USER_EVENT_SET_TAG(athis);
-//    USER_EVENT_CHECK_TAG(athis)
-//    uint32_t interest = watch_what;
-//    if( postable != NULL) {
-//        athis->fdevent_postable = postable;
-//    }
-//    if (arg != NULL) {
-//        athis->fdevent_postable_arg = arg;
-//    }
-//    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
-//    assert(res == 0);
-//}
 void runloop_user_event_deregister(RunloopUserEventRef athis)
 {
     USER_EVENT_SET_TAG(athis);
@@ -141,16 +130,17 @@ void runloop_user_event_disarm(RunloopUserEventRef athis)
     eph_mod(athis->runloop->epoll_fd, athis->fd, (uint32_t)0, athis);
 //    int res = runloop_reregister(athis->runloop, athis->fd, 0, (RunloopWatcherBaseRef) athis);
 }
-void runloop_user_event_fire(RunloopUserEventRef athis)
+void runloop_user_event_fire(RunloopUserEventRef uev)
 {
-    USER_EVENT_SET_TAG(athis);
-    USER_EVENT_CHECK_TAG(athis)
+    printf("runloop_user_event_fire %p\n", uev);
+    USER_EVENT_SET_TAG(uev);
+    USER_EVENT_CHECK_TAG(uev)
 #ifdef RUNLOOP_USER_EVENT_TWO_PIPE_TRICK
     uint64_t buf = 1;
     write(athis->write_fd, &buf, sizeof(buf));
 #else
     uint64_t buf = 1;
-    int x = write(athis->fd, &buf, sizeof(buf));
+    ssize_t x = write(uev->fd, &buf, sizeof(buf));
     assert(x == sizeof(buf));
 #endif
 }

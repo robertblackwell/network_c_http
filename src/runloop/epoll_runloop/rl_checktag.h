@@ -5,10 +5,11 @@
 #include <string.h>
 
 #define Runloop_TAG       "RUNLOOP"
-#define UserEvent_TAG       "USREVENT"
+#define UserEvent_TAG     "USREVT"
+#define UEQueue_TAG       "UEQU"
 #define Stream_TAG        "STREAM"
 #define Listener_TAG      "LISTNR"
-#define QueueWatcher_TAG  "QWatcher"
+#define QueueWatcher_TAG  "QUWTCH"
 #define Timer_TAG         "Timer"
 #define ITQueue_TAG       "ITQUEUE"
 #define FdTable_TAG       "FDTABL"
