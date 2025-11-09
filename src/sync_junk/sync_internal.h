@@ -5,8 +5,8 @@
 #include <src/common/queue.h>
 #include <src/http/http_message_parser.h>
 
-#include <src/sync/sync.h>
-#include <src/sync/tags.h>
+#include <src/sync_junk/sync.h>
+#include <src/sync_junk/tags.h>
 
 
 #define MAX_THREADS 100

@@ -6,6 +6,9 @@ add_executable(test_listener
 		listener_ctx.c
 		connector_ctx.h
 		connector_ctx.c
+		sync_client.c
+		sync_client.h
+#		sync_connection.c
 )
 target_compile_definitions(test_listener PUBLIC ASIO_LISTENER_DISABLED)
 target_include_directories(test_listener PUBLIC ${TEST_INCLUDE_dirS})

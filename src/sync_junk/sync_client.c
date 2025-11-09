@@ -2,8 +2,8 @@
 
 #include <netdb.h>
 #include <pthread.h>
-#include <src/sync/sync.h>
-#include <src/sync/sync_internal.h>
+#include <src/sync_junk/sync.h>
+#include <src/sync_junk/sync_internal.h>
 #include <src/common/alloc.h>
 #include <src/common/cbuffer.h>
 #include <src/http/http_message.h>

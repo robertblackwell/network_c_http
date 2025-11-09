@@ -2,15 +2,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <pthread.h>
-             /* See feature_test_macros(7) */
-#include <fcntl.h>
-#include <stdint.h>
-#include <string.h>
-#include <errno.h>
 #include <rbl/unittest.h>
-#include <src/common/utils.h>
-#include <src/common/socket_functions.h>
-#include <src/sync/sync_client.h>
+#include "sync_client.h"
 
 void* connector_thread_func(void* arg)
 {

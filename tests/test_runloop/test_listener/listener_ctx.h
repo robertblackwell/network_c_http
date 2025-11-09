@@ -1,18 +1,5 @@
 #ifndef c_http_tests_test_reactor_listener_h
 #define c_http_tests_test_reactor_listener_h
-
-
-#include <assert.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <pthread.h>
-             /* See feature_test_macros(7) */
-#include <fcntl.h>
-#include <stdint.h>
-#include <string.h>
-#include <errno.h>
-#include <rbl/unittest.h>
-#include <src/common/utils.h>
 #include <src/common/socket_functions.h>
 #include <src/runloop/runloop.h>
 

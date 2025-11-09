@@ -1,7 +1,7 @@
 
 #define CHLOG_ON
-#include <src/sync/sync.h>
-#include <src/sync/sync_internal.h>
+#include <src/sync_junk/sync.h>
+#include <src/sync_junk/sync_internal.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>

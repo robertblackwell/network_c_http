@@ -1,6 +1,6 @@
 
-#include <src/sync/sync_handler_example.h>
-#include <src/sync/sync.h>
+#include <src/sync_junk/sync_handler_example.h>
+#include <src/sync_junk/sync.h>
 #include <src/common/alloc.h>
 #include <src/common/socket_functions.h>
 

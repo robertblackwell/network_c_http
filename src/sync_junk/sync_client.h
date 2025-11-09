@@ -2,7 +2,7 @@
 #define c_http_api_sync_client_h
 
 #include <src/http/http_message.h>
-#include <src/sync/sync.h>
+#include <src/sync_junk/sync.h>
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
