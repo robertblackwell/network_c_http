@@ -64,7 +64,11 @@ RunloopTimerRef runloop_timer_new(RunloopRef runloop_ref);
 void runloop_timer_init(RunloopTimerRef timer, RunloopRef runloop);
 void runloop_timer_free(RunloopTimerRef timer);
 void runloop_timer_register(RunloopTimerRef timer, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
+#if defined(__APPLE__)
 void runloop_timer_update(RunloopTimerRef timer, uint64_t interval_ms, bool repeating);
+#elif defined(__linux__)
+void runloop_timer_update(RunloopTimerRef timer, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
+#endif
 void runloop_timer_disarm(RunloopTimerRef timer);
 void runloop_timer_rearm_old(RunloopTimerRef timer, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
 void runloop_timer_rearm(RunloopTimerRef timer);
@@ -127,7 +131,11 @@ void runloop_user_event_free(RunloopUserEventRef uevent);
 void runloop_user_event_register(RunloopUserEventRef uevent);
 void runloop_user_event_arm(RunloopUserEventRef uevent, UserEventCallback cb, void* cb_arg);
 void runloop_user_event_disarm(RunloopUserEventRef uevent);
+#if defined(__linux__)
+void runloop_user_event_fire(RunloopUserEventRef uevent);
+#elif defined(__APPLE__)
 void runloop_user_event_fire(RunloopUserEventRef uevent, void* data);
+#endif
 void runloop_user_event_deregister(RunloopUserEventRef uevent);
 void runloop_user_event_verify(RunloopUserEventRef uevent);
 RunloopRef runloop_user_event_get_runloop(RunloopUserEventRef uevent);

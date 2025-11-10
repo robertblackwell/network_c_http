@@ -1,7 +1,6 @@
 #ifndef C_HTTP_EPOLL_RL_EVENTS_INTERNAL_H
 #define C_HTTP_EPOLL_RL_EVENTS_INTERNAL_H
 #include "runloop_internal.h"
-#include "rl_checktag.h"
 
 #include <pthread.h>
 #include <stdbool.h>

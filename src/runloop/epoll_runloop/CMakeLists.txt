@@ -1,6 +1,6 @@
 set(epoll_RUNLOOP_HEADER_FILES
 	#aio runloop and aio_http/1.1 details
-		${CMAKE_CURRENT_SOURCE_DIR}/runloop.h
+		${C_HTTP_SOURCE_DIR}/runloop/runloop.h
 		${CMAKE_CURRENT_SOURCE_DIR}/runloop_internal.h
 		${CMAKE_CURRENT_SOURCE_DIR}/rl_internal.h
 		${CMAKE_CURRENT_SOURCE_DIR}/rl_events_internal.h

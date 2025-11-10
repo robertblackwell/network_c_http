@@ -83,7 +83,7 @@ void print_events(struct epoll_event events[], int count)
         printf("\n");
     }
 }
-int runloop_run(RunloopRef athis, int timeout_milli_secs) {
+int runloop_run(RunloopRef athis, long timeout_milli_secs) {
     RUNLOOP_CHECK_TAG(athis)
     RUNLOOP_CHECK_END_TAG(athis)
 //    athis->tid = gettid();
@@ -109,10 +109,10 @@ int runloop_run(RunloopRef athis, int timeout_milli_secs) {
             result = 0;
             goto cleanup;
         }
-
+        int int_timeout_milli_secs = (int)timeout_milli_secs;
         int max_events = runloop_MAX_EPOLL_FDS;
         if(functor_list_size(athis->ready_list) == 0) {
-            int nfds = epoll_wait(athis->epoll_fd, events, max_events, timeout_milli_secs);
+            int nfds = epoll_wait(athis->epoll_fd, events, max_events, int_timeout_milli_secs);
             time_t currtime = time(NULL);
             switch (nfds) {
                 case -1:
