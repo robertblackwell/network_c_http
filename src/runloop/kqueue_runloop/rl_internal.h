@@ -4,7 +4,7 @@
 #include <sys/event.h>
 #include <pthread.h>
 #include <stdbool.h>
-
+#if 0
 #define runloop_MAX_FDS            1024
 #define runloop_MAX_RUNLIST        1024
 #define runloop_MAX_ITQ            256
@@ -14,7 +14,7 @@
 #define runloop_MAX_EVENTS         runloop_MAX_FDS*2
 #define CBTABLE_MAX                runloop_MAX_FDS
 #define runloop_READY_LIST_MAX     (2 * runloop_MAX_FDS)
-
+#endif
 // enables use of eventfd rather than two pipe trick
 #define  runloop_eventfd_ENABLE
 
@@ -66,12 +66,14 @@ struct Runloop_s {
     bool                    runloop_executing;
     pthread_t               tid;
     EventTableRef           event_table;
-    struct kevent           change[runloop_MAX_EVENTS];
+#if 1
+    struct kevent           change[RL_MAX_EVENTS];
     int                     change_max;
     int                     change_count;
-    struct kevent           events[runloop_MAX_EVENTS];
+    struct kevent           events[RL_MAX_EVENTS];
     int                     events_max;
     int                     events_count;
+#endif
     FunctorListRef          ready_list;
     RBL_DECLARE_END_TAG;
 };

@@ -1,5 +1,5 @@
-#ifndef C_HTTP_KQ_RUNLOOP_H
-#define C_HTTP_KQ_RUNLOOP_H
+#ifndef C_HTTP_RUNLOOP_API_H
+#define C_HTTP_RUNLOOP_API_H
 
 #include <stdint.h>
 #include <time.h>
@@ -149,8 +149,8 @@ int runloop_user_event_get_fd(RunloopUserEventRef uevent);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // User Event Queue
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-UserEventQueueRef user_event_queue_new(RunloopRef runloop);
-void user_event_queue_init(RunloopRef runloop, UserEventQueueRef uequeue);
+UserEventQueueRef user_event_queue_new(RunloopRef runloop, size_t capacity);
+void user_event_queue_init(RunloopRef runloop, UserEventQueueRef uequeue, size_t capacity);
 void user_event_queue_deinit(UserEventQueueRef uequeue);
 void user_event_queue_free(UserEventQueueRef uequeue);
 void user_event_queue_add(UserEventQueueRef uequeue, Functor item);

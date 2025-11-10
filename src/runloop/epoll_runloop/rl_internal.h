@@ -6,7 +6,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <common/list.h>
-
+#if 0
 #define runloop_MAX_FDS            1024
 #define runloop_MAX_RUNLIST        1024
 #define runloop_MAX_ITQ            256
@@ -20,7 +20,7 @@
 
 // enables use of eventfd rather than two pipe trick
 #define  runloop_eventfd_ENABLE
-
+#endif
 typedef struct EventTable_s EventTable, *EventTableRef;
 
 struct FdTable_s;

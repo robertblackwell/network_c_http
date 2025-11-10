@@ -22,7 +22,7 @@ static Functor get_functor_entry(FunctorListRef lstref, int index)
 }
 FunctorListRef functor_list_new(int capacity)
 {
-    RBL_ASSERT((capacity <= runloop_READY_LIST_MAX), "Functor List capacity is too big");
+    RBL_ASSERT((capacity <= RL_MAX_RUNLIST), "Functor List capacity is too big");
     FunctorListRef st = malloc(sizeof(FunctorList));
     FNCLST_SET_TAG(st)
     RBL_SET_END_TAG(FunctorList_TAG, st)

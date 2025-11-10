@@ -65,20 +65,20 @@ void queue_triggered_cb(RunloopRef rl, void* arg)
 #endif
 }
 
-void user_event_queue_init(RunloopRef rl, UserEventQueueRef uequeue)
+void user_event_queue_init(RunloopRef rl, UserEventQueueRef uequeue, size_t capacity)
 {
     RBL_SET_TAG(UEQueue_TAG, uequeue);
     RBL_SET_END_TAG(UEQueue_TAG, uequeue);
     EvfQueuePtr me = (EvfQueuePtr)uequeue;
     me->runloop = rl;
     me->user_event = runloop_user_event_new(rl);
-    me->list = functor_list_new(runloop_MAX_FDS);
+    me->list = functor_list_new((int)capacity);
     pthread_mutex_init(&(me->queue_mutex), NULL);
 }
-UserEventQueueRef user_event_queue_new(RunloopRef rl)
+UserEventQueueRef user_event_queue_new(RunloopRef rl, size_t capacity)
 {
     UserEventQueueRef tmp = malloc(sizeof(UserEventQueue));
-    user_event_queue_init(rl, tmp);
+    user_event_queue_init(rl, tmp, capacity);
     return tmp;
 }
 void user_event_queue_free(UserEventQueueRef athis)

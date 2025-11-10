@@ -182,7 +182,7 @@ int test_q()
     pthread_t writer_threads[nbr_writers];
 
     RunloopRef rdr_runloop_ref = runloop_new();
-    UserEventQueueRef queue = user_event_queue_new(rdr_runloop_ref);
+    UserEventQueueRef queue = user_event_queue_new(rdr_runloop_ref, 100);
     for (int ir = 0; ir < nbr_readers; ++ir) {
         rdr[ir] = queue_reader_new(rdr_runloop_ref, queue, 10);
         int r_rdr = pthread_create(&(reader_threads[ir]), NULL, reader_thread_func, (void*)rdr[ir]);

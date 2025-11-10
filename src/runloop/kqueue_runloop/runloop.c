@@ -32,57 +32,27 @@ struct kevent* runloop_get_fresh_event_table(RunloopRef athis);
 int runloop_get_max_events(RunloopRef athis);
 struct kevent* runloop_events_at(RunloopRef athis, int index);
 
-/**
- * Perform a general epoll_ctl call with error checking.
- * In the event of an error abort 
- */
-static void runloop_kevent(RunloopRef athis, int op, int fd, uint64_t interest, void* watcher)
-{
-    RUNLOOP_CHECK_TAG(athis)
-    // struct epoll_event epev = {
-    //     .events = interest,
-    //     .data = {
-    //         .fd = fd,
-    //     }
-    // };
-    // // note epev.data is a union so the next line overites .fd = fd
-    // epev.data.ptr = watcher;
-    int status = 0;
-    // int status = epoll_ctl(athis->epoll_fd, op, fd, &(epev));
-    // if (status != 0) {
-    //     int errno_saved = errno;
-    //     RBL_LOG_ERROR("runloop_epoll_ctl epoll_fd: %d fd: %d status : %d errno : %d %s", athis->epoll_fd, fd, status, errno_saved, strerror(errno_saved));
-    // }
-    RBL_LOG_FMT("runloop_epoll_ctl epoll_fd: %d status : %d errno : %d", athis->kqueue_fd, status, errno);
-    // RBL_ASSERT((status == 0), "epoll ctl call failed");
-}
+void runloop_init(RunloopRef rl) {
 
-//RunloopRef runloop_get_threads_reactor()
-//{
-//    return my_reactor_ptr;
-//}
-
-void runloop_init(RunloopRef athis) {
-
-    RunloopRef runloop = athis;
-
+    RunloopRef runloop = rl;
     RUNLOOP_SET_TAG(runloop)
     RUNLOOP_SET_END_TAG(runloop)
-//    runloop->tid = gettid();
     runloop->kqueue_fd = kqueue();
     runloop->closed_flag = false;
     runloop->runloop_executing = false;
     RBL_ASSERT((runloop->kqueue_fd != -1), "kqueue create failed");
     RBL_LOG_FMT("runloop_new kqueue_fd %d", runloop->kqueue_fd);
     runloop->event_table = event_table_new();
-    runloop->ready_list = functor_list_new(runloop_READY_LIST_MAX);
+    runloop->ready_list = functor_list_new(RL_MAX_RUNLIST);
+#if 1
     runloop->change_count = 0;
-    runloop->change_max = runloop_MAX_EVENTS;
+    runloop->change_max = RL_MAX_EVENTS;
     runloop->events_count = 0;
-    runloop->events_max = runloop_MAX_EVENTS;
+    runloop->events_max = RL_MAX_EVENTS;
+#endif
 }
 /**
- * Create a new reactor runloop. Should only be one per thread
+ * Create a new runloop. Should only be one per thread
  * @NOTE - this implementation only works for Linux and uses epoll
  */
 RunloopRef runloop_new(void) {
@@ -110,77 +80,10 @@ void runloop_free(RunloopRef athis)
         runloop_close(athis);
     }
     // what to do about event_allocator_free(athis->event_allocator);
+
     functor_list_free(athis->ready_list);
     free(athis);
 }
-int runloop_register_timer(RunloopRef rl, uint64_t id, bool one_shot, uint64_t milli_secs)
-{
-    int flags = EV_ADD | EV_ENABLE | EV_RECEIPT | (one_shot ? EV_ONESHOT : 0); 
-    struct kevent change;
-    struct kevent* change_ptr;
-    int nev;
-    #ifdef RL_KQ_BATCH_CHANGES
-        change_ptr = runloop_change_next(rl)
-        EV_SET(&change, id, EVFILT_TIMER, flags, 0, milli_secs, 0);
-    #else
-        change_ptr = &change;
-        EV_SET(&change, id, EVFILT_TIMER, flags, 0, milli_secs, 0);
-        nev = kevent(rl->kqueue_fd, &change, 1, NULL, 0, NULL);
-    #endif
-
-    // check the data field of both change and event
-    return 0;
-}
-int runloop_cancel_timer(RunloopRef rl, uint64_t id)
-{
-    int flags = EV_DELETE | EV_RECEIPT; 
-    struct kevent change;
-    struct kevent* change_ptr;
-    int nev;
-    // int flags = EV_DELETE | EV_RECEIPT; 
-    // EV_SET(&change, id, EVFILT_TIMER, flags, 0, 0, 0);
-    // nev = kevent(kq, &change, 1, NULL, 0, NULL);
-
-    #ifdef RL_KQ_BATCH_CHANGES
-        change_ptr = runloop_change_next(rl)
-        EV_SET(&change, id, EVFILT_TIMER, flags, 0, milli_secs, 0);
-    #else
-        change_ptr = &change;
-        EV_SET(&change, id, EVFILT_TIMER, flags, 0, 0, 0);
-        nev = kevent(rl->kqueue_fd, &change, 1, NULL, 0, NULL);
-    #endif
-
-    return 0;
-}
-/**
- * Register a RunloopWatcherBase (actuallyr one of its derivatives) and its associated file descriptor
- * with the epoll instance. Specify the types of events the watcher is interested in
- */
-int runloop_register(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref)
-{
-    RUNLOOP_CHECK_TAG(athis)
-    RUNLOOP_CHECK_END_TAG(athis)
-    RBL_LOG_FMT("fd : %d  for events %d", fd, interest);
-    // runloop_epoll_ctl(athis, EPOLL_CTL_ADD, fd, interest, wref);
-    return 0;
-}
-// int runloop_deregister(RunloopRef athis, int fd)
-// {
-//     RUNLOOP_CHECK_TAG(athis)
-//     RUNLOOP_CHECK_END_TAG(athis)
-//     return 0;
-// }
-
-// // int runloop_reregister(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref) {
-// //     RUNLOOP_CHECK_TAG(athis)
-// //     RUNLOOP_CHECK_END_TAG(athis)
-// //     return 0;
-// // }
-// void runloop_delete(RunloopRef athis, int fd)
-// {
-//     RUNLOOP_CHECK_TAG(athis)
-//     RUNLOOP_CHECK_END_TAG(athis)
-// }
 void print_events(struct kevent events[], int count)
 {
     for(int i = 0; i < count; i++) {
@@ -215,7 +118,7 @@ int runloop_run(RunloopRef athis, time_t timeout_ms) {
             result = 0;
             goto cleanup;
         }
-        int max_events = runloop_MAX_EVENTS;
+        int max_events = RL_MAX_EVENTS;
         if(functor_list_size(athis->ready_list) == 0) {
             struct timespec *timeout = NULL;
             struct timespec t = { .tv_sec = timeout_ms / 1000 , .tv_nsec= 1000 *(timeout_ms % 1000)};

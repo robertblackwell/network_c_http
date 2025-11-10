@@ -52,6 +52,10 @@ EventTable* event_table_new()
     event_table_init(m);
     return m;
 }
+void event_table_free(EventTableRef evt)
+{
+    free(evt);
+}
 void event_table_init(EventTableRef ot)
 {
     freelist_init(&(ot->free_list));

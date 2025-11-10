@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdbool.h>
-#define EVT_MAX runloop_MAX_EVENTS
+#define EVT_MAX RL_MAX_EVENTS
 
 typedef struct FreeList_s FreeList, *FreeListRef;
 typedef struct MemorySlab_s MemorySlab, *MemorySlabRef;
@@ -61,6 +61,7 @@ struct EventTable_s {
 
 // create a new EventTable
 EventTableRef event_table_new();
+void event_table_free(EventTableRef evt);
 //Init an EventTable pass in the memory it will occupy
 void event_table_init(EventTableRef et);
 // get a free entry from an event table

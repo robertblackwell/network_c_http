@@ -1,8 +1,8 @@
 set(kq_RUNLOOP_HEADER_FILES
 	#aio runloop and aio_http/1.1 details
-		${CMAKE_CURRENT_SOURCE_DIR}/runloop.h
+		${C_HTTP_SOURCE_DIR}/runloop/runloop.h
+		${C_HTTP_SOURCE_DIR}/runloop/rl_checktag.h
 		${CMAKE_CURRENT_SOURCE_DIR}/runloop_internal.h
-		${CMAKE_CURRENT_SOURCE_DIR}/rl_checktag.h
 		${CMAKE_CURRENT_SOURCE_DIR}/rl_internal.h
         ${CMAKE_CURRENT_SOURCE_DIR}/event_table.h
 	)
