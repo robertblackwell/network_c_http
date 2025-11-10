@@ -13,8 +13,8 @@ set(kq_RUNLOOP_SOURCE_FILES
 		# ${CMAKE_CURRENT_SOURCE_DIR}/asio_listener.c
 		${CMAKE_CURRENT_SOURCE_DIR}/kqueue_helpers.c
 		 ${CMAKE_CURRENT_SOURCE_DIR}/user_event_queue.c
-		${CMAKE_CURRENT_SOURCE_DIR}/functor.c
-		${CMAKE_CURRENT_SOURCE_DIR}/functor_list.c
+#		${CMAKE_CURRENT_SOURCE_DIR}/functor.c
+#		${CMAKE_CURRENT_SOURCE_DIR}/functor_list.c
 		# ${CMAKE_CURRENT_SOURCE_DIR}/interthread_queue.c
 #		${CMAKE_CURRENT_SOURCE_DIR}/run_list.c
         ${CMAKE_CURRENT_SOURCE_DIR}/runloop.c
