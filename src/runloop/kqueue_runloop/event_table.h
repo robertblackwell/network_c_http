@@ -1,7 +1,7 @@
 
 #ifndef H_event_allocator_H
 #define H_event_allocator_H
-#include "runloop.h"
+#include <runloop/runloop.h>
 #include "rl_internal.h"
 #include "rl_events_internal.h"
 #include <unistd.h>
@@ -44,11 +44,11 @@ size_t freelist_size(FreeListRef fl);
 struct MemorySlab_s {
     struct {
         union {
-            RunloopEventRef     timer;
-            RunloopEventRef     listener;
-            RunloopStream       stream;
-            RunloopUserEvent    user_event;
-            RunloopSignal       signal;
+            RunloopTimer     timer;
+            RunloopListener  listener;
+            RunloopStream    stream;
+            RunloopUserEvent user_event;
+            RunloopSignal    signal;
         };
         uint16_t    my_index; 
     } m;

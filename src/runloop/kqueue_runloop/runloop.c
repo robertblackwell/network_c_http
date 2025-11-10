@@ -1,4 +1,4 @@
-#include "runloop.h"
+#include <runloop/runloop.h>
 #include "rl_internal.h"
 #include "event_table.h"
 #include <stdint.h>
@@ -62,16 +62,6 @@ static void runloop_kevent(RunloopRef athis, int op, int fd, uint64_t interest, 
 //    return my_reactor_ptr;
 //}
 
-/**
- * Create a new reactor runloop. Should only be one per thread
- * @NOTE - this implementation only works for Linux and uses epoll
- */
-RunloopRef runloop_new(void) {
-    RunloopRef runloop = malloc(sizeof(Runloop));
-    RBL_ASSERT((runloop != NULL), "malloc failed new runloop");
-    runloop_init(runloop);
-    return (RunloopRef)runloop;
-}
 void runloop_init(RunloopRef athis) {
 
     RunloopRef runloop = athis;
@@ -91,6 +81,17 @@ void runloop_init(RunloopRef athis) {
     runloop->events_count = 0;
     runloop->events_max = runloop_MAX_EVENTS;
 }
+/**
+ * Create a new reactor runloop. Should only be one per thread
+ * @NOTE - this implementation only works for Linux and uses epoll
+ */
+RunloopRef runloop_new(void) {
+    RunloopRef runloop = malloc(sizeof(Runloop));
+    RBL_ASSERT((runloop != NULL), "malloc failed new runloop");
+    runloop_init(runloop);
+    return (RunloopRef)runloop;
+}
+
 void runloop_close(RunloopRef athis)
 {
     RUNLOOP_CHECK_TAG(athis)

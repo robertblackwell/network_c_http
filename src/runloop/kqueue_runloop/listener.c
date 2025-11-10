@@ -30,7 +30,7 @@ static void handler(RunloopWatcherBaseRef lrwatcher, uint16_t event, uint16_t fl
         listener_ref->listen_postable(listener_ref->runloop,  listener_ref->listen_postable_arg);
     }
 }
-static void anonymous_free(RunloopEventRef p)
+static void anonymous_free(RunloopListenerRef p)
 {
     LISTNER_CHECK_TAG((RunloopListenerRef)p)
     LISTNER_CHECK_END_TAG((RunloopListenerRef)p)

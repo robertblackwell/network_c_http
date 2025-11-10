@@ -1,25 +1,23 @@
-#ifndef C_HTTP_EPOLL_RUNLOOP_H
-#define C_HTTP_EPOLL_RUNLOOP_H
+#ifndef C_HTTP_KQ_RUNLOOP_H
+#define C_HTTP_KQ_RUNLOOP_H
 
 #include <stdint.h>
+#include <time.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <time.h>
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Types -= forward declares
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 typedef struct Runloop_s Runloop, *RunloopRef;
 typedef struct RunloopWatcherBase_s RunloopWatcherBase, *RunloopWatcherBaseRef;
-typedef struct RunloopTimer_s RunloopTimer,  *RunloopTimerRef;  
-typedef struct RunloopListener_s RunloopListener, * RunloopListenerRef;  
-typedef struct RunloopStream_s RunloopStream, *RunloopStreamRef;         
-typedef struct RunloopUserEvent_s RunloopUserEvent, *RunloopUserEventRef;      
-
+typedef struct RunloopTimer_s RunloopTimer, *RunloopTimerRef;
+typedef struct RunloopListener_s RunloopListener, *RunloopListenerRef;
+typedef struct RunloopStream_s RunloopStream, *RunloopStreamRef;
+typedef struct RunloopUserEvent_s RunloopUserEvent, *RunloopUserEventRef;
+typedef struct RunloopSignal_s RunloopSignal, *RunloopSignalRef;
 typedef struct UserEventQueue_s UserEventQueue, * UserEventQueueRef;
-typedef struct InterthreadQueue_s InterthreadQueue, *InterthreadQueueRef;
-// typedef struct RunloopQueueWatcher_s RunloopQueueWatcher, *RunloopQueueWatcherRef; 
-
-
+// typedef struct InterthreadQueue_s InterthreadQueue, *InterthreadQueueRef;
+// typedef struct RunloopQueueWatcher_s RunloopQueueWatcher, *RunloopQueueWatcherRef;
 /**
  * PostableFunction defines the call signature of functions that can be added to a runloops queue of
  * functions to be called. As such they represent the next step in an ongoing computation of a lightweight
@@ -38,11 +36,11 @@ typedef void(*AcceptCallback)(void* arg, int accepted_fd, int errno);
 
 typedef struct Functor_s
 {
-//    RunloopWatcherBaseRef wref; // this is borrowed do not free
     PostableFunction f;
     void *arg;
 } Functor, *FunctorRef;
 
+typedef uint64_t EventMask, RunloopTimerEvent;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Runloop interface
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -54,7 +52,7 @@ void runloop_close(RunloopRef athis);
 //int runloop_register(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref);
 //int runloop_deregister(RunloopRef athis, int fd);
 //int runloop_reregister(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref);
-int runloop_run(RunloopRef athis, int timeout_milli_secs);
+int  runloop_run(RunloopRef athis, time_t timeout);
 void runloop_post(RunloopRef athis, PostableFunction cb, void* arg);
 //void runloop_delete(RunloopRef athis, int fd);
 void runloop_verify(RunloopRef r);
@@ -66,15 +64,14 @@ RunloopTimerRef runloop_timer_new(RunloopRef runloop_ref);
 void runloop_timer_init(RunloopTimerRef timer, RunloopRef runloop);
 void runloop_timer_free(RunloopTimerRef timer);
 void runloop_timer_register(RunloopTimerRef timer, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
-void runloop_timer_update(RunloopTimerRef timer, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
+void runloop_timer_update(RunloopTimerRef timer, uint64_t interval_ms, bool repeating);
 void runloop_timer_disarm(RunloopTimerRef timer);
 void runloop_timer_rearm_old(RunloopTimerRef timer, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
 void runloop_timer_rearm(RunloopTimerRef timer);
 void runloop_timer_deregister(RunloopTimerRef timer);
 RunloopRef runloop_timer_get_runloop(RunloopTimerRef timer);
-
 RunloopTimerRef runloop_timer_set(RunloopRef rl, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating);
-void runloop_timer_clear(RunloopRef rl, RunloopTimerRef timerref);
+void runloop_timer_clear(RunloopRef rl, RunloopTimerRef timer);
 void runloop_timer_checktag(RunloopTimerRef timer);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -118,25 +115,25 @@ void runloop_stream_checktag(RunloopStreamRef stream);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // User Event
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-/**
- * epoll provides a facility to create a file descriptor that is not attached to any file/pipe/device
- * and to "fire" events on that file descriptor that can be waited for using the epoll call.
- * This facility provides a mechanism to create and wait on arbitary event sources.
- * 
+/* *
+ * kqueue provides a facility to create and wait on an event source that is not attached to any fd/file/pipe/device
+ * and to "fire" such events explicitly.
+ * One of the variants of the RunloopEvent struct and related functions use the kqueue facility to provide a
+ * generalized mechanism for creating custom events that can be fired and notified
+ * using the standard kqueue feature.
  */
 RunloopUserEventRef runloop_user_event_new(RunloopRef runloop);
 void runloop_user_event_free(RunloopUserEventRef uevent);
 void runloop_user_event_register(RunloopUserEventRef uevent);
-void runloop_user_event_arm(RunloopUserEventRef uevent, PostableFunction cb, void* cb_arg);
+void runloop_user_event_arm(RunloopUserEventRef uevent, UserEventCallback cb, void* cb_arg);
 void runloop_user_event_disarm(RunloopUserEventRef uevent);
-void runloop_user_event_fire(RunloopUserEventRef uevent);
+void runloop_user_event_fire(RunloopUserEventRef uevent, void* data);
 void runloop_user_event_deregister(RunloopUserEventRef uevent);
 void runloop_user_event_verify(RunloopUserEventRef uevent);
 RunloopRef runloop_user_event_get_runloop(RunloopUserEventRef uevent);
 
 void runloop_user_event_init(RunloopUserEventRef uevent, RunloopRef runloop);
-void runloop_user_event_change_watch(RunloopUserEventRef uevent, PostableFunction postable, void* arg, uint64_t watch_what);
+void runloop_user_event_change_watch(RunloopUserEventRef uevent, UserEventCallback cb, void* cb_arg, uint64_t watch_what);
 void runloop_user_event_clear_one_event(RunloopUserEventRef uevent);
 void runloop_user_event_clear_all_events(RunloopUserEventRef uevent);
 int runloop_user_event_get_fd(RunloopUserEventRef uevent);
@@ -151,13 +148,13 @@ void user_event_queue_free(UserEventQueueRef uequeue);
 void user_event_queue_add(UserEventQueueRef uequeue, Functor item);
 void user_event_queue_arm(UserEventQueueRef uequeue);
 void user_event_queue_verify(UserEventQueueRef uequeue);
-RunloopRef runloop_user_event_queue_get_runloop(UserEventQueueRef uequeue);
+RunloopRef user_event_queue_get_runloop(UserEventQueueRef uequeue);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Base event
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-RunloopRef runloop_watcher_base_get_runloop(RunloopWatcherBaseRef athis);
-int        runloop_watcher_base_get_fd(RunloopWatcherBaseRef athis);
+RunloopRef runloop_watcher_base_get_runloop(RunloopWatcherBaseRef watcher);
+int        runloop_watcher_base_get_fd(RunloopWatcherBaseRef watcher);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Type safe - these macros provides functions to assert - that is crash if not - the types:
