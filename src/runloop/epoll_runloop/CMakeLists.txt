@@ -14,8 +14,8 @@ set(epoll_RUNLOOP_SOURCE_FILES
 #		${CMAKE_CURRENT_SOURCE_DIR}/asio_listener.c
 #		${CMAKE_CURRENT_SOURCE_DIR}/fd_map.c
 #		${CMAKE_CURRENT_SOURCE_DIR}/fdtable.c
-		${CMAKE_CURRENT_SOURCE_DIR}/functor.c
-		${CMAKE_CURRENT_SOURCE_DIR}/functor_list.c
+		# ${CMAKE_CURRENT_SOURCE_DIR}/functor.c
+		# ${CMAKE_CURRENT_SOURCE_DIR}/functor_list.c
 		 ${CMAKE_CURRENT_SOURCE_DIR}/rl_allocator.c
         ${CMAKE_CURRENT_SOURCE_DIR}/runloop.c
 		${CMAKE_CURRENT_SOURCE_DIR}/event_table.c

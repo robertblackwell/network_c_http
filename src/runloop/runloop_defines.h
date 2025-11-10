@@ -2,7 +2,7 @@
 #define H_C_HTTP_RUNLOOP_DEFINES_H
 
 /**
- * This file contains macros that control the size of various Runloop relaed data structures.
+ * This section of this file contains macros that control the size of various Runloop relaed data structures.
  */
 // max number of event watcher structures per runloop
 #define RL_MAX_WATCHERS            1024
@@ -24,6 +24,9 @@
 #define runloop_FDTABLE_MAX        runloop_MAX_FDS
 #define runloop_READY_LIST_MAX     (2 * runloop_MAX_FDS)
 #endif
-
+/**
+ * This next section contains flags that enable/disable features
+ */
+#define RL_EPOLL_EVENTFD_ENABLE 1 // on linux under epoll use eventfd for user_event
 
 #endif

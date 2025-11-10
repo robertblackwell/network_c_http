@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdbool.h>
-#define EVT_MAX runloop_MAX_EVENTS
+#define EVT_MAX RL_MAX_EVENTS
 
 typedef struct FreeList_s FreeList, *FreeListRef;
 typedef struct MemorySlab_s MemorySlab, *MemorySlabRef;
@@ -43,15 +43,10 @@ size_t freelist_size(FreeListRef fl);
 struct MemorySlab_s {
     struct {
         union {
-            #ifdef LINUX_FLAG
             RunloopTimer       timer;
             RunloopListener    listener;
             RunloopStream      stream;
             RunloopUserEvent   user_event;
-            #elif APPLE_FLAG
-            RunloopSignal      signal;
-            RunloopEvent       runloop_event;
-            #endif
             // RunloopQueueEvent   qevent;
             // RunloopInterthreadQueueEvent itqevent;
             // RunloopQueueWatcher qwatcher;

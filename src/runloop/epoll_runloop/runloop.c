@@ -40,7 +40,7 @@ void runloop_init(RunloopRef athis) {
     RBL_ASSERT((runloop->epoll_fd != -1), "epoll_create failed");
     RBL_LOG_FMT("runloop_new epoll_fd %d", runloop->epoll_fd);
     runloop->event_table_ref = event_table_new();
-    runloop->ready_list = functor_list_new(runloop_READY_LIST_MAX);
+    runloop->ready_list = functor_list_new(RL_MAX_RUNLIST);
 }
 RunloopRef runloop_new(void) {
     RunloopRef runloop = malloc(sizeof(Runloop));
@@ -88,7 +88,7 @@ int runloop_run(RunloopRef athis, long timeout_milli_secs) {
     RUNLOOP_CHECK_END_TAG(athis)
 //    athis->tid = gettid();
     int result;
-    struct epoll_event events[runloop_MAX_EPOLL_FDS];
+    struct epoll_event events[RL_MAX_EVENTS];
 
     time_t start = time(NULL);
 
@@ -110,7 +110,7 @@ int runloop_run(RunloopRef athis, long timeout_milli_secs) {
             goto cleanup;
         }
         int int_timeout_milli_secs = (int)timeout_milli_secs;
-        int max_events = runloop_MAX_EPOLL_FDS;
+        int max_events = RL_MAX_EVENTS;
         if(functor_list_size(athis->ready_list) == 0) {
             int nfds = epoll_wait(athis->epoll_fd, events, max_events, int_timeout_milli_secs);
             time_t currtime = time(NULL);

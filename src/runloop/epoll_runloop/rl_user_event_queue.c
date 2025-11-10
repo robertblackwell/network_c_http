@@ -43,7 +43,7 @@ void queue_triggered_cb(RunloopRef rl, void* arg)
 static void mk_fds(UserEventQueueRef athis)
 {
     EvfQueuePtr me = (EvfQueuePtr)athis;
-#ifdef runloop_eventfd_ENABLE
+#ifdef RL_EPOLL_EVENTFD_ENABLE
     int fd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
     me->readfd = fd;
     me->writefd = fd;
@@ -60,19 +60,19 @@ static void mk_fds(UserEventQueueRef athis)
     assert(errno == EAGAIN);
 
 }
-void runloop_user_event_queue_init(RunloopRef rl, UserEventQueueRef uequeue)
+void runloop_user_event_queue_init(RunloopRef rl, UserEventQueueRef uequeue, size_t capacity)
 {
     RBL_SET_TAG(UEQueue_TAG, uequeue)
     RBL_SET_END_TAG(UEQueue_TAG, uequeue)
     EvfQueuePtr me = (EvfQueuePtr)uequeue;
-    uequeue->list = functor_list_new(runloop_MAX_FDS);
+    uequeue->list = functor_list_new(capacity);
     uequeue->user_event = runloop_user_event_new(rl);
     pthread_mutex_init(&(uequeue->queue_mutex), NULL);
 }
-UserEventQueueRef user_event_queue_new(RunloopRef rl)
+UserEventQueueRef user_event_queue_new(RunloopRef rl, size_t capacity)
 {
     UserEventQueueRef tmp = rl_event_allocate(rl, sizeof(UserEventQueue));
-    runloop_user_event_queue_init(rl, tmp);
+    runloop_user_event_queue_init(rl, tmp, capacity);
     return tmp;
 }
 void user_event_queue_free(UserEventQueueRef ueq)

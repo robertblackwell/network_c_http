@@ -1,7 +1,7 @@
 #ifndef C_HTTP_epoll_RL_INTERNAL_H
 #define C_HTTP_epoll_RL_INTERNAL_H
 #include <runloop/runloop.h>
-
+#include <runloop/functor.h>
 #include <pthread.h>
 #include <stdbool.h>
 #include <string.h>
@@ -23,6 +23,7 @@
 #endif
 typedef struct EventTable_s EventTable, *EventTableRef;
 
+#if 0
 struct FdTable_s;
 //===============
 // #define CBTABLE_MAX 4096
@@ -36,7 +37,8 @@ RunloopWatcherBaseRef FdTable_lookup(FdTableRef athis, int fd);
 int        FdTable_iterator(FdTableRef athis);
 int        FdTable_next_iterator(FdTableRef athis, int iter);
 uint64_t   FdTable_size(FdTableRef athis);
-
+#endif
+#if 0
 /**
  * A Functor is a generic callback - a function pointer (of type PostableFunction) and single anonymous argument.
  *
@@ -69,10 +71,10 @@ void functor_list_free(FunctorListRef this);
 void functor_list_add(FunctorListRef this, Functor func);
 Functor functor_list_remove(FunctorListRef this);
 int functor_list_size(FunctorListRef this);
-
 void fd_map_init();
 bool fd_map_at(int j);
 bool fd_map_set(int j);
+#endif
 
 #define REGISTER_WQUEUE_REACTOR 1
 
@@ -83,7 +85,7 @@ struct Runloop_s {
     bool                    runloop_executing;
     pid_t                   tid;
     EventTableRef           event_table_ref;
-    FdTableRef              table; // (int, CallbackData)
+    // FdTableRef              table; // (int, CallbackData)
     FunctorListRef          ready_list;
     RBL_DECLARE_END_TAG;
 };
