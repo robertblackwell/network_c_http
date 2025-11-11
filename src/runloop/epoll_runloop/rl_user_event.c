@@ -1,4 +1,4 @@
-#include <src/runloop/epoll_runloop/event_table.h>
+#include <src/runloop/event_table.h>
 #include "runloop_internal.h"
 #include <rbl/macros.h>
 #include <assert.h>

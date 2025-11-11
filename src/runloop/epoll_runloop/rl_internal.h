@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <common/list.h>
+#include <runloop/rl_allocator.h>
 typedef void* EventTableRef;
 
 struct Runloop_s {
@@ -18,7 +19,4 @@ struct Runloop_s {
     FunctorListRef          ready_list;
     RBL_DECLARE_END_TAG;
 };
-
-void* rl_event_allocate(RunloopRef rl, size_t size_required);
-void  rl_event_free(RunloopRef rl, void* p);
 #endif

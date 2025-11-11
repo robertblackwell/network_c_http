@@ -1,5 +1,5 @@
-#include <src/runloop/epoll_runloop/event_table.h>
-#include "runloop_internal.h"
+#include <src/runloop/event_table.h>
+#include "src/runloop/epoll_runloop/runloop_internal.h"
 #include <assert.h>
 #define RL_ALLO_EVENT_TABLE
 void* rl_event_allocate(RunloopRef rl, size_t size)
