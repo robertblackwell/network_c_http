@@ -10,6 +10,7 @@ set(HEADER_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/queue.h
         ${CMAKE_CURRENT_SOURCE_DIR}/utils.h
         ${CMAKE_CURRENT_SOURCE_DIR}/make_uuid.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/object_pool.h
         ${CMAKE_CURRENT_SOURCE_DIR}/verify_statistics.h
 )
 set(SOURCE_FILES
@@ -24,6 +25,7 @@ set(SOURCE_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/utils.c
         ${CMAKE_CURRENT_SOURCE_DIR}/queue.c
         ${CMAKE_CURRENT_SOURCE_DIR}/make_uuid.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/object_pool.c
         ${CMAKE_CURRENT_SOURCE_DIR}/verify_statistics.c
 
 )
