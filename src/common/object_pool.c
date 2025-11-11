@@ -27,6 +27,10 @@ FreeList* freelist_new(int obj_count)
     }
     return fl;
 }
+void freelist_free(FreeListRef fl)
+{
+    free(fl);
+}
 bool freelist_is_full(FreeListRef fl)
 {
     return fl->count == (fl->max_entries);
@@ -232,9 +236,10 @@ ObjectPool* object_pool_create(int obj_size, int obj_count) {
     et->blk_end_tag_offset = et->stride - et->blk_tag_length;
     return et;
 }
-void object_pool_free(ObjectPoolRef et)
+void object_pool_destroy(ObjectPoolRef pool)
 {
-    free(et);
+    freelist_free(pool->free_list_ptr);
+    free(pool);
 }
 void* object_pool_allocate(ObjectPoolRef op)
 {
@@ -261,7 +266,7 @@ size_t object_pool_number_in_use(ObjectPoolRef et)
     size_t fl_used = (fl->max_entries) - fl_unused;
     return fl_used;
 }
-bool object_pool_has_outstanding_events(ObjectPoolRef et)
+bool object_pool_has_outstanding_objects(ObjectPoolRef et)
 {
     return ! freelist_is_full((et->free_list_ptr));
 }

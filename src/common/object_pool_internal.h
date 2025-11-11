@@ -35,6 +35,8 @@ struct FreeList_s {
  * Create a new free list with object_count entries
  */
 FreeListRef freelist_new(int object_count);
+void freelist_free(FreeListRef fl);
+
 /**
  *  tests a free list to see if its full
  */
@@ -73,8 +75,8 @@ struct ObjectPool_s {
 
 
 uint16_t object_pool_stride(ObjectPoolRef ot);
-uint16_t object_pool_obj_size(ObjectPoolRef ot);
-uint16_t object_pool_obj_count(ObjectPoolRef ot);
+//uint16_t object_pool_obj_size(ObjectPoolRef ot);
+//uint16_t object_pool_obj_count(ObjectPoolRef ot);
 /**
  * return the address (a pointer to) the index-th memory block
  * in the pool

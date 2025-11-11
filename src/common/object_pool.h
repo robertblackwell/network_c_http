@@ -41,4 +41,8 @@ size_t object_pool_number_in_use(ObjectPoolRef et);
  */
 void object_pool_destroy(ObjectPoolRef et);
 
+uint16_t object_pool_obj_size(ObjectPoolRef ot);
+
+uint16_t object_pool_obj_count(ObjectPoolRef ot);
+
 #endif

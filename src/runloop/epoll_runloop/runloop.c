@@ -10,21 +10,9 @@
 #include <errno.h>
 #include <rbl/logger.h>
 #include <rbl/macros.h>
-#include <common/list.h>
 
-static void drain_callback(void* arg)
-{
-    printf("drain callback\n");
-}
-static int *int_in_heap(int key) {
-    int *result;
-    if ((result = malloc(sizeof(*result))) == NULL)
-        abort();
-    *result = key;
-    return result;
-}
 /**
- * Create a new reactor runloop. Should only be one per thread
+ * Create a new runloop. Should only be one per thread
  * @NOTE - this implementation only works for Linux and uses epoll
  */
 void runloop_init(RunloopRef athis) {
