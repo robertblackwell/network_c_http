@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <rbl/logger.h>
 #include <rbl/macros.h>
+#include <common/object_pool.h>
 
 typedef union Mslab_u {
     RunloopTimer       timer;
@@ -21,6 +22,20 @@ typedef union Mslab_u {
     // RunloopQueueWatcher qwatcher;
     // RunloopEvent        runloop_event;
 } Mslab;
+
+
+void* rl_event_allocate(RunloopRef rl, size_t size)
+{
+    uint16_t objsize = object_pool_obj_size(rl->object_pool_ref);
+    assert(objsize >= size);
+    void* p = object_pool_allocate(rl->object_pool_ref);
+    return p;
+}
+
+void rl_event_free(RunloopRef rl, void* p)
+{
+    object_pool_deallocate(rl->object_pool_ref, p);
+}
 
 /**
  * Create a new runloop. Should only be one per thread
@@ -37,7 +52,7 @@ void runloop_init(RunloopRef athis) {
     runloop->runloop_executing = false;
     RBL_ASSERT((runloop->epoll_fd != -1), "epoll_create failed");
     RBL_LOG_FMT("runloop_new epoll_fd %d", runloop->epoll_fd);
-    runloop->object_pool_ref = rl_allocate_new(sizeof(Mslab), RL_MAX_EVENTS);
+    runloop->object_pool_ref = object_pool_create(sizeof(Mslab), RL_MAX_EVENTS);
     runloop->ready_list = functor_list_new(RL_MAX_RUNLIST);
 }
 RunloopRef runloop_new(void) {
@@ -64,7 +79,7 @@ void runloop_free(RunloopRef athis)
     if(! athis->closed_flag) {
         runloop_close(athis);
     }
-    event_table_free(athis->event_table_ref);
+    object_pool_destroy(athis->object_pool_ref);
     functor_list_free(athis->ready_list);
     free(athis);
 }
@@ -101,7 +116,7 @@ int runloop_run(RunloopRef athis, long timeout_milli_secs) {
         );
         if(
             ((functor_list_size(athis->ready_list) == 0))
-            &&(0 == event_table_number_in_use(athis->event_table_ref))
+            &&(0 == object_pool_number_in_use(athis->object_pool_ref))
         ) {
             // no more work to do - clean exit
             result = 0;

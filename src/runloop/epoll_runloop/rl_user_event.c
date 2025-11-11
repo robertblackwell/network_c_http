@@ -1,4 +1,3 @@
-#include <src/runloop/event_table.h>
 #include "runloop_internal.h"
 #include <rbl/macros.h>
 #include <assert.h>
