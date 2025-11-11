@@ -1,7 +1,6 @@
 
-#ifndef H_runloop_epoll_event_allocator_H
-#define H_runloop_epoll_event_allocator_H
-#include "src/runloop/epoll_runloop/runloop_internal.h"
+#ifndef H_runloop_event_allocator_H
+#define H_runloop_event_allocator_H
 #include <unistd.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -10,7 +9,7 @@
 #include <stdbool.h>
 #include <common/object_pool.h>
 #define EVT_MAX RL_MAX_EVENTS
-
+typedef void* EventTableRef;
 EventTableRef event_table_new();
 void event_table_init(EventTableRef et);
 void* event_table_get_entry(EventTableRef et);

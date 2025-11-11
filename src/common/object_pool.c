@@ -219,7 +219,7 @@ ObjectPool* object_pool_create(int obj_size, int obj_count) {
         char tag[8];
         uint16_t blk_index;
     } MBlk;
-    uint blk_size = 8+8+obj_size+8;
+    int blk_size = 8+8+obj_size+8;
     ObjectPool *et = malloc(sizeof(ObjectPool) + obj_count * blk_size);
     et->free_list_ptr = freelist_new(obj_count);
     et->obj_count = obj_count;

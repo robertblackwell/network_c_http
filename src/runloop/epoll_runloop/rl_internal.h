@@ -15,7 +15,7 @@ struct Runloop_s {
     bool                    closed_flag;
     bool                    runloop_executing;
     pid_t                   tid;
-    EventTableRef           event_table_ref;
+    ObjectPoolRef           object_pool_ref;
     FunctorListRef          ready_list;
     RBL_DECLARE_END_TAG;
 };

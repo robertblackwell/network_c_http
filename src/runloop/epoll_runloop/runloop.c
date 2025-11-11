@@ -11,6 +11,17 @@
 #include <rbl/logger.h>
 #include <rbl/macros.h>
 
+typedef union Mslab_u {
+    RunloopTimer       timer;
+    RunloopListener    listener;
+    RunloopStream      stream;
+    RunloopUserEvent   user_event;
+    // RunloopQueueEvent   qevent;
+    // RunloopInterthreadQueueEvent itqevent;
+    // RunloopQueueWatcher qwatcher;
+    // RunloopEvent        runloop_event;
+} Mslab;
+
 /**
  * Create a new runloop. Should only be one per thread
  * @NOTE - this implementation only works for Linux and uses epoll
@@ -18,7 +29,6 @@
 void runloop_init(RunloopRef athis) {
 
     RunloopRef runloop = athis;
-
     RUNLOOP_SET_TAG(runloop)
     RUNLOOP_SET_END_TAG(runloop)
 //    runloop->tid = gettid();
@@ -27,7 +37,7 @@ void runloop_init(RunloopRef athis) {
     runloop->runloop_executing = false;
     RBL_ASSERT((runloop->epoll_fd != -1), "epoll_create failed");
     RBL_LOG_FMT("runloop_new epoll_fd %d", runloop->epoll_fd);
-    runloop->event_table_ref = event_table_new();
+    runloop->object_pool_ref = rl_allocate_new(sizeof(Mslab), RL_MAX_EVENTS);
     runloop->ready_list = functor_list_new(RL_MAX_RUNLIST);
 }
 RunloopRef runloop_new(void) {
