@@ -91,7 +91,7 @@ void runloop_stream_deinit(RunloopStreamRef stream)
 
 RunloopStreamRef runloop_stream_new(RunloopRef runloop, int fd)
 {
-    RunloopStreamRef stream = event_table_get_entry(runloop->event_table);
+    RunloopStreamRef stream = runloop_event_allocate(runloop, sizeof(RunloopStream));
     runloop_stream_init(stream, runloop, fd);
     return stream;
 }
@@ -101,7 +101,7 @@ void runloop_stream_free(RunloopStreamRef stream)
     STREAM_SET_END_TAG(stream);
     runloop_stream_deregister(stream);
     close(stream->fd);
-    event_table_release_entry(stream->runloop->event_table, stream);
+    runloop_event_free(stream->runloop, stream);
 }
 void runloop_stream_register(RunloopStreamRef stream)
 {

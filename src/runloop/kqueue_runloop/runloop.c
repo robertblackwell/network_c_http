@@ -1,6 +1,5 @@
 #include <runloop/runloop.h>
-#include "rl_internal.h"
-#include "event_table.h"
+#include "runloop_internal.h"
 #include <stdint.h>
 #include <time.h>
 #include <sys/event.h>
@@ -13,7 +12,7 @@
 #include <errno.h>
 #include <rbl/logger.h>
 #include <rbl/macros.h>
-#include <common/list.h>
+#include <common/object_pool.h>
 
 //__thread RunloopRef my_reactor_ptr = NULL;
 //
@@ -32,6 +31,30 @@ struct kevent* runloop_get_fresh_event_table(RunloopRef athis);
 int runloop_get_max_events(RunloopRef athis);
 struct kevent* runloop_events_at(RunloopRef athis, int index);
 
+struct MemorySlab_s {
+        union {
+            RunloopTimer     timer;
+            RunloopListener  listener;
+            RunloopStream    stream;
+            RunloopUserEvent user_event;
+            RunloopSignal    signal;
+        };
+};
+
+void* runloop_event_allocate(RunloopRef rl, size_t size)
+{
+    uint16_t objsize = object_pool_obj_size(rl->object_pool_ref);
+    assert(objsize >= size);
+    void* p = object_pool_allocate(rl->object_pool_ref);
+    return p;
+}
+
+void runloop_event_free(RunloopRef rl, void* p)
+{
+    object_pool_deallocate(rl->object_pool_ref, p);
+}
+
+
 void runloop_init(RunloopRef rl) {
 
     RunloopRef runloop = rl;
@@ -42,7 +65,7 @@ void runloop_init(RunloopRef rl) {
     runloop->runloop_executing = false;
     RBL_ASSERT((runloop->kqueue_fd != -1), "kqueue create failed");
     RBL_LOG_FMT("runloop_new kqueue_fd %d", runloop->kqueue_fd);
-    runloop->event_table = event_table_new();
+    runloop->object_pool_ref = object_pool_create(sizeof(MemorySlab), RL_MAX_EVENTS);
     runloop->ready_list = functor_list_new(RL_MAX_RUNLIST);
 #if 1
     runloop->change_count = 0;
@@ -107,11 +130,11 @@ int runloop_run(RunloopRef athis, time_t timeout_ms) {
 
         printf("runloop functor_list_size: %d event_table_number_in_user %zu \n",
             functor_list_size(athis->ready_list),
-            event_table_number_in_use(athis->event_table)
+            object_pool_number_in_use(athis->object_pool_ref)
         );
         if(
             ((functor_list_size(athis->ready_list) == 0))
-            && (0 == event_table_number_in_use(athis->event_table))
+            && (0 == object_pool_number_in_use(athis->object_pool_ref))
         ) {
             // no more work to do - clean exit
             RBL_LOG_FMT("runloop exiting");

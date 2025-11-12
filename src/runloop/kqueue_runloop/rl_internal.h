@@ -5,6 +5,7 @@
 #include <sys/event.h>
 #include <pthread.h>
 #include <stdbool.h>
+#include <common/object_pool.h>
 
 typedef struct EventTable_s EventTable, *EventTableRef;
 
@@ -16,7 +17,7 @@ struct Runloop_s {
     bool                    closed_flag;
     bool                    runloop_executing;
     pthread_t               tid;
-    EventTableRef           event_table;
+    ObjectPoolRef           object_pool_ref;
 #if 1
     struct kevent           change[RL_MAX_EVENTS];
     int                     change_max;

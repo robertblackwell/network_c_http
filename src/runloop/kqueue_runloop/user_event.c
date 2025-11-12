@@ -58,7 +58,7 @@ void runloop_user_event_init(RunloopUserEventRef user_event, RunloopRef runloop)
 }
 RunloopUserEventRef runloop_user_event_new(RunloopRef runloop)
 {
-    RunloopUserEventRef user_event = event_table_get_entry(runloop->event_table);
+    RunloopUserEventRef user_event = runloop_event_allocate(runloop, sizeof(RunloopUserEvent));
     runloop_user_event_init(user_event, runloop);
     return user_event;
 }
@@ -67,7 +67,7 @@ void runloop_user_event_free(RunloopUserEventRef user_event)
     USER_EVENT_CHECK_TAG(user_event);
     USER_EVENT_CHECK_END_TAG(user_event)
     kqh_user_event_cancel(user_event);
-    event_table_release_entry(user_event->runloop->event_table, user_event);
+    runloop_event_free(user_event->runloop, user_event);
 }
 void runloop_user_event_register(RunloopUserEventRef user_event)
 {

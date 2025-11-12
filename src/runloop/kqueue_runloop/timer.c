@@ -56,7 +56,7 @@ void runloop_timer_init(RunloopTimerRef timer, RunloopRef runloop)
 }
 RunloopTimerRef runloop_timer_new(RunloopRef runloop_ref)
 {
-    RunloopTimerRef this = event_table_get_entry(runloop_ref->event_table);
+    RunloopTimerRef this = runloop_event_allocate(runloop_ref, sizeof(RunloopTimer));
     runloop_timer_init(this, runloop_ref);
     return this;
 }
@@ -64,7 +64,7 @@ void runloop_timer_free(RunloopTimerRef athis)
 {
     TIMER_CHECK_TAG(athis);
     TIMER_CHECK_END_TAG(athis);
-    event_table_release_entry(athis->runloop->event_table, athis);
+    runloop_event_free(athis->runloop, athis);
 }
 void runloop_timer_register(RunloopTimerRef timer, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating)
 {

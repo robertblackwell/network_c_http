@@ -57,8 +57,7 @@ void runloop_listener_deinit(RunloopListenerRef listener)
 }
 RunloopListenerRef runloop_listener_new(RunloopRef runloop, int fd)
 {
-    RunloopListenerRef listener = event_table_get_entry(runloop->event_table);
-    size_t x = event_table_number_in_use(runloop->event_table);
+    RunloopListenerRef listener = runloop_event_allocate(runloop, sizeof(RunloopListener));
     runloop_listener_init(listener, runloop, fd);
     return listener;
 }
@@ -68,7 +67,7 @@ void runloop_listener_free(RunloopListenerRef listener)
     LISTNER_CHECK_END_TAG(listener)
     runloop_listener_verify(listener);
     close(listener->fd);
-    event_table_release_entry(listener->runloop->event_table, listener);
+    runloop_event_free(listener->runloop, listener);
 }
 void runloop_listener_register(RunloopListenerRef listener, PostableFunction postable, void* postable_arg)
 {

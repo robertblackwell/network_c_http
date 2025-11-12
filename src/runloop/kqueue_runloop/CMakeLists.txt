@@ -4,7 +4,7 @@ set(kq_RUNLOOP_HEADER_FILES
 		${C_HTTP_SOURCE_DIR}/runloop/rl_checktag.h
 		${CMAKE_CURRENT_SOURCE_DIR}/runloop_internal.h
 		${CMAKE_CURRENT_SOURCE_DIR}/rl_internal.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/event_table.h
+#        ${CMAKE_CURRENT_SOURCE_DIR}/event_table.h
 	)
 
 set(kq_RUNLOOP_SOURCE_FILES
@@ -24,7 +24,7 @@ set(kq_RUNLOOP_SOURCE_FILES
 		${CMAKE_CURRENT_SOURCE_DIR}/stream.c
 		${CMAKE_CURRENT_SOURCE_DIR}/timer.c
 #		${CMAKE_CURRENT_SOURCE_DIR}/watcher_base.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/event_table.c
+#        ${CMAKE_CURRENT_SOURCE_DIR}/event_table.c
 	)
 
 set_source_files_properties(${RUNLOOP_SOURCE_FILES} PROPERTIES LANGUAGE C)
