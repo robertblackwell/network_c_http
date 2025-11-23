@@ -27,6 +27,8 @@ struct Runloop_s {
     int                     events_count;
 #endif
     FunctorListRef          ready_list;
+    int                     max_nbr_events;
+    int                     max_simultaneous_callbacks_per_event;
     RBL_DECLARE_END_TAG;
 };
 

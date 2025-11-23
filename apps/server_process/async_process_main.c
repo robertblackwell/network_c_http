@@ -53,7 +53,7 @@ void* thread_function(void* arg)
     socket_set_non_blocking(fd);
     RunloopRef runloop = runloop_new();
     ServerCtxRef server_ctx_ref = &server_ctx;
-    server_ctx_init(server_ctx_ref, runloop, fd);
+    server_ctx_init(server_ctx_ref, runloop, fd, 100);
     server_ctx_run(server_ctx_ref);
     runloop_run(runloop, -1L);
     return NULL;

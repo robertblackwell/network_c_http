@@ -2,7 +2,6 @@
 #include <stddef.h>
 #include <assert.h>
 #include <string.h>
-#include <src/common/alloc.h>
 #include <src/common/list.h>
 #include <src/common/iobuffer.h>
 
@@ -13,7 +12,7 @@ typedef struct BufferChain_s {
 
 BufferChainRef BufferChain_new()
 {
-    BufferChainRef tmp = eg_alloc(sizeof(BufferChain));
+    BufferChainRef tmp = malloc(sizeof(BufferChain));
     tmp->m_chain = List_new();
     tmp->m_size = 0;
     return tmp;

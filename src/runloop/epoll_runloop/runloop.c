@@ -36,29 +36,39 @@ void rl_event_free(RunloopRef rl, void* p)
 {
     object_pool_deallocate(rl->object_pool_ref, p);
 }
-
 /**
  * Create a new runloop. Should only be one per thread
  * @NOTE - this implementation only works for Linux and uses epoll
  */
-void runloop_init(RunloopRef athis) {
+void runloop_init(RunloopRef athis, RunloopConfig* config) {
 
     RunloopRef runloop = athis;
     RUNLOOP_SET_TAG(runloop)
     RUNLOOP_SET_END_TAG(runloop)
-//    runloop->tid = gettid();
+    runloop->
     runloop->epoll_fd = epoll_create1(0);
     runloop->closed_flag = false;
     runloop->runloop_executing = false;
+    runloop->max_nbr_events = (config) ? config->max_nbr_events+2: RL_MAX_EVENTS+2;
+    runloop->max_simultaneous_callbacks_per_event = (config)
+        ? config->max_simultaneous_callbacks_per_event
+        : RL_GTHREADS_PER_WATCHER;
     RBL_ASSERT((runloop->epoll_fd != -1), "epoll_create failed");
     RBL_LOG_FMT("runloop_new epoll_fd %d", runloop->epoll_fd);
-    runloop->object_pool_ref = object_pool_create(sizeof(Mslab), RL_MAX_EVENTS);
-    runloop->ready_list = functor_list_new(RL_MAX_RUNLIST);
+    runloop->object_pool_ref = object_pool_create(sizeof(Mslab), runloop->max_nbr_events);
+    runloop->ready_list = functor_list_new(runloop->max_nbr_events * runloop->max_simultaneous_callbacks_per_event );
+}
+RunloopRef runloop_new_with_config(RunloopConfig* config)
+{
+    RunloopRef runloop = malloc(sizeof(Runloop));
+    RBL_ASSERT((runloop != NULL), "malloc failed new runloop");
+    runloop_init(runloop, config);
+    return (RunloopRef)runloop;
 }
 RunloopRef runloop_new(void) {
     RunloopRef runloop = malloc(sizeof(Runloop));
     RBL_ASSERT((runloop != NULL), "malloc failed new runloop");
-    runloop_init(runloop);
+    runloop_init(runloop, NULL);
     return (RunloopRef)runloop;
 }
 

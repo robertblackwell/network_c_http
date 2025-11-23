@@ -94,12 +94,12 @@ void* server_thread_function(void* tctx)
     int fd = local_create_bound_socket(port, "localhost");
     socket_set_non_blocking(fd);
     RunloopRef runloop = runloop_new();
-    ServerCtxRef server_ctx_ref = server_ctx_new(runloop, fd);
+    ServerCtxRef server_ctx_ref = server_ctx_new(runloop, fd, 100);
     server_ctx_run(server_ctx_ref);
     runloop_run(runloop, 5000L);
 //    printf("XXXXXserver thread after runloop_run()\n");
     server_ctx_free(server_ctx_ref);
-    runloop_free(runloop);
+    // runloop_free(runloop);
     return 0;
 }
 GenericMsgRef make_send_msg(int ident, int i, int j)

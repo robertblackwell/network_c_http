@@ -4,17 +4,27 @@
 #include <apps/tcp_msg_stream/msg_stream.h>
 #include <apps/server/server_ctx.h>
 #define SimpleApp_TAG "SMPAPP"
+
+// When defined this macro cases struct SimpleApp_s to contain the full struct MsgStream_s
+// This avoids dynamic allocation of the MsgStream object
+#define SMAPP_MSG_STREAM_MEM
 typedef struct SimpleApp_s {
     RBL_DECLARE_TAG;
-    MsgStreamRef msg_stream_ref;
-    AppDoneCallback* done_cb;
-    void *done_arg;
-    RBL_DECLARE_END_TAG;    
+    MsgStreamRef        msg_stream_ref;
+    AppDoneCallback*    done_cb;
+    void*               done_arg;
+#ifdef SMAPP_MSG_STREAM_MEM
+    MsgStream           msg_stream_mem;
+#else
+#endif
+    RBL_DECLARE_END_TAG;
 } SimpleApp, *SimpleAppRef;
 typedef void(SimpleAppDoneCallback)(SimpleAppRef app_ref, void* arg, int error);
 typedef void(SimpleAppCallback)(SimpleAppRef app);
 
 SimpleAppRef simple_app_new(RunloopRef rl, int connection_fd);
+void simple_app_init(SimpleAppRef app, RunloopRef rl, int connection_fd);
+void simple_app_deinit(SimpleAppRef app);
 void simple_app_free(SimpleAppRef app);
 void simple_app_run(SimpleAppRef app_ref, AppDoneCallback cb, void* arg);
 typedef struct AppInterface

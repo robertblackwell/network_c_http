@@ -44,17 +44,32 @@ typedef uint64_t EventMask, RunloopTimerEvent;
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Runloop interface
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+typedef struct RunloopConfig_s
+{
+    /**
+     * A runloop allocates event sources such as RunloopTimer and RunloopStream from an object pool
+     * of fixed size set at creation time. max_nbr_events sets the size of that object pool.
+     */
+    int max_nbr_events;
+    /**
+     * A runloop maintains a list of callback functions (a run list) waiting to be called. This list has a maximum size
+     * set at startup time and list items are added and removed by value. This means that the run list can operate
+     * without allocation and deallocation of dynamic memory.
+     *
+     * To set the size of the run list the runloop requires a parameter that tells it the max number of callbacks
+     * that could be outstanding at the same time for each event source. So for example if the runloop is supporting
+     * a traditional http server, that processes a single request at a time, and does not apply any timeouts,
+     * this number is probably 1. For a full duplex TCP based protocol that both sends and receives messages
+     * at the same time and applies a timeout to the receives side this number might be 3.
+     */
+    int max_simultaneous_callbacks_per_event;
+}RunloopConfig ;
 RunloopRef runloop_new(void);
+RunloopRef runloop_new_with_config(RunloopConfig* config);
 void runloop_free(RunloopRef athis);
-//void runloop_init(RunloopRef athis);
-//void runloop_deinit(RunloopRef athis);
 void runloop_close(RunloopRef athis);
-//int runloop_register(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref);
-//int runloop_deregister(RunloopRef athis, int fd);
-//int runloop_reregister(RunloopRef athis, int fd, uint32_t interest, RunloopWatcherBaseRef wref);
 int  runloop_run(RunloopRef athis, time_t timeout);
 void runloop_post(RunloopRef athis, PostableFunction cb, void* arg);
-//void runloop_delete(RunloopRef athis, int fd);
 void runloop_verify(RunloopRef r);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -1,6 +1,5 @@
 
 #include "stx_msg.h"
-#include <src/common/alloc.h>
 #include <src/http/header_list.h>
 #include <rbl/logger.h>
 #include <stdbool.h>
@@ -23,7 +22,7 @@ struct StxMsg_s
 
 StxMsgRef stx_msg_new ()
 {
-    StxMsgRef mref = (StxMsgRef) eg_alloc(sizeof(StxMsg));
+    StxMsgRef mref = (StxMsgRef) malloc(sizeof(StxMsg));
     RBL_SET_TAG(StxMsg_TAG, mref)
     RBL_SET_END_TAG(StxMsg_TAG, mref);
     assert(mref != NULL);
@@ -38,7 +37,7 @@ void stx_msg_free(StxMsgRef this)
 
     IOBuffer_free(((this)->body));
     this->body = NULL;
-    eg_free(this);
+    free(this);
 }
 
 static char get_body_first_char(StxMsgRef msg_ref)

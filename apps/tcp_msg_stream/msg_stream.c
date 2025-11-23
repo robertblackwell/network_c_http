@@ -11,7 +11,12 @@ void msg_stream_init(MsgStreamRef msg_stream, RunloopRef rl, int fd)
 {
     RBL_SET_TAG(MsgStream_TAG, msg_stream)
     RBL_SET_END_TAG(MsgStream_TAG, msg_stream)
+#ifdef MSG_STREAM_TCP_MEMORY
+    msg_stream->tcp_stream_ref = &(msg_stream->tcp_stream_memory);
+    tcp_stream_init(msg_stream->tcp_stream_ref, rl, fd);
+#else
     msg_stream->tcp_stream_ref = tcp_stream_new(rl, fd);
+#endif
     msg_stream->read_cb = NULL;
     msg_stream->read_cb_arg = NULL;
     msg_stream->write_cb = NULL;
@@ -21,11 +26,29 @@ void msg_stream_init(MsgStreamRef msg_stream, RunloopRef rl, int fd)
     msg_stream->input_message_list = List_new();
     msg_stream_reader_init(msg_stream);
 }
+void msg_stream_deinit(MsgStream* msg_stream_ptr)
+{
+    RBL_CHECK_TAG(MsgStream_TAG, msg_stream_ptr)
+    RBL_CHECK_END_TAG(MsgStream_TAG, msg_stream_ptr)
+#ifdef MSG_STREAM_TCP_MEMORY
+    tcp_stream_deinit(msg_stream_ptr->tcp_stream_ref);
+#else
+    tcp_stream_free(msg_stream_ref->tcp_stream_ref);
+#endif
+    generic_msg_parser_free(msg_stream_ptr->msg_parser_ref);
+    List_safe_free(msg_stream_ptr->input_message_list, free);
+    if(msg_stream_ptr->input_buffer) IOBuffer_free(msg_stream_ptr->input_buffer);
+    if(msg_stream_ptr->output_buffer) IOBuffer_free(msg_stream_ptr->output_buffer);
+}
 void msg_stream_free(MsgStreamRef msg_stream_ref)
 {   
     RBL_CHECK_TAG(MsgStream_TAG, msg_stream_ref)
     RBL_CHECK_END_TAG(MsgStream_TAG, msg_stream_ref)
+#ifdef MSG_STREAM_TCP_MEMORY
+    tcp_stream_deinit(msg_stream_ref->tcp_stream_ref);
+#else
     tcp_stream_free(msg_stream_ref->tcp_stream_ref);
+#endif
     generic_msg_parser_free(msg_stream_ref->msg_parser_ref);
     List_safe_free(msg_stream_ref->input_message_list, free);
     if(msg_stream_ref->input_buffer) IOBuffer_free(msg_stream_ref->input_buffer);

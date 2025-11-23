@@ -4,7 +4,6 @@
 #include <string.h>
 #include <assert.h>
 #include <stdio.h>
-#include <src/common/alloc.h>
 #include <src/common/utils.h>
 #include <src/common/iobuffer.h>
 
@@ -49,7 +48,7 @@ int test_input_read_some(test_input_t* this, void* buffer, int length)
 }
 test_output_r test_output_new(HttpMessageRef msg, int rc)
 {
-    test_output_r rdref = eg_alloc(sizeof(test_output_t));
+    test_output_r rdref = malloc(sizeof(test_output_t));
     rdref->message = msg;
     rdref->rc = rc;
     return rdref;

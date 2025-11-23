@@ -1,7 +1,4 @@
-
-
 #include <common/iobuffer.h>
-#include <common/alloc.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -31,7 +28,7 @@ IOBufferRef IOBuffer_init(IOBufferRef this, int capacity )
 {
     RBL_SET_TAG(IOBuffer_TAG, this);
     this->allocated_capacity = capacity + 1;
-    this->buffer_ptr = this->mem_p = eg_alloc(this->allocated_capacity);
+    this->buffer_ptr = this->mem_p = malloc(this->allocated_capacity);
     if(this->mem_p == NULL) goto memerror;
     this->char_p = (char*)this->mem_p;
 #ifdef IOB_FILL
@@ -55,7 +52,7 @@ void IOBuffer_expand_and_reset(IOBufferRef iob, int new_capacity)
 }
 IOBufferRef IOBuffer_new_with_capacity(int capacity)
 {
-    IOBufferRef pcref = eg_alloc(sizeof(IOBuffer));
+    IOBufferRef pcref = malloc(sizeof(IOBuffer));
     if (pcref == NULL) {
         assert(0);
         return NULL;
@@ -182,7 +179,7 @@ void IOBuffer_consume(IOBufferRef this, int byte_count)
 void IOBuffer_destroy(IOBufferRef this)
 {
     RBL_CHECK_TAG(IOBuffer_TAG, this)
-    eg_free(this->mem_p);
+    free(this->mem_p);
 }
 void IOBuffer_reset(IOBufferRef this)
 {
@@ -194,8 +191,8 @@ void IOBuffer_reset(IOBufferRef this)
 void IOBuffer_free(IOBufferRef this)
 {
     RBL_CHECK_TAG(IOBuffer_TAG, this)
-    eg_free(this->mem_p);
-    eg_free(this);
+    free(this->mem_p);
+    free(this);
 }
 bool IOBuffer_empty(IOBufferRef this)
 {

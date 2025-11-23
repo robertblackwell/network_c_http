@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdio.h>
-#include <src/common/alloc.h>
 #include <src/common/list.h>
 #include <src/common/utils.h>
 //Internal - type used to build list
@@ -21,7 +20,7 @@ struct List_s {
 
 ListNode* ListNode_new(void* content, ListNode* prev, ListNode* next)
 {
-    ListNode* lnref = eg_alloc(sizeof(ListNode));
+    ListNode* lnref = malloc(sizeof(ListNode));
     lnref->item = content;
     lnref->forward = next;
     lnref->backward = prev;

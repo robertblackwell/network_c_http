@@ -23,7 +23,6 @@ bool Functor_is_empty(FunctorRef f);
 void Functor_dealloc(void **p);
 
 typedef struct FunctorList_s {
-//    char       tag[RBL_TAG_LENGTH];
     RBL_DECLARE_TAG;
     int        capacity;
     int        head;

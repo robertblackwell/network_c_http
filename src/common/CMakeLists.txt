@@ -1,6 +1,6 @@
 set(HEADER_FILES
 #        ${CMAKE_CURRENT_SOURCE_DIR}/generics/dlist.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/alloc.h
+#        ${CMAKE_CURRENT_SOURCE_DIR}/alloc.h
         ${CMAKE_CURRENT_SOURCE_DIR}/url_parser.h
         ${CMAKE_CURRENT_SOURCE_DIR}/url.h
         ${CMAKE_CURRENT_SOURCE_DIR}/buffer_chain.h
@@ -15,7 +15,7 @@ set(HEADER_FILES
 )
 set(SOURCE_FILES
 #        ${CMAKE_CURRENT_SOURCE_DIR}/generics/dlist.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/alloc.c
+#        ${CMAKE_CURRENT_SOURCE_DIR}/alloc.c
         ${CMAKE_CURRENT_SOURCE_DIR}/buffer_chain.c
         ${CMAKE_CURRENT_SOURCE_DIR}/cbuffer.c
         ${CMAKE_CURRENT_SOURCE_DIR}/iobuffer.c

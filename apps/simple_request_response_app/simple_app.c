@@ -6,7 +6,12 @@ void simple_app_init(SimpleAppRef app, RunloopRef rl, int connection_fd)
 {
     RBL_SET_TAG(SimpleApp_TAG, app)
     RBL_SET_END_TAG(SimpleApp_TAG, app)
+#ifdef SMAPP_MSG_STREAM_MEM
+    app->msg_stream_ref = &(app->msg_stream_mem);
+    msg_stream_init(app->msg_stream_ref, rl, connection_fd);
+#else
     app->msg_stream_ref = msg_stream_new(rl, connection_fd);
+#endif
     // other stuff to come
 }
 
@@ -16,9 +21,19 @@ SimpleAppRef simple_app_new(RunloopRef rl, int connection_fd)
     simple_app_init(appref, rl, connection_fd);
     return appref;
 }
+void simple_app_deinit(SimpleAppRef app)
+{
+#ifdef SMAPP_MSG_STREAM_MEM
+    msg_stream_deinit(app->msg_stream_ref);
+    app->msg_stream_ref = NULL;
+#else
+    msg_stream_free(app->msg_stream_ref);
+    app->msg_stream_ref = NULL;
+#endif
+}
 void simple_app_free(SimpleAppRef app)
 {
-    msg_stream_free(app->msg_stream_ref);
+    simple_app_deinit(app);
     free(app);
 }
 AppInterface simple_app_interface_variable;

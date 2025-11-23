@@ -5,7 +5,6 @@
 #include <stdbool.h>
 #include <pthread.h>
 #include <assert.h>
-#include <src/common/alloc.h>
 #define ENABLE_LOGX
 #include <rbl/logger.h>
 
@@ -71,7 +70,7 @@ static bool q_full(QueueRef qref)
 
 QueueRef Queue_new_with_capacity(size_t capacity)
 {
-    QueueRef q = (QueueRef)eg_alloc(sizeof(Queue));
+    QueueRef q = (QueueRef)malloc(sizeof(Queue));
     q->max_size = capacity;
     q->q = malloc(sizeof(SocketFD) * q->max_size);
     q->size = 0;
@@ -86,7 +85,7 @@ QueueRef Queue_new_with_capacity(size_t capacity)
 
 QueueRef Queue_new()
 {
-    QueueRef q = (QueueRef)eg_alloc(sizeof(Queue));
+    QueueRef q = (QueueRef)malloc(sizeof(Queue));
     q->max_size = QUEUE_DEFAULT_SIZE;
     q->q = malloc(sizeof(SocketFD) * q->max_size);
     q->size = 0;

@@ -9,6 +9,7 @@
 #include <rbl/logger.h>
 #include <rbl/macros.h>
 #include <src/common/utils.h>
+#include <src/common/iobuffer.h>
 #include "tcp_stream.h"
 #include "tcp_stream_internal.h"
 
@@ -41,8 +42,12 @@ void tcp_stream_deinit(TcpStreamRef t)
 {
     RBL_CHECK_TAG(TcpStream_TAG, t)
     RBL_CHECK_END_TAG(TcpStream_TAG, t)
-    assert(0);
-    // runloop_stream_deinit(t->rlstream_ref);
+    // assert(0);
+    if (t->input_buffer != NULL) { IOBuffer_free(t->input_buffer);}
+    if (t->output_buffer != NULL) { IOBuffer_free(t->output_buffer);}
+    t->write_cb = NULL;
+    t->read_cb = NULL;
+    runloop_stream_free(t->rlstream_ref);
 }
 void tcp_stream_free(TcpStreamRef t)
 {

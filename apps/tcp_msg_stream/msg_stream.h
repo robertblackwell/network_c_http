@@ -10,18 +10,24 @@ typedef struct MsgStream_s MsgStream, *MsgStreamRef;
 typedef void(MsgReadCallback)(void* arg, GenericMsgRef msg, int error);
 typedef void(MsgWriteCallback)(void* arg, int error);
 
+// when defined MsgStream_s contains the full struct of TcpStream_s. This avoids dynamic allocation
+// of TcpStream objects
+#define MSG_STREAM_TCP_MEMORY
+
 struct MsgStream_s {
     RBL_DECLARE_TAG;
-    TcpStreamRef    tcp_stream_ref;
-    GenericMsgParserRef    msg_parser_ref;
-
-    void*             read_cb_arg;
-    MsgReadCallback*  read_cb;
-    IOBufferRef       input_buffer;
-    ListRef           input_message_list;
-    IOBufferRef       output_buffer;
-    MsgWriteCallback* write_cb;
-    void*             write_cb_arg;
+    TcpStreamRef        tcp_stream_ref;
+    GenericMsgParserRef msg_parser_ref;
+    void*               read_cb_arg;
+    MsgReadCallback*    read_cb;
+    IOBufferRef         input_buffer;
+    ListRef             input_message_list;
+    IOBufferRef         output_buffer;
+    MsgWriteCallback*   write_cb;
+    void*               write_cb_arg;
+#ifdef MSG_STREAM_TCP_MEMORY
+    TcpStream           tcp_stream_memory;
+#endif
     RBL_DECLARE_END_TAG;
 };
 

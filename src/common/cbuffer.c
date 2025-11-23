@@ -2,7 +2,6 @@
 #include <assert.h>
 #include <string.h>
 #include <rbl/check_tag.h>
-#include <src/common/alloc.h>
 #include <src/common/utils.h>
 #include <src/common/cbuffer.h>
 
@@ -71,7 +70,7 @@ typedef struct Cbuffer_s
 void* BufferStrategy_allocate(BufferStrategyRef bsref, size_t required_size)
 {
     if (required_size > bsref->m_max_size) assert(0);
-    return eg_alloc(max_of_two(required_size, bsref->m_min_size));
+    return malloc(max_of_two(required_size, bsref->m_min_size));
 
 }
 /**
@@ -105,7 +104,7 @@ BufferStrategy common_strategy = {.m_min_size=256, .m_max_size=1024*1024};
 
 CbufferRef Cbuffer_new()
 {
-    CbufferRef cb_ptr = (CbufferRef)eg_alloc(sizeof(Cbuffer));
+    CbufferRef cb_ptr = (CbufferRef)malloc(sizeof(Cbuffer));
     RBL_SET_TAG(CBUFFER_Tag, cb_ptr);
     RBL_SET_END_TAG(CBUFFER_Tag, cb_ptr)
     cb_ptr->m_strategy=&common_strategy;
@@ -135,9 +134,9 @@ void Cbuffer_free(CbufferRef this)
     assert(this != NULL);
     // this will allow success free of invalidated cbuffer
     if(this->m_memPtr != NULL) {
-        eg_free(this->m_memPtr);
+        free(this->m_memPtr);
     }
-    eg_free(this);
+    free(this);
 }
 /**
  * gets a pointer to the start of the memory slab being managed by the instance

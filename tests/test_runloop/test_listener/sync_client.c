@@ -2,7 +2,6 @@
 
 #include <netdb.h>
 #include <pthread.h>
-#include <src/common/alloc.h>
 #include <src/common/cbuffer.h>
 #include <src/http/http_message.h>
 #include <rbl/logger.h>

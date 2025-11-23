@@ -1,6 +1,5 @@
 
 #include <src/common/url.h>
-#include <src/common/alloc.h>
 #include <src/common/url_parser.h>
 #include <src/common/cbuffer.h>
 #include <string.h>
@@ -10,7 +9,7 @@ UrlRef Url_new(char* url)
     struct c_http_parser_url u;
     c_http_parser_url_init(&u);
     c_http_parser_parse_url(url, strlen(url),0, &u);
-    UrlRef this = eg_alloc(sizeof(Url_t));
+    UrlRef this = malloc(sizeof(Url_t));
 
     this->scheme = Cbuffer_new();
     if(u.field_data[UF_SCHEMA].len != 0)
@@ -53,7 +52,7 @@ void ulr_free(UrlRef this)
     Cbuffer_free(this->path);
     Cbuffer_free(this->query);
     Cbuffer_free(this->user_info);
-    eg_free(this);
+    free(this);
 
 }
 void Url_dispose(UrlRef* this_ptr)
@@ -66,7 +65,7 @@ void Url_dispose(UrlRef* this_ptr)
     Cbuffer_free(this->path);
     Cbuffer_free(this->query);
     Cbuffer_free(this->user_info);
-    eg_free(this);
+    free(this);
     this = NULL;
 }
 

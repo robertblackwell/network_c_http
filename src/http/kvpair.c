@@ -1,14 +1,8 @@
-/**
- * @file KVPair.c
- * @Brief Implementation file for key/value pair
- */
-
 #include <src/http/kvpair.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
-#include <src/common/alloc.h>
 /**
  * @brief key value pair with string key and string value
  */
@@ -75,13 +69,13 @@ KVPairRef KVPair_from_cstrpair(CStrPair cstrp)
 
 void KVPair_free(KVPairRef hlref)
 {
-    eg_free(hlref->label_ptr);
+    free(hlref->label_ptr);
     hlref->label_len = 0;
 //    hlref->label_ptr = NULL;
-    eg_free(hlref->value_ptr);
+    free(hlref->value_ptr);
     hlref->value_len = 0;
 //    hlref->value_ptr = NULL;
-    eg_free((void*) hlref);
+    free((void*) hlref);
 }
 void KVPair_dealloc(void* ptr) { KVPair_free((KVPairRef)(ptr));}
 char* KVPair_label(KVPair const * hlref)
@@ -95,7 +89,7 @@ char* KVPair_value(KVPair const * hlref)
 void KVPair_set_value(KVPairRef hlref, const char* valptr, size_t vallen)
 {
     char* oldvalptr = hlref->value_ptr;
-    hlref->value_ptr = eg_alloc(vallen+1);
+    hlref->value_ptr = malloc(vallen+1);
     memcpy(hlref->value_ptr, valptr, vallen);
     hlref->value_ptr[vallen] = '\0';
     free(oldvalptr);

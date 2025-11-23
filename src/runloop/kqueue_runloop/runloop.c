@@ -55,7 +55,7 @@ void runloop_event_free(RunloopRef rl, void* p)
 }
 
 
-void runloop_init(RunloopRef rl) {
+void runloop_init(RunloopRef rl, RunloopConfig* config) {
 
     RunloopRef runloop = rl;
     RUNLOOP_SET_TAG(runloop)
@@ -63,6 +63,10 @@ void runloop_init(RunloopRef rl) {
     runloop->kqueue_fd = kqueue();
     runloop->closed_flag = false;
     runloop->runloop_executing = false;
+    runloop->max_nbr_events = (config) ? config->max_nbr_events+2: RL_MAX_EVENTS+2;
+    runloop->max_simultaneous_callbacks_per_event = (config)
+        ? config->max_simultaneous_callbacks_per_event
+        : RL_GTHREADS_PER_WATCHER;
     RBL_ASSERT((runloop->kqueue_fd != -1), "kqueue create failed");
     RBL_LOG_FMT("runloop_new kqueue_fd %d", runloop->kqueue_fd);
     runloop->object_pool_ref = object_pool_create(sizeof(MemorySlab), RL_MAX_EVENTS);
@@ -74,14 +78,17 @@ void runloop_init(RunloopRef rl) {
     runloop->events_max = RL_MAX_EVENTS;
 #endif
 }
-/**
- * Create a new runloop. Should only be one per thread
- * @NOTE - this implementation only works for Linux and uses epoll
- */
+RunloopRef runloop_new_with_config(RunloopConfig* config)
+{
+    RunloopRef runloop = malloc(sizeof(Runloop));
+    RBL_ASSERT((runloop != NULL), "malloc failed new runloop");
+    runloop_init(runloop, config);
+    return (RunloopRef)runloop;
+}
 RunloopRef runloop_new(void) {
     RunloopRef runloop = malloc(sizeof(Runloop));
     RBL_ASSERT((runloop != NULL), "malloc failed new runloop");
-    runloop_init(runloop);
+    runloop_init(runloop, NULL);
     return (RunloopRef)runloop;
 }
 

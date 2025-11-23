@@ -1,7 +1,6 @@
 
 #include "http_message.h"
 #include <src/test_helpers/message_private.h>
-#include <src/common/alloc.h>
 #include <src/http/header_list.h>
 #include <stdbool.h>
 #include <stdlib.h>
@@ -35,7 +34,7 @@ struct HttpMessage_s
 
 HttpMessageRef http_message_new ()
 {
-    HttpMessageRef mref = (HttpMessageRef) eg_alloc(sizeof(HttpMessage));
+    HttpMessageRef mref = (HttpMessageRef) malloc(sizeof(HttpMessage));
     if(mref == NULL) goto error_label_1;
     RBL_SET_TAG(HttpMessage_TAG, mref)
     mref->body = NULL;
@@ -83,7 +82,7 @@ void http_message_free(HttpMessageRef p)
     HdrList_safe_free(p->headers);
     Cbuffer_free(p->target);
     Cbuffer_free(p->reason);
-    eg_free(p);
+    free(p);
 }
 void http_message_anonymous_free(void* p)
 {

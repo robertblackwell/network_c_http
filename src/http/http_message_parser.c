@@ -1,4 +1,3 @@
-#include <src/common/alloc.h>
 #include "http_message_parser.h"
 #include <src/common/utils.h>
 /// forward declares
@@ -32,7 +31,7 @@ static int on_reset_cb(llhttp_t* parser);
 void HttpParser_initialize(HttpMessageParser *this);
 HttpMessageParserRef http_message_parser_new(void(*on_new_message_cb)(void* ctx, HttpMessageRef new_msg_ref, int error), void* handler_context)
 {
-    HttpMessageParserRef this = eg_alloc(sizeof(HttpMessageParser));
+    HttpMessageParserRef this = malloc(sizeof(HttpMessageParser));
     if(this == NULL)
         return NULL;
     RBL_SET_TAG(HTTP_PARSER_TAG, this)
@@ -158,7 +157,7 @@ void HttpParser_initialize(HttpMessageParser* this)
     if (this->m_llhttp_settings_ptr != NULL) {
         free(this->m_llhttp_settings_ptr);
     }
-    llhttp_settings_t* settings = (llhttp_settings_t*)eg_alloc(sizeof(llhttp_settings_t));
+    llhttp_settings_t* settings = (llhttp_settings_t*)malloc(sizeof(llhttp_settings_t));
     this->m_llhttp_settings_ptr = settings;
     if(this->m_status_buf != NULL) Cbuffer_clear(this->m_status_buf);
     if(this->m_url_buf != NULL) Cbuffer_clear(this->m_url_buf);
@@ -197,7 +196,7 @@ void HttpParser_initialize(HttpMessageParser* this)
         free(this->m_llhttp_ptr);
         this->m_llhttp_ptr = NULL;
     }
-    this->m_llhttp_ptr = (llhttp_t*)eg_alloc(sizeof(llhttp_t));
+    this->m_llhttp_ptr = (llhttp_t*)malloc(sizeof(llhttp_t));
     llhttp_init( this->m_llhttp_ptr, HTTP_BOTH, settings);
     /** a link back from the C parser to this class*/
     this->m_llhttp_ptr->data = (void*) this;

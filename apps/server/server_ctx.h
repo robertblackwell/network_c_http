@@ -18,7 +18,9 @@
 #include <common/list.h>
 #include <runloop/runloop.h>
 #include <rbl/check_tag.h>
+#include <common/object_pool.h>
 #include <tcp/tcp_stream.h>
+
 #include <apps/msg/msg_generic.h>
 
 #define StreamTable_TAG "SRMTBL"
@@ -26,6 +28,10 @@
 
 typedef int socket_handle_t;
 typedef void(AppDoneCallback)(void* app, void* server, int error);
+
+// When defined the server provides the memory for each instance of the application.
+// At the moment it does this with an object pool
+#define SERVER_ALLOCS_MEMORY_FOR_APP_INSTANCE
 struct ServerCtx_s {
     RBL_DECLARE_TAG;
     int                     l_state;
@@ -35,17 +41,15 @@ struct ServerCtx_s {
     RunloopRef              runloop_ref;
     // actual struct not pointer
     TcpListenerRef          tcp_listener_ref;
-    // RunloopListenerRef      rl_listener_ref;
-    // this is only here to allocate space always use the _ref
-    // RunloopListener         memory_rl_listener;
-    // This list keeps track of open connections/sockets 
     ListRef                 connection_list;
+    int                     max_nbr_connections;
+    ObjectPoolRef           app_object_pool;
     RBL_DECLARE_END_TAG;
 };
 typedef struct  ServerCtx_s ServerCtx, *ServerCtxRef;
 
-ServerCtxRef server_ctx_new(RunloopRef rl, int listener_fd);
-void server_ctx_init(ServerCtxRef server_ref, RunloopRef rl, int listener_fd);
+ServerCtxRef server_ctx_new(RunloopRef rl, int listener_fd, int max_connections);
+void server_ctx_init(ServerCtxRef server_ref, RunloopRef rl, int listener_fd, int max_connections);
 
 void server_ctx_free(ServerCtxRef sref);
 void server_ctx_run(ServerCtxRef sref);
