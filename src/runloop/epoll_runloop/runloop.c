@@ -45,7 +45,6 @@ void runloop_init(RunloopRef athis, RunloopConfig* config) {
     RunloopRef runloop = athis;
     RUNLOOP_SET_TAG(runloop)
     RUNLOOP_SET_END_TAG(runloop)
-    runloop->
     runloop->epoll_fd = epoll_create1(0);
     runloop->closed_flag = false;
     runloop->runloop_executing = false;

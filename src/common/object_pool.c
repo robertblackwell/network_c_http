@@ -225,6 +225,7 @@ ObjectPool* object_pool_create(int obj_size, int obj_count) {
     et->obj_count = obj_count;
     et->obj_size = obj_size;
     uint16_t vsize = sizeof(void*);
+    int xx = obj_size / vsize;
     assert((obj_size / vsize) * vsize == obj_size); // check alignment
     MBlk *p = 0;
     et->blk_tag_length = 8;
