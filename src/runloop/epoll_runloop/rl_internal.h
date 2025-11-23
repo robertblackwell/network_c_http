@@ -6,7 +6,6 @@
 #include <stdbool.h>
 #include <string.h>
 #include <common/list.h>
-#include <runloop/rl_allocator.h>
 typedef void* EventTableRef;
 
 struct Runloop_s {
