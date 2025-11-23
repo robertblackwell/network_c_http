@@ -1,27 +1,11 @@
 #ifndef h_test_echo_io_stream_h
 #define h_test_echo_io_stream_h
 
-
-#include <assert.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <pthread.h>
-#include <fcntl.h>
-#include <stdint.h>
-#include <string.h>
-#include <stdint.h>
-#include <errno.h>
-#include <math.h>
-#include <src/common/utils.h>
-#include <common/iobuffer.h>
 #include <common/socket_functions.h>
 #include <common/list.h>
 #include <runloop/runloop.h>
-#include <rbl/check_tag.h>
 #include <common/object_pool.h>
 #include <tcp/tcp_stream.h>
-
-#include <apps/msg/msg_generic.h>
 
 #define StreamTable_TAG "SRMTBL"
 #define ServerCtx_TAG "SVRCTX"
@@ -31,7 +15,7 @@ typedef void(AppDoneCallback)(void* app, void* server, int error);
 
 // When defined the server provides the memory for each instance of the application.
 // At the moment it does this with an object pool
-#define SERVER_ALLOCS_MEMORY_FOR_APP_INSTANCE
+#define SERVER_MEMORY_USE_OBJECT_POOL
 struct ServerCtx_s {
     RBL_DECLARE_TAG;
     int                     l_state;
@@ -44,6 +28,7 @@ struct ServerCtx_s {
     ListRef                 connection_list;
     int                     max_nbr_connections;
     ObjectPoolRef           app_object_pool;
+    void*                   pending_app_memory;
     RBL_DECLARE_END_TAG;
 };
 typedef struct  ServerCtx_s ServerCtx, *ServerCtxRef;

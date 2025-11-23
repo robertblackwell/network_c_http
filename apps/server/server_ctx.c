@@ -1,5 +1,6 @@
 #include <src/runloop/runloop.h>
 #include "server_ctx.h"
+#include "server_memory.h"
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -16,45 +17,9 @@
 #define L_STATE_STOPPED 55
 #define L_STATE_ERROR 66
 
-static void on_timer(RunloopRef rl, void* arg);
-static void on_accept_ready(RunloopRef rl, void* listener_ref_arg);
 static void handle_new_socket(void* server, int sock, int error);
-static bool can_do_more(ServerCtxRef ctx);
-static void try_accept(ServerCtxRef ctx);
 static void postable_start(RunloopRef rl, void* arg);
-static void handle_app_done(SimpleAppRef app_ref, void* arg, int error);
 static void app_instance_done_cb(void* app, void* server, int error);
-
-void* server_alloc_init_app(ServerCtxRef server_ctx, int new_sock)
-{
-    RBL_SET_TAG(ServerCtx_TAG, server_ctx)
-    RBL_SET_END_TAG(ServerCtx_TAG, server_ctx)
-    RunloopRef rl =  server_ctx->runloop_ref;
-#ifdef SERVER_ALLOCS_MEMORY_FOR_APP_INSTANCE
-    SimpleAppRef app_ref = object_pool_allocate(server_ctx->app_object_pool);
-    if (app_ref == NULL) {
-        return NULL;
-    }
-    simple_app_init(app_ref, rl, new_sock);
-    return app_ref;
-#else
-    SimpleAppRef app_ref = simple_app_new(rl, new_sock);
-    if (app_ref == NULL) {
-        return NULL;
-    }
-    return app_ref;
-#endif
-}
-void server_dealloc_app(ServerCtxRef server, SimpleApp* app_ptr)
-{
-#ifdef SERVER_ALLOCS_MEMORY_FOR_APP_INSTANCE
-    simple_app_deinit(app_ptr);
-    object_pool_deallocate(server->app_object_pool, app_ptr);
-    app_ptr = NULL;
-#else
-    simple_app_free(app_ref);
-#endif
-}
 
 ServerCtxRef server_ctx_new(RunloopRef rl, int listener_fd, int max_connections)
 {
@@ -73,6 +38,7 @@ void server_ctx_init(ServerCtxRef server_ctx, RunloopRef rl, int fd, int max_con
     server_ctx->connection_list = List_new();
     server_ctx->max_nbr_connections = 100;
     server_ctx->app_object_pool = object_pool_create(sizeof(SimpleApp), server_ctx->max_nbr_connections);
+    server_ctx->pending_app_memory = server_allocate_app_memory(server_ctx);
 }
 
 void server_ctx_deinit(ServerCtxRef server_ctx)
@@ -84,7 +50,8 @@ void server_ctx_deinit(ServerCtxRef server_ctx)
     server_ctx->tcp_listener_ref = NULL;
     while(List_size(server_ctx->connection_list) > 0) {
         SimpleAppRef app = List_remove_first(server_ctx->connection_list);
-        server_dealloc_app(server_ctx, app);
+        server_deinit_app(server_ctx, app);
+        server_dealloc_only_app_memory(server_ctx, app);
     }
     runloop_free(server_ctx->runloop_ref);
     List_safe_free(server_ctx->connection_list, free);
@@ -127,22 +94,20 @@ static void handle_new_socket(void* server, int new_sock, int error)
     // int nbsock = socket_set_blocking(sock);
     RBL_LOG_FMT("handle_new_socket ctx: %p sock: %d ", ctx, new_sock)
     RunloopRef rl = runloop_listener_get_runloop(ctx->tcp_listener_ref->rl_listener_ref);
-    SimpleAppRef app_ref = server_alloc_init_app(ctx, new_sock);
-    if (app_ref == NULL) {
-        assert(0);
-    }
+    SimpleAppRef app_ref = server_provide_init_app(ctx, new_sock);
     if(error == 0) {
         List_add_back(ctx->connection_list, app_ref);
         simple_app_run(app_ref, app_instance_done_cb, ctx);
     } else{
-        // terminate ?
         assert(0);
     }
     /**
      * This is the place to decide if the thread is working hard enough and should is accept another connection.
      * In this simple application the answer is always yes. SO
      */
-    runloop_post(rl, postable_start, ctx); 
+    if (server_has_resource_to_accept(ctx)) {
+        runloop_post(rl, postable_start, ctx);
+    }
 }
 static void app_instance_done_cb(void* app, void* server, int error)
 {
@@ -153,7 +118,7 @@ static void app_instance_done_cb(void* app, void* server, int error)
     ListIterator itr = List_find(ctx->connection_list, app);
     assert(itr != NULL);
     List_itr_remove(ctx->connection_list, &itr);
-    server_dealloc_app(ctx, app);
+    server_reclaim_app(ctx, app);
 }
 int local_create_bound_socket(int port, const char *host)
 {

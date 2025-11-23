@@ -8,6 +8,8 @@ set(TARGET_SRC
 
 		${C_HTTP_PROJECT_DIR}/apps/server/server_ctx.h
 		${C_HTTP_PROJECT_DIR}/apps/server/server_ctx.c
+		${C_HTTP_PROJECT_DIR}/apps/server/server_memory.h
+		${C_HTTP_PROJECT_DIR}/apps/server/server_memory.c
 
 #		${C_HTTP_PROJECT_DIR}/apps/tcp/tcp_stream.h
 #		${C_HTTP_PROJECT_DIR}/apps/tcp/tcp_stream_internal.h
