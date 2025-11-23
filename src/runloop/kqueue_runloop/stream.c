@@ -24,7 +24,7 @@ static void handler(RunloopWatcherBaseRef watcher, uint16_t filter, uint16_t fla
     int16_t int_filter = (int16_t)(filter);
     switch(int_filter) {
         case EVFILT_READ:
-            printf("read event %ld\n", (long)(int16_t)filter);
+            printf("read event fd:%d filter: %ld   flags: %d\n", stream->fd, (long)(int16_t)filter, (int)flags);
             if(stream->read_postable_cb != NULL) {
                 stream->read_postable_cb(rl, stream->read_postable_arg);
             } else {

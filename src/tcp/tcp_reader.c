@@ -52,12 +52,13 @@ void read_ready_callback(RunloopRef rl, void* read_ctx_ref_arg)
     switch(tcp_stream_ref->read_state){
         case RD_STATE_INITIAL:
         case RD_STATE_READY:
+            tcp_stream_ref->read_state = RD_STATE_READY;
+            break;
         case RD_STATE_EAGAIN:
             tcp_stream_ref->read_state = RD_STATE_READY;
             try_read(tcp_stream_ref);
             break;
         case RD_STATE_ERROR:
-            break;
         case RD_STATE_STOPPED:
             break;
         default:
