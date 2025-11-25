@@ -1,7 +1,4 @@
 set(HEADER_FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/http_header.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/hdr_list.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/http_header_line.h
         ${CMAKE_CURRENT_SOURCE_DIR}/header_list.h
         ${CMAKE_CURRENT_SOURCE_DIR}/kvpair.h
         ${CMAKE_CURRENT_SOURCE_DIR}/parser_types.h
@@ -9,11 +6,8 @@ set(HEADER_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/http_message_parser.h
 )
 set(SOURCE_FILES
-        ${CMAKE_CURRENT_SOURCE_DIR}/http_header_line.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/header_list.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/http_header.c
         ${CMAKE_CURRENT_SOURCE_DIR}/kvpair.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/hdr_list.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/header_list.c
         ${CMAKE_CURRENT_SOURCE_DIR}/parser_types.c
         ${CMAKE_CURRENT_SOURCE_DIR}/http_message.c
         ${CMAKE_CURRENT_SOURCE_DIR}/http_message_parser.c

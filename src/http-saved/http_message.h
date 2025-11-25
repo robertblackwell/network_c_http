@@ -1,10 +1,11 @@
+
 #ifndef C_HTTP_HTTP_MESSAGE_H
 #define C_HTTP_HTTP_MESSAGE_H
 #include <stdbool.h>
 #include <stdint.h>
 #include <src/common/buffer_chain.h>
 #include <src/http/parser_types.h>
-#include <src/http/hdr_list.h>
+#include <src/http/header_list.h>
 /**
  * @addtogroup group_message
  * @brief A module that implements a http/1.1 message container

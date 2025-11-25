@@ -50,18 +50,18 @@ typedef struct BufferStrategy_s {
 } BufferStrategy, *BufferStrategyRef;
 
 
-typedef struct Cbuffer_s
-{
-    RBL_DECLARE_TAG;
-    char        m_tag[8];
-    void*       m_memPtr;     /// points to the start of the memory slab managed by the instance
-    char*       m_cPtr;       /// same as memPtr but makes it easier in debugger to see whats in the buffer
-    size_t      m_length;    ///
-    size_t      m_capacity;  /// the capacity of the buffer, the value used for the eg_alloc call
-    size_t      m_size;      /// size of the currently filled portion of the memory slab
-    BufferStrategyRef m_strategy;
-    RBL_DECLARE_END_TAG;
-} Cbuffer;
+// typedef struct Cbuffer_s
+// {
+//     RBL_DECLARE_TAG;
+//     char        m_tag[8];
+//     void*       m_memPtr;     /// points to the start of the memory slab managed by the instance
+//     char*       m_cPtr;       /// same as memPtr but makes it easier in debugger to see whats in the buffer
+//     size_t      m_length;    ///
+//     size_t      m_capacity;  /// the capacity of the buffer, the value used for the eg_alloc call
+//     size_t      m_size;      /// size of the currently filled portion of the memory slab
+//     BufferStrategyRef m_strategy;
+//     RBL_DECLARE_END_TAG;
+// } Cbuffer;
 
 /**
 * Allocates memory - BufferStrategyRef determines how big the memory block
@@ -283,5 +283,15 @@ bool Cbuffer_contains_charptr(const CbufferRef cbuf, char* ptr)
     char* sPtr = cbuf->m_cPtr;
     bool r = ( ptr <= endPtr && ptr >= sPtr);
     return r;
+}
+bool Cbuffer_equal(CbufferRef cbuf1, CbufferRef cbuf2)
+{
+    RBL_CHECK_TAG(CBUFFER_Tag, cbuf1);
+    RBL_CHECK_END_TAG(CBUFFER_Tag, cbuf1);
+    RBL_CHECK_TAG(CBUFFER_Tag, cbuf2);
+    RBL_CHECK_END_TAG(CBUFFER_Tag, cbuf2);
+    if (cbuf1->m_length != cbuf2->m_length) return false;
+    if (strcmp(cbuf1->m_cPtr, cbuf2->m_cPtr) != 0) return false;
+    return true;
 }
 

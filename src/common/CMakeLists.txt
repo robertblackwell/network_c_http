@@ -12,6 +12,8 @@ set(HEADER_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/make_uuid.h
         ${CMAKE_CURRENT_SOURCE_DIR}/object_pool.h
         ${CMAKE_CURRENT_SOURCE_DIR}/verify_statistics.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/vec.h
+
 )
 set(SOURCE_FILES
 #        ${CMAKE_CURRENT_SOURCE_DIR}/generics/dlist.c
@@ -27,7 +29,7 @@ set(SOURCE_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/make_uuid.c
         ${CMAKE_CURRENT_SOURCE_DIR}/object_pool.c
         ${CMAKE_CURRENT_SOURCE_DIR}/verify_statistics.c
-
+        ${CMAKE_CURRENT_SOURCE_DIR}/vec.c
 )
 
 set_source_files_properties(${SOURCE_FILES} PROPERTIES LANGUAGE C)

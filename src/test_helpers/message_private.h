@@ -1,7 +1,7 @@
 /**
 * This is a private interface to the message object only to be used for testing
 */
-#include <src/http/header_list.h>
+#include <src/http/hdr_list.h>
 /**
  * Within a HttpMessage instance header lines are stored in a HdrList structure.
  * Methods are provided to:

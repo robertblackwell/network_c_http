@@ -4,6 +4,7 @@
 #include <stdio.h> 
 #include <stdlib.h> 
 #include <stdbool.h>
+#include <rbl/check_tag.h>
 
 
 #define CBUFFER_Tag  "CBUFFER"
@@ -16,15 +17,28 @@
  *  - always terminates the used portion with a '\0' which is not counted as part of the used portion
  *    so that the used portion is always a valid cstr
  @{*/
-struct Cbuffers;
-typedef struct Cbuffer_s *CbufferRef;
+typedef struct BufferStrategy_s BufferStrategy, *BufferStrategyRef;
+typedef struct Cbuffer_s Cbuffer, *CbufferRef;
+typedef struct Cbuffer_s
+{
+    RBL_DECLARE_TAG;
+    char        m_tag[8];
+    void*       m_memPtr;     /// points to the start of the memory slab managed by the instance
+    char*       m_cPtr;       /// same as memPtr but makes it easier in debugger to see whats in the buffer
+    size_t      m_length;    ///
+    size_t      m_capacity;  /// the capacity of the buffer, the value used for the eg_alloc call
+    size_t      m_size;      /// size of the currently filled portion of the memory slab
+    BufferStrategyRef m_strategy;
+    RBL_DECLARE_END_TAG;
+} Cbuffer;
+
 // typedef Cbuffer* CbufferRef;
 
 /**
  *  WARNING - THIS FUNCTION ALLOCATES MEMORY
  */
 CbufferRef Cbuffer_new();
-
+void Cbuffer_init(Cbuffer* cb);
 /**
  *  WARNING - THIS FUNCTION ALLOCATES MEMORY
  */
@@ -146,6 +160,6 @@ void Cbuffer_move(CbufferRef dest, CbufferRef src);
  */
 bool Cbuffer_contains_voidptr(const CbufferRef cbuf, void* ptr);
 bool Cbuffer_contains_charptr(const CbufferRef cbuf, char* ptr);
-
+bool Cbuffer_equal(const CbufferRef cbuf1, CbufferRef cbuf2);
 /**@} */
 #endif

@@ -1,198 +1,314 @@
-#include <src/http/kvpair.h>
-#include <src/http/header_list.h>
+#include "header_list.h"
+#include <ctype.h>
 #include <string.h>
 #include <src/common/utils.h>
+#define HeaderList_TAG "HDRLST"
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-///
-///
-/// WARNING The content between these block comments is generated code and will be over written at the next build
-///
-///
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-static void kvp_free(void *ptr)
+HeaderListPtr header_list_from_array(const char* ar[][2])
 {
-    KVPair_free((KVPairRef) ptr);
-}
-
-HdrListRef HdrList_new()
-{
-    return (HdrListRef) List_new(NULL);
-}
-void HdrList_safe_free(HdrListRef lref)
-{
-    List_safe_free(lref, kvp_free);
-}
-int HdrList_size(HdrListRef lref)
-{
-    return List_size(lref);
-}
-
-KVPairRef HdrList_first(HdrListRef lref)
-{
-    return (KVPairRef) List_first(lref);
-}
-
-KVPairRef HdrList_last(HdrListRef lref)
-{
-    return (KVPairRef) List_last(lref);
-}
-
-KVPairRef HdrList_remove_first(HdrListRef lref)
-{
-    return (KVPairRef) List_remove_first(lref);
-}
-
-KVPairRef HdrList_remove_last(HdrListRef lref)
-{
-    return (KVPairRef) List_remove_last(lref);
-}
-
-KVPairRef HdrList_itr_unpack(HdrListRef lref, HdrListIter iter)
-{
-    return (KVPairRef) List_itr_unpack(lref, iter);
-}
-
-HdrListIter HdrList_iterator(HdrListRef lref)
-{
-    return List_iterator(lref);
-}
-
-HdrListIter HdrList_itr_next(HdrListRef lref, HdrListIter iter)
-{
-    return List_itr_next(lref, iter);
-}
-
-void HdrList_itr_remove(HdrListRef lref, HdrListIter *iter)
-{
-    List_itr_remove(lref, iter);
-}
-
-void HdrList_add_back(HdrListRef lref, KVPairRef item)
-{
-    List_add_back(lref, (void *) item);
-}
-
-void HdrList_add_front(HdrListRef lref, KVPairRef item)
-{
-    List_add_front(lref, (void *) item);
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-///
-///
-/// WARNING after this the code is not generated - it comes from the relevant hand_code.h/.c file
-///
-///
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-HdrListRef HdrList_from_array(const char* ar[][2])
-{
-    HdrListRef tmp = HdrList_new();
+    HeaderListPtr tmp = header_list_new();
     const char* k;
     const char* v;
     for(int row = 0; ar[row][0] != NULL ; row++) {
         k = ar[row][0];
         v = ar[row][1];
-        HdrList_add_cstr(tmp, k, v);
+        HeaderLinePtr hl = header_line_from_cstr((char*)k, (char*)v);
+        header_list_add_back(tmp, hl);
     }
     return tmp;
 }
-void HdrList_add_arr(HdrListRef this, const char* ar[][2])
+void header_list_add_arr(HeaderListPtr hlist, const char* ar[][2])
 {
     const char* k;
     const char* v;
     for(int row = 0; ar[row][0] != NULL ; row++) {
         k = ar[row][0];
         v = ar[row][1];
-        HdrList_add_cstr(this, k, v);
+        header_list_add_cstr(hlist, k, v);
     }
-
 }
-
-HdrListIter HdrList_find_iter(const HdrListRef hlref, const char *key)
+HeaderListIter header_list_find_iter(const HeaderListPtr hlist, const char* key)
 {
-    HdrListIter result = NULL;
+    HeaderListIter result = NULL;
     char *fixed_key = make_upper(key);
-    HdrListIter iter = HdrList_iterator(hlref);
+    HeaderListIter iter = header_list_iterator(hlist);
     while(iter) {
-        KVPairRef hlr = HdrList_itr_unpack(hlref, iter);
-        char *k = KVPair_label(hlr);
+        HeaderLinePtr hlr = header_list_itr_unpack(hlist, iter);
+        const char* k = Cbuffer_cstr(iter->key);
         if(strcmp(k, fixed_key) == 0) {
             result = iter;
             break;
         }
-        iter = HdrList_itr_next(hlref, iter);
+        iter = header_list_itr_next(hlist, iter);
     }
     if(fixed_key != NULL) { free(fixed_key); }
     return result;
 }
-
-KVPairRef HdrList_find(const HdrListRef hlref, const char *key)
+HeaderLinePtr header_list_find(const HeaderListPtr hlist, const char *key)
 {
-    HdrListIter iter = HdrList_find_iter(hlref, key);
+    HeaderListIter iter = header_list_find_iter(hlist, key);
     if(iter == NULL) {
         return NULL;
-    } else {
-        KVPairRef hlr = HdrList_itr_unpack(hlref, iter);
-        return hlr;
     }
+    HeaderLinePtr hlr = header_list_itr_unpack(hlist, iter);
+    return hlr;
 }
 
-void HdrList_remove(HdrListRef hlref, const char *key)
+void header_list_remove(HeaderListPtr hlist, const char *key)
 {
-    HdrListIter iter = HdrList_find_iter(hlref, key);
+    HeaderListIter iter = header_list_find_iter(hlist, key);
     if(iter == NULL) {
         return;
-    } else {
-        HdrList_itr_remove(hlref, &iter);
     }
-
+    header_list_itr_remove(hlist, &iter);
 }
 
-void HdrList_add_cbuf(HdrListRef this, const CbufferRef key, const CbufferRef value)
+void header_list_add_cbuf(HeaderListPtr hlist, const CbufferRef key, const CbufferRef value)
 {
-    char *labptr = Cbuffer_data(key);
-    int lablen = Cbuffer_size(key);
-    char *valptr = Cbuffer_data(value);
-    int vallen = Cbuffer_size(value);
-    KVPairRef hl = KVPair_new(labptr, lablen, valptr, vallen);
-    HdrList_add_back(this, hl);
+    HeaderLinePtr hl = header_line_new(key, value);
+    header_list_add_back(hlist, hl);
 }
-
-void HdrList_add_line(HdrListRef this, const char *label, int lablen, const char *value, int vallen)
+void header_list_add_line(HeaderListPtr hlist, const char *label, int lablen, const char *value, int vallen)
 {
-    KVPairRef hl_content_type = KVPair_new(label, lablen, value, vallen);
-    HdrList_add_front(this, hl_content_type);
+    HeaderLinePtr hl = header_line_from_buffer((char*)label, lablen, (char*)value, vallen);
+    header_list_add_front(hlist, hl);
 }
-
-void HdrList_add_cstr(HdrListRef this, const char *label, const char *value)
+void header_list_add_cstr(HeaderListPtr hlist, const char *label, const char *value)
 {
+    char* lab = (char*)label;
+    char* v = (char*)value;
     int lablen = strlen(label);
     int vallen = strlen(value);
-    KVPairRef hl_content_type = KVPair_new(label, lablen, value, vallen);
-    HdrList_add_back(this, hl_content_type);
+    HeaderLinePtr hl_content_type = header_line_from_cstr(lab, v);
+    header_list_add_back(hlist, hl_content_type);
 }
-
-void HdrList_add_many(HdrListRef this, CStrPair *pairs[])
-{
-    for(int i = 0; pairs[i] != NULL; i++) {
-
-    }
-}
-
-// just to see it update
-CbufferRef HdrList_serialize(HdrListRef this)
+CbufferRef header_list_serialize(HeaderListPtr hlist)
 {
     CbufferRef cb = Cbuffer_new();
-    ListIterator iter = HdrList_iterator(this);
+    HeaderLinePtr iter = header_list_iterator(hlist);
     while(iter != NULL) {
-        KVPairRef line = HdrList_itr_unpack(this, iter);
-        Cbuffer_append_cstr(cb, KVPair_label(line));
+        Cbuffer_append_cstr(cb, Cbuffer_cstr(iter->key));
         Cbuffer_append_cstr(cb, ": ");
-        Cbuffer_append_cstr(cb, KVPair_value(line));
+        Cbuffer_append_cstr(cb, Cbuffer_cstr(iter->value));
         Cbuffer_append_cstr(cb, "\r\n");
-        iter = HdrList_itr_next(this, iter);
+        iter = header_list_itr_next(hlist, iter);
     }
     return cb;
+}
+HeaderListPtr header_list_new()
+{
+    HeaderListPtr hlist = malloc(sizeof(HeaderList));
+    assert(hlist != NULL);
+    header_list_init(hlist);
+    return hlist;
+}
+void header_list_init(HeaderListPtr hlist)
+{
+    RBL_SET_TAG(HeaderList_TAG, hlist);
+    RBL_SET_END_TAG(HeaderList_TAG, hlist)
+    ASSERT_NOT_NULL(hlist);
+    hlist->count = 0;
+    hlist->head = NULL;
+    hlist->tail = NULL;
+}
+void header_list_free(HeaderListPtr hlist)
+{
+    RBL_CHECK_TAG(HeaderList_TAG, hlist);
+    RBL_CHECK_END_TAG(HeaderList_TAG, hlist);
+    ASSERT_NOT_NULL(hlist);
+    while(hlist->count > 0) {
+        HeaderLinePtr p = header_list_remove_first(hlist);
+        header_line_free(p);
+    }
+    assert(hlist->count == 0);
+    free(hlist);
+}
+int header_list_size(const HeaderListPtr hlist)
+{
+    RBL_CHECK_TAG(HeaderList_TAG, hlist);
+    RBL_CHECK_END_TAG(HeaderList_TAG, hlist);
+    return hlist->count;
+}
+void header_list_display(const HeaderListPtr hlist)
+{
+    RBL_CHECK_TAG(HeaderList_TAG, hlist);
+    RBL_CHECK_END_TAG(HeaderList_TAG, hlist);
+    printf("List[%p] count: %d head %p tail %p\n", (void*)hlist, hlist->count, (void*)hlist->head, (void*)hlist->tail);
+    HeaderLine* iter = hlist->head;
+    while(iter != NULL) {
+        printf("Node[%p] forward:%p backwards:%p \n", (void*)iter, (void*)iter->forward, (void*)iter->backward);
+        HeaderLine* next = iter->forward;
+        iter = next;
+    }
+}
+HeaderLinePtr header_list_find_cbuffer(HeaderListPtr hlist, Cbuffer* needlekey)
+{
+    RBL_CHECK_TAG(HeaderList_TAG, hlist);
+    RBL_CHECK_END_TAG(HeaderList_TAG, hlist);
+    //    printf("List[%p] count: %d head %p tail %p\n", (void*)hlist, hlist->count, (void*)hlist->head, (void*)hlist->tail);
+    HeaderLine* iter = hlist->head;
+    while(iter != NULL) {
+        if(Cbuffer_equal(iter->key, needlekey)) {
+            return iter;
+        }
+//        printf("Node[%p] forward:%p backwards:%p  item:%p  %ld\n", (void*)iter, (void*)iter->forward, (void*)iter->backward, iter->item, (long)iter->item);
+        HeaderLine* next = iter->forward;
+        iter = next;
+    }
+    return NULL;
+}
+
+// add to the front of the list
+void header_list_add_front(HeaderListPtr hlist, HeaderLinePtr line)
+{
+    RBL_CHECK_TAG(HeaderList_TAG, hlist);
+    RBL_CHECK_END_TAG(HeaderList_TAG, hlist);
+    ASSERT_NOT_NULL(line);
+    assert(line->backward == NULL);
+    assert(line->forward == NULL);
+    if(hlist->count == 0) {
+        hlist->head = line;
+        hlist->tail = line;
+        hlist->count++;
+    } else {
+        line->forward = hlist->head;
+        line->backward = NULL;
+        hlist->head->backward = line;
+        hlist->head = line;
+        hlist->count++;
+    }
+}
+void header_list_add_back(HeaderListPtr hlist, HeaderLinePtr line)
+{
+    RBL_CHECK_TAG(HeaderList_TAG, hlist);
+    RBL_CHECK_END_TAG(HeaderList_TAG, hlist);
+    ASSERT_NOT_NULL(line);
+    assert(line->backward == NULL);
+    assert(line->forward == NULL);
+    if(hlist->count == 0) {
+        hlist->tail = line;
+        hlist->head = line;
+        hlist->count++;
+    } else {
+        line->backward = hlist->tail;
+        line->forward = NULL;
+        hlist->tail->forward = line;
+        hlist->tail = line;
+        hlist->count++;
+    }
+}
+HeaderLinePtr header_list_first(const HeaderListPtr hlist)
+{
+    RBL_CHECK_TAG(HeaderList_TAG, hlist);
+    RBL_CHECK_END_TAG(HeaderList_TAG, hlist);
+    ASSERT_NOT_NULL(hlist);
+    if(hlist->head == NULL)
+        return NULL;
+    return hlist->head;
+}
+HeaderLinePtr header_list_remove_first(HeaderListPtr hlist)
+{
+    RBL_CHECK_TAG(HeaderList_TAG, hlist);
+    RBL_CHECK_END_TAG(HeaderList_TAG, hlist);
+    assert(hlist != NULL);
+    if(hlist->count == 0)
+        return NULL;
+    if(hlist->count == 1) {
+        hlist->count--;
+        HeaderLinePtr content = hlist->head;
+        hlist->head = NULL; hlist->tail = NULL;
+        return content;
+    }
+    HeaderLine* first = hlist->head;
+    hlist->head = first->forward;
+    hlist->head->backward = NULL;
+    first->forward = NULL;
+    first->backward = NULL;
+    hlist->count--;
+    return first;
+}
+HeaderLinePtr header_list_last(const HeaderListPtr hlist)
+{
+    RBL_CHECK_TAG(HeaderList_TAG, hlist);
+    RBL_CHECK_END_TAG(HeaderList_TAG, hlist);
+    ASSERT_NOT_NULL(hlist);
+    if(hlist->tail == NULL) return NULL;
+    return hlist->tail;
+}
+HeaderLinePtr header_list_remove_last(HeaderListPtr hlist)
+{
+    RBL_CHECK_TAG(HeaderList_TAG, hlist);
+    RBL_CHECK_END_TAG(HeaderList_TAG, hlist);
+    ASSERT_NOT_NULL(hlist);
+    if(hlist->count == 0 ) {
+        return NULL;
+    }
+    if(hlist->count == 1) {
+        hlist->count--;
+        void* content = hlist->head;
+        hlist->head = NULL; hlist->tail = NULL;
+        return content;
+    }
+    HeaderLine* last = hlist->tail;
+    hlist->tail = last->backward;
+    hlist->tail->forward = NULL;
+    last->forward = NULL;
+    last->backward = NULL;
+    hlist->count--;
+    return last;
+}
+HeaderListIter header_list_iterator(const HeaderListPtr hlist)
+{
+    RBL_CHECK_TAG(HeaderList_TAG, hlist);
+    RBL_CHECK_END_TAG(HeaderList_TAG, hlist);
+    ASSERT_NOT_NULL(hlist);
+    return hlist->head;
+}
+HeaderListIter header_list_itr_next(const HeaderListPtr hlist, const HeaderListIter itr)
+{
+    ASSERT_NOT_NULL(hlist);
+    RBL_CHECK_TAG(HeaderList_TAG, hlist);
+    RBL_CHECK_END_TAG(HeaderList_TAG, hlist);
+    ASSERT_NOT_NULL(itr);
+    return itr->forward;
+}
+void header_list_itr_remove(HeaderListPtr hlist, HeaderListIter* itr_ptr)
+{
+    ASSERT_NOT_NULL(hlist);
+    RBL_CHECK_TAG(HeaderList_TAG, hlist);
+    RBL_CHECK_END_TAG(HeaderList_TAG, hlist);
+    ASSERT_NOT_NULL(itr_ptr);
+    HeaderLine* itr = *itr_ptr;
+    ASSERT_NOT_NULL(itr);
+    if(hlist->count == 0) {
+        return;
+    }
+    if(hlist->count == 1 ) {
+        assert(*itr_ptr == hlist->head);
+        hlist->count = 0;
+        hlist->head = NULL;
+        hlist->tail = NULL;
+        return;
+    }
+    if(hlist->head == *itr_ptr) {
+        (*itr_ptr)->forward->backward = (*itr_ptr)->backward;
+        hlist->head = (*itr_ptr)->forward;
+    } else if (hlist->tail == *itr_ptr) {
+        (*itr_ptr)->backward->forward = (*itr_ptr)->forward;
+        hlist->tail = (*itr_ptr)->backward;
+    } else {
+        (*itr_ptr)->forward->backward = (*itr_ptr)->backward;
+        (*itr_ptr)->backward->forward = (*itr_ptr)->forward;
+    }
+    hlist->count--;
+
+    header_line_free(*itr_ptr);
+}
+HeaderLinePtr header_list_itr_unpack(HeaderListPtr hlist, HeaderListIter itr)
+{
+    ASSERT_NOT_NULL(hlist);
+    RBL_CHECK_TAG(HeaderList_TAG, hlist);
+    RBL_CHECK_END_TAG(HeaderList_TAG, hlist);
+    ASSERT_NOT_NULL(itr);
+    return itr;
 }

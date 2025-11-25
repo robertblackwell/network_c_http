@@ -7,7 +7,7 @@
 #include <rbl/logger.h>
 #include <src/common/list.h>
 #include <src/http/kvpair.h>
-#include <src/http/hdr_list.h>
+#include <src/http/http_header.h>
 #include <src/http/http_message.h>
 
 
@@ -15,40 +15,60 @@ void free_kvpair(void* p) {
     KVPair_free((KVPairRef) p);
 }
 ///////////////////////////////////////////////////
-int test_hdrlist_new()
+int test_http_headers_new()
 {
-    HdrListRef hdrlistref = HdrList_new();
-    int sz = HdrList_size(hdrlistref);
-    UT_NOT_EQUAL_PTR(hdrlistref, NULL);
+    HttpHeaders* headers = http_header_new(100, 4005);
+    int sz = http_header_size(headers);
+    UT_NOT_EQUAL_PTR(headers, NULL);
     UT_EQUAL_INT(sz, 0);
-    HdrList_safe_free(hdrlistref);
-    hdrlistref = NULL;
-    UT_EQUAL_PTR(hdrlistref, NULL);
+    http_header_free(headers);
+    headers = NULL;
+    UT_EQUAL_PTR(headers, NULL);
 	return 0;
 }
-int test_hdrlist_add_back_get_content()
+int test_http_headers_set()
 {
-    HdrListRef hdrlistref = HdrList_new();
-    KVPairRef hdrln1 = KVPair_new("KVPairKey1", strlen("KVPairKey1"), "333", strlen("333"));
-    KVPairRef hdrln2 = KVPair_new("KVPairKey2", strlen("KVPairKey2"), "4444", strlen("4444"));
-    HdrList_add_back(hdrlistref, hdrln1);
-    HdrList_add_back(hdrlistref, hdrln2);
-    int sz = HdrList_size(hdrlistref);
-    UT_EQUAL_INT(sz, 2);
-    KVPairRef hdrref1 = HdrList_first(hdrlistref);
-    char* sh1 = KVPair_label(hdrref1);
-    char* sv1 = KVPair_value(hdrref1);
-    KVPairRef hdrref2 = HdrList_last(hdrlistref);
-    char* sh2 = KVPair_label(hdrref2);
-    char* sv2 = KVPair_value(hdrref2);
-    UT_EQUAL_INT(strcmp(sh1, "KVPAIRKEY1"), 0);
-    UT_EQUAL_INT(strcmp(sv1, "333"), 0);
-    UT_EQUAL_INT(strcmp(sh2, "KVPAIRKEY2"), 0);
-    UT_EQUAL_INT(strcmp(sv2, "4444"), 0);
-    List_display((ListRef)hdrlistref);
-    HdrList_safe_free(hdrlistref);
+    HttpHeaders* hdrs = http_header_new(100, 10*1024);
+    char* key1 = "KVPairKey1";
+    int klen1 = strlen(key1);
+    char* value1 = "KVPairValue1";
+    int vlen1 = strlen(value1);
+    char* expected1 = "KVPairKey1:KVPairValue1\r\n";
+    int expected_len1 = strlen(expected1);
+    UT_TRUE(!hdrs->waiting_for_value);
+    UT_TRUE(hdrs->next_offset == 0);
+    UT_TRUE(hdrs->size == 0)
+    http_header_set_key(hdrs, key1, klen1);
+    UT_TRUE(hdrs->waiting_for_value);
+    UT_TRUE((hdrs->next_offset == (klen1+1)));
+    UT_TRUE(hdrs->size == 0)
+    UT_TRUE(strncmp(hdrs->lines_buffer_start, key1, klen1) == 0)
+    http_header_set_value(hdrs, value1, vlen1);
+    UT_TRUE(!hdrs->waiting_for_value);
+    UT_TRUE((hdrs->next_offset == (expected_len1)));
+    UT_TRUE(hdrs->size == 1)
+    UT_TRUE(strncmp(hdrs->lines_buffer_start, expected1, expected_len1) == 0)
+    size_t sz = http_header_size(hdrs);
+    UT_TRUE(sz == 1);
+
+    char* key2 = "KV_Pair_Key_2";
+    int klen2 = strlen(key2);
+    char* value2 = "KV_Pair_Value_2";
+    int vlen2 = strlen(value2);
+    char* expected2 = "KVPairKey1:KVPairValue1\r\nKV_Pair_Key_2:KV_Pair_Value_2\r\n";
+    int expected_len2 = strlen(expected2);
+
+    http_header_set_key(hdrs, key2, klen2);
+    http_header_set_value(hdrs, value2, vlen2);
+    UT_TRUE(!hdrs->waiting_for_value);
+    UT_TRUE((hdrs->next_offset == (expected_len2)));
+    UT_TRUE(hdrs->size == 2)
+    UT_TRUE(strncmp(hdrs->lines_buffer_start, expected2, expected_len2) == 0)
+    size_t sz2 = http_header_size(hdrs);
+    UT_TRUE(sz2 == 2);
     return 0;
 }
+#if 0
 int test_hdrlist_find()
 {
     HdrListRef hdrlistref = HdrList_new();
@@ -278,18 +298,11 @@ int test_list_remove_back_one()
     return 0;
 }
 #endif
+#endif
 int main()
 {
-    UT_ADD(test_hdrlist_ar);
-	UT_ADD(test_hdrlist_new);
-    UT_ADD(test_hdrlist_add_back_get_content);
-    UT_ADD(test_hdrlist_find);
-    UT_ADD(test_hdr_add_many);
-//    UT_ADD(test_list_remove_front);
-//    UT_ADD(test_list_remove_back);
-//    UT_ADD(test_iter);
-    UT_ADD(test_serialize_headers);
-    UT_ADD(test_serialize_headers_2);
+    UT_ADD(test_http_headers_new);
+	UT_ADD(test_http_headers_set);
 	int rc = UT_RUN();
 	return rc;
 }

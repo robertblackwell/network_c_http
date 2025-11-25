@@ -7,7 +7,7 @@
 #include <rbl/logger.h>
 #include <src/common/list.h>
 #include <src/http/kvpair.h>
-#include <src/http/header_list.h>
+#include <src/http/hdr_list.h>
 #include <src/http/http_message.h>
 
 

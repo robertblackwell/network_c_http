@@ -1,7 +1,7 @@
 
 #include "http_message.h"
 #include <src/test_helpers/message_private.h>
-#include <src/http/hdr_list.h>
+#include <src/http/header_list.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
