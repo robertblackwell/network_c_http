@@ -59,6 +59,24 @@ void header_line_deinit(HeaderLine* hdr)
     Cbuffer_free(hdr->key);
     Cbuffer_free(hdr->value);
 }
+void header_line_append_key(HeaderLinePtr hline, char* buf, int len)
+{
+    for (int i = 0; i < len; ++i) {
+        char ch = toupper(buf[i]);
+        Cbuffer_append(hline->key, &ch, 1);
+    }
+}
+void header_line_append_value(HeaderLinePtr hline, char* buf, int len)
+{
+    Cbuffer_append(hline->value, buf, len);
+}
+
+void header_line_set_value(HeaderLinePtr hline, Cbuffer* value)
+{
+    CbufferRef tmp = hline->value;
+    hline->value = value;
+    Cbuffer_free(tmp);
+}
 
 #if 0
 HeaderListPtr header_list_from_array(const char* ar[][2])

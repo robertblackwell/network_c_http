@@ -2,9 +2,11 @@
 #define C_HTTP_HTTP_MESSAGE_H
 #include <stdbool.h>
 #include <stdint.h>
-#include <src/common/buffer_chain.h>
-#include <src/http/parser_types.h>
-#include <src/http/hdr_list.h>
+#include <common/buffer_chain.h>
+#include <common/alloc.h>
+#include <http/parser_types.h>
+#include <http/http_header_line.h>
+#include <http/header_list.h>
 /**
  * @addtogroup group_message
  * @brief A module that implements a http/1.1 message container
@@ -43,6 +45,7 @@ typedef int HttpMinorVersion;
 #define HttpMessage_TAG "HTTPMSGE"
 
 HttpMessageRef http_message_new();
+HttpMessageRef http_message_new_with_allocator(Allocator* allocator);
 HttpMessageRef http_message_new_request();
 HttpMessageRef http_message_new_response();
 
@@ -103,7 +106,6 @@ void http_message_set_content_length(HttpMessageRef this, int length);
  */
 void http_message_add_header_cstring(HttpMessageRef mref, const char* label, const char* value);
 void http_message_add_header_cbuf(HttpMessageRef this, CbufferRef key, CbufferRef value);
-
 /**
  * Get the value string for the header line with the given label or key.
  * If not found return NULL
@@ -114,7 +116,8 @@ void http_message_add_header_cbuf(HttpMessageRef this, CbufferRef key, CbufferRe
  *                              value is always lower case
  */
 const char* http_message_get_header_value(HttpMessageRef mref, const char* labptr);
-HdrListRef http_message_get_headerlist(HttpMessageRef this);
+HeaderListPtr http_message_get_headerlist(HttpMessageRef this);
+void http_message_set_headers(HttpMessageRef msg, HeaderListPtr hlist);
 /**
  * Compares a header
  * @return

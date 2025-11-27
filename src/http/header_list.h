@@ -1,5 +1,5 @@
-#ifndef c_ceg_http_header_list_h
-#define c_ceg_http_header_list_h
+#ifndef c_http_http_header_list_h
+#define c_http_http_header_list_h
 #include <rbl/check_tag.h>
 #include <src/common/cbuffer.h>
 #include "http_header_line.h"
@@ -7,8 +7,8 @@
 typedef struct HeaderList{
     RBL_DECLARE_TAG;
     int count;
-    HeaderLine* head;
-    HeaderLine* tail;
+    HeaderLinePtr head;
+    HeaderLinePtr tail;
     RBL_DECLARE_END_TAG;
 } HeaderList, *HeaderListPtr;;
 

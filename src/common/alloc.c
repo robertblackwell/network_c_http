@@ -1,19 +1,29 @@
 #include <src/common/alloc.h>
 #include <assert.h>
 #include <stdlib.h>
-#ifdef LINUX_FLAG
-#include <malloc.h>
-#endif
-void* eg__alloc(size_t n)
+void* allocator_alloc(Allocator* allocator, size_t size)
 {
-    void* p = malloc(n);
-    #ifdef LINUX_FLAG
-    int x = malloc_usable_size(p);
-    #endif
-    return p;
+    return allocator->allocate(allocator, size);
 }
-void eg__free(void* p)
+void* allocator_realloc(Allocator* allocator, void* old_ptr, size_t size)
 {
-    assert(p != NULL);
-    free(p);
+    return allocator->reallocate(allocator, old_ptr, size);
+}
+void allocator_dealloc(Allocator* allocator, void* ptr)
+{
+    if(allocator->deallocate) {
+        allocator->deallocate(allocator, ptr);
+    }
+}
+void allocator_reset(Allocator* allocator)
+{
+    if(allocator->reset) {
+        allocator->reset(allocator);
+    }
+}
+void allocator_destroy(Allocator* allocator)
+{
+    if(allocator->destroy) {
+        allocator->destroy(allocator);
+    }
 }

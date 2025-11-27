@@ -15,42 +15,42 @@ typedef struct IOBuffer_s {
     RBL_DECLARE_TAG;
     void*  mem_p;             // always points to the start of buffer
     char*  char_p;
-    int    allocated_capacity; // typically allocate a little more than requested - for a trailing 0x00
-    int    buffer_capacity;   // always holds the size of the buffer
+    size_t allocated_capacity; // typically allocate a little more than requested - for a trailing 0x00
+    size_t buffer_capacity;   // always holds the size of the buffer
     void*  buffer_ptr;        // points to the start of unused data in buffer
-    int    buffer_length;     // same as capacity
-    int    buffer_remaining;  // length of data not consumed
+    size_t buffer_length;     // same as capacity
+    size_t buffer_remaining;  // length of data not consumed
 
 } IOBuffer, *IOBufferRef;
 
 
-IOBufferRef IOBuffer_init(IOBufferRef this, int capacity )
+IOBufferRef IOBuffer_init(IOBufferRef iob, size_t capacity )
 {
-    RBL_SET_TAG(IOBuffer_TAG, this);
-    this->allocated_capacity = capacity + 1;
-    this->buffer_ptr = this->mem_p = malloc(this->allocated_capacity);
-    if(this->mem_p == NULL) goto memerror;
-    this->char_p = (char*)this->mem_p;
+    RBL_SET_TAG(IOBuffer_TAG, iob);
+    iob->allocated_capacity = capacity + 1;
+    iob->buffer_ptr = iob->mem_p = malloc(iob->allocated_capacity);
+    if(iob->mem_p == NULL) goto memerror;
+    iob->char_p = (char*)iob->mem_p;
 #ifdef IOB_FILL
-    for(int i = 0; i < this->allocated_capacity; i++) {
-        *(char*)(this->char_p + i) = IOB_FILL_CHAR;
+    for(int i = 0; i < iob->allocated_capacity; i++) {
+        *(char*)(iob->char_p + i) = IOB_FILL_CHAR;
     }
 #endif
-    this->buffer_capacity = capacity;
-    this->buffer_length = this->buffer_capacity;
-    this->buffer_remaining = 0;
-        return this;
+    iob->buffer_capacity = capacity;
+    iob->buffer_length = iob->buffer_capacity;
+    iob->buffer_remaining = 0;
+        return iob;
     memerror:
         return NULL;
 }
-void IOBuffer_expand_and_reset(IOBufferRef iob, int new_capacity)
+void IOBuffer_expand_and_reset(IOBufferRef iob, size_t new_capacity)
 {
     if (new_capacity > iob->buffer_capacity) {
         free(iob->mem_p);
         IOBuffer_init(iob, new_capacity);
     }
 }
-IOBufferRef IOBuffer_new_with_capacity(int capacity)
+IOBufferRef IOBuffer_new_with_capacity(size_t capacity)
 {
     IOBufferRef pcref = malloc(sizeof(IOBuffer));
     if (pcref == NULL) {
@@ -69,142 +69,163 @@ IOBufferRef IOBuffer_new()
 }
 IOBufferRef IOBuffer_from_cbuffer(CbufferRef cbuf)
 {
-    int cap = Cbuffer_size(cbuf);
-    IOBufferRef this = IOBuffer_new_with_capacity(cap*2);
-    memcpy(IOBuffer_space(this), Cbuffer_data(cbuf), cap);
-    IOBuffer_commit(this, cap);
-    return this;
+    size_t cap = Cbuffer_size(cbuf);
+    IOBufferRef iob = IOBuffer_new_with_capacity(cap*2);
+    memcpy(IOBuffer_space(iob), Cbuffer_data(cbuf), cap);
+    IOBuffer_commit(iob, cap);
+    return iob;
 }
-IOBufferRef IOBuffer_from_buf(char* buf, int len)
+IOBufferRef IOBuffer_from_buf(char* buf, size_t len)
 {
-    int cap = len;
-    IOBufferRef this = IOBuffer_new_with_capacity(cap*2);
-    memcpy(IOBuffer_space(this), buf, len);
-    IOBuffer_commit(this, cap);
-    return this;
+    size_t cap = len;
+    IOBufferRef iob = IOBuffer_new_with_capacity(cap*2);
+    memcpy(IOBuffer_space(iob), buf, len);
+    IOBuffer_commit(iob, cap);
+    return iob;
 }
 IOBufferRef IOBuffer_from_cstring(char* cstr)
 {
     return IOBuffer_from_buf(cstr, strlen(cstr));
 }
-const char* IOBuffer_cstr(IOBufferRef this)
+const char* IOBuffer_cstr(IOBufferRef iob)
 {
-    RBL_CHECK_TAG(IOBuffer_TAG, this)
-    return (const char*) this->buffer_ptr;
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    return (const char*) iob->buffer_ptr;
 }
-IOBufferRef IOBuffer_dup(IOBufferRef this)
+IOBufferRef IOBuffer_dup(IOBufferRef iob)
 {
-    RBL_CHECK_TAG(IOBuffer_TAG, this)
-    IOBufferRef new = IOBuffer_new_with_capacity(this->buffer_capacity);
-    new->buffer_capacity = this->buffer_capacity;
-    new->allocated_capacity = this->allocated_capacity;
-    new->buffer_remaining = this->buffer_remaining;
-    memcpy(new->mem_p, this->mem_p, this->allocated_capacity);
-    new->buffer_ptr = (new->mem_p + (this->buffer_ptr - this->mem_p));
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    IOBufferRef new = IOBuffer_new_with_capacity(iob->buffer_capacity);
+    new->buffer_capacity = iob->buffer_capacity;
+    new->allocated_capacity = iob->allocated_capacity;
+    new->buffer_remaining = iob->buffer_remaining;
+    memcpy(new->mem_p, iob->mem_p, iob->allocated_capacity);
+    new->buffer_ptr = (new->mem_p + (iob->buffer_ptr - iob->mem_p));
     new->char_p = new->buffer_ptr;
     return new;
 }
 
-void* IOBuffer_data(const IOBufferRef this)
+void* IOBuffer_data(const IOBufferRef iob)
 {
-    RBL_CHECK_TAG(IOBuffer_TAG, this)
-    return this->buffer_ptr;
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    return iob->buffer_ptr;
 }
-int IOBuffer_data_len(const IOBufferRef this)
+size_t IOBuffer_data_len(const IOBufferRef iob)
 {
-    RBL_CHECK_TAG(IOBuffer_TAG, this)
-    return this->buffer_remaining;
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    return iob->buffer_remaining;
 }
-void IOBuffer_data_add(IOBufferRef this, void* p, int len)
+void IOBuffer_expand(IOBufferRef iob, size_t new_capacity)
 {
-    RBL_CHECK_TAG(IOBuffer_TAG, this)
-    void* memp = IOBuffer_space(this);
-    int mem_len = IOBuffer_space_len(this);
-    assert(mem_len >= len);
+    iob->allocated_capacity = new_capacity + 1;
+    long offset = iob->buffer_ptr - iob->mem_p;
+    size_t buf_len = iob->buffer_remaining;
+    void* mem = iob->mem_p;
+    iob->mem_p = realloc(mem, iob->allocated_capacity);
+    assert(iob->mem_p != NULL);
+    iob->buffer_ptr = iob->mem_p + offset;
+    iob->char_p = (char*)iob->mem_p;
+#ifdef IOB_FILL
+    for(int i = 0; i < iob->allocated_capacity; i++) {
+        *(char*)(iob->char_p + i) = IOB_FILL_CHAR;
+    }
+#endif
+    iob->buffer_capacity = new_capacity;
+}
+void IOBuffer_data_add(IOBufferRef iob, void* p, size_t len)
+{
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    void* memp = IOBuffer_space(iob);
+    size_t mem_len = IOBuffer_space_len(iob);
+    if(mem_len < len) {
+        IOBuffer_expand(iob, 2*(iob->allocated_capacity + len));
+        memp = IOBuffer_space(iob);
+        mem_len = IOBuffer_space_len(iob);
+    }
     memcpy(memp, p, len);
-    IOBuffer_commit(this, len);
+    IOBuffer_commit(iob, len);
 }
 
-void* IOBuffer_space(const IOBufferRef this)
+void* IOBuffer_space(const IOBufferRef iob)
 {
-    RBL_CHECK_TAG(IOBuffer_TAG, this)
-    void* tmp = this->buffer_ptr + this->buffer_remaining;
-    return (this->buffer_ptr + this->buffer_remaining);
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    void* tmp = iob->buffer_ptr + iob->buffer_remaining;
+    return (iob->buffer_ptr + iob->buffer_remaining);
 }
-int IOBuffer_space_len(const IOBufferRef this)
+size_t IOBuffer_space_len(const IOBufferRef iob)
 {
-    RBL_CHECK_TAG(IOBuffer_TAG, this)
-    return (this->mem_p + this->buffer_capacity) - (this->buffer_ptr + this->buffer_remaining);
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    return (iob->mem_p + iob->buffer_capacity) - (iob->buffer_ptr + iob->buffer_remaining);
 }
-void IOBuffer_commit(IOBufferRef this, int bytes_used)
+void IOBuffer_commit(IOBufferRef iob, size_t bytes_used)
 {
-    RBL_CHECK_TAG(IOBuffer_TAG, this)
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
     assert(bytes_used > 0);
-    //@TODO  this looks like a bug test with two successive commits
+    //@TODO  iob looks like a bug test with two successive commits
     // TODO - what happens if the bytes_used parameter is too big
-    this->buffer_remaining += bytes_used;
-    *(char*)(this->mem_p + this->buffer_remaining) = IOB_TERM_CHAR;
+    iob->buffer_remaining += bytes_used;
+    *(char*)(iob->mem_p + iob->buffer_remaining) = IOB_TERM_CHAR;
 }
-void IOBuffer_consolidate_space(IOBufferRef this)
+void IOBuffer_consolidate_space(IOBufferRef iob)
 {
-    RBL_CHECK_TAG(IOBuffer_TAG, this)
-    IOBufferRef tmp = IOBuffer_new_with_capacity(this->buffer_capacity);
-    IOBuffer_data_add(tmp, IOBuffer_data(this), IOBuffer_data_len(this));
-    void* tmp_mem_p = this->mem_p;
-    this->mem_p = tmp->mem_p;
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    IOBufferRef tmp = IOBuffer_new_with_capacity(iob->buffer_capacity);
+    IOBuffer_data_add(tmp, IOBuffer_data(iob), IOBuffer_data_len(iob));
+    void* tmp_mem_p = iob->mem_p;
+    iob->mem_p = tmp->mem_p;
     free(tmp_mem_p);
-    this->buffer_ptr = tmp->buffer_ptr;
-    this->buffer_remaining = tmp->buffer_remaining;
-    this->buffer_capacity = tmp->buffer_capacity;
-    this->allocated_capacity = tmp->allocated_capacity;
-    this->char_p = this->mem_p;
+    iob->buffer_ptr = tmp->buffer_ptr;
+    iob->buffer_remaining = tmp->buffer_remaining;
+    iob->buffer_capacity = tmp->buffer_capacity;
+    iob->allocated_capacity = tmp->allocated_capacity;
+    iob->char_p = iob->mem_p;
     free(tmp);
 }
 
-void IOBuffer_consume(IOBufferRef this, int byte_count)
+void IOBuffer_consume(IOBufferRef iob, size_t byte_count)
 {
-    RBL_CHECK_TAG(IOBuffer_TAG, this)
-    this->buffer_ptr += byte_count;
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    iob->buffer_ptr += byte_count;
     // check no off end of buffer
-    void* x = this->mem_p + this->buffer_capacity;
-    // @TODO this looks like a bug
-    assert(this->buffer_ptr <= (this->mem_p + this->buffer_capacity));
-    this->buffer_remaining -= byte_count;
+    void* x = iob->mem_p + iob->buffer_capacity;
+    // @TODO iob looks like a bug
+    assert(iob->buffer_ptr <= (iob->mem_p + iob->buffer_capacity));
+    iob->buffer_remaining -= byte_count;
     // check consume did not remove too much
-    assert(this->buffer_remaining >= 0);
-    if(this->buffer_remaining == 0) {
-        this->buffer_ptr = this->mem_p;
+    assert(iob->buffer_remaining >= 0);
+    if(iob->buffer_remaining == 0) {
+        iob->buffer_ptr = iob->mem_p;
     }
 }
-void IOBuffer_destroy(IOBufferRef this)
+void IOBuffer_destroy(IOBufferRef iob)
 {
-    RBL_CHECK_TAG(IOBuffer_TAG, this)
-    free(this->mem_p);
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    free(iob->mem_p);
 }
-void IOBuffer_reset(IOBufferRef this)
+void IOBuffer_reset(IOBufferRef iob)
 {
-    RBL_CHECK_TAG(IOBuffer_TAG, this)
-    this->buffer_ptr = this->mem_p;
-    this->buffer_remaining = 0;
-    *(char*)(this->mem_p + this->buffer_remaining) = IOB_TERM_CHAR;
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    iob->buffer_ptr = iob->mem_p;
+    iob->buffer_remaining = 0;
+    *(char*)(iob->mem_p + iob->buffer_remaining) = IOB_TERM_CHAR;
 }
-void IOBuffer_free(IOBufferRef this)
+void IOBuffer_free(IOBufferRef iob)
 {
-    RBL_CHECK_TAG(IOBuffer_TAG, this)
-    free(this->mem_p);
-    free(this);
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    free(iob->mem_p);
+    free(iob);
 }
-bool IOBuffer_empty(IOBufferRef this)
+bool IOBuffer_empty(IOBufferRef iob)
 {
-    RBL_CHECK_TAG(IOBuffer_TAG, this)
-    return this->buffer_remaining == 0;
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    return iob->buffer_remaining == 0;
 }
 bool IOBuffer_equal(IOBufferRef a, IOBufferRef b)
 {
     RBL_CHECK_TAG(IOBuffer_TAG, a)
     RBL_CHECK_TAG(IOBuffer_TAG, b)
-    int lena = IOBuffer_data_len(a);
-    int lenb = IOBuffer_data_len(b);
+    size_t lena = IOBuffer_data_len(a);
+    size_t lenb = IOBuffer_data_len(b);
     void* a_p = IOBuffer_data(a);
     void* b_p = IOBuffer_data(b);
     if( lena != lenb) {
@@ -212,10 +233,10 @@ bool IOBuffer_equal(IOBufferRef a, IOBufferRef b)
     }
     return (strncmp(a_p, b_p, lena) == 0);
 }
-void* IOBuffer_memptr(IOBufferRef this)
+void* IOBuffer_memptr(IOBufferRef iob)
 {
-    RBL_CHECK_TAG(IOBuffer_TAG, this)
-    return this->mem_p;
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    return iob->mem_p;
 }
 char IOBuffer_consume_pop_front(IOBufferRef iob)
 {
@@ -237,16 +258,32 @@ void IOBuffer_sprintf(IOBufferRef iob, const char* fmt, ...)
     va_list args;
     va_start(args, fmt);
     char* buf = IOBuffer_space(iob);
-    int len1 = IOBuffer_space_len(iob);
-    int nchars1 = vsnprintf(buf, len1, fmt, args);
+    size_t len1 = IOBuffer_space_len(iob);
+    size_t nchars1 = vsnprintf(buf, len1, fmt, args);
     if (nchars1 > len1-1) {
         IOBuffer_expand_and_reset(iob, 2*nchars1);
-        int len2 = IOBuffer_space_len(iob);
-        int nchars2 = vsnprintf(buf, len2, fmt, args);
+        size_t len2 = IOBuffer_space_len(iob);
+        size_t nchars2 = vsnprintf(buf, len2, fmt, args);
         assert(len2 > nchars2);
         IOBuffer_commit(iob, nchars2);
     } else {
         IOBuffer_commit(iob, nchars1);
     }
     va_end(args);
+}
+void IOBuffer_append_cstr(IOBufferRef iob, const char* cstr)
+{
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    size_t len = 0;
+    char* p = (char*)cstr;
+    while (*p != '\0') {
+        IOBuffer_data_add(iob, (void*)p, 1);
+        p++;
+    }
+
+}
+void IOBuffer_append_buffer(IOBufferRef iob, const char* buf, size_t len)
+{
+    RBL_CHECK_TAG(IOBuffer_TAG, iob)
+    IOBuffer_data_add(iob, (void*)buf, len);
 }

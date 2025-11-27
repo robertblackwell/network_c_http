@@ -13,11 +13,14 @@
 int run_list (ListRef tests);
 
 #define CHECK_HEADER(h, K, V) do {\
-    KVPairRef hlref = HdrList_find(h, HEADER_HOST); \
-    UT_NOT_EQUAL_PTR(hlref, NULL); \
-    UT_EQUAL_CSTR(KVPair_label(hlref), HEADER_HOST); \
-    UT_EQUAL_CSTR(KVPair_value(hlref), "ahost"); \
+    HeaderLinePtr line = header_list_find(h, HEADER_HOST); \
+    assert(line != NULL); \
+    UT_NOT_EQUAL_PTR(line, NULL); \
+    UT_EQUAL_CSTR(Cbuffer_cstr(line->key), HEADER_HOST); \
+    UT_EQUAL_CSTR(Cbuffer_cstr(line->value), "ahost"); \
 } while(0);
+
+bool check_header(HeaderListPtr hlist, char* key, char* value);
 
 #define CHECK_BODY(M, S) do {\
     BufferChainRef body = http_message_get_body(M); \

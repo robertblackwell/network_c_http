@@ -10,6 +10,7 @@ add_executable(${TARGET}
 		test_harness.c
 		test_harness.h
 		helper.h
+		helper.c
 		test_suite_requests.c
 		test_suite_responses.c
 		)

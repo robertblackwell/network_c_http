@@ -1,7 +1,7 @@
 /**
 * This is a private interface to the message object only to be used for testing
 */
-#include <src/http/hdr_list.h>
+#include <src/http/header_list.h>
 /**
  * Within a HttpMessage instance header lines are stored in a HdrList structure.
  * Methods are provided to:
@@ -17,4 +17,4 @@
   * @param this HttpMessageRef
   * @return HdrListRef
   */
-HdrListRef http_message_get_headerlist(HttpMessageRef this);
+HeaderListPtr http_message_get_headerlist(HttpMessageRef this);

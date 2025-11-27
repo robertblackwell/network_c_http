@@ -32,6 +32,8 @@ set(TEST_LINK_LIBS
 endif()
 message("TEST_LINK_LIBS    ${TEST_LINK_LIBS}")
 set(TEST_SERVER_BASEURL "http://whiteacorn.com/utests/echo/test.php")
+add_subdirectory(test_arena)
+add_subdirectory(test_allocate_malloc)
 add_subdirectory(test_buffers)
 #add_subdirectory(test_generic) #does not build
 #add_subdirectory(test_generic_list)

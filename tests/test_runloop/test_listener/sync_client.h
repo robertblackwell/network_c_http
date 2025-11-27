@@ -1,6 +1,6 @@
 #ifndef c_http_api_sync_client_h
 #define c_http_api_sync_client_h
-
+#include <common/list.h>
 #include <src/http/http_message.h>
 #include <src/http/http_message_parser.h>
 #include <stdio.h>

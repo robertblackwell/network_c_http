@@ -1,4 +1,7 @@
-
+#ifndef H_c_http_rbl_check_tags_H
+#define H_c_http_rbl_check_tags_H
+#include <stdio.h>
+#include <string.h>
 /**
  * These macros add identity tags to a struct, set the value of that identity tag and test the value
  *
@@ -114,3 +117,4 @@
     #define RBL_INVALIDATE_STRUCT(p, TYPE)
 #endif
 /** @} */
+#endif

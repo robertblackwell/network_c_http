@@ -5,6 +5,7 @@
 #include <stdlib.h> 
 #include <stdbool.h>
 #include <rbl/check_tag.h>
+#include <common/alloc.h>
 
 
 #define CBUFFER_Tag  "CBUFFER"
@@ -29,6 +30,7 @@ typedef struct Cbuffer_s
     size_t      m_capacity;  /// the capacity of the buffer, the value used for the eg_alloc call
     size_t      m_size;      /// size of the currently filled portion of the memory slab
     BufferStrategyRef m_strategy;
+    Allocator*  m_allocator;
     RBL_DECLARE_END_TAG;
 } Cbuffer;
 
@@ -38,11 +40,12 @@ typedef struct Cbuffer_s
  *  WARNING - THIS FUNCTION ALLOCATES MEMORY
  */
 CbufferRef Cbuffer_new();
-void Cbuffer_init(Cbuffer* cb);
+CbufferRef Cbuffer_new_with_allocator(Allocator* allocator);
+void Cbuffer_init(Cbuffer* cb, Allocator* allocator);
 /**
  *  WARNING - THIS FUNCTION ALLOCATES MEMORY
  */
-CbufferRef Cbuffer_from_cstring(const char* cstr);
+CbufferRef Cbuffer_from_cstring(const char* cstr, Allocator* allocator);
 void Cbuffer_free(CbufferRef cbuf);
 /**
  *  @brief Gets a void* pointer to the start of the used portion of memory area
@@ -116,6 +119,8 @@ void Cbuffer_clear(CbufferRef this);
  *  @param len  size_t
  */
 void Cbuffer_append(CbufferRef cbuf, void* data, size_t len);
+void Cbuffer_append_upper(CbufferRef cbuf, void* data, size_t len);
+void Cbuffer_expand(CbufferRef cbuf, size_t new_capacity);
 
 /**
  *  WARNING - THIS FUNCTION ALLOCATES MEMORY

@@ -1,24 +1,28 @@
 #ifndef c_http_alloc_h
 #define c_http_alloc_h
 #include <stddef.h>
+#include <rbl/check_tag.h>
+typedef struct Allocator_s Allocator;
 
 /**
- * @addtogroup group_alloc
- * @{
+ * All instances of an allocator must provide a struct type with the corresponding
+ * 5 (five) function pointers at the beginning of the struct
  */
-/// used to mark return type of functions that allocate memory
-#define MEMALLOC(type) type
-#define IFNULL(A, label) do { \
-    if((A) == NULL) goto label; \
-} while(0);
-/*
- * Use the macros not the functions
- */
-void* eg__alloc(size_t n);
-void eg__free(void* p);
+struct Allocator_s
+{
+    RBL_DECLARE_TAG;
+    void*(*allocate)(Allocator* allocator, size_t size);
+    void*(*reallocate)(Allocator* allocator, void* ptr, size_t size);
+    void(*deallocate)(Allocator* allocator, void* p);
+    void(*reset)(Allocator* allocator);
+    void(*destroy)(Allocator* allocator);
+    RBL_DECLARE_END_TAG
+};
 
-#define eg_alloc(n) eg__alloc(n)
-#define eg_free(p) eg__free(p)
-
+void* allocator_alloc(Allocator* allcator, size_t size);
+void* allocator_realloc(Allocator* allocator, void* old_ptr, size_t size);
+void allocator_dealloc(Allocator* allocator, void* ptr);
+void allocator_reset(Allocator* allocator);
+void allocator_destroy(Allocator* allocator);
 /** @} */
 #endif

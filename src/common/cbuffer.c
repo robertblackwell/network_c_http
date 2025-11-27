@@ -1,9 +1,11 @@
 #include <stddef.h>
 #include <assert.h>
 #include <string.h>
+#include <ctype.h>
 #include <rbl/check_tag.h>
 #include <src/common/utils.h>
 #include <src/common/cbuffer.h>
+#include <src/common/alloc_malloc.h>
 
 
 #define CBUFFER_MAX_CAPACITY 10000
@@ -102,22 +104,40 @@ void* BufferStrategy_reallocate(BufferStrategyRef bsref, void* current_memptr, s
 
 BufferStrategy common_strategy = {.m_min_size=256, .m_max_size=1024*1024};
 
-CbufferRef Cbuffer_new()
+void Cbuffer_init(CbufferRef cb_ptr, Allocator* allocator)
 {
-    CbufferRef cb_ptr = (CbufferRef)malloc(sizeof(Cbuffer));
     RBL_SET_TAG(CBUFFER_Tag, cb_ptr);
     RBL_SET_END_TAG(CBUFFER_Tag, cb_ptr)
     cb_ptr->m_strategy=&common_strategy;
     size_t tmp_cap = cb_ptr->m_strategy->m_min_size;
-    cb_ptr->m_memPtr = BufferStrategy_allocate(cb_ptr->m_strategy, tmp_cap);
+    // cb_ptr->m_memPtr = BufferStrategy_allocate(cb_ptr->m_strategy, tmp_cap);
+    cb_ptr->m_memPtr = allocator_alloc(cb_ptr->m_allocator, tmp_cap);
     cb_ptr->m_cPtr = (char*) cb_ptr->m_memPtr;
     cb_ptr->m_length = 0;
     cb_ptr->m_size = 0;
     cb_ptr->m_capacity = tmp_cap;
+}
+CbufferRef Cbuffer_new()
+{
+    Allocator* allocator = NULL;
+    if(allocator == NULL) {
+        allocator = malloc_allocator_create();
+    }
+    CbufferRef cb = allocator->allocate(NULL, sizeof(CbufferRef));
+    assert(cb != NULL);
+    cb->m_allocator = allocator;
+    Cbuffer_init(cb, allocator);
+    return cb;
+}
+CbufferRef Cbuffer_new_with_allocator(Allocator* allocator)
+{
+    CbufferRef cb_ptr = (CbufferRef)allocator_alloc(allocator, sizeof(Cbuffer));
+    assert(cb_ptr != NULL);
+    cb_ptr->m_allocator = allocator;
+    Cbuffer_init(cb_ptr, allocator);
     return cb_ptr;
 }
-
-CbufferRef Cbuffer_from_cstring(const char* c_str)
+CbufferRef Cbuffer_from_cstring(const char* c_str, Allocator* allocator)
 {
     CbufferRef cbuf = Cbuffer_new();
     Cbuffer_append(cbuf, (void*)c_str, strlen(c_str));
@@ -134,9 +154,9 @@ void Cbuffer_free(CbufferRef this)
     assert(this != NULL);
     // this will allow success free of invalidated cbuffer
     if(this->m_memPtr != NULL) {
-        free(this->m_memPtr);
+        allocator_dealloc(this->m_allocator, this->m_memPtr);
     }
-    free(this);
+    allocator_dealloc(this->m_allocator, this);
 }
 /**
  * gets a pointer to the start of the memory slab being managed by the instance
@@ -191,7 +211,28 @@ void Cbuffer_clear(CbufferRef cbuf)
     RBL_CHECK_END_TAG(CBUFFER_Tag, cbuf);
     cbuf->m_length = 0; cbuf->m_length = 0; cbuf->m_cPtr[0] = (char)0;
 }
-
+void Cbuffer_append_upper(CbufferRef cbuf, void* data, size_t len)
+{
+    char b[len];
+    char* p = data;
+    int n = 0;
+    while (n < len) {
+        b[n] = (char)toupper(*p++);
+        n++;
+    }
+    Cbuffer_append(cbuf, b, len);
+}
+void Cbuffer_expand(CbufferRef cbuf, size_t new_capacity)
+{
+    RBL_CHECK_TAG(CBUFFER_Tag, cbuf);
+    RBL_CHECK_END_TAG(CBUFFER_Tag, cbuf);
+    void* newmem = allocator_realloc(cbuf->m_allocator, cbuf->m_memPtr, new_capacity);
+    void* old_mem = cbuf->m_memPtr;
+    cbuf->m_memPtr = newmem;
+    cbuf->m_cPtr = (char*) cbuf->m_memPtr;
+    cbuf->m_capacity = new_capacity;
+    allocator_dealloc(cbuf->m_allocator, old_mem);
+}
 void Cbuffer_append(CbufferRef cbuf, void* data, size_t len)
 {
     RBL_CHECK_TAG(CBUFFER_Tag, cbuf);
@@ -201,10 +242,13 @@ void Cbuffer_append(CbufferRef cbuf, void* data, size_t len)
         return;
     if ( ( (cbuf->m_length + len) >= cbuf->m_capacity )  ) {
         size_t new_capacity = BufferStrategy_reallocate_size(cbuf->m_strategy, cbuf->m_capacity, cbuf->m_length + len);
-        void* tmp = BufferStrategy_reallocate(cbuf->m_strategy, cbuf->m_memPtr, new_capacity);
-        cbuf->m_memPtr = tmp;
+        void* newmem = allocator_alloc(cbuf->m_allocator, new_capacity);
+        void* old_mem = cbuf->m_memPtr;
+        memcpy(newmem, old_mem, cbuf->m_capacity);
+        cbuf->m_memPtr = newmem;
         cbuf->m_cPtr = (char*) cbuf->m_memPtr;
         cbuf->m_capacity = new_capacity;
+        allocator_dealloc(cbuf->m_allocator, old_mem);
     }
     void* na = Cbuffer_next_available(cbuf);
     memcpy(na, data, len);
@@ -244,6 +288,7 @@ char* Cbuffer_toString(const CbufferRef cbuf)
 // c++ move semantics - saves a copy
 void Cbuffer_move(CbufferRef dest, CbufferRef src)
 {
+    assert(0); // deprecated
     ASSERT_NOT_NULL(src);
     ASSERT_NOT_NULL(dest);
 

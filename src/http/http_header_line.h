@@ -1,5 +1,5 @@
-#ifndef c_ceg_http_header_h
-#define c_ceg_http_header_h
+#ifndef c_http_http_header_line_h
+#define c_http_http_header_line_h
 #include <rbl/check_tag.h>
 #include <src/common/cbuffer.h>
 typedef struct HeaderLine_s *HeaderLinePtr;
@@ -21,6 +21,9 @@ typedef struct HeaderLine_s {
 HeaderLinePtr  header_line_new(Cbuffer* key, Cbuffer* value);
 HeaderLinePtr  header_line_from_buffer(char* key, int keylen, char* value, int valuelen);
 HeaderLinePtr  header_line_from_cstr(char* keycstr, char* valcstr);
+void header_line_append_key(HeaderLinePtr hline, char* buf, int len);
+void header_line_append_value(HeaderLinePtr hline, char* buf, int len);
+void header_line_set_value(HeaderLinePtr hline, Cbuffer* value);
 void header_line_free(HeaderLinePtr hline);
 void header_line_init(HeaderLinePtr hline, Cbuffer* key, Cbuffer* value);
 void header_line_deinit(HeaderLinePtr hline);

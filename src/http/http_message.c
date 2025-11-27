@@ -1,55 +1,45 @@
 
 #include "http_message.h"
+#include "http_message_internal.h"
 #include <src/test_helpers/message_private.h>
-#include <src/http/hdr_list.h>
+#include <src/http/header_list.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <assert.h>
-
+#include <math.h>
+#include <rbl/check_tag.h>
+#include <common/alloc.h>
+#include <common/alloc_malloc.h>
 /**
  * @addtogroup group_message
  * @{
  */
 
-
-#include <rbl/check_tag.h>
-
-
-
-struct HttpMessage_s
+void http_message_init (HttpMessageRef mref, Allocator* allocator_ptr)
 {
-    RBL_DECLARE_TAG;
-    BufferChainRef body;
-    HdrListRef headers;
-    int major_vers;
-    HttpMinorVersion minor_vers;
-    bool is_request;
-    HttpStatus status_code;
-    CbufferRef reason;
-    HttpMethod method;
-    CbufferRef target;
-};
-
-HttpMessageRef http_message_new ()
-{
-    HttpMessageRef mref = (HttpMessageRef) malloc(sizeof(HttpMessage));
-    if(mref == NULL) goto error_label_1;
     RBL_SET_TAG(HttpMessage_TAG, mref)
+    assert(allocator_ptr != NULL);
     mref->body = NULL;
-    mref->headers = HdrList_new();
-    if(mref->headers == NULL) goto error_label_2;
+    mref->allocator = allocator_ptr;
     mref->minor_vers = minor_version1;
     mref->major_vers = major_version1;
     mref->target = Cbuffer_new();
     mref->reason = Cbuffer_new();
+    mref->headers = header_list_new();
+}
+HttpMessageRef http_message_new_with_allocator(Allocator* allocator)
+{
+    HttpMessageRef mref = (HttpMessageRef) allocator_alloc(allocator, sizeof(HttpMessage));
+    assert(mref != NULL);
+    http_message_init(mref, allocator);
     return mref;
-
-    error_label_2:
-    http_message_free(mref);
-    error_label_1:
-        return NULL;
+}
+HttpMessageRef http_message_new()
+{
+    Allocator* allocator_ptr = (Allocator*) malloc_allocator_create();
+    return http_message_new_with_allocator(allocator_ptr);
 }
 /**
  * @brief Create a new request message instance
@@ -79,7 +69,7 @@ HttpMessageRef http_message_new_response()
 void http_message_free(HttpMessageRef p)
 {
     RBL_CHECK_TAG(HttpMessage_TAG, p)
-    HdrList_safe_free(p->headers);
+    header_list_free(p->headers);
     Cbuffer_free(p->target);
     Cbuffer_free(p->reason);
     free(p);
@@ -104,7 +94,6 @@ HttpMessageRef MessageResponse(HttpStatus status, void* body)
 IOBufferRef http_message_serialize(HttpMessageRef this)
 {
     RBL_CHECK_TAG(HttpMessage_TAG, this)
-    BufferChainRef bc_result = BufferChain_new();
     char* first_line;
     int first_line_len;
     if(this->is_request) {
@@ -113,27 +102,19 @@ IOBufferRef http_message_serialize(HttpMessageRef this)
     } else {
         first_line_len = asprintf(&first_line, "HTTP/%d.%d  %d %s\r\n", this->major_vers, this->minor_vers, this->status_code, (char*)Cbuffer_data(this->reason));
     }
-    BufferChain_append_cstr(bc_result, first_line);
+    IOBufferRef ioresult = IOBuffer_from_cstring(first_line);
     free(first_line);
-    HdrListRef hdrs = this->headers;
-    ListIterator iter = HdrList_iterator(hdrs);
-    while(iter != NULL) {
-        KVPairRef item = HdrList_itr_unpack(hdrs, iter);
-        char* s;
-        int len = asprintf(&s,"%s: %s\r\n", KVPair_label(item), KVPair_value(item));
-        BufferChain_append_cstr(bc_result, s);
-        ListIterator next = HdrList_itr_next(hdrs, iter);
-        iter = next;
-        free(s);
-    }
-    BufferChain_append_cstr(bc_result, "\r\n");
+    HeaderListPtr hdrs = this->headers;
+    CbufferRef hdr_serialize = header_list_serialize(hdrs);
+    IOBuffer_append_cstr(ioresult, (char*)Cbuffer_cstr(hdr_serialize));
+    Cbuffer_free(hdr_serialize);
+    IOBuffer_append_cstr(ioresult, "\r\n");
     if((this->body != NULL) && (BufferChain_size(this->body) != 0)) {
         IOBufferRef iob_body = BufferChain_compact(this->body);
-        BufferChain_add_back(bc_result, iob_body);
+        IOBuffer_append_cstr(ioresult, IOBuffer_cstr(iob_body));
     }
-    IOBufferRef result = BufferChain_compact(bc_result);
-    BufferChain_free(bc_result);
-    return result;
+    IOBufferRef result2 = ioresult;
+    return result2;
 }
 IOBufferRef http_message_dump(HttpMessageRef this)
 {
@@ -149,17 +130,9 @@ IOBufferRef http_message_dump(HttpMessageRef this)
     }
     BufferChain_append_cstr(bc_result, first_line);
     free(first_line);
-    HdrListRef hdrs = this->headers;
-    ListIterator iter = HdrList_iterator(hdrs);
-    while(iter != NULL) {
-        KVPairRef item = HdrList_itr_unpack(hdrs, iter);
-        char* s;
-        int len = asprintf(&s,"%s: %s\r\n", KVPair_label(item), KVPair_value(item));
-        BufferChain_append_cstr(bc_result, s);
-        ListIterator next = HdrList_itr_next(hdrs, iter);
-        iter = next;
-        free(s);
-    }
+    HeaderListPtr hdrs = this->headers;
+    CbufferRef hdump = header_list_serialize(hdrs);
+    BufferChain_append_cstr(bc_result, (char*)Cbuffer_cstr(hdump));
     BufferChain_append_cstr(bc_result, "\r\n");
     BufferChain_append_cstr(bc_result, "body begin ===========================================================\r\n");
     if((this->body != NULL) && (BufferChain_size(this->body) != 0)) {
@@ -174,13 +147,13 @@ IOBufferRef http_message_dump(HttpMessageRef this)
 void http_message_add_header_cstring(HttpMessageRef mref, const char* label, const char* value)
 {
     RBL_CHECK_TAG(HttpMessage_TAG, mref)
-    HdrListRef hdrlist = http_message_get_headerlist(mref);
-    HdrList_add_cstr(hdrlist, label, value);
+    HeaderListPtr hdrlist = http_message_get_headerlist(mref);
+    header_list_add_cstr(hdrlist, label, value);
 }
 void http_message_add_header_cbuf(HttpMessageRef this, CbufferRef key, CbufferRef value)
 {
     RBL_CHECK_TAG(HttpMessage_TAG, this)
-    HdrList_add_cbuf(http_message_get_headerlist(this), key, value);
+    header_list_add_cbuf(http_message_get_headerlist(this), key, value);
 }
 HttpStatus http_message_get_status(HttpMessageRef mref)
 {
@@ -250,8 +223,9 @@ void http_message_set_target(HttpMessageRef this, const char* target_cstr)
 }
 CbufferRef http_message_get_target_cbuffer(HttpMessageRef this)
 {
-    RBL_CHECK_TAG(HttpMessage_TAG, this)
-    return Cbuffer_from_cstring(Cbuffer_cstr(this->target));
+    assert(0);
+    // RBL_CHECK_TAG(HttpMessage_TAG, this)
+    // return Cbuffer_from_cstring(Cbuffer_cstr(this->target));
 }
 void http_message_set_target_cbuffer(HttpMessageRef this, CbufferRef target)
 {
@@ -280,8 +254,9 @@ const char* http_message_get_reason(HttpMessageRef this)
 }
 CbufferRef http_message_get_reason_cbuffer(HttpMessageRef this)
 {
-    RBL_CHECK_TAG(HttpMessage_TAG, this)
-    return Cbuffer_from_cstring(Cbuffer_cstr(this->reason));
+    assert(0);
+    // RBL_CHECK_TAG(HttpMessage_TAG, this)
+    // return Cbuffer_from_cstring(Cbuffer_cstr(this->reason));
 }
 void http_message_set_reason_cbuffer(HttpMessageRef this, CbufferRef reason)
 {
@@ -295,21 +270,31 @@ int Message_get_content_length(HttpMessageRef this)
 }
 void http_message_set_content_length(HttpMessageRef this, int length)
 {
+    assert(0);
+#if 0
     RBL_CHECK_TAG(HttpMessage_TAG, this)
     char buf[100];
     assert(length >= 0);
     int r = sprintf(buf, "%d", length);
-    HdrListRef hdrlist_ref = this->headers;
-    KVPairRef kvp = HdrList_find(hdrlist_ref, "Content-length");
-    if(kvp != NULL) {
-        KVPair_set_value(kvp, buf, strlen(buf));
+    HeaderListPtr hdrlist_ref = this->headers;
+    HeaderLinePtr hline = header_list_find(hdrlist_ref, "Content-length");
+    if(hline != NULL) {
+        header_line_set_value(hline, Cbuffer_from_cstring(buf));
     } else {
-        HdrList_add_cstr(hdrlist_ref, "Content-length", buf);
+        header_list_add_cstr(hdrlist_ref, "Content-length", buf);
     }
+#endif
 }
 
 // headers
-HdrListRef http_message_get_headerlist(HttpMessageRef this)
+void http_message_set_headers(HttpMessageRef msg, HeaderListPtr hlist)
+{
+    RBL_CHECK_TAG(HttpMessage_TAG, msg)
+    assert(hlist != NULL);
+    msg->headers = hlist;
+}
+
+HeaderListPtr http_message_get_headerlist(HttpMessageRef this)
 {
     RBL_CHECK_TAG(HttpMessage_TAG, this)
     return this->headers;
@@ -317,20 +302,20 @@ HdrListRef http_message_get_headerlist(HttpMessageRef this)
 const char* http_message_get_header_value(HttpMessageRef mref, const char* labptr)
 {
     RBL_CHECK_TAG(HttpMessage_TAG, mref)
-    KVPairRef kvp = HdrList_find(http_message_get_headerlist(mref), labptr);
-    if(kvp == NULL) {
+    HeaderLinePtr line = header_list_find(http_message_get_headerlist(mref), labptr);
+    if(line == NULL) {
         return NULL;
     }
-    return KVPair_value(kvp);
+    return Cbuffer_cstr(line->value);
 }
 int HttpMessage_cmp_header(HttpMessageRef msgref, const char* key, const char* test_value)
 {
     RBL_CHECK_TAG(HttpMessage_TAG, msgref)
-    KVPairRef kvp = HdrList_find(http_message_get_headerlist(msgref), key);
-    if(kvp == NULL) {
+    HeaderLinePtr line = header_list_find(http_message_get_headerlist(msgref), key);
+    if(line == NULL) {
         return -1;
     }
-    char* v = KVPair_value(kvp);
+    const char* v = Cbuffer_cstr(line->value);
     if(strlen(v) != strlen(test_value)) {
         return 0;
     }
@@ -355,7 +340,7 @@ void http_message_set_body(HttpMessageRef mref, BufferChainRef bodyp)
 void http_message_set_headers_arr(HttpMessageRef mref, const char* ar[][2])
 {
     RBL_CHECK_TAG(HttpMessage_TAG, mref)
-    HdrList_add_arr(mref->headers, ar);
+    header_list_add_arr(mref->headers, ar);
 }
 IOBufferRef http_message_get_content(HttpMessageRef mref)
 {
@@ -364,6 +349,30 @@ IOBufferRef http_message_get_content(HttpMessageRef mref)
 void http_message_set_content(HttpMessageRef mref, IOBufferRef iob)
 {
     
+}
+void http_message_target_append(HttpMessage* msg, char* at, size_t length)
+{
+    Cbuffer_append(msg->target, at, length);
+}
+void http_message_reason_append(HttpMessage* msg, char* at, size_t length)
+{
+    Cbuffer_append(msg->reason, at, length);
+}
+void http_message_add_empty_headerline(HttpMessage* msg)
+{
+    header_list_add_back(msg->headers, header_line_new(Cbuffer_new(), Cbuffer_new()));
+}
+HeaderLine* http_message_headers_last(HttpMessage* msg)
+{
+    return header_list_last(msg->headers);
+}
+void http_message_last_header_line_append_to_key(HttpMessage* msg, void* buf, size_t length)
+{
+    header_line_append_key(header_list_last(msg->headers), buf, (int)length);
+}
+void http_message_last_header_line_append_to_value(HttpMessage* msg, void* buf, size_t length)
+{
+    header_line_append_value(header_list_last(msg->headers), buf, (int)length);
 }
 
 /**@}*/

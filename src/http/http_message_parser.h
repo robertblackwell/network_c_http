@@ -51,16 +51,14 @@ struct HttpMessageParser_s {
     llhttp_t*                       m_llhttp_ptr;
     llhttp_settings_t*              m_llhttp_settings_ptr;
     HttpMessageRef                  current_message_ptr;
-    ParserOnMessageCompleteHandler*  on_message_handler;
+    ParserOnMessageCompleteHandler* on_message_handler;
     void*                           on_message_handler_context;
     int                             m_header_state;
     ///////////////////////////////////////////////////////////////////////////////////
-    // String buffers used to accumulate values from http-parser
+    // this is a reference to the most recent header line
+    // not owned by the parser. Just a convenience
     ///////////////////////////////////////////////////////////////////////////////////
-    CbufferRef                      m_url_buf;
-    CbufferRef                      m_status_buf;
-    CbufferRef                      m_name_buf;
-    CbufferRef                      m_value_buf;
+    // HeaderLinePtr                   m_current_header_line_ptr;
 };
 void HttpParser_reset(HttpMessageParser*);
 HttpMessageParserRef http_message_parser_new(

@@ -19,21 +19,21 @@
  *      The process would be something like:
  *
  *```c
- *      bytes_read = read(fd, IOBuffer_space(this), IOBUffer_space_len(this);
- *      IOBuffer_commit(this, bytes_read)
- *      bytes_processed = process_bytes(..... IOBuffer_data(this). IOBuffer_data_len(this))
- *      IOBuffer_consume(this, bytes_processed)
+ *      bytes_read = read(fd, IOBuffer_space(iob), IOBUffer_space_len(iob);
+ *      IOBuffer_commit(iob, bytes_read)
+ *      bytes_processed = process_bytes(..... IOBuffer_data(iob). IOBuffer_data_len(iob))
+ *      IOBuffer_consume(iob, bytes_processed)
  *```
  *
  * ```c
- *      bytes_generated = output_generator( .... IOBuffer_space(this), IOBUffer_spacelen(this))
- *      IOBUffer_commit(this, bytes_generated)
- *      bytes_written = write(fd, IOBuffer_data(this), IOBuffer_datalen(this))
- *      IOBuffer_consume(this, bytes_written)
+ *      bytes_generated = output_generator( .... IOBuffer_space(iob), IOBUffer_spacelen(iob))
+ *      IOBUffer_commit(iob, bytes_generated)
+ *      bytes_written = write(fd, IOBuffer_data(iob), IOBuffer_datalen(iob))
+ *      IOBuffer_consume(iob, bytes_written)
  *```
  *
  * NOTE: IOBuffers never (really ?) expand - they can be made to have any capacity needed at creation time, there after
- * they cannot expand. A consequence of this is that there re no "append" style methods.
+ * they cannot expand. A consequence of iob is that there re no "append" style methods.
  *
  * It would be dangerous to allow a buffer to expand (and the address of the underlying memory possibly change)
  * while the same buffer was being used for IO
@@ -47,15 +47,15 @@
  */
 typedef struct IOBuffer_s IOBuffer, *IOBufferRef;
 
-IOBufferRef IOBuffer_init(IOBufferRef this, int capacity);
+IOBufferRef IOBuffer_init(IOBufferRef iob, size_t capacity);
 /**
  * @brief Create a new IOBuffer with at least the requested capacity in bytes.
  *
- * @param capacity int The capacity of the new IOBuffer in bytes.
+ * @param capacity size_t The capacity of the new IOBuffer in bytes.
  * @return IOBufferRef
  */
-IOBufferRef IOBuffer_new_with_capacity(int capacity);
-void IOBuffer_expand_and_reset(IOBufferRef iob, int new_capacity);
+IOBufferRef IOBuffer_new_with_capacity(size_t capacity);
+void IOBuffer_expand_and_reset(IOBufferRef iob, size_t new_capacity);
 /**
  * @brief Create a new IOBuffer with a a default capacity.
  *
@@ -72,7 +72,7 @@ IOBufferRef IOBuffer_new();
  * AND THE SOURCE Cbuffer will be left
  *  either
  *      A) consistent but EMPTY
- *      B) undefined - to do this we will need a new Cbuffer method called Cbuffer_steal_content
+ *      B) undefined - to do iob we will need a new Cbuffer method called Cbuffer_steal_content
  *          needs more thinking about
  *
  */
@@ -81,10 +81,10 @@ IOBufferRef IOBuffer_from_cbuffer(CbufferRef cbuf);
 /**
  * @brief Makes an IOBUffer from the a pointer and length by COPY
  * @param buf char* pointing to start of data to put in IOBUffer
- * @param len int   length of data
+ * @param len size_t   length of data
  * @return IOBufferRef
  */
-IOBufferRef IOBuffer_from_buf(char* buf, int len);
+IOBufferRef IOBuffer_from_buf(char* buf, size_t len);
 
 /**
  * @brief Makes an IOBuffer from a c-string by COPY
@@ -94,112 +94,114 @@ IOBufferRef IOBuffer_from_buf(char* buf, int len);
 IOBufferRef IOBuffer_from_cstring(char* cstr);
 /**
  * @brief Returns a c string ref to internal data
- * @param this IOBuffer
+ * @param iob IOBuffer
  * @return c string Weak reference do not free
  */
-const char* IOBuffer_cstr(IOBufferRef this);
+const char* IOBuffer_cstr(IOBufferRef iob);
 /**
  * @brief Duplicate an IOBuffer including copying the content to a new memory allocation.
- * @param this IOBUfferRef
+ * @param iob IOBUfferRef
  * @return IOBufferRef
  */
-IOBufferRef IOBuffer_dup(IOBufferRef this);
-void IOBuffer_set_used(IOBufferRef this, int bytes_used);
+IOBufferRef IOBuffer_dup(IOBufferRef iob);
+void IOBuffer_set_used(IOBufferRef iob, size_t bytes_used);
 /**
  * @brief Returns a reference pointer to the start of active data in the buffer.
  * The memory pointed into is owned by the IoBuffer. Do not free
- * @param this
+ * @param iob
  * @return void*
  */
-void* IOBuffer_data(const IOBufferRef this);
+void* IOBuffer_data(const IOBufferRef iob);
 /**
  * @brief Returns a the length of active data in the buffer.
- * @param this
- * @return int
+ * @param iob
+ * @return size_t
  */
-int IOBuffer_data_len(const IOBufferRef this);
-void IOBuffer_data_add(IOBufferRef this, void* p, int len);
+size_t IOBuffer_data_len(const IOBufferRef iob);
+void IOBuffer_data_add(IOBufferRef iob, void* p, size_t len);
 
 /**
  * @brief Returns a reference pointer to the start of unused memory space after the last
  * active content in the buffer. This is the start of a memory where more data could be placed.
  * The memory pointed into is owned by the IoBuffer. Do not free
- * @param this
+ * @param iob
  * @return void*
  */
-void* IOBuffer_space(const IOBufferRef this);
+void* IOBuffer_space(const IOBufferRef iob);
 /**
  * @brief Returns a the length of available space in the buffer after
  * the active data.
- * @param this
- * @return int
+ * @param iob
+ * @return size_t
  */
-int IOBuffer_space_len(const IOBufferRef this);
+size_t IOBuffer_space_len(const IOBufferRef iob);
 
 /**
  * @brief Updates the IoBuffer so that the bytes_used bytes of memory area after the active content
  * is also considered to be active data. The memory addded is not updated as it is expected
  * that data has already been added to that area.
- * @param this
+ * @param iob
  * @param bytes_used
  */
-void IOBuffer_commit(IOBufferRef this, int bytes_used);
+void IOBuffer_commit(IOBufferRef iob, size_t bytes_used);
 /**
  * @brief Updates the IoBuffer so that the first byte_count bytes of the active data are now
  * considered not active data. IE Increments the start pointer
- * @param this
+ * @param iob
  * @param byte_count
  */
-void IOBuffer_consume(IOBufferRef this, int byte_count);
+void IOBuffer_consume(IOBufferRef iob, size_t byte_count);
 /**
  * Only use when absolutely necessary.
- * Frees the memory associated with 'this' but does not set pointer to NULL
- * @param this
+ * Frees the memory associated with 'iob' but does not set posize_ter to NULL
+ * @param iob
  */
-void IOBuffer_free(IOBufferRef this);
+void IOBuffer_free(IOBufferRef iob);
 /**
  * @deprecated - dont use
- * @param this
+ * @param iob
  */
-void IOBuffer_destroy(IOBufferRef this);
+void IOBuffer_destroy(IOBufferRef iob);
 /**
  * @brief Set the buffer back to empty without allocating new memory.
- * @param this IOBufferRef
+ * @param iob IOBufferRef
  */
-void IOBuffer_reset(IOBufferRef this);
+void IOBuffer_reset(IOBufferRef iob);
 /**
  * @brief Make more space in the buffer. Without changing the overall capacity of the buffer
- * There are two strategies used in this function:
+ * There are two strategies used in iob function:
  * Strategy 1 - move used area to front of allocated memory
  *      When a buffer contains data but no space for new data
- *      this operation will move the active data to the front of the allocated
+ *      iob operation will move the active data to the front of the allocated
  *      memory and relase some memory for space for new data.
  * Strategy 2 - when strategy 1 will not work expand the allocated memory space
  *      by doing a realloc
  */
-void IOBuffer_consolidate_space(IOBufferRef this);
+void IOBuffer_consolidate_space(IOBufferRef iob);
 /**
  * @brief Free an IOBuffer and all its associated resources.
  *
- * @Note: The argument is updated to NULL after this call.
+ * @Note: The argument is updated to NULL after iob call.
  *
  * @param p IOBufferRef*
  */
 //void IOBuffer_dispose(IOBufferRef* p);
-bool IOBuffer_empty(IOBufferRef this);
+bool IOBuffer_empty(IOBufferRef iob);
 bool IOBuffer_equal(IOBufferRef a, IOBufferRef b);
 /**
  * @brief Get the address of the start of the buffers memory region.
  *
  * @Note: This is a dangerous function as it breaks the integrity of the IOBuffer
  *
- * @param this IOBufferRef
+ * @param iob IOBufferRef
  * @return void*
  */
-void* IOBuffer_memptr(IOBufferRef this);
+void* IOBuffer_memptr(IOBufferRef iob);
 
-char IOBuffer_consume_pop_front(IOBufferRef this);
-void IOBuffer_commit_push_back(IOBufferRef this, char ch);
+char IOBuffer_consume_pop_front(IOBufferRef iob);
+void IOBuffer_commit_push_back(IOBufferRef iob, char ch);
 void IOBuffer_sprintf(IOBufferRef iob, const char* fmt, ...);
+void IOBuffer_append_cstr(IOBufferRef iob, const char* cstr);
+void IOBuffer_append_buffer(IOBufferRef iob, const char* buf, size_t len);
 /** @} */
 #endif
