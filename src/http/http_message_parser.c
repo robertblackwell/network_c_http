@@ -31,12 +31,18 @@ static int chunk_complete_cb(llhttp_t* parser);
 static int on_reset_cb(llhttp_t* parser);
 
 void HttpParser_initialize(HttpMessageParser *this);
-HttpMessageParserRef http_message_parser_new(void(*on_new_message_cb)(void* ctx, HttpMessageRef new_msg_ref, int error), void* handler_context)
+HttpMessageParserRef http_message_parser_new(
+    void(*on_new_message_cb)(void* ctx, HttpMessageRef new_msg_ref, int error),
+    void* handler_context, Allocator* allocator)
 {
-    HttpMessageParserRef this = malloc(sizeof(HttpMessageParser));
+    if(allocator == NULL) {
+        allocator = default_allocator_create();
+    }
+    HttpMessageParserRef this = allocator_alloc(allocator, sizeof(HttpMessageParser));
     if(this == NULL)
         return NULL;
     RBL_SET_TAG(HTTP_PARSER_TAG, this)
+    this->m_allocator = allocator;
     this->m_llhttp_ptr = NULL;
     this->m_llhttp_settings_ptr = NULL;
     this->m_header_state = kHEADER_STATE_NOTHING;
@@ -61,7 +67,7 @@ void http_message_parser_free(HttpMessageParserRef this)
         free(this->m_llhttp_settings_ptr);
         this->m_llhttp_settings_ptr = NULL;
     }
-    free(this);
+    allocator_dealloc(this->m_allocator, this);
 }
 int Parser_append_bytes(HttpMessageParserRef this, void *buffer, unsigned length)
 {
@@ -191,7 +197,7 @@ static int message_begin_cb(llhttp_t* parser)
     HttpMessageParserRef this =  (HttpMessageParserRef)(parser->data);
     RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
     assert(this->current_message_ptr == NULL);
-    this->current_message_ptr = http_message_new();
+    this->current_message_ptr = http_message_new(this->m_allocator);
     return 0;
 }
 static int url_data_cb(llhttp_t* parser, const char* at, size_t length)

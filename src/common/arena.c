@@ -64,9 +64,16 @@ size_t arena_round_up(size_t size_in_bytes)
 {
     return ((size_in_bytes % sizeof(uintptr_t)) == 0) ? size_in_bytes: sizeof(uintptr_t)*(1+(size_in_bytes / sizeof(uintptr_t)));
 }
-MBlockPtr arena_add_block(Arena* arena, size_t capacity_bytes)
+MBlockPtr arena_add_block(Arena* arena, size_t user_capacity_bytes)
 {
-    capacity_bytes = (capacity_bytes < ARENA_DEFAULT_CAPACITY) ? ARENA_DEFAULT_CAPACITY: capacity_bytes;
+    size_t capacity_bytes;
+    if(user_capacity_bytes == 0) {
+        capacity_bytes = arena->default_user_capacity + sizeof(AllocatedMemory);
+    } else {
+        capacity_bytes = (user_capacity_bytes <= arena->default_user_capacity)
+        ? arena->default_user_capacity + sizeof(AllocatedMemory)
+        : 2*(user_capacity_bytes+sizeof(AllocatedMemory));
+    }
     size_t block_size = sizeof(MBlock) + (capacity_bytes * sizeof(uint8_t));
     MBlockPtr bp = malloc(block_size);
     bp->mem_capacity_bytes = capacity_bytes;
@@ -107,7 +114,7 @@ void* arena_user_ptr_from_allocation(void* allocation)
 // api starts
 
 #define Arena_TAG "ARENAT"
-ArenaPtr arena_create(size_t capacity_bytes)
+ArenaPtr arena_create(size_t user_capacity_bytes)
 {
     ArenaPtr arena = malloc(sizeof(Arena));
     Allocator* alo = &(arena->allocator);
@@ -116,11 +123,12 @@ ArenaPtr arena_create(size_t capacity_bytes)
     assert(arena != NULL);
     assert(sizeof(uintptr_t) == sizeof(void*));
     assert(sizeof(uint8_t) == 1);
-    assert((capacity_bytes % sizeof(uintptr_t)) == 0);
-    assert(capacity_bytes >= ARENA_DEFAULT_CAPACITY);
+    assert((user_capacity_bytes % sizeof(uintptr_t)) == 0);
+    // assert(user_capacity_bytes >= ARENA_DEFAULT_CAPACITY);
     arena->begin = NULL;
     arena->end = NULL;
-    arena->begin = arena_add_block(arena, capacity_bytes);
+    arena->default_user_capacity = user_capacity_bytes;
+    arena->begin = arena_add_block(arena, user_capacity_bytes);
     arena->end = arena->begin;
     return arena;
 }
@@ -144,7 +152,7 @@ void arena_reset(ArenaPtr arena)
 }
 void* arena_alloc(Arena* arena, size_t alloc_size)
 {
-    assert(alloc_size < ARENA_DEFAULT_CAPACITY);
+    // assert(alloc_size < ARENA_DEFAULT_CAPACITY);
     alloc_size = arena_round_up(alloc_size);
     assert((alloc_size % sizeof(uintptr_t)) == 0);
     MBlockPtr p = arena->begin;

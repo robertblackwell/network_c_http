@@ -3,37 +3,49 @@
 #include <ctype.h>
 #include <string.h>
 #include <src/common/utils.h>
+#include <common/alloc_malloc.h>
 
 #define HeaderLine_TAG "HDR_TAG"
 
-HeaderLine* header_line_new(Cbuffer* key, Cbuffer* value)
+HeaderLine* header_line_new(Cbuffer* key, Cbuffer* value, Allocator* allocator)
 {
-    HeaderLine* tmp = malloc(sizeof(HeaderLine));
-    header_line_init(tmp, key, value);
+    if(allocator == NULL) {
+        allocator = default_allocator_create();
+    }
+    HeaderLine* tmp = allocator_alloc(allocator, sizeof(HeaderLine));
+    tmp->allocator = allocator;
+    header_line_init(tmp, key, value, allocator);
     return tmp;
 }
-HeaderLine* header_line_from_buffer(char* key, int keylen, char* value, int valuelen)
+HeaderLine* header_line_from_buffer(char* key, int keylen, char* value, int valuelen, Allocator* allocator)
 {
-    CbufferRef k = Cbuffer_new();
+    if(allocator == NULL) {
+        allocator = default_allocator_create();
+    }
+    CbufferRef k = Cbuffer_new(allocator);
     Cbuffer_append(k, key, keylen);
-    CbufferRef v = Cbuffer_new();
+    CbufferRef v = Cbuffer_new(allocator);
     Cbuffer_append(v, value, valuelen);
-    HeaderLine* tmp = header_line_new(k, v);
+    HeaderLine* tmp = header_line_new(k, v, allocator);
     return tmp;
 }
-HeaderLine* header_line_from_cstr(char* keycstr, char* valuecstr)
+HeaderLine* header_line_from_cstr(char* keycstr, char* valuecstr, Allocator* allocator)
 {
-    CbufferRef k = Cbuffer_new();
+    if(allocator == NULL) {
+        allocator = default_allocator_create();
+    }
+    CbufferRef k = Cbuffer_new(allocator);
     Cbuffer_append_cstr(k, keycstr);
-    CbufferRef v = Cbuffer_new();
+    CbufferRef v = Cbuffer_new(allocator);
     Cbuffer_append_cstr(v, valuecstr);
-    HeaderLine* tmp = header_line_new(k, v);
+    HeaderLine* tmp = header_line_new(k, v, allocator);
     return tmp;
 }
 void header_line_free(HeaderLine* hdr)
 {
+    Allocator* allocator = hdr->allocator;
     header_line_deinit(hdr);
-    free(hdr);
+    allocator_dealloc(hdr->allocator, hdr);
 }
 void inplace_toupper(char* cstr)
 {
@@ -41,11 +53,13 @@ void inplace_toupper(char* cstr)
         *p = toupper(*p);
     }
 }
-void header_line_init(HeaderLine* hdrline, Cbuffer* key, Cbuffer* value)
+void header_line_init(HeaderLine* hdrline, Cbuffer* key, Cbuffer* value, Allocator* allocator)
 {
     RBL_SET_TAG(HeaderLine_TAG, hdrline)
     RBL_SET_END_TAG(HeaderLine_TAG, hdrline)
     assert(sizeof(void*) == sizeof(size_t));
+    assert(allocator != NULL);
+
     inplace_toupper((char*)Cbuffer_cstr(key));
     hdrline->key = key;
     hdrline->value = value;

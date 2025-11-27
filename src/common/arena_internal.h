@@ -28,6 +28,7 @@ struct Arena_s {
     Allocator allocator;
     MBlockPtr begin;
     MBlockPtr end;
+    size_t default_user_capacity;
 };
 size_t arena_round_up(size_t size_in_bytes);
 void arena_fill(void* p, char ch, size_t n);

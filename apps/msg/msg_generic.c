@@ -14,7 +14,7 @@ inline GenericMsgRef generic_msg_new() {
 #elif defined(MSG_SELECT_STX)
     return stx_msg_new();
 #elif defined(MSG_SELECT_HTTP)
-    return http_message_new();
+    return http_message_new(NULL);
 #endif
 }
 inline void generic_msg_free(GenericMsgRef msg_ref){
@@ -61,7 +61,7 @@ inline GenericMsgParserRef generic_msg_parser_new(GenericMsgParserCallback* cb, 
 #elif defined(MSG_SELECT_STX)
     return stx_msg_parser_new(cb, arg);
 #elif defined(MSG_SELECT_HTTP)
-    return http_message_parser_new(cb, arg);
+    return http_message_parser_new(cb, arg, NULL);
 #endif
 }
 inline void generic_msg_parser_free(GenericMsgParserRef parser_ref){

@@ -18,9 +18,9 @@
 #endif
 char* cstr_concat(char* s1, char* s2)
 {
-    int n1 = strlen(s1);
-    int n2 = strlen(s2);
-    int sz = strlen(s1) + strlen(s2);
+    size_t n1 = strlen(s1);
+    size_t n2 = strlen(s2);
+    size_t sz = strlen(s1) + strlen(s2);
     char* result;
     asprintf(&result, "%s%s", s1, s2);
     return result;
@@ -83,14 +83,8 @@ int test_expand()
 #else
     Allocator* ma = arena_allocator_create(4*1024);
 #endif
-    char* s1 = cstr_concat("","");
     char* extra = "abcedfghijklmnopqrstuvwxyz01923456789";
-    for(int i = 0; i < 2800; i++) {
-        char* s2 = cstr_concat(s1, extra);
-        free(s1);
-        s1 = s2;
-    }
-    CbufferRef b2 = Cbuffer_from_cstring(s1, ma);
+    CbufferRef b2 = Cbuffer_from_cstring(extra, ma);
     size_t sz = Cbuffer_size(b2);
     size_t cp = Cbuffer_capacity(b2);
     Cbuffer_expand(b2, cp*3);

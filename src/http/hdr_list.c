@@ -184,7 +184,7 @@ void HdrList_add_many(HdrListRef this, CStrPair *pairs[])
 // just to see it update
 CbufferRef HdrList_serialize(HdrListRef this)
 {
-    CbufferRef cb = Cbuffer_new();
+    CbufferRef cb = Cbuffer_new(NULL);
     ListIterator iter = HdrList_iterator(this);
     while(iter != NULL) {
         KVPairRef line = HdrList_itr_unpack(this, iter);

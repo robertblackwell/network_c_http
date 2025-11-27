@@ -2,17 +2,18 @@
 #include <ctype.h>
 #include <string.h>
 #include <src/common/utils.h>
+#include <common/alloc_malloc.h>
 #define HeaderList_TAG "HDRLST"
 
-HeaderListPtr header_list_from_array(const char* ar[][2])
+HeaderListPtr header_list_from_array(const char* ar[][2], Allocator* allocator)
 {
-    HeaderListPtr tmp = header_list_new();
+    HeaderListPtr tmp = header_list_new(allocator);
     const char* k;
     const char* v;
     for(int row = 0; ar[row][0] != NULL ; row++) {
         k = ar[row][0];
         v = ar[row][1];
-        HeaderLinePtr hl = header_line_from_cstr((char*)k, (char*)v);
+        HeaderLinePtr hl = header_line_from_cstr((char*)k, (char*)v, allocator);
         header_list_add_back(tmp, hl);
     }
     return tmp;
@@ -65,12 +66,12 @@ void header_list_remove(HeaderListPtr hlist, const char *key)
 
 void header_list_add_cbuf(HeaderListPtr hlist, const CbufferRef key, const CbufferRef value)
 {
-    HeaderLinePtr hl = header_line_new(key, value);
+    HeaderLinePtr hl = header_line_new(key, value, hlist->allocator);
     header_list_add_back(hlist, hl);
 }
 void header_list_add_line(HeaderListPtr hlist, const char *label, int lablen, const char *value, int vallen)
 {
-    HeaderLinePtr hl = header_line_from_buffer((char*)label, lablen, (char*)value, vallen);
+    HeaderLinePtr hl = header_line_from_buffer((char*)label, lablen, (char*)value, vallen, hlist->allocator);
     header_list_add_front(hlist, hl);
 }
 void header_list_add_cstr(HeaderListPtr hlist, const char *label, const char *value)
@@ -79,12 +80,12 @@ void header_list_add_cstr(HeaderListPtr hlist, const char *label, const char *va
     char* v = (char*)value;
     int lablen = strlen(label);
     int vallen = strlen(value);
-    HeaderLinePtr hl_content_type = header_line_from_cstr(lab, v);
+    HeaderLinePtr hl_content_type = header_line_from_cstr(lab, v, hlist->allocator);
     header_list_add_back(hlist, hl_content_type);
 }
 CbufferRef header_list_serialize(HeaderListPtr hlist)
 {
-    CbufferRef cb = Cbuffer_new();
+    CbufferRef cb = Cbuffer_new(hlist->allocator);
     HeaderLinePtr iter = header_list_iterator(hlist);
     while(iter != NULL) {
         Cbuffer_append_cstr(cb, Cbuffer_cstr(iter->key));
@@ -95,14 +96,18 @@ CbufferRef header_list_serialize(HeaderListPtr hlist)
     }
     return cb;
 }
-HeaderListPtr header_list_new()
+HeaderListPtr header_list_new(Allocator* allocator)
 {
-    HeaderListPtr hlist = malloc(sizeof(HeaderList));
+    if(allocator == NULL) {
+        allocator = default_allocator_create();
+    }
+    HeaderListPtr hlist = allocator_alloc(allocator, sizeof(HeaderList));
     assert(hlist != NULL);
-    header_list_init(hlist);
+    hlist->allocator = allocator;
+    header_list_init(hlist, allocator);
     return hlist;
 }
-void header_list_init(HeaderListPtr hlist)
+void header_list_init(HeaderListPtr hlist, Allocator* allocator)
 {
     RBL_SET_TAG(HeaderList_TAG, hlist);
     RBL_SET_END_TAG(HeaderList_TAG, hlist)
@@ -121,7 +126,7 @@ void header_list_free(HeaderListPtr hlist)
         header_line_free(p);
     }
     assert(hlist->count == 0);
-    free(hlist);
+    allocator_dealloc(hlist->allocator, hlist);
 }
 int header_list_size(const HeaderListPtr hlist)
 {

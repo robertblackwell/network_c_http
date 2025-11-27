@@ -91,7 +91,7 @@ int parser_test_run(parser_test_t* this)
     IOBufferRef iobuf_ref = IOBuffer_new_with_capacity(256);
     test_input_t* ds_ptr = &this->test_input;
 
-    HttpMessageParser* pref = http_message_parser_new(on_message_handler, (void *) this);
+    HttpMessageParser* pref = http_message_parser_new(on_message_handler, (void *) this, NULL);
     llhttp_errno_t rc;
     while(1) {
 //        char*data = test_input_next(ds_ptr);

@@ -18,7 +18,7 @@ struct Allocator_s
     void(*destroy)(Allocator* allocator);
     RBL_DECLARE_END_TAG
 };
-
+Allocator* default_allocator_create();
 void* allocator_alloc(Allocator* allcator, size_t size);
 void* allocator_realloc(Allocator* allocator, void* old_ptr, size_t size);
 void allocator_dealloc(Allocator* allocator, void* ptr);

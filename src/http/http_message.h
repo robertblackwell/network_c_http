@@ -44,10 +44,10 @@ typedef void* HeaderIter;
 typedef int HttpMinorVersion;
 #define HttpMessage_TAG "HTTPMSGE"
 
-HttpMessageRef http_message_new();
+HttpMessageRef http_message_new(Allocator* allocator);
 HttpMessageRef http_message_new_with_allocator(Allocator* allocator);
-HttpMessageRef http_message_new_request();
-HttpMessageRef http_message_new_response();
+HttpMessageRef http_message_new_request(Allocator* allocator);
+HttpMessageRef http_message_new_response(Allocator* allocator);
 
 void http_message_free(HttpMessageRef p);
 void http_message_anonymous_free(void* m);

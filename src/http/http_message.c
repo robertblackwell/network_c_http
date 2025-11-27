@@ -25,9 +25,9 @@ void http_message_init (HttpMessageRef mref, Allocator* allocator_ptr)
     mref->allocator = allocator_ptr;
     mref->minor_vers = minor_version1;
     mref->major_vers = major_version1;
-    mref->target = Cbuffer_new();
-    mref->reason = Cbuffer_new();
-    mref->headers = header_list_new();
+    mref->target = Cbuffer_new(allocator_ptr);
+    mref->reason = Cbuffer_new(allocator_ptr);
+    mref->headers = header_list_new(allocator_ptr);
 }
 HttpMessageRef http_message_new_with_allocator(Allocator* allocator)
 {
@@ -36,32 +36,32 @@ HttpMessageRef http_message_new_with_allocator(Allocator* allocator)
     http_message_init(mref, allocator);
     return mref;
 }
-HttpMessageRef http_message_new()
+HttpMessageRef http_message_new(Allocator* allocator)
 {
-    Allocator* allocator_ptr = (Allocator*) malloc_allocator_create();
-    return http_message_new_with_allocator(allocator_ptr);
+    if(allocator == NULL) {
+        allocator = (Allocator*) default_allocator_create();
+    }
+    return http_message_new_with_allocator(allocator);
 }
 /**
  * @brief Create a new request message instance
  * @return HttpMessageRef
  */
-HttpMessageRef http_message_new_request()
+HttpMessageRef http_message_new_request(Allocator* allocator)
 {
-    HttpMessageRef mref = http_message_new();
+    HttpMessageRef mref = http_message_new(allocator);
     if(mref != NULL) {
         mref->is_request = true;
-//        mref->target = Cbuffer_new();
         return mref;
     }
     return NULL;
 }
-HttpMessageRef http_message_new_response()
+HttpMessageRef http_message_new_response(Allocator* allocator)
 {
 
-    HttpMessageRef mref = http_message_new();
+    HttpMessageRef mref = http_message_new(allocator);
     if(mref != NULL) {
         mref->is_request = false;
-//        mref->reason = Cbuffer_new();
         return mref;
     }
     return NULL;
@@ -69,18 +69,19 @@ HttpMessageRef http_message_new_response()
 void http_message_free(HttpMessageRef p)
 {
     RBL_CHECK_TAG(HttpMessage_TAG, p)
+    Allocator* a = p->allocator;
     header_list_free(p->headers);
     Cbuffer_free(p->target);
     Cbuffer_free(p->reason);
-    free(p);
+    allocator_dealloc(a, p);
 }
 void http_message_anonymous_free(void* p)
 {
     http_message_free(p);
 }
-HttpMessageRef MessageResponse(HttpStatus status, void* body)
+HttpMessageRef MessageResponse(HttpStatus status, void* body, Allocator* allocator)
 {
-    HttpMessageRef mref = http_message_new();
+    HttpMessageRef mref = http_message_new(allocator);
     if(mref == NULL) goto error_1;
     mref->is_request = false;
     mref->status_code = status;
@@ -208,13 +209,6 @@ const char* http_message_get_target(HttpMessageRef this)
     RBL_CHECK_TAG(HttpMessage_TAG, this)
     return (const char*)Cbuffer_cstr(this->target);
 }
-//void Message_move_target(HttpMessageRef this, CbufferRef target)
-//{
-//    if(this->target == NULL) {
-//        this->target = Cbuffer_new();
-//    }
-//    Cbuffer_move(this->target, target);
-//}
 void http_message_set_target(HttpMessageRef this, const char* target_cstr)
 {
     RBL_CHECK_TAG(HttpMessage_TAG, this)
@@ -241,12 +235,6 @@ void http_message_set_reason(HttpMessageRef this, const char* reason_cstr)
     assert((this->reason != NULL) && (Cbuffer_size(this->reason) == 0));
     Cbuffer_append_cstr(this->reason, (const char*)reason_cstr);
 }
-//void Message_move_reason(HttpMessageRef this, CbufferRef reason)
-//{
-//    if(this->reason == NULL)
-//        this->reason = Cbuffer_new();
-//    Cbuffer_move(this->reason, reason);
-//}
 const char* http_message_get_reason(HttpMessageRef this)
 {
     RBL_CHECK_TAG(HttpMessage_TAG, this)
@@ -270,8 +258,6 @@ int Message_get_content_length(HttpMessageRef this)
 }
 void http_message_set_content_length(HttpMessageRef this, int length)
 {
-    assert(0);
-#if 0
     RBL_CHECK_TAG(HttpMessage_TAG, this)
     char buf[100];
     assert(length >= 0);
@@ -279,11 +265,10 @@ void http_message_set_content_length(HttpMessageRef this, int length)
     HeaderListPtr hdrlist_ref = this->headers;
     HeaderLinePtr hline = header_list_find(hdrlist_ref, "Content-length");
     if(hline != NULL) {
-        header_line_set_value(hline, Cbuffer_from_cstring(buf));
+        header_line_set_value(hline, Cbuffer_from_cstring(buf, this->allocator));
     } else {
         header_list_add_cstr(hdrlist_ref, "Content-length", buf);
     }
-#endif
 }
 
 // headers
@@ -360,7 +345,8 @@ void http_message_reason_append(HttpMessage* msg, char* at, size_t length)
 }
 void http_message_add_empty_headerline(HttpMessage* msg)
 {
-    header_list_add_back(msg->headers, header_line_new(Cbuffer_new(), Cbuffer_new()));
+    Allocator* a = msg->allocator;
+    header_list_add_back(msg->headers, header_line_new(Cbuffer_new(a), Cbuffer_new(a), a));
 }
 HeaderLine* http_message_headers_last(HttpMessage* msg)
 {

@@ -11,33 +11,33 @@ UrlRef Url_new(char* url)
     c_http_parser_parse_url(url, strlen(url),0, &u);
     UrlRef this = malloc(sizeof(Url_t));
 
-    this->scheme = Cbuffer_new();
+    this->scheme = Cbuffer_new(NULL);
     if(u.field_data[UF_SCHEMA].len != 0)
         Cbuffer_append(this->scheme, u.field_data[UF_SCHEMA].off + url, u.field_data[UF_SCHEMA].len);
 
-    this->user_info = Cbuffer_new();
+    this->user_info = Cbuffer_new(NULL);
     if(u.field_data[UF_USERINFO].len != 0)
         Cbuffer_append(this->user_info, u.field_data[UF_USERINFO].off + url, u.field_data[UF_USERINFO].len);
 
-    this->host = Cbuffer_new();
+    this->host = Cbuffer_new(NULL);
     if(u.field_data[UF_HOST].len != 0)
         Cbuffer_append(this->host, u.field_data[UF_HOST].off + url, u.field_data[UF_HOST].len);
 
-    this->path = Cbuffer_new();
+    this->path = Cbuffer_new(NULL);
     if(u.field_data[UF_PATH].len != 0)
-    Cbuffer_append(this->path, u.field_data[UF_PATH].off + url, u.field_data[UF_PATH].len);
+        Cbuffer_append(this->path, u.field_data[UF_PATH].off + url, u.field_data[UF_PATH].len);
 
-    this->port = Cbuffer_new();
+    this->port = Cbuffer_new(NULL);
     if(u.field_data[UF_PORT].len != 0)
         Cbuffer_append(this->port, u.field_data[UF_PORT].off + url, u.field_data[UF_PORT].len);
 
-    this->fragement = Cbuffer_new();
+    this->fragement = Cbuffer_new(NULL);
     if(u.field_data[UF_FRAGMENT].len != 0)
-    Cbuffer_append(this->fragement, u.field_data[UF_FRAGMENT].off + url, u.field_data[UF_FRAGMENT].len);
+        Cbuffer_append(this->fragement, u.field_data[UF_FRAGMENT].off + url, u.field_data[UF_FRAGMENT].len);
 
-    this->query = Cbuffer_new();
+    this->query = Cbuffer_new(NULL);
     if(u.field_data[UF_QUERY].len != 0)
-    Cbuffer_append(this->query, u.field_data[UF_QUERY].off + url, u.field_data[UF_QUERY].len);
+        Cbuffer_append(this->query, u.field_data[UF_QUERY].off + url, u.field_data[UF_QUERY].len);
 
     return this;
 

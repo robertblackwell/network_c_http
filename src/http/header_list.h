@@ -9,14 +9,17 @@ typedef struct HeaderList{
     int count;
     HeaderLinePtr head;
     HeaderLinePtr tail;
+    Allocator* allocator;
     RBL_DECLARE_END_TAG;
 } HeaderList, *HeaderListPtr;;
 
 
-HeaderListPtr  header_list_new();
+HeaderListPtr  header_list_new(Allocator* allocator);
+HeaderListPtr header_list_from_array(const char* raw[][2], Allocator* allocator);
+void header_list_init(HeaderListPtr hlist, Allocator* allocator);
+
 void header_list_free(HeaderListPtr hlist);
 
-void header_list_init(HeaderListPtr hlist);
 void header_list_deinit(HeaderListPtr hlist);
 int  header_list_size(HeaderListPtr hlist);
 
@@ -31,7 +34,6 @@ void  header_list_itr_remove(HeaderListPtr hlist, HeaderListIter* iter_addr);
 
 void header_list_add_back(HeaderListPtr hlist, HeaderLinePtr line);
 void header_list_add_front(HeaderListPtr hlist, HeaderLinePtr line);
-HeaderListPtr header_list_from_array(const char* raw[][2]);
 void header_list_add(HeaderListPtr hlist, const CbufferRef key, const CbufferRef value);
 
 // void header_list_add_many(HeaderListPtr hlist, CStrPair* pairs[]);
@@ -42,6 +44,7 @@ CbufferRef header_list_serialize(const HeaderListPtr hlist);
 void header_list_add_cbuf(HeaderListPtr hlist, const CbufferRef key, const CbufferRef value);
 void header_list_add_line(HeaderListPtr hlist, const char* label, int lablen, const char* value, int vallen);
 void header_list_add_cstr(HeaderListPtr hlist, const char* label, const char* value);
+void header_list_display(const HeaderListPtr hlist);
 
 /** @} */
 

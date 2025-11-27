@@ -116,14 +116,16 @@ void Cbuffer_init(CbufferRef cb_ptr, Allocator* allocator)
     cb_ptr->m_length = 0;
     cb_ptr->m_size = 0;
     cb_ptr->m_capacity = tmp_cap;
+    cb_ptr->m_cPtr[cb_ptr->m_size] = '\0';
+    assert(cb_ptr->m_cPtr[cb_ptr->m_size] == '\0');
+
 }
-CbufferRef Cbuffer_new()
+CbufferRef Cbuffer_new(Allocator* allocator)
 {
-    Allocator* allocator = NULL;
     if(allocator == NULL) {
-        allocator = malloc_allocator_create();
+        allocator = default_allocator_create();
     }
-    CbufferRef cb = allocator->allocate(NULL, sizeof(CbufferRef));
+    CbufferRef cb = allocator->allocate(allocator, sizeof(Cbuffer));
     assert(cb != NULL);
     cb->m_allocator = allocator;
     Cbuffer_init(cb, allocator);
@@ -139,7 +141,7 @@ CbufferRef Cbuffer_new_with_allocator(Allocator* allocator)
 }
 CbufferRef Cbuffer_from_cstring(const char* c_str, Allocator* allocator)
 {
-    CbufferRef cbuf = Cbuffer_new();
+    CbufferRef cbuf = Cbuffer_new(allocator);
     Cbuffer_append(cbuf, (void*)c_str, strlen(c_str));
     return cbuf;
 }
@@ -226,8 +228,9 @@ void Cbuffer_expand(CbufferRef cbuf, size_t new_capacity)
 {
     RBL_CHECK_TAG(CBUFFER_Tag, cbuf);
     RBL_CHECK_END_TAG(CBUFFER_Tag, cbuf);
-    void* newmem = allocator_realloc(cbuf->m_allocator, cbuf->m_memPtr, new_capacity);
+    void* newmem = allocator_alloc(cbuf->m_allocator, new_capacity);
     void* old_mem = cbuf->m_memPtr;
+    memcpy(newmem, old_mem, cbuf->m_capacity);
     cbuf->m_memPtr = newmem;
     cbuf->m_cPtr = (char*) cbuf->m_memPtr;
     cbuf->m_capacity = new_capacity;

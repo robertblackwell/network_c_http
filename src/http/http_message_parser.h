@@ -54,6 +54,7 @@ struct HttpMessageParser_s {
     ParserOnMessageCompleteHandler* on_message_handler;
     void*                           on_message_handler_context;
     int                             m_header_state;
+    Allocator*                      m_allocator;
     ///////////////////////////////////////////////////////////////////////////////////
     // this is a reference to the most recent header line
     // not owned by the parser. Just a convenience
@@ -66,7 +67,8 @@ HttpMessageParserRef http_message_parser_new(
         void(on_new_message_cb)(void* on_new_message_ctx, HttpMessageRef new_message_ref, int error),
         // a pointer to a ctx object you want the handler to have access to while it
         // deciddes what to do with a new message
-        void* handler_context) ;
+        void* handler_context,
+        Allocator* allocator) ;
 void http_message_parser_free(HttpMessageParserRef this);
 
 /**

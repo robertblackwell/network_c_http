@@ -39,7 +39,7 @@ typedef struct Cbuffer_s
 /**
  *  WARNING - THIS FUNCTION ALLOCATES MEMORY
  */
-CbufferRef Cbuffer_new();
+CbufferRef Cbuffer_new(Allocator* allocator);
 CbufferRef Cbuffer_new_with_allocator(Allocator* allocator);
 void Cbuffer_init(Cbuffer* cb, Allocator* allocator);
 /**

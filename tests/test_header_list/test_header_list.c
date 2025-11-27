@@ -6,6 +6,9 @@
 #include <src/common/cbuffer.h>
 #include <rbl/logger.h>
 #include <src/common/list.h>
+#include <common/alloc.h>
+#include <common/alloc_malloc.h>
+#include <common/arena.h>
 #include <src/http/http_header_line.h>
 #include <src/http/header_list.h>
 #include <src/http/http_message.h>
@@ -14,20 +17,31 @@
 ///////////////////////////////////////////////////
 int test_header_list_new()
 {
-    HeaderListPtr hdrlistref = header_list_new();
+#ifdef CBUF_ALLOCATOR_MALLOC
+    Allocator* ma = malloc_allocator_create();
+#else
+    Allocator* ma = arena_allocator_create(4*1024);
+#endif
+    HeaderListPtr hdrlistref = header_list_new(ma);
     int sz = header_list_size(hdrlistref);
     UT_NOT_EQUAL_PTR(hdrlistref, NULL);
     UT_EQUAL_INT(sz, 0);
     header_list_free(hdrlistref);
     hdrlistref = NULL;
     UT_EQUAL_PTR(hdrlistref, NULL);
+    allocator_destroy(ma);
 	return 0;
 }
 int test_header_list_add_back_get_content()
 {
-    HeaderListPtr hdrlistref = header_list_new();
-    HeaderLinePtr hdrln1 = header_line_from_buffer("KVPairKey1", strlen("KVPairKey1"), "333", strlen("333"));
-    HeaderLinePtr hdrln2 = header_line_from_buffer("KVPairKey2", strlen("KVPairKey2"), "4444", strlen("4444"));
+#ifdef CBUF_ALLOCATOR_MALLOC
+    Allocator* ma = malloc_allocator_create();
+#else
+    Allocator* ma = arena_allocator_create(4*1024);
+#endif
+    HeaderListPtr hdrlistref = header_list_new(ma);
+    HeaderLinePtr hdrln1 = header_line_from_buffer("KVPairKey1", strlen("KVPairKey1"), "333", strlen("333"), ma);
+    HeaderLinePtr hdrln2 = header_line_from_buffer("KVPairKey2", strlen("KVPairKey2"), "4444", strlen("4444"), ma);
     header_list_add_back(hdrlistref, hdrln1);
     header_list_add_back(hdrlistref, hdrln2);
     int sz = header_list_size(hdrlistref);
@@ -42,17 +56,23 @@ int test_header_list_add_back_get_content()
     UT_EQUAL_INT(strcmp(sv1, "333"), 0);
     UT_EQUAL_INT(strcmp(sh2, "KVPAIRKEY2"), 0);
     UT_EQUAL_INT(strcmp(sv2, "4444"), 0);
-    List_display((ListRef)hdrlistref);
+    header_list_display(hdrlistref);
     header_list_free(hdrlistref);
+    allocator_destroy(ma);
     return 0;
 }
 int test_header_list_find()
 {
-    HeaderListPtr hdrlistref = header_list_new();
-    HeaderLinePtr hdrln1 = header_line_from_buffer("KVPairKey1", strlen("KVPairKey1"), "333", strlen("333"));
-    HeaderLinePtr hdrln2 = header_line_from_buffer("KVPairKey2", strlen("KVPairKey2"), "4444", strlen("4444"));
-    HeaderLinePtr hdrln3 = header_line_from_buffer("KVPairKey3", strlen("KVPairKey2"), "55555", strlen("55555"));
-    HeaderLinePtr hdrln4 = header_line_from_buffer("KVPairKey4", strlen("KVPairKey2"), "666666", strlen("666666"));
+#ifdef CBUF_ALLOCATOR_MALLOC
+    Allocator* ma = malloc_allocator_create();
+#else
+    Allocator* ma = arena_allocator_create(4*1024);
+#endif
+    HeaderListPtr hdrlistref = header_list_new(ma);
+    HeaderLinePtr hdrln1 = header_line_from_buffer("KVPairKey1", strlen("KVPairKey1"), "333", strlen("333"), ma);
+    HeaderLinePtr hdrln2 = header_line_from_buffer("KVPairKey2", strlen("KVPairKey2"), "4444", strlen("4444"), ma);
+    HeaderLinePtr hdrln3 = header_line_from_buffer("KVPairKey3", strlen("KVPairKey2"), "55555", strlen("55555"), ma);
+    HeaderLinePtr hdrln4 = header_line_from_buffer("KVPairKey4", strlen("KVPairKey2"), "666666", strlen("666666"), ma);
     HeaderLinePtr x = header_list_find(hdrlistref, "onetwothree");
     int sz = header_list_size(hdrlistref);
     UT_EQUAL_INT(sz, 0);
@@ -99,51 +119,92 @@ int test_header_list_find()
     header_list_free(hdrlistref);
     Cbuffer_free(cbref);cbref = NULL;
 
+    allocator_destroy(ma);
     return 0;
 }
 void trial_header_list_add_line(HeaderListPtr this, char* label, int lablen, char* value, int vallen)
 {
-    HeaderLinePtr hl_content_type = header_line_from_buffer(label, lablen, value, vallen);
+#ifdef CBUF_ALLOCATOR_MALLOC
+    Allocator* ma = malloc_allocator_create();
+#else
+    Allocator* ma = arena_allocator_create(4*1024);
+#endif
+    HeaderLinePtr hl_content_type = header_line_from_buffer(label, lablen, value, vallen, ma);
     header_list_add_front(this, hl_content_type);
 }
 int test_serialize_headers()
 {
+#ifdef CBUF_ALLOCATOR_MALLOC
+    Allocator* ma = malloc_allocator_create();
+#else
+    Allocator* ma = arena_allocator_create(4*1024);
+#endif
     int body_len = 37;
     char* body_len_str;
     asprintf(&body_len_str, "%d", body_len);
 
-    HeaderListPtr hdrs = header_list_new();
-    HeaderLinePtr hl_content_length = header_line_from_buffer(HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
+    HeaderListPtr hdrs = header_list_new(ma);
+    HeaderLinePtr hl_content_length = header_line_from_buffer(
+        HEADER_CONTENT_LENGTH,
+        strlen(HEADER_CONTENT_LENGTH),
+        body_len_str,
+        strlen(body_len_str),
+        ma);
     header_list_add_front(hdrs, hl_content_length);
     char* content_type = "text/html; charset=UTF-8";
-    HeaderLinePtr hl_content_type = header_line_from_buffer(HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
+    HeaderLinePtr hl_content_type = header_line_from_buffer(
+        HEADER_CONTENT_TYPE,
+        strlen(HEADER_CONTENT_TYPE),
+        content_type,
+        (int)strlen(content_type),
+        ma);
     header_list_add_front(hdrs, hl_content_type);
     CbufferRef ser = header_list_serialize(hdrs);
     free(body_len_str);
     header_list_free(hdrs);
     Cbuffer_free(ser);
+    allocator_destroy(ma);
     return 0;
 }
 int test_serialize_headers_2()
 {
+#ifdef CBUF_ALLOCATOR_MALLOC
+    Allocator* ma = malloc_allocator_create();
+#else
+    Allocator* ma = arena_allocator_create(4*1024);
+#endif
     int body_len = 37;
     char* body_len_str;
     asprintf(&body_len_str, "%d", body_len);
 
-    HeaderListPtr hdrs = header_list_new();
-    trial_header_list_add_line(hdrs, HEADER_CONTENT_LENGTH, strlen(HEADER_CONTENT_LENGTH), body_len_str, strlen(body_len_str));
+    HeaderListPtr hdrs = header_list_new(ma);
+    trial_header_list_add_line(hdrs,
+        HEADER_CONTENT_LENGTH,
+        strlen(HEADER_CONTENT_LENGTH),
+        body_len_str,
+        (int)strlen(body_len_str));
     char* content_type = "text/html; charset=UTF-8";
-    header_list_add_line(hdrs, HEADER_CONTENT_TYPE, strlen(HEADER_CONTENT_TYPE), content_type, strlen(content_type));
+    header_list_add_line(hdrs,
+        HEADER_CONTENT_TYPE,
+        strlen(HEADER_CONTENT_TYPE),
+        content_type,
+        (int)strlen(content_type));
 
     CbufferRef ser = header_list_serialize(hdrs);
     free(body_len_str);
     Cbuffer_free(ser);
     header_list_free(hdrs);
+    allocator_destroy(ma);
     return 0;
 }
 int test_hdr_add_many()
 {
-    HeaderListPtr hdrs = header_list_new();
+#ifdef CBUF_ALLOCATOR_MALLOC
+    Allocator* ma = malloc_allocator_create();
+#else
+    Allocator* ma = arena_allocator_create(4*1024);
+#endif
+    HeaderListPtr hdrs = header_list_new(ma);
     header_list_add_cstr(hdrs, "Key1", "value1");
     header_list_add_cstr(hdrs, "Key2", "value2");
     header_list_add_cstr(hdrs, "Key3", "value3");
@@ -151,10 +212,16 @@ int test_hdr_add_many()
     CbufferRef cb = header_list_serialize(hdrs);
     UT_EQUAL_CSTR(Cbuffer_cstr(cb), "KEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\n");
     printf("This is it\n");
+    allocator_destroy(ma);
     return 0;
 }
 int test_header_list_ar()
 {
+#ifdef CBUF_ALLOCATOR_MALLOC
+    Allocator* ma = malloc_allocator_create();
+#else
+    Allocator* ma = arena_allocator_create(4*1024);
+#endif
     const char* ar[][2] = {
         {"Key1", "value1"},
         {"Key2", "value2"},
@@ -162,10 +229,11 @@ int test_header_list_ar()
         {"Key4", "value4"},
         {NULL, NULL}
     };
-    HeaderListPtr hdrs = header_list_from_array(ar);
+    HeaderListPtr hdrs = header_list_from_array(ar, ma);
 
     CbufferRef cb = header_list_serialize(hdrs);
     UT_EQUAL_CSTR(Cbuffer_cstr(cb), "KEY1: value1\r\nKEY2: value2\r\nKEY3: value3\r\nKEY4: value4\r\n");
+    allocator_destroy(ma);
     return 0;
 }
 #define HGHGHx

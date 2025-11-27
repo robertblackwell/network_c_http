@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <common/alloc.h>
 #include <src/common/make_uuid.h>
 #include "http_make_request_response.h"
 
@@ -13,14 +14,14 @@ static BufferChainRef make_reply_body_from_request(HttpMessageRef request);
  * \param ctx
  * \return HttpMessageRef with ownership
  */
-HttpMessageRef http_make_request(char* url, bool last_request_flag)
+HttpMessageRef http_make_request(char* url, bool last_request_flag, Allocator* allocator)
 {
     url = "/echo";
     char uuid_buffer[100];
     char* uuid_ptr = &(uuid_buffer[0]);
     make_uuid(&uuid_ptr);
 
-    HttpMessageRef request = http_message_new();
+    HttpMessageRef request = http_message_new(allocator);
     http_message_set_is_request(request, true);
     http_message_set_method(request, HTTP_GET);
     http_message_set_target(request, url );

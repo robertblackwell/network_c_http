@@ -178,7 +178,7 @@ HttpMessageRef make_request_message()
             {"Key4", "value4"},
             {NULL, NULL}
     };
-    HttpMessageRef msg = http_message_new_request();
+    HttpMessageRef msg = http_message_new_request(NULL);
     http_message_set_method(msg, HTTP_POST);
     http_message_set_target(msg, "/somewhere.php?a=111&b=222");
     http_message_set_headers_arr(msg, ar);
@@ -193,7 +193,7 @@ HttpMessageRef make_response_message()
             {"Key4", "value4"},
             {NULL, NULL}
     };
-    HttpMessageRef msg = http_message_new_response();
+    HttpMessageRef msg = http_message_new_response(NULL);
     http_message_set_status(msg, 203);
     http_message_set_reason(msg, "AREASON");
     http_message_set_headers_arr(msg, ar);
@@ -208,7 +208,7 @@ HttpMessageRef make_response_message_empty_body()
             {"Key4", "value4"},
             {NULL, NULL}
     };
-    HttpMessageRef msg = http_message_new_response();
+    HttpMessageRef msg = http_message_new_response(NULL);
     http_message_set_status(msg, 203);
     http_message_set_reason(msg, "AREASON");
     http_message_set_headers_arr(msg, ar);
@@ -240,7 +240,7 @@ HttpMessageRef make_response_message_with_body()
             {"Key4", "value4"},
             {NULL, NULL}
     };
-    HttpMessageRef msg = http_message_new_response();
+    HttpMessageRef msg = http_message_new_response(NULL);
     http_message_set_status(msg, 203);
     http_message_set_reason(msg, "AREASON");
     http_message_set_headers_arr(msg, ar);

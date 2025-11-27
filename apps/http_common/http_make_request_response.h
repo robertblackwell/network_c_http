@@ -2,7 +2,7 @@
 #define C_HTTP_Http_MAKE_REQUEST_RESPONSE_H
 #include <src/http/http_message.h>
 
-HttpMessageRef http_make_request(char* url, bool keep_alive_flag);
+HttpMessageRef http_make_request(char* url, bool keep_alive_flag, Allocator* allocator);
 
 /**
  * Turns a request into a response. The request and response message objects are owned

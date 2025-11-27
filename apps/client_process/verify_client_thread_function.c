@@ -73,7 +73,7 @@ GenericMsgRef make_request(VerifyThreadContextRef ctx, int i, int j)
     return msg_ref;
 #elif defined(MSG_SELECT_HTTP)
     char* url = "http://somewhere.com/subfolder?a=1";
-    return http_make_request(url, false);
+    return http_make_request(url, false, NULL);
 #endif
 }
 void process_request(void* handler, GenericMsgRef request, GenericMsgRef reply)
@@ -89,7 +89,7 @@ void process_request(void* handler, GenericMsgRef request, GenericMsgRef reply)
     //    BufferChain_append_bufferchain(bc, request_body);
     demo_msg_set_body(reply, iob);
 #elif defined(MSG_SELECT_HTTP)
-    HttpMessageRef response = http_message_new();
+    HttpMessageRef response = http_message_new(NULL);
 
 #endif
 }

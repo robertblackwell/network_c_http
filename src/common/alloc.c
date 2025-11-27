@@ -1,6 +1,20 @@
 #include <src/common/alloc.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <common/arena.h>
+#include <common/alloc_malloc.h>
+Allocator* default_allocator_create()
+{
+#define ALLOCATOR_DEFAULT_ARENA
+#ifdef ALLOCATOR_DEFAULT_ARENA
+    Allocator* allocator = arena_allocator_create(1024*8);
+#else
+    Allocator* allocator = malloc_allocator_create();
+#endif
+    return allocator;
+}
+
+
 void* allocator_alloc(Allocator* allocator, size_t size)
 {
     return allocator->allocate(allocator, size);

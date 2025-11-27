@@ -113,7 +113,7 @@ GenericMsgRef make_send_msg(int ident, int i, int j)
     generic_msg_set_content(msgref, iob);
     return msgref;
 #elif defined(MSG_SELECT_HTTP)
-    return http_make_request("http://somewhere.com/somefolder?a=1", false);
+    return http_make_request("http://somewhere.com/somefolder?a=1", false, NULL);
 #endif
 }
 bool verify(GenericMsgRef sendmsg, GenericMsgRef response)

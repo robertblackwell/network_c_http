@@ -105,7 +105,7 @@ GenericMsgRef process_input_message(GenericMsgRef input_msg)
     generic_msg_set_content(response, tmp);
     return response;
 #elif defined(MSG_SELECT_HTTP)
-    HttpMessageRef reply = http_message_new();
+    HttpMessageRef reply = http_message_new(NULL);
     http_process_request(input_msg, reply);
     return reply;
 #else
