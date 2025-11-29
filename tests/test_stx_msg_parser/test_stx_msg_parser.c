@@ -2,10 +2,7 @@
 
 #include <assert.h>
 #include <stdio.h>
-#include <string.h>
 #include <rbl/unittest.h>
-#include <rbl/logger.h>
-#include <src/http/kvpair.h>
 #include <src/stx/stx_msg.h>
 #include "test_harness.h"
 #include "run_list.c"

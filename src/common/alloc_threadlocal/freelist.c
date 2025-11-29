@@ -33,7 +33,7 @@ void tl_freelist_free(MBlockList* list)
     RBL_ASSERT((list->count == 0), "Free-ing non empty list");
     free(list);
 }
-size_t tl_freelist_size(MBlockList* list)
+size_t tl_freelist_size(const MBlockList* list)
 {
     return list->count;
 }
@@ -47,7 +47,7 @@ void tl_freelist_display(MBlockList* list)
         iter = next;
     }
 }
-void tl_freelist_empty(MBlockList* list)
+void tl_freelist_empty(const MBlockList* list)
 {
     MBlock* b = list->head;
     while(b != NULL) {
@@ -56,7 +56,7 @@ void tl_freelist_empty(MBlockList* list)
         b = next;
     }
 }
-MBlock* tl_freelist_find_space(MBlockList* list, size_t required_user_size)
+MBlock* tl_freelist_find_space(const MBlockList* list, size_t required_user_size)
 {
     MBlock* iter = list->head;
     if(iter == NULL) return NULL;
@@ -68,8 +68,20 @@ MBlock* tl_freelist_find_space(MBlockList* list, size_t required_user_size)
     }
     RBL_ASSERT(0, "Sould not get here");
 }
+void* tl_freelist_find(const MBlockList* list, const MBlock* node)
+{
+    MBlock* iter = list->head;
+    while(iter != NULL) {
+        if(node == iter) {
+            return iter;
+        }
+        iter = iter->forward;
+    }
+    return NULL;
+}
 void tl_freelist_remove(MBlockList* list, MBlock* node)
 {
+    RBL_ASSERT((tl_freelist_find(list, node) != NULL), "removing node from wrong list")
     if(node == list->head && node == list->tail) {
         list->head = NULL;
         list->tail = NULL;
@@ -83,6 +95,7 @@ void tl_freelist_remove(MBlockList* list, MBlock* node)
         node->backward->forward = node->forward;
         node->forward->backward = node->backward;
     }
+    list->count--;
     node->forward = NULL;
     node->backward = NULL;
 }

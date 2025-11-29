@@ -19,9 +19,9 @@ struct MBlockList_s
 MBlockList* tl_freelist_new();
 void tl_freelist_init(MBlockList* list);
 void tl_freelist_free(MBlockList* list);
-void tl_freelist_empty(MBlockList* list);
+void tl_freelist_empty(const MBlockList* list);
 void tl_freelist_display(MBlockList* list);
-size_t tl_freelist_size(MBlockList* list);
+size_t tl_freelist_size(const MBlockList* list);
 
 /**
  * Add a free block to the list maintaining decreasing free space size order
@@ -34,7 +34,7 @@ void tl_freelist_add(MBlockList* list, MBlock* block);
  * The blocks free_space may be much larger than needed in which case you might like to split
  * the block. That depends on your allocation strategy.
  */
-MBlock* tl_freelist_find_space(MBlockList* list, size_t user_space_required);
+MBlock* tl_freelist_find_space(const MBlockList* list, size_t user_space_required);
 /**
  * Search the free list for a MBlock that is a candidate for merging with the parameter block.
  * Returns a poiter to the candidate but do not remove it
@@ -50,5 +50,5 @@ void tl_freelist_remove(MBlockList* list, MBlock* block);
  *  Find the block denoted by needle parameter in the list. Return
  *  needle if found NULL if not
  */
-void* tl_freelist_find(MBlockList* list, MBlock* needle);
+void* tl_freelist_find(const MBlockList* list, const MBlock* needle);
 #endif
