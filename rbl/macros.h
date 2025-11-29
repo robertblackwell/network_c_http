@@ -2,6 +2,7 @@
 #define rbl_macros_h
 
 #include <stdio.h>
+#include <assert.h>
 #include <rbl/logger.h>
 /**
  * @addtogroup group_macros

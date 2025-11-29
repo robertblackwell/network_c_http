@@ -1,0 +1,15 @@
+site_name: "C Language Project"
+theme:
+  name: material
+
+plugins:
+  - search
+  - mkdoxy:
+    projects:
+      Chttp:
+      src-dirs: /Users/robertblackwell/Projects/c_http/src
+      full-docs: True
+      doxy-cfg:
+        FILE_PATTERNS: "*.c *.h"
+        RECURSIVE: True
+

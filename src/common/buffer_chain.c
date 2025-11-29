@@ -1,7 +1,7 @@
 #include <src/common/buffer_chain.h>
 #include <stddef.h>
-#include <assert.h>
 #include <string.h>
+#include <rbl/macros.h>
 #include <src/common/list.h>
 #include <src/common/iobuffer.h>
 
@@ -63,7 +63,7 @@ void BufferChain_append_cstr(BufferChainRef this, char* cstr)
 
 void BufferChain_clear(BufferChainRef bchain)
 {
-    assert(false);
+    RBL_ASSERT(false,"function is deprecated");
 //    for(int i = 0; i < bchain->m_chain.size(); i++) {
 //        ContifBuffer_free(bchain->mchain.at(i));
 //    }
@@ -79,21 +79,17 @@ IOBufferRef BufferChain_compact(const BufferChainRef this)
 {
     int required_size = BufferChain_size(this);
     IOBufferRef iob_final = IOBuffer_new_with_capacity(required_size);
-    if(iob_final == NULL)
-        goto memerror_01;
+    RBL_ASSERT((iob_final != NULL), "IOBuffer_new_with_capacity returned NULL");
     ListIterator iter = List_iterator(this->m_chain);
     while(iter != NULL) {
         IOBufferRef tmp = (IOBufferRef)List_itr_unpack(this->m_chain, iter);
         void* data = IOBuffer_data(tmp);
-        int sz = IOBuffer_data_len(tmp);
+        int sz = (int)IOBuffer_data_len(tmp);
         IOBuffer_data_add(iob_final, data, sz); /* MEM CHECK REQUIRED*/
         ListIterator next = List_itr_next(this->m_chain, iter);
         iter = next;
     }
     return iob_final;
-    memerror_01:
-        assert(false);
-        return NULL;
 }
 bool BufferChain_eq_cstr(const BufferChainRef this, char* cstr)
 {
@@ -102,8 +98,8 @@ bool BufferChain_eq_cstr(const BufferChainRef this, char* cstr)
     while(iter != NULL) {
         IOBufferRef tmp = (IOBufferRef)List_itr_unpack(this->m_chain, iter);
         char* data = IOBuffer_data(tmp);
-        int sz = IOBuffer_data_len(tmp);
-        int l = strlen(cstr);
+        int sz = (int)IOBuffer_data_len(tmp);
+        int l = (int)strlen(cstr);
         for(int iob_index = 0; iob_index < sz; iob_index++) {
             if(cstr[cstr_index] != data[iob_index]) {
                 return false;

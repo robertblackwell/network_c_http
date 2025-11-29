@@ -1,6 +1,5 @@
 
 #include "stx_msg.h"
-#include <src/http/hdr_list.h>
 #include <rbl/logger.h>
 #include <stdbool.h>
 #include <stdlib.h>

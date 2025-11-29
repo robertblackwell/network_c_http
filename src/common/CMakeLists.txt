@@ -2,6 +2,9 @@ set(HEADER_FILES
 #        ${CMAKE_CURRENT_SOURCE_DIR}/generics/dlist.h
         ${CMAKE_CURRENT_SOURCE_DIR}/alloc.h
         ${CMAKE_CURRENT_SOURCE_DIR}/alloc_malloc.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/alloc_threadlocal/mblock.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/alloc_threadlocal/freelist.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/alloc_threadlocal/tl_allocator.h
         ${CMAKE_CURRENT_SOURCE_DIR}/arena.h
         ${CMAKE_CURRENT_SOURCE_DIR}/url_parser.h
         ${CMAKE_CURRENT_SOURCE_DIR}/url.h
@@ -21,6 +24,9 @@ set(SOURCE_FILES
 #        ${CMAKE_CURRENT_SOURCE_DIR}/generics/dlist.c
         ${CMAKE_CURRENT_SOURCE_DIR}/alloc.c
         ${CMAKE_CURRENT_SOURCE_DIR}/alloc_malloc.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/alloc_threadlocal/mblock.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/alloc_threadlocal/freelist.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/alloc_threadlocal/tl_allocator.c
         ${CMAKE_CURRENT_SOURCE_DIR}/arena.c
         ${CMAKE_CURRENT_SOURCE_DIR}/buffer_chain.c
         ${CMAKE_CURRENT_SOURCE_DIR}/cbuffer.c

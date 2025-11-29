@@ -1,8 +1,8 @@
 #include <stddef.h>
-#include <assert.h>
 #include <string.h>
 #include <ctype.h>
 #include <rbl/check_tag.h>
+#include <rbl/macros.h>
 #include <src/common/utils.h>
 #include <src/common/cbuffer.h>
 #include <src/common/alloc_malloc.h>
@@ -71,7 +71,9 @@ typedef struct BufferStrategy_s {
 */
 void* BufferStrategy_allocate(BufferStrategyRef bsref, size_t required_size)
 {
-    if (required_size > bsref->m_max_size) assert(0);
+    if (required_size > bsref->m_max_size) {
+        RBL_ASSERT(0, "required_size is too large");
+    }
     return malloc(max_of_two(required_size, bsref->m_min_size));
 
 }
@@ -88,7 +90,9 @@ void BufferStrategy_deallocate(BufferStrategyRef bsref, void* dataptr)
 */
 size_t BufferStrategy_reallocate_size(BufferStrategyRef bsref, size_t current_capacity, size_t requested_new_size)
 {
-        if (requested_new_size > bsref->m_max_size) assert(0);
+        if (requested_new_size > bsref->m_max_size) {
+            RBL_ASSERT(0, "required_size is too large");
+        }
         return max_of_two(requested_new_size, min_of_two(bsref->m_max_size, 2*current_capacity));
 
 }
@@ -98,7 +102,9 @@ size_t BufferStrategy_reallocate_size(BufferStrategyRef bsref, size_t current_ca
 */
 void* BufferStrategy_reallocate(BufferStrategyRef bsref, void* current_memptr, size_t new_size)
 {
-        if (new_size > bsref->m_max_size) assert(0);
+    if (new_size > bsref->m_max_size) {
+        RBL_ASSERT(0, "required_size is too large");
+    }
         return realloc(current_memptr, new_size);
 }
 
@@ -117,7 +123,7 @@ void Cbuffer_init(CbufferRef cb_ptr, Allocator* allocator)
     cb_ptr->m_size = 0;
     cb_ptr->m_capacity = tmp_cap;
     cb_ptr->m_cPtr[cb_ptr->m_size] = '\0';
-    assert(cb_ptr->m_cPtr[cb_ptr->m_size] == '\0');
+    RBL_ASSERT((cb_ptr->m_cPtr[cb_ptr->m_size] == '\0'), "data not terminated wit null");
 
 }
 CbufferRef Cbuffer_new(Allocator* allocator)
@@ -126,7 +132,7 @@ CbufferRef Cbuffer_new(Allocator* allocator)
         allocator = default_allocator_create();
     }
     CbufferRef cb = allocator->allocate(allocator, sizeof(Cbuffer));
-    assert(cb != NULL);
+    RBL_ASSERT((cb != NULL), "allocator_allocate returned NULL");
     cb->m_allocator = allocator;
     Cbuffer_init(cb, allocator);
     return cb;
@@ -134,7 +140,7 @@ CbufferRef Cbuffer_new(Allocator* allocator)
 CbufferRef Cbuffer_new_with_allocator(Allocator* allocator)
 {
     CbufferRef cb_ptr = (CbufferRef)allocator_alloc(allocator, sizeof(Cbuffer));
-    assert(cb_ptr != NULL);
+    RBL_ASSERT((cb_ptr != NULL), "allocator_allocate returned NULL");
     cb_ptr->m_allocator = allocator;
     Cbuffer_init(cb_ptr, allocator);
     return cb_ptr;
@@ -153,7 +159,7 @@ void Cbuffer_free(CbufferRef this)
 {
     RBL_CHECK_TAG(CBUFFER_Tag, this);
     RBL_CHECK_END_TAG(CBUFFER_Tag, this);
-    assert(this != NULL);
+    RBL_ASSERT((this != NULL), "argument is NULL");
     // this will allow success free of invalidated cbuffer
     if(this->m_memPtr != NULL) {
         allocator_dealloc(this->m_allocator, this->m_memPtr);
@@ -182,7 +188,7 @@ const char* Cbuffer_cstr(const CbufferRef this)
 {
     RBL_CHECK_TAG(CBUFFER_Tag, this);
     RBL_CHECK_END_TAG(CBUFFER_Tag, this);
-    assert(this->m_cPtr[this->m_size] == '\0');
+    RBL_ASSERT((this->m_cPtr[this->m_size] == '\0'), "data is not NULL terminated");
     return this->m_cPtr;
 }
 /**
@@ -291,7 +297,7 @@ char* Cbuffer_toString(const CbufferRef cbuf)
 // c++ move semantics - saves a copy
 void Cbuffer_move(CbufferRef dest, CbufferRef src)
 {
-    assert(0); // deprecated
+    RBL_ASSERT(0, "function is deprecated"); // deprecated
     ASSERT_NOT_NULL(src);
     ASSERT_NOT_NULL(dest);
 

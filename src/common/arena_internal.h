@@ -1,10 +1,7 @@
 #ifndef H_chttp_common_arena_internal_H
 #define H_chttp_common_arena_internal_H
 #include <inttypes.h>
-#include <stddef.h>
 #include <common/alloc.h>
-#include <stddef.h>
-#include <assert.h>
 typedef struct Arena_s Arena, *ArenaPtr;
 typedef struct MBlock_s MBlock, *MBlockPtr;
 typedef struct AllocatedMemory_s

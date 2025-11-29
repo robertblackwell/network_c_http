@@ -47,6 +47,7 @@ SimpleAppRef server_provide_init_app(ServerCtxRef ctx, int new_sock)
     assert(ctx->pending_app_memory);
     SimpleAppRef app_ref = ctx->pending_app_memory;
     server_init_app(ctx, app_ref, new_sock);
+    // will return NULL is all app objects are in use
     ctx->pending_app_memory = server_allocate_app_memory(ctx);
     return app_ref;
 }
