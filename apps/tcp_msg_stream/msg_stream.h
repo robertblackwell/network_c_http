@@ -17,7 +17,9 @@ typedef void(MsgWriteCallback)(void* arg, int error);
 struct MsgStream_s {
     RBL_DECLARE_TAG;
     TcpStreamRef        tcp_stream_ref;
+    //TODO - consider making parser inline as well as a pointer
     GenericMsgParserRef msg_parser_ref;
+    GenericMsgParser    msg_parser_mem;
     void*               read_cb_arg;
     MsgReadCallback*    read_cb;
     IOBufferRef         input_buffer;

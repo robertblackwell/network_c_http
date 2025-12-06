@@ -2,7 +2,7 @@
 #define  H_c_http_http_message_internal_H
 #include "http_message.h"
 #include <src/test_helpers/message_private.h>
-#include <src/http/header_list.h>
+// #include <src/http/header_list.h>
 #include <stdbool.h>
 
 struct HttpMessage_s

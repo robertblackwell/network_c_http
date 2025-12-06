@@ -24,6 +24,7 @@ int main(int argc, char* argv[])
     char* host_buf = malloc(200);
     strcpy(host_buf, "127.0.0.1");
     int port;
+    int nbr_processes = 1;
     int nbr_threads = NBR_THREADS;
     int nbr_connections_per_thread = NBR_CONNECTIONS_PER_THREAD;
     int nbr_roundtrips_per_connection = NBR_ROUNDTRIPS_PER_CONNECTION;
@@ -35,11 +36,15 @@ int main(int argc, char* argv[])
                         &host_buf, &port,
                         &nbr_roundtrips_per_connection,
                         &nbr_connections_per_thread,
-                        &nbr_threads);
+                        &nbr_threads, &nbr_processes);
     pthread_t workers[nbr_threads];
     VerifyThreadContext* tctx[nbr_threads];
     for(int t = 0; t < nbr_threads; t++) {
-        VerifyThreadContext* ctx = verify_ctx_new(port, t, nbr_roundtrips_per_connection, nbr_connections_per_thread, nbr_threads);
+        VerifyThreadContext* ctx = verify_ctx_new(port, t,
+            nbr_roundtrips_per_connection,
+            nbr_connections_per_thread,
+            nbr_threads,
+            nbr_processes);
         tctx[t] = ctx;
         pthread_create(&(workers[t]), NULL, verify_client_thread_function, (void*)ctx);
     }
@@ -63,7 +68,7 @@ int main(int argc, char* argv[])
     const struct timeval main_end_time = get_time();
     const double main_elapsed = time_diff_ms(main_end_time, main_time_start);
     double av_time = main_elapsed / (nbr_threads * 1.0);
-    printf("Total elapsed time %f  threads: %d per connections per thread: %d rountrips per connection: %d\n\n", tot_time, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection);
+    printf("Total elapsed time %f  processes: %d threads: %d per connections per thread: %d rountrips per connection: %d\n\n", tot_time, nbr_processes,  nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection);
     printf("Nbr threads : %d  nbr connections per thread: %d nbr of requests per connection: %d av time %f \n\n", nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection, av_time);
     printf("Response times mean: %f stddev: %f total nbr roundtrips: %d \n", avg, stddev, total_roundtrips);
 }

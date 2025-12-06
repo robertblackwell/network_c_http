@@ -1,4 +1,5 @@
 #include "msg_stream.h"
+#include <rbl/macros.h>
 static void postable_read(RunloopRef rl, void* arg);
 static void tcp_read_callback(void* arg, int error);
 static void new_message_callback(void* msgstream, GenericMsgRef new_msg, int error);
@@ -7,13 +8,19 @@ static void try_read(MsgStreamRef msg_stream_ref);
 
 void msg_stream_reader_init(MsgStreamRef ms)
 {
+#if 0
     ms->msg_parser_ref = generic_msg_parser_new(new_message_callback, ms);
+#else
+    ms->msg_parser_ref = &(ms->msg_parser_mem);
+    generic_msg_parser_init(ms->msg_parser_ref, new_message_callback, ms);
+#endif
 }
 void msg_stream_read(MsgStreamRef msg_stream, MsgReadCallback cb, void* arg)
 {
     RBL_CHECK_TAG(MsgStream_TAG, msg_stream);
     RBL_CHECK_END_TAG(MsgStream_TAG, msg_stream);
     assert(msg_stream->read_cb == NULL);
+    printf("msg_stream_read input_buffer: %p\n", msg_stream->input_buffer);
     if(msg_stream->input_buffer == NULL) {
         msg_stream->input_buffer = IOBuffer_new();
     }
@@ -69,6 +76,8 @@ static void new_message_callback(void* msgstream, GenericMsgRef new_msg, int err
     RBL_CHECK_END_TAG(MsgStream_TAG, msg_stream_ref);
     if(error == 0) {
         List_add_back(msg_stream_ref->input_message_list, new_msg);
+    } else {
+        printf("new_message_callback error:%d new_msg: %p\n", error, new_msg);
     }
 }
 static void postable_read(RunloopRef rl, void* arg)
@@ -76,7 +85,7 @@ static void postable_read(RunloopRef rl, void* arg)
     MsgStreamRef msg_stream_ref = arg;
     RBL_CHECK_TAG(MsgStream_TAG, msg_stream_ref);
     RBL_CHECK_END_TAG(MsgStream_TAG, msg_stream_ref);
-    assert(msg_stream_ref->input_buffer != NULL);
+    RBL_ASSERT((msg_stream_ref->input_buffer != NULL), "non-null input buffer ");
     try_read(msg_stream_ref);
 }
 static void try_read(MsgStreamRef msg_stream_ref)

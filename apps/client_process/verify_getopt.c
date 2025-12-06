@@ -31,7 +31,9 @@ void verify_usage()
     printf("\t-r\tNbr roundtrips per connection                            - default 3\n");
 
 }
-void verify_process_args(int argc, char* argv[], char** host_ip_p, int* port, int* nbr_roundtrips_per_connection_p, int* nbr_connections_per_thread_p, int* nbr_threads_p) {
+void verify_process_args(int argc, char* argv[], char** host_ip_p,
+    int* port,
+    int* nbr_roundtrips_per_connection_p, int* nbr_connections_per_thread_p, int* nbr_threads_p, int* nbr_processes_p) {
     int c;
     char* host_ptr = NULL;
     int port_number = 9002;
@@ -73,4 +75,5 @@ void verify_process_args(int argc, char* argv[], char** host_ip_p, int* port, in
     *nbr_roundtrips_per_connection_p = nbr_roundtrips_per_connection;
     *nbr_connections_per_thread_p = nbr_connections_per_thread;
     *nbr_threads_p = nbr_threads;
+    *nbr_processes_p = nbr_processes;
 }

@@ -74,6 +74,12 @@ StxMsgParserRef stx_msg_parser_new(
          */
         void* on_new_message_ctx);
 
+void stx_msg_parser_init(StxMsgParser* parser,
+        StxMsgParserCallback  on_message_complete_cb,
+        void* on_new_message_ctx
+);
+void stx_msg_parser_deinit(StxMsgParserRef this);
+
 void stx_msg_parser_free(StxMsgParserRef this);
 
 int stx_msg_parser_consume(StxMsgParserRef parser, IOBufferRef iobuffer_ref);

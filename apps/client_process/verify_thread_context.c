@@ -2,16 +2,17 @@
 #include <stdlib.h>
 #include <assert.h>
 
-VerifyThreadContext* verify_ctx_new(int port, int id, int nbr_roundtrips_per_connection, int nbr_connections_per_thread, int max_threads)
+VerifyThreadContext* verify_ctx_new(int port, int process_nbr, int id, int nbr_roundtrips_per_connection, int nbr_connections_per_thread, int max_threads)
 {
     VerifyThreadContext* ctx = malloc(sizeof(VerifyThreadContext));
-    verify_ctx_init(ctx, port, id, nbr_roundtrips_per_connection, nbr_connections_per_thread, max_threads);
+    verify_ctx_init(ctx, port, process_nbr, id, nbr_roundtrips_per_connection, nbr_connections_per_thread, max_threads);
     return ctx;
 }
-void verify_ctx_init(VerifyThreadContextRef ctx, int port, int id, int nbr_roundtrips_per_connection, int nbr_connections_per_thread, int max_threads)
+void verify_ctx_init(VerifyThreadContextRef ctx, int port, int process_nbr, int id, int nbr_roundtrips_per_connection, int nbr_connections_per_thread, int max_threads)
 {
     if (ctx == NULL) assert(0);
     ctx->port = port;
+    ctx->process_nbr = process_nbr;
     ctx->max_rountrips_per_connection = nbr_roundtrips_per_connection;
     ctx->max_connections_per_thread = nbr_connections_per_thread;
     int n = nbr_roundtrips_per_connection * nbr_connections_per_thread;

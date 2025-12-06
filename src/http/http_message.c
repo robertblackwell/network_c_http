@@ -11,7 +11,6 @@
 #include <math.h>
 #include <rbl/check_tag.h>
 #include <common/alloc.h>
-#include <common/alloc_malloc.h>
 /**
  * @addtogroup group_message
  * @{

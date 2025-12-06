@@ -49,7 +49,9 @@ struct HttpMessageParser_s {
     bool m_started;
 
     llhttp_t*                       m_llhttp_ptr;
+    llhttp_t                        m_llhttp_t_mem;
     llhttp_settings_t*              m_llhttp_settings_ptr;
+    llhttp_settings_t               m_llhttp_settings_t_mem;
     HttpMessageRef                  current_message_ptr;
     ParserOnMessageCompleteHandler* on_message_handler;
     void*                           on_message_handler_context;
@@ -69,6 +71,12 @@ HttpMessageParserRef http_message_parser_new(
         // deciddes what to do with a new message
         void* handler_context,
         Allocator* allocator) ;
+void http_message_parser_init(HttpMessageParser* parser,
+        void(on_new_message_cb)(void* on_new_message_ctx, HttpMessageRef new_message_ref, int error),
+        void* handler_context,
+        Allocator* allocator) ;
+
+void http_message_parser_deinit(HttpMessageParserRef this);
 void http_message_parser_free(HttpMessageParserRef this);
 
 /**

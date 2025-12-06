@@ -35,7 +35,11 @@ void msg_stream_deinit(MsgStream* msg_stream_ptr)
 #else
     tcp_stream_free(msg_stream_ref->tcp_stream_ref);
 #endif
+#if 0
     generic_msg_parser_free(msg_stream_ptr->msg_parser_ref);
+#else
+    generic_msg_parser_deinit(msg_stream_ptr->msg_parser_ref);
+#endif
     List_safe_free(msg_stream_ptr->input_message_list, free);
     if(msg_stream_ptr->input_buffer) IOBuffer_free(msg_stream_ptr->input_buffer);
     if(msg_stream_ptr->output_buffer) IOBuffer_free(msg_stream_ptr->output_buffer);
@@ -49,7 +53,11 @@ void msg_stream_free(MsgStreamRef msg_stream_ref)
 #else
     tcp_stream_free(msg_stream_ref->tcp_stream_ref);
 #endif
+#if 0
     generic_msg_parser_free(msg_stream_ref->msg_parser_ref);
+#else
+    generic_msg_parser_deinit(msg_stream_ref->msg_parser_ref);
+#endif
     List_safe_free(msg_stream_ref->input_message_list, free);
     if(msg_stream_ref->input_buffer) IOBuffer_free(msg_stream_ref->input_buffer);
     if(msg_stream_ref->output_buffer) IOBuffer_free(msg_stream_ref->output_buffer);

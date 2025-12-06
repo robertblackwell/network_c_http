@@ -1,9 +1,7 @@
 #include "http_header_line.h"
-
 #include <ctype.h>
 #include <string.h>
 #include <src/common/utils.h>
-#include <common/alloc_malloc.h>
 
 #define HeaderLine_TAG "HDR_TAG"
 

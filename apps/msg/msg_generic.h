@@ -41,6 +41,8 @@ void generic_msg_set_content(GenericMsgRef msg, IOBufferRef iob);
 IOBufferRef generic_msg_serialize(GenericMsgRef mr);
 
 GenericMsgParserRef generic_msg_parser_new(GenericMsgParserCallback* cb, void* arg);
+void generic_msg_parser_init(GenericMsgParserRef parser, GenericMsgParserCallback* cb, void* arg);
+void generic_msg_parser_deinit(GenericMsgParserRef parser);
 void generic_msg_parser_free(GenericMsgParserRef parser_ref);
 int generic_msg_parser_consume(GenericMsgParserRef pref, IOBufferRef new_data);
 const char* generic_strerror(GenericMsgParserRef parser_ref, int parser_errno);

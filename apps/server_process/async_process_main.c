@@ -17,6 +17,7 @@
 void* thread_function(void* arg);
 
 typedef struct ThreadContext_s {
+    int             process_id;
     int             ident;
     pthread_t       thread;
     int             port;
@@ -27,13 +28,14 @@ typedef struct ThreadContext_s {
 } ThreadContext;
 
 
-void process_main(char* host, int port, int nbr_threads, int nbr_connections_per_thread, int nbr_rountrips_per_connection)
+void process_main(char* host, int port, int process_id_value, int nbr_threads, int nbr_connections_per_thread, int nbr_rountrips_per_connection)
 {
     ThreadContext thread_table[nbr_threads];
     assert(nbr_threads <= MAX_NBR_THREADS);
     printf("Process starting pid: %d\n", getpid());
     for(int i = 0; i < nbr_threads; i++) {
         ThreadContext* ctx = &(thread_table[i]);
+        ctx->process_id = process_id_value;
         ctx->ident = i;
         ctx->port = port;
         ctx->host = host;
@@ -49,7 +51,7 @@ void* thread_function(void* arg)
     ServerCtx server_ctx;
     ThreadContext* ctx = arg;
     int fd = create_bound_socket(ctx->port, ctx->host);
-    printf("thread pid: %d tid: %lu host: %s port: %d ident: %d pthread_t: %lu fd: %d\n", getpid(), (unsigned long)pthread_self(), ctx->host, ctx->port, ctx->ident, (unsigned long)ctx->thread, ctx->listening_socket);
+    printf("process: %d thread pid: %d tid: %lu host: %s port: %d ident: %d pthread_t: %lu fd: %d\n", ctx->process_id, getpid(), (unsigned long)pthread_self(), ctx->host, ctx->port, ctx->ident, (unsigned long)ctx->thread, ctx->listening_socket);
     socket_set_non_blocking(fd);
     RunloopRef runloop = runloop_new();
     ServerCtxRef server_ctx_ref = &server_ctx;

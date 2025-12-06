@@ -50,16 +50,23 @@ StxMsgParserRef stx_msg_parser_new(
         void* on_new_message_ctx
     )
 {
-    StxMsgParserRef this = malloc(sizeof(StxMsgParser));
-    RBL_SET_TAG(StxMsgParser_TAG, this)
-    RBL_SET_END_TAG(StxMsgParser_TAG, this)
-    this->m_state = STATE_IDLE;
-    this->m_current_message_ptr = NULL;
-    this->on_new_message_callback = on_message_complete_cb;
-    this->on_new_message_complete_ctx = on_new_message_ctx;
-    return this;
+    StxMsgParserRef parser = malloc(sizeof(StxMsgParser));
+    assert(parser != NULL);
+    stx_msg_parser_init(parser, on_message_complete_cb, on_new_message_ctx);
+    return parser;
 }
-void stx_msg_parser_free(StxMsgParserRef this)
+void stx_msg_parser_init(StxMsgParser* parser,
+    StxMsgParserCallback on_message_complete_cb,
+    void* on_new_message_ctx
+){
+    RBL_SET_TAG(StxMsgParser_TAG, parser)
+    RBL_SET_END_TAG(StxMsgParser_TAG, parser)
+    parser->m_state = STATE_IDLE;
+    parser->m_current_message_ptr = NULL;
+    parser->on_new_message_callback = on_message_complete_cb;
+    parser->on_new_message_complete_ctx = on_new_message_ctx;
+}
+void stx_msg_parser_deinit(StxMsgParserRef this)
 {
     RBL_CHECK_TAG(StxMsgParser_TAG, this)
     RBL_CHECK_END_TAG(StxMsgParser_TAG, this)
@@ -67,7 +74,14 @@ void stx_msg_parser_free(StxMsgParserRef this)
     if(this->m_current_message_ptr) {
         stx_msg_free(this->m_current_message_ptr);
     }
-    free(this);
+}
+void stx_msg_parser_free(StxMsgParserRef parser)
+{
+    RBL_CHECK_TAG(StxMsgParser_TAG, parser)
+    RBL_CHECK_END_TAG(StxMsgParser_TAG, parser)
+    ASSERT_NOT_NULL(parser);
+    stx_msg_parser_deinit(parser);
+    free(parser);
 }
 StxMsgRef StxMsgParser_current_message(StxMsgParserRef this)
 {

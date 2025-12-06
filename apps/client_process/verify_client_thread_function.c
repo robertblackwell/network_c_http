@@ -18,6 +18,7 @@ bool verify_response(GenericMsgRef request, GenericMsgRef response);
 void* verify_client_thread_function(void* data)
 {
     VerifyThreadContext* ctx = (VerifyThreadContext*)data;
+    printf("client thread function process: %d thread: %d \n", ctx->process_nbr, ctx->ident);
     rta_start_measurement(ctx->response_times_ref);
 //    GenericMsgParserRef parser = generic_msg_parser_new();
     for(int i = 0; i < ctx->max_connections_per_thread; i++) {
@@ -69,7 +70,7 @@ GenericMsgRef make_request(VerifyThreadContextRef ctx, int i, int j)
     sprintf(buf, "%s", buf_ptr);
     GenericMsgRef msg_ref = generic_msg_new();
     IOBufferRef iob = generic_msg_get_content(msg_ref);
-    IOBuffer_sprintf(iob, "Client %d connection: %d msg: %d", ctx->ident, i, j);
+    IOBuffer_sprintf(iob, "Process: %d Client %d connection: %d msg: %d", ctx->process_nbr, ctx->ident, i, j);
     return msg_ref;
 #elif defined(MSG_SELECT_HTTP)
     char* url = "http://somewhere.com/subfolder?a=1";

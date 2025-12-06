@@ -64,6 +64,25 @@ inline GenericMsgParserRef generic_msg_parser_new(GenericMsgParserCallback* cb, 
     return http_message_parser_new(cb, arg, NULL);
 #endif
 }
+inline  void generic_msg_parser_init(GenericMsgParserRef parser, GenericMsgParserCallback* cb, void* arg){
+#if defined(MSG_SELECT_NEWLINE)
+    newline_msg_parser_init(parser, cb, arg);
+#elif defined(MSG_SELECT_STX)
+    stx_msg_parser_init(parser, cb, arg);
+#elif defined(MSG_SELECT_HTTP)
+    http_message_parser_init(parser, cb, arg, NULL);
+#endif
+}
+inline  void generic_msg_parser_deinit(GenericMsgParserRef parser){
+#if defined(MSG_SELECT_NEWLINE)
+    newline_msg_parser_deinit(parser);
+#elif defined(MSG_SELECT_STX)
+    stx_msg_parser_deinit(parser);
+#elif defined(MSG_SELECT_HTTP)
+    http_message_parser_deinit(parser);
+#endif
+}
+
 inline void generic_msg_parser_free(GenericMsgParserRef parser_ref){
 #if defined(MSG_SELECT_NEWLINE)
     newline_msg_parser_free(parser_ref);

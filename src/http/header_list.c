@@ -2,7 +2,6 @@
 #include <ctype.h>
 #include <string.h>
 #include <src/common/utils.h>
-#include <common/alloc_malloc.h>
 #define HeaderList_TAG "HDRLST"
 
 HeaderListPtr header_list_from_array(const char* ar[][2], Allocator* allocator)

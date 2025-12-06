@@ -31,6 +31,25 @@ static int chunk_complete_cb(llhttp_t* parser);
 static int on_reset_cb(llhttp_t* parser);
 
 void HttpParser_initialize(HttpMessageParser *this);
+void http_message_parser_init(
+    HttpMessageParser* parser,
+    void(*on_new_message_cb)(void* ctx, HttpMessageRef new_msg_ref, int error),
+    void* handler_context, Allocator* allocator)
+{
+    assert(parser != NULL);
+    if(allocator == NULL) {
+        allocator = default_allocator_create();
+    }
+    assert(allocator != NULL);
+    RBL_SET_TAG(HTTP_PARSER_TAG, parser)
+    parser->m_allocator = allocator;
+    parser->m_llhttp_ptr = NULL;
+    parser->m_llhttp_settings_ptr = NULL;
+    parser->m_header_state = kHEADER_STATE_NOTHING;
+    HttpParser_initialize(parser);
+    parser->on_message_handler = on_new_message_cb;
+    parser->on_message_handler_context = handler_context;
+}
 HttpMessageParserRef http_message_parser_new(
     void(*on_new_message_cb)(void* ctx, HttpMessageRef new_msg_ref, int error),
     void* handler_context, Allocator* allocator)
@@ -38,36 +57,36 @@ HttpMessageParserRef http_message_parser_new(
     if(allocator == NULL) {
         allocator = default_allocator_create();
     }
-    HttpMessageParserRef this = allocator_alloc(allocator, sizeof(HttpMessageParser));
-    if(this == NULL)
-        return NULL;
-    RBL_SET_TAG(HTTP_PARSER_TAG, this)
-    this->m_allocator = allocator;
-    this->m_llhttp_ptr = NULL;
-    this->m_llhttp_settings_ptr = NULL;
-    this->m_header_state = kHEADER_STATE_NOTHING;
-    HttpParser_initialize(this);
-    this->on_message_handler = on_new_message_cb;
-    this->on_message_handler_context = handler_context;
-    return this;
+
+    HttpMessageParserRef parser = allocator_alloc(allocator, sizeof(HttpMessageParser));
+    assert(parser != NULL);
+    http_message_parser_init(parser, on_new_message_cb, handler_context, allocator);
+    RBL_SET_TAG(HTTP_PARSER_TAG, parser)
+    return parser;
 }
 void HttpParser_reset(HttpMessageParser* parser_ptr)
 {
 
 }
-void http_message_parser_free(HttpMessageParserRef this)
+void http_message_parser_deinit(HttpMessageParserRef this)
 {
     ASSERT_NOT_NULL(this);
     RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
-    if (this->m_llhttp_ptr != NULL) {
-        free(this->m_llhttp_ptr);
-        this->m_llhttp_ptr = NULL;
-    }
-    if (this->m_llhttp_settings_ptr != NULL) {
-        free(this->m_llhttp_settings_ptr);
-        this->m_llhttp_settings_ptr = NULL;
-    }
-    allocator_dealloc(this->m_allocator, this);
+// #if defined(LLHTTP_MALLOC)
+//     if (this->m_llhttp_ptr != NULL) {
+//         free(this->m_llhttp_ptr);
+//         this->m_llhttp_ptr = NULL;
+//     }
+//     if (this->m_llhttp_settings_ptr != NULL) {
+//         free(this->m_llhttp_settings_ptr);
+//         this->m_llhttp_settings_ptr = NULL;
+//     }
+// #endif
+}
+void http_message_parser_free(HttpMessageParserRef parser)
+{
+    http_message_parser_deinit(parser);
+    allocator_dealloc(parser->m_allocator, parser);
 }
 int Parser_append_bytes(HttpMessageParserRef this, void *buffer, unsigned length)
 {
@@ -120,7 +139,6 @@ llhttp_errno_t  http_message_parser_consume_eof(HttpMessageParser* parser)
 llhttp_errno_t http_message_parser_get_errno(HttpMessageParser* parser)
 {
     RBL_CHECK_TAG(HTTP_PARSER_TAG, parser)
-
     llhttp_errno_t x = llhttp_get_errno(parser->m_llhttp_ptr);
     return x;
 }
@@ -130,7 +148,7 @@ const void* http_message_parser_last_byte_parsed(HttpMessageParser* this)
     const void* x = llhttp_get_error_pos(this->m_llhttp_ptr);
     return x;
 }
-http_parser_error_t http_message_parser_get_error(HttpMessageParser *parser)
+http_parser_error_t http_message_parser_get_error(HttpMessageParser* parser)
 {
     RBL_CHECK_TAG(HTTP_PARSER_TAG, parser)
     llhttp_errno_t x = llhttp_get_errno(parser->m_llhttp_ptr);
@@ -149,12 +167,11 @@ void HttpParser_initialize(HttpMessageParser* this)
     this->m_header_state = kHEADER_STATE_NOTHING;
     this->m_started = false;
     this->current_message_ptr = NULL;
+    this->m_llhttp_settings_ptr = &(this->m_llhttp_settings_t_mem);
+    this->m_llhttp_ptr = &(this->m_llhttp_t_mem);
+    llhttp_init( this->m_llhttp_ptr, HTTP_BOTH, this->m_llhttp_settings_ptr);
+    this->m_llhttp_ptr->data = (void*) this;
 
-    if (this->m_llhttp_settings_ptr != NULL) {
-        free(this->m_llhttp_settings_ptr);
-    }
-    llhttp_settings_t* settings = (llhttp_settings_t*)malloc(sizeof(llhttp_settings_t));
-    this->m_llhttp_settings_ptr = settings;
     this->m_llhttp_settings_ptr->on_message_begin = message_begin_cb;
     this->m_llhttp_settings_ptr->on_url = url_data_cb;
     this->m_llhttp_settings_ptr->on_status = status_data_cb;
@@ -181,15 +198,8 @@ void HttpParser_initialize(HttpMessageParser* this)
     this->m_llhttp_settings_ptr->on_chunk_header = chunk_header_cb;
     this->m_llhttp_settings_ptr->on_chunk_complete = chunk_complete_cb;
     this->m_llhttp_settings_ptr->on_reset = on_reset_cb;
-
-    if (this->m_llhttp_ptr != NULL) {
-        free(this->m_llhttp_ptr);
-        this->m_llhttp_ptr = NULL;
-    }
-    this->m_llhttp_ptr = (llhttp_t*)malloc(sizeof(llhttp_t));
-    llhttp_init( this->m_llhttp_ptr, HTTP_BOTH, settings);
-    /** a link back from the C parser to this class*/
-    this->m_llhttp_ptr->data = (void*) this;
+    // llhttp_init( this->m_llhttp_ptr, HTTP_BOTH, this->m_llhttp_settings_ptr);
+    // this->m_llhttp_ptr->data = (void*) this;
 }
 
 static int message_begin_cb(llhttp_t* parser)

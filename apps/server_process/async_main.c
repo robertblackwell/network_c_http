@@ -77,7 +77,7 @@ int main(int argc, char** argv) {
 //                printf("child process %d\n", getpid());
 //                sleep(2);
 //            }
-            process_main(host, port, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection);
+            process_main(host, port, nbr_processes, nbr_threads, nbr_connections_per_thread, nbr_roundtrips_per_connection);
 //            exit(0);
         }
     }

@@ -4,7 +4,7 @@
 extern "C" {
 #endif
 
-void process_main(char* host, int port, int nbr_threads, int nbr_connections_per_thread, int nbr_rountrips_per_connection);
+void process_main(char* host, int port, int process_id, int nbr_threads, int nbr_connections_per_thread, int nbr_rountrips_per_connection);
 #ifdef __cplusplus
 }
 #endif

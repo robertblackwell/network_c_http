@@ -130,12 +130,29 @@ int test_add_block_02()
 
     return 0;
 }
+int test_correct_size()
+{
+    ArenaPtr arena = arena_create(1024);
+    UT_TRUE(arena != NULL);
+    void* p1 = arena_alloc(arena, 512);
+    size_t fs = arena_block_free_space(arena->begin);
+    size_t rs = arena_block_require_freespace(512);
+    UT_TRUE(rs == 520)
+    bool can_satisfy_1 = arena_block_can_satisfy_alloc(arena->begin, 512);
+    UT_TRUE((!can_satisfy_1))
+    bool can_satisfy_12 = arena_block_can_satisfy_alloc(arena->begin, 505);
+    UT_TRUE((!can_satisfy_12))
+    bool can_satisfy_2 = arena_block_can_satisfy_alloc(arena->begin, 504);
+    UT_TRUE((can_satisfy_2))
+    return 0;
+}
 int main()
 {
     UT_ADD(test_simple);
     UT_ADD(test_size_round_up);
     UT_ADD(test_add_block);
     UT_ADD(test_add_block_02);
+    UT_ADD(test_correct_size);
     int rc = UT_RUN();
     return rc;
 }

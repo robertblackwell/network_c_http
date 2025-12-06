@@ -51,7 +51,8 @@ uint8_t* arena_block_alloc(MBlockPtr block, size_t user_alloc_size)
 {
     user_alloc_size = arena_round_up(user_alloc_size);
     size_t alloc_size = user_alloc_size + sizeof(AllocatedMemory);
-    RBL_ASSERT((arena_block_free_space(block) >= alloc_size), "arena block allocate invariant faield");
+    size_t xx = arena_block_free_space(block);
+    RBL_ASSERT((arena_block_free_space(block) >= alloc_size), "arena block allocate invariant failed");
     uint8_t* memptr = &(block->mem[0]) + block->mem_next_byte_index;
     AllocatedMemory* allocaptr = (AllocatedMemory*)memptr;
     block->mem_next_byte_index += alloc_size;
@@ -73,7 +74,7 @@ MBlockPtr arena_add_block(Arena* arena, size_t user_capacity_bytes)
     } else {
         capacity_bytes = (user_capacity_bytes <= arena->default_user_capacity)
         ? arena->default_user_capacity + sizeof(AllocatedMemory)
-        : 2*(user_capacity_bytes+sizeof(AllocatedMemory));
+        : 2 * (arena_block_require_freespace(user_capacity_bytes));
     }
     size_t block_size = sizeof(MBlock) + (capacity_bytes * sizeof(uint8_t));
     MBlockPtr bp = malloc(block_size);
@@ -150,22 +151,35 @@ void arena_reset(ArenaPtr arena)
         p = p->next_block_ptr;
     }
 }
-void* arena_alloc(Arena* arena, size_t alloc_size)
+size_t arena_block_require_freespace(size_t user_alloc_size)
 {
-    // RBL_ASSERT((alloc_size < ARENA_DEFAULT_CAPACITY);
-    alloc_size = arena_round_up(alloc_size);
-    RBL_ASSERT(((alloc_size % sizeof(uintptr_t)) == 0),"alloc_size incorrrect multiple/alignment");
+    size_t required_freespace_size = user_alloc_size + sizeof(AllocatedMemory);
+    return required_freespace_size;
+}
+bool arena_block_can_satisfy_alloc(MBlockPtr block, size_t user_alloc_size)
+{
+    user_alloc_size = arena_round_up(user_alloc_size);
+    RBL_ASSERT(((user_alloc_size % sizeof(uintptr_t)) == 0),"alloc_size incorrrect multiple/alignment");
+    size_t min_freespace_required = arena_block_require_freespace(user_alloc_size);
+    return (min_freespace_required <= arena_block_free_space(block));
+}
+
+void* arena_alloc(Arena* arena, size_t user_alloc_size)
+{
+    // round up to ensure is multiple of the correct base size usually 8
+    user_alloc_size = arena_round_up(user_alloc_size);
+    RBL_ASSERT(((user_alloc_size % sizeof(uintptr_t)) == 0),"alloc_size incorrrect multiple/alignment");
     MBlockPtr p = arena->begin;
     while(p != NULL) {
-        if(alloc_size <= arena_block_free_space(p)) {
-            void* memptr = arena_block_alloc(p, alloc_size);
+        if(arena_block_can_satisfy_alloc(p, user_alloc_size)) {
+            void* memptr = arena_block_alloc(p, user_alloc_size);
             return memptr;
         }
         p = p->next_block_ptr;
     }
     // here because could not find space - new block
-    MBlockPtr newptr = arena_add_block(arena, alloc_size);
-    void* memptr = arena_block_alloc(newptr, alloc_size);
+    MBlockPtr newptr = arena_add_block(arena, user_alloc_size);
+    void* memptr = arena_block_alloc(newptr, user_alloc_size);
     RBL_ASSERT((memptr != NULL), "allocator trying to return NULL");
     return memptr;
 }
