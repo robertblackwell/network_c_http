@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <common/list.h>
+#include <common/object_pool.h>
 typedef void* EventTableRef;
 
 struct Runloop_s {
@@ -15,6 +16,7 @@ struct Runloop_s {
     bool                    runloop_executing;
     pid_t                   tid;
     ObjectPoolRef           object_pool_ref;
+    size_t                  active_event_count;
     FunctorListRef          ready_list;
     int                     max_nbr_events;
     int                     max_simultaneous_callbacks_per_event;

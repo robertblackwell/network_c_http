@@ -1,8 +1,7 @@
 #ifndef C_HTTP_KQRL_EVENTS_INTERNAL_H
 #define C_HTTP_KQRL_EVENTS_INTERNAL_H
 #include <runloop/runloop.h>
-#include "rl_internal.h"
-
+#include <runloop/rl_internal.h>
 #include <pthread.h>
 #include <stdbool.h>
 #include <string.h>
@@ -10,12 +9,19 @@
 /**
  * The structs defined in this file are all associated with file descriptor events.
  *
- * There is a base struct called RuloopWatcherBase and then a number of sub structs that inherit from
+ * There is a base struct called RuloopEventBase and then a number of sub structs that inherit from
  * the base struct.
  *
  * The way the inheritence is implemented is to include the base struct as an anonymous struct at the start
  * of each derived struct. This has the effect that a pointer to a derived struct is automatically also
  * a pointer to the base struct. This attribute of events is used relatively widely throughout this project.
+ *
+ * This technique relies on a compiler extension -fms-extensions and with Apples CLANG compiler produces a warning
+ * "-Wmicrosoft-anon-tag" .. below that warning is disabled for this file.
+ *
+ * In the event that a compiler does not supprt the -fms-extension an alternative method using a macro
+ * names -- RUNLOOP_EVENTBASE_Fields -- is provided and is conditionally compiled in or out
+ * with the MICROSOFT_ANON_TAG macro
  *
  * One of the side effects of this form of inheritence is the way it interacts with the use of start and
  * end tags to provide error checking against mis-interpreting pointers.
@@ -24,71 +30,99 @@
  * and the value of both tags given in the derived struct.
  */
 /**
- * RunloopWatcherBase - a generic observer object
+ * RunloopEventBase - a generic observer object
  */
-typedef enum WatcherType {
-    RUNLOOP_WATCHER_SOCKET = 11,
-    RUNLOOP_WATCHER_TIMER = 12,
-    RUNLOOP_WATCHER_QUEUE = 13,
-    RUNLOOP_WATCHER_UEVENT = 14,
-    RUNLOOP_WATCHER_LISTENER = 15,
-    RUNLOOP_WATCHER_SIGNAL = 16,
-} WatcherType;
+typedef enum RunloopEventType {
+    RUNLOOP_EVENT_SOCKET = 11,
+    RUNLOOP_EVENT_TIMER = 12,
+    RUNLOOP_EVENT_QUEUE = 13,
+    RUNLOOP_USER_EVENT = 14,
+    RUNLOOP_EVENT_LISTENER = 15,
+    RUNLOOP_EVENT_SIGNAL = 16,
+} EventTypeEnum;
 
-struct RunloopWatcherBase_s {
+#ifndef MICROSOFT_ANON_TAG
+// each event has these fields at the start of its struct, it is a form of inheritance
+#define RUNLOOP_EVENTBASE_Fields   \
+    EventTypeEnum         type;    \
+    RunloopRef            runloop; \
+    void*                 context;  \
+    void(*handler)(RunloopEventBaseRef watcher, uint16_t filter, uint16_t flags, void* data);
+#endif
+
+struct RunloopEventBase_s {
+#ifndef MICROSOFT_ANON_TAG
     RBL_DECLARE_TAG;
-    WatcherType           type;
+    RUNLOOP_EVENTBASE_Fields
+#else
+    RBL_DECLARE_TAG;
+    EventTypeEnum         type;
     RunloopRef            runloop;
     void*                 context;
-    // void(*free)(RunloopEventRef);
-    // void(*handler)(RunloopWatcherBaseRef rlwatcher, uint64_t event);
-    void(*handler)(RunloopWatcherBaseRef watcher, uint16_t filter, uint16_t flags, void* data);
+    void(*handler)(RunloopEventBaseRef watcher, uint16_t filter, uint16_t flags, void* data);
+#endif
 };
+#ifdef MICROSOFT_ANON_TAG
+/**
+ * If using anon tags to implement inhertience need to turn off warnings for the
+ * cmpiler extension
+ */
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
+#endif
+
 //
 // Timer
 //
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
 struct RunloopTimer_s {
+#ifndef MICROSOFT_ANON_TAG
+    RBL_DECLARE_TAG;
+    RUNLOOP_EVENTBASE_Fields
+#else
     /** The start tag is declared in the base struct
     RBL_DECLARE_TAG; */
-    struct RunloopWatcherBase_s;
-     time_t                 expiry_time;
+    struct RunloopEventBase_s;
+#endif
+    time_t                  expiry_time;
     uint64_t                interval;
     bool                    repeating;
     PostableFunction        timer_postable;
     void*                   timer_postable_arg;
     RBL_DECLARE_END_TAG;
 };
-#pragma clang diagnostic pop
 
 /**
  * User event
 */
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
 typedef uint64_t WEventFdMask;
 struct RunloopUserEvent_s {
+#ifndef MICROSOFT_ANON_TAG
+    RBL_DECLARE_TAG;
+    RUNLOOP_EVENTBASE_Fields
+#else
     /** The start tag is declared in the base struct
     RBL_DECLARE_TAG; */
-    struct RunloopWatcherBase_s;
+    struct RunloopEventBase_s;
+#endif
     UserEventCallback       uevent_cb;
     void*                   uevent_cb_arg;
     void*                   uevent_data;
     int                     dup_fd;
     RBL_DECLARE_END_TAG;
 };
-#pragma clang diagnostic pop
 
 /**
  * RunloopStream
  */
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
 struct RunloopStream_s {
+#ifndef MICROSOFT_ANON_TAG
+    RBL_DECLARE_TAG;
+    RUNLOOP_EVENTBASE_Fields
+#else
     /** The start tag is declared in the base struct
     RBL_DECLARE_TAG; */
-    struct RunloopWatcherBase_s;
+    struct RunloopEventBase_s;
+#endif
     int                      fd;
     uint64_t                 event_mask;
     PostableFunction         read_postable_cb;
@@ -97,51 +131,43 @@ struct RunloopStream_s {
     void*                    write_postable_arg;
     RBL_DECLARE_END_TAG;
 };
-#pragma clang diagnostic pop
 
 /**
  * Listener
  */
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
 struct RunloopListener_s {
+#ifndef MICROSOFT_ANON_TAG
+    RBL_DECLARE_TAG;
+    RUNLOOP_EVENTBASE_Fields
+#else
     /** The start tag is declared in the base struct
     RBL_DECLARE_TAG; */
-    struct RunloopWatcherBase_s;
+    struct RunloopEventBase_s;
+#endif
     int                      fd;
     PostableFunction         listen_postable;
     void*                    listen_postable_arg;
     RBL_DECLARE_END_TAG;
 };
-#pragma clang diagnostic pop
 
 /**
  * Signal event - catch signals via event queue
  */
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmicrosoft-anon-tag"
 struct RunloopSignal_s{
+#ifndef MICROSOFT_ANON_TAG
+    RBL_DECLARE_TAG;
+    RUNLOOP_EVENTBASE_Fields
+#else
     /** The start tag is declared in the base struct
     RBL_DECLARE_TAG; */
-    struct RunloopWatcherBase_s;
-    RBL_DECLARE_END_TAG;
-};
-#pragma clang diagnostic pop
-#if 0
-/**
- * InterThreadQueue
- */
-typedef uint64_t RunloopInterthreadQueueEvent;
-typedef void(RunloopInterthreadQueuetWatcherCallerback(void* ctx));
-struct InterthreadQueue_s {
-    /** This struct does not inherit from WatcherBase hence must declare its own openning tag*/
-    RBL_DECLARE_TAG; 
-    UserEventQueueRef queue;
-    RunloopRef runloop;
-    RunloopQueueWatcherRef qwatcher_ref;
-    RBL_DECLARE_END_TAG;
-};
+    struct RunloopEventBase_s;
 #endif
+    RBL_DECLARE_END_TAG;
+};
+#ifdef MICROSOFT_ANON_TAG
+#pragma clang diagnostic pop
+#endif
+
 typedef void(*QueueCallback)(void* arg);
 struct UserEventQueue_s {
     /** This struct is not a sub struct of Watcher hence it must declare its own openning tag*/
@@ -163,54 +189,5 @@ struct UserEventQueue_s {
     int                 id;
     RBL_DECLARE_END_TAG;
 };
-#if 0
-typedef struct RunloopEvent_s {
-    RBL_DECLARE_TAG;
-    RunloopRef            runloop;
-    void*                 context;
-    void(*free)(RunloopEventRef);
-    void(*handler)(RunloopEventRef lrevent, uint16_t filter, uint16_t flags, void* data);
-    /** tag that determines the variant*/
-    WatcherType           type;
- 
-    union {
-        // Timer event - with kqueues does not use a file desccriptor
-        struct {
-            time_t                  expiry_time;
-            uint64_t                interval;
-            bool                    repeating;
-            PostableFunction        timer_postable;
-            void*                   timer_postable_arg;
-        } timer;
-        // Listener - uses a file descriptor only useful for sockets
-        struct {
-            int                      fd;
-            PostableFunction         listen_postable;
-            void*                    listen_postable_arg;
-        } listener;
-        // Stream - a file descriptor that can be read or written
-        struct {
-            int                      fd;
-            uint64_t                 event_mask;
-            PostableFunction         read_postable_cb;
-            void*                    read_postable_arg;
-            PostableFunction         write_postable_cb;
-            void*                    write_postable_arg;
-        } stream;
-        // user event - with kqueues does not use a file descriptor
-        struct {
-            UserEventCallback       uevent_cb;
-            void*                   uevent_cb_arg;
-            void*                   uevent_data;
-            int                     dup_fd;
-            // int                     write_fd; // on;y if using pipe trick
-            // int                     read_fd;  // same
-        } uevent;
-        // signal - treat a signa as a kqueue event
-        struct {
-        } signal;
-    };
-    RBL_DECLARE_END_TAG;
-} RunloopEvent, *RunloopEventRef;
-#endif
+
 #endif

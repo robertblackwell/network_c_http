@@ -10,14 +10,13 @@
 #include <rbl/logger.h>
 
 /**
- * Called whenever an fd associated with an WListener receives an fd event.
- * Should dispatch the read_evhandler and/or write_evhandler depending on whether those
- * events (read events and write events) are armed.
+ * Called whenever an fd associated with an Listener receives an fd event.
+ * Should dispatch the read event handler on read ready.
  * @param ctx       void*
  * @param fd        int
  * @param event     uint64_t
  */
-static void handler(RunloopWatcherBaseRef lrwatcher, uint16_t event, uint16_t flags, void* data)
+static void handler(RunloopEventBaseRef lrwatcher, uint16_t event, uint16_t flags, void* data)
 {
     RunloopListenerRef listener_ref = (RunloopListenerRef)lrwatcher;
     LISTNER_CHECK_TAG(listener_ref)
@@ -41,7 +40,7 @@ void runloop_listener_init(RunloopListenerRef listener, RunloopRef runloop, int 
 {
     LISTNER_SET_TAG(listener);
     LISTNER_SET_END_TAG(listener);
-    listener->type = RUNLOOP_WATCHER_LISTENER;
+    listener->type = RUNLOOP_EVENT_LISTENER;
     listener->runloop = runloop;
     listener->handler = &handler;
     listener->context = listener;

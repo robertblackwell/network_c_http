@@ -23,7 +23,7 @@ static void print_current_tme(char* prefix)
  * First level fd event handler - provided in the base/common part of an event source
  * object. Called directly from the select/epoll_wait loop
  */
-static void handler(RunloopWatcherBaseRef watcher, uint16_t event, uint16_t flags, void* data)
+static void handler(RunloopEventBaseRef watcher, uint16_t event, uint16_t flags, void* data)
 {
     RunloopTimerRef timer = (RunloopTimerRef)watcher;
     TIMER_CHECK_TAG(timer)
@@ -43,7 +43,7 @@ static void handler(RunloopWatcherBaseRef watcher, uint16_t event, uint16_t flag
 void runloop_timer_init(RunloopTimerRef timer, RunloopRef runloop)
 {
     RunloopTimerRef this = (RunloopTimerRef)timer;
-    this->type = RUNLOOP_WATCHER_TIMER;
+    this->type = RUNLOOP_EVENT_TIMER;
     TIMER_SET_TAG(this)
     TIMER_SET_END_TAG(this);
     this->runloop = runloop;
@@ -60,11 +60,11 @@ RunloopTimerRef runloop_timer_new(RunloopRef runloop_ref)
     runloop_timer_init(this, runloop_ref);
     return this;
 }
-void runloop_timer_free(RunloopTimerRef athis)
+void runloop_timer_free(RunloopTimerRef timer)
 {
-    TIMER_CHECK_TAG(athis);
-    TIMER_CHECK_END_TAG(athis);
-    runloop_event_free(athis->runloop, athis);
+    TIMER_CHECK_TAG(timer);
+    TIMER_CHECK_END_TAG(timer);
+    runloop_event_free(timer->runloop, timer);
 }
 void runloop_timer_register(RunloopTimerRef timer, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating)
 {

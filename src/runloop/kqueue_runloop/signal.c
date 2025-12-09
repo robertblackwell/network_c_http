@@ -15,30 +15,21 @@
  * @param fd
  * @param event
  */
-static void handler(RunloopEventRef watcher, uint16_t filter, uint16_t flags)
+static void handler(RunloopEventBaseRef watcher, uint16_t filter, uint16_t flags, void* data)
 {
-    RunloopEventRef fdev = (RunloopEventRef)watcher;
+    RunloopSignalRef fdev = (RunloopSignalRef)watcher;
     printf("user event handler entered\n");
-    EVENTFD_CHECK_TAG(fdev)
-    EVENTFD_CHECK_END_TAG(fdev)
-    uint64_t buf;
-    watcher->uevent.uevent_postable(watcher->runloop, watcher);
+    SIGNAL_CHECK_TAG(fdev)
+    SIGNAL_CHECK_END_TAG(fdev)
 }
-static void anonymous_free(RunloopEventRef p)
-{
-    RunloopEventRef fdevp = (RunloopEventRef)p;
-    EVENTFD_CHECK_TAG(fdevp)
-    EVENTFD_CHECK_END_TAG(fdevp)
-    runloop_user_event_free(fdevp);
-}
-void runloop_signal_init(RunloopEventRef this, RunloopRef runloop)
+void runloop_signal_init(RunloopSignalRef this, RunloopRef runloop)
 {
     RBL_ASSERT((this!=NULL), "this is NULL");
-    this->type = RUNLOOP_WATCHER_UEVENT;
-    EVENTFD_SET_TAG(this);
-    EVENTFD_SET_END_TAG(this);
-    EVENTFD_CHECK_TAG(this)
-    EVENTFD_CHECK_END_TAG(this)
+    this->type = RUNLOOP_USER_EVENT;
+    SIGNAL_SET_TAG(this);
+    SIGNAL_SET_END_TAG(this);
+    SIGNAL_CHECK_TAG(this)
+    SIGNAL_CHECK_END_TAG(this)
     /*
      * The readfd must be NONBLOCK
      */
@@ -59,30 +50,30 @@ void runloop_signal_init(RunloopEventRef this, RunloopRef runloop)
     #endif
 #endif
     this->runloop = runloop;
-    this->free = &anonymous_free;
     this->handler = &handler;
 }
-RunloopEventRef runloop_signal_new(RunloopRef runloop)
+RunloopSignalRef runloop_signal_new(RunloopRef runloop)
 {
-    RunloopEventRef this = event_table_get_entry(runloop->event_table);
-    runloop_user_event_init(this, runloop);
-    return this;
+    RunloopSignalRef sig_event = runloop_event_allocate(runloop, sizeof(RunloopSignal));
+    runloop_signal_init(sig_event, runloop);
+    return sig_event;
 }
-void runloop_signal_free(RunloopEventRef athis)
+void runloop_signal_free(RunloopSignalRef sig_event)
 {
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
-    close(athis->uevent.write_fd);
-    free((void*)athis);
+    SIGNAL_SET_TAG(sig_event);
+    SIGNAL_CHECK_TAG(sig_event)
+    kqh_signal_event_cancel(sig_event);
+    runloop_event_free(sig_event->runloop, sig_event);
+
 }
-void runloop_signal_register(RunloopEventRef rlevent)
+void runloop_signal_register(RunloopSignalRef rlevent)
 {
-    EVENTFD_SET_TAG(rlevent);
-    EVENTFD_CHECK_TAG(rlevent)
+    SIGNAL_SET_TAG(rlevent);
+    SIGNAL_CHECK_TAG(rlevent)
     kqh_user_event_register(rlevent);
     #if 0
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
+    SIGNAL_SET_TAG(athis);
+    SIGNAL_CHECK_TAG(athis)
 
     uint32_t interest = 0L;
     athis->uevent.uevent_postable = NULL;
@@ -90,15 +81,15 @@ void runloop_signal_register(RunloopEventRef rlevent)
     /**
      * Make sure this call enabled level triggering of events on this fd
      */
-    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
+    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopEventBaseRef) (athis));
     assert(res ==0);
     #endif
 }
-void runloop_signal_change_watch(RunloopEventRef athis, PostableFunction postable, void* arg, uint64_t watch_what)
+void runloop_signal_change_watch(RunloopSignalRef athis, PostableFunction postable, void* arg, uint64_t watch_what)
 {
     #if 0
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
+    SIGNAL_SET_TAG(athis);
+    SIGNAL_CHECK_TAG(athis)
     uint32_t interest = watch_what;
     if( postable != NULL) {
         athis->uevent.uevent_postable = postable;
@@ -106,23 +97,23 @@ void runloop_signal_change_watch(RunloopEventRef athis, PostableFunction postabl
     if (arg != NULL) {
         athis->uevent.uevent_postable_arg = arg;
     }
-    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
+    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopEventBaseRef) athis);
     assert(res == 0);
     #endif
 }
-void runloop_signal_deregister(RunloopEventRef athis)
+void runloop_signal_deregister(RunloopSignalRef athis)
 {
     #if 0
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
+    SIGNAL_SET_TAG(athis);
+    SIGNAL_CHECK_TAG(athis)
     int res = runloop_deregister(athis->runloop, athis->fd);
     assert(res == 0);
     #endif
 }
-void runloop_signal_arm(RunloopEventRef rlevent, PostableFunction postable, void* arg)
+void runloop_signal_arm(RunloopSignalRef rlevent, PostableFunction postable, void* arg)
 {
-    EVENTFD_SET_TAG(rlevent);
-    EVENTFD_CHECK_TAG(rlevent)
+    SIGNAL_SET_TAG(rlevent);
+    SIGNAL_CHECK_TAG(rlevent)
   if( postable != NULL) {
         rlevent->uevent.uevent_postable = postable;
     }
@@ -131,39 +122,39 @@ void runloop_signal_arm(RunloopEventRef rlevent, PostableFunction postable, void
     }
     kqh_user_event_register(rlevent);
 }
-void runloop_signal_disarm(RunloopEventRef rlevent)
+void runloop_signal_disarm(RunloopSignalRef rlevent)
 {
-    EVENTFD_SET_TAG(rlevent);
-    EVENTFD_CHECK_TAG(rlevent)
+    SIGNAL_SET_TAG(rlevent);
+    SIGNAL_CHECK_TAG(rlevent)
     kqh_user_event_pause(rlevent);
     #if 0
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
-    int res = runloop_reregister(athis->runloop, athis->fd, 0, (RunloopWatcherBaseRef) athis);
+    SIGNAL_SET_TAG(athis);
+    SIGNAL_CHECK_TAG(athis)
+    int res = runloop_reregister(athis->runloop, athis->fd, 0, (RunloopEventBaseRef) athis);
     #endif
 }
-void runloop_signal_fire(RunloopEventRef athis)
+void runloop_signal_fire(RunloopSignalRef athis)
 {
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
-#ifdef RUNLOOP_EVENTFD_TWO_PIPE_TRICK
+    SIGNAL_SET_TAG(athis);
+    SIGNAL_CHECK_TAG(athis)
+#ifdef RUNLOOP_SIGNAL_TWO_PIPE_TRICK
     uint64_t buf = 1;
     write(athis->uevent.write_fd, &buf, sizeof(buf));
 #else
     kqh_user_event_trigger(athis, (void*) 1234);
 #endif
 }
-void runloop_signal_clear_one_event(RunloopEventRef athis)
+void runloop_signal_clear_one_event(RunloopSignalRef athis)
 {
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
+    SIGNAL_SET_TAG(athis);
+    SIGNAL_CHECK_TAG(athis)
     uint64_t buf;
     int nread = read(athis->uevent.read_fd, &buf, sizeof(buf));
 }
-void runloop_signal_clear_all_events(RunloopEventRef athis)
+void runloop_signal_clear_all_events(RunloopSignalRef athis)
 {
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
+    SIGNAL_SET_TAG(athis);
+    SIGNAL_CHECK_TAG(athis)
     uint64_t buf;
     while(1) {
         int nread = read(athis->uevent.read_fd,  &buf, sizeof(buf));
@@ -172,21 +163,21 @@ void runloop_signal_clear_all_events(RunloopEventRef athis)
     assert(errno == EAGAIN);
 }
 
-RunloopRef runloop_signal_get_runloop(RunloopEventRef athis)
+RunloopRef runloop_signal_get_runloop(RunloopSignalRef athis)
 {
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
+    SIGNAL_SET_TAG(athis);
+    SIGNAL_CHECK_TAG(athis)
     return athis->runloop;
 }
-int runloop_signal_get_fd(RunloopEventRef athis)
+int runloop_signal_get_fd(RunloopSignalRef athis)
 {
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
+    SIGNAL_SET_TAG(athis);
+    SIGNAL_CHECK_TAG(athis)
     return athis->uevent.read_fd;
 }
 
-void runloop_signal_verify(RunloopEventRef athis, const char* file, int line_nbr)
+void runloop_signal_verify(RunloopSignalRef athis, const char* file, int line_nbr)
 {
-    EVENTFD_SET_TAG(athis);
-    EVENTFD_CHECK_TAG(athis)
+    SIGNAL_SET_TAG(athis);
+    SIGNAL_CHECK_TAG(athis)
 }

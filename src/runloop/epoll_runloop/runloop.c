@@ -29,12 +29,18 @@ void* rl_event_allocate(RunloopRef rl, size_t size)
     uint16_t objsize = object_pool_obj_size(rl->object_pool_ref);
     assert(objsize >= size);
     void* p = object_pool_allocate(rl->object_pool_ref);
+    size_t ixx = object_pool_number_in_use(rl->object_pool_ref);
+    RBL_ASSERT((p != NULL),"runloop failed to allocate event object")
+    rl->active_event_count += 1;
     return p;
 }
 
 void rl_event_free(RunloopRef rl, void* p)
 {
+    RUNLOOP_CHECK_TAG(rl)
+    RUNLOOP_CHECK_END_TAG(rl)
     object_pool_deallocate(rl->object_pool_ref, p);
+    rl->active_event_count -= 1;
 }
 /**
  * Create a new runloop. Should only be one per thread
@@ -46,6 +52,7 @@ void runloop_init(RunloopRef athis, RunloopConfig* config) {
     RUNLOOP_SET_TAG(runloop)
     RUNLOOP_SET_END_TAG(runloop)
     runloop->epoll_fd = epoll_create1(0);
+    runloop->active_event_count = 0;
     runloop->closed_flag = false;
     runloop->runloop_executing = false;
     runloop->max_nbr_events = (config) ? config->max_nbr_events+2: RL_MAX_EVENTS+2;
@@ -123,9 +130,14 @@ int runloop_run(RunloopRef athis, long timeout_milli_secs) {
                functor_list_size(athis->ready_list),
                event_table_number_in_use(athis->event_table_ref)
         );
+        size_t ixx = object_pool_number_in_use(runloop_p->object_pool_ref);
+        if(object_pool_number_in_use(runloop_p->object_pool_ref) != runloop_p->active_event_count) {
+            RBL_ASSERT((object_pool_number_in_use(runloop_p->object_pool_ref) == runloop_p->active_event_count), "")
+        }
         if(
             ((functor_list_size(athis->ready_list) == 0))
-            &&(0 == object_pool_number_in_use(athis->object_pool_ref))
+                &&(runloop_p->active_event_count == 0)
+            // &&(0 == object_pool_number_in_use(athis->object_pool_ref))
         ) {
             // no more work to do - clean exit
             result = 0;
@@ -162,7 +174,7 @@ int runloop_run(RunloopRef athis, long timeout_milli_secs) {
                         RUNLOOP_CHECK_TAG(athis)
                         RUNLOOP_CHECK_END_TAG(athis)
 #if 1
-                        RunloopWatcherBaseRef wr = events[i].data.ptr;
+                        RunloopEventBaseRef wr = events[i].data.ptr;
                         // here check we got a valid event watcher
                         int fd = wr->fd;
 #else

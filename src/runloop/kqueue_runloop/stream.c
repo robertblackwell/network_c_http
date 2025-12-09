@@ -14,7 +14,7 @@
  * @param fd        int
  * @param event     uint64_t
  */
-static void handler(RunloopWatcherBaseRef watcher, uint16_t filter, uint16_t flags, void* data)
+static void handler(RunloopEventBaseRef watcher, uint16_t filter, uint16_t flags, void* data)
 {
     RunloopStreamRef stream = (RunloopStreamRef)watcher;
     RunloopRef rl = watcher->runloop;

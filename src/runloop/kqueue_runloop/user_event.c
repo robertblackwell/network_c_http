@@ -10,7 +10,7 @@
 #define KQ_USER_EVENT_DUP_FD
 #undef KQ_USER_EVENT_TWO_PIPE_TRICK
 
-static void handler(RunloopWatcherBaseRef watcher, uint16_t filter, uint16_t flags, void* data)
+static void handler(RunloopEventBaseRef watcher, uint16_t filter, uint16_t flags, void* data)
 {
     RunloopUserEventRef fdev = (RunloopUserEventRef)watcher;
     USER_EVENT_CHECK_TAG(fdev)
@@ -31,7 +31,7 @@ static void handler(RunloopWatcherBaseRef watcher, uint16_t filter, uint16_t fla
 void runloop_user_event_init(RunloopUserEventRef user_event, RunloopRef runloop)
 {
     RBL_ASSERT((user_event!=NULL), "user_event is NULL");
-    user_event->type = RUNLOOP_WATCHER_UEVENT;
+    user_event->type = RUNLOOP_USER_EVENT;
     USER_EVENT_SET_TAG(user_event);
     USER_EVENT_SET_END_TAG(user_event);
     USER_EVENT_CHECK_TAG(user_event)
@@ -46,7 +46,7 @@ void runloop_user_event_init(RunloopUserEventRef user_event, RunloopRef runloop)
     // register_user_event(runloop, user_event);
     #ifdef KQ_USER_EVENT_DUP_FD
         RBL_LOG_FMT("two pipe trick disabled kqueue - dup fd")
-        user_event->dup_fd = dup(runloop->kqueue_fd);
+        user_event->dup_fd = dup(runloop->epoll_kqueue_fd);
     #else
     RBL_LOG_FMT("two pipe trick disabled dup_fd disabled")
         user_event->fd = -1;

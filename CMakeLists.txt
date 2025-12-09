@@ -109,7 +109,7 @@ set(other_flags "${other_flags} -frtti -fvisibility-inlines-hidden")
 set(other_flags "${other_flags} -fvisibility=hidden -D_GNU_SOURCE -DTYPE_CHECK_ON -D_GNU_SOURCE")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${other_flags} -pthread")
 #set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c11") # this caused a problem with time.h
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fms-extensions")
+set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fms-extensions -DMICROSOFT_ANON_TAG")
 # -D_GNU_SOURCE -DTYPE_CHECK_ON -DSYNC_WORKER_QUEUEX -DCH_TAG_CHECK_ON")
 set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CHTTP_C_FLAGS}")
 

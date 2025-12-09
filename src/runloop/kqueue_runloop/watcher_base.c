@@ -1,15 +1,15 @@
 #include "runloop.h"
 #include "rl_internal.h"
 
-void Watcher_call_handler(RunloopWatcherBaseRef this)
+void Watcher_call_handler(RunloopEventBaseRef this)
 {
 
 }
-RunloopRef Watcher_get_reactor(RunloopWatcherBaseRef this)
+RunloopRef Watcher_get_reactor(RunloopEventBaseRef this)
 {
     return this->runloop;
 }
-int runloop_watcher_base_get_fd(RunloopWatcherBaseRef this)
+int runloop_watcher_base_get_fd(RunloopEventBaseRef this)
 {
     return this->fd;
 }

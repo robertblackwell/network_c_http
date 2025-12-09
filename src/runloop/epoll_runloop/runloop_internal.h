@@ -2,7 +2,7 @@
 #define H_epoll_runloop_internal_H
 #include <common/object_pool.h>
 #include <runloop/runloop.h>
-#include "rl_internal.h"
+#include <runloop/rl_internal.h>
 #include "rl_events_internal.h"
 
 void* rl_event_allocate(RunloopRef rl, size_t size);

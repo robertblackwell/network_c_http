@@ -8,6 +8,7 @@
 #define UserEvent_TAG     "USREVT"
 #define UEQueue_TAG       "UEQU"
 #define STREAM_TAG        "STREAM"
+#define SIGNAL_TAG        "SIGNL"
 #define Listener_TAG      "LISTNR"
 #define QueueWatcher_TAG  "QUWTCH"
 #define Timer_TAG         "Timer"
@@ -53,6 +54,17 @@
 #define STREAM_DECLARE_END_TAG RBL_DECLARE_END_TAG(STREAM_TAG)
 #define STREAM_CHECK_END_TAG(p) RBL_CHECK_END_TAG(STREAM_TAG, p)
 #define STREAM_SET_END_TAG(p) RBL_SET_END_TAG(STREAM_TAG, p)
+
+/**
+ * RunloopSignal
+ */
+#define SIGNAL_DECLARE_TAG RBL_DECLARE_TAG(SIGNAL_TAG)
+#define SIGNAL_CHECK_TAG(p) RBL_CHECK_TAG(SIGNAL_TAG, p)
+#define SIGNAL_SET_TAG(p) RBL_SET_TAG(SIGNAL_TAG, p)
+
+#define SIGNAL_DECLARE_END_TAG RBL_DECLARE_END_TAG(SIGNAL_TAG)
+#define SIGNAL_CHECK_END_TAG(p) RBL_CHECK_END_TAG(SIGNAL_TAG, p)
+#define SIGNAL_SET_END_TAG(p) RBL_SET_END_TAG(SIGNAL_TAG, p)
 
 /**
  * WListener

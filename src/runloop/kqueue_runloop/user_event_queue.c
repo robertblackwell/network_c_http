@@ -12,8 +12,8 @@
 typedef UserEventQueue* EvfQueuePtr;
 void user_event_queue_register(UserEventQueueRef uequeue, UserEventQueueCallback cb, void* cb_arg);
 void user_event_queue_deregister(UserEventQueueRef uequeue);
-Functor user_event_queue_remove(UserEventQueueRef athis);
-int   user_event_queue_readfd(UserEventQueueRef athis);
+Functor user_event_queue_remove(UserEventQueueRef uequeue);
+int   user_event_queue_readfd(UserEventQueueRef uequeue);
 
 void queue_triggered_cb(RunloopRef rl, void* arg)
 {
@@ -53,13 +53,13 @@ UserEventQueueRef user_event_queue_new(RunloopRef rl, size_t capacity)
     user_event_queue_init(rl, tmp, capacity);
     return tmp;
 }
-void user_event_queue_free(UserEventQueueRef athis)
+void user_event_queue_free(UserEventQueueRef uequeue)
 {
-    RBL_CHECK_TAG(UEQueue_TAG, athis);
-    RBL_CHECK_END_TAG(UEQueue_TAG, athis);
-    runloop_user_event_free(athis->user_event);
-    functor_list_free(athis->list);
-    free(athis);
+    RBL_CHECK_TAG(UEQueue_TAG, uequeue);
+    RBL_CHECK_END_TAG(UEQueue_TAG, uequeue);
+    runloop_user_event_free(uequeue->user_event);
+    functor_list_free(uequeue->list);
+    free(uequeue);
 }
 void user_event_queue_arm(UserEventQueueRef uequeue)
 {
@@ -68,23 +68,23 @@ void user_event_queue_arm(UserEventQueueRef uequeue)
     runloop_user_event_register(uequeue->user_event);
     runloop_user_event_arm(uequeue->user_event, queue_triggered_cb, uequeue);
 }
-void user_event_queue_add(UserEventQueueRef athis, Functor item)
+void user_event_queue_add(UserEventQueueRef uequeue, Functor item)
 {
-    RBL_CHECK_TAG(UEQueue_TAG, athis);
-    RBL_CHECK_END_TAG(UEQueue_TAG, athis);
-    EvfQueuePtr me = athis;
+    RBL_CHECK_TAG(UEQueue_TAG, uequeue);
+    RBL_CHECK_END_TAG(UEQueue_TAG, uequeue);
+    EvfQueuePtr me = uequeue;
     pthread_mutex_lock(&(me->queue_mutex));
     if ((me->list != NULL) ) {
         functor_list_add(me->list, item);
-        RunloopUserEventRef uevent = athis->user_event;
+        RunloopUserEventRef uevent = uequeue->user_event;
         kqh_user_event_trigger(uevent, NULL);
     }
     pthread_mutex_unlock(&(me->queue_mutex));
 }
-Functor user_event_queue_remove(UserEventQueueRef athis) {
-    RBL_CHECK_TAG(UEQueue_TAG, athis);
-    RBL_CHECK_END_TAG(UEQueue_TAG, athis);
-    EvfQueuePtr me = athis;
+Functor user_event_queue_remove(UserEventQueueRef uequeue) {
+    RBL_CHECK_TAG(UEQueue_TAG, uequeue);
+    RBL_CHECK_END_TAG(UEQueue_TAG, uequeue);
+    EvfQueuePtr me = uequeue;
     pthread_mutex_lock(&(me->queue_mutex));
     Functor op;
     if (functor_list_size(me->list) > 0) {
@@ -101,12 +101,12 @@ void user_event_queue_verify(UserEventQueueRef ueq)
     RBL_CHECK_END_TAG(UEQueue_TAG, ueq);
 }
 // todo check we need all of these
-RunloopRef user_event_queue_get_runloop(UserEventQueueRef athis)
+RunloopRef user_event_queue_get_runloop(UserEventQueueRef uequeue)
 {
-    RBL_CHECK_TAG(UEQueue_TAG, athis);
-    RBL_CHECK_END_TAG(UEQueue_TAG, athis);
-    assert(athis->runloop == runloop_user_event_get_runloop(athis->user_event));
-    return athis->runloop;
+    RBL_CHECK_TAG(UEQueue_TAG, uequeue);
+    RBL_CHECK_END_TAG(UEQueue_TAG, uequeue);
+    assert(uequeue->runloop == runloop_user_event_get_runloop(uequeue->user_event));
+    return uequeue->runloop;
 }
 //todo
 void user_event_queue_register(UserEventQueueRef uequeue, UserEventQueueCallback cb, void* cb_arg)
@@ -125,11 +125,11 @@ void user_event_queue_deregister(UserEventQueueRef uequeue)
     runloop_user_event_deregister(uequeue->user_event);
 }
 // todo
-int user_event_queue_readfd(UserEventQueueRef athis)
+int user_event_queue_readfd(UserEventQueueRef uequeue)
 {
-    RBL_CHECK_TAG(UEQueue_TAG, athis);
-    RBL_CHECK_END_TAG(UEQueue_TAG, athis);
+    RBL_CHECK_TAG(UEQueue_TAG, uequeue);
+    RBL_CHECK_END_TAG(UEQueue_TAG, uequeue);
     assert(0); // kqueue user_event does not have a readfd
-    EvfQueuePtr me = (EvfQueuePtr)athis;
+    EvfQueuePtr me = (EvfQueuePtr)uequeue;
     return -1;
 }

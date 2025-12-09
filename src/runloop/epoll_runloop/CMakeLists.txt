@@ -1,7 +1,7 @@
 set(epoll_RUNLOOP_HEADER_FILES
 		${C_HTTP_SOURCE_DIR}/runloop/runloop.h
 		${CMAKE_CURRENT_SOURCE_DIR}/runloop_internal.h
-		${CMAKE_CURRENT_SOURCE_DIR}/rl_internal.h
+		# ${CMAKE_CURRENT_SOURCE_DIR}/rl_internal.h
 		${CMAKE_CURRENT_SOURCE_DIR}/rl_events_internal.h
 		${CMAKE_CURRENT_SOURCE_DIR}/epoll_helper.h
 	)

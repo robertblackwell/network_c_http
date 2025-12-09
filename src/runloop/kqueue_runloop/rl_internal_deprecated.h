@@ -13,13 +13,21 @@ typedef struct EventTable_s EventTable, *EventTableRef;
 
 struct Runloop_s {
     RBL_DECLARE_TAG;
+    #if defined(APPLE_FLAG)
     int                     kqueue_fd;
+    #elif defined(LINUX_FLAG)
+    int                     epoll_fd;
+    #endif
+    #
     bool                    closed_flag;
     bool                    runloop_executing;
     pthread_t               tid;
     ObjectPoolRef           object_pool_ref;
     size_t                  active_event_count;
-#if 1
+    FunctorListRef          ready_list;
+    int                     max_nbr_events;
+    int                     max_simultaneous_callbacks_per_event;
+#if defined(APPLE_FLAG)
     struct kevent           change[RL_MAX_EVENTS];
     int                     change_max;
     int                     change_count;
@@ -27,9 +35,6 @@ struct Runloop_s {
     int                     events_max;
     int                     events_count;
 #endif
-    FunctorListRef          ready_list;
-    int                     max_nbr_events;
-    int                     max_simultaneous_callbacks_per_event;
     RBL_DECLARE_END_TAG;
 };
 

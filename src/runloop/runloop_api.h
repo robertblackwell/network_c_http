@@ -9,7 +9,7 @@
 // Types -= forward declares
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 typedef struct Runloop_s Runloop, *RunloopRef;
-typedef struct RunloopWatcherBase_s RunloopWatcherBase, *RunloopWatcherBaseRef;
+typedef struct RunloopEventBase_s RunloopWatcherBase, *RunloopEventBaseRef;
 typedef struct RunloopTimer_s RunloopTimer, *RunloopTimerRef;
 typedef struct RunloopListener_s RunloopListener, *RunloopListenerRef;
 typedef struct RunloopStream_s RunloopStream, *RunloopStreamRef;
@@ -31,7 +31,7 @@ typedef void (*UserEventQueueCallback) (RunloopRef runloop_ref, void* arg);
 typedef void(*AcceptCallback)(void* arg, int accepted_fd, int errno);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-// Functors - not sure why it this promonent
+// Functors - not sure why it this prominent
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 typedef struct Functor_s
@@ -176,8 +176,8 @@ RunloopRef user_event_queue_get_runloop(UserEventQueueRef uequeue);
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Base event
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
-RunloopRef runloop_watcher_base_get_runloop(RunloopWatcherBaseRef watcher);
-int        runloop_watcher_base_get_fd(RunloopWatcherBaseRef watcher);
+RunloopRef runloop_watcher_base_get_runloop(RunloopEventBaseRef watcher);
+int        runloop_watcher_base_get_fd(RunloopEventBaseRef watcher);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Type safe - these macros provides functions to assert - that is crash if not - the types:
