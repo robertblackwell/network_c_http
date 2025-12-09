@@ -39,12 +39,13 @@ int main(int argc, char* argv[])
                         &nbr_threads, &nbr_processes);
     pthread_t workers[nbr_threads];
     VerifyThreadContext* tctx[nbr_threads];
+    int current_process_id_nbr = 1;
     for(int t = 0; t < nbr_threads; t++) {
-        VerifyThreadContext* ctx = verify_ctx_new(port, t,
+        VerifyThreadContext* ctx = verify_ctx_new(port,
+            current_process_id_nbr,
+            t,
             nbr_roundtrips_per_connection,
-            nbr_connections_per_thread,
-            nbr_threads,
-            nbr_processes);
+            nbr_connections_per_thread);
         tctx[t] = ctx;
         pthread_create(&(workers[t]), NULL, verify_client_thread_function, (void*)ctx);
     }

@@ -86,6 +86,7 @@ bool http_verify_response(HttpMessageRef request, HttpMessageRef response)
         printf("expected: [%s]\n", expected_response_body);
         printf("got     : [%s]\n", actual_response_body);
         return false;
+
     }
     return true;
 }

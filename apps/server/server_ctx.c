@@ -118,6 +118,7 @@ static void app_instance_done_cb(void* app, void* server, int error)
     ListIterator itr = List_find(ctx->connection_list, app);
     assert(itr != NULL);
     List_itr_remove(ctx->connection_list, &itr);
+    // printf("app_instance_done reclaim object ");
     server_reclaim_app(ctx, app);
 }
 int local_create_bound_socket(int port, const char *host)

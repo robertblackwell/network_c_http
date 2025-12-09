@@ -7,6 +7,9 @@
 #include <rbl/unittest.h>
 #include <src/common/socket_functions.h>
 #include <apps/simple_request_response_app/simple_app.h>
+
+#include "rbl/macros.h"
+
 void* server_allocate_app_memory(ServerCtxRef server_ctx)
 {
 #ifdef SERVER_MEMORY_USE_OBJECT_POOL
@@ -44,11 +47,12 @@ void server_dealloc_only_app_memory(ServerCtxRef server, SimpleApp* app_ptr)
 }
 SimpleAppRef server_provide_init_app(ServerCtxRef ctx, int new_sock)
 {
-    assert(ctx->pending_app_memory);
+    RBL_ASSERT((ctx->pending_app_memory != NULL),"server pending_app_memory is NULL - invariant failed");
     SimpleAppRef app_ref = ctx->pending_app_memory;
     server_init_app(ctx, app_ref, new_sock);
     // will return NULL is all app objects are in use
     ctx->pending_app_memory = server_allocate_app_memory(ctx);
+    RBL_ASSERT((ctx->pending_app_memory != NULL), "server allocation of app object failed")
     return app_ref;
 }
 void server_reclaim_app(ServerCtxRef ctx, SimpleAppRef app_ref)

@@ -24,12 +24,12 @@ static void drain_callback(void* arg)
 {
     printf("drain callback\n");
 }
-struct kevent* runloop_get_change_table(RunloopRef athis);
-int runloop_get_change_table_size(RunloopRef athis);
-struct kevent* runloop_change_at(RunloopRef athis, int index);
-struct kevent* runloop_get_fresh_event_table(RunloopRef athis);
-int runloop_get_max_events(RunloopRef athis);
-struct kevent* runloop_events_at(RunloopRef athis, int index);
+struct kevent* runloop_get_change_table(RunloopRef runloop_p);
+int runloop_get_change_table_size(RunloopRef runloop_p);
+struct kevent* runloop_change_at(RunloopRef runloop_p, int index);
+struct kevent* runloop_get_fresh_event_table(RunloopRef runloop_p);
+int runloop_get_max_events(RunloopRef runloop_p);
+struct kevent* runloop_events_at(RunloopRef runloop_p, int index);
 
 struct MemorySlab_s {
         union {
@@ -46,12 +46,19 @@ void* runloop_event_allocate(RunloopRef rl, size_t size)
     uint16_t objsize = object_pool_obj_size(rl->object_pool_ref);
     assert(objsize >= size);
     void* p = object_pool_allocate(rl->object_pool_ref);
+    size_t ixx = object_pool_number_in_use(rl->object_pool_ref);
+
+    RBL_ASSERT((p != NULL),"runloop failed to allocate event object")
+    rl->active_event_count += 1;
     return p;
 }
 
 void runloop_event_free(RunloopRef rl, void* p)
 {
+    RUNLOOP_SET_TAG(rl)
+    RUNLOOP_SET_END_TAG(rl)
     object_pool_deallocate(rl->object_pool_ref, p);
+    rl->active_event_count -= 1;
 }
 
 
@@ -61,6 +68,8 @@ void runloop_init(RunloopRef rl, RunloopConfig* config) {
     RUNLOOP_SET_TAG(runloop)
     RUNLOOP_SET_END_TAG(runloop)
     runloop->kqueue_fd = kqueue();
+    runloop->active_event_count = 0;
+    runloop->events_count = 0;
     runloop->closed_flag = false;
     runloop->runloop_executing = false;
     runloop->max_nbr_events = (config) ? config->max_nbr_events+2: RL_MAX_EVENTS+2;
@@ -70,6 +79,7 @@ void runloop_init(RunloopRef rl, RunloopConfig* config) {
     RBL_ASSERT((runloop->kqueue_fd != -1), "kqueue create failed");
     RBL_LOG_FMT("runloop_new kqueue_fd %d", runloop->kqueue_fd);
     runloop->object_pool_ref = object_pool_create(sizeof(MemorySlab), RL_MAX_EVENTS);
+    size_t ixx = object_pool_number_in_use(runloop->object_pool_ref);
     runloop->ready_list = functor_list_new(RL_MAX_RUNLIST);
 #if 1
     runloop->change_count = 0;
@@ -92,27 +102,27 @@ RunloopRef runloop_new(void) {
     return (RunloopRef)runloop;
 }
 
-void runloop_close(RunloopRef athis)
+void runloop_close(RunloopRef runloop_p)
 {
-    RUNLOOP_CHECK_TAG(athis)
-    RUNLOOP_CHECK_END_TAG(athis)
-    athis->closed_flag = true;
-    int status = close(athis->kqueue_fd);
+    RUNLOOP_CHECK_TAG(runloop_p)
+    RUNLOOP_CHECK_END_TAG(runloop_p)
+    runloop_p->closed_flag = true;
+    int status = close(runloop_p->kqueue_fd);
     RBL_LOG_FMT("runloop_close status: %d errno: %d", status, errno);
     RBL_ASSERT((status != -1), "close kqueue_fd failed");
 }
 
-void runloop_free(RunloopRef athis)
+void runloop_free(RunloopRef runloop_p)
 {
-    RUNLOOP_CHECK_TAG(athis)
-    RUNLOOP_CHECK_END_TAG(athis)
-    if(! athis->closed_flag) {
-        runloop_close(athis);
+    RUNLOOP_CHECK_TAG(runloop_p)
+    RUNLOOP_CHECK_END_TAG(runloop_p)
+    if(! runloop_p->closed_flag) {
+        runloop_close(runloop_p);
     }
-    // what to do about event_allocator_free(athis->event_allocator);
+    // what to do about event_allocator_free(runloop_p->event_allocator);
 
-    functor_list_free(athis->ready_list);
-    free(athis);
+    functor_list_free(runloop_p->ready_list);
+    free(runloop_p);
 }
 void print_events(struct kevent events[], int count)
 {
@@ -121,27 +131,31 @@ void print_events(struct kevent events[], int count)
         printf("\n");
     }
 }
-int runloop_run(RunloopRef athis, time_t timeout_ms) {
-    RUNLOOP_CHECK_TAG(athis)
-    RUNLOOP_CHECK_END_TAG(athis)
+int runloop_run(RunloopRef runloop_p, time_t timeout_ms) {
+    RUNLOOP_CHECK_TAG(runloop_p)
+    RUNLOOP_CHECK_END_TAG(runloop_p)
     #if 1
-//    athis->tid = gettid();
+//    runloop_p->tid = gettid();
     int result;
 
     time_t start = time(NULL);
 
     while (true) {
-        RUNLOOP_CHECK_TAG(athis)
-        RUNLOOP_CHECK_END_TAG(athis)
+        RUNLOOP_CHECK_TAG(runloop_p)
+        RUNLOOP_CHECK_END_TAG(runloop_p)
         time_t passed = time(NULL) - start;
 
-        printf("runloop functor_list_size: %d event_table_number_in_user %zu \n",
-            functor_list_size(athis->ready_list),
-            object_pool_number_in_use(athis->object_pool_ref)
+        RBL_LOG_FMT("runloop functor_list_size: %d event_table_number_in_user %zu",
+            functor_list_size(runloop_p->ready_list),
+            object_pool_number_in_use(runloop_p->object_pool_ref)
         );
+        size_t ixx = object_pool_number_in_use(runloop_p->object_pool_ref);
+        if(object_pool_number_in_use(runloop_p->object_pool_ref) != runloop_p->active_event_count)
+            RBL_ASSERT((object_pool_number_in_use(runloop_p->object_pool_ref) == runloop_p->active_event_count), "")
         if(
-            ((functor_list_size(athis->ready_list) == 0))
-            && (0 == object_pool_number_in_use(athis->object_pool_ref))
+            ((functor_list_size(runloop_p->ready_list) == 0))
+            &&(runloop_p->active_event_count == 0)
+            // && (0 == object_pool_number_in_use(runloop_p->object_pool_ref))
         ) {
             // no more work to do - clean exit
             RBL_LOG_FMT("runloop exiting");
@@ -149,20 +163,20 @@ int runloop_run(RunloopRef athis, time_t timeout_ms) {
             goto cleanup;
         }
         int max_events = RL_MAX_EVENTS;
-        if(functor_list_size(athis->ready_list) == 0) {
+        if(functor_list_size(runloop_p->ready_list) == 0) {
             struct timespec *timeout = NULL;
             struct timespec t = { .tv_sec = timeout_ms / 1000 , .tv_nsec= 1000 *(timeout_ms % 1000)};
             if(timeout_ms > 0) {
                 timeout = &t;
             }
-            struct  kevent* change = runloop_get_change_table(athis);
-            int change_n = runloop_get_change_table_size(athis);
-            struct kevent* events = runloop_get_fresh_event_table(athis);
-            int max_events = runloop_get_max_events(athis);
-            int nev = kevent(athis->kqueue_fd, change, change_n, events, max_events, timeout);
+            struct  kevent* change = runloop_get_change_table(runloop_p);
+            int change_n = runloop_get_change_table_size(runloop_p);
+            struct kevent* events = runloop_get_fresh_event_table(runloop_p);
+            int max_events = runloop_get_max_events(runloop_p);
+            int nev = kevent(runloop_p->kqueue_fd, change, change_n, events, max_events, timeout);
             RBL_LOG_FMT("runloop keventreturned nev: %d fd[0]: %lu events active: %zu  ready_list_size:%d",
                         nev, events[0].ident,
-                        event_table_number_in_use(athis->event_table), functor_list_size(athis->ready_list));
+                        event_table_number_in_use(runloop_p->event_table), functor_list_size(runloop_p->ready_list));
             time_t currtime = time(NULL);
             switch (nev) {
                 case -1:
@@ -172,7 +186,7 @@ int runloop_run(RunloopRef athis, time_t timeout_ms) {
                         result = -1;
                         goto cleanup;
                         continue;
-                    } else if (athis->closed_flag) {
+                    } else if (runloop_p->closed_flag) {
                         result = 0;
                     } else {
                         perror("XXX kqueue_wait");
@@ -182,43 +196,43 @@ int runloop_run(RunloopRef athis, time_t timeout_ms) {
                     goto cleanup;
                 case 0:
                     result = 0;
-                    close(athis->kqueue_fd);
-                    athis->closed_flag = true;
+                    close(runloop_p->kqueue_fd);
+                    runloop_p->closed_flag = true;
                     goto cleanup;
                 default: {
                     for (int i = 0; i < nev; i++) {
-                        RUNLOOP_CHECK_TAG(athis)
-                        RUNLOOP_CHECK_END_TAG(athis)
-                        struct kevent ke = athis->events[i];
+                        RUNLOOP_CHECK_TAG(runloop_p)
+                        RUNLOOP_CHECK_END_TAG(runloop_p)
+                        struct kevent ke = runloop_p->events[i];
                         void* pp = (void*)ke.ident;
                         RunloopWatcherBaseRef rlwatcher = events[i].udata;
 
-                        int filters = athis->events[i].filter;
+                        int filters = runloop_p->events[i].filter;
                         void* data = (void*)events[i].data;
-                        uint32_t flags = athis->events[i].flags;
+                        uint32_t flags = runloop_p->events[i].flags;
                         int eof = flags & EV_EOF;
                         RBL_LOG_FMT("runloop_run loop ident: %lu udata: %p events: %x flags: %x eof:%d", ke.ident ,rlevent , filters, flags, eof);
                         rlwatcher->handler(rlwatcher, filters, flags, data);
-                        RUNLOOP_CHECK_TAG(athis)
+                        RUNLOOP_CHECK_TAG(runloop_p)
                     }
                 }
             }
         } else {
             FunctorRef fnc;
             while (1) {
-                RUNLOOP_CHECK_TAG(athis)
-                RUNLOOP_CHECK_END_TAG(athis)
-                if (functor_list_size(athis->ready_list) == 0) {
+                RUNLOOP_CHECK_TAG(runloop_p)
+                RUNLOOP_CHECK_END_TAG(runloop_p)
+                if (functor_list_size(runloop_p->ready_list) == 0) {
                     break;
                 }
-                Functor func = functor_list_remove(athis->ready_list);
-                athis->runloop_executing = true;
-                func.f(athis, func.arg);
-                athis->runloop_executing = false;
-                RUNLOOP_CHECK_TAG(athis)
-                if (functor_list_size(athis->ready_list) == 0) {
+                Functor func = functor_list_remove(runloop_p->ready_list);
+                runloop_p->runloop_executing = true;
+                func.f(runloop_p, func.arg);
+                runloop_p->runloop_executing = false;
+                RUNLOOP_CHECK_TAG(runloop_p)
+                if (functor_list_size(runloop_p->ready_list) == 0) {
                     RBL_LOG_FMT("reactor runlist loop  break functor_list_size: %d func: %p arg: %p",
-                                functor_list_size(athis->ready_list), func.f, func.arg);
+                                functor_list_size(runloop_p->ready_list), func.f, func.arg);
                     break;
                 }
             }
@@ -230,44 +244,44 @@ cleanup:
     #endif
     return 0;
 }
-struct kevent* runloop_get_change_table(RunloopRef athis)
+struct kevent* runloop_get_change_table(RunloopRef runloop_p)
 {
-    return &(athis->change[0]);
+    return &(runloop_p->change[0]);
 }
-int runloop_get_change_table_size(RunloopRef athis)
+int runloop_get_change_table_size(RunloopRef runloop_p)
 {
-    return athis->change_count;
+    return runloop_p->change_count;
 }
-struct kevent* runloop_change_at(RunloopRef athis, int index)
+struct kevent* runloop_change_at(RunloopRef runloop_p, int index)
 {
-    RBL_ASSERT(((index >= 0)&&(index < athis->change_max)), "");
-    return &(athis->change[index]);
+    RBL_ASSERT(((index >= 0)&&(index < runloop_p->change_max)), "");
+    return &(runloop_p->change[index]);
 }
-struct kevent* runloop_get_fresh_event_table(RunloopRef athis)
+struct kevent* runloop_get_fresh_event_table(RunloopRef runloop_p)
 {
-    athis->events_count = 0;
-    return &(athis->events[0]);
+    runloop_p->events_count = 0;
+    return &(runloop_p->events[0]);
 }
-int runloop_get_max_events(RunloopRef athis)
+int runloop_get_max_events(RunloopRef runloop_p)
 {
-    return athis->events_max;
+    return runloop_p->events_max;
 }
-struct kevent* runloop_events_at(RunloopRef athis, int index)
+struct kevent* runloop_events_at(RunloopRef runloop_p, int index)
 {
-    return &(athis->events[index]);
+    return &(runloop_p->events[index]);
 }
 
-void runloop_post(RunloopRef athis, PostableFunction cb, void* arg)
+void runloop_post(RunloopRef runloop_p, PostableFunction cb, void* arg)
 {
-    RUNLOOP_CHECK_TAG(athis)
-    RUNLOOP_CHECK_END_TAG(athis)
-//    assert(athis->tid == gettid());
-    RBL_LOG_FMT("runloop_post entered functor_list_size: %d funct: %p arg: %p runloop_executing: %d", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
+    RUNLOOP_CHECK_TAG(runloop_p)
+    RUNLOOP_CHECK_END_TAG(runloop_p)
+//    assert(runloop_p->tid == gettid());
+    RBL_LOG_FMT("runloop_post entered functor_list_size: %d funct: %p arg: %p runloop_executing: %d", functor_list_size(runloop_p->ready_list), cb, arg, (int)runloop_p->runloop_executing);
     assert(cb != NULL);
     assert(arg != NULL);
     Functor func = {.f = cb, .arg = arg};
-    functor_list_add(athis->ready_list, func);
-    RBL_LOG_FMT("runloop_post exited functor_list_size: %d func: %p arg: %p runloop_executing: %d", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
+    functor_list_add(runloop_p->ready_list, func);
+    RBL_LOG_FMT("runloop_post exited functor_list_size: %d func: %p arg: %p runloop_executing: %d", functor_list_size(runloop_p->ready_list), cb, arg, (int)runloop_p->runloop_executing);
 }
 void runloop_verify(RunloopRef rl)
 {

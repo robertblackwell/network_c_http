@@ -18,6 +18,7 @@ struct Runloop_s {
     bool                    runloop_executing;
     pthread_t               tid;
     ObjectPoolRef           object_pool_ref;
+    size_t                  active_event_count;
 #if 1
     struct kevent           change[RL_MAX_EVENTS];
     int                     change_max;

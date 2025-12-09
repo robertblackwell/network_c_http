@@ -1,6 +1,6 @@
 #include "http_message_parser.h"
 #include "http_message_internal.h"
-
+#include <rbl/logger.h>
 #include <src/common/utils.h>
 /// forward declares
 static int message_begin_cb(llhttp_t* parser);
@@ -212,7 +212,7 @@ static int message_begin_cb(llhttp_t* parser)
 }
 static int url_data_cb(llhttp_t* parser, const char* at, size_t length)
 {
-    printf("url_data at: %p length:%d %.*s \n", at, (int)length, (int)length, at);
+    RBL_LOG_FMT("url_data at: %p length:%d %.*s \n", at, (int)length, (int)length, at);
     HttpMessageParserRef this =  (HttpMessageParserRef)(parser->data);
     RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
     http_message_set_is_request(this->current_message_ptr, true);
@@ -221,7 +221,7 @@ static int url_data_cb(llhttp_t* parser, const char* at, size_t length)
 }
 static int status_data_cb(llhttp_t* parser, const char* at, size_t length)
 {
-    printf("status_data at: %p length:%d %.*s \n", at, (int)length, (int)length, at);
+    RBL_LOG_FMT("status_data at: %p length:%d %.*s \n", at, (int)length, (int)length, at);
 
     HttpMessageParserRef this =  (HttpMessageParserRef)(parser->data);
     RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
@@ -233,17 +233,17 @@ static int status_data_cb(llhttp_t* parser, const char* at, size_t length)
 }
 static int method_data_cb(llhttp_t* parser, const char* at, size_t length)
 {
-    printf("method_data at: %p length:%d %.*s \n", at, (int)length, (int)length, at);
+    RBL_LOG_FMT("method_data at: %p length:%d %.*s \n", at, (int)length, (int)length, at);
     return 0;
 }
 static int version_data_cb(llhttp_t* parser, const char* at, size_t length)
 {
-    printf("version_data at: %p length:%d %.*s \n", at, (int)length, (int)length, at);
+    RBL_LOG_FMT("version_data at: %p length:%d %.*s \n", at, (int)length, (int)length, at);
     return 0;
 }
 static int header_field_data_cb(llhttp_t* parser, const char* at, size_t length)
 {
-    printf("header_field at: %p length:%d %.*s \n", at, (int)length, (int)length, at);
+    RBL_LOG_FMT("header_field at: %p length:%d %.*s \n", at, (int)length, (int)length, at);
     HttpMessageParserRef this =  (HttpMessageParserRef)(parser->data);
     RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
     int state = this->m_header_state;
@@ -260,7 +260,7 @@ static int header_field_data_cb(llhttp_t* parser, const char* at, size_t length)
 }
 static int header_value_data_cb(llhttp_t* parser, const char* at, size_t length)
 {
-    printf("header_value at: %p length:%d %.*s \n", at, (int)length, (int)length, at);
+    RBL_LOG_FMT("header_value at: %p length:%d %.*s \n", at, (int)length, (int)length, at);
     HttpMessageParserRef this =  (HttpMessageParserRef)(parser->data);
     RBL_CHECK_TAG(HTTP_PARSER_TAG, this)
     int state = this->m_header_state;

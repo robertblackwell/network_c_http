@@ -48,7 +48,8 @@ void freelist_add(FreeListRef fl, uint16_t element)
 }
 uint16_t freelist_get(FreeListRef fl)
 {
-    assert(!freelist_is_empty(fl));
+    if(freelist_is_empty(fl))
+        assert(!freelist_is_empty(fl));
     uint16_t v = fl->buffer[fl->rdix];
     fl->count--;
     fl->rdix = (fl->rdix + 1) % fl->modulo_max;
@@ -244,6 +245,9 @@ void object_pool_destroy(ObjectPoolRef pool)
 }
 void* object_pool_allocate(ObjectPoolRef op)
 {
+    if(freelist_is_empty(op->free_list_ptr)) {
+        return NULL;
+    }
     uint16_t ix = freelist_get((op->free_list_ptr));
     void* blkptr = block_at(op, ix);
     blk_set_index(op, blkptr, ix);

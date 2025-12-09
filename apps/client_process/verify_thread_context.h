@@ -18,8 +18,12 @@ struct VerifyThreadContext_s {
 
 typedef struct VerifyThreadContext_s VerifyThreadContext, *VerifyThreadContextRef;
 
-VerifyThreadContext* verify_ctx_new(int port, int process_nbr, int id, int max_roundtrips, int max_connections_per_thread, int max_threads);
-void verify_ctx_init(VerifyThreadContextRef ctx, int port, int process_nbr, int id, int max_roundtrips, int max_connections_per_thread, int max_threads);
+VerifyThreadContext* verify_ctx_new(int port,
+    int process_id_nbr, int thread_id,
+    int max_roundtrips, int max_connections_per_thread);
+void verify_ctx_init(VerifyThreadContextRef ctx, int port,
+    int process_nbr, int thread_id,
+    int max_roundtrips, int max_connections_per_thread);
 void verify_ctx_increment_total_round_trip_count(VerifyThreadContextRef ctx);
 void verify_ctx_reset_connection_round_trip_count(VerifyThreadContextRef ctx);
 void verify_ctx_increment_connection_round_trip_count(VerifyThreadContextRef ctx);

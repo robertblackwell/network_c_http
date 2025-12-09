@@ -68,6 +68,7 @@ static void msg_read_callback(void* arg, GenericMsgRef msg, int error)
     } else {
         assert(msg != NULL);
         GenericMsgRef response = process_input_message(msg);
+        printf("msg_read_callback response created .. about to send\n");
         generic_msg_free(msg);
         msg_stream_write(app->msg_stream_ref, response, msg_write_callback, app);
     }
