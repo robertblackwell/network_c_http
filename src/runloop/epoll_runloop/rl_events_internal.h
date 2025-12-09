@@ -78,7 +78,7 @@ struct RunloopTimer_s {
 #else
     /** The start tag is declared in the base struct
     RBL_DECLARE_TAG; */
-    struct RunloopWatcherBase_s;
+    struct RunloopEventBase_s;
 #endif
     time_t                  expiry_time;
     uint64_t                interval;
@@ -117,7 +117,7 @@ struct RunloopStream_s {
 #else
     /** The start tag is declared in the base struct
     RBL_DECLARE_TAG; */
-    struct RunloopWatcherBase_s;
+    struct RunloopEventBase_s;
 #endif
     uint64_t                 event_mask;
     PostableFunction         read_postable_cb;
@@ -137,7 +137,7 @@ typedef struct RunloopListener_s {
 #else
     /** The start tag is declared in the base struct
     RBL_DECLARE_TAG; */
-    struct RunloopWatcherBase_s;
+    struct RunloopEventBase_s;
 #endif
     PostableFunction         listen_postable;
     void*                    listen_postable_arg;

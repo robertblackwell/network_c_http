@@ -46,12 +46,12 @@ void rl_event_free(RunloopRef rl, void* p)
  * Create a new runloop. Should only be one per thread
  * @NOTE - this implementation only works for Linux and uses epoll
  */
-void runloop_init(RunloopRef athis, RunloopConfig* config) {
+void runloop_init(RunloopRef runloop_p, RunloopConfig* config) {
 
-    RunloopRef runloop = athis;
+    RunloopRef runloop = runloop_p;
     RUNLOOP_SET_TAG(runloop)
     RUNLOOP_SET_END_TAG(runloop)
-    runloop->epoll_fd = epoll_create1(0);
+    runloop->epoll_kqueue_fd = epoll_create1(0);
     runloop->active_event_count = 0;
     runloop->closed_flag = false;
     runloop->runloop_executing = false;
@@ -59,8 +59,8 @@ void runloop_init(RunloopRef athis, RunloopConfig* config) {
     runloop->max_simultaneous_callbacks_per_event = (config)
         ? config->max_simultaneous_callbacks_per_event
         : RL_GTHREADS_PER_WATCHER;
-    RBL_ASSERT((runloop->epoll_fd != -1), "epoll_create failed");
-    RBL_LOG_FMT("runloop_new epoll_fd %d", runloop->epoll_fd);
+    RBL_ASSERT((runloop->epoll_kqueue_fd != -1), "epoll_create failed");
+    RBL_LOG_FMT("runloop_new epoll_fd %d", runloop->epoll_kqueue_fd);
     runloop->object_pool_ref = object_pool_create(sizeof(Mslab), runloop->max_nbr_events);
     runloop->ready_list = functor_list_new(runloop->max_nbr_events * runloop->max_simultaneous_callbacks_per_event );
 }
@@ -78,32 +78,32 @@ RunloopRef runloop_new(void) {
     return (RunloopRef)runloop;
 }
 
-void runloop_close(RunloopRef athis)
+void runloop_close(RunloopRef runloop_p)
 {
-    RUNLOOP_CHECK_TAG(athis)
-    RUNLOOP_CHECK_END_TAG(athis)
-    athis->closed_flag = true;
-    int status = close(athis->epoll_fd);
+    RUNLOOP_CHECK_TAG(runloop_p)
+    RUNLOOP_CHECK_END_TAG(runloop_p)
+    runloop_p->closed_flag = true;
+    int status = close(runloop_p->epoll_kqueue_fd);
     RBL_LOG_FMT("runloop_close status: %d errno: %d", status, errno);
     RBL_ASSERT((status != -1), "close epoll_fd failed");
 }
 
-void runloop_free(RunloopRef athis)
+void runloop_free(RunloopRef runloop_p)
 {
-    RUNLOOP_CHECK_TAG(athis)
-    RUNLOOP_CHECK_END_TAG(athis)
-    if(! athis->closed_flag) {
-        runloop_close(athis);
+    RUNLOOP_CHECK_TAG(runloop_p)
+    RUNLOOP_CHECK_END_TAG(runloop_p)
+    if(! runloop_p->closed_flag) {
+        runloop_close(runloop_p);
     }
-    object_pool_destroy(athis->object_pool_ref);
-    functor_list_free(athis->ready_list);
-    free(athis);
+    object_pool_destroy(runloop_p->object_pool_ref);
+    functor_list_free(runloop_p->ready_list);
+    free(runloop_p);
 }
 
-void runloop_delete(RunloopRef athis, int fd)
+void runloop_delete(RunloopRef runloop_p, int fd)
 {
-    RUNLOOP_CHECK_TAG(athis)
-    RUNLOOP_CHECK_END_TAG(athis)
+    RUNLOOP_CHECK_TAG(runloop_p)
+    RUNLOOP_CHECK_END_TAG(runloop_p)
 }
 void print_events(struct epoll_event events[], int count)
 {
@@ -112,32 +112,32 @@ void print_events(struct epoll_event events[], int count)
         printf("\n");
     }
 }
-int runloop_run(RunloopRef athis, long timeout_milli_secs) {
-    RUNLOOP_CHECK_TAG(athis)
-    RUNLOOP_CHECK_END_TAG(athis)
-//    athis->tid = gettid();
+int runloop_run(RunloopRef runloop_p, long timeout_milli_secs) {
+    RUNLOOP_CHECK_TAG(runloop_p)
+    RUNLOOP_CHECK_END_TAG(runloop_p)
+//    runloop_p->tid = gettid();
     int result;
     struct epoll_event events[RL_MAX_EVENTS];
 
     time_t start = time(NULL);
 
     while (true) {
-        RUNLOOP_CHECK_TAG(athis)
-        RUNLOOP_CHECK_END_TAG(athis)
+        RUNLOOP_CHECK_TAG(runloop_p)
+        RUNLOOP_CHECK_END_TAG(runloop_p)
         time_t passed = time(NULL) - start;
 
         RBL_LOG_FMT("runloop functor_list_size: %d event_table_number_in_user %zu",
-               functor_list_size(athis->ready_list),
-               event_table_number_in_use(athis->event_table_ref)
+               functor_list_size(runloop_p->ready_list),
+               event_table_number_in_use(runloop_p->event_table_ref)
         );
         size_t ixx = object_pool_number_in_use(runloop_p->object_pool_ref);
         if(object_pool_number_in_use(runloop_p->object_pool_ref) != runloop_p->active_event_count) {
             RBL_ASSERT((object_pool_number_in_use(runloop_p->object_pool_ref) == runloop_p->active_event_count), "")
         }
         if(
-            ((functor_list_size(athis->ready_list) == 0))
+            ((functor_list_size(runloop_p->ready_list) == 0))
                 &&(runloop_p->active_event_count == 0)
-            // &&(0 == object_pool_number_in_use(athis->object_pool_ref))
+            // &&(0 == object_pool_number_in_use(runloop_p->object_pool_ref))
         ) {
             // no more work to do - clean exit
             result = 0;
@@ -145,8 +145,8 @@ int runloop_run(RunloopRef athis, long timeout_milli_secs) {
         }
         int int_timeout_milli_secs = (int)timeout_milli_secs;
         int max_events = RL_MAX_EVENTS;
-        if(functor_list_size(athis->ready_list) == 0) {
-            int nfds = epoll_wait(athis->epoll_fd, events, max_events, int_timeout_milli_secs);
+        if(functor_list_size(runloop_p->ready_list) == 0) {
+            int nfds = epoll_wait(runloop_p->epoll_kqueue_fd, events, max_events, int_timeout_milli_secs);
             time_t currtime = time(NULL);
             switch (nfds) {
                 case -1:
@@ -156,7 +156,7 @@ int runloop_run(RunloopRef athis, long timeout_milli_secs) {
                         result = -1;
                         goto cleanup;
                         continue;
-                    } else if (athis->closed_flag) {
+                    } else if (runloop_p->closed_flag) {
                         result = 0;
                     } else {
                         perror("XXX epoll_wait");
@@ -166,13 +166,13 @@ int runloop_run(RunloopRef athis, long timeout_milli_secs) {
                     goto cleanup;
                 case 0:
                     result = 0;
-                    close(athis->epoll_fd);
-                    athis->closed_flag = true;
+                    close(runloop_p->epoll_kqueue_fd);
+                    runloop_p->closed_flag = true;
                     goto cleanup;
                 default: {
                     for (int i = 0; i < nfds; i++) {
-                        RUNLOOP_CHECK_TAG(athis)
-                        RUNLOOP_CHECK_END_TAG(athis)
+                        RUNLOOP_CHECK_TAG(runloop_p)
+                        RUNLOOP_CHECK_END_TAG(runloop_p)
 #if 1
                         RunloopEventBaseRef wr = events[i].data.ptr;
                         // here check we got a valid event watcher
@@ -184,26 +184,26 @@ int runloop_run(RunloopRef athis, long timeout_milli_secs) {
                         int mask = events[i].events;
                         wr->handler(wr, events[i].events);
                         // call handler
-                        RUNLOOP_CHECK_TAG(athis)
+                        RUNLOOP_CHECK_TAG(runloop_p)
                     }
                 }
             }
         } else {
             FunctorRef fnc;
             while (1) {
-                RUNLOOP_CHECK_TAG(athis)
-                RUNLOOP_CHECK_END_TAG(athis)
-                if (functor_list_size(athis->ready_list) == 0) {
+                RUNLOOP_CHECK_TAG(runloop_p)
+                RUNLOOP_CHECK_END_TAG(runloop_p)
+                if (functor_list_size(runloop_p->ready_list) == 0) {
                     break;
                 }
-                Functor func = functor_list_remove(athis->ready_list);
-                athis->runloop_executing = true;
-                func.f(athis, func.arg);
-                athis->runloop_executing = false;
-                RUNLOOP_CHECK_TAG(athis)
-                if (functor_list_size(athis->ready_list) == 0) {
+                Functor func = functor_list_remove(runloop_p->ready_list);
+                runloop_p->runloop_executing = true;
+                func.f(runloop_p, func.arg);
+                runloop_p->runloop_executing = false;
+                RUNLOOP_CHECK_TAG(runloop_p)
+                if (functor_list_size(runloop_p->ready_list) == 0) {
                     RBL_LOG_FMT("reactor runlist loop  break functor_list_size: %d func: %p arg: %p",
-                                functor_list_size(athis->ready_list), func.f, func.arg);
+                                functor_list_size(runloop_p->ready_list), func.f, func.arg);
                     break;
                 }
             }
@@ -214,15 +214,15 @@ cleanup:
     return result;
 }
 
-void runloop_post(RunloopRef athis, PostableFunction cb, void* arg)
+void runloop_post(RunloopRef runloop_p, PostableFunction cb, void* arg)
 {
-    RUNLOOP_CHECK_TAG(athis)
-    RUNLOOP_CHECK_END_TAG(athis)
-//    assert(athis->tid == gettid());
-    RBL_LOG_FMT("runloop_post entered functor_list_size: %d funct: %p arg: %p runloop_executing: %d", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
+    RUNLOOP_CHECK_TAG(runloop_p)
+    RUNLOOP_CHECK_END_TAG(runloop_p)
+//    assert(runloop_p->tid == gettid());
+    RBL_LOG_FMT("runloop_post entered functor_list_size: %d funct: %p arg: %p runloop_executing: %d", functor_list_size(runloop_p->ready_list), cb, arg, (int)runloop_p->runloop_executing);
     assert(cb != NULL);
     assert(arg != NULL);
     Functor func = {.f = cb, .arg = arg};
-    functor_list_add(athis->ready_list, func);
-    RBL_LOG_FMT("runloop_post exited functor_list_size: %d func: %p arg: %p runloop_executing: %d", functor_list_size(athis->ready_list), cb, arg, (int)athis->runloop_executing);
+    functor_list_add(runloop_p->ready_list, func);
+    RBL_LOG_FMT("runloop_post exited functor_list_size: %d func: %p arg: %p runloop_executing: %d", functor_list_size(runloop_p->ready_list), cb, arg, (int)runloop_p->runloop_executing);
 }

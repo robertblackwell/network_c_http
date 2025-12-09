@@ -2,6 +2,7 @@
 #define c_http_threadlocal_mblock_h
 #include <stdlib.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <assert.h>
 #include <stdio.h>
 #include <rbl/check_tag.h>

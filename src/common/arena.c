@@ -31,6 +31,7 @@ Allocator* arena_allocator_create(size_t capacity)
     allocator->reallocate = &api_arena_reallocate;
     allocator->deallocate = NULL;
     allocator->reset = &api_arena_reset;
+    allocator->destroy = &api_arena_destroy;
     return allocator;
 }
 void arena_fill(void* p, char ch, size_t n)

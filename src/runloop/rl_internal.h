@@ -2,7 +2,9 @@
 #define C_HTTP_RL_INTERNAL_H
 #include <runloop/runloop.h>
 #include <runloop/functor.h>
+#if defined(APPLE_FLAG)
 #include <sys/event.h>
+#endif
 #include <pthread.h>
 #include <stdbool.h>
 #include <common/object_pool.h>

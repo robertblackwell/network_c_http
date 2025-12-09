@@ -32,7 +32,7 @@ static void print_current_tme(char* prefix)
  * @param fd
  * @param event
  */
-static void handler(RunloopWatcherBaseRef watcher, uint64_t event)
+static void handler(RunloopEventBaseRef watcher, uint64_t event)
 {
     struct timespec ts;
     struct itimerspec its;
@@ -58,14 +58,14 @@ static void handler(RunloopWatcherBaseRef watcher, uint64_t event)
     RBL_ASSERT((timer_watcher->timer_postable != NULL), "timer_handler should not be NULL");
     timer_watcher->timer_postable(timer_watcher->runloop, timer_watcher->timer_postable_arg);
 }
-static void anonymous_free(RunloopWatcherBaseRef p)
+static void anonymous_free(RunloopEventBaseRef p)
 {
     RunloopTimerRef twp = (RunloopTimerRef)p;
     runloop_timer_free(twp);
 }
 void runloop_timer_init(RunloopTimerRef this, RunloopRef runloop)
 {
-    this->type = RUNLOOP_WATCHER_TIMER;
+    this->type = RUNLOOP_EVENT_TIMER;
     TIMER_SET_TAG(this)
     TIMER_SET_END_TAG(this);
     this->runloop = runloop;
@@ -154,8 +154,8 @@ void runloop_timer_register(RunloopTimerRef athis, PostableFunction cb, void* ct
     print_current_tme("runloop_timer_register");
     RBL_LOG_FMT("runloop_timer_register its.it_value secs %ld nsecs: %ld ", its.it_value.tv_sec, its.it_value.tv_nsec);
     RBL_LOG_FMT("runloop_timer_register its.it_interval secs %ld nsecs: %ld", its.it_interval.tv_sec, its.it_interval.tv_nsec);
-    eph_add(athis->runloop->epoll_fd, athis->fd, interest, athis);
-//    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) (athis));
+    eph_add(athis->runloop->epoll_kqueue_fd, athis->fd, interest, athis);
+//    int res = runloop_register(athis->runloop, athis->fd, interest, (RunloopEventBaseRef) (athis));
 //    assert(res ==0);
 }
 void runloop_timer_update(RunloopTimerRef athis, PostableFunction cb, void* ctx, uint64_t interval_ms, bool repeating)
@@ -169,7 +169,7 @@ void runloop_timer_update(RunloopTimerRef athis, PostableFunction cb, void* ctx,
     int rc = timerfd_settime(athis->fd, flags, &its, NULL);
     assert(rc == 0);
     uint32_t interest = eph_interest_read(false); // EPOLLIN | EPOLLERR;
-    eph_mod(athis->runloop->epoll_fd, athis->fd, interest, athis);
+    eph_mod(athis->runloop->epoll_kqueue_fd, athis->fd, interest, athis);
 }
 
 void runloop_timer_disarm(RunloopTimerRef athis)
@@ -216,7 +216,7 @@ void runloop_timer_deregister(RunloopTimerRef athis)
     assert(athis->state != TIMER_STATE_NOT_REGISTERED);
     athis->state = TIMER_STATE_NOT_REGISTERED;
     RBL_LOG_FMT("runloop_timer_deregister this->fd : %d", athis->fd);
-    eph_del(athis->runloop->epoll_fd, athis->fd, eph_interest_none(), athis);
+    eph_del(athis->runloop->epoll_kqueue_fd, athis->fd, eph_interest_none(), athis);
 }
 RunloopRef runloop_timer_get_runloop(RunloopTimerRef athis)
 {

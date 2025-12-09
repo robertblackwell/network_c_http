@@ -19,7 +19,7 @@
  * @param fd
  * @param event
  */
-static void handler(RunloopWatcherBaseRef fdevent_ref, uint64_t event)
+static void handler(RunloopEventBaseRef fdevent_ref, uint64_t event)
 {
     RunloopUserEventRef fdev = (RunloopUserEventRef)fdevent_ref;
     USER_EVENT_CHECK_TAG(fdev)
@@ -38,7 +38,7 @@ static void handler(RunloopWatcherBaseRef fdevent_ref, uint64_t event)
         }
     }
 }
-// static void anonymous_free(RunloopWatcherBaseRef p)
+// static void anonymous_free(RunloopEventBaseRef p)
 // {
 //     RunloopUserEventRef fdevp = (RunloopUserEventRef)p;
 //     USER_EVENT_CHECK_TAG(fdevp)
@@ -48,7 +48,7 @@ static void handler(RunloopWatcherBaseRef fdevent_ref, uint64_t event)
 void runloop_user_event_init(RunloopUserEventRef uevent, RunloopRef runloop)
 {
     RBL_ASSERT((uevent!=NULL), "this is NULL");
-    uevent->type = RUNLOOP_WATCHER_FDEVENT;
+    uevent->type = RUNLOOP_USER_EVENT;
     USER_EVENT_SET_TAG(uevent);
     USER_EVENT_SET_END_TAG(uevent);
     USER_EVENT_CHECK_TAG(uevent)
@@ -97,13 +97,13 @@ void runloop_user_event_register(RunloopUserEventRef athis)
     uint32_t interest = 0L;
     athis->fdevent_postable = NULL;
     athis->fdevent_postable_arg = NULL;
-    eph_add(athis->runloop->epoll_fd, athis->fd, interest, athis);
+    eph_add(athis->runloop->epoll_kqueue_fd, athis->fd, interest, athis);
 }
 void runloop_user_event_deregister(RunloopUserEventRef athis)
 {
     USER_EVENT_SET_TAG(athis);
     USER_EVENT_CHECK_TAG(athis)
-    eph_del(athis->runloop->epoll_fd, athis->fd, (uint32_t)0, athis);
+    eph_del(athis->runloop->epoll_kqueue_fd, athis->fd, (uint32_t)0, athis);
 //    int res = runloop_deregister(athis->runloop, athis->fd);
 //    assert(res == 0);
 }
@@ -118,7 +118,7 @@ void runloop_user_event_arm(RunloopUserEventRef athis, PostableFunction postable
     if (arg != NULL) {
         athis->fdevent_postable_arg = arg;
     }
-    eph_mod(athis->runloop->epoll_fd, athis->fd, interest, athis);
+    eph_mod(athis->runloop->epoll_kqueue_fd, athis->fd, interest, athis);
 //    int res = runloop_reregister(athis->runloop, athis->fd, interest, (RunloopWatcherBaseRef) athis);
 //    assert(res == 0);
 }
@@ -126,7 +126,7 @@ void runloop_user_event_disarm(RunloopUserEventRef athis)
 {
     USER_EVENT_SET_TAG(athis);
     USER_EVENT_CHECK_TAG(athis)
-    eph_mod(athis->runloop->epoll_fd, athis->fd, (uint32_t)0, athis);
+    eph_mod(athis->runloop->epoll_kqueue_fd, athis->fd, (uint32_t)0, athis);
 //    int res = runloop_reregister(athis->runloop, athis->fd, 0, (RunloopWatcherBaseRef) athis);
 }
 void runloop_user_event_fire(RunloopUserEventRef uev)

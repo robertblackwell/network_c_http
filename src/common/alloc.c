@@ -1,6 +1,7 @@
 #include <src/common/alloc.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <rbl/macros.h>
 #include <common/arena.h>
 #include <common/alloc_malloc.h>
 Allocator* default_allocator_create()
@@ -37,7 +38,8 @@ void allocator_reset(Allocator* allocator)
 }
 void allocator_destroy(Allocator* allocator)
 {
-    if(allocator->destroy) {
+    RBL_ASSERT((allocator != NULL), "allocator_destroy - allocator is not null")
+    if(allocator->destroy != NULL) {
         allocator->destroy(allocator);
     }
 }

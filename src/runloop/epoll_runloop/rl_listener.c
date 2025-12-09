@@ -19,7 +19,7 @@
  * @param fd        int
  * @param event     uint64_t
  */
-static void handler(RunloopWatcherBaseRef watcher, uint64_t event)
+static void handler(RunloopEventBaseRef watcher, uint64_t event)
 {
     RunloopListenerRef listener_ref = (RunloopListenerRef)watcher;
     LISTNER_CHECK_TAG(listener_ref)
@@ -31,7 +31,7 @@ static void handler(RunloopWatcherBaseRef watcher, uint64_t event)
         listener_ref->listen_postable(listener_ref->runloop,  listener_ref->listen_postable_arg);
     }
 }
-static void anonymous_free(RunloopWatcherBaseRef p)
+static void anonymous_free(RunloopEventBaseRef p)
 {
     LISTNER_CHECK_TAG((RunloopListenerRef)p)
     LISTNER_CHECK_END_TAG((RunloopListenerRef)p)
@@ -42,7 +42,7 @@ void runloop_listener_init(RunloopListenerRef athis, RunloopRef runloop, int fd)
 {
     LISTNER_SET_TAG(athis);
     LISTNER_SET_END_TAG(athis)
-    athis->type = RUNLOOP_WATCHER_LISTENER;
+    athis->type = RUNLOOP_EVENT_LISTENER;
     athis->fd = fd;
     athis->runloop = runloop;
     athis->free = &anonymous_free;
@@ -85,13 +85,13 @@ void runloop_listener_register(RunloopListenerRef athis, PostableFunction postab
         athis->listen_postable_arg = postable_arg;
     }
     uint32_t interest =  EPOLLIN | EPOLLEXCLUSIVE;
-    eph_add(athis->runloop->epoll_fd, athis->fd, interest, (athis));
+    eph_add(athis->runloop->epoll_kqueue_fd, athis->fd, interest, (athis));
 }
 void runloop_listener_deregister(RunloopListenerRef athis)
 {
     LISTNER_CHECK_TAG(athis)
     LISTNER_CHECK_END_TAG(athis)
-    eph_del(athis->runloop->epoll_fd, athis->fd, (uint32_t)0, (athis));
+    eph_del(athis->runloop->epoll_kqueue_fd, athis->fd, (uint32_t)0, (athis));
 }
 void runloop_listener_arm(RunloopListenerRef athis, PostableFunction postable, void* postable_arg)
 {
@@ -106,14 +106,14 @@ void runloop_listener_arm(RunloopListenerRef athis, PostableFunction postable, v
     assert(0); // something is wrong here
     uint32_t interest = EPOLLIN; // | EPOLLEXCLUSIVE ;
 
-    eph_mod(athis->runloop->epoll_fd, athis->fd, interest, (RunloopWatcherBaseRef) athis);
+    eph_mod(athis->runloop->epoll_kqueue_fd, athis->fd, interest, (RunloopEventBaseRef) athis);
 }
 void runloop_listener_disarm(RunloopListenerRef athis)
 {
     LISTNER_CHECK_TAG(athis)
     LISTNER_CHECK_END_TAG(athis)
     uint32_t interest = 0;
-    eph_mod(athis->runloop->epoll_fd, athis->fd, interest, (RunloopWatcherBaseRef) athis);
+    eph_mod(athis->runloop->epoll_kqueue_fd, athis->fd, interest, (RunloopEventBaseRef) athis);
 }
 RunloopRef runloop_listener_get_runloop(RunloopListenerRef athis)
 {

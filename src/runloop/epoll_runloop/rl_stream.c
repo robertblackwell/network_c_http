@@ -15,7 +15,7 @@
  * @param fd        int
  * @param event     uint64_t
  */
-static void handler(RunloopWatcherBaseRef watcher, uint64_t event)
+static void handler(RunloopEventBaseRef watcher, uint64_t event)
 {
     RunloopStreamRef rl_stream = (RunloopStreamRef)watcher;
     RunloopRef rl = watcher->runloop;
@@ -36,7 +36,7 @@ static void handler(RunloopWatcherBaseRef watcher, uint64_t event)
     }
 }
 
-static void anonymous_free(RunloopWatcherBaseRef p)
+static void anonymous_free(RunloopEventBaseRef p)
 {
     RunloopStreamRef twp = (RunloopStreamRef)p;
     runloop_stream_free(twp);
@@ -73,8 +73,8 @@ void runloop_stream_register(RunloopStreamRef athis)
     STREAM_SET_TAG(athis);
     STREAM_SET_END_TAG(athis);
     uint32_t interest = 0;
-    eph_add(athis->runloop->epoll_fd, athis->fd, 0L, athis);
-//    int res = runloop_register(athis->runloop, athis->fd, 0L, (RunloopWatcherBaseRef) (athis));
+    eph_add(athis->runloop->epoll_kqueue_fd, athis->fd, 0L, athis);
+//    int res = runloop_register(athis->runloop, athis->fd, 0L, (RunloopEventBaseRef) (athis));
 //    assert(res ==0);
 }
 //void WIoFd_change_watch(RunloopStreamRef this, SocketEventHandler cb, void* arg, uint64_t watch_what)
@@ -87,14 +87,14 @@ void runloop_stream_register(RunloopStreamRef athis)
 //    if (arg != NULL) {
 //        this->cb_ctx = arg;
 //    }
-//    int res = runloop_reregister(this->runloop, this->fd, interest, (RunloopWatcherBaseRef)this);
+//    int res = runloop_reregister(this->runloop, this->fd, interest, (RunloopEventBaseRef)this);
 //    assert(res == 0);
 //}
 void runloop_stream_deregister(RunloopStreamRef athis)
 {
     STREAM_SET_TAG(athis);
     STREAM_SET_END_TAG(athis);
-    eph_del(athis->runloop->epoll_fd, athis->fd, 0, athis);
+    eph_del(athis->runloop->epoll_kqueue_fd, athis->fd, 0, athis);
 //    int res = runloop_deregister(athis->runloop, athis->fd);
 //    assert(res == 0);
 }
@@ -118,7 +118,7 @@ void runloop_stream_arm_both(RunloopStreamRef athis,
     if (write_arg != NULL) {
         athis->write_postable_arg = write_arg;
     }
-    eph_mod(athis->runloop->epoll_fd, athis->fd, interest, athis);
+    eph_mod(athis->runloop->epoll_kqueue_fd, athis->fd, interest, athis);
 }
 
 void runloop_stream_arm_read(RunloopStreamRef athis, PostableFunction postable_cb, void* arg)
@@ -133,7 +133,7 @@ void runloop_stream_arm_read(RunloopStreamRef athis, PostableFunction postable_c
     if (arg != NULL) {
         athis->read_postable_arg = arg;
     }
-    eph_mod(athis->runloop->epoll_fd, athis->fd, interest, athis);
+    eph_mod(athis->runloop->epoll_kqueue_fd, athis->fd, interest, athis);
 }
 void runloop_stream_arm_write(RunloopStreamRef athis, PostableFunction postable_cb, void* arg)
 {
@@ -147,7 +147,7 @@ void runloop_stream_arm_write(RunloopStreamRef athis, PostableFunction postable_
     if (arg != NULL) {
         athis->write_postable_arg = arg;
     }
-    eph_mod(athis->runloop->epoll_fd, athis->fd, interest, athis);
+    eph_mod(athis->runloop->epoll_kqueue_fd, athis->fd, interest, athis);
 }
 void runloop_stream_disarm_read(RunloopStreamRef athis)
 {
@@ -156,7 +156,7 @@ void runloop_stream_disarm_read(RunloopStreamRef athis)
     STREAM_SET_END_TAG(athis);
     athis->read_postable_cb = NULL;
     athis->read_postable_arg = NULL;
-    eph_mod(athis->runloop->epoll_fd, athis->fd, athis->event_mask, athis);
+    eph_mod(athis->runloop->epoll_kqueue_fd, athis->fd, athis->event_mask, athis);
 }
 void runloop_stream_disarm_write(RunloopStreamRef athis)
 {
@@ -165,7 +165,7 @@ void runloop_stream_disarm_write(RunloopStreamRef athis)
     STREAM_SET_END_TAG(athis);
     athis->write_postable_cb = NULL;
     athis->write_postable_arg = NULL;
-    eph_mod(athis->runloop->epoll_fd, athis->fd, athis->event_mask, athis);
+    eph_mod(athis->runloop->epoll_kqueue_fd, athis->fd, athis->event_mask, athis);
 }
 RunloopRef runloop_stream_get_runloop(RunloopStreamRef athis)
 {

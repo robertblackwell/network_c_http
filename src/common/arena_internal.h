@@ -15,11 +15,12 @@ struct MBlock_s
     MBlockPtr   next_block_ptr;
     size_t      mem_capacity_bytes;
     size_t      mem_next_byte_index;
-    union
-    {
-        uint8_t mem[];
-        void*   vmem[];
-    };
+    uint8_t mem[];
+//    union
+//    {
+//        uint8_t mem[];
+//        void*   vmem[];
+//    };
 };
 struct Arena_s {
     Allocator allocator;
