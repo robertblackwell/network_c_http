@@ -8,7 +8,7 @@
 #include <src/common/list.h>
 #include <common/alloc.h>
 #include <common/alloc_malloc.h>
-#include <common/arena.h>
+#include <../../src/common/arena/arena.h>
 #include <src/http/http_header_line.h>
 #include <src/http/header_list.h>
 #include <src/http/http_message.h>

@@ -2,7 +2,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <rbl/macros.h>
-#include <common/arena.h>
+#include <common/arena/arena.h>
 #include <common/alloc_malloc.h>
 Allocator* default_allocator_create()
 {

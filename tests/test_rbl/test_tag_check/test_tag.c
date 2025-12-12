@@ -37,6 +37,22 @@ TypeBRef TypeB_new()
     RBL_SET_END_TAG(TypeB_TAG, this)
     return this;
 }
+typedef union
+{
+    unsigned long long uvalue;
+    char               ch[8];
+} TagType;
+int test_01()
+{
+    unsigned long long xy = 'abcdefghijklmnop';
+    unsigned long long xx;
+    int zz = sizeof(xx);
+    char* tag = "abcdefghijklmnop";
+    memcpy((char*)&xx, &tag, sizeof(xx));
+    TagType redzone;
+    strncpy((char*)&(redzone.ch), tag, sizeof(redzone.ch));
+    return 0;
+}
 int test_a()
 {
     TypeARef a = TypeA_new();
@@ -65,6 +81,7 @@ int test_a()
 
 int main()
 {
+    UT_ADD(test_01);
     UT_ADD(test_a);
     int rc = UT_RUN();
     return rc;

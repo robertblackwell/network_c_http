@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#if 0
 void* api_arena_allocate(Allocator* allocator, size_t size)
 {
     return arena_alloc((Arena*)allocator, size);
@@ -48,18 +49,30 @@ size_t arena_allocation_size(Arena* arena, void* user_ptr)
 {
     return arena_allocated_memory_from_user_ptr(arena, user_ptr)->mem_size_bytes;
 }
-uint8_t* arena_block_alloc(MBlockPtr block, size_t user_alloc_size)
+// calculates the address of the first byte of freespace within a block
+#define BlockFreespacePtr(block) (&(block->mem[0]) + block->mem_next_byte_index);
+#define AllocatedMemoryInit(amptr, amsize) do{ \
+        ((AllocatedMemory*)amptr)->mem_size_bytes = amsize; \
+        arena_fill(memptr, 'z', alloc_size); \
+    }while(0);
+UserMemory arena_block_alloc(MBlockPtr block, size_t user_alloc_size)
 {
     user_alloc_size = arena_round_up(user_alloc_size);
-    size_t alloc_size = user_alloc_size + sizeof(AllocatedMemory);
+    size_t alloc_mem_size = user_alloc_size + sizeof(AllocatedMemory);
     size_t xx = arena_block_free_space(block);
-    RBL_ASSERT((arena_block_free_space(block) >= alloc_size), "arena block allocate invariant failed");
-    uint8_t* memptr = &(block->mem[0]) + block->mem_next_byte_index;
-    AllocatedMemory* allocaptr = (AllocatedMemory*)memptr;
-    block->mem_next_byte_index += alloc_size;
-    arena_fill(memptr, 'z', alloc_size);
-    allocaptr->mem_size_bytes = user_alloc_size;
-    void* result = arena_user_ptr_from_allocation(memptr);
+    RBL_ASSERT((arena_block_free_space(block) >= alloc_mem_size), "arena block allocate invariant failed");
+    // this is pointer to start of free space
+    // uint8_t* memptr = &(block->mem[0]) + block->mem_next_byte_index;
+    void* memptr = BlockFreespacePtr(block)
+    AllocatedMemory* alloc_ptr = (AllocatedMemory*)memptr;
+    block->mem_next_byte_index += alloc_mem_size;
+#if 1
+    arena_allocated_memory_init(alloc_ptr, user_alloc_size);
+#else
+    arena_fill(&(alloc_ptr->mem[0]), 'z', user_alloc_size);
+    alloc_ptr->mem_size_bytes = user_alloc_size;
+#endif
+    void* result = arena_user_ptr_from_allocation((AllocatedMemory*)memptr);
     return result;
 }
 
@@ -91,7 +104,7 @@ MBlockPtr arena_add_block(Arena* arena, size_t user_capacity_bytes)
     }
     return bp;
 }
-MBlockPtr arena_find_block(ArenaPtr arena, void* needle)
+MBlockPtr arena_find_block(ArenaPtr arena, UserMemory needle)
 {
     MBlockPtr p = arena->begin;
     uint8_t* pn = (uint8_t*)arena_allocated_memory_from_user_ptr(arena, needle);
@@ -103,16 +116,94 @@ MBlockPtr arena_find_block(ArenaPtr arena, void* needle)
     }
     return NULL;
 }
-AllocatedMemory* arena_allocated_memory_from_user_ptr(ArenaPtr arena, void* ptr)
+#endif
+size_t arena_allocated_memory_overhead()
+{
+#if defined(ARENA_REDZONE_ENABLED)
+    return sizeof(AllocatedMemory) + sizeof(RedZone);
+#else
+    return sizeof(AllocatedMemory);
+#endif
+}
+size_t arena_allocated_memory_freespace_overhead()
+{
+#if defined(ARENA_REDZONE_ENABLED)
+    return sizeof(AllocatedMemory) + sizeof(RedZone);
+#else
+    return sizeof(AllocatedMemory);
+#endif
+}
+
+void arena_allocated_memory_redzone_fill(AllocatedMemory* allocated_mem)
+{
+    ARENA_REDZONE_FILL(allocated_mem->redzone_start)
+    void* p = (&(allocated_mem->mem[0])) + allocated_mem->mem_size_bytes;
+    ARENA_REDZONE_FILL(p)
+}
+void arena_allocated_memory_init(AllocatedMemory* allocated_mem, size_t size)
+{
+    ((AllocatedMemory*)allocated_mem)->mem_size_bytes = size;
+    ARENA_REDZONE_FILL(&(allocated_mem->redzone_start))
+    void* p = (&(allocated_mem->mem[0])) + allocated_mem->mem_size_bytes;
+    ARENA_REDZONE_FILL(p)
+    arena_fill(&(allocated_mem->mem[0]), 'z', size);
+}
+AllocatedMemory* arena_allocated_memory_from_user_ptr(ArenaPtr arena, UserMemory ptr)
 {
     size_t offset = offsetof(AllocatedMemory, mem);
+    AllocatedMemory* amem = (AllocatedMemory*)((uint8_t*)ptr - offset);
+    // ASSERT_REDZONE(amem->redzone_begin, ARENA_REDZONE_CHAR);
+    // ASSERT_REDZONE(&(amem->mem)+amem->mem_size_bytes, ARENA_REDZONE_CHAR);
     return (AllocatedMemory*)((uint8_t*)ptr - offset);
 }
-void* arena_user_ptr_from_allocation(void* allocation)
+UserMemory arena_allocated_memory_get_user_ptr(AllocatedMemory* allocation)
 {
     void* p = &(((AllocatedMemory*)allocation)->mem[0]);
     return p;
 }
+void redzone_verify(void* p)
+{
+    char* q = (char*)p;
+    for(int i = 0; i < 8; i++) {
+        if(*q != ARENA_REDZONE_CHAR) {
+            assert(0);
+        }
+        q++;
+    }
+
+}
+void* allocated_memory_start_redzone_ptr(AllocatedMemory* ap)
+{
+#if defined(ARENA_REDZONE_ENABLED)
+    return &(ap->redzone_start);
+#else
+    assert(0);
+#endif
+}
+void* allocated_memory_end_redzone_ptr(AllocatedMemory* ap)
+{
+    return (&(ap->mem[0]) + ap->mem_size_bytes);
+}
+void arena_allocated_memory_redzone_verify(AllocatedMemory* ap, const char* file, int line_number)
+{
+#if defined(ARENA_REDZONE_ENABLED)
+    redzone_verify(&(ap->redzone_start));
+    redzone_verify(allocated_memory_end_redzone_ptr(ap));
+#endif
+}
+
+#if 0
+void arena_block_validate(MBlockPtr p)
+{
+
+}
+MBlockPtr arena_block_next(MBlockPtr block)
+{
+    MBlockPtr memptr = (MBlockPtr)&(block->mem[0]) + block->mem_next_byte_index;
+    arena_block_validate(memptr);
+    return memptr;
+}
+
 //
 // api starts
 
@@ -193,3 +284,4 @@ void* arena_realloc(ArenaPtr arena, void* ptr, size_t alloc_size)
     memcpy(newptr, memptr, old_size);
     return newptr;
 }
+#endif

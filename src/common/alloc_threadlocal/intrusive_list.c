@@ -1,23 +1,24 @@
 //opaque type representing list
-#include "freelist.h"
+#include "intrusive_list.h"
 #include <stdlib.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <rbl/check_tag.h>
 #include <src/common/utils.h>
 #include <rbl/macros.h>
+
 #include "mblock.h"
 #include "rbl/macros.h"
 
-MBlockList* tl_freelist_new()
+MBlockList* tl_intrusive_list_new()
 {
     MBlockList* list = malloc(sizeof(MBlockList));
     RBL_ASSERT((list != NULL), "malloc returned NULL");
-    tl_freelist_init(list);
+    tl_intrusive_list_init(list);
     return list;
 }
 
-void tl_freelist_init(MBlockList* list)
+void tl_intrusive_list_init(MBlockList* list)
 {
     ASSERT_NOT_NULL(list);
     RBL_SET_TAG(FreeList_TAG, list)
@@ -27,17 +28,17 @@ void tl_freelist_init(MBlockList* list)
     list->tail = NULL;
 }
 
-void tl_freelist_free(MBlockList* list)
+void tl_intrusive_list_free(MBlockList* list)
 {
     ASSERT_NOT_NULL(list);
     RBL_ASSERT((list->count == 0), "Free-ing non empty list");
     free(list);
 }
-size_t tl_freelist_size(const MBlockList* list)
+size_t tl_intrusive_list_size(const MBlockList* list)
 {
     return list->count;
 }
-void tl_freelist_display(MBlockList* list)
+void tl_intrusive_list_display(MBlockList* list)
 {
     printf("MblockList[%p] count: %ld head %p tail %p\n", (void*)list, list->count, (void*)list->head, (void*)list->tail);
     MBlock* iter = list->head;
@@ -47,7 +48,7 @@ void tl_freelist_display(MBlockList* list)
         iter = next;
     }
 }
-void tl_freelist_empty(const MBlockList* list)
+void tl_intrusive_list_empty(const MBlockList* list)
 {
     MBlock* b = list->head;
     while(b != NULL) {
@@ -56,7 +57,7 @@ void tl_freelist_empty(const MBlockList* list)
         b = next;
     }
 }
-MBlock* tl_freelist_find_space(const MBlockList* list, size_t required_user_size)
+MBlock* tl_intrusive_list_find_space(const MBlockList* list, size_t required_user_size)
 {
     MBlock* iter = list->head;
     if(iter == NULL) return NULL;
@@ -68,7 +69,7 @@ MBlock* tl_freelist_find_space(const MBlockList* list, size_t required_user_size
     }
     RBL_ASSERT(0, "Sould not get here");
 }
-void* tl_freelist_find(const MBlockList* list, const MBlock* node)
+void* tl_intrusive_list_find(const MBlockList* list, const MBlock* node)
 {
     MBlock* iter = list->head;
     while(iter != NULL) {
@@ -79,9 +80,9 @@ void* tl_freelist_find(const MBlockList* list, const MBlock* node)
     }
     return NULL;
 }
-void tl_freelist_remove(MBlockList* list, MBlock* node)
+void tl_intrusive_list_remove(MBlockList* list, MBlock* node)
 {
-    RBL_ASSERT((tl_freelist_find(list, node) != NULL), "removing node from wrong list")
+    RBL_ASSERT((tl_intrusive_list_find(list, node) != NULL), "removing node from wrong list")
     if(node == list->head && node == list->tail) {
         list->head = NULL;
         list->tail = NULL;
@@ -100,7 +101,7 @@ void tl_freelist_remove(MBlockList* list, MBlock* node)
     node->backward = NULL;
 }
 // add to the list in descending order of size
-void tl_freelist_add(MBlockList* list, MBlock* node)
+void tl_intrusive_list_add(MBlockList* list, MBlock* node)
 {
     ASSERT_NOT_NULL(list);
     node->forward = NULL;
@@ -138,7 +139,7 @@ void tl_freelist_add(MBlockList* list, MBlock* node)
         iter = iter->forward;
     }
 }
-MBlock* tl_freelist_find_merge(MBlockList* list, MBlock* block)
+MBlock* tl_intrusive_list_find_merge(MBlockList* list, MBlock* block)
 {
     ASSERT_NOT_NULL(list);
     MBlock* iter = list->head;
@@ -151,7 +152,7 @@ MBlock* tl_freelist_find_merge(MBlockList* list, MBlock* block)
     return NULL;
 }
 #if 0
-MBlock* tl_freelist_find_space(MBlockList* list, size_t user_space_required)
+MBlock* tl_intrusive_list_find_space(MBlockList* list, size_t user_space_required)
 {
     ASSERT_NOT_NULL(list);
     MBlock* iter = list->head;
@@ -164,7 +165,7 @@ MBlock* tl_freelist_find_space(MBlockList* list, size_t user_space_required)
     }
     return NULL;
 }
-void tl_freelist_remove(MblockList* lref, MBlock* node_ptr)
+void tl_intrusive_list_remove(MblockList* lref, MBlock* node_ptr)
 {
     ASSERT_NOT_NULL(lref);
     ASSERT_NOT_NULL(node_ptr);

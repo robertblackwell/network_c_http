@@ -3,9 +3,10 @@ set(HEADER_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/alloc.h
         ${CMAKE_CURRENT_SOURCE_DIR}/alloc_malloc.h
         ${CMAKE_CURRENT_SOURCE_DIR}/alloc_threadlocal/mblock.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/alloc_threadlocal/freelist.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/alloc_threadlocal/intrusive_list.h
         ${CMAKE_CURRENT_SOURCE_DIR}/alloc_threadlocal/tl_allocator.h
-        ${CMAKE_CURRENT_SOURCE_DIR}/arena.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/arena/arena.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/arena/arena_internal.h
         ${CMAKE_CURRENT_SOURCE_DIR}/url_parser.h
         ${CMAKE_CURRENT_SOURCE_DIR}/url.h
         ${CMAKE_CURRENT_SOURCE_DIR}/buffer_chain.h
@@ -25,9 +26,12 @@ set(SOURCE_FILES
         ${CMAKE_CURRENT_SOURCE_DIR}/alloc.c
         ${CMAKE_CURRENT_SOURCE_DIR}/alloc_malloc.c
         ${CMAKE_CURRENT_SOURCE_DIR}/alloc_threadlocal/mblock.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/alloc_threadlocal/freelist.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/alloc_threadlocal/intrusive_list.c
         ${CMAKE_CURRENT_SOURCE_DIR}/alloc_threadlocal/tl_allocator.c
-        ${CMAKE_CURRENT_SOURCE_DIR}/arena.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/arena/arena.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/arena/arena_api.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/arena/allocated_memory.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/arena/block.c
         ${CMAKE_CURRENT_SOURCE_DIR}/buffer_chain.c
         ${CMAKE_CURRENT_SOURCE_DIR}/cbuffer.c
         ${CMAKE_CURRENT_SOURCE_DIR}/iobuffer.c

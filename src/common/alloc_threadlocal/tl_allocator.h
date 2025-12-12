@@ -2,7 +2,7 @@
 #define H_c_http_common_tl_allocator_H
 #include <stddef.h>
 #include "mblock.h"
-#include "freelist.h"
+#include "intrusive_list.h"
 
 typedef struct Tlocal_Allocator_s Tlocal_Allocator;
 struct Tlocal_Allocator_s

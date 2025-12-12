@@ -1,6 +1,8 @@
+#include <runloop/runloop.h>
 #include "runloop_internal.h"
 #include <stdint.h>
 #include <time.h>
+#include <sys/time.h>
 #include <sys/epoll.h>
 #include <assert.h>
 #include <stdbool.h>
@@ -12,15 +14,14 @@
 #include <rbl/macros.h>
 #include <common/object_pool.h>
 
-typedef union Mslab_u {
-    RunloopTimer       timer;
-    RunloopListener    listener;
-    RunloopStream      stream;
-    RunloopUserEvent   user_event;
-    // RunloopQueueEvent   qevent;
-    // RunloopInterthreadQueueEvent itqevent;
-    // RunloopQueueWatcher qwatcher;
-    // RunloopEvent        runloop_event;
+typedef struct Mslab_s {
+    union {
+        RunloopTimer       timer;
+        RunloopListener    listener;
+        RunloopStream      stream;
+        RunloopUserEvent   user_event;
+        RunloopSignal      signal;
+    }
 } Mslab;
 
 

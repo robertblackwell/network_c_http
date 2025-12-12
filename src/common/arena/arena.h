@@ -12,7 +12,8 @@ ArenaPtr arena_create(size_t capacity);
 void arena_destroy(ArenaPtr arena);
 
 void* arena_alloc(ArenaPtr arena, size_t alloc_size);
-void *arena_realloc(ArenaPtr arena, void* ptr, size_t size);
+void* arena_realloc(ArenaPtr arena, void* ptr, size_t size);
+void api_arena_deallocate(Allocator* allocator, void* ptr);
 void arena_reset(ArenaPtr arena);
 
 

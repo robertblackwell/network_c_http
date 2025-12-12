@@ -14,21 +14,6 @@
 #include <rbl/macros.h>
 #include <common/object_pool.h>
 
-struct MemorySlab_s {
-        union {
-            RunloopTimer     timer;
-            RunloopListener  listener;
-            RunloopStream    stream;
-            RunloopUserEvent user_event;
-            RunloopSignal    signal;
-        };
-};
-
-
-static void drain_callback(void* arg)
-{
-    printf("drain callback\n");
-}
 struct kevent* runloop_get_change_table(RunloopRef runloop_p);
 int runloop_get_change_table_size(RunloopRef runloop_p);
 struct kevent* runloop_change_at(RunloopRef runloop_p, int index);
@@ -36,96 +21,6 @@ struct kevent* runloop_get_fresh_event_table(RunloopRef runloop_p);
 int runloop_get_max_events(RunloopRef runloop_p);
 struct kevent* runloop_events_at(RunloopRef runloop_p, int index);
 
-void* runloop_event_allocate(RunloopRef rl, size_t size)
-{
-    uint16_t objsize = object_pool_obj_size(rl->object_pool_ref);
-    assert(objsize >= size);
-    void* p = object_pool_allocate(rl->object_pool_ref);
-    size_t ixx = object_pool_number_in_use(rl->object_pool_ref);
-    RBL_ASSERT((p != NULL),"runloop failed to allocate event object")
-    rl->active_event_count += 1;
-    return p;
-}
-
-void runloop_event_free(RunloopRef rl, void* p)
-{
-    RUNLOOP_CHECK_TAG(rl)
-    RUNLOOP_CHECK_END_TAG(rl)
-    object_pool_deallocate(rl->object_pool_ref, p);
-    rl->active_event_count -= 1;
-}
-
-void runloop_init(RunloopRef rl, RunloopConfig* config) {
-
-    RunloopRef runloop = rl;
-    RUNLOOP_SET_TAG(runloop)
-    RUNLOOP_SET_END_TAG(runloop)
-    runloop->epoll_kqueue_fd = kqueue();
-    runloop->active_event_count = 0;
-    runloop->events_count = 0;
-    runloop->closed_flag = false;
-    runloop->runloop_executing = false;
-    runloop->max_nbr_events = (config) ? config->max_nbr_events+2: RL_MAX_EVENTS+2;
-    runloop->max_simultaneous_callbacks_per_event = (config)
-        ? config->max_simultaneous_callbacks_per_event
-        : RL_GTHREADS_PER_WATCHER;
-    RBL_ASSERT((runloop->epoll_kqueue_fd != -1), "kqueue create failed");
-    RBL_LOG_FMT("runloop_new kqueue_fd %d", runloop->kqueue_fd);
-    runloop->object_pool_ref = object_pool_create(sizeof(MemorySlab), RL_MAX_EVENTS);
-    size_t ixx = object_pool_number_in_use(runloop->object_pool_ref);
-    runloop->ready_list = functor_list_new(RL_MAX_RUNLIST);
-#if 1
-    runloop->change_count = 0;
-    runloop->change_max = RL_MAX_EVENTS;
-    runloop->events_count = 0;
-    runloop->events_max = RL_MAX_EVENTS;
-#endif
-}
-RunloopRef runloop_new_with_config(RunloopConfig* config)
-{
-    RunloopRef runloop = malloc(sizeof(Runloop));
-    RBL_ASSERT((runloop != NULL), "malloc failed new runloop");
-    runloop_init(runloop, config);
-    return (RunloopRef)runloop;
-}
-RunloopRef runloop_new(void) {
-    RunloopRef runloop = malloc(sizeof(Runloop));
-    RBL_ASSERT((runloop != NULL), "malloc failed new runloop");
-    runloop_init(runloop, NULL);
-    return (RunloopRef)runloop;
-}
-
-void runloop_close(RunloopRef runloop_p)
-{
-    RUNLOOP_CHECK_TAG(runloop_p)
-    RUNLOOP_CHECK_END_TAG(runloop_p)
-    runloop_p->closed_flag = true;
-    int status = close(runloop_p->epoll_kqueue_fd);
-    RBL_LOG_FMT("runloop_close status: %d errno: %d", status, errno);
-    RBL_ASSERT((status != -1), "close kqueue_fd failed");
-}
-
-void runloop_free(RunloopRef runloop_p)
-{
-    RUNLOOP_CHECK_TAG(runloop_p)
-    RUNLOOP_CHECK_END_TAG(runloop_p)
-    if(! runloop_p->closed_flag) {
-        runloop_close(runloop_p);
-    }
-    // what to do about event_allocator_free(runloop_p->event_allocator);
-
-    functor_list_free(runloop_p->ready_list);
-    // TODO destroy the object pool
-    free(runloop_p);
-}
-void print_events(struct kevent events[], int count)
-{
-    for(int i = 0; i < count; i++) {
-        // struct epoll_event *ev = &(events[i]);
-        printf("\n");
-    }
-}
-#if 0
 int runloop_run(RunloopRef runloop_p, time_t timeout_ms) {
     RUNLOOP_CHECK_TAG(runloop_p)
     RUNLOOP_CHECK_END_TAG(runloop_p)
@@ -264,22 +159,4 @@ int runloop_get_max_events(RunloopRef runloop_p)
 struct kevent* runloop_events_at(RunloopRef runloop_p, int index)
 {
     return &(runloop_p->events[index]);
-}
-#endif
-void runloop_post(RunloopRef runloop_p, PostableFunction cb, void* arg)
-{
-    RUNLOOP_CHECK_TAG(runloop_p)
-    RUNLOOP_CHECK_END_TAG(runloop_p)
-//    assert(runloop_p->tid == gettid());
-    RBL_LOG_FMT("runloop_post entered functor_list_size: %d funct: %p arg: %p runloop_executing: %d", functor_list_size(runloop_p->ready_list), cb, arg, (int)runloop_p->runloop_executing);
-    assert(cb != NULL);
-    assert(arg != NULL);
-    Functor func = {.f = cb, .arg = arg};
-    functor_list_add(runloop_p->ready_list, func);
-    RBL_LOG_FMT("runloop_post exited functor_list_size: %d func: %p arg: %p runloop_executing: %d", functor_list_size(runloop_p->ready_list), cb, arg, (int)runloop_p->runloop_executing);
-}
-void runloop_verify(RunloopRef rl)
-{
-    RUNLOOP_CHECK_TAG(rl)
-    RUNLOOP_CHECK_END_TAG(rl)
 }

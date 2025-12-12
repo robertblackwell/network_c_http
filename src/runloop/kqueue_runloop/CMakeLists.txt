@@ -18,6 +18,7 @@ set(kq_RUNLOOP_SOURCE_FILES
 		# ${CMAKE_CURRENT_SOURCE_DIR}/interthread_queue.c
 #		${CMAKE_CURRENT_SOURCE_DIR}/run_list.c
         ${CMAKE_CURRENT_SOURCE_DIR}/runloop.c
+        ${CMAKE_CURRENT_SOURCE_DIR}/runloop_run.c
 		${CMAKE_CURRENT_SOURCE_DIR}/user_event.c
 		${CMAKE_CURRENT_SOURCE_DIR}/listener.c
 #         ${CMAKE_CURRENT_SOURCE_DIR}/queue_watcher.c

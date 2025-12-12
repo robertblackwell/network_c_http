@@ -7,7 +7,7 @@
 #include <common/alloc_threadlocal/mblock.h>
 #include <src/common/iobuffer.h>
 
-#include <common/alloc_threadlocal/freelist.h>
+#include <common/alloc_threadlocal/intrusive_list.h>
 #include <common/alloc_threadlocal/tl_allocator.h>
 
 static void fill(void* p, char ch, size_t n)
@@ -110,17 +110,17 @@ int test_split()
 }
 int test_freelist_01()
 {
-    MBlockList* freelist = tl_freelist_new();
-    tl_freelist_add(freelist, memblock_new(256));
+    MBlockList* freelist = tl_intrusive_list_new();
+    tl_intrusive_list_add(freelist, memblock_new(256));
     UT_TRUE(freelist->head->free_space_size == 256)
     UT_TRUE(freelist->tail->free_space_size == 256)
     UT_TRUE(freelist->head->forward == NULL)
     UT_TRUE(freelist->head->backward == NULL)
-    tl_freelist_add(freelist, memblock_new(128));
+    tl_intrusive_list_add(freelist, memblock_new(128));
     UT_TRUE(freelist->head->free_space_size == 256)
     UT_TRUE(freelist->head->forward->free_space_size == 128)
     UT_TRUE(freelist->head->forward->forward == NULL)
-    tl_freelist_add(freelist, memblock_new(1024));
+    tl_intrusive_list_add(freelist, memblock_new(1024));
     UT_TRUE(freelist->head->free_space_size == 1024)
     UT_TRUE(freelist->head->forward->free_space_size == 256)
     UT_TRUE(freelist->head->forward->forward->free_space_size == 128)
@@ -130,7 +130,7 @@ int test_freelist_01()
     UT_TRUE(freelist->head->backward == NULL)
     UT_TRUE(freelist->tail->forward == NULL)
     UT_TRUE(freelist->tail->free_space_size  == 128)
-    tl_freelist_add(freelist, memblock_new(512));
+    tl_intrusive_list_add(freelist, memblock_new(512));
     UT_TRUE(freelist->head->free_space_size == 1024)
     UT_TRUE(freelist->head->forward->free_space_size == 512)
     UT_TRUE(freelist->head->forward->forward->free_space_size == 256)
@@ -142,9 +142,9 @@ int test_freelist_01()
     UT_TRUE(freelist->head->backward == NULL)
     UT_TRUE(freelist->tail->forward == NULL)
     UT_TRUE(freelist->tail->free_space_size  == 128)
-    MBlock* nb = tl_freelist_find_space(freelist, 136);
+    MBlock* nb = tl_intrusive_list_find_space(freelist, 136);
     UT_TRUE(nb->free_space_size >= 136)
-    tl_freelist_remove(freelist, nb);
+    tl_intrusive_list_remove(freelist, nb);
 
     return 0;
 }
