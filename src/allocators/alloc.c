@@ -1,9 +1,9 @@
-#include <src/common/alloc.h>
+#include <allocators/alloc.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <rbl/macros.h>
-#include <common/arena/arena.h>
-#include <common/alloc_malloc.h>
+#include <allocators/arena/arena.h>
+#include <allocators/malloc/alloc_malloc.h>
 Allocator* default_allocator_create()
 {
 #define ALLOCATOR_DEFAULT_ARENA

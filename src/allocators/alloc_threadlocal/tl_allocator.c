@@ -7,7 +7,7 @@
 #include "tl_allocator.h"
 #include "mblock.h"
 #include "intrusive_list.h"
-
+#define TL_Allocator_TAG "TLAllo"
 static __thread Tlocal_Allocator* thread_local_allocator = NULL;
 
 // struct Tlocal_Allocator_s
@@ -37,6 +37,8 @@ void* tl_new_block(Tlocal_Allocator* tla, size_t block_size)
 }
 void tl_allocator_init(Tlocal_Allocator* tla)
 {
+    RBL_SET_TAG(TL_Allocator_TAG, tla)
+    RBL_SET_END_TAG(TL_Allocator_TAG, tla)
     tla->free_list = &(tla->free_list_mem);
     tl_intrusive_list_init(tla->free_list);
     tla->allocated_list = &(tla->allocated_list_mem);
@@ -60,6 +62,8 @@ Tlocal_Allocator* tl_allocator_create()
 }
 void* tl_allocator_alloc(Tlocal_Allocator* tl, size_t size)
 {
+    RBL_CHECK_TAG(TL_Allocator_TAG, tl)
+    RBL_CHECK_END_TAG(TL_Allocator_TAG, tl)
     MBlock* block = tl_intrusive_list_find_space(tl->free_list, size);
     if(block == NULL) {
         // printf("tl_alllocator_alloc NULL from free list find space\n");
@@ -89,6 +93,8 @@ void* tl_allocator_alloc(Tlocal_Allocator* tl, size_t size)
 }
 void  tl_allocator_free(Tlocal_Allocator* tl, void* ptr)
 {
+    RBL_CHECK_TAG(TL_Allocator_TAG, tl)
+    RBL_CHECK_END_TAG(TL_Allocator_TAG, tl)
     MBlock* block = memblock_from_userptr(ptr);
     memblock_check_tags(block);
     // memblock_check_allocated(block);
@@ -108,6 +114,8 @@ void  tl_allocator_free(Tlocal_Allocator* tl, void* ptr)
 }
 void* tl_allocator_realloc(Tlocal_Allocator* tl, void* ptr, size_t size)
 {
+    RBL_CHECK_TAG(TL_Allocator_TAG, tl)
+    RBL_CHECK_END_TAG(TL_Allocator_TAG, tl)
     void* newuser_ptr = tl_allocator_alloc(tl, size);
     MBlock* newblock = memblock_from_userptr(newuser_ptr);
     MBlock* old_block = memblock_from_userptr(ptr);
@@ -117,6 +125,8 @@ void* tl_allocator_realloc(Tlocal_Allocator* tl, void* ptr, size_t size)
 }
 void tl_allocator_reset(Tlocal_Allocator* tl)
 {
+    RBL_CHECK_TAG(TL_Allocator_TAG, tl)
+    RBL_CHECK_END_TAG(TL_Allocator_TAG, tl)
     // tl_intrusive_list_empty(tl->allocated_list);
     tl_intrusive_list_empty(tl->free_list);
     free(tl->malloc_blocks);

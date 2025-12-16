@@ -10,7 +10,7 @@
 #include <assert.h>
 #include <math.h>
 #include <rbl/check_tag.h>
-#include <common/alloc.h>
+#include <allocators/alloc.h>
 /**
  * @addtogroup group_message
  * @{

@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <rbl/unittest.h>
-#include <common/alloc_malloc.h>
+#include <allocators/malloc/alloc_malloc.h>
 #include <src/common/iobuffer.h>
 struct TestBlock
 {

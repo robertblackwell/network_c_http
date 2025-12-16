@@ -5,8 +5,8 @@
 #include <src/common/cbuffer.h>
 #include <src/common/buffer_chain.h>
 #include <src/common/iobuffer.h>
-#include <common/alloc_malloc.h>
-#include <../../src/common/arena/arena.h>
+#include <allocators/malloc/alloc_malloc.h>
+#include <allocators/arena/arena.h>
 
 //#define IOB_FILL
 #ifdef IOB_FILL

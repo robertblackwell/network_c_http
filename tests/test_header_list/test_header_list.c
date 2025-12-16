@@ -6,9 +6,9 @@
 #include <src/common/cbuffer.h>
 #include <rbl/logger.h>
 #include <src/common/list.h>
-#include <common/alloc.h>
-#include <common/alloc_malloc.h>
-#include <../../src/common/arena/arena.h>
+#include <allocators/alloc.h>
+#include <allocators/malloc/alloc_malloc.h>
+#include <allocators/arena/arena.h>
 #include <src/http/http_header_line.h>
 #include <src/http/header_list.h>
 #include <src/http/http_message.h>

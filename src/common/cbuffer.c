@@ -5,7 +5,7 @@
 #include <rbl/macros.h>
 #include <src/common/utils.h>
 #include <src/common/cbuffer.h>
-#include <src/common/alloc_malloc.h>
+#include <allocators/malloc/alloc_malloc.h>
 
 
 #define CBUFFER_MAX_CAPACITY 10000

@@ -38,6 +38,7 @@ set(C_HTTP_LIBRARY_HEADER_FILES
 set(C_HTTP_LIBRARY_SOURCE_FILES
 		../rbl/unittest.c
         ../rbl/logger.c
+		../rbl/check_tag.c
 		common/socket_functions.c
 		#{EXTSRC}/http-parser-2.9.4/http_parser.c
 		${EXTSRC}/llhttp/api.c

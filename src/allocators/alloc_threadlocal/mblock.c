@@ -8,6 +8,8 @@
 #include <src/common/utils.h>
 void* memblock_user_ptr(MBlock* memblk)
 {
+    RBL_CHECK_TAG(Block_Free_TAG, memblk)
+    RBL_CHECK_TAG_PTR(Block_ENDTAG, (char*)memblock_endtag(memblk))
     void* p = &(memblk->mem[0]);
     return p;
 }
@@ -32,20 +34,19 @@ void* memblock_endtag(MBlock* mblock)
 void memblock_check_tags(MBlock* memblk)
 {
     RBL_CHECK_TAG(Block_Free_TAG, memblk)
-    MBlock* p = memblock_endtag(memblk);
-    RBL_CHECK_TAG(Block_ENDTAG, p)
+    RBL_CHECK_TAG_PTR(Block_ENDTAG, (char*)memblock_endtag(memblk))
 }
 void memblock_check_allocated(MBlock* memblk)
 {
-    RBL_CHECK_TAG(Block_Allocated_TAG, memblk)
-    MBlock* p = memblock_endtag(memblk);
-    RBL_CHECK_TAG(Block_ENDTAG, p)
+    RBL_CHECK_TAG(Block_Free_TAG, memblk)
+    RBL_CHECK_TAG_PTR(Block_ENDTAG, (char*)memblock_endtag(memblk))
 }
 MBlock* memblock_from_userptr(void* userptr)
 {
     size_t offset = offsetof(MBlock, mem);
     MBlock* memblk_ptr = (MBlock*)((char*)userptr - offset);
-    // memblock_check_free_tags(memblk_ptr);
+    RBL_CHECK_TAG(Block_Free_TAG, memblk_ptr)
+    RBL_CHECK_TAG_PTR(Block_ENDTAG, (char*)memblock_endtag(memblk_ptr))
     return memblk_ptr;
 }
 MBlock* memblock_after(MBlock* memblk)
@@ -60,6 +61,10 @@ MBlock* memblock_after(MBlock* memblk)
 }
 bool memblock_adjacent(MBlock* a, MBlock* b)
 {
+    RBL_CHECK_TAG(Block_Free_TAG, a)
+    RBL_CHECK_TAG_PTR(Block_ENDTAG, (char*)memblock_endtag(a))
+    RBL_CHECK_TAG(Block_Free_TAG, b)
+    RBL_CHECK_TAG_PTR(Block_ENDTAG, (char*)memblock_endtag(b))
     if(b > a) {
         return b == memblock_after(a);
     }
@@ -85,6 +90,8 @@ size_t memblock_split_needed_freespace(size_t user_space_size)
 }
 MBlock* memblock_split(MBlock* original, size_t user_size)
 {
+    RBL_CHECK_TAG(Block_Free_TAG, original)
+    RBL_CHECK_TAG_PTR(Block_ENDTAG, (char*)memblock_endtag(original))
     // The original block consists of a Header + FreeSpace + Trailer denoted by H + F0 + T
     // Into this space must fit (H1 + FS1 + T1)+(H2 + F2 + T2)
     // H + F0 + T = H + F1 + T + H + F2 + T, simplifying gives
@@ -107,7 +114,11 @@ MBlock* memblock_split(MBlock* original, size_t user_size)
 }
 MBlock* memblock_merge(MBlock* a, MBlock* b)
 {
-    // this is the reverse of split.
+    RBL_CHECK_TAG(Block_Free_TAG, a)
+    RBL_CHECK_TAG_PTR(Block_ENDTAG, (char*)memblock_endtag(a))
+    RBL_CHECK_TAG(Block_Free_TAG, b)
+    RBL_CHECK_TAG_PTR(Block_ENDTAG, (char*)memblock_endtag(b))
+// this is the reverse of split.
     // start with H1 + F1 + T1 and H2 + F2 + T2 and finish with H1 + (F1+H2+F2+T2) + T1
     // so the free space of the result is F1 + H2 + F2 + T2
     RBL_ASSERT((a != b), "a and b must not be the same");
@@ -124,18 +135,18 @@ MBlock* memblock_merge(MBlock* a, MBlock* b)
 }
 bool memblock_should_split(MBlock* block, size_t user_size)
 {
+    RBL_CHECK_TAG(Block_Free_TAG, block)
+    RBL_CHECK_TAG_PTR(Block_ENDTAG, (char*)memblock_endtag(block))
     bool x = (block->free_space_size > 2 * user_size) &&(user_size > 64);
     return x;
 }
 void memblock_mark_allocated(MBlock* block)
 {
-    RBL_SET_TAG(Block_Allocated_TAG, block)
-    MBlock* p = memblock_endtag(block);
-    RBL_SET_TAG(Block_ENDTAG, p)
+    RBL_CHECK_TAG(Block_Free_TAG, block)
+    RBL_CHECK_TAG_PTR(Block_ENDTAG, (char*)memblock_endtag(block))
 }
 void memblock_mark_free(MBlock* block)
 {
-    RBL_SET_TAG(Block_Free_TAG, block)
-    MBlock* p = memblock_endtag(block);
-    RBL_SET_TAG(Block_ENDTAG, p)
+    RBL_CHECK_TAG(Block_Free_TAG, block)
+    RBL_CHECK_TAG_PTR(Block_ENDTAG, (char*)memblock_endtag(block))
 }

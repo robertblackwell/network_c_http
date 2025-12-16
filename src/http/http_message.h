@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <common/buffer_chain.h>
-#include <common/alloc.h>
+#include <allocators/alloc.h>
 #include <http/parser_types.h>
 #include <http/http_header_line.h>
 #include <http/header_list.h>

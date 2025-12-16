@@ -67,7 +67,7 @@ MBlock* tl_intrusive_list_find_space(const MBlockList* list, size_t required_use
         if(iter->forward->free_space_size < required_user_size) return iter;
         iter = iter->forward;
     }
-    RBL_ASSERT(0, "Sould not get here");
+    RBL_ASSERT(0, "Should not get here");
 }
 void* tl_intrusive_list_find(const MBlockList* list, const MBlock* node)
 {

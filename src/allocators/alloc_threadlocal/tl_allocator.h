@@ -7,6 +7,7 @@
 typedef struct Tlocal_Allocator_s Tlocal_Allocator;
 struct Tlocal_Allocator_s
 {
+    RBL_DECLARE_TAG
     size_t default_block_size;
     MBlockList* free_list;
     MBlockList* allocated_list;
@@ -14,6 +15,7 @@ struct Tlocal_Allocator_s
     MBlockList  allocated_list_mem;
     size_t      malloc_block_count;
     intptr_t*   malloc_blocks;
+    RBL_DECLARE_END_TAG
 };
 
 Tlocal_Allocator* tl_allocator_create();

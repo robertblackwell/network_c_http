@@ -5,7 +5,7 @@
 #include <stdlib.h> 
 #include <stdbool.h>
 #include <rbl/check_tag.h>
-#include <common/alloc.h>
+#include <allocators/alloc.h>
 
 
 #define CBUFFER_Tag  "CBUFFER"

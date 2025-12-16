@@ -4,11 +4,11 @@
 #include <stdlib.h>
 #include <time.h>
 #include <rbl/unittest.h>
-#include <common/alloc_threadlocal/mblock.h>
+#include <allocators/alloc_threadlocal/mblock.h>
 #include <src/common/iobuffer.h>
 
-#include <common/alloc_threadlocal/intrusive_list.h>
-#include <common/alloc_threadlocal/tl_allocator.h>
+#include <allocators/alloc_threadlocal/intrusive_list.h>
+#include <allocators/alloc_threadlocal/tl_allocator.h>
 
 static void fill(void* p, char ch, size_t n)
 {

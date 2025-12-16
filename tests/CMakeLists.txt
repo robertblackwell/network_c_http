@@ -47,7 +47,7 @@ add_subdirectory(test_list)
 # add_subdirectory(test_list_macro)
 #add_subdirectory(test_memalloc) #does not build
 add_subdirectory(test_http_message)
-add_subdirectory(test_object_pool)
+add_subdirectory(test_object_pool_new)
 add_subdirectory(test_http_parser)
 add_subdirectory(test_query)
 add_subdirectory(test_queue)

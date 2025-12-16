@@ -2,7 +2,7 @@
 #define c_http_http_header_line_h
 #include <rbl/check_tag.h>
 #include <src/common/cbuffer.h>
-#include <common/alloc.h>
+#include <allocators/alloc.h>
 typedef struct HeaderLine_s *HeaderLinePtr;
 typedef struct HeaderLine_s {
     RBL_DECLARE_TAG;
